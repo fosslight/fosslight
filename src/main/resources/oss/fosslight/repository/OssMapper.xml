@@ -9,7 +9,7 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-    	ORDER BY TBL.DEACTIVATE_FLAG ASC, 
+    	ORDER BY
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 			CASE
     	    WHEN TBL.OSS_NAME = #{ossName} THEN 1
@@ -18,7 +18,7 @@
 			END ASC,
     	</if>
     	<choose>
-    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> TBL.OSS_ID desc</when>
+    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">DATE_FORMAT(TBL.MODIFIED_DATE, '%Y%m%d') DESC</when>
    			<otherwise>
 				<choose>
 					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sidx)">
@@ -85,6 +85,7 @@
 				</if>
 			</otherwise>
     	</choose>
+    	, TBL.DEACTIVATE_FLAG ASC
     </sql>
     
 	<insert id="insertCommonOssMaster" parameterType="oss.fosslight.domain.OssMaster" useGeneratedKeys="true" keyProperty="ossCommonId" >
@@ -1520,6 +1521,9 @@
 			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) 
 						FROM OSS_DOWNLOADLOCATION D
 					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+			, IFNULL((SELECT GROUP_CONCAT(D.PURL ORDER BY D.OSS_DL_IDX ASC) 
+						FROM OSS_DOWNLOADLOCATION D
+					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), '') AS PURL
 			, T1.HOMEPAGE
 			, T1.SUMMARY_DESCRIPTION
 			, T1.ATTRIBUTION
@@ -1601,6 +1605,9 @@
 			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) 
 						FROM OSS_DOWNLOADLOCATION D
 					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+			, IFNULL((SELECT GROUP_CONCAT(D.PURL ORDER BY D.OSS_DL_IDX ASC) 
+						FROM OSS_DOWNLOADLOCATION D
+					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), '') AS PURL
 			, T1.HOMEPAGE
 			, T1.SUMMARY_DESCRIPTION
 			, T1.ATTRIBUTION
@@ -2817,7 +2824,8 @@
 	<select id="getOssInfoAll" resultType="oss.fosslight.domain.OssMaster">
 		SELECT 
 			T1.OSS_COMMON_ID, T1.OSS_ID, T1.OSS_NAME, T1.OSS_NAME AS OSS_NAME_TEMP,T1.OSS_VERSION,T1.LICENSE_DIV,T1.DOWNLOAD_LOCATION
-			,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
+			,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID) AS DOWNLOAD_LOCATION_GROUP
+			,(SELECT GROUP_CONCAT(D.PURL ORDER BY D.OSS_DL_IDX ASC) FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID) AS PURL
 			,T1.HOMEPAGE
 			,T1.SUMMARY_DESCRIPTION
 			,T1.ATTRIBUTION
@@ -2944,54 +2952,22 @@
 	</update>
 	
     <select id="checkExistsOssDownloadLocation" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT A.OSS_NAME 
-		     , MIN(A.S_ORDER) AS S_ORDER 
-		  FROM ( SELECT T1.OSS_ID 
-		  			  , T1.OSS_NAME 
-					  , (CASE 
-					  		  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%', #{downloadLocation}) THEN 1
-							  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT(#{downloadLocation},'%') THEN 2
-							  ELSE 3
-						  END) AS S_ORDER
-				   FROM (
-			SELECT
-    			OV.OSS_ID,
-    			OC.OSS_COMMON_ID,
-    			OC.OSS_NAME,
-    			OV.OSS_VERSION,
-    			OC.HOMEPAGE,
-				OC.DOWNLOAD_LOCATION,
-    			OC.SUMMARY_DESCRIPTION,
-    			OV.LICENSE_DIV,
-    			OV.USE_YN,
-    			OV.VULN_CPE_NM,
-    			OV.CVSS_SCORE,
-    			OV.CVE_ID,
-    			OV.VULN_YN,
-    			OV.VULN_RECHECK,
-    			OV.VULN_DATE,
-    			OV.LICENSE_TYPE,
-    			OV.OBLIGATION_TYPE,
-    			OV.COPYRIGHT,
-    			OV.ATTRIBUTION,
-				OC.DEACTIVATE_FLAG,
-				OV.CREATOR,
-				OV.CREATED_DATE,
-				OV.MODIFIER,
-				OV.MODIFIED_DATE,
-				OV.RESTRICTION,
-				OV.IN_CPE_MATCH_FLAG
-  			FROM OSS_COMMON OC
-  			LEFT JOIN OSS_VERSION OV
-  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-		) T1
-			       LEFT JOIN OSS_DOWNLOADLOCATION T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
-		    	  WHERE T1.USE_YN = 'Y' 
-		    	    AND IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%',#{downloadLocation},'%')
-			   ) AS A
-		 WHERE 1 = 1
+		SELECT A.OSS_NAME, MIN(A.S_ORDER) AS S_ORDER 
+		FROM (
+			SELECT T1.OSS_NAME 
+				  , (CASE 
+				  		  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%', #{downloadLocation}) THEN 1
+						  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT(#{downloadLocation},'%') THEN 2
+						  ELSE 3
+					  END) AS S_ORDER
+				FROM OSS_COMMON T1
+	  			LEFT JOIN OSS_DOWNLOADLOCATION T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
+			    WHERE T1.USE_YN = 'Y' 
+			   	AND IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%',#{downloadLocation},'%')
+		) A
+		WHERE 1 = 1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-		  AND A.OSS_NAME != #{ossName} 
+			AND A.OSS_NAME != #{ossName} 
 		</if>
 		GROUP BY A.OSS_NAME
 		ORDER BY MIN(A.S_ORDER)
@@ -3004,45 +2980,14 @@
 			, MIN(T1.S_ORDER) AS S_ORDER
 		FROM (
 			SELECT
-				TBL.OSS_ID
-				, TBL.OSS_NAME
+				TBL.OSS_NAME
 				, (CASE WHEN TBL.HOMEPAGE LIKE CONCAT('%',#{homepage}) THEN 1
 						WHEN TBL.HOMEPAGE LIKE CONCAT(#{homepage},'%') THEN 2
 						ELSE 3
 				  END) AS S_ORDER
-			FROM (
-			SELECT
-    			OV.OSS_ID,
-    			OC.OSS_COMMON_ID,
-    			OC.OSS_NAME,
-    			OV.OSS_VERSION,
-    			OC.HOMEPAGE,
-				OC.DOWNLOAD_LOCATION,
-    			OC.SUMMARY_DESCRIPTION,
-    			OV.LICENSE_DIV,
-    			OV.USE_YN,
-    			OV.VULN_CPE_NM,
-    			OV.CVSS_SCORE,
-    			OV.CVE_ID,
-    			OV.VULN_YN,
-    			OV.VULN_RECHECK,
-    			OV.VULN_DATE,
-    			OV.LICENSE_TYPE,
-    			OV.OBLIGATION_TYPE,
-    			OV.COPYRIGHT,
-    			OV.ATTRIBUTION,
-				OC.DEACTIVATE_FLAG,
-				OV.CREATOR,
-				OV.CREATED_DATE,
-				OV.MODIFIER,
-				OV.MODIFIED_DATE,
-				OV.RESTRICTION,
-				OV.IN_CPE_MATCH_FLAG
-  			FROM OSS_COMMON OC
-  			LEFT JOIN OSS_VERSION OV
-  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-		) TBL
-			WHERE TBL.USE_YN = 'Y' AND TBL.HOMEPAGE LIKE CONCAT('%',#{homepage},'%')
+			FROM OSS_COMMON TBL
+  			WHERE TBL.USE_YN = 'Y'
+			AND TBL.HOMEPAGE LIKE CONCAT('%',#{homepage},'%')
 		) T1
 		WHERE 1 = 1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
@@ -3625,7 +3570,7 @@
 		)
 		SELECT OC.COMPONENT_ID
 		<choose>
-    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
     			, CONCAT('3rd_', #{prjId}) AS REFERENCE_ID
     		</when>
     		<otherwise>, #{prjId} AS REFERENCE_ID</otherwise>
@@ -3983,9 +3928,9 @@
     		, T1.OSS_VERSION = #{mergeOssVersion}
     	WHERE T1.ADMIN_CHECK_YN	!= 'Y'
     		<choose>
-    			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+    			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
     				AND T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
-    				AND T1.REFERENCE_DIV IN ('20')
+    				AND T1.REFERENCE_DIV IN ('20', '23')
     				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
     				AND T1.OSS_ID = #{ossId}
     				</if>
@@ -4040,11 +3985,11 @@
            AND T1.OSS_NAME			= #{ossName}
            AND T1.OSS_VERSION		= #{ossVersion}
 		<choose>
-    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
-           AND T1.REFERENCE_DIV IN ('20')
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
+           AND T1.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
-           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
     		</otherwise>
     	</choose>
            AND T1.ADMIN_CHECK_YN	!= 'Y'
@@ -4098,8 +4043,8 @@
 		 WHERE OC.ADMIN_CHECK_YN != 'Y'
 		   AND OC.REFERENCE_ID = #{prjId}
 		 <choose>
-    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
-		   		AND OC.REFERENCE_DIV IN ('20')
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
+		   		AND OC.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
     			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
@@ -4244,7 +4189,7 @@
 	</select>
 
 	<select id="getRecentlyModifiedOss" parameterType="oss.fosslight.domain.OssMaster" resultType="HashMap">
-		SELECT COUNT(*) AS CNT, OSS_ID
+		SELECT COUNT(*) AS CNT, OSS_COMMON_ID
 		FROM OSS_DOWNLOADLOCATION
 		WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = #{ossName} ORDER BY MODIFIED_DATE DESC LIMIT 1)
 	</select>

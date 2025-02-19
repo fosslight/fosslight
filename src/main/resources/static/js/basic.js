@@ -2658,10 +2658,19 @@ const CHART_COLORS = {
 };
 
 function getBarChart(target, obj) {
+	const labels = new Array();
+	const totals = new Array();
+	
+	for (var i in obj.labels) {
+		let label = obj.labels[i];
+		totals.push(label.split("|")[1]);
+		label = label.split("|")[0];
+		labels.push(label);
+	}
 	
 	return new Chart(target, {
 		type: 'bar',
-		data: {labels:obj.labels, datasets:obj.datasets},
+		data: {labels:labels, datasets:obj.datasets},
 		options: {
 			responsive: true,
 			interaction: {
@@ -2679,10 +2688,8 @@ function getBarChart(target, obj) {
 				tooltip: {
 					callbacks: {
 						label: function(context) {
-							let dataLabel = context.dataset.label || '';
-							let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
-							        return previousValue + currentValue;
-							      });
+							let dataLabel = context.label || '';
+							let total = totals[context.dataIndex];
 							let currentValue = context.raw;
 							let percentage = 0;
 							if (total > 0) {
@@ -2696,7 +2703,48 @@ function getBarChart(target, obj) {
 			}
 		}
 	});
+}
 
+function barChartOption(data) {
+	var totals = new Array();
+	for (var i in data) {
+		let label = data[i];
+		totals.push(label.split("|")[1]);
+	}
+	
+	var barChartOptions = {
+		responsive: true,
+		interaction: {
+		  intersect: false,
+		},
+		scales: {
+		  x: {
+		    stacked: true,
+		  },
+		  y: {
+		    stacked: true
+		  }
+		},
+		plugins: {
+			tooltip: {
+				callbacks: {
+					label: function(context) {
+						let dataLabel = context.label || '';
+						let total = totals[context.dataIndex];
+						let currentValue = context.raw;
+						let percentage = 0;
+						if (total > 0) {
+							percentage = Math.floor(((currentValue/total) * 100)+0.5);
+						}
+						let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+						return dataLabel += value;
+					}
+				}
+			}				
+		}
+	}
+	
+	return barChartOptions;
 }
 
 function getPieChart(target, obj) {
@@ -2869,7 +2917,7 @@ function findAndReplace(match) {
     } else if (third.test(match)) {
         url += "/partner/shareUrl/" + id;
     }
-    return "<a href=" + url + " class='urlLink2' target='_blank' onclick='window.open(this.href)'>" + match + "</a>";
+    return "<a href=\"" + url + "\" class='urlLink2' target='_blank' onclick='window.open(this.href)'>" + match + "</a>";
 }
 
 function popUpHelpGuide(id, _step) {
@@ -2911,7 +2959,7 @@ var createTabNew = function (tabNm, tabLk) {
     var tabName = tabNm.replace(pattern, '-');
 	
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
-    	if ("BOM_Compare" == tabName || "History" == tabName) {
+    	if ("PRJ_BOM_Compare" == tabName || "History" == tabName || "3rdParty_BOM_Compare" == tabName) {
 			deleteTabNew(tabName);
 			createTabFnc(tabNm, tabName, tabLk);
 		} else {
@@ -2925,7 +2973,8 @@ var createTabNew = function (tabNm, tabLk) {
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").hasClass("ui-tabs") === true) {
         $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
     }
-
+    
+	moveNavbar();
 }
 
 var createTabFnc = function (tabNm, tabName, tabLk) {
@@ -4150,4 +4199,78 @@ function draftUserComments(param) {
 		error : fn.onError
 	});
 	return comments;
+}
+
+function commonAlertifyDialog(target) {
+	alertify.dialog(target, function() {
+		return {
+			setup: function() {
+				var settings = alertify.confirm().settings;
+				
+				for (var prop in settings) {
+					this.settings[prop] = settings[prop];
+				}
+				
+				var setup = alertify.confirm().setup();
+				setup.focus.element = 1;
+				setup.buttons[0].key = 0;
+
+				return setup;
+			},
+			hooks: {
+				onshow: function() {
+					this.elements.dialog.style.maxWidth = 'none';
+					this.elements.dialog.style.width = '700px';
+				}
+			}
+		};
+	}, false, 'confirm');
+}
+
+function alertifyWithoutButtons(target) {
+	alertify.dialog(target, function() {
+		return {
+			setup: function() {
+				var settings = alertify.confirm().settings;
+				
+				for (var prop in settings) {
+					this.settings[prop] = settings[prop];
+				}
+				
+				var setup = alertify.confirm().setup();
+				setup.focus.element = 0;
+				setup.buttons = [];
+
+				return setup;
+			},
+			hooks: {
+				onshow: function() {
+					this.elements.dialog.style.maxWidth = 'none';
+					this.elements.dialog.style.width = '700px';
+				}
+			}
+		};
+	}, false, 'alert');
+}
+
+function basicAlertifyDialog(target) {
+	alertify.dialog(target, function() {
+		var settings;
+
+		return {
+			setup: function() {
+				var settings = alertify.confirm().settings;
+
+				for (var prop in settings) {
+					this.settings[prop] = settings[prop];
+				}
+				
+				var setup = alertify.confirm().setup();
+				
+				setup.focus.element = 0;
+				
+				return setup;
+			}
+		};
+	}, false, 'confirm');
 }

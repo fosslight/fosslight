@@ -12,12 +12,6 @@ var totalRow = 0;
 var refreshParam = {};
 const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
 
-//prevent clicking the OK button on Enter
-let keyCode;
-$(document).on('keydown', function (event) {
-	keyCode = event.keyCode;
-});
-
 $(document).ready(function () {
 	'use strict';
 	setMaxRowCnt(G_ROW_CNT);
@@ -314,38 +308,11 @@ var fn = {
 				var innerHtml 	= [[#{msg.selfcheck.confirm.remove.project}]] + '<br><br>';
 	           	innerHtml 		+= '<textarea id="delSelfEditor"></textarea>';
 	           	
-	           	if (!alertify.delSelfDialog){
-	    			alertify.dialog('delSelfDialog', function() {
-	    				return {
-	    					setup: function() {
-	    						var settings = alertify.confirm().settings;
-	    						
-	    						for (var prop in settings) {
-	    							this.settings[prop] = settings[prop];
-	    						}
-	    						
-	    						var setup = alertify.confirm().setup();
-	    						setup.focus.element = 0;
-	    						
-	    						return setup;
-	    					},
-	    				    hooks: {
-	    				    	onshow: function() {
-	    				        	this.elements.dialog.style.maxWidth = 'none';
-	    				          	this.elements.dialog.style.width = '650px';
-	    				        }
-	    					}
-	    				};
-	    			}, false, 'confirm');
+	           	if (!alertify.delSelfDialog) {
+	           		commonAlertifyDialog('delSelfDialog');
 	        	}
 	           	
 	           	alertify.delSelfDialog(innerHtml, function () {
-					// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-
 					var editorVal = $("#delSelfEditor").summernote('code');
 
 					if ("" == $(editorVal).text().trim()) {

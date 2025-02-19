@@ -25,6 +25,7 @@ import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.ApiLicenseService;
 import oss.fosslight.service.ApiOssService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.RefineOssService;
 import oss.fosslight.service.T2UserService;
 
 import javax.validation.constraints.Min;
@@ -48,6 +49,8 @@ public class ApiOssV2Controller extends CoTopComponent {
     private final OssService ossService;
 
     private final ApiLicenseService apiLicenseService;
+    
+    private final RefineOssService refineOssService;
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
@@ -203,5 +206,27 @@ public class ApiOssV2Controller extends CoTopComponent {
         }
         return responseService.errorResponse(HttpStatus.FORBIDDEN,
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+    }
+    
+    @ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL의 경우 다음 순서대로 처리합니다. <ol><li>UPDATE DOWNLOAD LOCATION FORMAT</li><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* doUpdateFlag가 N인 경우 Database를 Update하지 않습니다.")
+	@GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION})
+    public ResponseEntity<Map<String, Object>> refineOssDownloadLocation(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+    		@ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
+    		@ApiParam(value = "Do Update Database", required = true, defaultValue = "N", allowableValues = "N,Y") @RequestParam(required = true) String doUpdateFlag,
+    		@ApiParam(value = "Refine Type", required = true, allowableValues = "0.UPDATE DOWNLOAD LOCATION FORMAT,1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
+		
+		// 사용자 인증
+		try {
+			if (!userService.isAdmin(authorization)) {
+				return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+						CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+			}
+			return ResponseEntity.ok(refineOssService.refineDownloadLocation(ossName, refineType, "Y".equalsIgnoreCase(doUpdateFlag)));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return responseService.errorResponse(HttpStatus.FORBIDDEN,
+					CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+		}
     }
 }

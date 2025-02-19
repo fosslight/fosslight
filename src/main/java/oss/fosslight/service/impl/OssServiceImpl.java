@@ -302,9 +302,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<String> excludeCpeList = ossMapper.selectOssExcludeCpeList(ossMaster);
 		List<String> ossVersionAliasList = ossMapper.selectOssVersionAliases(ossMaster);
 		
-		if (includeCpeList != null && !includeCpeList.isEmpty()) ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
-		if (excludeCpeList != null && !excludeCpeList.isEmpty()) ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
-		if (ossVersionAliasList != null && !ossVersionAliasList.isEmpty()) ossMaster.setOssVersionAliases(ossVersionAliasList.toArray(new String[ossVersionAliasList.size()]));
+		if (includeCpeList != null && !includeCpeList.isEmpty()) {
+			ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
+		}
+		if (excludeCpeList != null && !excludeCpeList.isEmpty()) {
+			ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
+		}
+		if (ossVersionAliasList != null && !ossVersionAliasList.isEmpty()) {
+			ossMaster.setOssVersionAliases(ossVersionAliasList.toArray(new String[ossVersionAliasList.size()]));
+		}
 		
 		String totLicenseTxt = CommonFunction.makeLicenseExpression(ossLicenses);
 		ossMaster.setTotLicenseTxt(totLicenseTxt);
@@ -458,24 +464,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.addDetectedLicense(detectedLicense);
 				}
 				
-				param.setOssId(ossId);
-				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(param);
-				if (ossDownloadLocation.size() > 0) {
-					StringBuilder sb = new StringBuilder();
-					StringBuilder sb1 = new StringBuilder();
-					
-					for (OssMaster location : ossDownloadLocation) {
-						sb.append(location.getDownloadLocation()).append(",");
-						sb1.append(location.getPurl()).append(",");
-					}
-					
-					String[] ossDownloadLocations = new String(sb).split("[,]");
-					bean.setDownloadLocations(ossDownloadLocations);
-					bean.setPurl(sb1.toString());
-				} else {
-					if (!isEmpty(bean.getDownloadLocation())) {
-						String purl = generatePurlByDownloadLocation(bean);
-						bean.setPurl(purl);
+				if (!isEmpty(bean.getDownloadLocation())) {
+					bean.setDownloadLocations(bean.getDownloadLocation().split(","));
+					if (isEmpty(bean.getPurl())) {
+						StringBuilder sb = new StringBuilder();
+						OssMaster ossMaster = new OssMaster();
+						
+						for (String downloadLocation : bean.getDownloadLocations()) {
+							ossMaster.setDownloadLocation(downloadLocation);
+							String purl = generatePurlByDownloadLocation(bean);
+							sb.append(purl).append(",");
+						}
+						
+						bean.setPurl(sb.toString());
 					}
 				}
 				
@@ -878,7 +879,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(ossMaster);
 
 		if (confirmPartnerList.size() > 0) {
-			ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+			ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 			ossMapper.mergeOssName(ossMaster);
 
 			for (PartnerMaster pm : confirmPartnerList) {
@@ -1043,7 +1044,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		try {
 			if (isEmpty(ossMaster.getOssCommonId())) {
 				OssMaster bean = ossMapper.checkExistsOssname(ossMaster);
-				if (bean != null) ossMaster.setOssCommonId(bean.getOssCommonId());
+				if (bean != null) {
+					ossMaster.setOssCommonId(bean.getOssCommonId());
+				}
 			}
 			
 			String[] ossNicknames = ossMaster.getOssNicknames();
@@ -2227,6 +2230,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		} else {
 			customDownloadlocationUrl = downloadlocationUrl;
 		}
+
+		if(urlSearchSeq == 12 && downloadlocationUrl.contains("/-/")){
+			customDownloadlocationUrl = downloadlocationUrl.split("/-/")[0];
+		}
+
 		Matcher ossNameMatcher = p.matcher("https://" + customDownloadlocationUrl);
 		while (ossNameMatcher.find()){
 			switch(urlSearchSeq) {
@@ -2261,6 +2269,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 11:
 					checkName = "cargo:" + ossNameMatcher.group(3);
 					break;
+				case 12 :
+					ArrayList<String> name = new ArrayList<>();
+					name.add("codelinaro");
+					for(String nick : ossNameMatcher.group(5).split("/")) {
+						name.add(nick);
+					}
+					checkName = String.join("-", name);
+					break;
 				default:
 					break;
 			}
@@ -2274,7 +2290,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if(ossNameList != null) {
 			for (OssMaster ossBean : ossNameList) {
 				if(ossBean != null) {
-					checkName.add(ossBean.getOssName());
+					for(String name : ossBean.getOssName().split(",")){
+						checkName.add(name);
+					}
 				}
 			}
 		}
@@ -2319,7 +2337,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
 				break;
 			case 7:
-				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
+				p = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
 				break;
 			case 8:
 				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
@@ -2329,6 +2347,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				break;
 			case 11:
 				p = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
+				break;
+			case 12 :
+				p = Pattern.compile("((http|https)://git.codelinaro.org/([^/]+)/([^/]+)/(.*))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
@@ -2600,7 +2621,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						if (!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 							bean.setRecommendedNickname(bean.getOssNickName());
-
 						} else {
 							if (urlSearchSeq == 7) {
 								generateCheckOSSName(bean, p, androidPlatformList, downloadlocationUrl);
@@ -2967,7 +2987,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		Map<String, List<OssMaster>> updateOssNameVersionDiffMergeObject = null;
 		try {
 			History h;
-			if (("Y").equals(ossMaster.getOssCopyFlag())) {
+			if (CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getOssCopyFlag()))) {
 				ossMaster.setOssId(null);
 				isNew = true;
 			}
@@ -2982,11 +3002,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				List<String> excludeCpeList = ossMapper.selectOssExcludeCpeList(ossMaster);
 				
 				List<String> newIncludeCpes = new ArrayList<>();
-				if (ossMaster.getIncludeCpes() != null) newIncludeCpes = Arrays.asList(ossMaster.getIncludeCpes());
+				if (ossMaster.getIncludeCpes() != null) {
+					newIncludeCpes = Arrays.asList(ossMaster.getIncludeCpes());
+				}
 				List<String> newExcludeCpes = new ArrayList<>();
-				if (ossMaster.getExcludeCpes() != null) newExcludeCpes = Arrays.asList(ossMaster.getExcludeCpes());
+				if (ossMaster.getExcludeCpes() != null) {
+					newExcludeCpes = Arrays.asList(ossMaster.getExcludeCpes());
+				}
 				List<String> newNicknames = null;
-				if (ossMaster.getOssNicknames() != null) newNicknames = Arrays.asList(ossMaster.getOssNicknames());
+				if (ossMaster.getOssNicknames() != null) {
+					newNicknames = Arrays.asList(ossMaster.getOssNicknames());
+				}
 				
 				if (!Objects.equals(includeCpeList, newIncludeCpes) || !Objects.equals(excludeCpeList, newExcludeCpes) || !Objects.equals(nicknames, newNicknames)
 						|| !ossMaster.getOssName().equals(beforeBean.getOssName()) || !ossMaster.getOssVersion().equals(beforeBean.getOssVersion())) {
@@ -3050,6 +3076,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						ossMaster.setExistSummaryDescription(ossBean.getSummaryDescription());
 						ossMaster.setExistImportantNotes(ossBean.getImportantNotes());
 					}
+				} else {
+					ossMaster.setOssCommonId(null);
 				}
 				ossId = registOssMaster(ossMaster);
 				
@@ -3415,7 +3443,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			switch(key) {
 				case "VIEW":
 					String prjId = ossBean.getPrjId();
-					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossBean.getReferenceDiv())) {
+					if (CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(ossBean.getReferenceDiv())) {
 						prjId = "3rd_" + prjId;
 					}
 					
@@ -3463,7 +3491,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<OssAnalysis> list = null;
 		String prjId = ossMaster.getPrjId();
 		
-		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossMaster.getReferenceDiv())) {
+		if (CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(ossMaster.getReferenceDiv())) {
 			ossMaster.setPrjId("3rd_" + prjId);
 		}
 		
@@ -3513,16 +3541,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			oss_auto_analysis_log.info("ANALYSIS START PRJ ID : "+prjId+" ANALYSIS file ID : " + fileSeq);
 			
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
-			
-			String EMAIL_VAL = ""; // reviewer와 loginUser의 email
-			String loginUserName = userName != null ? userName : loginUserName();
-			if (prjId.toUpperCase().indexOf("3RD") > -1){
-				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName);
-			} else {
-				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName);
-			}
 
-			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1), (userName == null ? 0 : 1));
+			String loginUserName = userName != null ? userName : loginUserName();
+			T2Users user = new T2Users();
+			user.setUserId(loginUserName);
+			user = userMapper.getUser(user);
+			String EMAIL_VAL = user.getEmail();
+
+			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1), 1);
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );
 			
@@ -4183,7 +4209,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 			if (confirmPartnerList.size() > 0) {
 				param.setMergeOssName(afterOssName);
-				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 				
 				for (PartnerMaster pm : confirmPartnerList) {
 					param.setPrjId(pm.getPartnerId());
@@ -4685,55 +4711,60 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public Map<String, Object> saveOssURLNickname(ProjectIdentification paramBean) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		OssMaster ossMaster = new OssMaster();
-		ossMaster.setOssName(paramBean.getCheckName());
-		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
-		int urlSearchSeq = -1;
-		int seq = 0;
-		for (String url : checkOssNameUrl) {
-			if (urlSearchSeq == -1 && paramBean.getDownloadLocation().contains(url)) {
-				urlSearchSeq = seq;
-				break;
+		OssMaster ossMaster = getOssInfo(null, paramBean.getCheckName(), true);
+		if (ossMaster != null) {
+			List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+			int urlSearchSeq = -1;
+			int seq = 0;
+			for (String url : checkOssNameUrl) {
+				if (urlSearchSeq == -1 && paramBean.getDownloadLocation().contains(url)) {
+					urlSearchSeq = seq;
+					break;
+				}
+				seq++;
 			}
-			seq++;
-		}
-		ProjectIdentification bean;
+			ProjectIdentification bean;
 
-		try {
-			for (String recommendedNickname : paramBean.getRecommendedNickname().split("\\|")) {
-				ossMaster.setOssNickname(recommendedNickname);
-				ossMapper.mergeOssNickname2(ossMaster);
-			}
-
-			if (urlSearchSeq > -1) {
-				bean = downloadlocationFormatter(paramBean, urlSearchSeq);
-				String downloadLocation = bean.getDownloadLocation();
-				String redirectLocation = bean.getRedirectLocation();
-				bean.setOssName(paramBean.getCheckName());
-
-				for (int i = 0; i < 2; i++) {
-					if (i == 0) {
-						bean.setDownloadLocation(downloadLocation);
-					} else {
-						bean.setDownloadLocation(redirectLocation);
-					}
-
-					if (ossMapper.checkOssNameUrl2Cnt(bean) == 0) {
-						Map<String, Object> data = ossMapper.getRecentlyModifiedOss(ossMaster);
-						ossMaster.setOssId(String.valueOf(data.get("OSS_ID")));
-						int cnt = Integer.parseInt(String.valueOf(data.get("CNT"))) + 1;
-						ossMaster.setSOrder(Integer.toString(cnt));
-						ossMaster.setDownloadLocation("https://" + bean.getDownloadLocation());
-						ossMapper.insertOssDownloadLocation(ossMaster);
+			try {
+				for (String recommendedNickname : paramBean.getRecommendedNickname().split("\\|")) {
+					if (!isEmpty(recommendedNickname)) {
+						ossMaster.setOssNickname(recommendedNickname);
+						ossMapper.mergeOssNickname2(ossMaster);
 					}
 				}
+
+				if (urlSearchSeq > -1) {
+					bean = downloadlocationFormatter(paramBean, urlSearchSeq);
+					String downloadLocation = bean.getDownloadLocation();
+					String redirectLocation = bean.getRedirectLocation();
+					bean.setOssName(paramBean.getCheckName());
+
+					for (int i = 0; i < 2; i++) {
+						if (i == 0) {
+							bean.setDownloadLocation(downloadLocation);
+						} else {
+							bean.setDownloadLocation(redirectLocation);
+						}
+
+						if (ossMapper.checkOssNameUrl2Cnt(bean) == 0) {
+							Map<String, Object> data = ossMapper.getRecentlyModifiedOss(ossMaster);
+							ossMaster.setOssCommonId(String.valueOf(data.get("OSS_COMMON_ID")));
+							int cnt = Integer.parseInt(String.valueOf(data.get("CNT"))) + 1;
+							ossMaster.setOssDlIdx(cnt);
+							ossMaster.setDownloadLocation("https://" + bean.getDownloadLocation());
+							ossMapper.insertOssDownloadLocation(ossMaster);
+						}
+					}
+				}
+				map.put("isValid", true);
+				map.put("returnType", "Success");
+			} catch (Exception e) {
+				log.error(e.getMessage());
+				map.put("isValid", false);
+				map.put("returnType", e.getMessage());
 			}
-			map.put("isValid", true);
-			map.put("returnType", "Success");
-		} catch (Exception e) {
-			log.error(e.getMessage());
+		} else {
 			map.put("isValid", false);
-			map.put("returnType", e.getMessage());
 		}
 		return map;
 	}
@@ -4882,13 +4913,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public String getPurlByDownloadLocation(OssMaster ossMaster) {
-		String purl = "";
-		try {
-			purl = generatePurlByDownloadLocation(ossMaster);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return purl;
+		return generatePurlByDownloadLocation(ossMaster);
 	}
 
 	private String generatePurlByDownloadLocation(OssMaster ossMaster) {
@@ -4897,83 +4922,94 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		int urlSearchSeq = -1;
 		int seq = 0;
 		
-		try {
-			String downloadLocation = ossMaster.getDownloadLocation();
-			if (!isEmpty(downloadLocation)) {
-				String subPath = "";
-				
-				for (String url : checkPurl) {
-					if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
-						urlSearchSeq = seq;
-						break;
-					}
-					seq++;
+		String downloadLocation = ossMaster.getDownloadLocation();
+		if (!isEmpty(downloadLocation)) {
+			String subPath = "";
+			
+			for (String url : checkPurl) {
+				if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
+					urlSearchSeq = seq;
+					break;
 				}
-				
+				seq++;
+			}
+			
+			if (downloadLocation.contains("://")) {
 				downloadLocation = downloadLocation.split("://")[1];
-				if (downloadLocation.startsWith("www.")) {
-					downloadLocation = downloadLocation.substring(4, downloadLocation.length());
+			}
+			if (downloadLocation.startsWith("www.")) {
+				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
+			}
+			if (downloadLocation.contains(";")) {
+				downloadLocation = downloadLocation.split("[;]")[0];
+			}
+			// delete port number
+			if (downloadLocation.contains(":")) {
+				int colonIdx = downloadLocation.indexOf(":");
+				int slashIdx = downloadLocation.indexOf("/", colonIdx);
+				if (slashIdx > -1 && slashIdx > colonIdx && downloadLocation.substring(colonIdx+1, slashIdx).chars().allMatch(Character::isDigit)) {
+					downloadLocation = downloadLocation.substring(0, colonIdx) + downloadLocation.substring(slashIdx, downloadLocation.length());
 				}
-				if (downloadLocation.contains(";")) {
-					downloadLocation = downloadLocation.split("[;]")[0];
-				}
-				// delete port number
-				if (downloadLocation.contains(":")) {
-					int colonIdx = downloadLocation.indexOf(":");
-					int slashIdx = downloadLocation.indexOf("/", colonIdx);
-					if (slashIdx > -1 && slashIdx > colonIdx && downloadLocation.substring(colonIdx+1, slashIdx).chars().allMatch(Character::isDigit)) {
-						downloadLocation = downloadLocation.substring(0, colonIdx) + downloadLocation.substring(slashIdx, downloadLocation.length());
-					}
-				}
-				
-				if (downloadLocation.contains(".git")) {
-					if (downloadLocation.endsWith(".git")) {
-						downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-					} else {
-						if (downloadLocation.contains("#")) {
-							downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
-							if (downloadLocation.endsWith(".git")) {
-								downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-							}
+			}
+			
+			if (downloadLocation.contains(".git")) {
+				if (downloadLocation.endsWith(".git")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
+				} else {
+					if (downloadLocation.contains("#")) {
+						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
+						if (downloadLocation.endsWith(".git")) {
+							downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
 						}
 					}
 				}
-				
-				if (downloadLocation.contains("#")) {
-					if (urlSearchSeq == 9) {
-						String[] splitDownloadLocation = downloadLocation.split("[#]");
-						subPath = splitDownloadLocation[1];
-					}
-					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
+			}
+			
+			if (downloadLocation.contains("#")) {
+				if (urlSearchSeq == 9) {
+					String[] splitDownloadLocation = downloadLocation.split("[#]");
+					subPath = splitDownloadLocation[1];
 				}
-				
-				if (downloadLocation.contains("@")) {
-					if (urlSearchSeq == 9) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
+				downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
+			}
+			
+			if (downloadLocation.contains("@")) {
+				if (urlSearchSeq == 9) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
 				}
+			}
+			
+			if (downloadLocation.endsWith("/")) {
+				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+			}
+			
+			if (urlSearchSeq > -1) {
+				Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
+				Matcher m = p.matcher(downloadLocation);
 				
-				if (downloadLocation.endsWith("/")) downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
-				
-				if (urlSearchSeq > -1) {
-					Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
-					Matcher m = p.matcher(downloadLocation);
-					
-					while (m.find()) {
-						downloadLocation = m.group(0);
-					}
+				while (m.find()) {
+					downloadLocation = m.group(0);
 				}
+			}
+			
+			PackageURL purl = null;
+			if (urlSearchSeq == -1) {
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
+				}
+				purlString = "link:" + downloadLocation;
+			} else if (urlSearchSeq == 10) {
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+				}
+				purlString = "link:" + downloadLocation;
+			} else {
+				String[] splitDownloadLocation = downloadLocation.split("/");
+				boolean addFlag = false;
+				String namespace = "/";
 				
-				PackageURL purl = null;
-				if (urlSearchSeq == -1) {
-					if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
-					purlString = "link:" + downloadLocation;
-				} else if (urlSearchSeq == 10) {
-					if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
-					purlString = "link:" + downloadLocation;
-				} else {
-					String[] splitDownloadLocation = downloadLocation.split("/");
-					boolean addFlag = false;
-					String namespace = "/";
-					
+				boolean errorFlag = false;
+				try {
 					switch(urlSearchSeq) {
 						case 0: // github
 							purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
@@ -5018,7 +5054,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						default:
 							break;
 					}
-					
+				} catch (Exception e) {
+					errorFlag = true;
+					log.error("failed to generate purl download location : {}, link generate purl {}", downloadLocation, "link:" + downloadLocation);
+				}
+				
+				if (errorFlag) {
+					purlString = "link:" + downloadLocation;
+				} else {
 					if (purl != null) {
 						purlString = purl.toString();
 						if (urlSearchSeq == 9) {
@@ -5035,8 +5078,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 				}
 			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 		}
 		
 		return purlString;

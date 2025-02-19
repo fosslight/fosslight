@@ -1,45 +1,34 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
+<link rel="stylesheet" th:href="@{/css/datatables/dataTables.bootstrap4.min.css}">
+<script th:src="@{/js/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/js/datatables/dataTables.bootstrap4.min.js}"></script>
 <script th:inline="javascript">
-//<![CDATA[
-/*global $ */
-/*jslint browser: true, nomen: true */
-//	var subGridUrl = true;
-var userRole = [[${sessUserInfo.authority}]];
-var ossNames = [];
+var userRole = [[${#authentication.authorities[0].authority}]];
 var objs = [];
-var licenseNames = [];
 var isStatusChangeFlag = false;
 var isSort = false;
 var delDocumentsFile = [];
-var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var partnerData = [[${detail}]];
 var prjList = [[${prjList}]];
 var sampleFile = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_SAMPLE_FILE'))}]];
-var _popupCheckOssName = null;
-var _popupCheckOssLicense = null;
 var saveFlag = false;
 var commentsParam = {referenceDiv : '3rd'};
 var documentsFileCnt = 0;
-var ossFileObj;
 var partnerStatus = [[${detail.status}]];
 var partnerId = [[${detail.partnerId}]];
-
-//prevent clicking the OK button on Enter
-let keyCode;
-$(document).on('keydown', function (event) {
-	keyCode = event.keyCode;
-});
+var ossFileObj;
 
 $(document).ready(function () {
 	'use strict';
 	evt.init();
-	evt.tabInit();
 	datas.init();
-
-	if (partnerData.documentsFileCnt != null) documentsFileCnt = partnerData.documentsFileCnt;
+	
+	if (partnerData.documentsFileCnt != null) {
+		documentsFileCnt = partnerData.documentsFileCnt;
+	}
 	if (parseInt(documentsFileCnt) >= 5) {
 		$(".documentsUploader").attr("style", "display: none !important");
 	}
@@ -47,169 +36,69 @@ $(document).ready(function () {
 	// autoConplete 문제로 인한 처리
 	$("#partnerName").val(partnerData.partnerName);
 	$("#softwareName").val(partnerData.softwareName);
-	// ossNames auto complete
-	fn_grid_com.griOssNames().success(function(data, status, headers, config){
-		if(data != null){
-			data.forEach(function(obj){
-				ossNames.push(obj.ossName);
-			});
-		}
-	});
 	
-	// licenseNames auto complete
-	commonAjax.getLicenseTags().success(function(data, status, headers, config){
-		if(data != null){
-			var tag = "";
-			
-			data.forEach(function(obj){
-				if(obj!=null) {
-					tag = {
-						value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
-						label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
-						type : obj.licenseType,
-						obligation : obj.obligation,
-						obligationChecks : obj.obligationChecks
-					}
-					
-					licenseNames.push(tag);
-				}
-			});
-		}
-	});
-	
-	if (partnerData.partnerId != null) {
-		$("input[name=creatorNm]").val(partnerData.creatorName||"");
+	if ([[${detail.partnerId}]] != null) {
+		$("input[name=creatorName]").val([[${detail.creatorName}]]);
+		
 		fn.displayPartnerInfo();
 	}
 	
 	if (prjList != null) {
 		grid.projectList();
 	}
-	
-	$(".select2").select2();
-	
-	$("[id^=tabMenu]").on("click", function() {
-		var tabId = $(this).attr("id");
-		tabId = tabId.replace("tabMenu", "");
-		$("[name=gridArea]").hide();
-		
-		if ("Party" == tabId) {
-			$("#girdAreaParty").show();
-		}
-	});
 });
 
-var commentTemp = '';
 var modifyCommentId = [[${detail.comment}]];
 var commentIdx= [[${detail.comment}]];
 var evt = {
 	init : function(){
-		$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
-		
-		commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
-		$('dl[name=commentClone]').remove();
-		
 		$('select[name=userDivision]').trigger('change');
 		$('select[name=division]').trigger('change');
-
+		$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+		
 		$('div.multiTxtSet2 .smallDelete').on('click', function(){
 			$(this).parent().remove();
 		});
-
-		fn.confirmationUploadFile();
-		fn.ossUploadFile();
-		fn.partnerBinaryUploadFile();
+		
+		if ([[${confirmationFile}]] == null) {
+			fn.confirmationUploadFile();
+		}
 		fn.documentsUploadFile();
 		
 		// file uploader hide in CONF status
         if ('CONF' == [[${detail.status}]]) {
             $(".ajax-upload-dragdrop").hide();
         }
-
-        if ([[${detail.partnerId}]] != null) {
+		
+		if ([[${detail.partnerId}]] != null) {
 			fn.publicChange();
+			
+			let description = [[${detail.description}]];
+			if ("" != description && description != null) {
+				$("#descriptionTextarea").summernote('code', description);
+			}
+		} else {
+			fn.ossUploadFile();
 		}
-        
-      	//프로젝트 리스트 더보기
+		if ("Y" == [[${prjLiseMore}]]) {
+			$("#listMore").show();
+		}
 		$("#listMore").on("click",function(){
 			createTabInFrameWithCondition("Project List", '/project/list', 'PARTNERLISTMORE', $('input[name=partnerName]').val());
 		});
-        
-		$("#domain").on("change", function(e){
-			var value = $(this).find("option:selected").val();
-			var domain = $(this).find("option:selected").text();
-			
-			if(etcDomain == value){
-				$("#emailTemp").val("").show();
-			} else {
-				$("#emailTemp").val(domain).hide();
-			}
-		});
 
 		$("#createProject").on("click", function(){
-			if (partnerData != null) {
-				var partnerId = partnerData.partnerId||"";
-				var partnerName = partnerData.partnerName||"";
-				var softwareName = partnerData.softwareName||"";
-				if (softwareName.indexOf("/") > -1){
-					softwareName = softwareName.replace("/", "[]");
-				}
-				createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
+			var partnerId = [[${detail.partnerId}]];
+			var partnerName = [[${detail.partnerName}]];
+			var softwareName = [[${detail.softwareName}]];
+			if(softwareName.indexOf("/") > -1){
+				softwareName = softwareName.replace("/", "[]");
 			}
+			createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
 		});
-	},
-	tabInit: function(){
-		var tabContent = $(".tabContent");
-		var tabMenuA = $(".tabMenu a");
-
-/* 		if (partnerData != null && partnerData.partnerId == null) {
-			tabMenuA.eq("1").hide();
-		} */
-		
-		tabContent.hide();
-		tabMenuA.click(function () {
-			$(".tabMenu a span").remove();
-			tabMenuA.eq("0").text("3rd party");
-			if ([[${batFlag}]]) {
-				tabMenuA.eq("1").text("BAT(Optional)");
-			}
-			
-			var tag = "<span>"+$(this).text()+"</span>";
-			$(this).html(tag);
-			
-			tabContent.hide();
-			activeTabText = $(this).text();
-			activeTab = $(this).attr("rel");
-			
-			$("#" + activeTab).show();
-
-			if(activeTab == "batDiv") {
-				$(".projdecBtn").hide();
-			} else {
-				$(".projdecBtn").show();
-			}
-			
-			// _mainLastsel 꼬이는것 방지
-			if(activeTab == "0") {
-				_mainLastsel = $('#list').jqGrid('getGridParam', "selrow" );
-			} else if(activeTab == "batDiv") {}
-			
-			// 선택된 로우가 없을경우 _mainLastsel 초기화
-			if(typeof(_mainLastsel)!="string") {
-				_mainLastsel = -1;
-			}
-		});
-		
-		tabMenuA.eq("0").click(); 
 	}
 };
 
-// party 그리드 데이터 전역 변수
-var partyMainData;
-var partySubData;
-var partyValidMsgData_e = []; //초기화
-var partyDiffMsgData_e = []; //초기화
-var partyInfoMsgData_e = []; // 초기화
 var fn = {
 	displayPartnerInfo : function () {
 		var display = "";
@@ -220,7 +109,7 @@ var fn = {
 			softwareName += " (" + softwareVersion + ")";
 		}
 		
-		var partnerName = "<span class=\"text-dark-gray text-bold hover-line goToEditLink\">" + softwareName + "</span>";
+		var partnerName = "<span class=\"text-dark-gray text-bold hover-line urlLink goToEditLink\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab()\">" + softwareName + "</span>";
 		display += partnerName
 		
 		var status = "<span class=\"ml-2\"> | </span>";
@@ -229,24 +118,246 @@ var fn = {
 		switch(partnerStatus){
 			case "REQ" :
 				status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
-					break;
+
+				break;
 			case "REV" :
 				status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
-					break;
+
+				break;
 			case "CONF" :
 				status += "<span class=\"text-dark text-bold ml-2\">Confirm</span>";
-					break;
+
+				break;
 			default :
 				status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
-					break;
+
+				break;
 		}
 		
 		display += status;
+		
+		var oscProgress = "<span class=\"ml-2\"> | </span>";
+		
+		let request = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST')}]];
+		let review = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW')}]];
+		let confirm = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}]];
+		let progress = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS')}]];
+		
+		switch (partnerStatus) {
+			case confirm : oscProgress += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+			case request : oscProgress += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+			case review : oscProgress += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+			case progress :
+			default : oscProgress += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+		}
+		
+		display += oscProgress;
 		
 		$("#displayPartnerInfo").html(display);
 		
 		if ($(".goToEditLink").width() > 300) {
 			$(".goToEditLink").addClass("ellipsis");
+		}
+	},
+	ossUploadFile : function () {
+		//파일업로드
+		var accept2 = '';
+		var fileAccept2 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept2) {
+			if ('22' == fileAccept2[i].cdDtlNo) {
+				accept2 = fileAccept2[i].cdDtlExp;
+			}
+		}
+		
+		$('#ossFile').uploadFile({
+			url : '/partner/ossFile?excel=Y',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept2,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					if (result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function() {});
+					} else if(result[2] == "CSV_FILE") {
+						var result_ = result[0][0];
+
+						if (result && result_.uploadSucc) {
+							fn.makeFileTag(result[0][0], 'ossFile');
+							fn.getCsvData();
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "EXCEL_FILE") {
+						var result_ = result[0][0];
+						
+						if (result && result_.uploadSucc) {
+							if (result[1] && result[1].length != 0) {
+								for(var i = 0; i < result[1].length; i++){
+									var num = i+1;
+									var checkedTxt = "";
+									var sheetName = result[1][i].name.toUpperCase().trim();
+
+									if (sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST") {
+										checkedTxt = "checked";
+									}
+									
+									var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+									sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+									$("#sheetBody").append(sheetTr);
+								}
+								
+								const sheetHtml = $(".sheetSelectPop").html();
+								$("#sheetBody").empty();
+								
+								if(!alertify.selectSheet){
+									alertify.dialog('selectSheet', function() {
+										return {
+											setup: function() {
+												var settings = alertify.confirm().settings;
+												
+												for (var prop in settings) {
+													this.settings[prop] = settings[prop];
+												}
+												
+												var setup = alertify.confirm().setup();
+												setup.buttons = [];
+												setup.focus.element = 0;
+												
+												return setup;
+											},
+										    hooks: {
+										    	onshow: function() {
+										        	this.elements.dialog.style.maxWidth = 'none';
+										          	this.elements.dialog.style.width = '365px';
+										        }
+											}
+										};
+									}, false, 'alert');
+			                	}
+								
+								alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
+								
+								$('.ajax-file-upload-statusbar').fadeOut('slow');
+								$('.ajax-file-upload-statusbar').remove();
+								
+								ossFileObj = result_;
+							}
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "SPDX_SPREADSHEET_FILE") {
+						var result_ = result[0][0];
+						if (result && result_.uploadSucc) {
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+							
+							fn.makeFileTag(result_, 'ossFile');
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						}
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
+	},
+	getSheetData : function(){
+		fn.closePop();
+		
+		var sheetNum = [];
+		$('input:checkbox[name="sheetNameSelect"]').each(function(){
+			if ($(this).is(':checked')){
+				sheetNum.push($(this).val());
+			}
+		});
+		
+		var fileSeq = ossFileObj.registSeq;
+		
+		if (sheetNum.length == 0) {
+			alertify.alert([[#{msg.common.check.sheet}]], function(){});
+			
+			return;
+		} else {
+			loading.show();
+			
+			var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq};
+			fn.exeLoadReportData(finalData);
+		}
+	},
+	exeLoadReportData : function(finalData){
+		$.ajax({
+			url : suffixUrl + '/project/getSheetData',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if ("false" == data.isValid) {
+					if (data.validMsg) {
+						$('#ossFileId').val("");
+						$('#ossFileSheetNo').val("");
+						ossFileObj = undefined;
+						
+						alertify.alert(data.validMsg, function(){});
+					} else {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				} else {
+					$('#ossFileId').val(ossFileObj.registSeq);
+					$('#ossFileSheetNo').val(finalData.sheetNums);
+					fn.makeFileTag(ossFileObj, 'ossFile');
+					ossFileObj = undefined;
+					
+					if (data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+						alertify.alert(data.resultData.systemChangeHisStr, function(){});
+					}
+				}
+			},
+			error: function(data){
+				loading.hide();
+				$('.ossUpload').children().remove();
+				
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	mvEditTab : function () {
+		if (parseInt(partnerData.permission) > 0) {
+			createTabInFrame(partnerId+'_3rdParty', '/partner/edit/' + partnerData.partnerId);
+		} else {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
+		}
+	},
+	mvIdentification : function () {
+		if (partnerId != null) {
+			if (parseInt(partnerData.permission) > 0) {
+				createTabInFrame(partnerId + '_3rdParty_Identify', '/partner/identification/' + partnerData.partnerId);
+			} else {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
+			}
+		} else {
+			alertify.alert([[#{msg.partner.identification.move}]], function(){});
 		}
 	},
 	addWatcherFnc : function () {
@@ -296,15 +407,18 @@ var fn = {
 	addEmailFnc : function () {
 		/* AD ID 정보 */
 		var adId = $("#adId").val();
-		var domain = $("#emailTemp").val();
+		var adIdDomain = $("input[name=adIdDomain]").val();
 
 		if ("" == adId) {
 			$("#adId").focus();
-			// return alertify.error('Please enter watcher AD ID', 0);
 			return alertify.error([[#{enter.watcher.error}]], 0);
 		}
 		
-		var _email = adId + "@" + domain;
+		if ("" == adIdDomain) {
+			return alertify.error([[#{select.watcher.domain.error}]], 0);
+		}
+		
+		var _email = adId + "@" + adIdDomain;
 		var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
 
 		if (regEmail.test(_email) == false) {
@@ -326,7 +440,6 @@ var fn = {
 					fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
 				} else {
 					fn.addWatcher('', '', _email);
-					fn.addHtml($("#multiDiv"), _email, _email, "Email");
 				}
 			},
 			error: function(data){
@@ -335,13 +448,14 @@ var fn = {
 		});
 		
 		$("#adId").val('');
-		$("#domain").val([[${@CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN')}]]).trigger('change');
+		$("input[name=adIdDomain]").val('');
+		$("select[name=prjDomain] option:eq(0)").prop("selected", true);
+		$("select[name=prjDomain]").next().find("#select2-prjDomain-container").text("Select Domain");
 	},
 	addListFnc : function () {
-		var listKind = $("#listKind").val()
-		  , listId = $("#listId").val();
+		var listKind = $("#listKind").val(), listId = $("#listId").val();
 			
-		if (fn.chkListValidation(listKind, listId)){
+		if (fn.chkListValidation(listKind, listId)) {
 			var obj = {};
 			
 			obj["listKind"] = listKind;
@@ -401,189 +515,16 @@ var fn = {
 					alertify.error([[#{msg.common.valid}]], 0);
 				} else {
 					result = result[0][0];
+					
 					if (result && result.uploadSucc) {
 						fn.makeFileTag(result, 'confirmationFile');
 					} else {
-						alert([[#{msg.common.upload.failed}]]);
+						alertify.alert([[#{msg.common.upload.failed}]], function(){});
 					}
 				}
 				
 				$('.ajax-file-upload-statusbar').fadeOut('slow');
 				$('.ajax-file-upload-statusbar').remove();
-			}
-		});
-	},
-	ossUploadFile : function() {
-		//파일업로드
-		var accept2 = '';
-		var fileAccept2 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-		for (var i in fileAccept2) {
-			if ('22' == fileAccept2[i].cdDtlNo) {
-				accept2 = fileAccept2[i].cdDtlExp;
-			}
-		}
-		
-		$('#ossFile').uploadFile({
-			url : '/partner/ossFile?excel=Y',
-			multiple:false,
-			dragDrop:true,
-			allowedTypes:accept2,
-			fileName:'myfile',
-			sequential:true,
-			sequentialCount:1,
-			onSuccess:function(files,data,xhr,pd){
-				// 161102 jy-seo 파일 업로드 에러처리
-				var result = jQuery.parseJSON(data);
-				
-				if (result == null) {
-					alertify.error([[#{msg.common.valid}]], 0);
-				} else {
-					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
-						alertify.alert(result[1], function() {});
-					} else if(result[2] == "CSV_FILE") {
-						var result_ = result[0][0];
-
-						if (result && result_.uploadSucc) {
-							fn.makeFileTag(result[0][0], 'ossFile');
-							fn.getCsvData();
-						} else {
-							alertify.alert([[#{msg.common.upload.failed}]], function(){});
-						}
-					} else if(result[2] == "EXCEL_FILE") {
-						var result_ = result[0][0];
-						
-						if (result && result_.uploadSucc) {
-							if (result[1] && result[1].length != 0) {
-								for(var i = 0; i < result[1].length; i++){
-									var num = i+1;
-									var checkedTxt = "";
-									var sheetName = result[1][i].name.toUpperCase().trim();
-
-									if (sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST") {
-										checkedTxt = "checked";
-									}
-									
-									var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
-												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
-									sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
-									$("#sheetBody").append(sheetTr);
-								}
-								
-								const sheetHtml = $(".sheetSelectPop").html();
-								$("#sheetBody").empty();
-								
-								if(!alertify.selectSheet){
-									alertify.dialog('selectSheet', function() {
-										return {
-											setup: function() {
-												var settings = alertify.confirm().settings;
-												
-												for (var prop in settings) {
-													this.settings[prop] = settings[prop];
-												}
-												
-												var setup = alertify.confirm().setup();
-												setup.buttons = [];
-												setup.focus.element = 1;
-												
-												return setup;
-											},
-										    hooks: {
-										    	onshow: function() {
-										        	this.elements.dialog.style.maxWidth = 'none';
-										          	this.elements.dialog.style.width = '365px';
-										        }
-											}
-										};
-									}, false, 'alert');
-			                	}
-								
-								alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
-								
-								$('.ajax-file-upload-statusbar').fadeOut('slow');
-								$('.ajax-file-upload-statusbar').remove();
-								
-								ossFileObj = result_;
-							}
-						} else {
-							alertify.alert([[#{msg.common.upload.failed}]], function(){});
-						}
-					} else if(result[2] == "SPDX_SPREADSHEET_FILE") {
-						var result_ = result[0][0];
-						if (result && result_.uploadSucc) {
-							$('.ajax-file-upload-statusbar').fadeOut('slow');
-							$('.ajax-file-upload-statusbar').remove();
-							
-							fn.makeFileTag(result_, 'ossFile');
-							fn.getSpdxSpreadsheetData();
-						} else {
-							alertify.alert([[#{msg.common.upload.failed}]], function(){});
-							$('.ajax-file-upload-statusbar').fadeOut('slow');
-							$('.ajax-file-upload-statusbar').remove();
-						}
-					} else {
-						alertify.error([[#{msg.common.valid}]], 0);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-					}
-				}
-			}
-		});
-	},
-	partnerBinaryUploadFile : function () {
-		var accept4 = '';
-		var fileAccept4 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-		for (var i in fileAccept4) {
-			if ('19' == fileAccept4[i].cdDtlNo) {
-				accept4 = fileAccept4[i].cdDtlExp;
-			}
-		}
- 		
-		$('#partnerBinaryFile').uploadFile({
-			url:'/partner/noticeText?fileType=text',
-			multiple:false,
-			dragDrop:true,
-			allowedTypes:accept4,
-			fileName:"myfile",
-			sequential:true,
-			sequentialCount:1,
-			dynamicFormData: function() {
-				var data ={ "registFileId" : '' }
-
-				return data;
-			},
-			onSubmit:function(files){
-				// file ext 재확인
-				var accept4 = "";
-				var ext = files[0].split(".")[1];
-				
-				fileAccept4 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-				for (var i in fileAccept4) {
-					if ('19' == fileAccept4[i].cdDtlNo) {
-						accept4 = fileAccept4[i].cdDtlExp;
-					}
-				}
-				
-				if(accept4 != ext){
-					return false;
-				}
-			},
-			onSuccess:function(files,data,xhr,pd){
-				var result = jQuery.parseJSON(data);
-				
-				if (result == null) {
-					alertify.error([[#{msg.common.valid}]], 0);
-					
-				} else {
-					result = result[0][0];
-					fn.makeFileTag(result, 'binaryFile');
-				}
-				
-				$('.ajax-file-upload-statusbar').fadeOut('slow');
-				$('.ajax-file-upload-statusbar').remove();
-			},
-			onError:function(files,status,errMsg,pd){
-				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
 	},
@@ -634,32 +575,11 @@ var fn = {
 		
         getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
         	if (!alertify.editDialog){
-				alertify.dialog('editDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-						
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-						
-							var setup = alertify.confirm().setup();
-							setup.buttons = [];
-							setup.focus.element = 0;
-						
-							return setup;
-						},
-				    	hooks: {
-				    		onshow: function() {
-				        		this.elements.dialog.style.maxWidth = 'none';
-				          		this.elements.dialog.style.width = '700px';
-				        	}
-						}
-					};
-				}, false, 'confirm');
+        		commonAlertifyDialog('editDialog');
     		}
-		
-			alertify.editDialog(res);
+        	alertify.editDialog().set('onshow', function(e) {
+        		$(alertify.editDialog().elements.buttons.primary).empty();
+        	}).setContent(res).show();
       	},
        	null,
       	function () {
@@ -694,16 +614,16 @@ var fn = {
 				if(json.isValid == 'false'){
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
-					alertify.success([[#{msg.project.sent.comments.success}]]);
-                	$("#modifiedCommentInPjtEditor").summernote('code', '');
-                	$("#userContents").val('');
-                	$('.ajs-close').trigger("click");
-                	fn_comment.getCommentList(commentsParam);
-                
-                	if (_popupComment == null || _popupComment.closed) {
-                	} else {
-                		_popupComment.callbackFunction();
-                	}
+                    alertify.success([[#{msg.project.sent.comments.success}]]);
+                    $("#modifiedCommentInPjtEditor").summernote('code', '');
+                    $("#userContents").val('');
+                    $('.ajs-close').trigger("click");
+                    fn_comment.getCommentList(commentsParam);
+                    
+                    if (_popupComment == null || _popupComment.closed) {
+                    } else {
+                    	_popupComment.callbackFunction();
+                    }
 				}
 			},
 			error : function(){
@@ -736,7 +656,7 @@ var fn = {
 			}
 		});
 	},
-/* 	editDescription : function(){
+	editDescription : function(){
 		var linkText = "";
 		var data = {"partnerId" : $('input[name=partnerId]').val() , "description" : linkText};
 		$.ajax({
@@ -753,57 +673,11 @@ var fn = {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
-	}, */
-	// party 그리드 데이터
-	getPartyGridData : function(){
-		if (partnerData.partnerId != null) {
-			loading.show();
-			
-			$.ajax({
-				url : '/project/identificationGrid/'+partnerData.partnerId+'/20',
-				type : 'GET',
-				dataType : 'json',
-				cache : false,
-				data : {referenceId : partnerData.partnerId},
-				contentType : 'application/json',
-				success : function(data){
-					loading.hide();
-					
-					partyMainData = data.mainData;
-					partyValidMsgData_e = []; //초기화
-					partyDiffMsgData_e = []; //초기화
-					partyInfoMsgData_e = [];
-					
-					if(data.validData) {
-						partyValidMsgData_e = data.validData;
-					}
-					if(data.diffData) {
-						partyDiffMsgData_e = data.diffData;
-					}
-					if(data.infoData) {
-						partyInfoMsgData_e = data.infoData;	
-					}
-					
-					// 리로드 대신 그리드 삭제 후 다시 그리기
-					$("#list").jqGrid('GridUnload');
-					
-					grid.init();
-					
-					// totla record 표시
-					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
-					
-					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
-				},
-				error : function(){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
 	},
 	changeDivision : function() {
 		var divisionCd = $("#division option:selected").val();
-		if ("" != divisionCd) {
-			var postData = { "partnerId" : partnerData.partnerId||"", "division" : divisionCd};
+		if("" != divisionCd) {
+			var postData = { "partnerId" : [[${detail.partnerId}]], "division" : divisionCd};
 			$.ajax({
 				url : '/partner/changeDivisionAjax',
 				type : 'POST',
@@ -826,126 +700,91 @@ var fn = {
 	},
 	save : function(){
 		if (fn.checkStatus()){
-			com_fn.exitCell(_mainLastsel, "list");
-			
-			if (typeof alertify.parSaveDialog === 'undefined') {
-				alertify.dialog('parSaveDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
-        	}
-			
-			var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
-       		innerHtml 		+= '<br><textarea id="parSaveEditor"></textarea>';
-			
-       		alertify.parSaveDialog()
-       		.set('onok', function(e) {
-       			// prevent clicking the OK button on Enter
-				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-					keyCode = undefined;
-					return false;
+			if (partnerId == null || (partnerId != null && isStatusChangeFlag)) {
+				if (typeof alertify.parSaveDialog === 'undefined') {
+					commonAlertifyDialog('parSaveDialog');
+	        	}
+				
+	           	var innerHtml = "";
+           		if (isStatusChangeFlag) {
+					innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.request', true)}]];
+				} else {
+					innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
 				}
-       			
-       			if (e) {
-       				cleanErrMsg("list");
-					$("div.retxt").hide();
-					$("input, textarea").removeClass("is-invalid");
-					$(".permissionRadio").find(".active").find("input").prop("checked", true);
-					
-					//public 값 넣어주기
-					if($('#checkbox3').is(':checked')) {
-						$('#checkbox3').val('N');
+           		innerHtml += '<br><textarea id="parSaveEditor"></textarea>';
+           		
+           		alertify.parSaveDialog()
+	       		.set('onok', function(e) {
+	       			if (e) {
+	       				var comment = $("#parSaveEditor").summernote('code');
+	       					if ("" != $(comment).text().trim() && !isStatusChangeFlag) {
+	       					$("#userComment").val(comment);
+	       				} else {
+	       					$('#userComment').val("");
+	       				}
+	       				
+	       				fn.saveSubmit();
+	       			} else {
+	       				return false;
+	       			}
+	       		})
+	       		.set('title', 'Save').setContent(innerHtml)
+	       		.set('onshow', function(e){
+	       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	       			const parameter = {
+	    		   		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+	    		       	"referenceId" : $('input[name=partnerId]').val()
+	    		  	}
+	    		    var draftUserComment = draftUserComments(parameter);
+	    		    if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+	    		       	$("#parSaveEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+	    		    }
+	       		})
+				.show();
+           	} else {
+           		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+					if (e) {
+						fn.saveSubmit();
 					} else {
-						$('#checkbox3').val('Y');
+						return false;
 					}
-					
-					com_fn.exitRow("list");
-					
-					fn_grid_com.totalGridSaveMode('list');
-					
-					var target = $("#list");
-					var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
-					
-			 		mainData.forEach( function(_rowData){
-			 			var _rowId = _rowData['gridId'];
-			 			
-			 			if(_rowData["obligationLicense"] == "90") {
-			 				if(_rowData["notify"] == "Y") {
-			 					if(_rowData["source"] == "Y") {
-			 						_rowData["obligationType"] = "11";
-			 					} else {
-			 						_rowData["obligationType"] = "10";
-			 					}
-			 				} else if(_rowData["notify"] == "N") {
-			 					_rowData["obligationType"] = "99";
-			 				}
-			 			}
-			 		});
-			 		
-					$('#ossComponentsStr').val(JSON.stringify(mainData));
-					var comment = $("#parSaveEditor").summernote('code');
-       				if ("" != $(comment).text().trim()) {
-						$("#userComment").val(comment);
-					} else {
-						$('#userComment').val("");
-					}
-       				var editorVal = $("#descriptionTextarea").summernote('code');
-					if ("" != $(editorVal).text().trim()){
-						$('#description').val(replaceWithLink(editorVal));
-					} else {
-						$('#description').val("");
-					}
-					
-					if ("CONF" == [[${detail.status}]]) {
-						fn.disabledComfirmedRow(false);
-					}
-					
-					var prjId = partnerData.partnerId||"";
-					var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
-					
-					$.ajax({
-						url : '/project/nickNameValid/20',
-						type : 'POST',
-						data : JSON.stringify(postData),
-						dataType : 'json',
-						cache : false,
-						contentType : 'application/json',
-						success: function(data){fn.makeNickNamePopup(data);},
-						error: function(data){
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					});
-       			} else {
-       				return false;
-       			}
-       		})
-       		.set('title', 'Save').setContent(innerHtml)
-       		.set('onshow', function(e){
-       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-       		})
-			.show();
-		}else{
+				});
+           	}
+		} else {
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
-
+	},
+	saveSubmit : function () {
+		cleanErrMsg("list");
+		$("div.retxt").hide();
+		$("input, textarea").removeClass("is-invalid");
+		$(".permissionRadio").find(".active").find("input").prop("checked", true);
+		
+		var editorVal = $("#descriptionTextarea").summernote('code');
+		if ("" != $(editorVal).text().trim()){
+			$('#description').val(replaceWithLink(editorVal));
+		} else {
+			$('#description').val("");
+		}
+		
+		if ("CONF" == [[${detail.status}]]) {
+			fn.disabledComfirmedRow(false);
+		}
+		
+		var postData = $("#partnerForm").serializeObject();
+		
+		$.ajax({
+			url : '/partner/saveAjax',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			contentType : 'application/json',
+			cache : false,
+			success: fn.onRegistSuccess,
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
 	},
 	disabledComfirmedRow : function(disabledBoolean) {
 		var diabledNameList = ['partnerName', 'softwareName', 'softwareVersion', 'publicYn', 'division', 'reviewerName'];
@@ -955,58 +794,11 @@ var fn = {
 		
 		$("#deliveryForm").prop("disabled", disabledBoolean);
 	},
-	makeNickNamePopup : function(obj) {
-		// ajax FormSubmit 사용시 huge String 문자가 포함되면 data가 전송되지 않는 문제가 있어서 formsubmi에서 applicaton/json으로 변경
-		var postData = $("#partnerForm").serializeObject();
-		
-		if(obj.validMsg && obj.validMsg.length != 0){
-			alertify.alert(obj.validMsg, function () {
-				$.ajax({
-					url : '/partner/saveAjax',
-					type : 'POST',
-					data : JSON.stringify(postData),
-					dataType : 'json',
-					contentType : 'application/json',
-					cache : false,
-					success: fn.onRegistSuccess,
-					error: function(data){
-						alertify.error([[#{msg.common.valid2}]], 0);
-					}
-				});
-			});
-		} else {
-			$.ajax({
-				url : '/partner/saveAjax',
-				type : 'POST',
-				data : JSON.stringify(postData),
-				dataType : 'json',
-				contentType : 'application/json',
-				cache : false,
-				success: fn.onRegistSuccess,
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
-	},
 	onRegistSuccess : function(data) {
-		_mainLastsel = -1;
+		loadingIden.hide();
 		
-		if("false" == data.isValid) {
-			if("99" == data.resCd) { //중복 처리
-				alertify.alert([[#{msg.value.duplicate.partner}]]);
-				fn.partnerGridValidMsg(data.dupData);
-
-				return;
-			}
-
-			if(data.validMsg != ''){
-				alertify.error([[#{msg.common.valid}]], 0);
-				fn.partnerGridValidMsg(data.resultData);
-				
-				return;
-			}
-			
+		_mainLastsel = -1;
+		if ("false" == data.isValid) {
 			// 폼 메세지
 			if(data.partnerName){
 				$('input[name=partnerName]').next().text(data.partnerName).show();
@@ -1034,89 +826,23 @@ var fn = {
 				$('input[name=softwareVersion]').next().text(data.duplicatePartner).show();
 			}
 			
-			partyValidMsgData_e = data;
-			
 			alertify.error([[#{msg.common.valid}]], 0);
 		} else {
-			if("10" == data.resCd){
-				if (isStatusChangeFlag) {
-					var param = {status : 'REQ', partnerId : [[${detail.partnerId}]], userComment : ""};
-					checkObligationFlag = false;
-					var _list = $("#list");
-					var mainData = _list.jqGrid('getGridParam','data');
-
-					mainData.forEach( function(_rowData){
-						if( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
-							checkObligationFlag = true;
+			if ("10" == data.resCd){
+				var partnerId = $('input[name=partnerId]').val();
+				alertify.alert([[#{msg.common.success}]], function(){
+					reloadTabInframe('/partner/list');
+					if (partnerId){
+						deleteTabInFrame('/partner/edit' + partnerId);
+						createTabInFrame(data.partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+					} else {
+						deleteTabInFrame('/partner/edit');
+						if (data.partnerId) {
+							createTabInFrame(data.partnerId + '_3rdParty', "/partner/edit/" + data.partnerId);
 						}
-					});
-					
-					if (checkObligationFlag) {
-						alert([[#{msg.warn.include.needcheck.license}]]);
-						return false;
 					}
-					
-					isStatusChangeFlag = false;
-					$.ajax({
-						url : '/partner/changeStatus',
-						type : 'POST',
-						data : param,
-						dataType : 'json',
-						cache : false,
-						success : function(data){
-							if (data.isValid == "false") {
-								alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){});
-								
-								gridCleanErrMsg("list");
-								partyValidMsgData_e = data.externalData;
-								partyDiffMsgData_e = data.externalData2;
-								
-								if(partyValidMsgData_e) {
-									gridValidMsgNew(partyValidMsgData_e, "list");
-								}
-								
-								if(partyDiffMsgData_e) {
-									gridDiffMsg(partyDiffMsgData_e, "list");
-								}
-								
-								alertify.error([[#{msg.common.valid}]], 0);
-							} else {
-								reloadTabInframe('/partner/list');
-								if ([[${detail.partnerId}]] != null) {
-									alertify.alert([[#{msg.common.success}]], function(){
-										deleteTabInFrame("/partner/edit/" + [[${detail.partnerId}]]);
-										createTabInFrame([[${detail.partnerId}]] + '_3rdParty', "/partner/edit/" + [[${detail.partnerId}]]);
-									});
-								}
-							}
-						},
-						error : function(){
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					});
-				} else {
-					var partnerId = $('input[name=partnerId]').val();
-					alertify.alert([[#{msg.common.success}]], function(){
-						reloadTabInframe('/partner/list');
-						if ("CONF" == [[${detail.status}]]) {
-							fn.disabledComfirmedRow(true);
-						}
-						if(partnerId){
-							com_fn.changeMode('view', false, [[${detail.status}]]);
-							partnerStatus = [[${detail.status}]];
-							fn.getPartyGridData();
-							fn_comment.getCommentList(commentsParam);
-							saveFlag = true;
-						} else {
-							deleteTabInFrame('/partner/edit');	
-							if(data.partnerId) {
-								createTabInFrame(data.partnerId+'_3rdParty', '/partner/edit/'+data.partnerId);
-							}
-						}
-					});
-				}
-
-			}else{
+				});
+			} else {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		}
@@ -1162,7 +888,7 @@ var fn = {
 		var btnHtm = '<br/><b>Send an email to</b><br/>';
 		btnHtm += '<input type="button" value="Watcher Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'W\')"/>&nbsp;&nbsp;&nbsp;';
 
-		if (userRole == "ROLE_ADMIN") {
+		if(userRole == "ROLE_ADMIN") {
 			btnHtm += '<input type="button" value="Creator Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'C\')"/>&nbsp;&nbsp;&nbsp;';
 		} else {
 			btnHtm += '<input type="button" value="Reviewer Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'R\')"/>&nbsp;&nbsp;&nbsp;';
@@ -1172,152 +898,12 @@ var fn = {
 
 		alertify.myAlert(btnHtm);
 	},
-	modifyComment : function(obj){
-		$('.commModifyPop').show();
-		$('#blind_wrap').show();
-		var commId = $(obj).next().next().val();
-		modifyCommentId = commId;
-		var contents = $(obj).parent().parent().next().html();
-//		CKEDITOR.instances.editor3.setData(contents);
-		
-		$('.closeModComment').click(function(){
-			$('.commModifyPop').hide();
-			$('#blind_wrap').hide();	
-		})
-		
-		$('.modifyComment').click(function(){
-			var editorVal = ""; // replaceWithLink(CKEDITOR.instances.editor3.getData());
-			var register = [[${sessUserInfo.userId}]];
-			var param = {commId : modifyCommentId, referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal};
-
-			$.ajax({
-				url : '/partner/saveComment',
-				type : 'POST',
-				dataType : 'json',
-				cache : false,
-				data : param,
-				success : function(json){
-					if(json.isValid) {
-						if(json.isValid == 'false') {
-							createValidMsgComplex(json);
-							alertify.error([[#{msg.common.valid}]], 0);
-							
-						} else if(json.isValid == 'true') {
-							alertify.alert([[#{msg.common.success}]], function(){
-							});
-						}	
-					} else {
-						//코멘트 임시저장
-						$('.modifyComment').click(function(){
-							var editorVal = ""; // replaceWithLink(CKEDITOR.instances.editor3.getData());
-							var register = [[${sessUserInfo.userId}]];
-							var param = {commId : commentIdx, referenceId : $('input[name=partnerId]').val(), referenceDiv :'13', contents : editorVal};
-
-							$.ajax({
-								url : '/partner/saveComment',
-								type : 'POST',
-								dataType : 'json',
-								cache : false,
-								data : param,
-								success : function(json){
-									if(json.isValid){
-										if(json.isValid == 'false') {
-											createValidMsgComplex(json);
-											alertify.error([[#{msg.common.valid}]], 0);
-											
-										} else if(json.isValid == 'true') {
-											alertify.alert([[#{msg.common.success}]], function(){});
-										}	
-									}else{
-										commentIdx = json.commId;
-									}
-									
-								},
-								error : function(){
-									alertify.error([[#{msg.common.valid2}]], 0);
-								}
-							});
-						});
-					}
-					
-					$('.commModifyPop').hide();
-					$('#blind_wrap').hide();
-				},
-				error : function(){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			})
-		});
-	},
-	reset : function(){
-		if (fn.checkStatus()){
-			alertify.confirm([[#{msg.partner.check.reset}]], function (e) {
-				if (e) {
-					$('.ossUpload').empty();
-					$('.binaryUpload').empty();
-					
-					var mode = $("#mode").val();
-					if ("edit" == mode) {
-						fn.ossUploadFile();
-						fn.partnerBinaryUploadFile();
-					} else {
-						var appendHtml = "<li><span>No File</span></li>";
-						$('.ossUpload').append(appendHtml);
-						$('.binaryUpload').append(appendHtml);
-					}
-					
-					var target = $("#list");
-					target.jqGrid('clearGridData');
-
-					fn_grid_com.totalGridSaveMode('list');
-					var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
-					
-			 		mainData.forEach( function(_rowData){
-			 			var _rowId = _rowData['gridId'];
-			 			
-			 			if(_rowData["obligationLicense"] == "90") {
-			 				if(_rowData["notify"] == "Y") {
-			 					if(_rowData["source"] == "Y") {
-			 						_rowData["obligationType"] = "11";
-			 					} else {
-			 						_rowData["obligationType"] = "10";
-			 					}
-			 				} else if(_rowData["notify"] == "N") {
-			 					_rowData["obligationType"] = "99";
-			 				}
-			 			}
-			 		});
-			 		
-					$('#ossComponentsStr').val(JSON.stringify(mainData));
-					$("#documentsFileId").val('');
-					
-	 				var postData = $("#partnerForm").serializeObject();
-					$.ajax({
-						url : '/partner/saveAjax',
-						type : 'POST',
-						data : JSON.stringify(postData),
-						dataType : 'json',
-						contentType : 'application/json',
-						cache : false,
-						success: fn.onRegistSuccess,
-						error: function(data){
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					});
-				} else {
-					return false;
-				}
-			});
-		} else {
-			alertify.alert([[#{msg.partner.warning}]], function(){});
-		}
-	},
 	delete : function(){
 		if (fn.checkStatus()){
 			var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
            	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
-           	
-       		if(!alertify.deleteParDialog){
+			
+			if (!alertify.deleteParDialog){
 				alertify.dialog('deleteParDialog', function() {
 					return {
 						setup: function() {
@@ -1343,51 +929,49 @@ var fn = {
         	}
            	
            	alertify.deleteParDialog()
-       		.set('onok', function(e) {
-       			if (e) {
-       				// prevent clicking the OK button on Enter
-    				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-    					keyCode = undefined;
-    					return false;
-    				}
-    				
-    				var editorVal = $("#parDelEditor").summernote('code');
-    				
-    				if ("" == $(editorVal).text().trim()) {
-    					alertify.alert([[#{msg.project.required.comments}]], function(){});
-
-    					return false;
-    				} else {
+           	.set('onok', function(e){
+           		if (e) {
+           			var comment = $("#parDelEditor").summernote('code');
+               		if ("" == $(comment).text().trim()){
+               			alertify.alert([[#{msg.project.required.comments}]], function(){});
+               		} else {
     					var partnerId = $('input[name=partnerId]').val();
     					$.ajax({
     						url : '/partner/delAjax',
     						type : 'POST',
     						dataType : 'json',
     						cache : false,
-    						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code')) },
+    						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code'))},
     						success: function(data){
-    							if(partnerId) {
+    							if (partnerId) {
     								deleteTabInFrame('/partner/edit/'+partnerId);			
     							} else {
     								deleteTabInFrame('/partner/edit');
     							}
     							
-    							reloadTabInframe('/partner/list');
+    							callCreateTabInFrame('3rd Party', '/partner/list', 'partner-list', true);
     						},
     						error: function(){
     							alertify.error([[#{msg.common.valid2}]], 0);
     						}
     					});
     				}
-       			} else {
-       				return false;
-       			}
-       		})
-           	.set('title', 'Delete').setContent(innerHtml)
-       		.set('onshow', function(e){
-       			$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-       		})
-			.show();
+           		} else {
+           			return false;
+           		}
+           	})
+           	.set('onshow', function(e){
+           		$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		const parameter = {
+           		 	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+           		   	"referenceId" : $('input[name=partnerId]').val()
+           		}
+           		var draftUserComment = draftUserComments(parameter);
+           		if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+           			$("#parDelEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+           		}
+           	})
+           	.setContent(innerHtml).show();
 		} else {
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
@@ -1397,44 +981,6 @@ var fn = {
 		$(".confirmationUploader").attr("style", "display: flex !important");
 
 		evt.init();
-	},
-	deleteOssFile : function(obj){
-		$('.ossUpload').empty();
-		$(".ossUploader").attr("style", "display: flex !important");
-		
-		evt.init();
-	},
-	deleteBinaryFile : function(obj){
-		$('.binaryUpload').empty();
-//		$(".binaryUploader").attr("style", "display: flex !important");
-		$(".binaryFileDiv").hide();
-		evt.init();
-	},
-	makeOssList : function(data){
-		// 서브 그리드 url 전송 설정(false 전송 안함)
-		partyMainData = data.mainData;
-		partySubData = data.subData;
-		
-		// 리로드 대신 그리드 삭제 후 다시 그리기
-		$("#list").jqGrid('GridUnload');
-		
-		grid.init();
-
-		// totla record 표시
-		$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
-	},
-	displayButton : function(cellvalue){
-		var icon1 = "<input type=\"button\" value=\"Delete\" class=\"btnCLight gray wauto\" onclick=\"fn.deleteOssComponents(this)\"/>";
-
-		return icon1;
-	},
-	deleteOssComponents : function(obj){
-		var id = $(obj).parent().parent().attr('id');
-
-		$('#list').jqGrid('delRowData',id);
-	},
-	binaryTab : function(){
-		window.open('https://github.com/fosslight/fosslight_binary_scanner', '_blank');
 	},
 	selectDivision : function(){
 		var division = $('#userDivision').val();
@@ -1464,360 +1010,12 @@ var fn = {
 		});
 	},
 	selectDomain : function() {
-		var tempDomain = $("select[name=parDomain] option:checked").text();
+		var adIdDomain = $("select[name=parDomain] option:checked").text();
 		if ("Select Domain" == adIdDomain) adIdDomain = "";
-		$("input[name=emailTemp]").val(tempDomain);
-	},
-	//requestReview
-	requestReview : function(){
-		if (fn.checkStatus()){
-			isStatusChangeFlag = true;
-			
-			fn.save();
-		}else{
-			alertify.alert([[#{msg.partner.warning}]], function(){});
-		}
-	},
-	//reject
-	reject : function(){
-		if (fn.checkStatus()) {
-			var innerHtml 	= 'Are you sure you want to reject?<br><br>';
-           	innerHtml 		+= '<textarea id="partnerRejectEditor"></textarea>';
-			
-         	if (!alertify.partnerRejectDialog){
-				alertify.dialog('partnerRejectDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
-           	}
-           	
-           	alertify.partnerRejectDialog()
-       		.set('onok', function(e) {
-       			if (e) {
-       				// prevent clicking the OK button on Enter
-    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
-    					keyCode = undefined;
-    					return false;
-    				}
-       				
-					var editorVal = $("#partnerRejectEditor").summernote('code');
-    				
-    				if ("" == $(editorVal).text().trim()){
-               			alertify.alert([[#{msg.project.required.comments}]], function(){});
-
-    					return false;
-    				} else {
-    					var param = {status : 'PROG', partnerId : partnerData.partnerId||"", userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
-
-    					$.ajax({
-    						url : '/partner/changeStatus',
-    						type : 'POST',
-    						data : param,
-    						dataType : 'json',
-    						cache : false,
-    						success : function(data){
-    							reloadTabInframe('/partner/list');
-    							
-    							if (partnerData.partnerId != null) {
-    								alertify.alert([[#{msg.common.success}]], function() {
-    									deleteTabInFrame("/partner/edit/" + partnerId);
-    									createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
-    								});
-    							}
-    						},
-    						error : function(){
-    							alertify.error([[#{msg.common.valid2}]], 0);
-    						}
-    					});
-    				}
-       			} else {
-       				return false;
-       			}
-       		})
-       		.set('title', 'Reject').setContent(innerHtml)
-       		.set('onshow', function(e){
-       			$("#partnerRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-       		})
-			.show();
-		} else {
-			alertify.alert([[#{msg.partner.warning}]], function(){});
-		}
-	},
-	//reviewStart
-	reviewStart : function(){
-		if (fn.checkStatus()){
-			var param = {status : 'REV', partnerId : partnerData.partnerId||""};
-			$.ajax({
-				url : '/partner/changeStatus',
-				type : 'POST',
-				data : param,
-				dataType : 'json',
-				cache : false,
-				success : function(data){
-					reloadTabInframe('/partner/list');
-					
-					if (partnerId != null && partnerId != ''){
-						deleteTabInFrame("/partner/edit/" + partnerId);
-						createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
-					}
-				},
-				error : function(){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		} else {
-			alertify.alert([[#{msg.partner.warning}]], function(){});
-		}
-	},
-	//confirm
-	confirm : function(){
-		if (fn.checkStatus()){
-			cleanErrMsg();
-			checkObligationFlag = false;
-
-			var _list = $("#list");
-			var mainData = _list.jqGrid('getGridParam','data');
-			
-			mainData.forEach( function(_rowData){
-				if( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
-					checkObligationFlag = true;
-				}
-			});
-			
-			if (checkObligationFlag) {
-				alert([[#{msg.warn.include.needcheck.license}]]);
-				
-				return false;
-			}
-			
-			var innerHtml 	= 'Are you sure you want to confirm?<br><br>';
-           	innerHtml 		+= '<textarea id="partnerConfirmEditor"></textarea>';
-           	
-         	if (!alertify.partnerConfirmDialog){
-				alertify.dialog('partnerConfirmDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
-           	}
-			
-        	alertify.partnerConfirmDialog()
-        	.set('onok', function(e) {
-        		if (e) {
-        			// prevent clicking the OK button on Enter
-    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
-    					keyCode = undefined;
-    					return false;
-    				}
-        			
-    				var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
-               		if (typeof ignoreBinaryDbFlag === 'undefined') ignoreBinaryDbFlag = "";
-               		
-               		var editorVal = $("#partnerConfirmEditor").summernote('code');
-       				if ("" == $(editorVal).text().trim()) {
-       					editorVal = "";
-       				}
-               		
-               		var param = {status : 'CONF', partnerId : [[${detail.partnerId}]], binaryFileId : [[${detail.binaryFileId}]], "ignoreBinaryDbFlag" : ignoreBinaryDbFlag};
-               		if ("" != editorVal) {
-    					param["userComment"] = replaceWithLink(editorVal);
-    				} else {
-    					param["userComment"] = "";
-    				}
-               		
-               		$.ajax({
-        				url : '/partner/changeStatus',
-        				type : 'POST',
-        				data : param,
-        				dataType : 'json',
-        				cache : false,
-        				success : function(data){
-        					if(data.isValid == "false") {
-        						gridValidMsgNew(data, "list");
-        						
-        						alertify.error([[#{msg.common.valid}]], 0);
-        					} else {
-        						reloadTabInframe('/partner/list');
-        						
-        						if (partnerId != null && partnerId != ''){
-        							alertify.alert([[#{msg.common.success}]], function() {
-        								deleteTabInFrame("/partner/edit/" + partnerId);
-        								createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
-        							});
-        						}
-        					}
-        					
-        				},
-        				error : function(){
-        					alertify.error([[#{msg.common.valid2}]], 0);
-        				}
-        			});
-        		} else {
-        			return false;
-        		}
-        	})
-           	.set('title', 'Confirm').setContent(innerHtml)
-       		.set('onshow', function(e){
-       			$("#partnerConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-       		})
-			.show();
-		} else {
-			alertify.alert([[#{msg.partner.warning}]], function(){});
-		}
+		$("input[name=adIdDomain]").val(adIdDomain);
 	},
 	closePop : function(){
-		$(".ajs-close").trigger("click");
-	},
-	getSheetData : function(){
-		fn.closePop();
-		
-		var sheetNum = [];
-		$('input:checkbox[name="sheetNameSelect"]').each(function(){
-			if($(this).is(':checked')){
-				sheetNum.push($(this).val());
-			}
-		});
-		
-		var fileSeq = ossFileObj.registSeq;
-		
-		if (sheetNum.length == 0) {
-			alertify.alert([[#{msg.common.check.sheet}]], function(){});
-			
-			return;
-		} else {
-			loading.show();
-			
-			fn_grid_com.totalGridSaveMode('list');
-			cleanErrMsg("list");
-			
-			var target = $("#list");
-			var mainData = target.jqGrid('getGridParam','data');
-			var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
-
-			fn.exeLoadReportData(finalData);
-		}
-	},
-	getCsvData : function(){
-		loading.show();
-
-		fn_grid_com.totalGridSaveMode('list');
-		cleanErrMsg("list");
-
-		var fileSeq = $('input[name=ossFileId]').val();
-		var sheetNum = ["0"];
-		var target = $("#list");
-		var mainData = target.jqGrid('getGridParam','data');
-		var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
-
-		fn.exeLoadReportData(finalData);
-	},
-	getSpdxSpreadsheetData : function(){
-		loading.show();
-
-		fn_grid_com.totalGridSaveMode('list');
-		cleanErrMsg("list");
-
-		var fileSeq = $('input[name=ossFileId]').val();
-		var sheetNum = ["1", "4"];
-		var target = $("#list");
-		var mainData = target.jqGrid('getGridParam','data');
-		var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
-
-		fn.exeLoadReportData(finalData);
-	},
-	exeLoadReportData : function(finalData){
-		try {
-			$.ajax({
-				url : '/project/getSheetData',
-				type : 'POST',
-				data : JSON.stringify(finalData),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function(data){
-					loading.hide();
-				
-					if ("false" == data.isValid) {
-						if (data.validMsg) {
-							$('#ossFileId').val(ossFileObj.registSeq);
-							fn.makeFileTag(ossFileObj, 'ossFile');
-							ossFileObj = undefined;
-							
-							alertify.alert(data.validMsg, function(){});
-						} else {
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					} else {
-						if (data.externalData) {
-							// validData 표시
-							partyValidMsgData_e = data.externalData;
-							//gridValidMsgNew(partyValidMsgData_e, "list");
-						}
-
-						if(data.externalData2) {
-							// validData 표시
-							partyDiffMsgData_e = data.externalData2;
-							//gridDiffMsg(partyDiffMsgData_e, "list");
-						}
-					
-						fn.makeOssList(data.resultData);
-					
-						$('input[name=ossFileId]').val(ossFileObj.registSeq);
-						fn.makeFileTag(ossFileObj, 'ossFile');
-						ossFileObj = undefined;
-					
-						if (data.validMsg) {
-							alertify.alert(data.validMsg, function(){});
-						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-							alertify.alert(data.resultData.systemChangeHisStr, function(){});
-						}
-					}
-				},
-				error: function(data){
-					loading.hide();
-					$('.ossUpload').children().remove();
-				
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		} finally {
-			fn.closePop();
-		}
+		$('.ajs-close').trigger("click");
 	},
 	modeForStatus : function(status){
 		var fileDelete = $(".uploadCase .smallDelete");
@@ -1827,18 +1025,20 @@ var fn = {
 		var partySave = $("#partySave");
 		var partyBulkRegist = $(".idenBulkRegist");
 		var objArr = [];
+		var autoAnalysis = $(".idenAnalysis");
+		var autoAnalysisResult = $(".idenAnalysisResult");
 		
 		objArr.push($("#list"));
 		
-		if (userRole == "ROLE_VIEWER") {
+		if ("ROLE_VIEWER" == userRole) {
 			fileDelete.hide(); addWatcher.hide();
 			partyDelete.hide(); partyReset.hide(); partySave.hide(); partyBulkRegist.hide();
 		} else {
-			switch(status){
+			switch (status) {
 				case "CONF" :
 					fileDelete.hide(); addWatcher.show();
-					partyDelete.hide(); partyReset.hide(); partySave.hide(); partyBulkRegist.hide();
-
+					partyDelete.hide(); partyReset.hide(); partySave.show();
+					autoAnalysis.hide(); autoAnalysisResult.hide(); partyBulkRegist.hide();
 					break;
 				// 추후 추가
 				default :
@@ -1850,31 +1050,11 @@ var fn = {
 		}
 	},
 	
-	// 그리드 체크 메세지( gridStr 그리드 문자열 )
-	partnerGridValidMsg : function(msgData) {
-		$.each(msgData,function(key,value) {
-			if("isValid" != key) {
-				if($('input[name='+key+']').length > 0) {
-					$('input[name=' + key + ']').addClass("is-invalid");
-					$('input[name=' + key + ']').next("div.retxt").html(value).show();
-				} else if($('textarea[name='+key+']').length > 0) {
-					$('textarea[name=' + key + ']').addClass("is-invalid");
-					$('textarea[name=' + key + ']').next("div.retxt").html(value).show();
-				} 
-			}
-		});
-	},
-	
 	// 왓쳐 엘리먼트 그리기
 	addHtml : function(target, str, division, userId){
-		var emptyDivision = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
-		var rlt = "";
+		var rlt = division;
 		if ("" != userId) {
-			if (emptyDivision != division) {
-				rlt = division + "/" + userId;
-			} else {
-				rlt = userId;
-			}
+			rlt += "/" + userId;
 		}
 		
 		var html  = "";
@@ -1885,14 +1065,14 @@ var fn = {
 		}
 		
 		html += str;
-		html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i></div>';
+		html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i></div>';
 		
 		target.append(html);
 	},
 	addWatcher : function(uDiv, uId, uEmail) {
 		var partnerId = [[${detail.partnerId}]];
 
-		if (partnerId == null) {
+		if (partnerId == "" || partnerId == null) {
 			return true;
 		}
 		
@@ -1909,8 +1089,11 @@ var fn = {
 				if (resultData.isValid == "true") {
 					if ('' != uEmail){
 						alertify.success([[#{msg.common.success}]]);
+						// TODO - ldap search를 통해 확인된 domain을 우선적으로 적용하도록 처리가 필요함.
+						fn.addHtml($("#multiDiv"), resultData.email, resultData.email, "Email");
 					}
 				} else {
+					// email로 watcher등록을 실패할 경우 error message를 띄움.
 					if ('' != uEmail){
 						alertify.error("Invalid email address.", 0);
 					}
@@ -1928,14 +1111,14 @@ var fn = {
 			uDiv = "";
 		}
 
-		var partnerId = partnerData.partnerId;
+		var partnerId = [[${detail.partnerId}]];
 
 		if ("" == partnerId || partnerId == null) {
 			return true;
 		}
 		
 		var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
-		
+
 		$.ajax({
 			url : '/partner/removeWatcher',
 			type : 'POST',
@@ -1944,7 +1127,7 @@ var fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(resultData){
-				if ("true" == resultData.isValid) {
+				if (resultData.isValid == "true") {
 					$(obj).parent().remove();
 					alertify.success([[#{msg.common.success}]]);
 				}
@@ -1953,11 +1136,7 @@ var fn = {
 		});
 	},
 	copyWatcher : function(obj) {
-		var partnerId = partnerData.partnerId;
-
-		if (partnerId != null) {
-			return true;
-		}
+		var partnerId = [[${detail.partnerId}]];
 		
 		obj["partnerId"] = partnerId;
 		
@@ -2003,18 +1182,18 @@ var fn = {
 							}
 						});
 						
-						if(isNew){
-							if(email != "") {
+						if (isNew) {
+							if (email != "") {
 								fn.addHtml($("#multiDiv"), email, email, "Email");
 							} else {
 								var str = "";
 								
-								if(userName == "") {
+								if (userName == "") {
 									str = divisionName;
 								} else {
 									str = '<b';
-									
-									if (divisionEmptyCd != division) {
+
+									if (divisionEmptyCd != divVal) {
 										if(deptUseYn == "N"){
 											str += ' class="deleteUser"';
 										}
@@ -2022,7 +1201,7 @@ var fn = {
 										str += '>'+divisionName+'</b>/<b';
 									}
 									
-									if(userUseYn == "N"){
+									if (userUseYn == "N") {
 										str += ' class="deleteUser"';
 									}
 									
@@ -2045,180 +1224,15 @@ var fn = {
 			error : fn.onError
 		});
 	},
-	//sample download
-	sampleDownload : function(type){
-		var logiPath = "";
-		var fileName = "";
-
-		if(sampleFile.length > 0) {
-			for(var i=0; i < sampleFile.length; i++) {
-				if(type == "arg" && sampleFile[i].cdDtlNo == '10') {
-					logiPath = sampleFile[i].cdDtlExp ;
-					fileName = sampleFile[i].cdDtlNm;
-
-					break;
-				} else if(type == "chk" && sampleFile[i].cdDtlNo == '11') {
-					logiPath = sampleFile[i].cdDtlExp ;
-					fileName = sampleFile[i].cdDtlNm;
-
-					break;
-				}
-			}
-			location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
-		} else {
-			alertify.error([[#{msg.common.valid2}]], 0);
-		}
-	},
-	downloadExcel : function() {
-		$.ajax({
-			type: "POST",
-			url: '/exceldownload/getExcelPost',
-			data: JSON.stringify({"type":"partnerCheckList", "parameter":partnerData.partnerId||""}),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success: function (data) {
-				if("false" == data.isValid) {
-					alertify.error([[#{msg.common.valid2}]], 0);
-				} else {
-					window.location = '/exceldownload/getFile?id='+data.validMsg;
-				}
-			},
-			error: function(data){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
-	},
-    downloadYaml: function () {
-        var params = {'partnerId': partnerData.partnerId||"", 'partnerName': partnerData.partnerName||""};
-
-        $.ajax({
-            type: "POST",
-            url: '/partner/makeYaml',
-            data: JSON.stringify(params),
-            dataType: 'json',
-            cache: false,
-            contentType: 'application/json',
-            success: function (data) {
-                if ("false" == data.isValid) {
-                    alertify.error([[#{msg.common.valid2}]], 0);
-                } else {
-                    window.location = '/exceldownload/getFile?id='+data.validMsg;
-                }
-            },
-            error: function (data) {
-                alertify.error([[#{msg.common.valid2}]], 0);
-            }
-        });
-    },
-	displayNotify : function(cellvalue, options, rowObject){
-		var display = "";
-		var obligationLicense = rowObject["obligationLicense"];
-		var obligationType = rowObject["obligationType"];
-		
-		if (obligationLicense == 10 || obligationLicense == 11) {
-			display="<i class=\"fas fa-check fa-2xs mr-1\" title=\"Notice\"></i>";
-		} else if(obligationLicense == 90) {
-			display = '<select id="'+options.rowId+'_notify" onchange="fn.onNotifyCboxClick(' + options.rowId + ')">'
-				+ '<option value=""></option>'
-				+ '<option value="Y" '+((rowObject["obligationType"]=='10' || rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
-				+ '<option value="N" '+((rowObject["obligationType"]=='99') ? ' selected="selected"' : '') +'>X</option>'
-				+ '</select>';
-		}
-		
-		return display;
-	},
-	displaySource : function(cellvalue, options, rowObject){
-		var display = "";
-		var obligationLicense = rowObject["obligationLicense"];
-		var obligationType = rowObject["obligationType"];
-		
-		if(obligationLicense == 11) {
-			display="<i class=\"fas fa-check fa-2xs\" title=\"Source Code\"></i>";
-		} else if(obligationLicense == 90) {
-			display = '<select id="'+options.rowId+'_source" onchange="fn.onSourceCboxClick(' + options.rowId + ')">'
-				+ '<option value=""></option>'
-				+ '<option value="Y" '+((rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
-				+ '<option value="N" '+((rowObject["obligationType"]=='99' || rowObject["obligationType"]=='10') ? ' selected="selected"' : '') +'>X</option>'
-				+ '</select>';
-		}
-		
-		return display;
-	},
-	unDisplayNotify : function(cellvalue, options, rowObject){
-		var display = $("#"+options.rowId+"_notify").val();
-
-		return display;
-	},
-	unDisplaySource : function(cellvalue, options, rowObject){
-		var display = $("#"+options.rowId+"_source").val();
-
-		return display;
-	},
-	onNotifyCboxClick : function(rowId){
-		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
-		var selectedVal = $("#"+id+"_notify").val();
-		var selectedVal2 = $("#"+id+"_source").val();
-
-		fn_grid_com.saveCellData("list",id,'notify',selectedVal,partyValidMsgData_e, partyDiffMsgData_e);
-
-		if(selectedVal) {
-			if(selectedVal == "N") {
-				selectedVal2 = "N";
-			}
-			
-			$("#"+id+"_notify").parent().css("background", "");
-			
-			if($("#"+id+"_source").val()) {
-				$("#"+id+"_source").parent().css("background", "");
-			}
-		} else {
-			selectedVal2 = "";
-			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
-			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
-		}
-		
-		if(selectedVal2 != $("#"+id+"_source").val()) {
-			$("#"+id+"_source").val(selectedVal2).trigger('change');
-		}
-	},
-	onSourceCboxClick : function(rowId){
-		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
-		var selectedVal = $("#"+id+"_source").val();
-		var selectedVal2 = $("#"+id+"_notify").val();
-		
-		fn_grid_com.saveCellData("list",id,'source',selectedVal,partyValidMsgData_e, partyDiffMsgData_e);
-		
-		if(selectedVal) {
-			if(selectedVal == "Y") {
-				selectedVal2 = "Y";
-			}
-			
-			$("#"+id+"_source").parent().css("background", "");
-			
-			if($("#"+id+"_notify").val()) {
-				$("#"+id+"_notify").parent().css("background", "");
-			}
-		} else {
-			selectedVal2 = "";
-			
-			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
-			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
-		}
-		
-		if(selectedVal2 != $("#"+id+"_notify").val()) {
-			$("#"+id+"_notify").val(selectedVal2).trigger('change');
-		}
-	},
 	chkListValidation : function(listKind, listId){
-		if(listKind == ""){
+		if (listKind == "") {
 			// TODO : 추후 문구 수정예정
 			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
 
 			return false;
 		}
 		
-		if(listId == ""){
+		if (listId == "") {
 			// TODO : 추후 문구 수정예정
 			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
 
@@ -2241,54 +1255,15 @@ var fn = {
 		}
 	},
 	CheckChar : function(){
-		if(event.keyCode == 64){//@ 특수문자 체크
+		if (event.keyCode == 64){//@ 특수문자 체크
     		alertify.alert([[#{msg.login.check.char}]], function(){});
     		event.returnValue = false;
     	}
 	},
-	CheckOssViewPage : function(){
-		if (saveFlag) {
-			if(_popupCheckOssName != null){
-				_popupCheckOssName.close();
-			}
-			
-			if (partnerData != null && partnerData.partnerId != null) {
-				var partnerId = partnerData.partnerId;
-				_popupCheckOssName = window.open("/oss/checkOssName?prjId="+partnerId+"&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
-
-				if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
-					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
-				}
-			}
-		} else {
-			alertify.alert([[#{msg.project.required.checkOssName}]], function(){});
-
-			return false;
-		}
-	},
-	CheckOssLicenseViewPage : function(){
-		if(saveFlag) {
-			if(_popupCheckOssLicense != null){
-				_popupCheckOssLicense.close();
-			}
-			
-			if (partnerData != null && partnerData.partnerId != null) {
-				_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId="+partnerData.partnerId+"&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
-			}
-
-			if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
-				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
-			}
-		} else {
-			alertify.alert([[#{msg.project.required.checkOssLicense}]], function(){});
-
-			return false;
-		}
-	},
 	checkStatus : function(){
 		var partnerId = $("input[name=partnerId]").val();
 		var returnFlag = false;
-
+		
 		if (partnerId == "" || partnerId == null) {
 			returnFlag = true;
 		} else {
@@ -2321,7 +1296,7 @@ var fn = {
 		copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
 		
 		$("#copyUrl").val(copyUrl);
-
+		
 		//launch it.
 		var btnHtml 	= 	'<div class="row form-group">';
 		btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
@@ -2331,7 +1306,7 @@ var fn = {
 		btnHtml 		+= 	'<div class="row float-right custom-layout">';
 		btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
 		btnHtml 		+= 	'</div>';
-
+		
 		if(!alertify.myAlert){
 			//define a new dialog
 			alertify.dialog('myAlert',function factory(){
@@ -2370,443 +1345,75 @@ var fn = {
         	alertify.error([[#{msg.common.valid}]]);
         }
 	},
-	binaryDBSave : function() {
-		var param = {
-			"partnerId" : partnerData.partnerId,
-			"referenceDiv" : "20"
-		};
-
-		$.ajax({
-			url : '/partner/saveBinaryDB',
-			type : 'POST',
-			data : JSON.stringify(param),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success : function(data){
-				if("false" == data.isValid) {
-					alertify.alert('Nothing to store in Binary DB', function(){});
-				}else{
-					alertify.alert([[#{msg.common.success}]], function(){});
-				}
-			},
-			error : function(){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
-    },
-    bulkEdit : function(permission, status){
-    	if (!permission) {
-			alertify.alert([[#{msg.common.not.permission}]], function(){});
-			return false;
-		} else if ("CONF" == status) {
-			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
-			return false;
-		}
-    	
-    	var gridList = $("#list");
-        var targetGird = "list";
-
-        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
-        var rowCheckedArr = [];
-        for(var i=0; i<selarrrow.length; i++){
-			if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
-				rowCheckedArr.push(selarrrow[i]);
-			}
-        }
-
-        if(rowCheckedArr.length > 0){
-            fn_grid_com.totalGridSaveMode(targetGird);
-            
-            var _popup = null;
-
-            if(_popup == null || _popup.closed){
-                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
-
-                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
-				$("#partnerBulkEditForm > input[name=target]").val(targetGird);
-				$("#partnerBulkEditForm").submit();
-                
-                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-                    alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
-                }
-            } else {
-                _popup.close();
-                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
-
-                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
-				$("#partnerBulkEditForm > input[name=target]").val(targetGird);
-				$("#partnerBulkEditForm").submit();
-            }
-        }else{
-            alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
-            return false;
-        }
-	},
-	selectDownloadFile : function(target) {
-    	// download file
-    	if (target === "report_sub") {
-    		fn.downloadExcel();
-    	} else {
-    		var status = [[${detail.status}]];
-        	if ('CONF' != status) {
-        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-    				if (e) {
-    					fn.selectDownloadFileValidation(target);
-    				} else {
-    					return false;
-    				}
-    			});
-        	} else {
-        		fn.selectDownloadFileValidation(target);
-        	}
-    	}
-    },
-    selectDownloadFileValidation : function(target) {
-    	if (fn.checkSelectDownloadFile()) {
-    		if (target === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
-	        else if (target === "RDF_sub") fn.downloadSpdxRdf();
-	        else if (target === "TAG_sub") fn.downloadSpdxTag();
-	        else if (target === "JSON_sub") fn.downloadSpdxJson();
-	        else if (target === "YAML_sub") fn.downloadSpdxYaml();
-	        else if (target === "YAML") fn.downloadYaml();
-	        else if (target === "cdxJSON") fn.downloadCycloneDX("cycloneDXJson");
-            else if (target === "cdxXML") fn.downloadCycloneDX("cycloneDXXml");
-		} else {
-    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    	}
-    },
-	checkSelectDownloadFile : function() {
-		var checkEmptyFlag = false;
-		if (partnerData.partnerId != null) {
-			$.ajax({
-    			type: "POST",
-				url: '/partner/checkSelectDownloadFile',
-				data: JSON.stringify({"partnerId":partnerData.partnerId}),
-				dataType : 'json',
-				cache : false,
-				async : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if (data.isValid) {
-						checkEmptyFlag = true;
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-    		});
-		}
-    	
-    	return checkEmptyFlag;
-	},
-	downloadSpdxSpreadSheetExcel : function(){
-		var partnerId = partnerData.partnerId;
-		if (partnerId != null) {
-			partnerId = "3rd_" + partnerId;
-			
-			$.ajax({
-				type: "POST",
-				url: '/spdxdownload/getSPDXPost',
-				data: JSON.stringify({"type":"spdx", "prjId":partnerId, "dataStr":"spdx_sbom"}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error([[#{msg.common.valid2}]], 0);
-					} else {
-						window.location = '/spdxdownload/getFile?id='+data.validMsg;
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
-	},
-	downloadSpdxRdf : function() {
-		var partnerId = partnerData.partnerId;
-		if (partnerId != null) {
-			partnerId = "3rd_" + partnerId;
-			
-			$.ajax({
-				type: "POST",
-				url: '/spdxdownload/getSPDXPost',
-				data: JSON.stringify({"type":"spdxRdf", "prjId":partnerId, "dataStr":"spdx_sbom"}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error([[#{msg.common.valid2}]], 0);
-					} else {
-						window.location = '/spdxdownload/getFile?id='+data.validMsg;
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
-	},
-	downloadSpdxTag : function() {
-		var partnerId = partnerData.partnerId;
-		if (partnerId != null) {
-			partnerId = "3rd_" + partnerId;
-			
-			$.ajax({
-				type: "POST",				   
-				url: '/spdxdownload/getSPDXPost',
-				data: JSON.stringify({"type":"spdxTag", "prjId":partnerId, "dataStr":"spdx_sbom"}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error([[#{msg.common.valid2}]], 0);
-					} else {
-						window.location = '/spdxdownload/getFile?id='+data.validMsg;
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
-	},
-	downloadSpdxJson : function() {
-		var partnerId = partnerData.partnerId;
-		if (partnerId != null) {
-			partnerId = "3rd_" + partnerId;
-			
-			$.ajax({
-				type: "POST",
-				url: '/spdxdownload/getSPDXPost',
-				data: JSON.stringify({"type":"spdxJson", "prjId":partnerId, "dataStr":"spdx_sbom"}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error([[#{msg.common.valid2}]], 0);
-					} else {
-						window.location = '/spdxdownload/getFile?id='+data.validMsg;
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
-	},
-	downloadSpdxYaml : function() {
-		var partnerId = partnerData.partnerId;
-		if (partnerId != null) {
-			partnerId = "3rd_" + partnerId;
-			
-			$.ajax({
-				type: "POST",
-				url: '/spdxdownload/getSPDXPost',
-				data: JSON.stringify({"type":"spdxYaml", "prjId":partnerId, "dataStr":"spdx_sbom"}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error([[#{msg.common.valid2}]], 0);
-					} else {
-						window.location = '/spdxdownload/getFile?id='+data.validMsg;
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
-	},
-	downloadCycloneDX : function(type) {
-		var partnerId = [[${detail.partnerId}]];
-		if ("" !== partnerId) {
-			partnerId = "3rd_" + partnerId;
-			
-			$.ajax({
-				type: "POST",
-				url: "/cyclonedxdownload/getCycloneDXPost",
-				data: JSON.stringify({"type":type, "prjId": partnerId}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					loadingIden.hide();
-					
-					if("false" == data.isValid) {
-						if (typeof data.validMsg !== "undefined") {
-							if (data.validMsg.indexOf("generation failed") != -1) {
-								alertify.error(data.validMsg, 0);
-							} else {
-								alertify.error([[#{msg.common.valid2}]], 0);
-							}
-						} else {
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					} else {
-						window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		}
-	},
 	makeFileTag : function(obj, flag) {
 		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
-		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
+		var uploadFileTag = "";
 		
-		if ("ossFile" == flag) {
-			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteOssFile(this)">X</span>'+appendHtml+'</li>';
-			uploadFileTag += '<input type="hidden" name="ossFileId" value="'+obj.registSeq+'"/>';
-			$('.ossUpload').append(uploadFileTag);
-			$(".ossUploader").attr("style", "display: none !important");
-		} else if ("confirmationFile" == flag) {
+		if ("confirmationFile" == flag) {
+			uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
 			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteConfirmationFile(this)">X</span>'+appendHtml+'</li>';
 			uploadFileTag += '<input type="hidden" name="confirmationFileId" value="'+obj.registSeq+'"/>';
 			$('.confirmationUpload').append(uploadFileTag);
 			$(".confirmationUploader").attr("style", "display: none !important");
-		} else if ("binaryFile" == flag) {
-			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteBinaryFile(this)">X</span>'+appendHtml+'</li>';
-			uploadFileTag += '<input type="hidden" id="binaryFileId" name="binaryFileId" value="'+obj.registSeq+'"/>';
-			$('.binaryUpload').append(uploadFileTag);
-			$(".binaryUploader").attr("style", "display: none !important");
 		} else if ("documentsFile" == flag) {
+			uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
 			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteDocumentsFile(this)">X</span>'+appendHtml+'</li>';
 			uploadFileTag += '<input type="hidden" value="'+obj.registSeq+'"/>';
 			if ("" == $("#documentsFileId").val()) $("#documentsFileId").val(obj.registFileId);
 			$('.documentsFileArea').append(uploadFileTag);
+		} else if ("ossFile" == flag) {
+			uploadFileTag = '<li><a class="ajax-file-upload-filename" style="cursor: pointer" onclick="fn.mvIdentification()">'+obj.originalFilename+'</a>';
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteOssFile(this)">X</span>'+appendHtml+'</li>';
+			$(".ossUpload").parent().attr("style", "display: flex !important");
+			$('.ossUpload').append(uploadFileTag);
+			$(".ossUploader").attr("style", "display: none !important");
 		}
 	},
-	handleUserCommentPopupOpen: function () {
-        const param = {
-            "referenceDiv" : "3rd",
-            "referenceId" : [[${detail.partnerId}]]
-        }
-        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
-                if (!alertify.editDialog) {
-                    alertify.dialog('editDialog', function () {
-                        return {
-                            main: function (content) {
-                                this.setContent(content);
-                            },
-                            setup: function () {
-                                var setup = alertify.confirm().setup();
-                                setup.buttons = [];
-                                setup.focus.element = 1;
-
-                                return setup;
-                            },
-                            hooks: {
-                                onshow: function() {
-                                    this.elements.dialog.style.maxWidth = 'none';
-                                    this.elements.dialog.style.width = '700px';
-                                }
-                            }
-                        };
-                    });
-                }
-
-                editDailog = alertify.editDialog(res);
-            },
-            null,
-            function () {
-                $("#modifiedCommentInPjtEditor").summernote({
-                    height: 180,
-                    callbacks: {
-                        onInit: function () {
-                            $(this).summernote('code', $("#contents").val());
-                        }
-                    }
-                });
-            });
-    },
-    saveEditor: function () {
-        //코멘트 임시저장
-        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
-
-        var referenceId = [[${detail.partnerId}]]
-        var param = {
-            referenceId: referenceId
-            , referenceDiv: '21'
-            , contents: editorVal
-        };
-        $.ajax({
-            url: "/project/saveComment",
-            type: "POST",
-            dataType: "json",
-            cache: false,
-            data: param,
-            success: function (json) {
-                if (json.isValid == 'false') {
-                    alertify.error([[#{msg.common.valid2}]], 0);
-                } else {
-                    alertify.success([[#{msg.common.success}]]);
-                }
-                $("#userComment").val(editorVal);
-                editDailog.close();
-            },
-            error: function () {
-                alertify.error([[#{msg.common.valid2}]], 0);
-            }
-        });
-    }
+	deleteOssFile : function(obj){
+		$('.ossUpload').empty();
+		$(".ossUploader").attr("style", "display: flex !important");
+		$("#ossFileSheetNo").val("");
+		$("#ossFileId").val("");
+		
+		evt.init();
+	}
 }
 
 var datas = {
 	init : function(){
-		if (partnerData.partnerId != null) {
-			fn.getPartyGridData();
-		} else {
-			grid.init();
-			partyMainData = [];
-			partySubData = [];
-		}
-		
 		var userDivision = $('#division');
- 		if (partnerData != null) {
- 			if (partnerData.partnerId != null && partnerData.division != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
- 				for (var i=0;i<userDivision.children().length;i++) {
- 					if (userDivision.children()[i].value == partnerData.division||"") {
- 						break;
- 					}
- 					if (userDivision.children().length - 1 == i ) {
- 						var divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail.division)}]];
- 						userDivision.append("<option value='" + partnerData.division||"" + "' >" + divisionName+ "</option>");
- 						$('#division option:last').attr("selected", "selected");
- 						$('#division option:last').change();
- 					}
- 				}
- 			}
- 		}
-
-		userDivision = $('#division');
-		if (partnerData != null) {
-			for (var i=0;i<userDivision.children().length;i++) {
-				if (userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+		if ([[${detail.partnerId}]] != '' && [[${detail.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+			for(var i=0;i<userDivision.children().length;i++){
+				if(userDivision.children()[i].value == [[${detail.division}]]) {
 					break;
 				}
-				if (userDivision.children().length - 1 == i ) {
-					userDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
-					if (partnerData.division == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
-						$('#division option:last').attr("selected", "selected");
-						$('#division option:last').change();
-					}
+				if(userDivision.children().length - 1 == i ) {
+					var divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail.division)}]];
+					userDivision.append("<option value='" + [[${detail.division}]] + "' >" + divisionName+ "</option>");
+					$('#division option:last').attr("selected", "selected");
+					$('#division option:last').change();
 				}
 			}
 		}
+
+		userDivision = $('#division');
+		for (var i=0;i<userDivision.children().length;i++){
+			if(userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+				break;
+			}
+			if(userDivision.children().length - 1 == i ) {
+				userDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
+				if([[${detail.division}]] == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
+					$('#division option:last').attr("selected", "selected");
+					$('#division option:last').change();
+				}
+			}
+		}
+
 		var prjDivision = $("#userDivision");
-		for (var i=0;i<prjDivision.children().length;i++) {
-			if (prjDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] ) {
+		for (var i=0;i<prjDivision.children().length;i++){
+			if(prjDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] ){
 				break;
 			}
 			if(prjDivision.children().length-1 == i) {
@@ -2830,23 +1437,19 @@ var datas = {
 			var deptUseYn = watcher.deptUseYn || "Y";
 			var userUseYn = watcher.userUseYn || "Y";
 			
-			if (watcher!=""){
-				if (watcher.parEmail) { 
+			if (watcher) {
+				if (watcher.parEmail != null && "" != watcher.parEmail) {
 					fn.addHtml($("#multiDiv"), watcher.parEmail, watcher.parEmail, "Email");
 				} else {
 					var str = "";
 					
-					if (watcher.parUserName == undefined){
+					if (watcher.parUserName == null || "" == watcher.parUserName) {
 						str = watcher.parDivisionName;
 					} else {
-						str = '<span class="text-bold"';
-						
-						if (divisionEmptyCd != watcher.prjDivision) {
-							str += '>'+watcher.parDivisionName+'</span>/';
+						if (watcher.parDivisionName != null && "" != watcher.parDivisionName) {
+							str += '<span class="text-bold">' + watcher.parDivisionName + '</span>/';
 						}
-						
-						str += '<span class="text-bold">';
-						str += watcher.parUserName+'</span>';
+						str += '<span class="text-bold">' + watcher.parUserName+ '</span>';
 					}
 					
 					fn.addHtml($("#multiDiv"), str, watcher.parDivision, watcher.parUserId);
@@ -2857,844 +1460,42 @@ var datas = {
 }
 var grid = {
 	projectList : function () {
-		$("#_projectList").jqGrid({
-			datatype: 'local',
-			data: prjList,
-			colNames:['ID','Project Name', 'Project Version'],
-			colModel:[
-				{name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
-				{name:'prjName',index:'prjName', width:400, sortable:false, formatter: fn.setProjectInfo},
-				{name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"}
-			],
-			rowNum:100,
-			viewrecords: true,
-			height: 'auto',
-			ondblClickRow: function(rowid,iRow,iCol,e) {
-				var rowData = $("#_projectList").jqGrid('getRowData',rowid);
-				if("Y" != rowData.oldSystemFlag) {
-					createTabInFrame(rowData['prjId']+'_Project','/project/edit/'+rowData['prjId']);
-				}
-			},
-			loadComplete: function(data) {
-				if(data.records > 0) {
-					var multRowIds = []; 
-					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
-					for(var _idx=0;_idx<rowsCount;_idx++) {
-						row = rows[_idx];
-						className = row.className;
-						if (className.indexOf('jqgrow') !== -1) {
-							rowid = row.id;
-							rowData = data.rows[rowIdx++];
-							if(rowData.oldSystemFlag == "Y") {
-								className = className + ' excludeRow';
-							}
-							row.className = className;
-						} else if(className.indexOf('ui-subgrid') !== -1){
-							rowIdx++;
-						}
+		var prjDataList = $('#_projectList').DataTable({
+	    	paging : false,
+	    	searching : false,
+	    	info : false,
+	    	autoWidth : false,
+	    	responsive : true,
+	    	lengthChange : true,
+	    	ordering : false,
+	    	data : prjList,
+	    	columns : [ {
+	    		data : "prjId"
+	    	}, {
+	      		data : "prjName",
+				render : function(data, type, row, meta){
+					var display = data;
+					if ("" != row.prjVersion) {
+						display + " (" + row.prjVersion + ")";
 					}
+					return display;
 				}
+	    	}],
+		  	columnDefs : [
+		      	{
+		      		targets : [0],
+		      		className : "text-center"
+		      	}
+		    ]
+	    });
+		
+		$("#_projectList > tbody").on('dblclick', 'tr', function () {
+			var data = prjDataList.row(this).data();
+			if ("Y" != data.oldSystemFlag) {
+				var url = '/project/edit/' + data.prjId;
+				createTabInFrame(data.prjId + '_Project', url);
 			}
 		});
-	},
-	init : function(){
-		var currentOssName = '';
-		var ondblClickRowBln = false;
-		var partnerList = $("#list");
-		
-		partnerList.jqGrid({
-			datatype: 'local',
-			data : partyMainData,
-			colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
-					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notice','Source','Restriction', 'Tlsh', 'Check Sum'],
-			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
-				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
-				{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
-				{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
-				{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
-				{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
-				{name: 'filePath', index: 'filePath', width: 140, align: 'left', editable:true, template: searchStringOptions, 
-					editoptions: {
-						dataInit:
-							function (e) { 
-								$(e).on("change", function() {
-									var rowid = (e.id).split('_')[0];
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								});
-							}
-					}
-				},
-				{name: 'ossName', index: 'ossName', width: 140, align: 'left', editable:true, edittype:'text', template: searchStringOptions, 
-						editoptions: {
-							dataInit:
-								function (e) { 
-									// ossName auto complete
-									$(e).autocomplete({
-										source: ossNames
-										, minLength: 3 // IE 스크립트 성능이슈로 0->3 으로 변경 yuns
-										, open: function() { $(this).attr('state', 'open');}
-										, close: function () { $(this).attr('state', 'closed');}
-									}).focus(function() {
-										if ($(this).attr('state') != 'open') {
-											$(this).autocomplete("search");
-										}
-									}).on('autocompletechange', function() {
-										if(e.value!=""){
-											var rowid = (e.id).split('_')[0];
-											fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'list');
-											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-										}
-									}).dblclick(function(){
-										var rowid = (e.id).split('_')[0];
-										var licenseName = com_fn.getLicenseName(partnerList.getRowData(rowid));
-										
-										partnerList.jqGrid("setCell", rowid, "licenseName", licenseName);
-										fn_grid_com.saveCellData(partnerList.attr("id"), rowid, "licenseName", licenseName, null, null);
-										partnerList.jqGrid('saveRow',rowid);
-										
-										fn_grid_com.mvOssPage(partnerList, rowid);
-									});
-									
-									currentOssName = e.value;
-								}
-						}
-				},
-				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center', editable:true, edittype:'text', template: searchStringOptions, 
-					editoptions: {
-						dataInit:
-							function (e) { 
-								fn_grid_com.griOssVersions(e, currentOssName, 'list');
-								
-								$(e).on( "autocompletechange", function() {
-									var rowid = (e.id).split('_')[0];
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								});
-							}
-					}
-				},
-				{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
-				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
-					editoptions: {
-						dataInit: function (e) {
-								var licenseNameId = $(e).attr("id").split('_')[0];
-								var licenseNameTd = $(e).parent();
-
-								var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
-								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
-								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
-								displayLicenseNameCell += '</div>';
-					
-								$(licenseNameTd).empty();
-								$(licenseNameTd).html(displayLicenseNameCell);
-								$('#'+licenseNameId+'_licenseNameDiv').append(e);
-							
-								// licenseName auto complete
-								$(e).autocomplete({
-									source: licenseNames
-									, minLength: 0
-									, open: function() { $(this).attr('state', 'open'); }
-									, close: function () { $(this).attr('state', 'closed'); }
-								}).focus(function() {
-									if ($(this).attr('state') != 'open') {
-										$(this).autocomplete("search");
-									}
-								});
-								
-								// set license data
-								$(e).on( "autocompletechange", function() {
-									var rowid = (e.id).split('_')[0];
-									var mult = null;
-									var multText = null;
-									let li = e.value;
-									
-									for(var i in licenseNames){
-										if("" != e.value && e.value == licenseNames[i].value){
-											var licenseIds = $('#'+rowid+'_licenseId').val();
-											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-											multText = licenseNames[i].value;
-											break;
-										}
-									}
-									
-									if(mult == null){
-										mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-										multText = e.value;
-									}
-									
-									var rowLicenseNames = [];
-									$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
-										rowLicenseNames.push($(this).text());
-									});
-									
-									if (multText != null){
-										if(rowLicenseNames.length > 0){
-											var duplicateFlag = false;
-											for(var i in rowLicenseNames){
-												if(multText == rowLicenseNames[i]){
-													duplicateFlag = true;
-													break;
-												}
-											}
-											
-											if(!duplicateFlag){
-												$('#'+rowid+'_licenseNameBtn').append(mult);
-											}
-										} else {
-											$('#'+rowid+'_licenseNameBtn').append(mult);
-										}
-									}
-									
-									$('#'+rowid+'_licenseName').val("");
-									
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-									
-									if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
-										alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
-	                                        if (e) {
-	                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
-	                                        } else {
-	                                        	return false;
-	                                        }
-										});
-									}
-								}).on("keypress", function(evt){
-									if(evt.keyCode == 13){
-										var rowid = (e.id).split('_')[0];
-										var mult = null;
-										var multText = null;
-										let li = e.value;
-										
-										for(var i in licenseNames){
-											if("" != e.value && e.value == licenseNames[i].value){
-												var licenseIds = $('#'+rowid+'_licenseId').val();
-												mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-												multText = licenseNames[i].value;
-												break;
-											}
-										}
-										
-										if(mult == null && "" != e.value){
-											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-											multText = e.value;
-										}
-										
-										var rowLicenseNames = [];
-										$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
-											rowLicenseNames.push($(this).text());
-										});
-										
-										if (multText != null){
-											if(rowLicenseNames.length > 0){
-												var duplicateFlag = false;
-												for(var i in rowLicenseNames){
-													if(multText == rowLicenseNames[i]){
-														duplicateFlag = true;
-														break;
-													}
-												}
-												
-												if(!duplicateFlag){
-													$('#'+rowid+'_licenseNameBtn').append(mult);
-												}
-											} else {
-												$('#'+rowid+'_licenseNameBtn').append(mult);
-											}
-										}
-										
-										$('#'+rowid+'_licenseName').val("");
-
-										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
-										
-										if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
-											alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
-		                                        if (e) {
-		                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
-		                                        } else {
-		                                        	return false;
-		                                        }
-											});
-										}
-									}
-								});
-							}
-					}
-				},
-				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions,
-					editoptions: {
-						dataInit:
-							function (e) { 
-								$(e).on("change", function() {
-									var rowid = (e.id).split('_')[0];
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+rowid+"_downloadLocation").val(value);
-									}
-									
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								}).on("blur", function() {
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+e.id).val(value);
-									}
-								});
-							}
-					}
-				},
-				{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
-					editoptions: {
-						dataInit:
-							function (e) { 
-								$(e).on("change", function() {
-									var rowid = (e.id).split('_')[0];
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+rowid+"_homepage").val(value);
-									}
-									
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								}).on("blur", function() {
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+e.id).val(value);
-									}
-								});
-							}
-					}
-				},
-				{name: 'copyrightText', index: 'copyrightText', width: 140, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
-					dataInit:
-						function (e) { 
-							$(e).on("change", function() {
-								var rowid = (e.id).split('_')[0];
-								
-								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e);
-							});
-						}
-					}
-				},
-				
-				{name: 'cveId', index: 'cveId', hidden:true},
-				{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float', template: searchNumberOptions},
-				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false},
-				{name: 'comments', index: 'comments', width: 150, align: 'left', editable:true, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
-					dataInit:
-						function (e) {
-							$(e).on("change", function() {
-								var rowid = (e.id).split('_')[0];
-
-								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
-							});
-						}
-					}
-				},
-				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
-				{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
-				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
-				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : true, search : false,
-					sorttype: function (cell, rowData) {
-						var rtnVal = rowData.obligationType;
-						if(rtnVal == '10' || rtnVal == '11') {
-							return 0;
-						} else {
-							return 99;
-						}
-                    }
-				},
-				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : true, search : false,
-					sorttype: function (cell, rowData) {
-						var rtnVal = rowData.obligationType;
-						if(rtnVal == '11') {
-							return 0;
-						} else {
-							return 99;
-						}
-                    }
-				},
-				{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
-				{name: 'tlsh', index: 'tlsh', editable:false, hidden:true},
-				{name: 'checkSum', index: 'checkSum', editable:false, hidden:true}
-			],
-			autoencode: true,
-			editurl:'clientArray',
-			autowidth: true,
-			height: 'auto',
-			gridview: true,
-			pager: '#pager',
-			rowNum: 200,
-			rowList: [200, 500, 1000, 5000],
-			recordpos:'right',
-			toppager:true,
-			loadonce:true,
-			cellEdit : true,
-			cellsubmit : 'clientArray',
-			ignoreCase: true,
-			multiselect: true,
-            multiselectWidth: 35,
-			onSortCol: function (index, columnIndex, sortOrder) {
-				isSort = true;
-			},
-			loadComplete: function(data) {
-				_mainLastsel = -1;
-				
-				if(data.records > 0) {
-					var multRowIds = []; 
-					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
-					for(var _idx=0;_idx<rowsCount;_idx++) {
-						row = rows[_idx];
-						className = row.className;
-						if (className.indexOf('jqgrow') !== -1) {
-							rowid = row.id;
-							rowData = data.rows[rowIdx++];
-							
-							if(rowData.licenseDiv != "M") {
-								className = className + ' singleLicenseClass';
-								
-								$("#" + rowid).next("tr.ui-subgrid").hide();
-							} else {
-								multRowIds.push(rowid);
-							}
-							
-							if(rowData.excludeYn == "Y" && className.indexOf('excludeRow') === -1) {
-								className= className + ' excludeRow';
-							}
-							
-							row.className = className;
-							
-						} else if(className.indexOf('ui-subgrid') !== -1){
-							rowIdx++;
-						}
-
-						// checkbox click event
-						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
-					}
-					
-					// 한번에 처리
-					$("#list tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
-				}
-				
-				// 상태에 따른 화면 처리
-				fn.modeForStatus([[${detail.status}]]);
-				
-				if(isSort){
-					isSort = false;
-				}
-				
-				// append button event
-				if ($("#list_toppager_left").find('button').length == 0) {
-					var permission = partnerData.statusPermission == 1 || partnerData.partnerId == null;
-					var status = partnerData.status;
-					
-	            	var appendBtn = "";
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3rdParty', 'list', "+permission+", '"+status+"')\">";
-					if (!permission || "CONF" == status) {
-						appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
-            		} else {
-            			appendBtn += "<i class=\"fas fa-plus\"></i></button>";
-            		}
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('3rdParty', 'list', 'main', "+permission+", '"+status+"')\">";
-	            	if (!permission || "CONF" == status) {
-						appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
-            		} else {
-            			appendBtn += "<i class=\"far fa-trash-alt\"></i></button>";
-            		}
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"fn.bulkEdit("+permission+", '"+status+"')\">";
-	            	if (!permission || "CONF" == status) {
-						appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
-            		} else {
-            			appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
-            		}
-            		
-	            	appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
-	            	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('Spreadsheet_sub')\">SPDX (Spreadsheet)</span>";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span>";
-	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('cdxJSON')\">CycloneDX (JSON)</span>";
-                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('cdxXML')\">CycloneDX (XML)</span></div>";
-	            	
-	                $("#list_toppager_left").append(appendBtn);
-	            }
-			},
-			onSelectRow: function(rowid,status,eventObject) {
-			},
-			beforeSelectRow: function(rowid, e) {
-				var $self = $(this), iCol, cm,
-			    $td = $(e.target).closest("tr.jqgrow>td"),
-			    $tr = $td.closest("tr.jqgrow"),
-			    p = $self.jqGrid("getGridParam");
-
-			    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
-			       iCol = $.jgrid.getCellIndex($td[0]);
-			       cm = p.colModel[iCol];
-			       if (cm != null && cm.name === "cb") {
-			           // multiselect checkbox is clicked
-			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
-			       }
-			    }
-				// 경고 클래스 설정
-			    fn_grid_com.setWarningClass(partnerList,rowid,["ossName","licenseName"]);
-			    return false;
-			},
-			onCellSelect: function(rowid,iCol,cellcontent,e) {
-				if(iCol=="3") {
-					com_fn.exitCell(_mainLastsel, "list");
-					
-					fn_grid_com.showOssViewPage(partnerList, rowid, true, partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
-				}
-			},
-			ondblClickRow: function(rowid,iRow,iCol,e) {
-				var permission = partnerData.permission == 1;
-				
-				if (iCol != "17" && (permission && "CONF" != partnerStatus)) {
-					if ('ROLE_USER' == userRole && ('REQ' == partnerStatus || 'REV' == partnerStatus)) {
-					} else {
-						cleanErrMsg("list", rowid);
-						fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
-
-						// 서브 그리드 제외
-						ondblClickRowBln = false;
-						
-						$('#'+rowid+'_licenseName').addClass('autoCom');
-						$('#'+rowid+'_licenseName').css({'width' : '60px'});
-						var result = $('#'+rowid+'_licenseName').val().split(",");
-						
-						result.forEach(function(cur,idx){
-							if(cur != ""){
-								var mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-								
-								$('#'+rowid+'_licenseNameBtn').append(mult);
-							}
-						});
-						
-						$('#'+rowid+'_licenseName').val("");
-	                    var nextCol = partnerList.jqGrid('getGridParam', 'colModel')[iCol].name;
-	                    var nextRow = rowid;
-	                    $('#'+nextRow+"_"+nextCol).focus();
-					}
-				}
-			},
-			onPaging: function(action) {
-				cleanErrMsg("list");
-				fn_grid_com.totalGridSaveMode('list');
-			},
-			gridComplete : function() {
-				cleanErrMsg("list");
-
-				if(partyValidMsgData_e) {
-					gridValidMsgNew(partyValidMsgData_e, "list");
-				}
-
-				if(partyDiffMsgData_e) {
-					gridDiffMsg(partyDiffMsgData_e, "list");
-				}
-				
-				if (partyInfoMsgData_e) {
-					gridInfoMsg(partyInfoMsgData_e, "list");
-				}
-				
-				var arr = [];
-				arr = partnerList.jqGrid('getDataIDs');
-
-				for(var i in arr){
-					if(partnerList.jqGrid('getCell',arr[i],'obligationType') == 90) {
-						$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
-						$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
-					}
-				}
-			},
-			removeHighLight : true
-
-		});
-		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
-		
-/* 		if ($("#partySave").is(":visible")) {
-			partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
-				  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
-				  , delfunc: function () { fn_grid_com.rowDelNew(partnerList,"main");}
-				  , cloneToTop:true
-			});
-		} else {
-			partnerList.jqGrid('navGrid',"#pager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
-		} */
-		
-		$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
-	}
-}
-
-var com_fn = {
-	changeMode : function (mode, resetFlag, status) {
-		var targetId = $("#menu-tab").find(".active").attr("aria-controls");
-		var tabDiv = targetId.split("-")[1];
-		
-		if ("menu-party" == targetId) {
-			$.ajax({
-	            url: "/partner/" + mode + "/" + partnerData.partnerId,
-	            type: 'POST',
-	            dataType: 'html',
-	            cache: false,
-	            success: function (data) {
-	            	$("#" + targetId).empty();
-					$("#" + targetId).html(data);
-					
-					if ("party" == tabDiv) {
-						fn.confirmationUploadFile();
-						fn.ossUploadFile();
-						fn.partnerBinaryUploadFile();
-						fn.documentsUploadFile();
-						callAutoCompleteFnc("autoComCreatorDivision");
-						
-						// file uploader hide in CONF status
-				        if ('CONF' == [[${detail.status}]]) {
-				            $(".ajax-upload-dragdrop").hide();
-				        }
-						
-						$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
-						var description = [[${detail.description}]];
-						if ("" != description) {
-							$("#descriptionTextarea").summernote('code', description);
-						}
-						
-						var partnerWatcher = [[${detail.partnerWatcher}]];
-						if (partnerWatcher != null) {
-							datas.initPartnerWatcher(partnerWatcher);
-						}
-						
-						var prjList2 = [[${prjList}]];
-						if (prjList2 != null) {
-							prjList = prjList2;
-							$("#_projectList").jqGrid('GridUnload');
-							grid.projectList();
-						}
-							
-						if ([[${detail.partnerId}]] != null) {
-							$("input[name=creatorName]").val($("#creatorNm").val());
-							fn.publicChange();
-						}
-					}
-	            }
-			});
-		}
-	},
-	deleteLicense : function(target){
-		$(target).parent().remove();
-	},
-	deleteLicenseRenewal : function(target){
-		$(target).parent().next().remove();
-		$(target).parent().remove();
-	},
-	getLicenseName : function(obj){
-		return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
-			if(cur.toUpperCase() != "X" && cur != ""){
-				arr.push(cur);
-			}
-
-			return arr;
-		}, []).join(",");
-	},
-	exitCell : function(_mainLastsel, target){
-		if(_mainLastsel != -1){
-			var grid = $("#" + target);
-			var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
-
-			grid.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
-			fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
-			grid.jqGrid('saveRow',_mainLastsel);
-		}
-	},
-	exitRow : function(target){
-		var gridRowData = $("#" + target).jqGrid("getRowData");
-		gridRowData.forEach(function(obj){
-			var gridId = obj["gridId"];
-			var key = Object.keys(obj);
-			key.forEach(function(value){
-				if("gridId" != value){
-					var data = obj[value];
-					if(value == "downloadLocation" || value == "homepage"){
-						if(data.indexOf("Not the same as property") > -1){
-							data = data.split("Not the same as property")[0];
-						} else if(data.indexOf("The address should be") > -1){
-							data = data.split("The address should be")[0];
-						}
-					} else {
-						if(data.indexOf("<div class") > -1){
-							data = data.split("<")[0];
-						}
-					}
-					
-					fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
-				}
-			});
-		});
-	},
-	showLicenseInfo : function(obj){
-		var licenseName = $(obj).text();
-
-		$.ajax({
-			url : '/license/getLicenseId',
-			type : 'POST',
-			data : {"licenseName" : licenseName},
-			dataType : 'json',
-			cache : false,
-			success : function(data){
-				var _frameId = data.licenseId + "_License";
-				var _frameTarget = "/license/edit/" + data.licenseId;
-				createTabInFrame(_frameId, _frameTarget);
-			},
-			error : function(){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
-	},
-	bulkEditOssInfo : function(obj){
-		var editFlag = false;
-		try{
-			var ossArr = [];
-	        var rowId = obj["rowId"];
-	        var target = obj["target"];
-	        var param = $('#'+target).jqGrid('getGridParam','data');
-	        
-	        if(rowId.indexOf(",") > -1){
-	            ossArr = rowId.split(",");
-	            for(var idx in ossArr){
-	                com_fn.bulkEditSetCell(target, ossArr[idx], obj);
-
-	                for (var i=0; i<param.length; i++){
-	                    if(param[i]["gridId"] == ossArr[idx]){
-	                        for(var key in obj){
-	                            if(key != "rowId" && key != "target"){
-	                            	param[i][key] = obj[key];
-	                            }
-	                        }
-	                    }
-	                }
-	            }
-	        }else{
-	            com_fn.bulkEditSetCell(target, rowId, obj);
-
-	            for (var i=0; i<param.length; i++){
-	                if(param[i]["gridId"] == rowId){
-	                    for(var key in obj){
-	                        if(key != "rowId" && key != "target"){
-	                        	param[i][key] = obj[key];
-	                        }
-	                    }
-	                }
-	            }
-	        }
-
-	        $("#"+target).jqGrid('setGridParam', {data:param}).trigger('reloadGrid');
-		}catch(e){
-			alertify.error([[#{msg.common.valid2}]], 0);
-    		editFlag = true;
-    	}finally{
-    		if(!editFlag){
-	    		alertify.success([[#{msg.common.success}]]);
-    		}
-       	}
-    },
-    bulkEditSetCell : function (target, rowId, obj){
-        for(var key in obj){
-            if(key != "rowId" && key != "target"){
-            	$('#'+target).jqGrid('setCell', rowId, key, obj[key]);
-            }
-        }
-    },
-    bulkEditDelRow : function (target, rowId, flag){
-    	var delFlag = false;
-		try{
-			var selrow = "";
-			var param = $("#"+target).jqGrid('getGridParam', 'data');
-			
-	    	if(rowId.indexOf(",") > -1){
-	    		selrow = rowId.split(",");
-	    		for (var i=0; i<selrow.length; i++){
-	    			$("#"+target).jqGrid('delRowData', selrow[i]);
-	    			param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, selrow[i]);
-	        	}
-	        }else{
-	        	$("#"+target).jqGrid('delRowData', rowId);
-	        	param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, rowId);
-	        }
-
-	        if(flag == "main"){
-	        	$("#"+target).jqGrid('GridUnload');
-
-	        	partyMainData = param;
-	        	grid.init();
-
-	        	// total record 표시
-				$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
-	        }
-		}catch(e){
-			alertify.error([[#{msg.common.valid2}]], 0);
-			delFlag = true;
-    	}finally{
-    		if(!delFlag){
-	    		alertify.success([[#{msg.common.success}]]);
-    		}
-       	}
-    },
-    bulkEditDeleteLocalDataAfterDelRow : function (dataArray, rowId){
-    	var reMakeArrObj=[];
-    	var newIdx = 0;
-
-    	for(var idx=0; idx < dataArray.length; ++idx) {
-			if(dataArray[idx].gridId != rowId) {
-				reMakeArrObj[newIdx++] = dataArray[idx];
-			}
-		}
-		
-		return reMakeArrObj;
-    },
-    gridAddFunc : function (gubn, targetId, permission, status) {
-		if (!permission) {
-			alertify.alert([[#{msg.common.not.permission}]], function(){});
-			return false;
-		} else if ("CONF" == status) {
-			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd party')}]], function(){});
-			return false;
-		}
-		
-		var grid = $("#" + targetId);
-		saveFlag = false;
-		fn_grid_com.rowAddNew(targetId, grid, "main", null, com_fn.getLicenseName);
-	},
-	gridDelFunc : function (tab, targetId, target, permission, status) {
-		if (!permission) {
-			alertify.alert([[#{msg.common.not.permission}]], function(){});
-			return false;
-		} else if ("CONF" == status) {
-			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
-			return false;
-		}
-		
-		var grid = $("#" + targetId);
-		var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
-		
-		if (selarrrow.length > 0) {
-			fn_grid_com.rowDelNew(grid, target);
-		} else {
-			alertify.confirm([[#{msg.common.confirm.delete.all}]], function (e) {
-				if (e) {
-					fn_grid_com.rowDelAll(grid, target);
-				} else {
-					return false;
-				}
-			});
-		}
 	}
 }
 
@@ -3734,33 +1535,10 @@ var com_fn = {
 				dataType : 'html',
 				cache : false,
 				success : function(res){
-					if(!alertify.editComments){
-						alertify.dialog('editComments', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									setup.buttons = [];
-									setup.focus.element = 0;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '750px';
-							        }
-								}
-							};
-						}, false, 'alert');
-                	}
-					
-					alertify.editComments(res).set('title', 'Edit Comments');
+					if (typeof alertify.editComments === "undefined"){
+						alertifyWithoutButtons('editComments');
+	        		}
+					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
 					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
 				}
@@ -3791,7 +1569,10 @@ var com_fn = {
 			}
 		},
 		deleteComments : function (_commId) {
-			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+			if (typeof alertify.delCommentParDialog === "undefined") {
+				basicAlertifyDialog('delCommentParDialog');
+			}
+			alertify.delCommentParDialog("Are you sure you want to delete this comment?", function (e) {
 				if (e) {
 					$.ajax({
 						url : '/comment/deleteComment',
@@ -3814,17 +1595,23 @@ var com_fn = {
 			});
 		},
 		activateCommentArea : function () {
+			var commentRow = $("#commentList .card-body").length;
+			
 			// change tab area
-			if (!$(".comment-area").is(":visible")) {
-				$(".contents-area").removeClass("col-md-12");
-				$(".contents-area").addClass("col-md-9");
+			if (!$(".basicInfoCommentArea").is(":visible")) {
+				$(".basicInfoAreaTop").hide();
+				$(".basicInfoArea").removeClass("col-md-10");
+				$(".basicInfoAreaBottom").hide();
+				$(".basicInfoArea").addClass("col-md-9");
 				
 				fn_comment.getCommentList(commentsParam);
-				$(".comment-area").show();
+				$(".basicInfoCommentArea").show();
 			} else {
-				$(".contents-area").removeClass("col-md-9");
-				$(".contents-area").addClass("col-md-12");
-	 			$(".comment-area").hide();
+				$(".basicInfoAreaTop").show();
+				$(".basicInfoArea").removeClass("col-md-9");
+				$(".basicInfoArea").addClass("col-md-10");
+				$(".basicInfoAreaBottom").show();
+	 			$(".basicInfoCommentArea").hide();
 			}
 		},
 		showCommentHistory : function () {
@@ -3834,6 +1621,5 @@ var com_fn = {
 	        openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + [[${detail.partnerId}]]);
 		}
 	}
-//]]>
 </script>
 </th:block>

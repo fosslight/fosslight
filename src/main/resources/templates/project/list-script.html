@@ -15,12 +15,6 @@ const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConst
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
 
-//prevent clicking the OK button on Enter
-let keyCode;
-$(document).on('keydown', function (event) {
-	keyCode = event.keyCode;
-});
-
 $(document).ready(function () {
 	evt.init();
 	fn.getUserIdList("Y", "REVIEWER"); // 근무자
@@ -867,12 +861,33 @@ var fn = {
 		return isValid;
 	},
 	checkProjectStatus : function(){
-		if(fn.checkProjectCnt()) {
-			var prjId = $("#list").getGridParam("selrow");
-			var rowData = $("#list").getRowData(prjId);
+		var prjIds = new Array();
+		prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		if (prjIds.length > 0) {
+			// check permission
+			var notPermissions = new Array();
+			var permissions = new Array();
+			
+			for (var i in prjIds) {
+				var rowData = $('#list').jqGrid('getRowData', prjIds[i]);
+				if (rowData.statusPermission > 0) {
+					permissions.push(prjIds[i]);
+				} else {
+					notPermissions.push(prjIds[i]);
+				}
+			}
 
-			if (parseInt(rowData["statusPermission"]) > 0) {
-				var rtnParameter = {};
+			if (permissions.length > 0) {
+				permissions.sort();
+				if (notPermissions.length > 0) {
+					notPermissions.sort();
+				}
+				
+				var param = {
+					permissionPrjIds : permissions,
+					notPermissionPrjIds : notPermissions
+				}
 				
 				$.ajax({
 					url : '/project/getProjectChangeView/status',
@@ -921,7 +936,7 @@ var fn = {
 		                	}
 							
 							alertify.changeStatus().set('title', 'Change Status').setContent(res).show();
-							fn.showChangeStatus();
+//							fn.showChangeStatus();
 						}
 					},
 					error: function(data){
@@ -929,8 +944,25 @@ var fn = {
 					}
 				});
 			} else {
-				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
+				var notPermissionsLength = notPermissions.length;
+				if (notPermissionsLength > 0) {
+					notPermissions.sort();
+				}
+				
+				var message = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
+				message += "<br>&emsp;- ";
+				notPermissions.forEach(function (el, index) {
+					message += "PRJ-" + el;
+					if (index < notPermissionsLength-1) {
+						message += ", ";
+					}
+				});
+				
+				alertify.alert(message, function(){});
+				return false;
 			}
+		} else {
+			alertify.alert([[#{msg.oss.select.project}]], function(){});
 		}
 	},
 	copy : function(){
@@ -992,143 +1024,129 @@ var fn = {
 			$("#CSDelete > input[type=radio]").attr("disabled", true);
 		}
 	},
-	changeStatusProc : function(){
-		$("#warningMsg").hide(); // required reset
+	changeStatus : function() {
+		var prjIds = $("#permissionPrjIds").val();
+		var notPerPrjIds = $("#notPermissionPrjIds").val(); 
 		
-		var prjId = $("#list").getGridParam("selrow");
-		var rowData = $("#list").getRowData(prjId);
-		var changeSeq = $("input:radio[name='radioName']:checked").val();
-		var reason = $("#reason").val();
-		var identificationStatus = $("#identificationStatus").val();
-		var distributionStatus = $("#distributionStatus").val();
-		var completeFlag = $("#completeFlag").val();
-		var dropFlag = $("#dropFlag").val();
-		var commentFlag = true;
-		
-		var authority = [[${sessUserInfo.authority}]];
-		if ("ROLE_ADMIN" == authority) {
-			if(changeSeq == 1 || changeSeq == 4) {
-				commentFlag = false;
+		if ("" != prjIds) {
+			var changeSeq = $("input:radio[name='radioName']:checked").val();
+			var reason = $("#reason").val();
+			
+			if (typeof changeSeq === "undefined" || reason.split(" ").join("") == "") {
+				$("#warningMsg").show();
+			} else {
+				fn.closeAlertify();
+				
+				loading.show();
+				setTimeout(function () {fn.changeStatusProc(prjIds, notPerPrjIds, changeSeq, reason);}, 200);
 			}
-		}
-		
-		if (commentFlag && reason.split(" ").join("") == "") {
-			$("#warningMsg").show();
 		} else {
-			switch(changeSeq){
-			case "1": // restart identification
-				var param = {
-					"prjId" : prjId
-				  , "userComment" : reason
-				  , "identificationStatus" : "PROG"
-				};
-				if ("ROLE_ADMIN" == authority){
-					if(identificationStatus == "CONF"){
-						if(distributionStatus == "DONE"){
-							param["delOsdd"] = "Y"; // -> delete with OSDD
-							
-							if(completeFlag != "Y"){ // -> delete with OSDD & identification reject 후 end 
-								param["changeStatusFlag"] = "Y";
-							}
-						}
-
-						if(completeFlag == "Y"){
-							param["completeYn"] = "N"; // -> reopen 동작
-						}
-					}
-
-					if (dropFlag == "Y"){
-						param["completeYn"] = "N"; // -> reopen 동작
-					}
-					
-					fn.updateProjectStatus(param);
-				}else{
-					if(completeFlag == "Y"){
-						param["commId"] = $("#commId").val();
-						fn.reqToOpenUser(param);
-					}else {
-						if (dropFlag == "Y"){
-							param["completeYn"] = "N"; // -> reopen 동작
-						}
-						
-						fn.updateProjectStatus(param);
-					}
-				}
+			if ("" != notPerPrjIds) {
+				var message = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
+				notPerPrjIds = notPerPrjIds.split(",");
 				
-				break;
-			case "2": // drop -> distribution Done 일경우 delete with OSDD를 실행 후 drop 처리함.
-				if(distributionStatus == "DONE"){
-					var param = {
-						"prjId" : prjId
-						, "identificationStatus" : "PROG"
-						, "userComment" : reason
-					};
-						
-					param["delOsdd"] = "Y"; // -> delete with OSDD
-
-					var dropMessage = [[#{msg.project.warn.drop.rsv}]];
-
-					alertify.confirm(dropMessage, function (e) {
-						if (e) {
-							fn.updateProjectStatus(param, fn.exeProjectDrop);
-						} else {
-							return false;
-						}
-					});
-				}else if (distributionStatus == "RSV"){
-					var dropMessage = [[#{msg.project.warn.drop.rsv}]];
-
-					alertify.confirm(dropMessage, function (e) {
-						if (e) {
-							fn.cancelDistributeReserve();
-						} else {
-							return false;
-						}
-					});
-				}else{
-					var param = {
-						"prjId" : prjId
-						, "userComment" : reason
-					};
-					
-					fn.exeProjectDrop(param);
-				}
-
-				break;
-			case "3": // delete
-				var param = {
-					"prjId" : prjId
-				  , "userComment" : reason
-				  , "identificationStatus" : "PROG"
-				};
-
-				if(identificationStatus == "CONF"){ // identification > confirm 일 경우 reject 후 delete
-					if(distributionStatus == "DONE"){
-						param["delOsdd"] = "Y"; // -> delete with OSDD
-						
-						if(completeFlag != "Y"){
-							param["changeStatusFlag"] = "Y"; // -> delete with OSDD & identification reject 후 end 
-						}
-					} 
-
-					if(completeFlag == "Y"){
-						param["completeYn"] = "N"; // -> reopen 동작
+				notPerPrjIds.forEach(function (el, index) {
+					message += "PRJ-" + el;
+					if (index < notPerPrjIds.length-1) {
+						message += ", ";
 					}
-					
-					fn.updateProjectStatus(param, fn.projectDelete);
-				} else { // identification > !confirm 일 경우 즉시 delete
-					fn.projectDelete({"prjId" : prjId, "userComment" : reason});
-				}
+				});
 				
-				break;
-			case "4": // complete
-				fn.updateProjectStatus({"prjId" : prjId, "completeYn" : "Y", "userComment" : reason});
-				
-				break;
-			default:
-				break;
+				alertify.alert(message, function(){});
 			}
 		}
+	},
+	changeStatusProc : function(prjIds, notPerPrjIds, changeSeq, reason) {
+		prjIds = prjIds.split(",");
+		var noChangePrjIds = new Array();
+		var changePrjIds = new Array();
+		
+		for (var i in prjIds) {
+			var param = {
+				prjId : prjIds[i],
+				code : changeSeq,
+				userComment : reason
+			}
+			
+			$.ajax({
+				url : "/project/changeProjectStatus",
+				type : 'POST',
+				data : JSON.stringify(param),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success : function(data){
+					if (typeof data.notChangePrjId !== "undefined") {
+						noChangePrjIds.push(data.notChangePrjId);
+					} else {
+						changePrjIds.push(prjIds[i]);
+					}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+		
+		loading.hide();
+		
+		var message = "";
+		if (noChangePrjIds.length == 0) {
+			message = [[#{msg.common.success}]];
+		} else {
+			if (changePrjIds.length > 0) {
+				message += [[#{msg.common.success}]];
+				message += "<br/>";
+				changePrjIds.forEach(function (el, index) {
+					message += "PRJ-" + el;
+					if (index < changePrjIds.length-1) {
+						message += ", ";
+					}
+				});
+			}
+			
+			if (noChangePrjIds.length > 0) {
+				if ("" != message) {
+					message += "<br/><br/>";
+				}
+				if ("1" == changeSeq) {
+					message += [[${@CommonFunction.getCustomMessage('msg.project.cannot.changed.status', 'Restart Identification')}]];
+				} else if ("2" == changeSeq) {
+					message += [[${@CommonFunction.getCustomMessage('msg.project.cannot.changed.status', 'Drop')}]];
+				} else {
+					message += [[${@CommonFunction.getCustomMessage('msg.project.cannot.changed.status', 'Complete')}]];
+				}
+				message += "<br/>";
+				
+				noChangePrjIds.forEach(function (el, index) {
+					message += "PRJ-" + el;
+					if (index < noChangePrjIds.length-1) {
+						message += ", ";
+					}
+				});
+			}
+			
+			if ("" != notPerPrjIds) {
+				if ("" != message) {
+					message += "<br/><br/>";
+				}
+				message += [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
+				message += "<br/>";
+				notPerPrjIds = notPerPrjIds.split(",");
+				
+				notPerPrjIds.forEach(function (el, index) {
+					message += "PRJ-" + el;
+					if (index < notPerPrjIds.length-1) {
+						message += ", ";
+					}
+				});
+			}
+		}
+		
+		alertify.alert(message, function(){
+			reloadTabInframe('/project/list');
+		});
 	},
 	projectDelete : function(data){
 		var _url = '/project/delAjax?prjId=' + data.prjId + '&userComment=' + data.userComment;
@@ -1232,7 +1250,7 @@ var fn = {
 					break;
 			}
 			
-			var tabNm = "BOM_Compare";
+			var tabNm = "PRJ_BOM_Compare";
 			var tabLk = '/project/bomCompare/'+beforePrjId+'/'+afterPrjId+'';
 	
 			createTabInFrame(tabNm, tabLk);
@@ -1833,8 +1851,8 @@ var fn = {
 			});
 		}
 	},
-	checkChar : function(){
-		if(event.keyCode == 64){//@ 특수문자 체크
+	checkChar : function(event){
+		if (event.keyCode == 64){//@ 특수문자 체크
 			alertify.alert([[#{msg.login.check.char}]], function(){});
     		
 			event.returnValue = false;
@@ -1885,39 +1903,12 @@ var fn = {
 	           	innerHtml 		+= '<textarea id="delPrjListEditor"></textarea>';
 				
 				if (!alertify.delPrjListDialog){
-					alertify.dialog('delPrjListDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								setup.focus.element = 0;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
+					commonAlertifyDialog('delPrjListDialog');
 	        	}
 	           	
 	           	alertify.delPrjListDialog()
 	           		.set('onok', function(e){
-	           			// prevent clicking the OK button on Enter
-						if (typeof keyCode !== 'undefined' && keyCode == 13) {
-							keyCode = undefined;
-							return false;
-						}
-	           			
-						if (e) {
+	           			if (e) {
 		           			var editorVal = $("#delPrjListEditor").summernote('code');
 		           			
 		           			if ("" == $(editorVal).text().trim()){
@@ -2317,22 +2308,6 @@ var list = {
 					
 					lastsel=rowid;
 				}
-
-// 				if('true' == isAdmin && iCol == 5 || 'false' == isAdmin && iCol == 4) {
-// 					fn.mvIdentification(rowid, "5", rowData['permission']);
-// 				} else if('true' == isAdmin && iCol == 6 || 'false' == isAdmin && iCol == 5) {
-// 					if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
-
-// 					} else {
-// 						fn.mvVerification(rowData['prjId'], rowData['permission']);
-// 					}
-// 				} else if('true' == isAdmin && iCol == 7 || 'false' == isAdmin && iCol == 6) {
-// 					if(rowData.destributionStatus == '' || rowData.destributionStatus == 'N/A') {
-
-// 					} else {
-// 						fn.mvDistribution(rowData['prjId'], rowData['permission']);
-// 					}
-// 				}
 			},
             gridComplete:function (){
             	updateGridRowCount('list', 'pager');

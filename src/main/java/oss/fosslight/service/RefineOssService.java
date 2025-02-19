@@ -41,6 +41,8 @@ public class RefineOssService {
 	
 	private static final String RESULT_KEY_TOTALCNT = "reFineTotalCnt";
 	private static final String RESULT_KEY_ITEMS = "reFineItems";
+	private static final String RESULT_NEED_CHECK_TOTALCNT = "needCheckTotalCnt";
+	private static final String RESULT_NEED_CHECK_ITEMS = "needCheckItems";
 	
 	private static final String LOG_FORMAT_INPROGRESS = "IN PROGRESS {}/{}";
 	private static final String LOG_FORMAT_METHOD_START = "Start refine OSS : {}";
@@ -215,7 +217,7 @@ public class RefineOssService {
 					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
 
-					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
 						for(Map<String, String> n : ossDownloadLocationList) {
 							if(StringUtil.isEmpty(n.get(FIELD_PURL))) {
 								downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
@@ -229,7 +231,7 @@ public class RefineOssService {
 							}
 						}
 
-						if(!CollectionUtils.isEmpty(refinedItemList)) {
+						if (!CollectionUtils.isEmpty(refinedItemList)) {
 							reFineTotalCnt++;
 							reFineItems.put(ossName, refinedItemList);							
 						}						
@@ -258,51 +260,62 @@ public class RefineOssService {
 		log.info(LOG_FORMAT_METHOD_START, "trySetPurl");
 		final Map<String, Object> resultMap = new HashMap<>();
 		final Map<String, List<String>> reFineItems = new HashMap<>();
+		final Map<String, List<String>> needCheckItems = new HashMap<>();
 		
 		final RefineOssMapper refineOssMapper = sqlSession.getMapper(RefineOssMapper.class);
 		int itemTotalCnt = refineOssMapper.getRefineOssTotalCnt(schOssName, "unsetPurl");
 		List<String> refinedItemList;
 		List<Map<String, String>> ossDownloadLocationList;
+		List<String> needCheckItemList;
 		int reFineTotalCnt = 0;
+		int needCheckTotalCnt = 0;
 		if (itemTotalCnt > 0) {
 			if(itemTotalCnt < PROC_CHUNK_SIZE) {
 				itemTotalCnt = PROC_CHUNK_SIZE;
 			}
 			
-			for(int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
+			for (int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
 				final List<Map<String, Object>> ossCommonList = refineOssMapper.selectRefineOssCommonList(schOssName, "unsetPurl", limitIndex*PROC_CHUNK_SIZE, PROC_CHUNK_SIZE);
 				String ossCommonId;
 				String ossName;
-				for(Map<String, Object> ossCommonInfo : ossCommonList) {
+				for (Map<String, Object> ossCommonInfo : ossCommonList) {
 					refinedItemList = new ArrayList<>();
 					ossCommonId = Integer.toString((int)ossCommonInfo.get(FIELD_OSS_COMMON_ID));
 					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
 
-					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
-						for(Map<String, String> n : ossDownloadLocationList) {
-							if(StringUtil.isEmpty(n.get(FIELD_PURL))) {
+					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+						needCheckItemList = new ArrayList<>();
+						for (Map<String, String> n : ossDownloadLocationList) {
+							if (StringUtil.isEmpty(n.get(FIELD_PURL))) {
 								String downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
 								try {
 									String purl = generatePurlByDownloadLocation(downloadLocation);
-									if(!StringUtil.isEmpty(purl)) {
-										n.put(FIELD_PURL, purl);
-										refinedItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl));
+									if (!StringUtil.isEmpty(purl)) {
+										if (purl.contains("|")) {
+											needCheckItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl.split("[|]")[1]));
+										} else {
+											n.put(FIELD_PURL, purl);
+											refinedItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl));
+										}
 									}
 								} catch (Exception e) {
 									log.error("failed to generate purl download location : {}, {}", downloadLocation, e.getMessage());
 								}
 							}
 						}
-
-						if(!CollectionUtils.isEmpty(refinedItemList)) {
-							if(doUpdateFlag) {
+						if (!CollectionUtils.isEmpty(refinedItemList)) {
+							if (doUpdateFlag) {
 								refineOssMapper.deleteOssDownloadLocation(ossCommonId);
 								refineOssMapper.insertOssDownloadLocation(ossCommonId, ossDownloadLocationList);
 							}
 							reFineTotalCnt++;
 							reFineItems.put(ossName, refinedItemList);							
-						}						
+						}
+						if (!CollectionUtils.isEmpty(needCheckItemList)) {
+							needCheckTotalCnt++;
+							needCheckItems.put(ossName, needCheckItemList);
+						}
 					}
 				}
 
@@ -313,6 +326,8 @@ public class RefineOssService {
 
 		resultMap.put(RESULT_KEY_TOTALCNT, reFineTotalCnt);
 		resultMap.put(RESULT_KEY_ITEMS, reFineItems);
+		resultMap.put(RESULT_NEED_CHECK_TOTALCNT, needCheckTotalCnt);
+		resultMap.put(RESULT_NEED_CHECK_ITEMS, needCheckItems);
 		log.info(LOG_FORMAT_METHOD_END, "trySetPurl", reFineTotalCnt);
 		return resultMap;
 	}
@@ -333,48 +348,49 @@ public class RefineOssService {
 		int itemTotalCnt = refineOssMapper.getRefineOssTotalCnt(schOssName, "reorderGithubUrl");
 		List<String> refinedItemList;
 		List<Map<String, String>> ossDownloadLocationList;
+		List<Map<String, String>> githubItemList = new ArrayList<>();
+		List<Map<String, String>> notGithubItemList = new ArrayList<>();
 		int reFineTotalCnt = 0;
 		if (itemTotalCnt > 0) {
-			if(itemTotalCnt < PROC_CHUNK_SIZE) {
+			if (itemTotalCnt < PROC_CHUNK_SIZE) {
 				itemTotalCnt = PROC_CHUNK_SIZE;
 			}
 			
-			for(int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
+			for (int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
 				final List<Map<String, Object>> ossCommonList = refineOssMapper.selectRefineOssCommonList(schOssName, "reorderGithubUrl", limitIndex*PROC_CHUNK_SIZE, PROC_CHUNK_SIZE);
 				String ossCommonId;
 				String ossName;
-				for(Map<String, Object> ossCommonInfo : ossCommonList) {
+				for (Map<String, Object> ossCommonInfo : ossCommonList) {
 					refinedItemList = new ArrayList<>();
 					ossCommonId = Integer.toString((int)ossCommonInfo.get(FIELD_OSS_COMMON_ID));
 					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
 
-					// find github.com url item
-					int githubUrlItemIndex = 0;
-					Map<String, String> githubUrlItem = null;
-					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
-						for(Map<String, String> n : ossDownloadLocationList) {
-							if(n.get(FIELD_DOWNLOAD_LOCATION).contains("github.com")) {
-								githubUrlItem = n;
-								break;
+					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+						githubItemList.clear();
+						notGithubItemList.clear();
+						for (Map<String, String> n : ossDownloadLocationList) {
+							if (n.get(FIELD_DOWNLOAD_LOCATION).contains("github.com")) {
+								githubItemList.add(n);
+							} else {
+								notGithubItemList.add(n);
 							}
-							githubUrlItemIndex++;
 						}
-						
-						// remove and insert first github.com url item
-						if(githubUrlItem != null) {
-							ossDownloadLocationList.remove(githubUrlItemIndex);
-							ossDownloadLocationList.add(0, githubUrlItem);
-							refinedItemList.add(githubUrlItem.get(FIELD_DOWNLOAD_LOCATION));
+						if (!CollectionUtils.isEmpty(githubItemList) && !CollectionUtils.isEmpty(notGithubItemList)) {
+							githubItemList.addAll(notGithubItemList);
+							if (!ossDownloadLocationList.equals(githubItemList)) {
+								for (Map<String, String> githubUrlItem : githubItemList) {
+									refinedItemList.add(githubUrlItem.get(FIELD_DOWNLOAD_LOCATION));
+								}
+								if (doUpdateFlag) {
+									refineOssMapper.deleteOssDownloadLocation(ossCommonId);
+									refineOssMapper.insertOssDownloadLocation(ossCommonId, githubItemList);
+								}
+								reFineTotalCnt++;
+								reFineItems.put(ossName, refinedItemList);
+							}
 							
-							if(doUpdateFlag) {
-								refineOssMapper.deleteOssDownloadLocation(ossCommonId);
-								refineOssMapper.insertOssDownloadLocation(ossCommonId, ossDownloadLocationList);
-							}
-							reFineTotalCnt++;
-							reFineItems.put(ossName, refinedItemList);
 						}
-						
 					}
 				}
 
@@ -437,7 +453,7 @@ public class RefineOssService {
 								if (StringUtil.isEmpty(map.get(FIELD_PURL))) {
 									try {
 										String purl = generatePurlByDownloadLocation(map.get(FIELD_DOWNLOAD_LOCATION));
-										if (!StringUtil.isEmpty(purl)) {
+										if (!StringUtil.isEmpty(purl) && purl.contains("|")) {
 											map.put(FIELD_PURL, purl);
 										}
 									} catch (Exception e) {
@@ -645,7 +661,7 @@ public class RefineOssService {
 	 * @return
 	 * @throws MalformedPackageURLException
 	 */
-	private String generatePurlByDownloadLocation(String downloadLocation) throws MalformedPackageURLException {
+	private String generatePurlByDownloadLocation(String downloadLocation) {
 		final List<String> checkPurl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_DOWNLOADLOCAION_PURL);
 		String purlString = "";
 		int urlSearchSeq = -1;
@@ -661,8 +677,9 @@ public class RefineOssService {
 				}
 				seq++;
 			}
-			
-			downloadLocation = downloadLocation.split("://")[1];
+			if (downloadLocation.contains("://")) {
+				downloadLocation = downloadLocation.split("://")[1];
+			}
 			if (downloadLocation.startsWith("www.")) {
 				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
 			}
@@ -700,10 +717,14 @@ public class RefineOssService {
 			}
 			
 			if (downloadLocation.contains("@")) {
-				if (urlSearchSeq == 9) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
+				if (urlSearchSeq == 9) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
+				}
 			}
 			
-			if (downloadLocation.endsWith("/")) downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+			if (downloadLocation.endsWith("/")) {
+				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+			}
 			
 			if (urlSearchSeq > -1) {
 				Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
@@ -716,71 +737,84 @@ public class RefineOssService {
 			
 			PackageURL purl = null;
 			if (urlSearchSeq == -1) {
-				if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
+				}
 				purlString = "link:" + downloadLocation;
 			} else if (urlSearchSeq == 10) {
-				if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+				}
 				purlString = "link:" + downloadLocation;
 			} else {
 				String[] splitDownloadLocation = downloadLocation.split("/");
 				boolean addFlag = false;
 				String namespace = "/";
+				boolean errorFlag = false;
 				
-				switch(urlSearchSeq) {
-					case 0: // github
-						purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
-						break;
-					case 1: // npm
-						if (downloadLocation.contains("/package/@")) addFlag = true;
-						purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[2], null, null, null);
-						break;
-					case 2: // npm
-						if (downloadLocation.contains("/@")) addFlag = true;
-						purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[1], null, null, null);
-						break;
-					case 3: // pypi
-					case 4: // pypi
-						purl = new PackageURL(StandardTypes.PYPI, null, splitDownloadLocation[2].replaceAll("_", "-"), null, null, null);
-						break;
-					case 5: // maven
-					case 6: // maven
-						purl = new PackageURL(StandardTypes.MAVEN, splitDownloadLocation[2], splitDownloadLocation[3], null, null, null);
-						break;
-					case 7: // cocoapod
-						purl = new PackageURL("cocoapods", null, splitDownloadLocation[2], null, null, null);
-						break;
-					case 8: // gem
-						purl = new PackageURL(StandardTypes.GEM, null, splitDownloadLocation[2], null, null, null);
-						break;
-					case 9: // go
-						int idx = 0;
-						for (String data : splitDownloadLocation) {
-							if (idx > 1) {
-								namespace += data + "/";
+				try {
+					switch(urlSearchSeq) {
+						case 0: // github
+							purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
+							break;
+						case 1: // npm
+							if (downloadLocation.contains("/package/@")) addFlag = true;
+							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 2: // npm
+							if (downloadLocation.contains("/@")) addFlag = true;
+							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[1], null, null, null);
+							break;
+						case 3: // pypi
+						case 4: // pypi
+							purl = new PackageURL(StandardTypes.PYPI, null, splitDownloadLocation[2].replaceAll("_", "-"), null, null, null);
+							break;
+						case 5: // maven
+						case 6: // maven
+							purl = new PackageURL(StandardTypes.MAVEN, splitDownloadLocation[2], splitDownloadLocation[3], null, null, null);
+							break;
+						case 7: // cocoapod
+							purl = new PackageURL("cocoapods", null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 8: // gem
+							purl = new PackageURL(StandardTypes.GEM, null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 9: // go
+							int idx = 0;
+							for (String data : splitDownloadLocation) {
+								if (idx > 1) {
+									namespace += data + "/";
+								}
+								idx++;
 							}
-							idx++;
-						}
-						namespace = namespace.substring(0, namespace.length()-1);
-						purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1]);
-						
-						break;
-					case 11:
-						purl = new PackageURL("pub", null, splitDownloadLocation[2], null, null, null);
-						break;
-					default:
-						break;
+							namespace = namespace.substring(0, namespace.length()-1);
+							purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1]);
+							
+							break;
+						case 11:
+							purl = new PackageURL("pub", null, splitDownloadLocation[2], null, null, null);
+							break;
+						default:
+							break;
+					}
+				} catch (Exception e) {
+					errorFlag = true;
 				}
 				
-				if (purl != null) {
-					purlString = purl.toString();
-					if (urlSearchSeq == 9) {
-						purlString += namespace + subPath;
-					} else {
-						if (addFlag) {
-							if (urlSearchSeq == 1) {
-								if (splitDownloadLocation.length > 3) purlString += "/" + splitDownloadLocation[3];
-							} else {
-								if (splitDownloadLocation.length > 2) purlString += "/" + splitDownloadLocation[2];
+				if (errorFlag) {
+					purlString = "error|link:" + downloadLocation;
+				} else {
+					if (purl != null) {
+						purlString = purl.toString();
+						if (urlSearchSeq == 9) {
+							purlString += namespace + subPath;
+						} else {
+							if (addFlag) {
+								if (urlSearchSeq == 1) {
+									if (splitDownloadLocation.length > 3) purlString += "/" + splitDownloadLocation[3];
+								} else {
+									if (splitDownloadLocation.length > 2) purlString += "/" + splitDownloadLocation[2];
+								}
 							}
 						}
 					}
@@ -878,6 +912,13 @@ public class RefineOssService {
 				customDownloadLocation = checkOssNameUrl.get(2) + name[name.length-2];
 			}
 			
+			if (urlSearchSeq == 7) {
+				if (customDownloadLocation.contains("+")) {
+					customDownloadLocation = customDownloadLocation.split("[+]")[0];
+					customDownloadLocation = customDownloadLocation.substring(0, customDownloadLocation.lastIndexOf("/"));
+				}
+			}
+			
 			if (urlSearchSeq == 0) {
 				if (customDownloadLocation.startsWith("git://")) {
 					customDownloadLocation = customDownloadLocation.replace("git://", "https://");
@@ -946,7 +987,7 @@ public class RefineOssService {
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
 				break;
 			case 7:
-				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
+				p = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
 				break;
 			case 8:
 				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");

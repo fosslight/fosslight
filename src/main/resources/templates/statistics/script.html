@@ -145,7 +145,9 @@ var common_fn = {
 		chart_fn.updatedOssChartOpen();
 		chart_fn.updatedLicenseChartOpen();
 		chart_fn.userRelatedChartOpen();
-		if ([[${partnerFlag}]]) chart_fn.trdPartyRelatedChartOpen();
+		if ([[${partnerFlag}]]) {
+			chart_fn.trdPartyRelatedChartOpen();
+		}
 	},
 	validation : function(type){
 		var startDate = $("#startDate").val();
@@ -236,18 +238,26 @@ var chart_fn = {
 					var idx = 0;
 					
 					for(var title in data.titleArray){
-						datasets.push({label:data.titleArray[idx], data:data.dataArray[idx] , backgroundColor:data.colorArray[idx]});
+						datasets.push({label:data.titleArray[idx], data:data.dataArray[idx], backgroundColor:data.colorArray[idx]});
 						idx++;
 					}
-
-       				obj["labels"] = divisionList;
-       				obj["datasets"] = datasets;
 					
-       				if(divisionalProjectChartObject) {
+					var customLabels = new Array();
+					for (var i in divisionList) {
+						let key = divisionList[i] + "|" + data.dataSumArray[i];
+						customLabels.push(key);
+					}
+					
+					obj["datasets"] = datasets;
+					
+       				if (divisionalProjectChartObject) {
+       					obj["labels"] = divisionList;
        					divisionalProjectChartObject.data.labels = obj["labels"];
        					divisionalProjectChartObject.data.datasets = obj["datasets"];
+       					divisionalProjectChartObject.options = barChartOption(customLabels);
        					divisionalProjectChartObject.update();
        				} else {
+       					obj["labels"] = customLabels;
        					divisionalProjectChartObject = getBarChart($('#divisionalProjectChart').get(0).getContext('2d'), obj);
        				}
 				},
@@ -390,14 +400,22 @@ var chart_fn = {
 						idx++;
 					}
 
-       				obj["labels"] = data.categoryList;
+					var customLabels = new Array();
+					for (var i in data.categoryList) {
+						let key = data.categoryList[i] + "|" + data.dataSumArray[i];
+						customLabels.push(key);
+					}
+					
        				obj["datasets"] = datasets;
 					
-       				if(updatedOssChartObject) {
+       				if (updatedOssChartObject) {
+       					obj["labels"] = data.categoryList;
        					updatedOssChartObject.data.labels = obj["labels"];
        					updatedOssChartObject.data.datasets = obj["datasets"];
+       					updatedOssChartObject.options = barChartOption(customLabels);
        					updatedOssChartObject.update();
        				} else {
+       					obj["labels"] = customLabels;
        					updatedOssChartObject = getBarChart($('#updatedOssChart').get(0).getContext('2d'), obj);
        				}
 				},
@@ -433,14 +451,22 @@ var chart_fn = {
 						idx++;
 					}
 
-       				obj["labels"] = data.categoryList;
+					var customLabels = new Array();
+					for (var i in data.categoryList) {
+						let key = data.categoryList[i] + "|" + data.dataSumArray[i];
+						customLabels.push(key);
+					}
+					
        				obj["datasets"] = datasets;
 					
-       				if(updatedLicenseChartObject) {
+       				if (updatedLicenseChartObject) {
+       					obj["labels"] = data.categoryList;
        					updatedLicenseChartObject.data.labels = obj["labels"];
        					updatedLicenseChartObject.data.datasets = obj["datasets"];
+       					updatedLicenseChartObject.options = barChartOption(customLabels);
        					updatedLicenseChartObject.update();
        				} else {
+       					obj["labels"] = customLabels;
        					updatedLicenseChartObject = getBarChart($('#updatedLicenseChart').get(0).getContext('2d'), obj);
        				}
 				},
@@ -475,14 +501,22 @@ var chart_fn = {
 						idx++;
 					}
 
-       				obj["labels"] = divisionList;
-       				obj["datasets"] = datasets;
+					var customLabels = new Array();
+					for (var i in divisionList) {
+						let key = divisionList[i] + "|" + data.dataSumArray[i];
+						customLabels.push(key);
+					}
 					
-       				if(trdPartyRelatedChartObject) {
+					obj["datasets"] = datasets;
+					
+       				if (trdPartyRelatedChartObject) {
+       					obj["labels"] = divisionList;
        					trdPartyRelatedChartObject.data.labels = obj["labels"];
        					trdPartyRelatedChartObject.data.datasets = obj["datasets"];
+       					trdPartyRelatedChartObject.options = barChartOption(customLabels);
        					trdPartyRelatedChartObject.update();
        				} else {
+       					obj["labels"] = customLabels;
        					trdPartyRelatedChartObject = getBarChart($('#trdPartyRelatedChart').get(0).getContext('2d'), obj);
        				}
 				},
@@ -515,15 +549,23 @@ var chart_fn = {
 						datasets.push({label:data.titleArray[idx], data:data.dataArray[idx] , backgroundColor:data.colorArray[idx]});
 						idx++;
 					}
-
-       				obj["labels"] = divisionList;
+					
+					var customLabels = new Array();
+					for (var i in divisionList) {
+						let key = divisionList[i] + "|" + data.dataSumArray[i];
+						customLabels.push(key);
+					}
+					
        				obj["datasets"] = datasets;
 					
-       				if(userRelatedChartObject) {
+       				if (userRelatedChartObject) {
+       					obj["labels"] = divisionList;
        					userRelatedChartObject.data.labels = obj["labels"];
        					userRelatedChartObject.data.datasets = obj["datasets"];
+       					userRelatedChartObject.options = barChartOption(customLabels);
        					userRelatedChartObject.update();
        				} else {
+       					obj["labels"] = customLabels;
        					userRelatedChartObject = getBarChart($('#userRelatedChart').get(0).getContext('2d'), obj);
        				}
 				},
@@ -583,8 +625,6 @@ var chart_fn = {
 			params["startDate"] = $("#startDate").val();
 			params["endDate"] = $("#endDate").val();
 			params["isRawData"] = "Y";
-			
-			console.log(params);
 			
 			$.ajax({
 				url : '/exceldownload/getChartExcel',

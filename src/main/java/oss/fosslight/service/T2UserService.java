@@ -69,4 +69,5 @@ public interface T2UserService extends UserDetailsService {
 	
 	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap);
 	public boolean checkSystemUser(String userId, String rawPassword);
+	public void sendMailForUnusedDivision(String[] unusedDivisions);
 }

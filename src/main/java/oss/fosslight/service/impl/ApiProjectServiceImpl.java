@@ -428,7 +428,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			OssNotice noticeParam = new OssNotice();
 			noticeParam.setPrjId((String) paramMap.get("prjId").toString());
-			noticeParam.setNoticeType(CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL);
+			noticeParam.setNoticeType((String) paramMap.getOrDefault("noticeType", CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL));
+			noticeParam.setNoticeTypeEtc((String) paramMap.getOrDefault("noticeTypeEtc", ""));
 			
 			projectMapper.makeOssNotice(noticeParam);
 		}
@@ -1808,7 +1809,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					prjParam.put("prjId", prjId);
 					prjParam.put("packageFileId", fileSeqs.get(0));
 					
-					if (prjInfo.containsKey("destributionStatus") && prjInfo.get("destributionStatus") != null && !("").equals(prjInfo.get("destributionStatus"))){
+					if (prjInfo.containsKey("distributionStatus") && prjInfo.get("distributionStatus") != null && !("").equals(prjInfo.get("distributionStatus"))){
 						prjParam.put("statusVerifyYn", "C");
 					} else {
 						prjParam.put("statusVerifyYn", CoConstDef.FLAG_YES);

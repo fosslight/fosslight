@@ -163,7 +163,9 @@ public class SelfCheckController extends CoTopComponent {
 			if (selfCheckService.checkUserPermissions(project, loginUserName())) {
 				permissionFlag = true;
 			}
-			if (!permissionFlag) model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
+			if (!permissionFlag) {
+				model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
+			}
 		}
 		
 		return "selfCheck/edit";

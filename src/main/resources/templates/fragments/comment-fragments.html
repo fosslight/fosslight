@@ -13,7 +13,7 @@
                                     <div class="post">
                                         <div class="row mb-1">
                                             <th:block th:if="${not #strings.isEmpty(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv))}">
-                                                <span th:if="${comment.referenceDiv != '20'}" class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${comment.referenceDiv != '20' and not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
+                                                <span class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${comment.referenceDiv != '20' and not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
                                                 <th:block th:if="${not #strings.isEmpty(comment.status)}">
                                                		<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'"></span>
 													<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
@@ -23,7 +23,9 @@
                                         <div class="user-block mt-1" style="display: flex;">
                                             <span class="username" th:text="${comment.creator}"></span><span class="ml-2 text-sm" style="margin-top: .1rem;" th:text="${comment.modifiedDate}"></span>
                                         </div>
-                                        <div th:utext="${comment.contents}"></div>
+                                        <div class="note-editor note-frame line-break-anywhere" style="border: 0;">
+                                        	<p th:utext="${comment.contents}"></p>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="text-right py-0 align-middle">
@@ -75,21 +77,6 @@
                         		<div class="col-lg-12">
                         			<span class="text-dark-gray text-smaller pt-2 pl-2" th:text="'Project : '"></span><span th:text="${'[' + project.prjId + ']'}"></span><span class="ml-1" th:text="${project.prjName}"></span>
                         		</div>
-<!--                      		<div class="col-lg-10">
-                        			<span class="description-percentage text-lg text-blue-gray text-bold">
-                                		<b><span th:text="${'[' + project.prjId + ']'}"></span><span class="ml-1" th:text="${project.prjName}"></span></b>
-                            		</span>
-                          			<span class="text-lg-gray text-smaller ml-2">
-                            			<span class="badge badge-info text-sm px-2 py-1 callOpener pointer" id="basicInfoPrj">Basic Information</span>
-                              			<span th:if="${project.prjId != null}" class="badge badge-orange text-sm px-2 py-1 callOpener pointer" id="identification">Identification</span>
-                              			<th:block th:if="${project.identificationStatus == 'CONF' and project.verificationStatus != 'NA'}">
-                                			<span class="badge badge-success text-sm px-2 py-1 callOpener pointer" id="packaging">Packaging</span>
-                              			</th:block>
-                              			<th:block th:if="${project.verificationStatus == 'CONF' and project.destributionStatus != 'NA'}">
-                                 			<span class="badge badge-danger text-sm px-2 py-1 callOpener pointer" id="distribution" >Distribution</span>
-                               			</th:block>
-                            		</span>
-                        		</div> -->
                         	</div>
                         </div>
                     </th:block>
@@ -204,6 +191,38 @@
                                     	<input name="referenceId" id="referenceId"  th:value="${basicInfo.referenceId}" type="hidden">
                                 	</div>
                              	</th:block>
+                             	<th:block th:if="${basicInfo.referenceDiv == '3rd'}">
+                             		<div class="col-md-3 px-1">
+                                        <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
+                                            <option value="" th:text="Section"></option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}">
+                                                [[
+                                                    ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
+                                                    @CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS'))}
+                                                ]]
+                                            </option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS')}">
+                                                [[
+                                                    ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
+                                                    @CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS'))}
+                                                ]]
+                                            </option>
+                                        </select>
+                                	</div>
+                                	<div class="col-md-9 px-0">
+                                    	<div class="input-group">
+                                        	<input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
+                                        	<div class="input-group-append">
+                                            	<button class="btn btn-default" id="search" type="button"><i class="fa fa-search"></i></button>
+                                        	</div>
+                                        	<button class="btn btn-ivory btn-md px-2 ml-1 width-7rem commentBtn" type="button">
+                                            	<i class="fas fa-plus mr-2"></i>Add
+                                        	</button>
+                                    	</div>
+                                    	<input name="referenceDiv" id="referenceDiv" th:value="${basicInfo.referenceDiv}" type="hidden">
+                                    	<input name="referenceId" id="referenceId"  th:value="${basicInfo.referenceId}" type="hidden">
+                                	</div>
+                             	</th:block>
                              	<th:block th:if="${basicInfo.referenceDiv == 'oss'}">
                              		<div class="col-md-3 px-1">
                                         <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
@@ -226,7 +245,7 @@
                                     	<input name="referenceId" id="referenceId"  th:value="${basicInfo.referenceId}" type="hidden">
                                 	</div>
                              	</th:block>
-                               	<th:block th:if="${basicInfo.referenceDiv == '3rd' or basicInfo.referenceDiv == 'license'}">
+                               	<th:block th:if="${basicInfo.referenceDiv == 'license'}">
                                     <div class="col-md-12 px-0">
                                     	<div class="input-group ml-1">
                                         	<input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
@@ -478,47 +497,28 @@
                     "referenceId" : [[${basicInfo.referenceId}]]
                 }
                 getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
-                        if (!alertify.addBtnDialog) {
-                            alertify.dialog('addBtnDialog', function () {
-                                return {
-                                	setup: function() {
-        								var settings = alertify.confirm().settings;
-        								
-        								for (var prop in settings) {
-        									this.settings[prop] = settings[prop];
-        								}
-        								
-        								var setup = alertify.confirm().setup();
-        								setup.buttons = [];
-        								setup.focus.element = 0;
-        								
-        								return setup;
-        							},
-        						    hooks: {
-        						    	onshow: function() {
-        						        	this.elements.dialog.style.maxWidth = 'none';
-        						          	this.elements.dialog.style.width = '680px';
-        						        }
-        							}
-                                };
-                            }, false, 'confirm');
-                        }
+                   	if (!alertify.addBtnDialog) {
+						commonAlertifyDialog('addBtnDialog');
+					}
+                   	alertify.addBtnDialog().set('onshow', function(e) {
+                   		$(alertify.addBtnDialog().elements.buttons.primary).empty();
+                	}).setContent(res).show();
+				},
+				null,
+				function () {
+					$("#modifiedCommentInPjtEditor").summernote({
+						height: 180,
+						callbacks: {
+							onInit: function () {
+								$(this).summernote('code', $("#userContents").val());
+							}
+						}
+					});
 
-                        alertify.addBtnDialog(res);
-                    },
-                    null,
-                    function () {
-                        $("#modifiedCommentInPjtEditor").summernote({
-                            height: 180,
-                            callbacks: {
-                                onInit: function () {
-                                    $(this).summernote('code', $("#userContents").val());
-                                }
-                            }
-                        });
-                        
-                        if ("41" == userCommentReferenceDiv) $(".checkboxArea").show();
-                    });
+					if ("41" == userCommentReferenceDiv) {
+						$(".checkboxArea").show();
+					}
+            	});
             },
             sendEditor: function (type) {
                 //코멘트 저장

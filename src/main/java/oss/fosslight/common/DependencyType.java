@@ -12,10 +12,15 @@ import java.util.regex.Pattern;
 public enum DependencyType {
 	GITHUB("git", "github", CoConstDef.GITHUB_PATTERN),
 	NPM("npm", "npmjs", CoConstDef.NPM_PATTERN),
+	NPM2("npm", "npmjs", CoConstDef.NPM_PATTERN2),
 	PYPI("pypi", "pypi", CoConstDef.PYPI_PATTERN),
 	MAVEN_CENTRAL("maven", "mavencentral", CoConstDef.MAVEN_CENTRAL_PATTERN),
 	MAVEN_GOOGLE("maven", "mavengoogle", CoConstDef.MAVEN_GOOGLE_PATTERN),
 	COCOAPODS("pod", "cocoapods", CoConstDef.COCOAPODS_PATTERN),
+	GOOGLESOURCE("googlesource", "googlesource", CoConstDef.GOOGLESOURCE_PATTERN),
+	NUGET("nuget", "nuget", CoConstDef.NUGET_PATTERN),
+	STACKOVERFLOW("stackoverflow", "stackoverflow", CoConstDef.STACKOVERFLOW_PATTERN),
+	CRATES("crates", "crates", CoConstDef.CRATES_PATTERN),
 	UNSUPPORTED("unsupported", "unsupported", CoConstDef.UNSUPPORTED_PATTERN);
 
 	String type;

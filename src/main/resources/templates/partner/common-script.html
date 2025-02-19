@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="3rdScript">
+<script th:inline="javascript">
+	var saveFlag = false;
+
+	var com_fn = {
+		checkSelectDownloadFile : function () {
+			var checkEmptyFlag = false;
+			
+			$.ajax({
+	    		type: "POST",
+				url: '/partner/checkSelectDownloadFile',
+				data: JSON.stringify({"partnerId":[[${detail.partnerId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if (data.isValid) {
+						checkEmptyFlag = true;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+	    	});
+	    	
+	    	return checkEmptyFlag;
+		},
+		//requestReview
+		requestReview : function() {
+			if (com_fn.checkStatus()) {
+				if ("Y" != $("#mergeYn").val()) {
+					alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.required.binandroidBomSave', '3rd Party')}]], function(){
+						$("#tabMenuPartyBom").trigger("click");
+					});
+					
+					return false;
+				}
+				
+				isStatusChangeFlag = true;
+					
+				fn.save();
+			} else {
+				alertify.alert([[#{msg.partner.warning}]], function(){});
+			}
+		},
+		//reject
+		reject : function(){
+			if (com_fn.checkStatus()) {
+				var innerHtml 	= 'Are you sure you want to reject?<br>';
+		        	innerHtml 		+= '<textarea id="partnerRejectEditor"></textarea>';
+		           	
+		     	if (!alertify.partnerRejectDialog){
+		     		commonAlertifyDialog('partnerRejectDialog');
+		     	}
+
+		     	alertify.partnerRejectDialog()
+		       	.set('onok', function(e) {
+		       		if (e) {
+		       			var editorVal = $("#partnerRejectEditor").summernote('code');
+		       			
+		       			if ("" == $(editorVal).text().trim()){
+		       				alertify.alert([[#{msg.project.required.comments}]], function(){});
+		       				
+		       				return false;
+		    			} else {
+		    				var param = {status : 'PROG', partnerId : [[${detail.partnerId}]], userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
+
+		    				$.ajax({
+		    					url : '/partner/changeStatus',
+		    					type : 'POST',
+		    					data : param,
+		    					dataType : 'json',
+		    					cache : false,
+		    					success : function(data){
+		    						reloadTabInframe('/partner/list');
+		    						
+		    						if (partnerId != null && "" != partnerId) {
+		    							alertify.alert([[#{msg.common.success}]], function() {
+		    								deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
+		    								createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+		    							});
+		    						}
+		    					},
+		    					error : function(){
+		    						alertify.error([[#{msg.common.valid2}]], 0);
+		    					}
+		    				});
+		    			}
+		       		} else {
+		       			return false;
+		       		}
+		       	})
+		       	.set('title', 'Reject').setContent(innerHtml)
+		       	.set('onshow', function(e){
+		       		$("#partnerRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+					let partnerId = [[${detail.partnerId}]];
+					if (partnerId != null) {
+						const parameter = {
+					    	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+					       	"referenceId" : partnerId
+						}
+					    var draftUserComment = draftUserComments(parameter);
+						if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+				       		$("#partnerRejectEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+					  	}
+					}
+		       	})
+				.show();
+			} else {
+				alertify.alert([[#{msg.partner.warning}]], function(){});
+			}
+		},
+		//reviewStart
+		reviewStart : function(){
+			if (com_fn.checkStatus()){
+				var param = {status : 'REV', partnerId : [[${detail.partnerId}]]};
+				$.ajax({
+					url : '/partner/changeStatus',
+					type : 'POST',
+					data : param,
+					dataType : 'json',
+					cache : false,
+					success : function(data){
+						reloadTabInframe('/partner/list');
+						
+						if (partnerId != null && partnerId != ''){
+							deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
+							createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}else{
+				alertify.alert([[#{msg.partner.warning}]], function(){});
+			}
+		},
+		//confirm
+		confirm : function(){
+			if (com_fn.checkStatus()){
+				if ("Y" != $("#mergeYn").val()) {
+					alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.required.binandroidBomSave', '3rd Party')}]], function(){
+						$("#tabMenuPartyBom").trigger("click");
+					});
+					
+					return false;
+				}
+				
+				cleanErrMsg();
+				checkObligationFlag = false;
+
+				var _list = $("#list");
+				var mainData = _list.jqGrid('getGridParam','data');
+				
+				mainData.forEach( function(_rowData){
+					if ( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
+						checkObligationFlag = true;
+					}
+				});
+
+				if (checkObligationFlag) {
+					alert([[#{msg.warn.include.needcheck.license}]]);
+					
+					return false;
+				}
+					
+				var innerHtml 	= 'Are you sure you want to confirm?<br>';
+		      	innerHtml 		+= '<textarea id="partnerConfirmEditor"></textarea>';
+		        
+		      	if (!alertify.partnerConfirmDialog){
+		      		commonAlertifyDialog('partnerConfirmDialog');
+		       	}
+					
+		      	alertify.partnerConfirmDialog()
+		        .set('onok', function(e) {
+		        	if (e) {
+		        		loadingIden.show();
+		        		
+		    			var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
+		               	if (typeof ignoreBinaryDbFlag === 'undefined') {
+		               		ignoreBinaryDbFlag = "";
+		               	}
+		               	
+		               	var editorVal = $("#partnerConfirmEditor").summernote('code');
+		       			if ("" == $(editorVal).text().trim()) {
+		       				editorVal = "";
+		       			}
+		       			
+		       			var param = {status : 'CONF', partnerId : [[${detail.partnerId}]], binaryFileId : [[${detail.binaryFileId}]], "ignoreBinaryDbFlag" : ignoreBinaryDbFlag};
+		       			if ("" != editorVal) {
+		    				param["userComment"] = replaceWithLink(editorVal);
+		    			} else {
+		    				param["userComment"] = "";
+		    			}
+		       			
+		       			$.ajax({
+		    				url : '/partner/changeStatus',
+		    				type : 'POST',
+		    				data : param,
+		    				dataType : 'json',
+		    				cache : false,
+		    				success : function(data){
+		    					loadingIden.hide();
+		    					
+		    					if (data.isValid == "false") {
+		    						alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){
+		    							bom_evt.init();
+		    						});
+		    						gridValidMsgNew(data, "bomList");
+		    					} else {
+		    						reloadTabInframe('/partner/list');
+		    						
+		    						if (partnerId != null && partnerId != ''){
+		    							alertify.alert([[#{msg.common.success}]], function() {
+		    								deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
+		    								createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+		    							});
+		    						}
+		    					}
+		    				},
+		    				error : function(){
+		    					alertify.error([[#{msg.common.valid2}]], 0);
+		    				}
+		    			});
+		        	} else {
+		        		alertify.error([[#{msg.common.valid2}]], 0);
+		        	}
+		        })
+		        .set('title', 'Confirm').setContent(innerHtml)
+		       	.set('onshow', function(e){
+		       		$("#partnerConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+		       		let partnerId = [[${detail.partnerId}]];
+					if (partnerId != null) {
+						const parameter = {
+					    	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+					       	"referenceId" : partnerId
+						}
+					    var draftUserComment = draftUserComments(parameter);
+						if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+			       			$("#partnerConfirmEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+			       		}
+					}
+		       	})
+				.show();
+			} else {
+				alertify.alert([[#{msg.partner.warning}]], function(){});
+			}
+		},
+		checkStatus : function(){
+			var partnerId = [[${detail.partnerId}]];
+			var returnFlag = false;
+			
+			if (partnerId == "" || partnerId == null) {
+				returnFlag = true;
+			} else {
+				$.ajax({
+					url : '/partner/checkStatus/'+partnerId,
+					type : 'GET',
+					dataType : 'json',
+					cache : false,
+					async : false,
+					success : function(data){
+						var status = data.status;
+						
+						returnFlag = (status == partnerStatus);
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+						returnFlag = false;
+					}
+				});
+			}
+			
+			return returnFlag;
+		},
+		save : function (tab) {
+			if ("PartyBom" == tab) {
+				bom_fn.beforeSave();
+			} else {
+				fn.save();
+			}
+		},
+		displayPartnerInfo : function () {
+			var display = "";
+			var softwareName = [[${detail.softwareName}]];
+			var softwareVersion = [[${detail.softwareVersion}]];
+			if ("" != softwareVersion && softwareVersion != null) {
+				softwareName += " (" + softwareVersion + ")";
+			}
+			
+			var partnerName = "<span class=\"text-dark-gray text-bold hover-line urlLink goToEditLink\" style=\"cursor: pointer;\" onclick=\"com_fn.mvEditTab()\">" + softwareName + "</span>";
+			display += partnerName;
+
+			var status = "<span class=\"ml-2\"> | </span>";
+			var partnerStatus = [[${detail.status}]];
+			
+			switch(partnerStatus){
+				case "REQ" :
+					status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
+						break;
+				case "REV" :
+					status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
+						break;
+				case "CONF" :
+					status += "<span class=\"text-dark text-bold ml-2\">Confirm</span>";
+						break;
+				default :
+					status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
+						break;
+			}
+		
+			display += status;
+
+			var oscProgress = "<span class=\"ml-2\"> | </span>";
+			
+			let request = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST')}]];
+			let review = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW')}]];
+			let confirm = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}]];
+			let progress = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS')}]];
+			
+			switch (partnerStatus) {
+				case confirm : oscProgress += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' onclick=\"com_fn.mvIdentification()\">Identification</span>";
+					break;
+				case request : oscProgress += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' onclick=\"com_fn.mvIdentification()\">Identification</span>";
+					break;
+				case review : oscProgress += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' onclick=\"com_fn.mvIdentification()\">Identification</span>";
+					break;
+				case progress :
+				default : oscProgress += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem px-1 ml-2' onclick=\"com_fn.mvIdentification()\">Identification</span>";
+					break;
+			}
+			
+			display += oscProgress;
+			
+			$("#displayPartnerInfo").html(display);
+
+			if ($(".goToEditLink").width() > 300) {
+				$(".goToEditLink").addClass("ellipsis");
+			}
+		},
+		mvEditTab : function () {
+			createTabInFrame(partnerId+'_3rdParty', '/partner/edit/' + [[${detail.partnerId}]]);
+		},
+		deleteLicense : function(target){
+			$(target).parent().remove();
+		},
+		deleteLicenseRenewal : function(target){
+			$(target).parent().next().remove();
+			$(target).parent().remove();
+		},
+		getLicenseName : function(obj){
+			return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
+				if(cur.toUpperCase() != "X" && cur != ""){
+					arr.push(cur);
+				}
+
+				return arr;
+			}, []).join(",");
+		},
+		exitCell : function(_mainLastsel, target){
+			if(_mainLastsel != -1){
+				var grid = $("#" + target);
+				var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
+
+				grid.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
+				fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
+				grid.jqGrid('saveRow',_mainLastsel);
+			}
+		},
+		exitRow : function(target){
+			var gridRowData = $("#" + target).jqGrid("getRowData");
+			gridRowData.forEach(function(obj){
+				var gridId = obj["gridId"];
+				var key = Object.keys(obj);
+				key.forEach(function(value){
+					if("gridId" != value){
+						var data = obj[value];
+						if(value == "downloadLocation" || value == "homepage"){
+							if(data.indexOf("Not the same as property") > -1){
+								data = data.split("Not the same as property")[0];
+							} else if(data.indexOf("The address should be") > -1){
+								data = data.split("The address should be")[0];
+							}
+						} else {
+							if(data.indexOf("<div class") > -1){
+								data = data.split("<")[0];
+							}
+						}
+						
+						fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
+					}
+				});
+			});
+		},
+		showLicenseInfo : function(obj){
+			var licenseName = $(obj).text();
+
+			$.ajax({
+				url : '/license/getLicenseId',
+				type : 'POST',
+				data : {"licenseName" : licenseName},
+				dataType : 'json',
+				cache : false,
+				success : function(data){
+					var _frameId = data.licenseId + "_License";
+					var _frameTarget = "/license/edit/" + data.licenseId;
+					createTabInFrame(_frameId, _frameTarget);
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		bulkEdit : function(permission, status){
+	    	if (!permission) {
+				alertify.alert([[#{msg.common.not.permission}]], function(){});
+			} else if ("bom" == status) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', "BOM")}]], function(){});
+			} else if ("CONF" == status) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			} else if ("REQ" == status) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
+			} else {
+				var gridList = $("#list");
+		        var targetGird = "list";
+
+		        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+		        var rowCheckedArr = [];
+		        for(var i=0; i<selarrrow.length; i++){
+					if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+						rowCheckedArr.push(selarrrow[i]);
+					}
+		        }
+
+		        if(rowCheckedArr.length > 0){
+		            fn_grid_com.totalGridSaveMode(targetGird);
+		            
+		            var _popup = null;
+
+		            if(_popup == null || _popup.closed){
+		                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+		                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+						$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+						$("#partnerBulkEditForm").submit();
+		                
+		                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+		                    alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+		                }
+		            } else {
+		                _popup.close();
+		                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+		                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+						$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+						$("#partnerBulkEditForm").submit();
+		            }
+		        } else {
+		            alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
+		            return false;
+		        }
+			}
+		},
+		bulkEditOssInfo : function(obj){
+			var editFlag = false;
+			try {
+				var ossArr = [];
+		        var rowId = obj["rowId"];
+		        var target = obj["target"];
+		        var param = $('#'+target).jqGrid('getGridParam','data');
+		        
+		        if(rowId.indexOf(",") > -1){
+		            ossArr = rowId.split(",");
+		            for(var idx in ossArr){
+		                com_fn.bulkEditSetCell(target, ossArr[idx], obj);
+
+		                for (var i=0; i<param.length; i++){
+		                    if(param[i]["gridId"] == ossArr[idx]){
+		                        for(var key in obj){
+		                            if(key != "rowId" && key != "target"){
+		                            	param[i][key] = obj[key];
+		                            }
+		                        }
+		                    }
+		                }
+		            }
+		        } else{
+		            com_fn.bulkEditSetCell(target, rowId, obj);
+
+		            for (var i=0; i<param.length; i++){
+		                if(param[i]["gridId"] == rowId){
+		                    for(var key in obj){
+		                        if(key != "rowId" && key != "target"){
+		                        	param[i][key] = obj[key];
+		                        }
+		                    }
+		                }
+		            }
+		        }
+
+		        $("#"+target).jqGrid('setGridParam', {data:param}).trigger('reloadGrid');
+			}catch(e){
+				alertify.error([[#{msg.common.valid2}]], 0);
+	    		editFlag = true;
+	    	}finally{
+	    		if(!editFlag){
+		    		alertify.success([[#{msg.common.success}]]);
+	    		}
+	       	}
+	    },
+	    bulkEditSetCell : function (target, rowId, obj){
+	        for(var key in obj){
+	            if(key != "rowId" && key != "target"){
+	            	$('#'+target).jqGrid('setCell', rowId, key, obj[key]);
+	            }
+	        }
+	    },
+	    bulkEditDelRow : function (target, rowId, flag){
+	    	var delFlag = false;
+			try{
+				var selrow = "";
+				var param = $("#"+target).jqGrid('getGridParam', 'data');
+				
+		    	if(rowId.indexOf(",") > -1){
+		    		selrow = rowId.split(",");
+		    		for (var i=0; i<selrow.length; i++){
+		    			$("#"+target).jqGrid('delRowData', selrow[i]);
+		    			param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, selrow[i]);
+		        	}
+		        }else{
+		        	$("#"+target).jqGrid('delRowData', rowId);
+		        	param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, rowId);
+		        }
+
+		        if(flag == "main"){
+		        	$("#"+target).jqGrid('GridUnload');
+
+		        	partyMainData = param;
+		        	grid.init();
+		        	
+		        }
+			} catch(e) {
+				alertify.error([[#{msg.common.valid2}]], 0);
+				delFlag = true;
+	    	} finally {
+	    		if(!delFlag){
+		    		alertify.success([[#{msg.common.success}]]);
+	    		}
+	       	}
+	    },
+	    bulkEditDeleteLocalDataAfterDelRow : function (dataArray, rowId){
+	    	var reMakeArrObj=[];
+	    	var newIdx = 0;
+
+	    	for(var idx=0; idx < dataArray.length; ++idx) {
+				if(dataArray[idx].gridId != rowId) {
+					reMakeArrObj[newIdx++] = dataArray[idx];
+				}
+			}
+			
+			return reMakeArrObj;
+	    },
+	    setMessage : function (msg){
+	        var alertMsg  = msg;
+	        var collabInfo = [[${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_COLLAB_INFO'))}]];
+	        collabInfo = collabInfo||"";
+	        
+	        if ("" != collabInfo) {
+	        	var collabUrl = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_COLLAB_INFO'), @CommonFunction.getCoConstDefVal('CD_HELP_URL'))}]];
+	            
+	            alertMsg += "<br>";
+	            alertMsg += "<span onclick='com_fn.loadTabCollabUrl(this);' style='cursor: pointer; color:#0070c0; text-decoration: underline;'>" + collabUrl + "</span>";
+	        }
+	        
+	        return alertMsg; 
+	    },
+	    loadTabCollabUrl : function (obj){
+			var collabUrl = $(obj).text();
+			window.open(collabUrl);
+		},
+		gridAddFunc : function (gubn, targetId, permission, status) {
+			if (!permission) {
+				alertify.alert([[#{msg.common.not.permission}]], function(){});
+			} else if ("bom" == gubn) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
+			} else if ("CONF" == status) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd party')}]], function(){});
+			} else if ("REQ" == status) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
+			} else {
+				var grid = $("#" + targetId);
+				saveFlag = false;
+				fn_grid_com.rowAddNew(targetId, grid, "main", null, com_fn.getLicenseName);
+			}
+		},
+		gridDelFunc : function (tab, targetId, target, permission, status) {
+			if (!permission) {
+				alertify.alert([[#{msg.common.not.permission}]], function(){});
+			} else if ("bom" == tab) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
+			} else if ("CONF" == status) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			} else if ("REQ" == status) {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
+			} else {
+				var grid = $("#" + targetId);
+				var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
+				
+				if (selarrrow.length > 0) {
+					fn_grid_com.rowDelNew(grid, target);
+				} else {
+					alertify.confirm([[#{msg.common.confirm.delete.all}]], function (e) {
+						if (e) {
+							fn_grid_com.rowDelAll(grid, target);
+						} else {
+							return false;
+						}
+					});
+				}
+			}
+		}
+	}
+</script>
+</th:block>

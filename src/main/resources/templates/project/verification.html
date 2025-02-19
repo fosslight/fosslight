@@ -11,16 +11,9 @@
                     <div class="row">
                         <div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
                         <div class="float-right align-items-center mt-2" style="margin-left: auto;">
-<!--                       	<div class="helpLink f-left dropdown float-right px-1">
-                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
-                                <div class="dropdown-menu mt-0">
-                                    <a class="dropdown-item text-dark" th:onclick="|openHelpGuideLink('Project_List_Packaging')|" th:text="'How to use FossLight Hub'"></a>
-                                    <a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Package', 'P')|" th:text="'Role of Creator & Reviewer'"></a>
-                                </div>
-                            </div> -->
                             <div class="float-right">
                             	<span th:if="${@CommonFunction.isAdmin()}" class="px-1 icheck-danger center-atom projdecBtn" style="margin-left: 2.5rem; font-size: .85rem">
-                                    <input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
+                                    <input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox" th:checked="${project.withoutVerifyYn == 'Y'}">
                                     <label class="form-check-label text-lg-gray mt-1 mr-2" for="approve" th:text="'Bypass'"></label>
                                 </span>
                                 <th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.verificationStatus != 'NA' and project.distributeDeployYn != 'Y'}">

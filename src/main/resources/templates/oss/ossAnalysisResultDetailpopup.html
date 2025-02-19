@@ -13,7 +13,7 @@
 							<div class="col-12">
 							<form name="ossForm1" id="ossForm1">
 								<input type="hidden" name="ossLicensesJson"/>
-								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="recentOssId"/>
 								<input type="hidden" name="ossCommonId"/>
 								<input type="hidden" name="licenseType" id="licenseType" />
 								<input type="hidden" name="obligationType" id="obligationType" />
@@ -168,7 +168,7 @@
 									</div>
 									<div class="form-group">
 										<div class="row">
-											<div class="col-lg-6">
+											<div class="col-lg-12">
 												<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
 												<div class="col-12 input-group">
                                         			<input class="form-control" id="input_downloadLocations1" type="text"/>
@@ -177,9 +177,9 @@
                                             		</div>
                                      			</div>
 											</div>
-											<div class="col-lg-6">
+<!-- 										<div class="col-lg-6">
 												<label class="text-smaller" th:text="#{msg.common.field.packageUrl}"></label>
-											</div>
+											</div> -->
 										</div>
 										<div class="col-12">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation1"></div>
@@ -200,6 +200,12 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.importantNotes}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="importantNotes" id="detailImportantNotes1" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.comment}"></label>
 										<div class="col-12">
 											<textarea class="form-control" name="comment" id="detailcomment1" rows="3"></textarea>
@@ -210,13 +216,27 @@
 									</div>
 								</div>
 							</form>
+								<div id="detailViewComment1" style="display:none;position:sticky;">
+									<div class="card card-lg-red">
+				                     	<div class="card-header">
+                           					<h3 class="card-title" th:text="Comment"></h3>
+                           				</div>
+										<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+					                    	<div clas="row">
+					                           	<div clas="col-md-12" id="commentList">
+					                           		
+					                           	</div>
+					                      	</div>
+					                  	</div>
+									</div>
+								</div>
 							</div>
 						</div>
 						<div class="col-4 detailView2">
 							<div class="col-12">
 							<form name="ossForm2" id="ossForm2">
 								<input type="hidden" name="ossLicensesJson"/>
-								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="recentOssId"/>
 								<input type="hidden" name="ossCommonId"/>
 								<input type="hidden" name="licenseType" id="licenseType" />
 								<input type="hidden" name="obligationType" id="obligationType" />
@@ -363,15 +383,15 @@
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.licenseType}"></label>
-										<span id="lt2"></span>
+										<div class="col-12" id="lt2"></div>
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.obligation}"></label>
-										<span id="ob2"></span>
+										<div class="col-12" id="ob2"></div>
 									</div>
 									<div class="form-group">
 										<div class="row">
-											<div class="col-lg-6">
+											<div class="col-lg-12">
 												<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
 												<div class="col-12 input-group">
                                         			<input class="form-control" id="input_downloadLocations2" type="text"/>
@@ -380,9 +400,9 @@
                                             		</div>
                                      			</div>
 											</div>
-											<div class="col-lg-6">
+<!-- 										<div class="col-lg-6">
 												<label class="text-smaller" th:text="#{msg.common.field.packageUrl}"></label>
-											</div>
+											</div> -->
 										</div>
 										<div class="col-12">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation2"></div>
@@ -403,6 +423,12 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.importantNotes}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="importantNotes" id="detailImportantNotes2" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.comment}"></label>
 										<div class="col-12">
 											<textarea class="form-control" name="comment" id="detailcomment2" rows="3"></textarea>
@@ -413,13 +439,27 @@
 									</div>
 								</div>
 							</form>
+								<div id="detailViewComment2" style="display:none;position:sticky;">
+									<div class="card card-lg-red">
+				                     	<div class="card-header">
+                           					<h3 class="card-title" th:text="Comment"></h3>
+                           				</div>
+										<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+					                    	<div clas="row">
+					                           	<div clas="col-md-12" id="commentList">
+					                           		
+					                           	</div>
+					                      	</div>
+					                  	</div>
+									</div>
+								</div>
 							</div>
 						</div>
 						<div class="col-4 detailView3">
 							<div class="col-12">
 							<form name="ossForm3" id="ossForm3">
 								<input type="hidden" name="ossLicensesJson"/>
-								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="recentOssId"/>
 								<input type="hidden" name="ossCommonId"/>
 								<input type="hidden" name="licenseType" id="licenseType" />
 								<input type="hidden" name="obligationType" id="obligationType" />
@@ -566,15 +606,15 @@
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.licenseType}"></label>
-										<span id="lt3"></span>
+										<div class="col-12" id="lt3"></div>
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.obligation}"></label>
-										<span id="ob3"></span>
+										<div class="col-12" id="ob3"></div>
 									</div>
 									<div class="form-group">
 										<div class="row">
-											<div class="col-lg-6">
+											<div class="col-lg-12">
 												<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
 												<div class="col-12 input-group">
                                         			<input class="form-control" id="input_downloadLocations3" type="text"/>
@@ -583,9 +623,9 @@
                                             		</div>
                                      			</div>
 											</div>
-											<div class="col-lg-6">
+<!-- 										<div class="col-lg-6">
 												<label class="text-smaller" th:text="#{msg.common.field.packageUrl}"></label>
-											</div>
+											</div> -->
 										</div>
 										<div class="col-12">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation3"></div>
@@ -606,6 +646,12 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.importantNotes}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="importantNotes" id="detailImportantNotes3" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.comment}"></label>
 										<div class="col-12">
 											<textarea class="form-control" name="comment" id="detailcomment3" rows="3"></textarea>
@@ -616,6 +662,20 @@
 									</div>
 								</div>
 							</form>
+								<div id="detailViewComment3" style="display:none;position:sticky;">
+									<div class="card card-lg-red">
+				                     	<div class="card-header">
+                           					<h3 class="card-title" th:text="Comment"></h3>
+                           				</div>
+										<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+					                    	<div clas="row">
+					                           	<div clas="col-md-12" id="commentList">
+					                           		
+					                           	</div>
+					                      	</div>
+					                  	</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

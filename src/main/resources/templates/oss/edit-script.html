@@ -13,20 +13,17 @@
 	var detectedLicenseValid = true;
 	var deactivateFlag = "N";
 	var renameFlag = "N";
+	var renameCheckFlag = false;
 	var nickNameClone;
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
     var ossId = [[${ossId}]] || null;
+    var isDisabled = ossId != null ? true : false;
     var isReadOnly = [[${isReadOnly}]] || null;
     var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
+    var backupFormData = null;
     
- 	// prevent clicking the OK button on Enter
-    let keyCode;
-    $(document).on('keydown', function (event) {
-        keyCode = event.keyCode;
-    });
-    
-	//데이터 객체
+ 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
 		list : [[${list}]],
@@ -36,6 +33,13 @@
 		clone : '',
 		typeCodes : [],
 		copyData : [[${copyData}]],
+		backupFormValue : function() {
+			if (isDisabled) {
+				$("input[name='ossName']").prop("disabled", false);
+				backupFormData = $('#ossForm').serializeObject();
+				$("input[name='ossName']").prop("disabled", true);
+			}
+		},
 		init : function(){
 			if (data.list == null) {
 				data.list = new Array();
@@ -153,7 +157,9 @@
                         }
                     }
                 }
-            })
+            });
+            
+            data.backupFormValue();
 		},
 		syncData : function(syncData, copyFlag){
 			$.each(syncData, function(k, v){
@@ -214,28 +220,29 @@
 								
 									let downloadLocationHtml 	= 	'<div class="col-md-12">';
 									downloadLocationHtml 		+=		'<div class="row">';
-									downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
+									downloadLocationHtml 		+= 			'<div class="col-lg-12" style="margin-top: 5px;">';
 									downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
 				               	if (isReadOnly == 'true' || isReadOnly) {
-	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)" disabled>';
+	                                downloadLocationHtml 		+=					'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)" disabled>';
 				                } else {
-	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)">';
-				                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
+	                                downloadLocationHtml 		+=					'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)">';
+				                    downloadLocationHtml 		+=					'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
 				                }
 									downloadLocationHtml 		+=				'</div>';
-									downloadLocationHtml 		+=				'<span class="urltxt"></span>';
-									downloadLocationHtml 		+=				'<span class="retxt"></span>';
 									downloadLocationHtml 		+= 			'</div>';
-									downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
+									downloadLocationHtml 		+= 			'<div class="col-lg-12 purlArea">';
 									downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
 									downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#fff !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
 									downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+download+'">';
 									downloadLocationHtml 		+=				'</div>';
+									downloadLocationHtml 		+=				'<span class="urltxt"></span>';
+									downloadLocationHtml 		+=				'<span class="retxt"></span>';
 									downloadLocationHtml 		+= 			'</div>';
 									downloadLocationHtml 		+= 		'</div>';
 									downloadLocationHtml 		+= 	'</div>';
 								
 								$(".multiDownloadLocationSet").append(downloadLocationHtml);
+								$(".multiDownloadLocationSet > div:last").find("input").trigger("blur");
 							}
 						});
 						
@@ -379,6 +386,7 @@
 			
 			if (copyFlag) {
 				$("input[name=ossId]").val("");
+				$("input[name=ossCommonId]").val("");
 				$(".multiDownloadLocationSet > div > span > input[name='downloadLocations']").each(function(idx, cur){
 					$(cur).attr("onblur", "fn.urlDuplication(this)");
 				});
@@ -449,24 +457,15 @@
                     downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
                 }
 				downloadLocationHtml 		+=				'</div>';
-				downloadLocationHtml 		+=				'<span class="urltxt"></span>';
-				downloadLocationHtml 		+=				'<span class="retxt"></span>';
 				downloadLocationHtml 		+= 			'</div>';
 				downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
 				downloadLocationHtml 		+= 				'<div class="row">';
 				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-//				downloadLocationHtml 		+=						'<div class="input-group">';
-				downloadLocationHtml 		+=							'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
-				downloadLocationHtml 		+=							'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
-//				downloadLocationHtml 		+=							'<div class="input-group-append">';
-//				downloadLocationHtml 		+=								'<button class="btn btn-default" type="button" onclick="fn.addPurl(this);">Add</button>';
-//				downloadLocationHtml 		+=								'<input class="form-control" type="hidden" value="'+downloadLocation+'"/>';
-//				downloadLocationHtml 		+=							'</div>';
-//				downloadLocationHtml 		+=						'</div>';
+				downloadLocationHtml 		+=						'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
+				downloadLocationHtml 		+=						'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
 				downloadLocationHtml 		+=					'</div>';
-//				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-//				downloadLocationHtml 		+= 						'<div class="row multiPurlSet"></div>';
-//				downloadLocationHtml 		+=					'</div>';
+				downloadLocationHtml 		+=					'<span class="urltxt"></span>';
+				downloadLocationHtml 		+=					'<span class="retxt"></span>';
 				downloadLocationHtml 		+=				'</div>';
 				downloadLocationHtml 		+= 			'</div>';
 				downloadLocationHtml 		+= 		'</div>';
@@ -527,12 +526,6 @@
 				fn.save();
 			});
 			
-			$("#rename").on('click',function(){
-				renameFlag = 'Y';
-				$('input[name=renameFlag]').val(renameFlag);
-				fn.save();
-			});
-			
 			$("#copy").on('click',function(){
 				var ossId = $('input[name=ossId]').val();
 				if (opener == null) {
@@ -549,38 +542,11 @@
                	innerHtml 		+= '<textarea id="deleteOssEditor"></textarea>';
 
                 if (!alertify.delOssDialog){
-					alertify.dialog('delOssDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								setup.focus.element = 0;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
+                	commonAlertifyDialog('delOssDialog');
 	        	}
 
                 alertify.delOssDialog()
                     .set('onok', function(event){
-                        // prevent clicking the OK button on Enter
-                        if (typeof keyCode !== 'undefined' && keyCode == 13) {
-                            keyCode = undefined;
-                            return false;
-                        }
-
                         var editorVal = $("#deleteOssEditor").summernote('code');
                         if ("" == $(editorVal).text().trim()){
                             alertify.alert([[#{msg.oss.required.deletion}]], function(){});
@@ -590,7 +556,9 @@
                         loading.show();
 
                         $('input[name=comment]').val($("#deleteOssEditor").summernote('code'));
-
+                        if (isDisabled) {
+    						$("input[name='ossName']").prop("disabled", false);
+    					}
                         if (validationDataSet()) {
                             $("#ossForm").ajaxForm({
                                 url : '/oss/validation',
@@ -754,11 +722,17 @@
 			});
 
 			$("#sync").on('click',function(){
+				if (isDisabled) {
+					$("input[name='ossName']").prop("disabled", false);
+				}
 				var ossName = $("input[name=ossName]").val();
 				var ossVersion = $("input[name=ossVersion]").val();
 				var ossId = $("input[name=ossId]").val();
 
-				if(ossName!=""){
+				if ("" != ossName) {
+					if (isDisabled) {
+						$("input[name='ossName']").prop("disabled", true);
+					}
 					onAjaxLoadingHide = true;
 					$.ajax({
 						url : '/oss/getOssListByName',
@@ -1905,6 +1879,7 @@
 	function registSubmit(){
 		if(validationDataSet()){
 			fn.checkAddData();
+			$("input[name=ossName]").prop("disabled", false);
 			
 			$("#ossForm").ajaxForm({
 				url :'/oss/validation',
@@ -1930,6 +1905,9 @@
 			success : function(data){
 				if (parseInt(data) > 0) {
 					loading.hide();
+					if (isDisabled) {
+						$("input[name='ossName']").prop("disabled", true);
+					}
 					$('.ossSelectPop').show();
 				} else if (parseInt(data) == 0) {
 					deleteOssByOne();
@@ -2097,20 +2075,20 @@
 				}
 				
 				alertify.alert(_alertMsg, function(){});
-			} else if(json.validMsg == "rename"){
-				if (typeof json.resultData !== 'undefined') {
-					var data = json.resultData;
-					var _alertMsg  = [[#{msg.oss.check.rename}]];
-					for(var i in data){
-						_alertMsg += '<br> - ' + data[i];
-					}
-					alertify.alert(_alertMsg, function(){});
-				} else {
-					alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
-				}
+// 			} else if(json.validMsg == "rename"){
+// 				if (typeof json.resultData !== 'undefined') {
+// 					var data = json.resultData;
+// 					var _alertMsg  = [[#{msg.oss.check.rename}]];
+// 					for(var i in data){
+// 						_alertMsg += '<br> - ' + data[i];
+// 					}
+// 					alertify.alert(_alertMsg, function(){});
+// 				} else {
+// 					alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
+// 				}
 				
-				renameFlag = 'N';
-				$('input[name=renameFlag]').val(renameFlag);
+// 				renameFlag = 'N';
+// 				$('input[name=renameFlag]').val(renameFlag);
 			} else if(json.validMsg == "notChange"){
 				alertify.alert([[#{msg.oss.name.nickname.sametime.notchange}]], function(){});
 			} else if(json.resultData) {
@@ -2274,7 +2252,7 @@
 		if (json.isValid == 'false') {
 			loading.hide();
 			
-			if(json.validMsg == "hasDelNick") {
+			if (json.validMsg == "hasDelNick") {
 				// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
 				
 				// nick name 필드 초기화
@@ -2390,30 +2368,39 @@
 	//등록성공콜백함수
 	function onRegistSuccess(json, status){
 		loading.hide();
-		if(json.resCd == '10'){
-			alertify.alert([[#{msg.common.success}]], function(){
-				if(opener){
-					// 현재 창이 팝업인 경우
-					self.opener = null;self.close();
-				} else {
-                    if (ossId != null) {
-                    	if (data.copyData != null) {
-                    		deleteTabInFrame('/oss/copy/'+ossId);
-                    	} else {
-                    		deleteTabInFrame('/oss/edit/'+json.ossId);
-                    	}
-                        
-                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
-                    } else {
-                        deleteTabInFrame('/oss/edit');
-                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
-                    }
+		$("input[name='ossName']").prop("disabled", true);
+		
+		if (json.resCd == '10') {
+			if (renameCheckFlag) {
+				$("input[name='ossName']").prop("disabled", true);
+				renameCheckFlag = false;
+				fn.ossRename();
+			} else {
+				alertify.alert([[#{msg.common.success}]], function(){
+					if(opener){
+						// 현재 창이 팝업인 경우
+						self.opener = null;self.close();
+					} else {
+	                    if (ossId != null) {
+	                    	if (data.copyData != null) {
+	                    		deleteTabInFrame('/oss/copy/'+ossId);
+	                    	} else {
+	                    		deleteTabInFrame('/oss/edit/'+json.ossId);
+	                    	}
+	                        
+	                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
+	                    } else {
+	                        deleteTabInFrame('/oss/edit');
+	                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
+	                    }
 
-                    reloadTabInframe('/oss/list');
-				}
-			});
-		}else{
+	                    reloadTabInframe('/oss/list');
+					}
+				});
+			}
+		} else {
 			alertify.error([[#{msg.common.valid2}]], 0);
+			renameCheckFlag = false;
 			renameFlag = 'N';
 			$('input[name=renameFlag]').val(renameFlag);
 		}
@@ -2640,33 +2627,10 @@
 				dataType : 'html',
 				cache : false,
 				success : function(res){
-					if(!alertify.editComments){
-						alertify.dialog('editComments', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-								
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-								
-									var setup = alertify.confirm().setup();
-									setup.buttons = [];
-									setup.focus.element = 1;
-								
-									return setup;
-								},
-						    	hooks: {
-						    		onshow: function() {
-						        		this.elements.dialog.style.maxWidth = 'none';
-                                        this.elements.dialog.style.width = '700px';
-						        	}
-								}
-							};
-                        }, false, 'confirm');
-            		}
-				
-					alertify.editComments(res).set('title', 'Edit Comments');
+					if (typeof alertify.editComments === "undefined"){
+						alertifyWithoutButtons('editComments');
+	        		}
+					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
 					$("#commentEdit").summernote({minHeight: 180, maxHeight: 800, lang: "ko-KR"});
 				}
@@ -2697,7 +2661,10 @@
 			}
 		},
 		deleteComments : function (_commId) {
-			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+			if (typeof alertify.delCommentOssDialog === "undefined") {
+				basicAlertifyDialog('delCommentOssDialog');
+			}
+			alertify.delCommentOssDialog("Are you sure you want to delete this comment?", function (e) {
 				if (e) {
 					$.ajax({
 						url : '/comment/deleteComment',
@@ -2765,15 +2732,18 @@
 		
 			var pattern = /\s/g;
 			if (value.match(pattern)) {
-				$(target).parent().next("span.urltxt").empty();
-				$(target).parent().next("span.urltxt").css("display", "none");
-				$(target).parent().next().next("span.retxt").empty();
-				$(target).parent().next().next("span.retxt").html("Remove spaces").show();
+				$(target).parent().parent().next().find("span.urltxt").empty();
+				$(target).parent().parent().next().find("span.urltxt").css("display", "none");
+				$(target).parent().parent().next().find("span.retxt").empty();
+				$(target).parent().parent().next().find("span.retxt").html("Remove spaces").show();
 			} else {
-				$(target).parent().next().next("span.retxt").empty();
-				$(target).parent().next().next("span.retxt").css("display", "none");
+				$(target).parent().parent().next().find("span.retxt").empty();
+				$(target).parent().parent().next().find("span.retxt").css("display", "none");
 				
 				$("input[name=validationType]").val('DOWNLOADLOCATION');
+				if (isDisabled) {
+					$("input[name=ossName]").prop("disabled", false);
+				}
 	    		$("[name='downloadLocation']").val(value);
 				$("#ossForm").ajaxForm({
 					url :'/oss/urlDuplicateValidation',
@@ -2781,6 +2751,9 @@
 	            	dataType:"json",
 	           	 	cache : false,
 		        	success : function(json) {
+		        		if (isDisabled) {
+		        			$("input[name=ossName]").prop("disabled", true);
+		        		}
 		        		if (json.externalData2) {
 		        			if (typeof json.externalData2.downloadLocation !== 'undefined') {
 			        			var downloadLocation = json.externalData2.downloadLocation;
@@ -2788,12 +2761,12 @@
 			        				downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
 			        			}
 			        		
-			        			$(target).parent().next("span.urltxt").empty();
-			        			$(target).parent().next("span.urltxt").html(downloadLocation).show();
+			        			$(target).parent().parent().next().find("span.urltxt").empty();
+			        			$(target).parent().parent().next().find("span.urltxt").html(downloadLocation).show();
 			        			$(target).addClass("is-warning");
 			        		}
 		        		} else {
-			        		$(target).parent().next("span.urltxt").empty();
+		        			$(target).parent().parent().next().find("span.urltxt").empty();
 		        		}
 		        		
 		        		$(target).parent().parent().next().find("input[name='purl']").val(json.resultData);
@@ -2827,12 +2800,18 @@
 			
 			if (patternCnt == 0) {
 				$("input[name=validationType]").val('DOWNLOADLOCATIONS');
+				if (isDisabled) {
+					$("input[name=ossName]").prop("disabled", false);
+				}
 				$("#ossForm").ajaxForm({
 					url :'/oss/urlDuplicateValidation',
 	            	type : 'POST',
 	           		dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
+		        		if (isDisabled) {
+		        			$("input[name=ossName]").prop("disabled", true);
+		        		}
 		        		if (json.externalData2){
 		        			var diffMsg = json.externalData2.downloadLocations.split("||");
 						
@@ -2880,7 +2859,9 @@
 			} else {
 				$(target).next().next("span.retxt").empty();
 				$(target).next().next("span.retxt").css("display", "none");
-				
+				if (isDisabled) {
+					$("input[name=ossName]").prop("disabled", false);
+				}
 				$("input[name=validationType]").val('HOMEPAGE');
 				
 				$("#ossForm").ajaxForm({
@@ -2889,6 +2870,10 @@
 	            	dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
+		        		if (isDisabled) {
+		        			$("input[name=ossName]").prop("disabled", true);
+		        		}
+		        		
 		        		if (json.externalData2) {
 		        			if (typeof json.externalData2.homepage !== 'undefined') {
 		        				var homepageHtml = json.externalData2.homepage;
@@ -3059,28 +3044,7 @@
 				}
 
 				if (typeof alertify.ossSaveDialog === 'undefined') {
-					alertify.dialog('ossSaveDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								setup.focus.element = 0;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
+					commonAlertifyDialog('ossSaveDialog');
             	}
 				
 				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
@@ -3090,12 +3054,6 @@
            		
            		alertify.ossSaveDialog()
            		.set('onok', function(e) {
-           			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-           			
            			if (e) {
            				var editorVal = $("#ossSaveEditor").summernote('code');
            				if ("" != $(editorVal).text().trim()) {
@@ -3132,6 +3090,14 @@
            				return false;
            			}
            		})
+           		.set('oncancel', function(e) {
+       				if ("Y" == renameFlag) {
+       					let ossName = backupFormData["ossName"];
+           				$("input[name='ossName']").val(ossName);
+       					renameFlag = 'N';
+       					$('input[name=renameFlag]').val(renameFlag);
+       				}
+           		})
            		.set('onshow', function(e){
            			$("#ossSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
            		})
@@ -3139,9 +3105,201 @@
 				.show();
 		}
 	},
+	isChangedFormValue : function () {
+		let isChanged = false;
+		
+		if (isDisabled) {
+			$("input[name='ossName']").prop("disabled", false);
+			let currentFormData = $("#ossForm").serializeObject();
+			$("input[name='ossName']").prop("disabled", true);
+			
+			for (var key in currentFormData){
+				let backupValue = backupFormData[key];
+				let currentValue = currentFormData[key];
+				if (backupValue != currentValue) {
+					isChanged = true;
+					break;
+				}
+			}
+		}
+		
+		if (isChanged) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+	checkOssRename : function () {
+		// 기존 데이터 변경 여부 확인
+		if (fn.isChangedFormValue()) {
+			if (typeof alertify.renameCheckDialog === 'undefined') {
+				commonAlertifyDialog('renameCheckDialog');
+	    	}
+			
+			alertify.renameCheckDialog([[#{msg.oss.check.before.rename.save}]]).set('labels', {ok: 'SAVE'})
+			.set('onok', function(e) {
+				if (e) {
+					renameCheckFlag = true;
+					
+					var referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]];
+			        $("input[name='referenceDiv']").val(referenceDiv);
+       				
+					$('#_licenseChoice').jqGrid('saveRow',lastsel);
+       				$("input[name='ossName']").prop("disabled", false);
+					
+					registSubmit();
+				} else {
+					renameCheckFlag = false;
+					return false;
+				}
+			}).show();
+		} else {
+			fn.ossRename();
+		}
+	},
+	ossRename : function () {
+		if (typeof alertify.ossRenameDialog === 'undefined') {
+			alertifyWithoutButtons('ossRenameDialog');
+    	}
+		
+		let innerHtml 	= [[#{msg.oss.check.rename.save}]];
+   		innerHtml 		+= '<br><div class="row col-lg-12 mt-3"><label class="d-flex-align mb-0">' + [[#{msg.common.field.OSS.name}]] + '</label><input class="form-control ml-2" id="ossRename" style="width: 400px;" placeholder="OSS Name (to-be)"/><span class="retxt text-danger text-sm" style="margin-left: 85px;"></span></div>';
+   		
+   		alertify.ossRenameDialog()
+   		.set('onshow', function(e){
+			$(alertify.ossRenameDialog().elements.buttons.primary).empty();
+   			
+   			const cancelBtn = document.createElement('button');
+   			cancelBtn.setAttribute("class", "ajs-button");
+   			cancelBtn.setAttribute("style", "color: #3593d2;");
+   			cancelBtn.setAttribute("onclick", "fn.closeAlertifyDialog()");
+   			cancelBtn.innerText = "CANCEL";
+   			
+   			const saveBtn = document.createElement('button');
+   			saveBtn.setAttribute("class", "ajs-button");
+   			saveBtn.setAttribute("style", "color: #3593d2;");
+   			saveBtn.setAttribute("onclick", "fn.registOssRename()");
+   			saveBtn.innerText = "SAVE";
+   			
+   			alertify.ossRenameDialog().elements.buttons.primary.appendChild(cancelBtn);
+   			alertify.ossRenameDialog().elements.buttons.primary.appendChild(saveBtn);
+   		})
+   		.setContent(innerHtml).show();
+	},
+	registOssRename : function () {
+		var ossName = $("input[name='ossName']").val();
+		fn.checkValidMsg();
+		
+		loadingIden.show();
+		setTimeout(function() {
+			let ossRenameVal = $("#ossRename").val();
+			if ("" != ossRenameVal) {
+				if (ossName == ossRenameVal) {
+					loadingIden.hide();
+					alertify.alert([[#{msg.oss.check.same.ossName}]], function(){});
+				} else {
+					let ossId = $("input[name='ossId']").val();
+					let dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
+					
+					let newRows = new Array();
+					let checkLicenses = new Array();
+					dataIds.forEach(function(dataId){
+						var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
+						var licenseName = rowData.licenseName;
+						if( licenseName.indexOf('<div') > -1){
+							rowData['licenseName'] = '';
+						}
+						checkLicenses.push(rowData.licenseNameEx);
+						newRows.push(rowData);
+					});
+					
+					let form = document.createElement('form');
+					let input = document.createElement('input');
+				    input.setAttribute('type', 'hidden');
+				    input.setAttribute('name', 'ossId');
+				    input.setAttribute('value', ossId);
+				 	form.appendChild(input);
+				 	
+				 	let input2 = document.createElement('input');
+				 	input2.setAttribute('type', 'hidden');
+					input2.setAttribute('name', 'ossName');
+					input2.setAttribute('value', ossRenameVal);
+				 	form.appendChild(input2);
+				 	
+				 	let input3 = document.createElement('input');
+				 	input3.setAttribute('type', 'hidden');
+					input3.setAttribute('name', 'renameFlag');
+					input3.setAttribute('value', 'Y');
+				 	form.appendChild(input3);
+				 	
+				 	let input4 = document.createElement('input');
+				 	input4.setAttribute('type', 'hidden');
+					input4.setAttribute('name', 'ossLicensesJson');
+					input4.setAttribute('value', JSON.stringify(newRows));
+				 	form.appendChild(input4);
+				    
+					const renameFormData = new FormData(form);
+					
+					$.ajax({
+						url : suffix + '/oss/validation',
+						type : 'POST',
+						data : renameFormData,
+						cache : false,
+						async : false,
+						contentType: false,
+						processData: false,
+						success : function(data){
+							loadingIden.hide();
+							
+							if (typeof data.isValid !== "undefined") {
+								if (data.isValid == 'false') {
+									if (data.validMsg == "rename"){
+										let ossInfo = data.resultData.split("|");
+										let targetOssId = ossInfo[0];
+										let targetOssName = ossInfo[1];
+										let msg = targetOssName + " are Duplicated by <a class=\"tabLink\" href=\"#none\" onclick=\"fn.mvEdit('/oss/edit/" + targetOssId + "','" + targetOssId + "');\">< " + targetOssName + " ></a>";
+										$("#ossRename").addClass("is-invalid");
+										$("#ossRename").next().html(msg).show();
+									}
+								} else {
+									fn.closeAlertifyDialog();
+	 								renameFlag = 'Y';
+	 				   	   			$('input[name=renameFlag]').val(renameFlag);
+	 				   	   			$("input[name=ossName]").val(ossRenameVal);
+	 				   				fn.save();
+								}
+							} else {
+								alertify.error([[#{msg.common.valid2}]], 0);
+							}
+						},
+						error : function(){
+							loading.hide();
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				}
+			} else {
+				loadingIden.hide();
+				alertify.alert([[#{msg.oss.check.enter.ossName}]], function(){});
+			}
+		}, 200);
+	},
+	checkValidMsg : function () {
+		$("#ossRename").removeClass("is-invalid");
+		$("#ossRename").next().empty();
+	},
+	mvEdit : function (url, ossId) {
+		createTabInFrame(ossId+'_Opensource', url);
+	},
+	closeAlertifyDialog : function () {
+		if (typeof alertify.ossRenameDialog !== 'undefined') {
+			$(alertify.ossRenameDialog().elements.buttons.primary).empty();
+		}
+		$(".ajs-close").trigger("click");
+	},
 	showOssViewPage : function (obj) {
-        var ossName = $(obj).parent().find('input[name="ossName"]').val();
-		var ossVersion = $(obj).parent().parent().parent().next().find('input').val();
+		let ossName = $(obj).parent().parent().parent().prev().find('input[name="ossName"]').val();
+		let ossVersion = $(obj).parent().find('input[name="ossVersion"]').val();
 		fn.showDetailPopup(ossName, ossVersion);
 	},
 	loadUrl : function (target, url) {
@@ -3223,47 +3381,26 @@
         }
 
         getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
-                if (!alertify.editDialog){
-                    alertify.dialog('editDialog', function() {
-                        return {
-                            setup: function() {
-                                var settings = alertify.confirm().settings;
-
-                                for (var prop in settings) {
-                                    this.settings[prop] = settings[prop];
-                                }
-
-                                var setup = alertify.confirm().setup();
-                                setup.buttons = [];
-                                setup.focus.element = 0;
-
-                                return setup;
-                            },
-                            hooks: {
-                                onshow: function() {
-                                    this.elements.dialog.style.maxWidth = 'none';
-                                    this.elements.dialog.style.width = '700px';
-                                }
-                            }
-                        };
-                    }, false, 'confirm');
-                }
-
-                alertify.editDialog(res);
-            },
-            null,
-            function () {
-                $("#modifiedCommentInPjtEditor").summernote({
-                    height: 180,
-                    callbacks: {
-                        onInit: function () {
-                            $(this).summernote('code', $("#userContents").val());
-                        }
-                    }
-                });
-                
-                $(".checkboxArea").show();
-            });
+           	if (!alertify.editDialog){
+              	commonAlertifyDialog('editDialog');
+          	}
+           	alertify.editDialog().set('onshow', function(e) {
+           		$(alertify.editDialog().elements.buttons.primary).empty();
+        	}).setContent(res).show();
+		},
+		null,
+		function () {
+			$("#modifiedCommentInPjtEditor").summernote({
+				height: 180,
+				callbacks: {
+					onInit: function () {
+						$(this).summernote('code', $("#userContents").val());
+					}
+				}
+			});
+         	
+			$(".checkboxArea").show();
+		});
     },
     sendEditor: function (type) {
         //코멘트 저장

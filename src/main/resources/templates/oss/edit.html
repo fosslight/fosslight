@@ -56,11 +56,10 @@
 											<div class="row">
 												<div class="col-md-12 required">
 													<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
-													<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
-													<button th:if="${detail?.ossId != null}" type="button" class="btn btn-outline-lg-red btn-sm width-5rem px-1 mb-1 float-right" id="rename" th:text="Rename"></button>
+													<i th:if="${detail?.ossId != null}" class="fas fa-edit customIcon2 text-gray" title="rename" style="cursor: pointer;" th:onclick="|fn.checkOssRename()|"></i>
 													<span class="float-right mr-2" id="ossTypeDiv"></span>
 													<div class="input-group">
-														<input class="form-control" name="ossName" th:value="${detail?.ossName}" type="text" th:style="${detail?.ossId != null} ? 'border-right: 0px solid #fff;' : ''"/>
+														<input class="form-control" name="ossName" th:value="${detail?.ossName}" type="text" th:style="${detail?.ossId != null} ? 'border-right: 0px solid #fff; color: #999 !important;' : ''" th:disabled="${detail?.ossId != null}"/>
 														<div th:if="${detail?.ossId != null}" class="input-group-append">
                                                     		<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
                                                     			<input type="checkbox" class="form-check-input" id="deactivateFlag" value="N">
@@ -78,6 +77,7 @@
 											<div class="row">
 												<div class="col-md-12">
 													<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label>
+													<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
 													<input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}" type="text" th:disabled="${isReadOnly}"/>
 												</div>
 												<div class="col-12 required">
@@ -226,7 +226,7 @@
 									</div>
                                     
                                     <div class="row form-group">
-                                    	<div class="col-lg-6">
+                                    	<div class="col-lg-12">
                                     		<label th:text="#{msg.common.field.downloadLocation}"></label>
                                         	<div class="input-group" th:unless="${isReadOnly}">
                                         		<input class="form-control" id="input_downloadLocations" type="text"/>
@@ -235,15 +235,15 @@
                                             	</div>
                                      		</div>
                                     	</div>
-                                    	<div class="col-lg-6">
+<!--                                   	<div class="col-lg-6">
                                     		<label th:text="#{msg.common.field.packageUrl}"></label>
-                                    	</div>
+                                    	</div> -->
 										<div class="col-md-12">
 											<div class="row multiDownloadLocationSet"></div>
 										</div>
                                     </div>
                                     <div class="row form-group">
-                                    	<div class="col-lg-6">
+                                    	<div class="col-lg-12">
                                     		<label th:text="#{msg.common.field.homepage}"></label>
                                         	<input class="form-control" name="homepage" th:value="${detail?.homepage}" placeholder="http://" type="text" th:disabled="${isReadOnly}"/>
                                     	</div>

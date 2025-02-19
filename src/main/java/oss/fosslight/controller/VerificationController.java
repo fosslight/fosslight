@@ -586,14 +586,14 @@ public class VerificationController extends CoTopComponent {
 							|| (CoConstDef.FLAG_NO.equalsIgnoreCase(avoidNull(distributionType)) && verificationService.checkNetworkServer(ossNotice.getPrjId()))
 							|| CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget()) // 배포사이트 사용안함으로 설정한 경우
 							) {
-						project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+						project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 						ignoreMailSend = true;
 					} else if (!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget())
-							&& CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA.equals(prjInfo.getDestributionStatus())) {
+							&& CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA.equals(prjInfo.getDistributionStatus())) {
 						project.setResetDistributionStatus(CoConstDef.FLAG_YES);
 					}
 					
-					if (!isEmpty(prjInfo.getDestributionStatus()) 
+					if (!isEmpty(prjInfo.getDistributionStatus()) 
 							&& CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(confirm.toUpperCase())) {
 						project.setChangedNoticeYn(CoConstDef.FLAG_YES);
 					}

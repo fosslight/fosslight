@@ -1661,8 +1661,8 @@
                         if(prjId.startsWith("3rd_")){
                             var partId = prjId.replace('3rd_','');
                             reloadTabInframe('/partner/list');
-                            deleteTabInFrame("/partner/edit/" + partId);
-                            createTabInFrame(partId + '_3rdParty', "/partner/edit/" + partId);
+                            deleteTabInFrame("/partner/identification/" + partId);
+                            createTabInFrame(partId + '_3rdParty', "/partner/identification/" + partId);
                         } else {
                             reloadTabInframe("/project/list");
                             deleteTabInFrame([[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');

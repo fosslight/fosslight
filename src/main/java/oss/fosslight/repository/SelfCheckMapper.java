@@ -110,8 +110,6 @@ public interface SelfCheckMapper {
 	
 	int selectDuplicatedProject(Project project);		//프로젝트 리스트중 Name + Version이 중복될 경우 0 이상의 값 리턴
 
-	List<Project> selectProjectListExcel(Project project);
-
 	String selectLastPrjId();
 
 	List<ProjectIdentification> selectOssComponentsList(Project project);

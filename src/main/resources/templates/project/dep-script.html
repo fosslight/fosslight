@@ -560,7 +560,7 @@ var dep_fn = {
 				var cnt = $('#_depProjectList2').jqGrid('getGridParam', "records" );
 				var ids = $('#_depAddList').jqGrid('getDataIDs');
 				listData.componentCount = cnt;
-				$('#_depAddList').jqGrid('addRowData',ids.length+1,listData);
+				$('#_depAddList').jqGrid('addRowData',ids.length+1,listData,"first");
 				
 				param["mainData"] = JSON.stringify(mainData);				
 				param = JSON.stringify(param);

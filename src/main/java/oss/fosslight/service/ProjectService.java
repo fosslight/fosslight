@@ -59,9 +59,11 @@ public interface ProjectService extends HistoryConfig{
 	
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid);
 	
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid, boolean isPartner);
+	
 	public void checkProjectReviewer(Project project);
 	
-	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm) throws Exception;
+	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) throws Exception;
 	
 	public List<ProjectIdentification> getBomListExcel(ProjectIdentification bom);
 	
@@ -100,7 +102,7 @@ public interface ProjectService extends HistoryConfig{
 
 	List<UploadFile> selectAndroidFileDetail(Project project);
 	
-	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm);
+	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm);
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 
@@ -228,9 +230,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void setLoadToList(Map<String, Object> map, String prjId);
 
-	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent,
-			List<List<ProjectIdentification>> ossComponentLicense);
+	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
+	
+	public Map<String, Object> changeProjectStatus(Project project);
 }
-
-
-

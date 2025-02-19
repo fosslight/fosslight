@@ -32,7 +32,7 @@ public class Project extends ComBean implements Serializable {
 				+ prjDivisionName + ", prjUserId=" + prjUserId + ", prjUserName=" + prjUserName + ", prjEmail=" + prjEmail 
 				+ ", watchers=" + Arrays.toString(watchers) + ", watcherList=" + watcherList + ", modelList=" + modelList 
 				+ ", copy=" + copy + ", oldId=" + oldId + ", lastModifiedTime=" + lastModifiedTime + ", distributeTarget="
-				+ distributeTarget + ", destributionStatus=" + destributionStatus + ", distributeMasterCategory="
+				+ distributeTarget + ", distributionStatus=" + distributionStatus + ", distributeMasterCategory="
 				+ distributeMasterCategory + ", distributeName=" + distributeName + ", distributeSoftwareType="
 				+ distributeSoftwareType + ", distributeDeployYn=" + distributeDeployYn + ", distributeDeployTime="
 				+ distributeDeployTime + ", licenseFileName=" + licenseFileName + ", openSourceFileName="
@@ -275,7 +275,7 @@ public class Project extends ComBean implements Serializable {
 	private String distributeTarget;			//배포사이트
 	
 	/** The destribution status. */
-	private String destributionStatus; 			// 디스트리뷰트 상태
+	private String distributionStatus; 			// 디스트리뷰트 상태
 	
 	private String beforeDistributionStatus;
 
@@ -364,6 +364,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String vulDocInst;
 	private String vulDocInfo;
+
+	private String vulDocSkipYn;
 
 	private Float standardScore;
 	
@@ -750,6 +752,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String[] noticeFileFormat;
 	
+	private int prjAddIdx;
+	
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -831,6 +835,8 @@ public class Project extends ComBean implements Serializable {
 	private String vulnerabilityResolution;
 	
 	private String cvssScoreMax;
+	
+	private int prjRefIdx;
 	
 	/**
 	 * Gets the prj id.
@@ -1486,17 +1492,17 @@ public class Project extends ComBean implements Serializable {
 	 *
 	 * @return the destribution status
 	 */
-	public String getDestributionStatus() {
-		return destributionStatus;
+	public String getDistributionStatus() {
+		return distributionStatus;
 	}
 
 	/**
 	 * Sets the destribution status.
 	 *
-	 * @param destributionStatus the new destribution status
+	 * @param distributionStatus the new destribution status
 	 */
-	public void setDestributionStatus(String destributionStatus) {
-		this.destributionStatus = destributionStatus;
+	public void setDistributionStatus(String distributionStatus) {
+		this.distributionStatus = distributionStatus;
 	}
 	
 	public String getBeforeDistributionStatus() {
@@ -2270,8 +2276,8 @@ public class Project extends ComBean implements Serializable {
 		} else {
 			etc.append("|V:null");
 		}
-		if (!StringUtil.isEmpty(destributionStatus)) {
-			etc.append("|D:" + destributionStatus);
+		if (!StringUtil.isEmpty(distributionStatus)) {
+			etc.append("|D:" + distributionStatus);
 		} else {
 			etc.append("|D:null");
 		}
@@ -4471,6 +4477,14 @@ public class Project extends ComBean implements Serializable {
 		this.vulDocInfo = vulDocInfo;
 	}
 
+	public String getVulDocSkipYn() {
+		return vulDocSkipYn;
+	}
+
+	public void setVulDocSkipYn(String vulDocSkipYn) {
+		this.vulDocSkipYn = vulDocSkipYn;
+	}
+
 	public T2File getPackageVulDocFileInfo() {
 		return packageVulDocFileInfo;
 	}
@@ -4693,5 +4707,21 @@ public class Project extends ComBean implements Serializable {
 
 	public void setNoticeAppendFileInfo(T2File noticeAppendFileInfo) {
 		this.noticeAppendFileInfo = noticeAppendFileInfo;
+	}
+
+	public int getPrjAddIdx() {
+		return prjAddIdx;
+	}
+
+	public void setPrjAddIdx(int prjAddIdx) {
+		this.prjAddIdx = prjAddIdx;
+	}
+
+	public int getPrjRefIdx() {
+		return prjRefIdx;
+	}
+
+	public void setPrjRefIdx(int prjRefIdx) {
+		this.prjRefIdx = prjRefIdx;
 	}
 }

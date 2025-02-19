@@ -81,3 +81,33 @@ set @restart_sql:=concat('alter sequence NEXT_FILE_ID restart with ',(SELECT IFN
 prepare restart_sequence from @restart_sql;
 execute restart_sequence;
 deallocate prepare restart_sequence;
+
+-- Add PRJ_REF_IDX column
+ALTER TABLE `PROJECT_ADDLIST` ADD `PRJ_REF_IDX` INT(11) DEFAULT NULL;
+UPDATE PROJECT_ADDLIST PA
+INNER JOIN
+(
+	SELECT PM.*, ROW_NUMBER() OVER (PARTITION BY PM.PRJ_ID, PM.REFERENCE_DIV) AS SEQ
+	FROM
+	(
+		SELECT PA.PRJ_ID, PA.REFERENCE_ID, PA.REFERENCE_DIV
+		FROM PROJECT_ADDLIST PA
+		INNER JOIN PROJECT_MASTER PM
+		ON PA.PRJ_ID = PM.PRJ_ID
+		GROUP BY PA.PRJ_ID, PA.REFERENCE_ID, PA.REFERENCE_DIV
+	) PM
+	ORDER BY PM.PRJ_ID DESC
+) TBL
+ON PA.PRJ_ID = TBL.PRJ_ID
+AND PA.REFERENCE_ID = TBL.REFERENCE_ID
+AND PA.REFERENCE_DIV = TBL.REFERENCE_DIV
+SET PA.PRJ_REF_IDX = TBL.SEQ;
+
+-- Modify code management
+UPDATE `T2_CODE_DTL` SET CD_DTL_NM = 'android.googlesource.com' WHERE CD_NO=903 AND CD_DTL_NO=008;
+UPDATE `T2_CODE_DTL` SET CD_DTL_NM = 'android.googlesource.com' WHERE CD_NO=913 AND CD_DTL_NO=011;
+
+DELETE `T2_CODE_DTL` WHERE CD_NO = '102' AND CD_DTL_NO = '817';
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('102', '817', '[FOSSLight] Your password has been reset : ${User}', '', '${User}''s password has been reset.', 817, 'Y');
+DELETE `T2_CODE_DTL` WHERE CD_NO = '110' AND CD_DTL_NO = '71';
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('110', '71', 'resetUserPassword.html', '', '817', 18, 'Y');

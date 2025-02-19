@@ -270,6 +270,7 @@ var ajax = {
 				createValidMsgComplex(data);
 			} else {
 				alertify.success([[#{msg.common.success}]]);
+				ajax.getCodeDetailList(codeDetailList.nowCodeNo);
 			}
 		}).error(function (data, status, headers, config) {
 			alertify.error([[#{msg.common.valid2}]], 0);

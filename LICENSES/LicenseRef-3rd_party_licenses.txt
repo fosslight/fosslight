@@ -3,7 +3,7 @@
 This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
 
 AspectJ Weaver (EPL-2.0)
-https://eclipse.org/aspectj
+https://www.eclipse.org/aspectj
 Copyright (c) 2005 Contributors
 Copyright (c) 2002 Palo Alto Research Center, Incorporated (PARC)
 Copyright (c) 2001 The Apache Software Foundation
@@ -51,7 +51,7 @@ Hibernate Commons Annotations (LGPL-2.1)
 http://hibernate.org
 
 hibernate-core (LGPL-2.1)
-https://mvnrepository.com/artifact/org.hibernate/hibernate-core
+https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core
 Copyright (c) 2008-2020 Oracle and/or its affiliates
 
 itextpdf (AGPL-3.0 w/Linking Exception)
@@ -77,7 +77,7 @@ Copyright (c) 2013, Francis Galiegue <fgaliegue@gmail.com>
 
 Jakarta Annotations API (EPL-2.0)
 https://projects.eclipse.org/projects/ee4j.ca
-Copyright (c) 2005, 2009, 2012, 2018 Oracle and/or its affiliates. 
+Copyright (c) 2005, 2009, 2012, 2018 Oracle and/or its affiliates.
 
 jakarta.json (EPL-2.0)
 https://github.com/eclipse-ee4j/jsonp
@@ -95,7 +95,7 @@ Copyright (c) 2013, 2018 Oracle and/or its affiliates.
 Copyright (c) 2010, 2018 Oracle and/or its affiliates.
 
 logback (EPL-1.0)
-https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+http://logback.qos.ch
 Copyright (c) 1999-2022, QOS.ch.
 
 mailapi (CDDL-1.1)
@@ -103,7 +103,7 @@ https://mvnrepository.com/artifact/com.sun.mail/mailapi
 Copyright (c) 1997-2017 Oracle and/or its affiliates
 
 mariadb-java-client (LGPL-2.1)
-https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j
+https://mariadb.com
 Copyright (c) 2012-2014 Monty Program Ab
 Copyright (c) 2015-2020 MariaDB Corporation Ab
 Copyright (c) 2009-2011, Marcus Eriksson
@@ -127,17 +127,17 @@ ________________________________________________________________________________
 Please be informed that this product may contain open source software listed in the tables below.
 
 ant-launcher (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.ant/ant-launcher
+http://ant.apache.org
 Copyright 1999-2021 The Apache Software Foundation
 Copyright (c) 2002, Landmark Graphics Corp
 
 antlr (ANTLR-PD)
-http://www.antlr.org
+https://github.com/antlr/antlr3
 Copyright (c) ANTLR 1989-2006 Developed by Terence Parr
 Copyright (c) University of San Francisco & jGuru.com
 
 Apache Ant (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.ant/ant
+http://ant.apache.org
 Copyright 1999-2021 The Apache Software Foundation
 Copyright (c) 2002, Landmark Graphics Corp
 
@@ -150,28 +150,28 @@ https://commons.apache.org/proper/commons-collections
 Copyright (c) 2001-2019 The Apache Software Foundation
 
 Apache Commons Compress (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.commons/commons-compress
+http://commons.apache.org/compress
 Copyright 2002-2023 The Apache Software Foundation
 copyright (c) 1996-2019 Julian R Seward
 
 Apache Commons IO (Apache-2.0)
-https://mvnrepository.com/artifact/commons-io/commons-io
+http://commons.apache.org/proper/commons-io
 Copyright 2002-2023 The Apache Software Foundation
 
 Apache Commons Text (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.commons/commons-text
+http://commons.apache.org/proper/commons-text
 Copyright 2014-2023 The Apache Software Foundation
 
 Apache HttpClient (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+http://hc.apache.org
 Copyright (c) 1999-2022, The Apache Software Foundation
 
 Apache HttpClient Cache (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient-cache
+http://hc.apache.org/httpcomponents-client
 Copyright 2010-2022 The Apache Software Foundation
 
 Apache HttpCore (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore
+http://hc.apache.org
 Copyright (c) 2005-2022 The Apache Software Foundation
 
 Apache Log4j API (Apache-2.0)
@@ -183,25 +183,37 @@ https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-to-slf4j
 Copyright (c) 1999-2020 The Apache Software Foundation
 
 Apache Thrift (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.thrift/libthrift
+https://thrift.apache.org
 
 attoparser (Apache-2.0)
 http://www.attoparser.org
 Copyright (c) 2012-2014, The ATTOPARSER team (http://www.attoparser.org)
 
 bcpkix-jdk15on (MIT)
-https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on
+http://www.bouncycastle.org/java.html
 
 bcprov-jdk15on (MIT)
-https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on
+http://www.bouncycastle.org/java.html
 Copyright (c) 2000-2021 The Legion of the Bouncy Castle Inc. (http://www.bouncycastle.org)
 
 bcutil-jdk15on (MIT)
 https://mvnrepository.com/artifact/org.bouncycastle/bcutil-jdk15on
 
+beanvalidation-api (Apache-2.0)
+http://github.com/beanvalidation/beanvalidation-api
+Copyright (c) 2009-2019, Red Hat, Inc. and/or its affiliates, and individual contributors
+Copyright (c) 2009-2019 Dhanji R. Prasanna
+Copyright (c) 2009-2019 Emmanuel Bernard
+Copyright (c) 2009-2019 Gavin King
+Copyright (c) 2009-2019 Gerhard Petracek
+Copyright (c) 2009-2019 Gunnar Morling
+Copyright (c) 2009-2019 Hardy Ferentschik
+Copyright (c) 2009-2019 Kevin Pollet
+Copyright (c) 2009-2019 Sebastian Thomschke
+
 bootstrap (MIT)
-https://github.com/twbs/bootstrap
-Copyright (c) 2011-2023 The Bootstrap Authors
+https://getbootstrap.com
+Copyright (c) 2011-2015 Twitter, Inc
 
 btf (Apache-2.0)
 https://github.com/java-json-tools/btf
@@ -213,11 +225,11 @@ Copyright (c) 2011-2016 Terracotta, Inc.
 Copyright (c) 2011-2016 Oracle America Incorporated
 
 caffeine (Apache-2.0)
-https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine
+https://github.com/ben-manes/caffeine
 Copyright (c) 2014,2015,2021 Ben Manes
 
 checker-qual (MIT)
-https://mvnrepository.com/artifact/org.checkerframework/checker-qual
+https://checkerframework.org
 Copyright 2004-present by the Checker Framework
 
 classgraph (MIT)
@@ -225,7 +237,7 @@ https://mvnrepository.com/artifact/io.github.classgraph/classgraph
 Copyright (c) 2016, 2019-2020 Luke Hutchison
 
 ClassMate (Apache-2.0)
-https://mvnrepository.com/artifact/com.fasterxml/classmate
+http://central.maven.org/maven2/com/fasterxml/classmate
 
 com.github.andrewoma.dexx:collection (MIT)
 https://mvnrepository.com/artifact/com.github.andrewoma.dexx/collection
@@ -237,16 +249,16 @@ Copyright 2010 Dmitry Naumenko (dm.naumenko@gmail.com)
 Copyright (c) 1999-2003 The Apache Software Foundation
 
 Commons CLI (Apache-2.0)
-https://mvnrepository.com/artifact/commons-cli/commons-cli
+http://commons.apache.org/cli
 Copyright 2002-2021 The Apache Software Foundation
 
 commons-codec (Apache-2.0)
-https://mvnrepository.com/artifact/commons-codec/commons-codec
+https://commons.apache.org
 Copyright 2002-2024 The Apache Software Foundation
 Copyright (c) 2004-2006 Intel Corporation
 
 commons-lang (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+http://commons.apache.org/proper/commons-lang
 Copyright 2001-2023 The Apache Software Foundation
 
 commons-logging (Apache-2.0)
@@ -254,17 +266,23 @@ http://commons.apache.org
 Copyright (c) 2003-2014 The Apache Software Foundation
 
 commons-math (Apache-2.0)
-http://commons.apache.org/proper/commons-math
+http://commons.apache.org
 Copyright (c) 2001-2013, The Apache Software Foundation
 Copyright (c) 2009 Google Inc.
 
 curvesapi (BSD-3-Clause)
-https://mvnrepository.com/artifact/com.github.virtuald/curvesapi
+https://github.com/virtuald/curvesapi
 Copyright (c) 2005, Graph Builder
 
 cyclonedx-core-java (Apache-2.0)
 https://github.com/CycloneDX/cyclonedx-core-java
 Copyright (c) OWASP Foundation
+
+d3-wordcloud (MIT)
+https://github.com/wvengen/d3-wordcloud
+Copyright (c) 2014 wvengen
+
+Copyright (c) 2014 Julien Renaux
 
 DataTables (MIT)
 https://datatables.net
@@ -285,36 +303,37 @@ https://mvnrepository.com/artifact/com.google.guava/failureaccess
 Copyright (c) 2018 The Guava Authors
 
 FindBugs JSR305 (Apache-2.0)
-http://findbugs.sourceforge.net
+https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
 
 flot (MIT)
 http://www.flotcharts.org
 Copyright (c) 2007-2013 IOLA and Ole Laursen
-
-gradle-wrapper (Apache-2.0)
-https://gradle.org
-Copyright (c) 2017 Gradle Inc.
 
 groovy-extensions (Apache-2.0)
 https://mvnrepository.com/artifact/nz.net.ultraq.extensions/groovy-extensions
 Copyright (c) 2019,2020, Emanuel Rabina (http://www.ultraq.net.nz/)
 
 gson (Apache-2.0)
-https://mvnrepository.com/artifact/com.google.code.gson/gson/2.8.7
+https://code.google.com/p/google-gson
 Copyright (c) 2008,2010,2011 Google Inc.
 
 guava (Apache-2.0)
-https://mvnrepository.com/artifact/com.google.guava/guava
+https://github.com/google/guava
 Copyright (c) 2007 The Guava Authors
 Copyright (c) 2011 The Guava Authors
 Copyright (c) 2012 The Guava Authors
+
+hibernate-validator (Apache-2.0)
+http://hibernate.org/validator
+Copyright (c) 2011, 2012 SERLI
+Copyright (c) 2009 IIZUKA Software Technologies Ltd
 
 HikariCP (Apache-2.0)
 https://github.com/brettwooldridge/HikariCP
 Copyright (c) 2013, 2014 Brett Wooldridge
 
 istack-commons-runtime (BSD-3-Clause)
-https://mvnrepository.com/artifact/com.sun.istack/istack-commons-runtime
+https://mvnrepository.com
 Copyright (c) 2017 Oracle and/or its affiliates
 
 itu (Apache-2.0)
@@ -322,23 +341,23 @@ https://github.com/ethlo/itu
 Copyright (c) 2017 Morten Haraldsen
 
 Jackson Datatype: JDK8 (Apache-2.0)
-https://github.com/FasterXML/jackson-datatype-jdk8
+https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jdk8
 
 Jackson Datatype: JSR310 (Apache-2.0)
 https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
 Copyright (c) 2013 FasterXML.com
 
 Jackson Module Parameter Names (Apache-2.0)
-https://github.com/FasterXML/jackson-modules-java8
+https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-parameter-names
 
 jackson-annotations (Apache-2.0)
-https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
+https://github.com/FasterXML/jackson-annotations
 
 jackson-core (Apache-2.0)
-https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+https://github.com/FasterXML/jackson-core
 
 jackson-databind (Apache-2.0)
-https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+https://github.com/FasterXML/jackson-databind
 
 jackson-dataformats-text (Apache-2.0)
 https://github.com/FasterXML/jackson-dataformats-text
@@ -375,11 +394,11 @@ https://mvnrepository.com/artifact/javax.batch/javax.batch-api
 Copyright (c) 2012 International Business Machines Corp.
 
 jboss-logging (Apache-2.0)
-https://mvnrepository.com/artifact/org.jboss.logging/jboss-logging
+https://github.com/jboss-logging/jboss-logging
 Copyright (c) 2010, 2013 Red Hat, Inc.
 
 jcl-over-slf4j (Apache-2.0)
-http://www.slf4j.org
+https://mvnrepository.com/artifact/org.slf4j/jcl-over-slf4j
 Copyright (c) 2001-2004 The Apache Software Foundation
 
 jena-arq (Apache-2.0)
@@ -438,19 +457,9 @@ jQuery BlockUI (MIT)
 http://malsup.com/jquery/block
 Copyright (c) 2007-2013 M. Alsup
 
-jQuery contextMenu (MIT)
-http://swisnl.github.io/jQuery-contextMenu
-Copyright (c) 2010-2016, SWIS BV
-
-jquery-multiselect (MIT)
-https://github.com/nobleclem/jQuery-MultiSelect
-
-jquery-upload-file (MIT)
-https://github.com/hayageek/jquery-upload-file
-
 jquery.form (MIT)
 http://jquery.malsup.com/form
-Copyright (c) 2017 jquery-form
+Copyright (c) 2014 M. Alsup
 
 jsch (BSD-3-Clause)
 http://www.jcraft.com/jsch
@@ -465,14 +474,14 @@ https://github.com/java-json-tools/json-schema-validator
 Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
 
 jsonld-java (BSD-3-Clause)
-https://mvnrepository.com/artifact/com.github.jsonld-java/jsonld-java
+https://github.com/jsonld-java/jsonld-java
 
-jsoup (MIT)
-https://mvnrepository.com/artifact/org.jsoup/jsoup
+Jsoup (MIT)
+https://jsoup.org
 Copyright (c) 2009-2023 Jonathan Hedley <https://jsoup.org/>
 
 libphonenumber (Apache-2.0)
-https://github.com/google/libphonenumber
+https://github.com/googlei18n/libphonenumber
 Copyright (c) 2009-2021, The Libphonenumber Authors
 
 listenablefuture (Apache-2.0)
@@ -482,12 +491,12 @@ lucy-xss (Apache-2.0)
 https://mvnrepository.com/artifact/com.navercorp.lucy/lucy-xss
 Copyright (c) 2014 Naver Corp.
 
-mapstruct (Apache-2.0)
-https://mapstruct.org
+MapStruct (Apache-2.0)
+http://mapstruct.org
 Copyright (c) MapStruct Authors
 
 micrometer (Apache-2.0)
-https://mvnrepository.com/artifact/io.micrometer/micrometer-core
+https://github.com/micrometer-metrics/micrometer
 Copyright 2017 VMware, Inc.
 Copyright 2020 VMware, Inc.
 Copyright 2019 VMware, Inc.
@@ -497,19 +506,19 @@ https://github.com/java-json-tools/msg-simple
 Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
 
 mybatis (Apache-2.0)
-https://mybatis.org/mybatis-3
+http://blog.mybatis.org
 Copyright (c) 2004, Drew Davidson and Luke Blanshard
 Copyright (c) 2010 Adam Gent
 Copyright (c) 2010 The Apache Software Foundation
 
 mybatis-migrations (Apache-2.0)
-https://mvnrepository.com/artifact/org.mybatis/mybatis-migrations
+https://github.com/mybatis/migrations
 Copyright 2010 The Apache Software Foundation
 Copyright (c) 2004, Drew Davidson and Luke Blanshard
 Copyright 2010-2016
 
 mybatis-spring (Apache-2.0)
-https://mvnrepository.com/artifact/org.mybatis/mybatis-spring
+http://www.mybatis.org/spring
 Copyright 2010-2013
 Copyright 2002-2010 the original author or authors
 Copyright 2010 The Apache Software Foundation
@@ -519,8 +528,8 @@ https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-a
 Copyright 2015-2022 the original author or authors
 Copyright 2015-2023 the original author or authors
 
-mybatis-spring-boot-starter (Apache-2.0)
-https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter
+Mybatis-spring-boot-starter (Apache-2.0)
+http://www.mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure
 Copyright 2015-2023 the original author or authors
 
 naver-nanum-fonts (OFL-1.1)
@@ -531,17 +540,17 @@ https://netty.io
 Copyright (c) 2012,2013,2015 The Netty Project
 
 networknt-json-schema-validator (Apache-2.0)
-https://mvnrepository.com/artifact/com.networknt/json-schema-validator
+https://github.com/networknt/json-schema-validator
 Copyright (c) 2016 Network New Technologies Inc.
 Copyright (c) 2020 Network New Technologies Inc.
 (c) 2022 Unicode(r), Inc.
 
 ognl (BSD-3-Clause)
-https://mvnrepository.com/artifact/ognl/ognl
+http://mvnrepository.com/artifact/ognl/ognl
 Copyright (c) 1998-2004, Drew Davidson and Luke Blanshard
 
 opencsv (Apache-2.0)
-https://mvnrepository.com/artifact/com.opencsv/opencsv
+https://sourceforge.net/projects/opencsv
 Copyright 2016 Andrew Rucker Jones
 
 Copyright 2017 Andrew Rucker Jones
@@ -549,7 +558,7 @@ Copyright 2017 Andrew Rucker Jones
 Copyright 2018 Andrew Rucker Jones
 
 org.apache.commons:commons-csv (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.commons/commons-csv
+http://commons.apache.org/proper/commons-csv
 Copyright 2005-2023 The Apache Software Foundation
 
 org.glassfish.jaxb:txw2 (BSD-3-Clause)
@@ -564,11 +573,11 @@ https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
 Copyright (c) 2003-2022 The Apache Software Foundation
 
 PostgreSQL JDBC Driver (BSD-2-Clause)
-https://mvnrepository.com/artifact/org.postgresql/postgresql
+http://jdbc.postgresql.org
 Copyright (c) 1997, PostgreSQL Global Development Group
 
 Protocol Buffers (BSD-3-Clause)
-https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
+https://github.com/protocolbuffers/protobuf
 Copyright 2008 Google Inc.
 
 QUARTZ (Apache-2.0)
@@ -591,14 +600,14 @@ Copyright (c) 2020-2023 VMware, Inc. or its affiliates
 Copyright (c) 2019-2023 VMware, Inc. or its affiliates
 
 RoaringBitmap (Apache-2.0)
-https://mvnrepository.com/artifact/org.roaringbitmap/RoaringBitmap
+https://github.com/RoaringBitmap/RoaringBitmap
 
 slf4J (MIT)
 http://www.slf4j.org
 Copyright (c) 2004-2022 QOS.ch Sarl (Switzerland)
 
-snakeyaml (Apache-2.0)
-https://mvnrepository.com/artifact/org.yaml/snakeyaml
+SnakeYAML (Apache-2.0)
+http://www.snakeyaml.org
 Copyright (c) 2008, http://www.snakeyaml.org
 Copyright (c) 2008 Google Inc.
 Copyright (c) 2003-2010 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
@@ -637,19 +646,19 @@ https://mvnrepository.com/artifact/org.springframework.data/spring-data-commons
 Copyright (c) 2010-2021 Pivotal Software, Inc.
 
 Spring Data JPA (Apache-2.0)
-https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa
+http://projects.spring.io/spring-data-jpa
 Copyright 2008-2023 the original author or authors
 Copyright 2014-2023 the original author or authors
 Copyright 2011-2023 the original author or authors
 
 Spring Framework (Apache-2.0)
-https://spring.io/projects/spring-framework
+https://mvnrepository.com/artifact/org.springframework/spring-beans
 Copyright 2002-2018 the original author or authors
 Copyright 2002-2021 the original author or authors
 Copyright 2002-2020 the original author or authors
 
 Spring Integration Core (Apache-2.0)
-https://mvnrepository.com/artifact/org.springframework.integration/spring-integration-core
+https://projects.spring.io/spring-integration
 Copyright 2002-2019 the original author or authors
 Copyright 2002-2021 the original author or authors
 Copyright 2002-2020 the original author or authors
@@ -659,13 +668,13 @@ http://www.springsource.org
 Copyright (c) 2006-2023 the original author or authors
 
 spring-batch (Apache-2.0)
-https://mvnrepository.com/artifact/org.springframework.batch/spring-batch-infrastructure
+https://mvnrepository.com/artifact/org.springframework.batch/spring-batch-core
 Copyright 2006-2007 the original author or authors
 Copyright 2018 the original author or authors
 Copyright 2006-2019 the original author or authors
 
 spring-data-relational (Apache-2.0)
-https://mvnrepository.com/artifact/org.springframework.data/spring-data-jdbc
+https://github.com/spring-projects/spring-data-relational
 Copyright 2017-2023 the original author or authors
 Copyright 2020-2023 the original author or authors
 Copyright 2019-2023 the original author or authors
@@ -683,10 +692,10 @@ https://mvnrepository.com/artifact/org.springframework.plugin/spring-plugin-meta
 Copyright (c) 2008-2019 Pivotal Software, Inc.
 
 spring-security (Apache-2.0)
-https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+http://spring.io/spring-security
 
 spring-security-crypto (Apache-2.0)
-https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
+https://spring.io/spring-security
 Copyright 2011-2016 the original author or authors
 
 Springfox (Apache-2.0)
@@ -696,11 +705,11 @@ Copyright (c) 2015 Dilip Krishnan - @dilipkrish
 Copyright (c) 2015 Adrian Kelly - @adrianbk,
 
 Stax2 API (BSD-2-Clause)
-http://wiki.fasterxml.com/WoodstoxStax2
+http://mvnrepository.com/artifact/org.codehaus.woodstox/stax2-api/3.1.1
 Copyright (c) 2008- Tatu Saloranta tatu.saloranta@iki.fi
 
 summernote (MIT)
-https://www.npmjs.com/package/summernote
+Http://github.com/summernote/summernote
 Copyright (c) 2015~ Summernote Team (https://github.com/orgs/summernote/people)
 
 swagger-annotations (Apache-2.0)
@@ -713,11 +722,11 @@ https://mvnrepository.com/artifact/io.swagger/swagger-models
 Copyright (c) 2017 SmartBear Software
 
 thymeleaf (Apache-2.0)
-https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf
+http://www.thymeleaf.org
 Copyright (c) 2011-2018, The THYMELEAF team (http://www.thymeleaf.org)
 
-thymeleaf-expression-processor (Apache-2.0)
-https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-expression-processor
+Thymeleaf-Expression-Processor (Apache-2.0)
+https://github.com/ultraq/thymeleaf-expression-processor
 Copyright (c) 2016, Emanuel Rabina (http://www.ultraq.net.nz/)
 
 thymeleaf-extras-java8time (Apache-2.0)
@@ -741,11 +750,11 @@ https://tomcat.apache.org
 Copyright 1999-2024 The Apache Software Foundation
 
 Tomcat Embed EL (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-el
+https://tomcat.apache.org
 Copyright 1999-2023 The Apache Software Foundation
 
 Tomcat Embed WebSocket (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-websocket
+https://tomcat.apache.org
 Copyright 1999-2023 The Apache Software Foundation
 
 tools-java (Apache-2.0)
@@ -771,8 +780,8 @@ woodstox (Apache-2.0)
 https://github.com/FasterXML/woodstox
 Copyright (c) 2004,2005 Tatu Saloranta, tatu.saloranta@iki.fi
 
-xmlbeans (Apache-2.0)
-https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans
+XmlBeans (Apache-2.0)
+https://xmlbeans.apache.org
 Copyright (c) 2004-2018 The Apache Software Foundatio
 
 xmlpull-xpp3 (BSD-3-Clause)
@@ -793,7 +802,7 @@ GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
 
 Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
- 
+
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 
                             Preamble
@@ -1043,7 +1052,7 @@ GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
 
 Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
- 
+
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 
                             Preamble
@@ -1282,9 +1291,9 @@ ________________________________________________________________________________
 ANTLR-PD
 
 
-We reserve no legal rights to the ANTLR--it is fully in the public domain. An individual or company may do whatever they wish with source code distributed with ANTLR or the code generated by ANTLR, including the incorporation of ANTLR, or its output, into commerical software. 
+We reserve no legal rights to the ANTLR--it is fully in the public domain. An individual or company may do whatever they wish with source code distributed with ANTLR or the code generated by ANTLR, including the incorporation of ANTLR, or its output, into commerical software.
 
-We encourage users to develop software with ANTLR. However, we do ask that credit is given to us for developing ANTLR. By "credit", we mean that if you use ANTLR or incorporate any source code into one of your programs (commercial product, research project, or otherwise) that you acknowledge this fact somewhere in the documentation, research report, etc... If you like ANTLR and have developed a nice tool with the output, please mention that you developed it using ANTLR. In addition, we ask that the headers remain intact in our source code. As long as these guidelines are kept, we expect to continue enhancing this system and expect to make other tools available as they are completed. 
+We encourage users to develop software with ANTLR. However, we do ask that credit is given to us for developing ANTLR. By "credit", we mean that if you use ANTLR or incorporate any source code into one of your programs (commercial product, research project, or otherwise) that you acknowledge this fact somewhere in the documentation, research report, etc... If you like ANTLR and have developed a nice tool with the output, please mention that you developed it using ANTLR. In addition, we ask that the headers remain intact in our source code. As long as these guidelines are kept, we expect to continue enhancing this system and expect to make other tools available as they are completed.
 
 
 
@@ -1379,7 +1388,7 @@ Copyright (c) <year> <owner> All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
@@ -1392,17 +1401,17 @@ ________________________________________________________________________________
 BSD-3-Clause
 
 
-Copyright (c) <year> <owner>. All rights reserved. 
+Copyright (c) <year> <owner>. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 _________________________________________________________________________________________________________________________
@@ -1433,11 +1442,11 @@ Version 1.1
 1.8. “Licensable” means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
 
 1.9. “Modifications” means the Source Code and Executable form of any of the following:
-     
+
      A. Any file that results from an addition to, deletion from or modification of the contents of a file containing Original Software or previous Modifications;
-     
+
      B. Any new file that contains any part of the Original Software or previous Modification; or
-     
+
      C. Any new file that is contributed or otherwise made available under the terms of this License.
 
 1.10. “Original Software” means the Source Code and Executable form of computer software code that is originally released under this License.
@@ -1458,7 +1467,7 @@ Conditioned upon Your compliance with Section 3.1 below and subject to third par
      (b) under Patent Claims infringed by the making, using or selling of Original Software, to make, have made, use, practice, sell, and offer for sale, and/or otherwise dispose of the Original Software (or portions thereof).
 
      (c) The licenses granted in Sections 2.1(a) and (b) are effective on the date Initial Developer first distributes or otherwise makes the Original Software available to a third party under the terms of this License.
- 
+
      (d) Notwithstanding Section 2.1(b) above, no patent license is granted: (1) for code that You delete from the Original Software, or (2) for infringements caused by: (i) the modification of the Original Software, or (ii) the combination of the Original Software with other software or devices.
 
 2.2. Contributor Grant.
@@ -1566,7 +1575,7 @@ where such changes and/or additions to the Program originate from and are distri
 2. GRANT OF RIGHTS
 
      a) Subject to the terms of this Agreement, each Contributor hereby grants Recipient a non-exclusive, worldwide, royalty-free copyright license to reproduce, prepare derivative works of, publicly display, publicly perform, distribute and sublicense the Contribution of such Contributor, if any, and such derivative works, in source code and object code form.
- 
+
      b) Subject to the terms of this Agreement, each Contributor hereby grants Recipient a non-exclusive, worldwide, royalty-free patent license under Licensed Patents to make, use, sell, offer to sell, import and otherwise transfer the Contribution of such Contributor, if any, in source code and object code form. This patent license shall apply to the combination of the Contribution and the Program if, at the time the Contribution is added by the Contributor, such addition of the Contribution causes such combination to be covered by the Licensed Patents. The patent license shall not apply to any other combinations which include the Contribution. No hardware per se is licensed hereunder.
 
      c) Recipient understands that although each Contributor grants the licenses to its Contributions set forth herein, no assurances are provided by any Contributor that the Program does not infringe the patent or other intellectual property rights of any other entity. Each Contributor disclaims any liability to Recipient for claims brought by any other entity based on infringement of intellectual property rights or otherwise. As a condition to exercising the rights and licenses granted hereunder, each Recipient hereby assumes sole responsibility to secure any other intellectual property rights needed, if any. For example, if a third party patent license is required to allow Recipient to distribute the Program, it is Recipient's responsibility to acquire that license before distributing the Program.
@@ -1577,7 +1586,7 @@ where such changes and/or additions to the Program originate from and are distri
 A Contributor may choose to distribute the Program in object code form under its own license agreement, provided that:
 
      a) it complies with the terms and conditions of this Agreement; and
- 
+
      b) its license agreement:
           i) effectively disclaims on behalf of all Contributors all warranties and conditions, express and implied, including warranties or conditions of title and non-infringement, and implied warranties or conditions of merchantability and fitness for a particular purpose;
           ii) effectively excludes on behalf of all Contributors all liability for damages, including direct, indirect, special, incidental and consequential damages, such as lost profits;
@@ -1772,7 +1781,7 @@ You may charge a fee for the physical act of transferring a copy, and you may at
 2. You may modify your copy or copies of the Library or any portion of it, thus forming a work based on the Library, and copy and distribute such modifications or work under the terms of Section 1 above, provided that you also meet all of these conditions:
 
      a) The modified work must itself be a software library.
- 
+
      b) You must cause the files modified to carry prominent notices stating that you changed the files and the date of any change.
 
      c) You must cause the whole of the work to be licensed at no charge to all third parties under the terms of this License.
@@ -1897,7 +1906,7 @@ GNU LESSER GENERAL PUBLIC LICENSE
 Version 3, 29 June 2007
 
 Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
- 
+
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 
 This version of the GNU Lesser General Public License incorporates the terms and conditions of version 3 of the GNU General Public License, supplemented by the additional permissions listed below.
@@ -2047,28 +2056,28 @@ You may charge any price or no price for each copy that you convey, and you may 
 5. Conveying Modified Source Versions.
 You may convey a work based on the Program, or the modifications to produce it from the Program, in the form of source code under the terms of section 4, provided that you also meet all of these conditions:
 
-     a) The work must carry prominent notices stating that you modified it, and giving a relevant date. 
-  
-     b) The work must carry prominent notices stating that it is released under this License and any conditions added under section 7. This requirement modifies the requirement in section 4 to “keep intact all notices”. 
-  
-     c) You must license the entire work, as a whole, under this License to anyone who comes into possession of a copy. This License will therefore apply, along with any applicable section 7 additional terms, to the whole of the work, and all its parts, regardless of how they are packaged. This License gives no permission to license the work in any other way, but it does not invalidate such permission if you have separately received it. 
-  
-     d) If the work has interactive user interfaces, each must display Appropriate Legal Notices; however, if the Program has interactive interfaces that do not display Appropriate Legal Notices, your work need not make them do so. 
+     a) The work must carry prominent notices stating that you modified it, and giving a relevant date.
+
+     b) The work must carry prominent notices stating that it is released under this License and any conditions added under section 7. This requirement modifies the requirement in section 4 to “keep intact all notices”.
+
+     c) You must license the entire work, as a whole, under this License to anyone who comes into possession of a copy. This License will therefore apply, along with any applicable section 7 additional terms, to the whole of the work, and all its parts, regardless of how they are packaged. This License gives no permission to license the work in any other way, but it does not invalidate such permission if you have separately received it.
+
+     d) If the work has interactive user interfaces, each must display Appropriate Legal Notices; however, if the Program has interactive interfaces that do not display Appropriate Legal Notices, your work need not make them do so.
 
 A compilation of a covered work with other separate and independent works, which are not by their nature extensions of the covered work, and which are not combined with it such as to form a larger program, in or on a volume of a storage or distribution medium, is called an “aggregate” if the compilation and its resulting copyright are not used to limit the access or legal rights of the compilation's users beyond what the individual works permit. Inclusion of a covered work in an aggregate does not cause this License to apply to the other parts of the aggregate.
 
 6. Conveying Non-Source Forms.
 You may convey a covered work in object code form under the terms of sections 4 and 5, provided that you also convey the machine-readable Corresponding Source under the terms of this License, in one of these ways:
 
-     a) Convey the object code in, or embodied in, a physical product (including a physical distribution medium), accompanied by the Corresponding Source fixed on a durable physical medium customarily used for software interchange. 
-  
-     b) Convey the object code in, or embodied in, a physical product (including a physical distribution medium), accompanied by a written offer, valid for at least three years and valid for as long as you offer spare parts or customer support for that product model, to give anyone who possesses the object code either (1) a copy of the Corresponding Source for all the software in the product that is covered by this License, on a durable physical medium customarily used for software interchange, for a price no more than your reasonable cost of physically performing this conveying of source, or (2) access to copy the Corresponding Source from a network server at no charge. 
+     a) Convey the object code in, or embodied in, a physical product (including a physical distribution medium), accompanied by the Corresponding Source fixed on a durable physical medium customarily used for software interchange.
 
-     c) Convey individual copies of the object code with a copy of the written offer to provide the Corresponding Source. This alternative is allowed only occasionally and noncommercially, and only if you received the object code with such an offer, in accord with subsection 6b. 
-  
-     d) Convey the object code by offering access from a designated place (gratis or for a charge), and offer equivalent access to the Corresponding Source in the same way through the same place at no further charge. You need not require recipients to copy the Corresponding Source along with the object code. If the place to copy the object code is a network server, the Corresponding Source may be on a different server (operated by you or a third party) that supports equivalent copying facilities, provided you maintain clear directions next to the object code saying where to find the Corresponding Source. Regardless of what server hosts the Corresponding Source, you remain obligated to ensure that it is available for as long as needed to satisfy these requirements. 
-  
-     e) Convey the object code using peer-to-peer transmission, provided you inform other peers where the object code and Corresponding Source of the work are being offered to the general public at no charge under subsection 6d. 
+     b) Convey the object code in, or embodied in, a physical product (including a physical distribution medium), accompanied by a written offer, valid for at least three years and valid for as long as you offer spare parts or customer support for that product model, to give anyone who possesses the object code either (1) a copy of the Corresponding Source for all the software in the product that is covered by this License, on a durable physical medium customarily used for software interchange, for a price no more than your reasonable cost of physically performing this conveying of source, or (2) access to copy the Corresponding Source from a network server at no charge.
+
+     c) Convey individual copies of the object code with a copy of the written offer to provide the Corresponding Source. This alternative is allowed only occasionally and noncommercially, and only if you received the object code with such an offer, in accord with subsection 6b.
+
+     d) Convey the object code by offering access from a designated place (gratis or for a charge), and offer equivalent access to the Corresponding Source in the same way through the same place at no further charge. You need not require recipients to copy the Corresponding Source along with the object code. If the place to copy the object code is a network server, the Corresponding Source may be on a different server (operated by you or a third party) that supports equivalent copying facilities, provided you maintain clear directions next to the object code saying where to find the Corresponding Source. Regardless of what server hosts the Corresponding Source, you remain obligated to ensure that it is available for as long as needed to satisfy these requirements.
+
+     e) Convey the object code using peer-to-peer transmission, provided you inform other peers where the object code and Corresponding Source of the work are being offered to the general public at no charge under subsection 6d.
 
 A separable portion of the object code, whose source code is excluded from the Corresponding Source as a System Library, need not be included in conveying the object code work.
 
@@ -2089,17 +2098,17 @@ When you convey a copy of a covered work, you may at your option remove any addi
 
 Notwithstanding any other provision of this License, for material you add to a covered work, you may (if authorized by the copyright holders of that material) supplement the terms of this License with terms:
 
-     a) Disclaiming warranty or limiting liability differently from the terms of sections 15 and 16 of this License; or 
-  
-     b) Requiring preservation of specified reasonable legal notices or author attributions in that material or in the Appropriate Legal Notices displayed by works containing it; or 
-  
-     c) Prohibiting misrepresentation of the origin of that material, or requiring that modified versions of such material be marked in reasonable ways as different from the original version; or 
-  
-     d) Limiting the use for publicity purposes of names of licensors or authors of the material; or 
-  
-     e) Declining to grant rights under trademark law for use of some trade names, trademarks, or service marks; or 
-  
-     f) Requiring indemnification of licensors and authors of that material by anyone who conveys the material (or modified versions of it) with contractual assumptions of liability to the recipient, for any liability that these contractual assumptions directly impose on those licensors and authors. 
+     a) Disclaiming warranty or limiting liability differently from the terms of sections 15 and 16 of this License; or
+
+     b) Requiring preservation of specified reasonable legal notices or author attributions in that material or in the Appropriate Legal Notices displayed by works containing it; or
+
+     c) Prohibiting misrepresentation of the origin of that material, or requiring that modified versions of such material be marked in reasonable ways as different from the original version; or
+
+     d) Limiting the use for publicity purposes of names of licensors or authors of the material; or
+
+     e) Declining to grant rights under trademark law for use of some trade names, trademarks, or service marks; or
+
+     f) Requiring indemnification of licensors and authors of that material by anyone who conveys the material (or modified versions of it) with contractual assumptions of liability to the recipient, for any liability that these contractual assumptions directly impose on those licensors and authors.
 
 All other non-permissive additional terms are considered “further restrictions” within the meaning of section 10. If the Program as you received it, or any part of it, contains a notice stating that it is governed by this License along with a term that is a further restriction, you may remove that term. If a license document contains a further restriction but permits relicensing or conveying under this License, you may add to a covered work material governed by the terms of that license document, provided that the further restriction does not survive such relicensing or conveying.
 
@@ -2229,7 +2238,7 @@ ________________________________________________________________________________
 MPL-2.0
 
 
-Mozilla Public License Version 2.0 
+Mozilla Public License Version 2.0
 
 1. Definitions
 
@@ -2269,7 +2278,7 @@ Mozilla Public License Version 2.0
 
      1.14. "You" (or "Your") means an individual or a legal entity exercising rights under this License. For legal entities, "You" includes any entity that controls, is controlled by, or is under common control with You. For purposes of this definition, "control" means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity.
 
-2. License Grants and Conditions 
+2. License Grants and Conditions
 
      2.1. Grants
      Each Contributor hereby grants You a world-wide, royalty-free, non-exclusive license:
@@ -2321,14 +2330,14 @@ Mozilla Public License Version 2.0
 
      3.4. Notices
      You may not remove or alter the substance of any license notices (including copyright notices, patent notices, disclaimers of warranty, or limitations of liability) contained within the Source Code Form of the Covered Software, except that You may alter any license notices to the extent required to remedy known factual inaccuracies.
- 
+
      3.5. Application of Additional Terms
      You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Covered Software. However, You may do so only on Your own behalf, and not on behalf of any Contributor. You must make it absolutely clear that any such warranty, support, indemnity, or liability obligation is offered by You alone, and You hereby agree to indemnify every Contributor for any liability incurred by such Contributor as a result of warranty, support, indemnity or liability terms You offer. You may include additional disclaimers of warranty and limitations of liability specific to any jurisdiction.
 
-4. Inability to Comply Due to Statute or Regulation 
+4. Inability to Comply Due to Statute or Regulation
 If it is impossible for You to comply with any of the terms of this License with respect to some or all of the Covered Software due to statute, judicial order, or regulation then You must: (a) comply with the terms of this License to the maximum extent possible; and (b) describe the limitations and the code they affect. Such description must be placed in a text file included with all distributions of the Covered Software under this License. Except to the extent prohibited by statute or regulation, such description must be sufficiently detailed for a recipient of ordinary skill to be able to understand it.
 
-5. Termination 
+5. Termination
 
      5.1. The rights granted under this License will terminate automatically if You fail to comply with any of its terms. However, if You become compliant, then the rights granted under this License from a particular Contributor are reinstated (a) provisionally, unless and until such Contributor explicitly and finally terminates Your grants, and (b) on an ongoing basis, if such Contributor fails to notify You of the non-compliance by some reasonable means prior to 60 days after You have come back into compliance. Moreover, Your grants from a particular Contributor are reinstated on an ongoing basis if such Contributor notifies You of the non-compliance by some reasonable means, this is the first time You have received notice of non-compliance with this License from such Contributor, and You become compliant prior to 30 days after Your receipt of the notice.
 
@@ -2336,19 +2345,19 @@ If it is impossible for You to comply with any of the terms of this License with
 
      5.3. In the event of termination under Sections 5.1 or 5.2 above, all end user license agreements (excluding distributors and resellers) which have been validly granted by You or Your distributors under this License prior to termination shall survive termination.
 
-6. Disclaimer of Warranty 
-Covered Software is provided under this License on an "as is" basis, without warranty of any kind, either expressed, implied, or statutory, including, without limitation, warranties that the Covered Software is free of defects, merchantable, fit for a particular purpose or non-infringing. The entire risk as to the quality and performance of the Covered Software is with You. Should any Covered Software prove defective in any respect, You (not any Contributor) assume the cost of any necessary servicing, repair, or correction. This disclaimer of warranty constitutes an essential part of this License. No use of any Covered Software is authorized under this License except under this disclaimer. 
+6. Disclaimer of Warranty
+Covered Software is provided under this License on an "as is" basis, without warranty of any kind, either expressed, implied, or statutory, including, without limitation, warranties that the Covered Software is free of defects, merchantable, fit for a particular purpose or non-infringing. The entire risk as to the quality and performance of the Covered Software is with You. Should any Covered Software prove defective in any respect, You (not any Contributor) assume the cost of any necessary servicing, repair, or correction. This disclaimer of warranty constitutes an essential part of this License. No use of any Covered Software is authorized under this License except under this disclaimer.
 
-7. Limitation of Liability 
-Under no circumstances and under no legal theory, whether tort (including negligence), contract, or otherwise, shall any Contributor, or anyone who distributes Covered Software as permitted above, be liable to You for any direct, indirect, special, incidental, or consequential damages of any character including, without limitation, damages for lost profits, loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses, even if such party shall have been informed of the possibility of such damages. This limitation of liability shall not apply to liability for death or personal injury resulting from such party's negligence to the extent applicable law prohibits such limitation. Some jurisdictions do not allow the exclusion or limitation of incidental or consequential damages, so this exclusion and limitation may not apply to You. 
+7. Limitation of Liability
+Under no circumstances and under no legal theory, whether tort (including negligence), contract, or otherwise, shall any Contributor, or anyone who distributes Covered Software as permitted above, be liable to You for any direct, indirect, special, incidental, or consequential damages of any character including, without limitation, damages for lost profits, loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses, even if such party shall have been informed of the possibility of such damages. This limitation of liability shall not apply to liability for death or personal injury resulting from such party's negligence to the extent applicable law prohibits such limitation. Some jurisdictions do not allow the exclusion or limitation of incidental or consequential damages, so this exclusion and limitation may not apply to You.
 
-8. Litigation 
+8. Litigation
 Any litigation relating to this License may be brought only in the courts of a jurisdiction where the defendant maintains its principal place of business and such litigation shall be governed by laws of that jurisdiction, without reference to its conflict-of-law provisions. Nothing in this Section shall prevent a party's ability to bring cross-claims or counter-claims.
 
-9. Miscellaneous 
+9. Miscellaneous
 This License represents the complete agreement concerning the subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable. Any law or regulation which provides that the language of a contract shall be construed against the drafter shall not be used to construe this License against a Contributor.
 
-10. Versions of the License 
+10. Versions of the License
 
      10.1. New Versions
      Mozilla Foundation is the license steward. Except as provided in Section 10.3, no one other than the license steward has the right to modify or publish new versions of this License. Each version will be given a distinguishing version number.
@@ -2362,7 +2371,7 @@ This License represents the complete agreement concerning the subject matter her
      10.4. Distributing Source Code Form that is Incompatible With Secondary Licenses
      If You choose to distribute Source Code Form that is Incompatible With Secondary Licenses under the terms of this version of the License, the notice described in Exhibit B of this License must be attached.
 
-Exhibit A - Source Code Form License Notice 
+Exhibit A - Source Code Form License Notice
 
      This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
@@ -2370,7 +2379,7 @@ If it is not possible or desirable to put the notice in a particular file, then 
 
 You may add additional accurate notices of copyright ownership.
 
-Exhibit B - "Incompatible With Secondary Licenses" Notice 
+Exhibit B - "Incompatible With Secondary Licenses" Notice
 
      This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 
@@ -2385,13 +2394,13 @@ SIL OPEN FONT LICENSE
 
 Version 1.1 - 26 February 2007
 
-PREAMBLE 
+PREAMBLE
 
 The goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.
 
 The OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.
 
-DEFINITIONS 
+DEFINITIONS
 
 "Font Software" refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.
 
@@ -2403,7 +2412,7 @@ DEFINITIONS
 
 "Author" refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.
 
-PERMISSION & CONDITIONS 
+PERMISSION & CONDITIONS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:
 
@@ -2417,17 +2426,15 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.
 
-TERMINATION 
+TERMINATION
 
 This license becomes null and void if any of the above conditions are not met.
 
-DISCLAIMER 
+DISCLAIMER
 
 THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 
-(OSSNotice-7199_Fosslight Hub_2.0.1.pre-release_240722)
-
-
+(OSSNotice-8223_Fosslight Hub_2.1.1_250106)
 

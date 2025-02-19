@@ -93,4 +93,6 @@ public interface VerificationService {
 	String changePackageFileNameCombine(String prjId);
 
 	void deleteFile(Map<Object, Object> map);
+
+	void updateFileWhenVerificationCopyConfirm(Project project, Project copyProject, List<String> packageFileSeqList) throws IOException;
 }

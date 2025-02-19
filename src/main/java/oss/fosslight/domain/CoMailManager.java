@@ -163,6 +163,7 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType())
@@ -171,6 +172,7 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_LICENSE_DELETED_COMMENT.equals(bean.getMsgType())
 					) {
 				convertDataMap.put("contentsTitle", StringUtil.replace(makeMailSubject((isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()), bean, true), "[FOSSLight]", ""));
 			} else {
@@ -200,7 +202,9 @@ public class CoMailManager extends CoTopComponent {
     			OssMaster oss_basic_info = bean.getParamOssInfo();
     			String result = appendChangeStyleLinkFormatArray(oss_basic_info.getDownloadLocation());
 				oss_basic_info.setDownloadLocation(result);
-				
+				if (oss_basic_info.getPurl() != null && oss_basic_info.getPurls() == null) {
+					oss_basic_info.setPurls(oss_basic_info.getPurl().split(","));
+				}
     			convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO), oss_basic_info); // oss_basic_info
     		}
     		
@@ -316,12 +320,13 @@ public class CoMailManager extends CoTopComponent {
         		if (!isEmpty(bean.getComment())) {
         			// FIXME
         			if (CoConstDef.CD_MAIL_TYPE_PROJECT_MODIFIED_COMMENT.equals(bean.getMsgType())
-        					||CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT.equals(bean.getMsgType())
-        					||CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_MODIFIED_COMMENT.equals(bean.getMsgType())
-        					||CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT.equals(bean.getMsgType())
-        					||CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT.equals(bean.getMsgType())
-        					||CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
-        					||CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_MODIFIED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_MODIFIED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
         					) {
         				bean.setComment(appendChangeStyleMultiLine(bean.getParamExpansion1(), bean.getParamExpansion2()));
         			}
@@ -330,6 +335,20 @@ public class CoMailManager extends CoTopComponent {
         			convertDataMap.put("comment", _comment);
         		}
     			
+        		if (CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_DELETED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_DELETED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PARTER_DELETED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT.equals(bean.getMsgType())
+        					|| CoConstDef.CD_MAIL_TYPE_LICENSE_DELETED_COMMENT.equals(bean.getMsgType())
+        					) {
+        			bean.setComment(appendChangeStyleMultiLine(bean.getParamExpansion1(), bean.getParamExpansion2()));
+        			String _comment = CommonFunction.pReplaceToBR(bean.getComment());
+        			convertDataMap.put("comment", _comment);
+        		}
+        		
     			if (isEmpty(bean.getModifier())) {
     				bean.setModifier(bean.getLoginUserName());
     			}
@@ -372,7 +391,7 @@ public class CoMailManager extends CoTopComponent {
     				convertModifiedData(convertDataMap, bean.getMsgType());
 				}
     			
-    			if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType())) {
+    			if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType()) || CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMsgType())) {
     				convertDataMap.put("paramLicenseInfo", bean.getParamLicenseInfo());
     				convertModifiedData(convertDataMap, bean.getMsgType());
     			}
@@ -757,12 +776,14 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_OSS_DELETE:
     		case CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_DELETE:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_LICENSE_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED:
@@ -782,7 +803,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
        		case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_REQ_REVIEW:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF:
-				case CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF:
+			case CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT:
@@ -804,11 +825,15 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_ADD:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_CHANGED:
@@ -831,7 +856,11 @@ public class CoMailManager extends CoTopComponent {
     			if (CoConstDef.CD_MAIL_TYPE_PROJECT_MODIFIED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_MODIFIED_COMMENT.equals(bean.getMsgType())
-    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT.equals(bean.getMsgType())    					
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_DELETED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_DELETED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED_COMMENT.equals(bean.getMsgType())
     					) {
     				toList = new ArrayList<>();
     				ccList = new ArrayList<>();
@@ -1075,10 +1104,16 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PARTER_DELETED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_WATCHER_REGISTED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PARTER_DELETED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT:
     			// to :  creator + cc : watcher + reviewer
     			partnerInfo = mailManagerMapper.getPartnerInfo(bean.getParamPartnerId());
-    			if (CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT.equals(bean.getMsgType())) {
+    			if (CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PARTER_DELETED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_MODIFIED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT.equals(bean.getMsgType())) {
 					toList = new ArrayList<>();
     				ccList = new ArrayList<>();
     				// 로그인 사용자가 Admin이면 to : project creator cc: reviewer, watcher
@@ -1513,12 +1548,13 @@ public class CoMailManager extends CoTopComponent {
 								|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+								|| CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMsgType())
 							)
 						)
 				{
 					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
-					linkUrl += "/oss/list?ossName=" + ossInfo.getOssName();
+					linkUrl += "/oss/list?linkFlag=Y&ossName=" + ossInfo.getOssName();
 					_s = "<a href='" + linkUrl + "' style='font-size:16px;' target='_blank'>" + _s + "</a>";
 					
 					if (CoConstDef.CD_DTL_COMMENT_OSS_COMMON.equals(avoidNull(bean.getParamReferenceDiv()))) {
@@ -1546,6 +1582,7 @@ public class CoMailManager extends CoTopComponent {
 							|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMsgType())
 						)
 					)
@@ -1598,6 +1635,7 @@ public class CoMailManager extends CoTopComponent {
 							|| CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE_TYPE.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_LICENSE_DELETED_COMMENT.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMsgType()))) {
 				String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
 				linkUrl += "/license/edit/" + bean.getParamLicenseId();
@@ -2217,6 +2255,11 @@ public class CoMailManager extends CoTopComponent {
 			Project before = (Project) convertDataMap.get("before");
 			Project after = (Project) convertDataMap.get("after");
 
+			String beforePermission = CoConstDef.FLAG_YES.equals(before.getPublicYn()) ? "Everyone" : "Creator & Editor";
+			String afterPermission = CoConstDef.FLAG_YES.equals(after.getPublicYn()) ? "Everyone" : "Creator & Editor";
+			before.setPublicYn(beforePermission);
+			after.setPublicYn(afterPermission);
+			
 			isModified = checkEquals(before.getPrjName(), after.getPrjName(), isModified);
 			isModified = checkEquals(before.getPrjVersion(), after.getPrjVersion(), isModified);
 			isModified = checkEquals(before.getOsType(), after.getOsType(), isModified);
@@ -2230,6 +2273,7 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getDivision(), after.getDivision(), isModified);
 			isModified = checkEquals(before.getSecMailYn(), after.getSecMailYn(), isModified);
 			isModified = checkEquals(before.getSecMailDesc(), after.getSecMailDesc(), isModified);
+			isModified = checkEquals(before.getPublicYn(), after.getPublicYn(), isModified);
 			
 			after.setPrjName(appendChangeStyle(before.getPrjName(), after.getPrjName()));
 			after.setPrjVersion(appendChangeStyle(before.getPrjVersion(), after.getPrjVersion()));
@@ -2244,8 +2288,8 @@ public class CoMailManager extends CoTopComponent {
 			after.setDivision(appendChangeStyle(before.getDivision(), after.getDivision()));
 			after.setSecMailYn(appendChangeStyle(before.getSecMailYn(), after.getSecMailYn()));
 			after.setSecMailDesc(appendChangeStyle(avoidNull(before.getSecMailDesc()), avoidNull(after.getSecMailDesc())));
+			after.setPublicYn(appendChangeStyle(avoidNull(before.getPublicYn()), avoidNull(after.getPublicYn())));
 			
-
 			if (before.getModelList().size() > 0 || after.getModelList().size() > 0) {
 				String distributeTargetString = "";
 				List<String> _beforeList = new ArrayList<>();
@@ -2491,8 +2535,8 @@ public class CoMailManager extends CoTopComponent {
 				}
 				isModified = checkEquals(om.getHomepage(), om.getExistHomepage(), isModified);
 				ossBasicInfo.setHomepage(appendChangeStyleLinkFormat(om.getExistHomepage(), om.getHomepage()));
-				isModified = checkEquals(om.getSummaryDescription(), om.getExistSummaryDescription(), isModified);
-				ossBasicInfo.setSummaryDescription(appendChangeStyle(om.getExistSummaryDescription(), om.getSummaryDescription()));
+				isModified = checkEquals(CommonFunction.lineReplaceToBR(om.getSummaryDescription()), om.getExistSummaryDescription(), isModified);
+				ossBasicInfo.setSummaryDescription(appendChangeStyle(om.getExistSummaryDescription(), CommonFunction.lineReplaceToBR(om.getSummaryDescription())));
 				isModified = checkEquals(om.getImportantNotes(), om.getExistImportantNotes(), isModified);
 				ossBasicInfo.setImportantNotes(appendChangeStyle(om.getExistImportantNotes(), om.getImportantNotes()));
 				
@@ -2506,11 +2550,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 				
 				convertDataMap.replace("oss_basic_info", ossBasicInfo);
-				if (isModified){
-					convertDataMap.replace("isModify", false);
-				} else {
-					convertDataMap.replace("isModify", true);
-				}
+				convertDataMap.replace("isModify", false);
 			}
 		} else if (CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(msgType)) {
 			PartnerMaster before = (PartnerMaster) convertDataMap.get("before");
@@ -2528,7 +2568,7 @@ public class CoMailManager extends CoTopComponent {
 			
 			convertDataMap.replace("before", before);
 			convertDataMap.replace("after", after);
-		} else if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(msgType)) {
+		} else if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(msgType) || CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(msgType)) {
 			LicenseMaster lm = (LicenseMaster) convertDataMap.get("paramLicenseInfo");
 			if (lm != null && !isEmpty(lm.getInternalUrl())) {
 				LicenseMaster licenseBasicInfo = (LicenseMaster) convertDataMap.get("license_basic_info");
@@ -3395,7 +3435,7 @@ public class CoMailManager extends CoTopComponent {
 			bean.setReviewer(makeUserNameFormatWithDivision(avoidNull((String) dataMap.get("REVIEWER")))); 
 			bean.setIdentificationStatus(avoidNull((String) dataMap.get("IDENTIFICATION_STATUS"))); 
 			bean.setVerificationStatus(avoidNull((String) dataMap.get("VERIFICATION_STATUS"))); 
-			bean.setDestributionStatus(avoidNull((String) dataMap.get("DESTRIBUTION_STATUS")));
+			bean.setDistributionStatus(avoidNull((String) dataMap.get("DESTRIBUTION_STATUS")));
 			bean.setNoticeType(avoidNull((String) dataMap.get("NOTICE_TYPE")));
 			bean.setNoticeTypeEtc(avoidNull((String) dataMap.get("NOTICE_TYPE_ETC")));
 			bean.setPriority(avoidNull((String) dataMap.get("PRIORITY")));
@@ -3452,8 +3492,8 @@ public class CoMailManager extends CoTopComponent {
 			if (!isEmpty(bean.getVerificationStatus())) {
 				bean.setVerificationStatus(CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, bean.getVerificationStatus()));
 			}
-			if (!isEmpty(bean.getDestributionStatus())) {
-				bean.setDestributionStatus(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, bean.getDestributionStatus()));
+			if (!isEmpty(bean.getDistributionStatus())) {
+				bean.setDistributionStatus(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, bean.getDistributionStatus()));
 			}
 			if (!isEmpty(bean.getDistributeTarget())) {
 				bean.setDistributeTarget(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, bean.getDistributeTarget()));

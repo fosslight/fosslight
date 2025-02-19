@@ -113,7 +113,7 @@ public interface ProjectMapper {
 
 	List<ProjectIdentification> selectBomList(ProjectIdentification projectIdentification);
 	
-	List<ProjectIdentification> selectAndroidBomList(ProjectIdentification projectIdentification);
+	List<ProjectIdentification> selectOtherBomList(ProjectIdentification projectIdentification);
 	
 	List<OssComponents> selectOssRefPrjList1(OssMaster ossMaster);
 	
@@ -144,6 +144,8 @@ public interface ProjectMapper {
 	void updateReadmeContent(Project project);
 
 	void updateVerifyContents(Project project);
+
+	void updateVulDocSkipYn(Project project);
 	
 	List<ProjectIdentification> identificationSubGrid(ProjectIdentification identification);
 
@@ -286,6 +288,8 @@ public interface ProjectMapper {
 	void deleteProjectModelWithModelName(Project project);
 
 	void updateFilePath(OssComponents newBean);
+	
+	void updateFilePathWithFileCount(OssComponents newBean);
 
 	void updateDistributeTarget(Project project);
 
@@ -319,7 +323,7 @@ public interface ProjectMapper {
 	
 	void updateProjectAllowDownloadBitFlag(Project project);
 	
-	void updateProjectDistributionStatus(@Param("prjId") String prjId, @Param("destributionStatus") String destributionStatus);
+	void updateProjectDistributionStatus(@Param("prjId") String prjId, @Param("distributionStatus") String distributionStatus);
 	
 	List<String> getDeleteOssComponentsLicenseIds(OssComponents bean);
 	
@@ -353,7 +357,7 @@ public interface ProjectMapper {
 
 	void updateCopyConfirmStatusProjectStatus(Project project);
 
-	void updateConfirmCopyVerificationDestributionStatus(Project project);
+	void updateConfirmCopyVerificationDistributionStatus(Project project);
 
 	void updateProjectDivision(Project project);
 	
@@ -401,22 +405,21 @@ public interface ProjectMapper {
 	
 	void updateProjectForSecurity(Project project);
 
-	List<String> selectProjectForSecurity();
-	
-	/**
-	 * Delete Component and license row from OSS_COMPONENTS and OSS_COMPONENTS_LICENSE Table
-	 * @param referenceId
-	 * @param referenceDiv
-	 * @return
-	 */
 	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
 	int resetSecurityData(@Param("prjId")String prjId);
 	
 	void insertOssComponentListWithComponentId(@Param("list")List<ProjectIdentification> OssComponentList);
+
 	void insertOssComponentList(@Param("list") List<ProjectIdentification> OssComponentList);
+
 	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
 
 	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);
 
 	String selectNvdInfoWithOutVer(OssMaster ossMaster);
+	
+	List<ProjectIdentification> selectOssComponentsThirdCopy(OssComponents ossComponents);
+	
+	List<OssComponentsLicense> selectOssComponentsLicenseThirdCopy(OssComponents ossComponents);
 }

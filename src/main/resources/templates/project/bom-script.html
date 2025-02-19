@@ -215,6 +215,7 @@ var bom_fn = {
 		var obligationLicense = rowObject["obligationLicense"] || rowObject[20];
 		var preObligationType = rowObject["preObligationType"] || rowObject[21];
 		var obligationType = rowObject["obligationType"] || rowObject[22];
+		var notAdminCheck = rowObject["notAdminCheck"];
 		var rowId = options.rowId;
 		var adminCheck = $("#"+rowId+"_adminCheck").prop("checked");
 		
@@ -222,21 +223,23 @@ var bom_fn = {
 			adminCheck = rowObject.adminCheckYn == "Y";
 		}
 		
-		if (adminCheck == false) {
-			if (preObligationType == 10 || preObligationType == 11){
-				display="<i class=\"fas fa-check fa-2xs\"></i>";
-			}
+		if ("Y" != notAdminCheck) {
+			if (adminCheck == false) {
+				if (preObligationType == 10 || preObligationType == 11){
+					display="<i class=\"fas fa-check fa-2xs\"></i>";
+				}
 
-			if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
-				display="<i class=\"fas fa-check fa-2xs\"></i>";
+				if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
+					display="<i class=\"fas fa-check fa-2xs\"></i>";
+				}
+			} else if(obligationLicense == 90 || adminCheck == true) {
+				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
+					+ '<option value="Y" '+((obligationType=='10' || obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
+					+ '<option value="N" '+((obligationType!='10' && obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
+					+ '</select>';
+			} else if(obligationLicense == 10 || obligationLicense == 11) {
+				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
-		} else if(obligationLicense == 90 || adminCheck == true) {
-			display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
-				+ '<option value="Y" '+((obligationType=='10' || obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
-				+ '<option value="N" '+((obligationType!='10' && obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
-				+ '</select>';
-		} else if(obligationLicense == 10 || obligationLicense == 11) {
-			display = "<i class=\"fas fa-check fa-2xs\"></i>";
 		}
 		
 		return display;
@@ -373,12 +376,13 @@ var bom_fn = {
 		var adminCheckYn = $("#"+id+"_adminCheck").prop("checked");
 		
 		if (adminCheckYn && "ROLE_ADMIN" == userRole) {
-			$("#bomList").jqGrid('setCell', id, 'notify', "10");
+			var rowData = $("#bomList").getRowData(id);
+			if ("Y" != rowData.notAdminCheck) {
+				$("#bomList").jqGrid('setCell', id, 'notify', "10");
+			}
 			$("#bomList").jqGrid('setCell', id, 'source', "10");
 			
 			var checkList = ["downloadLocation", "homepage", "copyrightText"];
-			
-			var rowData = $("#bomList").getRowData(id);
 			var componentId = rowData["componentId"];
 			
 			$("#bomList").jqGrid('setColProp','homepage', {editable: true});
@@ -1160,7 +1164,7 @@ var bom_data = {
 				, colNames: ['','ID','ID_KEY','groupingColumn','refComponentId','refComponentIdx','refDiv','ReferenceId','MergePreDiv','ReferenceDiv','OSS ID','OSS Name','OSS Version','License'
 		             ,'Download Location','Homepage','LicenseId','Copyright Text'
 		             ,'CVE ID' ,'Vulnera<br/>bility','Depends On','obligationLicense','ObligationType','preObligationType','Notice','Source','Restriction','licenseTypeIdx','adminCheckYn'
-		             ,'admin<br>check<br><input type="checkbox" onclick="bom_fn.onCboxClickAll(this,\'bomList\');">', 'refOssName']
+		             ,'admin<br>check<br><input type="checkbox" onclick="bom_fn.onCboxClickAll(this,\'bomList\');">','notAdminCheck','refOssName']
 				, colModel : [
 					{name: 'componentIdx', index: 'componentIdx', width: 20, align: 'center', search : false, sorttype: 'number',
 					    cellattr: function(rowId, tv, rawObject, cm, rdata) {
@@ -1218,6 +1222,7 @@ var bom_data = {
 					{name: 'licenseTypeIdx', index: 'licenseTypeIdx', width: 60, align: 'center', hidden:true},
 					{name: 'adminCheckYn', index: 'adminCheckYn', width: 50, align: 'center', hidden:true},
 					{name: 'adminCheck', index: 'adminCheck', width: 50, align: 'center', formatter: bom_fn.displayAdminCheck, unformat: bom_fn.unDisplayAdminCheck, sortable:false, search:false},
+					{name: 'notAdminCheck', index: 'notAdminCheck', width: 30, hidden:true},
 					{name: 'refOssName', index: 'refOssName', width: 50, hidden:true}
 				]
 				, rowNum: 200

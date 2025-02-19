@@ -827,7 +827,8 @@ div.jqcloud span.w1 { color: #feb24c; }
 
 .ui-jqgrid tr.jqgrow td {
 	overflow: hidden;
-	white-space: pre;
+	white-space: nowrap;
+	text-overflow : ellipsis;
 }
 
 .ui-jqgrid tr.jqgrow td .btnCLight {
@@ -1134,8 +1135,9 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
   color: #e22563;
 }
 
-td .retxt, div .retxt {padding-top:2px; font-size:13px; color:red !important;}
+td.retxt, div.retxt {padding-top:2px; font-size:13px; color:red !important;}
 .urltxt {display:none; padding-top:2px; font-size:13px; color:blue !important;}
+span.retxt {display:none; padding-top:2px; font-size:13px; color:red !important;}
 div .retxtb {padding-top:2px; font-size:13px; color:blue !important;}
 div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .urlLink {display:block;color:#0070c0 !important;text-decoration:underline !important;}
@@ -1195,3 +1197,8 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 #_ossListDiv .ui-jqgrid-bdiv::-webkit-scrollbar{display: none;}
 .ossSyncPopup .ui-jqgrid-bdiv {max-height: 435px;}
 .custom-select-disabled {color: #6c757d; background-color: #e9ecef; border: 0;}
+.line-break-anywhere {line-break: anywhere;}
+.note-editor.note-frame table {border: 1px solid #ddd;}
+.note-editor.note-frame table th {border: 1px solid #ddd;}
+.note-editor.note-frame table td {border: 1px solid #ddd;}
+.checkBulkEdit {background-color: #fbf9ee;}

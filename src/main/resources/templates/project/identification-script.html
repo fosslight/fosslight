@@ -308,45 +308,24 @@ var fn = {
             "referenceId" : [[${project.prjId}]]
         }
         getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
-                if (!alertify.editDialog) {
-                    alertify.dialog('editDialog', function () {
-                    	return {
-        					setup: function() {
-        						var settings = alertify.confirm().settings;
-        					
-        						for (var prop in settings) {
-        							this.settings[prop] = settings[prop];
-        						}
-        					
-        						var setup = alertify.confirm().setup();
-        						setup.buttons = [];
-        						setup.focus.element = 0;
-        					
-        						return setup;
-        					},
-        			    	hooks: {
-        			    		onshow: function() {
-        			        		this.elements.dialog.style.maxWidth = 'none';
-        			          		this.elements.dialog.style.width = '700px';
-        			        	}
-        					}
-        				};
-                    }, false, 'confirm');
-                }
-
-                alertify.editDialog(res);
-            },
-            null,
-            function () {
-                $("#modifiedCommentInPjtEditor").summernote({
-                    height: 180,
-                    callbacks: {
-                        onInit: function () {
-                            $(this).summernote('code', $("#userContents").val());
-                        }
-                    }
-                });
-            });
+          	if (!alertify.editDialog) {
+          		commonAlertifyDialog('editDialog');
+           	}
+          	alertify.editDialog().set('onshow', function(e) {
+          		$(alertify.editDialog().elements.buttons.primary).empty();
+        	}).setContent(res).show();
+       	},
+       	null,
+       	function () {
+           	$("#modifiedCommentInPjtEditor").summernote({
+              	height: 180,
+              	callbacks: {
+                  	onInit: function () {
+                      	$(this).summernote('code', $("#userContents").val());
+                 	}
+              	}
+          	});
+      	});
     },
     sendEditor: function (type) {
         //코멘트 저장

@@ -17,20 +17,14 @@
         var $editor;
         var gStatus = "";
         var tempHandler = "";
-        var distributionStatus = [[${project.destributionStatus}]];
+        var distributionStatus = [[${project.distributionStatus}]];
         var deleteFileList = new Array();
         var isAndroid = [[${project.androidFlag}]];
         var appendReadOnlyFlag = false;
         var activeTab = null;
         var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
 
-     	// prevent clicking the OK button on Enter
-		let keyCode;
-		$(document).on('keydown', function (event) {
-			keyCode = event.keyCode;
-		});
-        
-        $(document).ready(function () {
+     	$(document).ready(function () {
             'use strict';
             $('.select2').select2();
             datas.init();
@@ -212,17 +206,13 @@
             ossList: [[${ossList}]],
             noticeFileFormat : [],
             init: function () {
-            	if (datas.ossList == null) datas.ossList = new Array();
+            	if (datas.ossList == null) {
+            		datas.ossList = new Array();
+            	}
             	
                 modifyCommentId = datas.verify.data.commentIdx;
                 commentIdx = datas.verify.data.commentIdx;
                 if (isAdmin) {
-                    if ("Y" == [[${project.withoutVerifyYn}]]) {
-                        $("#approve").prop("checked", true);
-                    } else {
-                        $("#approve").prop("checked", false);
-                    }
-
                     $("#approve").click(function () {
                         if ($("#approve").is(":checked")) {
                             $("input[name=withoutVerifyYn]").val($("#approve").val());
@@ -592,46 +582,17 @@
                         var innerHtml 	= 'Are you sure you want to confirm?<br>';
                         innerHtml 		+= '<textarea id="verConfirmEditor"></textarea>';
                         
-                     	if(!alertify.verConfirmDialog){
-    						alertify.dialog('verConfirmDialog', function() {
-    							return {
-    								setup: function() {
-    									var settings = alertify.confirm().settings;
-    									
-    									for (var prop in settings) {
-    										this.settings[prop] = settings[prop];
-    									}
-    									
-    									var setup = alertify.confirm().setup();
-    									setup.focus.element = 1;
-    									
-    									return setup;
-    								},
-    							    hooks: {
-    							    	onshow: function() {
-    							        	this.elements.dialog.style.maxWidth = 'none';
-    							          	this.elements.dialog.style.width = '650px';
-    							        }
-    								}
-    							};
-    						}, false, 'confirm');
+                     	if (!alertify.verConfirmDialog) {
+                     		commonAlertifyDialog('verConfirmDialog');
                     	}
                         
                         alertify.verConfirmDialog()
                         .set('onok', function(e) {
-                        	// prevent clicking the OK button on Enter
-            				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-								keyCode = undefined;
-								return false;
-							}
-                        	
-            				var editorVal = $("#verConfirmEditor").summernote('code');
+                        	var editorVal = $("#verConfirmEditor").summernote('code');
             				if ("" == $(editorVal).text().trim()) {
                					editorVal = "";
                				}
             				$("input[name='userComment']").val(editorVal);
-            				
-            				
                         })
                         .set('onshow', function(e){
                         	if ($("#append").prop("checked")) {
@@ -700,40 +661,13 @@
                         var innerHtml 	= 'Are you sure you want to reject?<br>';
                         innerHtml 		+= '<textarea id="editor3"></textarea>';
                         
-                        if(!alertify.verRejectDialog){
-    						alertify.dialog('verRejectDialog', function() {
-    							return {
-    								setup: function() {
-    									var settings = alertify.confirm().settings;
-    									
-    									for (var prop in settings) {
-    										this.settings[prop] = settings[prop];
-    									}
-    									
-    									var setup = alertify.confirm().setup();
-    									setup.focus.element = 0;
-    									
-    									return setup;
-    								},
-    							    hooks: {
-    							    	onshow: function() {
-    							        	this.elements.dialog.style.maxWidth = 'none';
-    							          	this.elements.dialog.style.width = '650px';
-    							        }
-    								}
-    							};
-    						}, false, 'confirm');
+                        if (!alertify.verRejectDialog) {
+                        	commonAlertifyDialog('verRejectDialog');
                     	}
                         
                         alertify.verRejectDialog()
                         .set('onok', function(e) {
-                        	// prevent clicking the OK button on Enter
-            				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-								keyCode = undefined;
-								return false;
-							}
-                        	
-							var editorVal = $("#editor3").summernote('code');
+                        	var editorVal = $("#editor3").summernote('code');
                         	
      						if ("" == $(editorVal).text().trim()){
      							alertify.alert([[#{msg.project.required.comments}]], function(){});
@@ -754,7 +688,6 @@
                         })
                         .set('onshow', function(e){
                         	$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
-                        	
                         	const parameter = {
                                	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]],
                                	"referenceId" : [[${project.prjId}]]
@@ -803,6 +736,7 @@
                             , "userComment": [[${project.userComment}]]
                             , "referenceDiv": "12"
                             , "noticeFileFormat": datas.noticeFileFormat
+                            , "withoutVerifyYn" : $("input[name='withoutVerifyYn']").val()
                         };
 
                         fn.exeProjectStatus(data, "REV");
@@ -987,6 +921,7 @@
                                 });
 
                                 $('.verifyFile_3').hide();
+                                $("#uploadAdd_3").show();
                                 $("#uploadRemove_3").hide();
                                 $("#sendWgetUrl_3").val("");
                                 
@@ -1171,7 +1106,7 @@
                 $("[name='btnEditOssNotice']").change(function (e) {
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     $("#editNoticeYn").val(checked ? "Y" : "N");
-                    fn.defaultNotice(checked);
+                    fn.changeNotice(checked);
                 });
 
                 $("#companyName").click(function (e) {
@@ -2181,26 +2116,23 @@
                 if (result.isValid == 'false') {
                     alertify.error([[#{msg.common.valid2}]], 0);
                 } else {
+                	if (typeof alertify.openNoticeEditDialog === 'undefined') {
+        				commonAlertifyDialog('openNoticeEditDialog');
+                	}
                 	var contents = '<textarea cols="80" id="noticeEditPop" name="noticeEditPop" rows="10"></textarea>';
-        			alertify.confirm()
-        					.set({'resizable': true, 'startMaximized':true}).resizeTo('650', '480')
-        					.set('labels', {ok:'save'})
-        					.set('onok', function(event){
-        						// prevent clicking the OK button on Enter
-        						if (typeof keyCode !== 'undefined' && keyCode == 13) {
-        							keyCode = undefined;
-        							return false;
-        						}
-        						
-        						fn.saveNoticeEditPop();
-        						return false;
-        					})
-        					.set('onshow', function(event){
-        						$("#noticeEditPop").summernote({height: 700, minHeight: null, maxHeight: null, lang: "ko-KR"});
-        						$("#noticeEditPop").summernote('code', result.resultData);
-        					})
-        					.setContent(contents)
-        					.show();
+        			alertify.openNoticeEditDialog()
+        				.set({'resizable': true, 'startMaximized':true}).resizeTo('650', '480')
+        				.set('labels', {ok:'save'})
+        				.set('onok', function(event){
+        					fn.saveNoticeEditPop();
+        					return false;
+        				})
+        				.set('onshow', function(event){
+        					$("#noticeEditPop").summernote({height: 700, minHeight: null, maxHeight: null, lang: "ko-KR"});
+        					$("#noticeEditPop").summernote('code', result.resultData);
+        				})
+        				.setContent(contents)
+        				.show();
 					
 					fn.defaultNotice(false);
                 }
@@ -2374,44 +2306,23 @@
                 }
                 getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
                 	if (!alertify.editDialog){
-        				alertify.dialog('editDialog', function() {
-        					return {
-        						setup: function() {
-        							var settings = alertify.confirm().settings;
-        						
-        							for (var prop in settings) {
-        								this.settings[prop] = settings[prop];
-        							}
-        						
-        							var setup = alertify.confirm().setup();
-        							setup.buttons = [];
-        							setup.focus.element = 0;
-        						
-        							return setup;
-        						},
-        				    	hooks: {
-        				    		onshow: function() {
-        				        		this.elements.dialog.style.maxWidth = 'none';
-        				          		this.elements.dialog.style.width = '700px';
-        				        	}
-        						}
-        					};
-        				}, false, 'confirm');
+                		commonAlertifyDialog('editDialog');
             		}
-        		
-        			alertify.editDialog(res);
-                    },
-                    null,
-                    function () {
-                        $("#modifiedCommentInPjtEditor").summernote({
-                            height: 180,
-                            callbacks: {
-                                onInit: function () {
-                                    $(this).summernote('code', $("#userContents").val());
-                                }
-                            }
-                        });
-                    });
+                	alertify.editDialog().set('onshow', function(e) {
+                		$(alertify.editDialog().elements.buttons.primary).empty();
+                	}).setContent(res).show();
+               	},
+              	null,
+             	function () {
+                 	$("#modifiedCommentInPjtEditor").summernote({
+                      	height: 180,
+                       	callbacks: {
+                        	onInit: function () {
+                            	$(this).summernote('code', $("#userContents").val());
+                         	}
+                      	}
+                 	});
+               	});
             },
             sendEditor: function (type) {
                 //코멘트 저장
@@ -2847,6 +2758,27 @@
                     $("#editAppend").hide();
                 }
             },
+            changeNotice : function (checked) {
+            	let isHideOssVersion = $("#hideOssVersion").prop("checked");
+            	let isAppend = $("#append").prop("checked");
+            	
+            	if (checked) {
+            		$("#companyName").prop("checked", true);
+                    $("#ossDistributionSite").prop("checked", true);
+                    $("#email").prop("checked", true);
+            	} else {
+            		$("#companyName").prop("checked", false);
+                    $("#ossDistributionSite").prop("checked", false);
+                    $("#email").prop("checked", false);
+                    if (isHideOssVersion) {
+                    	$("#hideOssVersion").trigger("click");
+                    }
+                    if (isAppend) {
+                    	$("#append").trigger("click");
+                    }
+            	}
+            	fn.defaultNotice(checked);
+            },
             defaultNotice: function (checked, type) {
             	if (checked) {
                     $("#companyName").attr("disabled", !checked);
@@ -2952,29 +2884,29 @@
 
                     if (editNoticeYn == "Y") {
                         $("[name='btnEditOssNotice']").trigger("click").attr("checked", true);
-                    }
-
-                    if (editCompanyYn == "Y") {
-                        $("#companyName").trigger("click").attr("checked", true);
-                    }
-
-                    if (editDistributionSiteUrlYn == "Y") {
-                        $("#ossDistributionSite").trigger("click").attr("checked", true);
-                    }
-
-                    if (editEmailYn == "Y") {
-                        $("#email").trigger("click").attr("checked", true);
-                    }
-
-                    if (hideOssVersionYn == "Y") {
-                        $("#hideOssVersion").trigger("click").attr("checked", true);
-                    }
-
-                    if (editAppendedYn == "Y") {
-                        $("#append").trigger("click").attr("checked", true);
                         
-                        if (!appendReadOnlyFlag) {
-                        	$('#editor2').summernote('enable');
+                        if (editCompanyYn == "Y") {
+                            $("#companyName").trigger("click").attr("checked", true);
+                        }
+
+                        if (editDistributionSiteUrlYn == "Y") {
+                            $("#ossDistributionSite").trigger("click").attr("checked", true);
+                        }
+
+                        if (editEmailYn == "Y") {
+                            $("#email").trigger("click").attr("checked", true);
+                        }
+
+                        if (hideOssVersionYn == "Y") {
+                            $("#hideOssVersion").trigger("click").attr("checked", true);
+                        }
+
+                        if (editAppendedYn == "Y") {
+                            $("#append").trigger("click").attr("checked", true);
+                            
+                            if (!appendReadOnlyFlag) {
+                            	$('#editor2').summernote('enable');
+                            }
                         }
                     }
                 }, 1);
@@ -3036,7 +2968,12 @@
                     , "referenceDiv": "12"
                     , "noticeFileFormat": datas.noticeFileFormat
                 };
-
+                
+                if ("Y" == $("input[name='withoutVerifyYn']").val()) {
+                	data["withoutVerifyYn"] = "Y";
+                	data["userComment"] = "<p>By Pass is checked</p>";
+                }
+                
                 //공개의무 리스트가 있고 파일업로드가 완료된 상태이며 verify가 완료 되었을때
                 var fileSeq = $("input[name='fileSeq_1']").val();
                 var withoutVerifyYn = $('input[name=withoutVerifyYn]').val();
@@ -3888,33 +3825,10 @@
         				dataType : 'html',
         				cache : false,
         				success : function(res){
-        					if(!alertify.editComments){
-        						alertify.dialog('editComments', function() {
-        							return {
-        								setup: function() {
-        									var settings = alertify.confirm().settings;
-        								
-        									for (var prop in settings) {
-        										this.settings[prop] = settings[prop];
-        									}
-        								
-        									var setup = alertify.confirm().setup();
-        									setup.buttons = [];
-        									setup.focus.element = 1;
-        								
-        									return setup;
-        								},
-        						    	hooks: {
-        						    		onshow: function() {
-        						        		this.elements.dialog.style.maxWidth = 'none';
-        						          		this.elements.dialog.style.width = '700px';
-        						        	}
-        								}
-        							};
-        						}, false, 'confirm');
-                    		}
-        				
-        					alertify.editComments(res).set('title', 'Edit Comments');
+        					if (typeof alertify.editComments === "undefined"){
+        						alertifyWithoutButtons('editComments');
+        	        		}
+        					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
         					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
         					$("#commentEdit").summernote({minHeight: 180, maxHeight: 800, lang: "ko-KR"});
         				}
@@ -3944,7 +3858,10 @@
         			}
         		},
         		deleteComments : function (_commId) {
-        			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+        			if (typeof alertify.delCommentVeriDialog === "undefined") {
+        				basicAlertifyDialog('delCommentVeriDialog');
+        			}
+        			alertify.delCommentVeriDialog("Are you sure you want to delete this comment?", function (e) {
         				if (e) {
         					$.ajax({
         						url : '/comment/deleteComment',

@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @WithMockUser(username = "user", roles = {"USER"})
 @Transactional
-@TestPropertySource(locations = "classpath:application.test.properties")
+@TestPropertySource("/application.test.properties")
 public class LiteSelfCheckTest {
     @Autowired
     private MockMvc mockMvc;

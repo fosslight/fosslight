@@ -120,7 +120,7 @@ public class LicenseController extends CoTopComponent {
 
 	@GetMapping(value = LICENSE.EDIT)
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
-		return "license/edit";
+		return CommonFunction.isAdmin() ? "license/edit" : "license/view";
 	}
 
 	@GetMapping(value = LICENSE.EDIT_ID)
@@ -303,6 +303,16 @@ public class LicenseController extends CoTopComponent {
 		mailBean.setParamLicenseId(commentsHistory.getReferenceId());
 		mailBean.setComment(commentsHistory.getContents());
 
+		LicenseMaster licenseMaster = new LicenseMaster();
+		licenseMaster.setLicenseId(commentsHistory.getReferenceId());
+		licenseMaster = licenseService.getLicenseMasterOne(licenseMaster);
+		licenseMaster.setDomain(CommonFunction.getDomain(req));
+		String internalUrl = CommonFunction.makeLicenseInternalUrl(licenseMaster, CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		if (!isEmpty(internalUrl)) {
+			licenseMaster.setInternalUrl(internalUrl);
+			mailBean.setParamLicenseInfo(licenseMaster);
+		}
+		
 		CoMailManager.getInstance().sendMail(mailBean);
 
 		return makeJsonResponseHeader();

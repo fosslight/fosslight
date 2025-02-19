@@ -22,7 +22,7 @@ ADD ./src/main/resources/template /app/template
 
 RUN chmod +x /app/wait-for /app/verify/verify && \
     apt-get update && \
-    apt-get install -y --no-install-recommends netcat && \
+    apt-get install -y --no-install-recommends netcat tree && \
     rm -rf /var/lib/apt/lists/* && \
     ln -s /bin/sh bash
 

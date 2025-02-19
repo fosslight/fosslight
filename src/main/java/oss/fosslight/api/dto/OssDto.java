@@ -16,18 +16,18 @@ public class OssDto implements ExcelData {
     String ossVersion;
     String licenseName;
     String licenseType;
-    String downloadUrl;
-    String homepageUrl;
-    String description;
-    String cveId;
-    String cvssScore;
+    String downloadUrl = "";
+    String homepageUrl = "";
+    String description = "";
+    String cveId = "";
+    String cvssScore = "";
     String creator;
     String created;
     String modifier;
     String modified;
     List<Character> obligations;
 
-    String copyright;
+    String copyright = "";
     String nicknames = "";
     String attribution = "";
 

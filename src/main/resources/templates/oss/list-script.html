@@ -11,13 +11,7 @@
         let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
         let linkFlag = [[ ${searchBean.linkFlag}]];
         
-     	// prevent clicking the OK button on Enter
-		let keyCode;
-		$(document).on('keydown', function (event) {
-			keyCode = event.keyCode;
-		});
-        
-        $(document).ready(function () {
+     	$(document).ready(function () {
             oss_lst_evt.init();
         });
 
@@ -385,38 +379,11 @@
                     };
                     postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
                        	if (!alertify.deleteOssListDialog){
-							alertify.dialog('deleteOssListDialog', function() {
-								return {
-									setup: function() {
-										var settings = alertify.confirm().settings;
-										
-										for (var prop in settings) {
-											this.settings[prop] = settings[prop];
-										}
-										
-										var setup = alertify.confirm().setup();
-										setup.focus.element = 0;
-										
-										return setup;
-									},
-								    hooks: {
-								    	onshow: function() {
-								        	this.elements.dialog.style.maxWidth = 'none';
-								          	this.elements.dialog.style.width = '650px';
-								        }
-									}
-								};
-							}, false, 'confirm');
+                       		commonAlertifyDialog('deleteOssListDialog');
 	                	}
 						
 						alertify.deleteOssListDialog()
 							.set('onok', function(e){
-								// prevent clicking the OK button on Enter
-								if (typeof keyCode !== 'undefined' && keyCode == 13) {
-									keyCode = undefined;
-									return false;
-								}
-							
 								var comment = $("#promptPopupEditor").summernote('code');
 	                            if (e) {
 	                            	if ("" == $(comment).text().trim()){
@@ -503,8 +470,7 @@
                         display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
                     }
                 } else {
-                	var url = '/oss/edit/'+rowObject['ossId'];
-    				display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
+                	display = "<a onclick=\"openDetailPage('" + rowObject['ossId'] + "')\" class='urlLink d-inline-block' style=\"cursor: pointer;\" target='_blank'>" + cellvalue + "</a>";
                 }
             	 
                 return display;
@@ -534,8 +500,27 @@
         const oss_lst_grid = {
             oldRowNum: 20,
             load: function () {
-            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Restriction', 'Notice', 'Source', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
-
+            	var colNameArr = new Array();
+            	if (isAdmin) {
+                	colNameArr.push('<input type="checkbox" onclick="fn.onCboxClickAll(this,\'list\');">');
+            	} else {
+                	colNameArr.push("");
+            	}
+            	colNameArr.push("ID");
+            	colNameArr.push("CID");
+            	colNameArr.push("OSS Type");
+            	colNameArr.push("OSS Name");
+            	colNameArr.push("OSS Version");
+            	colNameArr.push("License Name");
+            	colNameArr.push("License Type");
+            	colNameArr.push("Restriction");
+            	colNameArr.push("Notice");
+            	colNameArr.push("Source");
+            	colNameArr.push("Download<br>Location");
+            	colNameArr.push("Homepage");
+            	colNameArr.push("Description");
+            	colNameArr.push("CVE ID");
+            	colNameArr.push("Vulnera<br/>bility");
                 colNameArr.push("Creator");
                 colNameArr.push("Created<br>Date");
                 colNameArr.push("Modifier");
@@ -936,16 +921,12 @@
         }
 
         function openDetailPage(ossId) {
-            if ("Y" != linkFlag) {
-                callCreateTabInFrame(ossId + '_Opensource', '/oss/edit/' + ossId, 'oss-edit_' + ossId, true);
-            } else {
-                const openNewWindow = window.open("about:blank");
+        	const openNewWindow = window.open("about:blank");
 
-                if (isAdmin) {
-                    openNewWindow.location.href = "/oss/edit/" + ossId;
-                } else {
-                    openNewWindow.location.href = "/oss/view/" + ossId;
-                }
+            if (isAdmin) {
+                openNewWindow.location.href = "/oss/edit/" + ossId;
+            } else {
+                openNewWindow.location.href = "/oss/view/" + ossId;
             }
         }
 
@@ -1031,6 +1012,23 @@
                 }
 				
                 return display;
+        	},
+        	onCboxClickAll : function (allChk, target) {
+        		if (event.stopPropagation) {
+        	    	event.stopPropagation(); //MOZILLA
+            	} else {
+        	    	event.cancelBubble = true; //IE
+            	}
+        		
+        		if ($(allChk).is(":checked")) {
+        			$("#"+target+" input[type='checkbox']").each(function (idx){
+        				$(this).prop('checked', true);
+        			});
+        		} else {
+        			$("#"+target+" input[type='checkbox']").each(function (idx){
+        				$(this).prop('checked', false);
+        			});
+        		}
         	}
         }
         

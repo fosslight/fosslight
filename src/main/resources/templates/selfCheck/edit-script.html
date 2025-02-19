@@ -645,9 +645,11 @@ var fn = {
 		if (result.isValid == 'false') {
            	alertify.error([[#{msg.common.valid2}]], 0);
 		} else {
+			if (typeof alertify.selfOpenNoticeEditDialog === 'undefined') {
+				commonAlertifyDialog('selfOpenNoticeEditDialog');
+        	}
 			var contents = '<textarea id="editor3" name="editor3"></textarea>';
-			
-			alertify.confirm()
+			alertify.selfOpenNoticeEditDialog()
 					.set({'resizable': true, 'startMaximized':true})
 					.set('labels', {ok:'save'})
 					.set('onok', function(event){ fn.saveNoticeEditPop(); return false; })
@@ -1593,32 +1595,28 @@ var data = {
 			$('input[name=prjName]').val(data.detail.prjName);
 			$('input[name=prjVersion]').val(data.detail.prjVersion);
 
-            if (viewFlag == null && data.detail.watcherList.length > 0) {
-                $(".tbws1.w1025.mt10").removeClass("collapsed-card")
-            }
-
-            if (viewFlag == null) {
+            if (viewFlag == null && data.detail.watcherList != null) {
+            	$(".tbws1.w1025.mt10").removeClass("collapsed-card");
+            	
             	data.detail.watcherList.forEach(function(watcher, index, obj){
     				var deptUseYn = watcher.deptUseYn || "Y";
     				var userUseYn = watcher.userUseYn || "Y";
     				
-    				if (watcher != "") {
-    					if (watcher.prjEmail) { 
+    				if (watcher) {
+						if (watcher.prjEmail != null && "" != watcher.prjEmail) {
     						fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
     					} else {
     						var str = "";
     						
-    						if (watcher.prjUserName == undefined){
-    							str = watcher.prjDivisionName;
-    						} else {
-    							str = '<b';
-    							
-    							if (divisionEmptyCd != watcher.prjDivision) {
-    								str += '>'+watcher.prjDivisionName+'</b>/<b';
-    							}
-    							
-    							str += '>'+watcher.prjUserName+'</b>';
-    						}
+    						if (watcher.prjUserName == null || "" == watcher.prjUserName) {
+								str = watcher.prjDivisionName;
+							} else {
+								str = "";
+								if (watcher.prjDivisionName != null && "" != watcher.prjDivisionName) {
+									str += '<span class="text-bold">' + watcher.prjDivisionName + '</span>/';
+								}
+								str += '<span class="text-bold">' + watcher.prjUserName + '</span>';
+							}
     						
     						fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
     					}
@@ -2349,8 +2347,11 @@ var src_fn = {
 			dataType : 'json',
 			cache : false,
 			success : function(data){
-				if(data.success) {
-					alertify.success([[#{msg.common.success}]]);						
+				if (data.success) {
+					alertify.alert([[#{msg.common.success}]], function() {
+						deleteTabInFrame('/selfCheck/edit/' + [[${project.prjId}]]);
+						createTabInFrame([[${project.prjId}]] + '_selfCheck', "/selfCheck/edit/" + [[${project.prjId}]]);
+					});
 				} else {
 					alertify.error([[#{msg.common.valid2}]], 0);
 					if(data.msg) {
@@ -2370,6 +2371,17 @@ var src_fn = {
     		$("input[name='sheetNameSelect']").prop("checked", false);
     	}
     }
+};
+
+var gridTooltip = {
+		typeCodes : [],
+		tooltipCont : "<div class=\"tooltipData500\"><span style=\"color:red;\">Obligation is unclear. Obliagtion이 불명확한 경우입니다.</span>"
+	                   +"<dl><dt><span>non-included license : License is different from registered in FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed oss : It is a new OSS not registered in FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed version : It is the new OSS version that is not registered with FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed license : It is a new license not registered in FOSSLight Hub.</span></dt></dl>"
+	                   +"</div>",
+		existTooltip : false
 };
 
 //SRC 그리드
@@ -2931,29 +2943,18 @@ var src_grid = {
 		});
 		
 		if (viewFlag == null) {
-			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
-				updateGridRowCount('srcList', 'srcListPager');
-			}});
-//			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
-// 													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
-// 													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
-// 													  , cloneToTop:true
-// 			});
+			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+				beforeSearch: function () {
+					if (_mainLastsel != -1) {
+						fn_grid_com.setGridBeforeSearch(srcList, com_fn.getLicenseName);
+	            	}
+				},
+				afterSearch : function () {
+					updateGridRowCount('srcList', 'srcListPager');
+				}
+			});
 		}
-		
-		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 	}
-};
-
-var gridTooltip = {
-		typeCodes : [],
-		tooltipCont : "<div class=\"tooltipData500\"><span style=\"color:red;\">Obligation is unclear. Obliagtion이 불명확한 경우입니다.</span>"
-	                   +"<dl><dt><span>non-included license : License is different from registered in FOSSLight Hub.</span></dt></dl><br>"
-	                   +"<dl><dt><span>unconfirmed oss : It is a new OSS not registered in FOSSLight Hub.</span></dt></dl><br>"
-	                   +"<dl><dt><span>unconfirmed version : It is the new OSS version that is not registered with FOSSLight Hub.</span></dt></dl><br>"
-	                   +"<dl><dt><span>unconfirmed license : It is a new license not registered in FOSSLight Hub.</span></dt></dl>"
-	                   +"</div>",
-		existTooltip : false
 };
 
 var com_fn = {

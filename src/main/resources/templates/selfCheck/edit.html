@@ -5,7 +5,7 @@
 <th:block th:replace="selfCheck/edit-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        <div class="custom-layout">
+        <div class="custom-layout multi-grid-page">
             <section class="content-header">
                 <div class="container-fluid">
                 	<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
@@ -129,7 +129,8 @@
             </section>
             <section class="content" th:if="${project.prjId != null}">
                 <div class="container-fluid">
-                    <div class="card card-secondary card-tabs">
+                	<div class="topper-content">
+                		<div class="card card-secondary card-tabs">
                         <div class="card-header d-flex p-0 pt-1">
                         	<div class="d-flex align-items-center">
                         		<ul class="nav nav-tabs" id="menu-tab" role="tablist">
@@ -326,14 +327,13 @@
                                             <input class="btn btn-block btn-default btn-xm" type="button" id="noticeEditor" value="Edit" th:disabled="${project?.useCustomNoticeYn != 'Y'} ? 'disabled'"></input>
                                         </div>
                                     </div>
-
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                <div class="container-fluid">
-                    <div class="tabButtonArea" name="gridArea" id="gridAreaOssList">
+                	</div>
+                	
+                    <div class="tabButtonArea bottom-component" name="gridArea" id="gridAreaOssList">
                         <div th:class="${viewFlag == null ? 'row mt-3 ml-1' : 'row mt-3 ml-3'}">
                             <div th:if="${viewFlag == null}" class="col-md-12">
                                 <div th:if="${project.permission > 0}" class="row float-left">
@@ -345,32 +345,8 @@
                                       	<span class="dropdown-item pointer" th:onclick="|src_fn.CheckOssLicenseViewPage()|" th:text="'License'"></span>
                                		</div>
                                 </div>
-<!--                           	<div class="row float-right">
-                                    <div class="btn-group mr-xm">
-                                    <input type="button" class="btn btn-yellow-04 btn-sm width-7rem mr-xm px-3" th:onclick="|fn.shareUrl()|" value="Share URL"></input>
-                                    	<input type="hidden" id="copyUrl"/>
-                                        <button type="button" class="btn btn-yellow-04 btn-sm px-3" th:text="Export"></button>
-                                        <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon mr-xm" data-toggle="dropdown">
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu" role="menu"  th:onclick="|fn.selectDownloadFile()|">
-                                            <a class="dropdown-item" id="report_sub" style="cursor: pointer;" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                            <a class="dropdown-item" id="YAML" style="cursor: pointer;" th:text="'FOSSLight Report (YAML)'"></a>
-                                            <a class="dropdown-item" id="Spreadsheet_sub" style="cursor: pointer;" th:text="'SPDX (Spreadsheet)'"></a>
-                                            <a class="dropdown-item" id="RDF_sub" style="cursor: pointer;" th:text="'SPDX (RDF)'"></a>
-                                            <a class="dropdown-item" id="TAG_sub" style="cursor: pointer;" th:text="'SPDX (TAG)'"></a>
-                                            <a class="dropdown-item" id="JSON_sub" style="cursor: pointer;" th:text="'SPDX (JSON)'"></a>
-                                            <a class="dropdown-item" id="YAML_sub" style="cursor: pointer;" th:text="'SPDX (YAML)'"></a>
-                                        </div>
-                                        <input type="button" class="btn btn-yellow-04 btn-sm width-7rem mr-xm px-3" th:onclick="|fn.bulkEdit()|" value="Bulk Edit"></input>
-                                        <input type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="|src_fn.CheckOssViewPage()|" value="Check OSS Name"></input>
-                                        <input type="button" class="btn btn-yellow-04 btn-sm width-8rem mr-xm px-3" th:onclick="|src_fn.CheckOssLicenseViewPage()|" value="Check License"></input>
-                                        <input type="button" id="srcResetUp" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" value="Reset"></input>
-                                        <input type="button" id="srcSaveUp" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" value="Save"></input>
-                                    </div>
-                                </div> -->
                             </div>
-                            <div class="col-md-12 mt-2">
+                            <div class="col-md-12 mt-2 grid-area">
                                 <div class="jqGridSet">
                                     <table id="srcList"><tr><td></td></tr></table>
                                     <div id="srcPager"></div>

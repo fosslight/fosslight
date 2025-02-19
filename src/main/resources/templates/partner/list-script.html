@@ -15,12 +15,6 @@ var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMP
 var changeWatcherArr = [];
 var role = [[${#authentication.authorities[0].authority}]];
 
-//prevent clicking the OK button on Enter
-let keyCode;
-$(document).on('keydown', function (event) {
-	keyCode = event.keyCode;
-});
-
 $(document).ready(function () {
 	'use strict';
 	setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
@@ -330,6 +324,34 @@ var fn = {
 				break;
 		}
 		return display;
+	},
+	displayProgress: function (cellvalue, options, rowObject){
+		let request = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST')}]];
+		let review = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW')}]];
+		let confirm = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}]];
+		let progress = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS')}]];
+		
+		let status = rowObject.status;
+		var display = "";
+		switch (status) {
+			case confirm : display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+","+rowObject.permission+")\">Identification</span>";
+				break;
+			case request : display += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+","+rowObject.permission+")\">Identification</span>";
+				break;
+			case review : display += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+","+rowObject.permission+")\">Identification</span>";
+				break;
+			case progress :
+			default : display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+","+rowObject.permission+")\">Identification</span>";
+				break;
+		}
+		return display;
+	},
+	mvIdentification: function (partnerId, permission) {
+		if (parseInt(permission) > 0){
+			createTabInFrame(partnerId + '_3rdParty_Identify', '/partner/identification/'+partnerId);
+		} else {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
+		}
 	},
 	displayDeliveryForm: function (cellvalue, options, rowObject) {
 		var display = "";
@@ -929,8 +951,8 @@ var fn = {
 			});
 		}
 	},
-	checkChar : function(){
-		if(event.keyCode == 64){//@ 특수문자 체크
+	checkChar : function(event){
+		if (event.keyCode == 64){//@ 특수문자 체크
 			alertify.alert([[#{msg.login.check.char}]], function(){});
     		
 			event.returnValue = false;
@@ -987,38 +1009,11 @@ var fn = {
 	           	innerHtml 		+= '<textarea id="delParEditor"></textarea>';
 	           	
 	           	if (!alertify.delParDialog){
-	    			alertify.dialog('delParDialog', function() {
-	    				return {
-	    					setup: function() {
-	    						var settings = alertify.confirm().settings;
-	    						
-	    						for (var prop in settings) {
-	    							this.settings[prop] = settings[prop];
-	    						}
-	    						
-	    						var setup = alertify.confirm().setup();
-	    						setup.focus.element = 0;
-	    						
-	    						return setup;
-	    					},
-	    				    hooks: {
-	    				    	onshow: function() {
-	    				        	this.elements.dialog.style.maxWidth = 'none';
-	    				          	this.elements.dialog.style.width = '650px';
-	    				        }
-	    					}
-	    				};
-	    			}, false, 'confirm');
+	           		commonAlertifyDialog('delParDialog');
 	        	}
 	           	
 	           	alertify.delParDialog()
            		.set('onok', function(e) {
-           			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-					
 				   	if (e) {
 				   		var editorVal = $("#delParEditor").summernote('code');
 				   		if ("" == $(editorVal).text().trim()) {
@@ -1191,6 +1186,10 @@ var partnerList = {
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true};
 	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'progress', index: 'progress', width: 50, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false,  cellattr: function(rowId, val, rawObject, cm, rdata) {
+                return 'style="min-width: ' + (cm.width + 20) + 'px;"';
+            }};
+			colModelArr.push(colModelObj);
 	        colModelObj = {name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true, hidden: true};
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'description', index: 'description', width: 100, align: 'left', sortable : true, formatter:fn.displayComment, unformatter:fn.unformatter, hidden: true};
@@ -1288,7 +1287,7 @@ var partnerList = {
 				total:function(obj){return obj.total;},
 				records:function(obj){return obj.records;}
 			},
-		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
+		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'OSC Process', 'Delivery<br/>Form','Description'
 			  	, 'CVE ID', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName', 'permission', 'statusPermission'],
             colModel: colModelArr,
 			onSelectRow: function(id){},

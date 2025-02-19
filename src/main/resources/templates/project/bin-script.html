@@ -530,7 +530,7 @@ var bin_fn = {
 				var ids = $('#_binAddList').jqGrid('getDataIDs');
 				listData.componentCount = cnt;
 
-				$('#_binAddList').jqGrid('addRowData',ids.length+1,listData);
+				$('#_binAddList').jqGrid('addRowData',ids.length+1,listData,"first");
 				
 				param["mainData"] = JSON.stringify(mainData);
 				param = JSON.stringify(param);

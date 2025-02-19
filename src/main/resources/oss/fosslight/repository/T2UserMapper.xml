@@ -403,4 +403,17 @@
         WHERE 
         	USER_ID = #{userId}
     </update>
+    
+    <select id="selectUnusedDivisionUserList" parameterType="string" resultType="oss.fosslight.domain.T2Users">
+    	SELECT *
+    	FROM T2_USERS
+    	WHERE 1=1
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(unusedDivisionList)">
+    		AND DIVISION IN (
+		   	<foreach item="division" index="index" collection="unusedDivisionList" separator=",">
+				#{division}
+			</foreach>
+			)
+    	</if>
+    </select>
 </mapper>

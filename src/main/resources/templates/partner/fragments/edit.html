@@ -576,5 +576,81 @@
 		</div>
 	</div>
 </th:block>
+<th:block th:fragment="partyEditFragments">
+	<div class="card-body bg-ivory">
+		<div id="content_party">
+			<form id="binAndroidUploadForm" class="binAndroidBtn">
+				<div class="row mt-3" id="content-partner">
+					<div class="col-12">
+						<div class="row">
+							<div class="col-lg-2 pl-3 mt-1">
+								<strong th:text="#{msg.common.field.OSSChecklist}"></strong><br><strong th:text="'(Open Source List)'"></strong>
+							</div>
+							<div class="col-lg-3 ossUploader" th:style="${ossFile != null} ? 'display : none;' : 'display : flex;'">
+								<div class="multi-fileuploader" id="ossFile" th:text="Upload"></div>
+							</div>
+							<div class="col-lg-7">
+								<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+									<ul class="ossUpload">
+										<li th:if="${ossFile != null}">
+											<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
+											<span th:if="${detail.viewOnlyFlag != 'Y' and detail.status != 'REQ'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="|fn.deleteOssFile(this)|" th:text="X"></span>
+											<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}"/>
+											<br>[[${ossFile.createdDate}]]
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</th:block>
+<th:block th:fragment="partyViewFragments">
+	<div class="card-body bg-ivory">
+		<div th:if="${detail.statusPermission > 0 and 'CONF' != detail.status}" class="row">
+			<div class="col-lg-6"></div>
+			<div class="col-lg-6">
+				<div class="row d-flex-align-right float-right">
+					<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="fn.changeMode('edit', false, [[${detail.status}]])" >
+						<i class="fas fa-edit customIcon2 text-gray"></i>
+					</span>
+				</div>
+			</div>
+		</div>
+		<form id="partyUploadForm" class="partyBtn">
+		<div name="content_party">
+			<div class="row mt-3" id="content-partner">
+				<div class="col-12">
+					<div class="row">
+						<div class="col-lg-2 pl-3 mt-1">
+							<strong th:text="#{msg.common.field.OSSChecklist}"></strong><br><strong th:text="'(Open Source List)'"></strong>
+						</div>
+						<div class="col-lg-9">
+							<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+								<ul class="ossUpload">
+									<li th:if="${ossFile != null}">
+										<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
+										<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}"/>
+										<br>[[${ossFile.createdDate}]]
+									</li>
+									<li th:unless="${ossFile != null}" class="mt-1" th:text="'No File'"></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>	
+	</div>
+</th:block>
+<th:block th:fragment="partyBomViewFragments">
+	<div class="row">
+		<div class="col-lg-2"></div>
+		<div class="col-lg-10 loadedProjectArea"></div>
+	</div>
+</th:block>
 </body>
 </html>

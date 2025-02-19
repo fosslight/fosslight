@@ -4,6 +4,9 @@
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 		<style>
 			.marker{background-color: Yellow;}
+			.commentDiv table {border: 1px solid #ddd;}
+			.commentDiv table th {border: 1px solid #ddd;}
+			.commentDiv table td {border: 1px solid #ddd;}
 		</style>
 		<title>FOSSLight Hub</title>
 	</head>
@@ -24,12 +27,12 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}" th:utext="${contentsTitle}"></div>
-								<p style="font-size:12px;" th:if="${contentsSubTitle}" th:utext="${contentsSubTitle}"></p>
-								<th:block th:if="${comment != null and comment != '' and (mailType == '19' or mailType == '10' or mailType == '13' or mailType == '131')}">
+								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null}" th:utext="${contentsTitle}"></div>
+								<p style="font-size:12px;" th:if="${contentsSubTitle != null}" th:utext="${contentsSubTitle}"></p>
+								<div th:if="${comment != null and comment != '' and (mailType == '19' or mailType == '10' or mailType == '13' or mailType == '131' or mailType == '813' or mailType == '814')}" class="commentDiv">
 									<h2 style="margin:0; padding:25px 10px 0; font-size:14px;">Comment</h2>
-									<div style="padding:10px; font-size:12px;" th:utext="${comment}"></div>
-								</th:block>
+									<div style="padding:10px; font-size:12px;font-color:#000;" th:utext="${comment}"></div>
+								</div>
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
         							<col style="width:60%">

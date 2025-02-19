@@ -10,7 +10,7 @@
 	var isCheckT = false;
 	var modelData;
 	var gDateKeyup = false;
-	var distributionStatus = [[${project.destributionStatus}]];
+	var distributionStatus = [[${project.distributionStatus}]];
 	var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
 	var osTypeEtc = [[${@CommonFunction.getCoConstDefVal('CD_OS_TYPE_ETC')}]];
 	var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
@@ -23,13 +23,7 @@
 	var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
     var isReadOnly = [[${isReadOnly}]];
 	
- 	// prevent clicking the OK button on Enter
-	let keyCode;
-	$(document).on('keydown', function (event) {
-		keyCode = event.keyCode;
-	});
-    
-	$(document).ready(function() {
+ 	$(document).ready(function() {
 		'use strict';
 		data.init();
 		evt.init();
@@ -55,7 +49,7 @@
 		showHelpLink("Project_List_BasicInfo_Oss_Notice", "helpLink_ossNotice");
 		showHelpLink("Project_List_BasicInfo_Priority", "helpLink_priority");
 		
-		if([[${project.destributionStatus}]] == 'NA' && [[${project.completeYn}]] == 'Y'){
+		if([[${project.distributionStatus}]] == 'NA' && [[${project.completeYn}]] == 'Y'){
 			$("#saveModel").show();
 		}
 
@@ -174,6 +168,7 @@
 								var customButtons = [];
 								for (var i in buttons) {
 									if ('OK' == buttons[i].text) {
+										buttons[i].key = 0;
 										customButtons.push(buttons[i]);
 									}
 								}
@@ -194,13 +189,7 @@
                 
                 alertify.completeDialog()
            		.set('onok', function(e) {
-           			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-           			
-					if (e) {
+           			if (e) {
 						var editorVal = $("#completeEditor").summernote('code');
 						if ("" == $(editorVal).text().trim()) {
 	       					editorVal = "";
@@ -213,7 +202,6 @@
            		})
            		.set('onshow', function(e){
            			$("#completeEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-                    
                     const parameter = {
     		          	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]],
     		            "referenceId" : [[${project.prjId}]]
@@ -246,6 +234,7 @@
 								var customButtons = [];
 								for (var i in buttons) {
 									if ('OK' == buttons[i].text) {
+										buttons[i].key = 0;
 										customButtons.push(buttons[i]);
 									}
 								}
@@ -266,13 +255,7 @@
 				
                 alertify.dropDialog()
                 	.set('onok', function(e) {
-                		// prevent clicking the OK button on Enter
-						if (typeof keyCode !== 'undefined' && keyCode == 13) {
-							keyCode = undefined;
-							return false;
-						}
-                		
-						if (e) {
+                		if (e) {
 							var editorVal = $("#dropEditor").summernote('code');
 							if ("" == $(editorVal).text().trim()){
 		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
@@ -341,47 +324,32 @@
 			
 			// 삭제
 			$("#delete").click(function(){
-				if (data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
+				fn.getProjectStatus();
+				
+				if (displayInfo.completeFlag == 'Y' || displayInfo.identificationStatus == "CONF") {
 					alertify.alert([[#{msg.project.warn.edit.delete}]], function(){});
 
 					return;
+				} else if ('REV' == displayInfo.projectStatus || 'PROC' == displayInfo.distributionStatus) { 
+					var msg = "";
+					if ("PROC" == displayInfo.distributionStatus){
+						msg = [[#{msg.project.distribution.loading}]];
+					} else {
+						msg = [[#{msg.project.warn.project.status}]];
+					}
+					alertify.alert(msg, function(){});
+
+					return false;
 				} else {
 					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
 					
-					if(!alertify.deletePrjDialog){
-						alertify.dialog('deletePrjDialog', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									setup.focus.element = 0;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '650px';
-							        }
-								}
-							};
-						}, false, 'confirm');
+					if (!alertify.deletePrjDialog){
+						commonAlertifyDialog('deletePrjDialog');
                 	}
 	               	
 	               	alertify.deletePrjDialog()
 					.set('onok', function(event){
-						// prevent clicking the OK button on Enter
-						if (typeof keyCode !== 'undefined' && keyCode == 13) {
-							keyCode = undefined;
-							return false;
-						}
-
 						var editorVal = $("#prjDelEditor").summernote('code');
 
 						if ("" == $(editorVal).text().trim()) {
@@ -810,38 +778,11 @@
 			}
 			
 			if (typeof alertify.prjSaveDialog === 'undefined') {
-				alertify.dialog('prjSaveDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
+				commonAlertifyDialog('prjSaveDialog');
         	}
 			
 			alertify.prjSaveDialog()
        		.set('onok', function(e) {
-       			// prevent clicking the OK button on Enter
-				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-					keyCode = undefined;
-					return false;
-				}
-       			
        			if (e) {
        				var editorVal = $("#prjSaveEditor").summernote('code');
        				if ("" != $(editorVal).text().trim()) {
@@ -969,77 +910,76 @@
 				cache : false,
 				contentType : 'application/json',
 				success: function(resultData){
-					var copyWatcher = resultData.copyWatcher;
-					
-					if(copyWatcher.length){
-						for(var i = 0, len = copyWatcher.length ; i < len ; i++){
-							var isNew = true
-							  , division = copyWatcher[i].prjDivision || ""
-							  , divisionName = copyWatcher[i].prjDivisionName || ""
-							  , userId = copyWatcher[i].prjUserId || ""
-							  , userName = copyWatcher[i].prjUserName || ""
-							  , email = copyWatcher[i].prjEmail || ""
-							  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
-							  , userUseYn = copyWatcher[i].userUseYn || "Y";
-							
-							$(".watcherTags").each(function(idx, tag){
-								var tagDiv = $(tag).val().split("/")[0]
-								  , tagUid = $(tag).val().split("/")[1];
-								  
-								if(division == tagDiv) {
-									if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
-										isNew = false;
-										
-										return false;
-									} else if(tagUid == userId) {
-										isNew = false;	// 이미 등록된 watcher가 있을경우
-									}
-								}
+					if (typeof resultData.copyWatcher !== "undefined") {
+						var copyWatcher = resultData.copyWatcher;
+						if (copyWatcher.length > 0) {
+							for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+								var isNew = true
+								  , division = copyWatcher[i].prjDivision || ""
+								  , divisionName = copyWatcher[i].prjDivisionName || ""
+								  , userId = copyWatcher[i].prjUserId || ""
+								  , userName = copyWatcher[i].prjUserName || ""
+								  , email = copyWatcher[i].prjEmail || ""
+								  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+								  , userUseYn = copyWatcher[i].userUseYn || "Y";
 								
-								if(tagUid == "Email") {
-									if(email == tagDiv) {
-										isNew = false;
+								$(".watcherTags").each(function(idx, tag){
+									var tagDiv = $(tag).val().split("/")[0]
+									  , tagUid = $(tag).val().split("/")[1];
+									  
+									if(division == tagDiv) {
+										if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+											isNew = false;
+											
+											return false;
+										} else if(tagUid == userId) {
+											isNew = false;	// 이미 등록된 watcher가 있을경우
+										}
 									}
-								}
-							});
-							
-							if(isNew){
-								if(email != ""){
-									fn.addHtml($("#multiDiv"), email, email, "Email");
-								} else {
-									var str = "";
 									
-									if(userName == "") {
-										str = divisionName;
+									if(tagUid == "Email") {
+										if(email == tagDiv) {
+											isNew = false;
+										}
+									}
+								});
+								
+								if(isNew){
+									if(email != ""){
+										fn.addHtml($("#multiDiv"), email, email, "Email");
 									} else {
-										str = '<b';
+										var str = "";
+										
+										if(userName == "") {
+											str = divisionName;
+										} else {
+											str = '<b';
 
-										if(divisionEmptyCd != division) {
-											if(deptUseYn == "N"){
+											if(divisionEmptyCd != division) {
+												if(deptUseYn == "N"){
+													str += ' class="deleteUser"';
+												}
+												
+												str += '>'+divisionName+'</b>/<b';
+											}
+											
+											if(userUseYn == "N"){
 												str += ' class="deleteUser"';
 											}
 											
-											str += '>'+divisionName+'</b>/<b';
+											str += '>'+userName+'</b>';
 										}
 										
-										if(userUseYn == "N"){
-											str += ' class="deleteUser"';
-										}
-										
-										str += '>'+userName+'</b>';
+										fn.addHtml($("#multiDiv"), str, division, userId);
 									}
-									
-									fn.addHtml($("#multiDiv"), str, division, userId);
 								}
 							}
+							
+							if(prjId) {
+								alertify.success([[#{msg.common.success}]]);
+							}
 						}
-						
-						if(prjId) {
-							alertify.success([[#{msg.common.success}]]);
-						}
-					}
-					
-					if(!copyWatcher.length) {
+					} else {
 						alertify.warning([[#{msg.project.required.id}]]);
 					}
 				},
@@ -1220,11 +1160,8 @@
 				}
 				
 				//public 값 넣어주기
-				if ($('#checkbox3').is(':checked')) {
-					$('#checkbox3').val('N');
-				} else {
-					$('#checkbox3').val('Y');
-				}
+				var publicYn = $("input[name='permissionRadio']:checked").val();
+				$("input[name='publicYn']").val(publicYn);
 				 
  				$("#projectForm").ajaxForm({
  					url : URL,
@@ -1347,7 +1284,7 @@
 									deleteTabInFrame('/project/edit');
 									createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
 								} else {
-									var status = data.detail.destributionStatus;
+									var status = data.detail.distributionStatus;
 									var flag = "false";
 									
 									if (json.resultData) {
@@ -1501,32 +1438,11 @@
 				
 		        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
 		        	if (!alertify.editDialog){
-						alertify.dialog('editDialog', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-								
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-								
-									var setup = alertify.confirm().setup();
-									setup.buttons = [];
-									setup.focus.element = 0;
-								
-									return setup;
-								},
-						    	hooks: {
-						    		onshow: function() {
-						        		this.elements.dialog.style.maxWidth = 'none';
-						          		this.elements.dialog.style.width = '700px';
-						        	}
-								}
-							};
-						}, false, 'confirm');
+		        		commonAlertifyDialog('editDialog');
 		    		}
-				
-					alertify.editDialog(res);
+		        	alertify.editDialog().set('onshow', function(e) {
+		        		$(alertify.editDialog().elements.buttons.primary).empty();
+		        	}).setContent(res).show();
 		      	},
 		       	null,
 		      	function () {
@@ -2090,11 +2006,10 @@
 					$("[name='noticeType'][value|='"+noticeTypeGeneral+"']").trigger("click");
 				}
 			},
-			CheckChar : function(){
-				if(event.keyCode == 64){//@ 특수문자 체크
-            				alertify.alert([[#{msg.login.check.char}]], function(){});
-            		
-            				event.returnValue = false;
+			CheckChar : function(event){
+				if (event.keyCode == 64){//@ 특수문자 체크
+            		alertify.alert([[#{msg.login.check.char}]], function(){});
+            		event.returnValue = false;
             	}
 			},
 			shareUrl : function(){
@@ -2350,33 +2265,10 @@
 				dataType : 'html',
 				cache : false,
 				success : function(res){
-					if(!alertify.editComments){
-						alertify.dialog('editComments', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									setup.buttons = [];
-									setup.focus.element = 0;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '750px';
-							        }
-								}
-							};
-						}, false, 'alert');
-	               	}
-					
-					alertify.editComments(res).set('title', 'Edit Comments');
+					if (typeof alertify.editComments === "undefined"){
+						alertifyWithoutButtons('editComments');
+	        		}
+					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
 					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
 				}
@@ -2407,7 +2299,10 @@
 			}
 		},
 		deleteComments : function (_commId) {
-			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+			if (typeof alertify.delCommentPrjDialog === "undefined") {
+				basicAlertifyDialog('delCommentPrjDialog');
+			}
+			alertify.delCommentPrjDialog("Are you sure you want to delete this comment?", function (e) {
 				if (e) {
 					$.ajax({
 						url : '/comment/deleteComment',
@@ -2500,40 +2395,32 @@
 				$("#priority").trigger("change");
 				$("#noticeTypeEtc").trigger("change");
 				
-				data.detail.watcherList.forEach(function(watcher, index, obj){
-					var deptUseYn = watcher.deptUseYn || "Y";
-					var userUseYn = watcher.userUseYn || "Y";
-					
-					if(watcher!=""){
-						if(watcher.prjEmail){ 
-							fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
-						} else {
-							var str = "";
-							
-							if(watcher.prjUserName == undefined){
-								str = watcher.prjDivisionName;
+				if (data.detail.watcherList != null) {
+					data.detail.watcherList.forEach(function(watcher, index, obj){
+						var deptUseYn = watcher.deptUseYn || "Y";
+						var userUseYn = watcher.userUseYn || "Y";
+						
+						if (watcher) {
+							if (watcher.prjEmail != null && "" != watcher.prjEmail) {
+								fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
 							} else {
-								str = '<b';
+								var str = "";
 								
-								if (divisionEmptyCd != watcher.prjDivision) {
-									if(deptUseYn == "N"){
-										str += ' class="deleteUser"';
+								if (watcher.prjUserName == null || "" == watcher.prjUserName) {
+									str = watcher.prjDivisionName;
+								} else {
+									str = "";
+									if (watcher.prjDivisionName != null && "" != watcher.prjDivisionName) {
+										str += '<span class="text-bold">' + watcher.prjDivisionName + '</span>/';
 									}
-									
-									str += '>'+watcher.prjDivisionName+'</b>/<b';
+									str += '<span class="text-bold">' + watcher.prjUserName + '</span>';
 								}
 								
-								if(userUseYn == "N"){
-									str += ' class="deleteUser"';
-								}
-								
-								str += '>'+watcher.prjUserName+'</b>';
+								fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
 							}
-							
-							fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
 						}
-					}
-				});
+					});
+				}
 
                 // Security Mail
                 var checked = $("[name='secMailYn']:checked").val();
@@ -2632,6 +2519,33 @@
 						$(this).trigger('click');
 					}
 				});
+				
+				if (data.copy.watcherList != null) {
+					data.copy.watcherList.forEach(function(watcher, index, obj){
+						var deptUseYn = watcher.deptUseYn || "Y";
+						var userUseYn = watcher.userUseYn || "Y";
+						
+						if (watcher) {
+							if (watcher.prjEmail != null && "" != watcher.prjEmail) {
+								fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
+							} else {
+								var str = "";
+								
+								if (watcher.prjUserName == null || "" == watcher.prjUserName) {
+									str = watcher.prjDivisionName;
+								} else {
+									str = "";
+									if (watcher.prjDivisionName != null && "" != watcher.prjDivisionName) {
+										str += '<span class="text-bold">' + watcher.prjDivisionName + '</span>/';
+									}
+									str += '<span class="text-bold">' + watcher.prjUserName + '</span>';
+								}
+								
+								fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
+							}
+						}
+					});
+				}
 				
 				$("#complete").hide();
 				$("#drop").hide();

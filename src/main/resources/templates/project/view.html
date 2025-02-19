@@ -115,21 +115,21 @@
 												<th th:text="#{msg.common.field.watcher}"></th>
 												<td>
 													<th:block th:if="${project.watcherList != null}" th:each="watcher, status : ${project.watcherList}">
-														<th:block th:if="${watcher.prjEmail != ''}">
-															<span th:text="${watcher.prjEmail + ' / Email'}"></span>
+														<th:block th:if="${watcher.prjEmail != null and watcher.prjEmail != ''}">
+															<span th:text="${watcher.prjEmail}"></span>
 														</th:block>
-														<th:block th:unless="${watcher.prjEmail != ''}">
-															<th:block th:if="${watcher.prjDivisionName != ''}">
-																<span th:text="${watcher.prjDivisionName}"></span>
-																<span th:if="${watcher.prjUserName != ''}" th:text="${' / ' + watcher.prjUserName}"></span>
-															</th:block>
-															<th:block th:unless="${watcher.prjDivisionName != ''}">
-																<span th:if="${watcher.prjUserName != ''}" th:text="${watcher.prjUserName}"></span>
-																<span th:if="${watcher.prjUserId != ''}" th:text="${' / ' + watcher.prjUserId}"></span>
+														<th:block th:unless="${watcher.prjEmail != null and watcher.prjEmail != ''}">
+															<th:block th:if="${watcher.prjUserName != null and watcher.prjUserName != ''}">
+																<th:block th:if="${watcher.prjDivisionName != null and watcher.prjDivisionName != ''}">
+																	<span th:text="${watcher.prjDivisionName}"></span>
+																	<span th:text="${'/' + watcher.prjUserName}"></span>
+																</th:block>
+																<th:block th:unless="${watcher.prjDivisionName != null and watcher.prjDivisionName != ''}">
+																	<span th:text="${watcher.prjUserName}"></span>
+																</th:block>
 															</th:block>
 														</th:block>
 														<span th:if="${status.count != status.size}" th:text="', '"></span>
-														<th:block th:if="${status.count%2 == 0}"><br></th:block>
 													</th:block>
 												</td>
 											</tr>

@@ -569,10 +569,7 @@ var com_fn = {
 		var prjId = [[${project.prjId}]];
 		var tabMenu = target;
 
-        console.log("aaa");
-        console.log(`prjId: ${prjId} / ${tabMenu}`);
-		if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
-            console.log("bbb")
+        if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
 			com_fn.downloadExcel(tabMenu);
 		} else {
 			loading.hide();
@@ -916,7 +913,7 @@ var total = {
 			formData:{"registFileId" : $('#scrtCsvFileId').val(), "tabNm" : "SECURITY"},
 			onSuccess:function(files,data,xhr,pd) {
 				var result = jQuery.parseJSON(data);
-				console.log("result", result);
+				
 				if (result[1] == null) {
 					if (result[0] == "TAB_GUBN_ERROR") {
 						alertify.error([[#{msg.common.upload.failed.separator}]], 0);
@@ -1334,29 +1331,11 @@ var fn = {
 	   	}
 	    getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
 	  		if (!alertify.editDialog) {
-	           	alertify.dialog('editDialog', function () {
-	            	return {
-	           			main: function (content) {
-	                  		this.setContent(content);
-	              		},
-	             		setup: function () {
-	             			var setup = alertify.confirm().setup();
-							setup.buttons = [];
-							setup.focus.element = 1;
-						
-							return setup;
-	            		},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '700px';
-					        }
-						}
-	           		};
-	     		});
+	  			commonAlertifyDialog('editDialog');
 	  		}
-	  		
-	     	editDailog = alertify.editDialog(res);
+	  		alertify.editDialog().set('onshow', function(e) {
+	  			$(alertify.editDialog().elements.buttons.primary).empty();
+        	}).setContent(res).show();
 	   	},
 	   	null,
 	 	function () {
@@ -1476,33 +1455,10 @@ var fn = {
 				dataType : 'html',
 				cache : false,
 				success : function(res){
-					if(!alertify.editComments){
-						alertify.dialog('editComments', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-								
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-								
-									var setup = alertify.confirm().setup();
-									setup.buttons = [];
-									setup.focus.element = 1;
-								
-									return setup;
-								},
-						    	hooks: {
-						    		onshow: function() {
-						        		this.elements.dialog.style.maxWidth = 'none';
-						          		this.elements.dialog.style.width = '700px';
-						        	}
-								}
-							};
-						}, false, 'confirm');
+					if (typeof alertify.editComments === "undefined"){
+						alertifyWithoutButtons('editComments');
 	        		}
-				
-					alertify.editComments(res).set('title', 'Edit Comments');
+					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
 					$("#commentEdit").summernote({minHeight: 180, maxHeight: 800, lang: "ko-KR"});
 				}
@@ -1532,7 +1488,10 @@ var fn = {
 			}
 		},
 		deleteComments : function (_commId) {
-			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+			if (typeof alertify.delCommentSecDialog === "undefined") {
+				basicAlertifyDialog('delCommentSecDialog');
+			}
+			alertify.delCommentSecDialog("Are you sure you want to delete this comment?", function (e) {
 				if (e) {
 					$.ajax({
 						url : '/comment/deleteComment',

@@ -3,9 +3,10 @@
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <style>
-        .marker {
-            background-color: Yellow;
-        }
+        .marker {background-color: Yellow;}
+        .commentDiv table {border: 1px solid #ddd;}
+		.commentDiv table th {border: 1px solid #ddd;}
+		.commentDiv table td {border: 1px solid #ddd;}
     </style>
     <title>FOSSLight Hub</title>
 </head>
@@ -26,12 +27,11 @@
                 <tr>
                     <td style="background:#ddd" width="1"></td>
                     <td style="padding:40px;">
-                        <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}"
-                             th:utext="${contentsTitle}"></div>
+                        <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}" th:utext="${contentsTitle}"></div>
                         <p style="font-size:12px;" th:if="${contentsSubTitle}" th:utext="${contentsSubTitle}"></p>
-                        <div th:if="${comment != null && comment != ''}">
+                        <div th:if="${comment != null && comment != ''}" class="commentDiv">
                             <h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-                            <div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+                            <div style="padding:10px;font-size:12px;font-color:#000;" th:utext="${comment}"></div>
                         </div>
                         <table border="1" cellpadding="0" cellspacing="0" style="font-size:12px;border-color:#ddd;"
                                width="100%">

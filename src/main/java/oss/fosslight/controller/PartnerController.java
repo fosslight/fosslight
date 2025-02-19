@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -156,8 +158,6 @@ public class PartnerController extends CoTopComponent{
 	@GetMapping(value=PARTNER.EDIT, produces = "text/html; charset=utf-8")
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		PartnerMaster partnerMaster = new PartnerMaster();
 		model.addAttribute("detail", partnerMaster);
 		model.addAttribute("editMode", CoConstDef.FLAG_YES);
@@ -177,18 +177,11 @@ public class PartnerController extends CoTopComponent{
 		
 		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
 		
-		T2File ossFile = new T2File();
-		ossFile.setFileSeq(partnerMaster.getOssFileId());
-		ossFile = fileMapper.getFileInfo(ossFile);
-		
-		String binaryFileId = partnerMaster.getBinaryFileId();
-		T2File binaryFile = new T2File();
-		
-		if (!isEmpty(binaryFileId)){
-			binaryFile.setFileSeq(binaryFileId);
-			binaryFile = fileMapper.getFileInfo(binaryFile);
-			
-			model.addAttribute("binaryFile", binaryFile);
+		if (!isEmpty(partnerMaster.getOssFileId())) {
+			T2File ossFile = fileService.selectFileInfo(partnerMaster.getOssFileId());
+			if (ossFile != null) {
+				model.addAttribute("ossFile", ossFile);
+			}
 		}
 		
 		CommentsHistory comHisBean = new CommentsHistory();
@@ -197,6 +190,53 @@ public class PartnerController extends CoTopComponent{
 		partnerMaster.setUserComment(commentService.getUserComment(comHisBean));
 		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
+		
+		boolean notPermission = false;
+		CommonFunction.setPartnerService(partnerService);
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+		if (permissionCheckList != null) {
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				partnerMaster.setPermission(0);
+				partnerMaster.setStatusPermission(0);
+				notPermission = true;
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setStatusPermission(0);
+					notPermission = true;
+				} else {
+					partnerMaster.setStatusPermission(1);
+				}
+				partnerMaster.setPermission(1);
+			}
+		}
+		
+		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+		if (!CollectionUtils.isEmpty(prjList)) {
+			model.addAttribute("prjList", prjList);
+			if (prjList.size() == 5) {
+				model.addAttribute("prjLiseMore", CoConstDef.FLAG_YES);
+			}
+		}
+		
+		model.addAttribute("editMode", CoConstDef.FLAG_NO);
+		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("detailJson", partnerMaster);
+		model.addAttribute("confirmationFile", confirmationFile);
+		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		
+		return !notPermission ? "partner/edit" : "partner/view";
+	}
+	
+	@GetMapping(value = PARTNER.IDENTIFICATION_ID, produces = "text/html; charset=utf-8")
+	public String identification(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String partnerId) throws Exception {
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
 		
 		CommonFunction.setPartnerService(partnerService);
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
@@ -216,23 +256,16 @@ public class PartnerController extends CoTopComponent{
 			}
 		}
 		
-		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+		T2File ossFile = new T2File();
+		ossFile.setFileSeq(partnerMaster.getOssFileId());
+		ossFile = fileMapper.getFileInfo(ossFile);
 		
-		if (prjList.size() > 0) {
-			model.addAttribute("prjList", prjList);
-		}
-		
+		model.addAttribute("ossFile", ossFile);
 		model.addAttribute("editMode", CoConstDef.FLAG_NO);
 		model.addAttribute("detail", partnerMaster);
-		model.addAttribute("detailJson", partnerMaster);
-		model.addAttribute("confirmationFile", confirmationFile);
-		model.addAttribute("ossFile", ossFile);
-		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
-		return "partner/edit";
+		return "partner/identification";
 	}
 	
 	@PostMapping(value=PARTNER.MODE_CONVERSION, produces = "text/html; charset=utf-8")
@@ -240,26 +273,11 @@ public class PartnerController extends CoTopComponent{
 		PartnerMaster partnerMaster = new PartnerMaster();
 		partnerMaster.setPartnerId(partnerId);
 		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
-		
-		T2File confirmationFile = new T2File();
-		confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
-		confirmationFile = fileMapper.getFileInfo(confirmationFile);
-		
 		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
 		
 		T2File ossFile = new T2File();
 		ossFile.setFileSeq(partnerMaster.getOssFileId());
 		ossFile = fileMapper.getFileInfo(ossFile);
-		
-		String binaryFileId = partnerMaster.getBinaryFileId();
-		T2File binaryFile = new T2File();
-		
-		if (!isEmpty(binaryFileId)){
-			binaryFile.setFileSeq(binaryFileId);
-			binaryFile = fileMapper.getFileInfo(binaryFile);
-			
-			model.addAttribute("binaryFile", binaryFile);
-		}
 		
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
@@ -286,16 +304,8 @@ public class PartnerController extends CoTopComponent{
 			}
 		}
 		
-		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
-		
-		if (prjList.size() > 0) {
-			model.addAttribute("prjList", prjList);
-		}
-		
 		model.addAttribute("editMode", CoConstDef.FLAG_NO);
 		model.addAttribute("detail", partnerMaster);
-		model.addAttribute("detailJson", partnerMaster);
-		model.addAttribute("confirmationFile", confirmationFile);
 		model.addAttribute("ossFile", ossFile);
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
@@ -303,9 +313,9 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
 		if (mode.equals("edit")) {
-			return "partner/fragments/edit :: editFragments";
+			return "partner/fragments/edit :: partyEditFragments";
 		} else {
-			return "partner/fragments/edit :: viewFragments";
+			return "partner/fragments/edit :: partyViewFragments";
 		}
 	}
 	
@@ -600,7 +610,6 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@PostMapping(value=PARTNER.SAVE_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveAjax(
 			@RequestBody PartnerMaster partnerMaster
@@ -636,98 +645,24 @@ public class PartnerController extends CoTopComponent{
 			return makeJsonResponseHeader(retMap);
 		}
 				
-		String mainGrid = partnerMaster.getOssComponentsStr();
-		
-		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
-		// ossVersion N/A => "" 치환 / 3rd Party > e2fsprogs를 Row에 추가 시 Save 불가
-		// ossVersion N/A => "" replace / 3rd Party > cannot save when adding e2fsprogs to row
-		ossComponents = CommonFunction.replaceOssVersionNA((List<ProjectIdentification>) fromJson(mainGrid, collectionType));
-		ossComponents = CommonFunction.removeDuplicateLicense(ossComponents);
-		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
-		
-		ossComponentsLicense = CommonFunction.mergeGridAndSession(
-				CommonFunction.makeSessionKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()), ossComponents, ossComponentsLicense,
-				CommonFunction.makeSessionReportKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()));
-		
-		T2CoProjectValidator pv = new T2CoProjectValidator(); // validation proceeded with t2coProject
-		pv.setIgnore("OSS_NAME");
-		pv.setIgnore("OSS_VERSION");
-		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
-		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
-		// main grid
-		pv.setAppendix("mainList", ossComponents);
-		
-		T2CoValidationResult vr = pv.validateObject(partnerMaster); 
-		
-		// return validator result
-		if (!vr.isValid()) {
-			return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
-		}
-		
 		Boolean isNew = isEmpty(partnerMaster.getPartnerId());
-		
-		Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
-		ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
-		ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+		String userComment = partnerMaster.getUserComment();
 		
 		try{
-			// binary.txt 파일이 변경된 경우 최초 한번만 수행
-			PartnerMaster beforePartnerInfo = new PartnerMaster();
-			if(!isEmpty(partnerMaster.getPartnerId())) {
-				beforePartnerInfo.setPartnerId(partnerMaster.getPartnerId());
-				beforePartnerInfo = partnerService.getPartnerMasterOne(partnerMaster);
+			partnerService.registPartnerMaster(partnerMaster);
+			if (!isEmpty(partnerMaster.getOssFileId()) && !isEmpty(partnerMaster.getOssFileSheetNo())) {
+				partnerService.registOssWhenRegistPartner(partnerMaster);
 			}
 			
-			String binaryFileId = partnerMaster.getBinaryFileId();
-			
-			if((!isEmpty(binaryFileId) && beforePartnerInfo == null)  // 최초생성시 binary.txt File을 upload하였거나
-					|| (!isEmpty(binaryFileId) && beforePartnerInfo != null && !binaryFileId.equals(beforePartnerInfo.getBinaryFileId()))) { // binary.txt를 변경하였을 경우에만 동작.
-				List<String> binaryTxtList = CommonFunction.getBinaryListBinBinaryTxt(fileService.selectFileInfo(binaryFileId));
-				
-				if(binaryTxtList != null && !binaryTxtList.isEmpty()) {
-					// 현재 osslist의 binary 목록을 격납
-					Map<String, ProjectIdentification> componentBinaryList = new HashMap<>();
-					
-					for(ProjectIdentification bean : ossComponents) {
-						if(!isEmpty(bean.getBinaryName())) {
-							componentBinaryList.put(bean.getBinaryName(), bean);
-						}
-					}
-					
-					List<ProjectIdentification> addComponentList = Lists.newArrayList();
-					
-					// 존재여부 확인
-					for(String binaryNameTxt : binaryTxtList) {
-						if(!componentBinaryList.containsKey(binaryNameTxt)) {
-							// add 해야할 list
-							ProjectIdentification bean = new ProjectIdentification();
-							// 화면에서 추가한 것 처럼 jqg로 시작하는 component id를 임시로 설정한다.
-							bean.setGridId("jqg_"+binaryFileId+"_"+addComponentList.size());
-							bean.setBinaryName(binaryNameTxt);
-							addComponentList.add(bean);
-							
-//							changeAdded += "<br> - " + binaryNameTxt;
-						} else { // exclude처리된 경우
-							ProjectIdentification bean = componentBinaryList.get(binaryNameTxt);
-							if(bean != null && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-//								changeExclude += "<br>" + binaryNameTxt;
-							}
-						}
-					}
-					
-					if(addComponentList != null && !addComponentList.isEmpty()) {
-						ossComponents.addAll(addComponentList);
-					}
-				}
-			}
-			
-			partnerService.registPartnerMaster(partnerMaster, ossComponents, ossComponentsLicense);
 			History h = partnerService.work(partnerMaster);
 			h.sethAction(!isNew ? CoConstDef.ACTION_CODE_UPDATE : CoConstDef.ACTION_CODE_INSERT);
 			
-			if(!isEmpty(binaryFileId)) {
-				binaryDataService.autoIdentificationWithBinryTextFilePartner(partnerMaster);
+			if (!isEmpty(userComment)) {
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+				commHisBean.setReferenceId(partnerMaster.getPartnerId());
+				commHisBean.setContents(userComment);
+				commentService.registComment(commHisBean);
 			}
 			
 			historyService.storeData(h);
@@ -825,6 +760,169 @@ public class PartnerController extends CoTopComponent{
 		
 		resMap.put("isValid", String.valueOf(isValid));
 		resMap.put("resCd", resCd);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = PARTNER.SAVE_PARTY)
+	public @ResponseBody ResponseEntity<Object> saveParty(@RequestBody Map<String, Object> map, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		boolean isValid = true;
+		Map<String, String> resMap = new HashMap<>();
+		String resCd = "00";
+		String partnerId = (String) map.get("partnerId");
+		String ossFileId = (String) map.get("ossFileId");
+		String mainDataString = (String) map.get("mainData");
+		String resetFlag = map.containsKey("resetFlag") ? (String) map.get("resetFlag") : CoConstDef.FLAG_NO;
+		
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster.setOssFileId(ossFileId);
+		
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
+		ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType);
+		
+		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
+		ossComponentsLicense = CommonFunction.mergeGridAndSession(
+				CommonFunction.makeSessionKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()), ossComponents, ossComponentsLicense,
+				CommonFunction.makeSessionReportKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()));
+		
+		{
+			T2CoProjectValidator pv = new T2CoProjectValidator(); // validation proceeded with t2coProject
+			pv.setIgnore("OSS_NAME");
+			pv.setIgnore("OSS_VERSION");
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
+			pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+			// main grid
+			pv.setAppendix("mainList", ossComponents);
+			
+			T2CoValidationResult vr = pv.validateObject(partnerMaster); 
+			
+			// return validator result
+			if (!vr.isValid()) {
+				return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+			}
+			
+			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
+			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+			ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+			
+			try {
+				partnerService.registOss(partnerMaster, ossComponents, ossComponentsLicense);
+				resCd="10";
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+			
+			if ("10".equals(resCd)) {
+				String prjId = partnerMaster.getPartnerId();
+				// 분석 결과어 업로시 nickname 변경된 사항
+				// In the case of nickname is changed when uploading to analysis result
+				try {
+					if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+							CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, partnerMaster.getOssFileId())) != null) {
+						String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(
+								loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE,
+								partnerMaster.getOssFileId()), true);
+						
+						if (!isEmpty(changedLicenseName)) {
+							CommentsHistory commentHisBean = new CommentsHistory();
+							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+							commentHisBean.setReferenceId(prjId);
+							commentHisBean.setContents(changedLicenseName);
+							commentService.registComment(commentHisBean, false);
+						}
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
+				try {
+					if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_PARTNER)) != null) {
+						String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+								CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_PARTNER), true);
+						if (!isEmpty(changedLicenseName)) {
+							CommentsHistory commentHisBean = new CommentsHistory();
+							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+							commentHisBean.setReferenceId(prjId);
+							commentHisBean.setContents(changedLicenseName);
+							commentService.registComment(commentHisBean, false);
+						}
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
+				try {
+					if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, partnerMaster.getOssFileId())) != null) {
+						String chagedOssVersion = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, partnerMaster.getOssFileId()), true);
+						
+						if (!isEmpty(chagedOssVersion)) {
+							CommentsHistory commentHisBean = new CommentsHistory();
+							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+							commentHisBean.setReferenceId(prjId);
+							commentHisBean.setContents(chagedOssVersion);
+							commentService.registComment(commentHisBean, false);
+						}
+					}
+					
+					if (!isEmpty(resetFlag) && CoConstDef.FLAG_YES.equals(resetFlag)) {
+						CommentsHistory commentHisBean = new CommentsHistory();
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+						commentHisBean.setReferenceId(prjId);
+						commentHisBean.setContents("reset all data");
+						commentService.registComment(commentHisBean, false);
+						
+						CommonFunction.addSystemLogRecords("3rd_" + prjId, loginUserName());
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+		if (!isEmpty(partnerMaster.getPartnerId())) {
+			resMap.put("partnerId", partnerMaster.getPartnerId());
+		}
+		
+		resMap.put("isValid", String.valueOf(isValid));
+		resMap.put("resCd", resCd);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PARTNER.SAVE_BOM)
+	public @ResponseBody ResponseEntity<Object> saveBom(@RequestBody Map<String, Object> map, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		String partnerId = (String) map.get("referenceId");
+		String merge = (String) map.get("merge");
+		String gridString = (String) map.get("gridData");
+		String checkGridString = (String) map.get("checkGridData");
+		
+		// bom에서 admin check선택한 data
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> projectIdentification = new ArrayList<>();
+		projectIdentification = (List<ProjectIdentification>) fromJson(gridString, collectionType);
+		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
+		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
+		projectService.registBom(partnerId, merge, projectIdentification, checkGridBomList, null, false, false, true);
+//		projectService.updateSecurityDataForProject(prjId);
+		Map<String, String> resMap = new HashMap<>();
+		
+		try {
+			PartnerMaster pDat = new PartnerMaster();
+			pDat.setPartnerId(partnerId);
+			pDat = partnerService.getPartnerMasterOne(pDat);
+			resMap.put("status", pDat.getStatus());
+			History h = partnerService.work(pDat);
+			h.sethAction(CoConstDef.ACTION_CODE_NEEDED);
+			historyService.storeData(h); // 메일로 보낼 데이터를 History에 저장합니다. -> h.gethData()로 확인 가능
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		
 		return makeJsonResponseHeader(resMap);
 	}
@@ -1180,30 +1278,29 @@ public class PartnerController extends CoTopComponent{
 			, Model model){
 		CoMail mailbean = null;
 		
-		String commentDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
+		String commentDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS;
 		String userComment = partnerMaster.getUserComment();
 		String statusCode = partnerMaster.getStatus();
 		String status = CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, statusCode);
 		
 		if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(partnerMaster.getStatus())) {
 			ProjectIdentification _param = new ProjectIdentification();
-			_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+			_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 			_param.setReferenceId(partnerMaster.getPartnerId());
+			_param.setMerge(CoConstDef.FLAG_NO);
 			Map<String, Object> map = projectService.getIdentificationGridList(_param);
 			
-			T2CoProjectValidator pv = new T2CoProjectValidator();
-			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
+			if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
+				T2CoProjectValidator pv = new T2CoProjectValidator();
+				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
 
-			// main grid
-			pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
-			// sub grid
-			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
-			//pv.setCheckForAdmin(true);
-			
-			T2CoValidationResult vr = pv.validate(new HashMap<>());
-			// return validator result
-			if (!vr.isValid()) {
-				return makeJsonResponseHeader(vr.getValidMessageMap());
+				pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
+
+				T2CoValidationResult vr = pv.validate(new HashMap<>());
+				
+				if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
+					return makeJsonResponseHeader(vr.getValidMessageMap());
+				}
 			}
 			
 			partnerService.updatePartnerConfirm(partnerMaster);
@@ -1396,10 +1493,12 @@ public class PartnerController extends CoTopComponent{
 					}
 				}
 				
-				for (Object sheet : sheetNameList) {
-					String sheetName = sheet.toString();
-					if (sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
-						isSpdxSpreadsheet = true;
+				if (sheetNameList != null) {
+					for (Object sheet : sheetNameList) {
+						String sheetName = sheet.toString();
+						if (sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
+							isSpdxSpreadsheet = true;
+						}
 					}
 				}
 			} catch(Exception e) {
@@ -1628,7 +1727,7 @@ public class PartnerController extends CoTopComponent{
 		
 		try {
 			// partnerId / partnerName 필수 값.
-			yamlFileId = YamlUtil.makeYaml(CoConstDef.CD_DTL_COMPONENT_PARTNER, toJson(partnerMaster));
+			yamlFileId = YamlUtil.makeYaml(isEmpty(partnerMaster.getReferenceDiv()) ? CoConstDef.CD_DTL_COMPONENT_PARTNER : partnerMaster.getReferenceDiv(), toJson(partnerMaster));
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}		
@@ -1837,5 +1936,70 @@ public class PartnerController extends CoTopComponent{
 			log.error(e.getMessage(), e);
 		}
 		return makeJsonResponseHeader(resMap);
+	}
+	
+	@GetMapping(value=PARTNER.BOM_COMPARE, produces = "text/html; charset=utf-8")
+	public String bomCompare(@PathVariable String beforePartnerId, @PathVariable String afterPartnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+		if (beforePartnerId.equals("0000")) {
+			model.addAttribute("beforePartnerId", "");
+		} else {
+			model.addAttribute("beforePartnerId", beforePartnerId);
+		}
+		
+		if (afterPartnerId.equals("0000")) {
+			model.addAttribute("afterPartnerId", "");
+		}else {
+			model.addAttribute("afterPartnerId", afterPartnerId);
+		}
+		
+		return "partner/bomCompare";
+	}
+	
+	@SuppressWarnings("unchecked")
+	@GetMapping(value=PARTNER.BOM_COMPARE_LIST_AJAX)
+	public @ResponseBody ResponseEntity<Object> bomCompareList(
+			@RequestParam("beforePartnerId") String beforePartnerId, @RequestParam("afterPartnerId") String afterPartnerId) throws Exception{
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		try {
+			ProjectIdentification param = new ProjectIdentification();
+			param.setReferenceId(beforePartnerId);
+			param.setMerge(CoConstDef.FLAG_NO);
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+			
+			Map<String, Object> beforeBom = new HashMap<String, Object>();
+			Map<String, Object> afterBom = new HashMap<String, Object>();
+			List<ProjectIdentification> beforeBomList = null;
+			List<ProjectIdentification> afterBomList = null;
+			boolean beforeDataFlag = false;
+			boolean afterDataFlag = false;
+			
+			beforeBom = projectService.getIdentificationGridList(param, true);
+			if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+				beforeDataFlag = true;
+			} else {
+				beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
+			}
+			if (beforeDataFlag || beforeBomList == null) {
+				return makeJsonResponseHeader(false, "1");
+			}
+			
+			param.setReferenceId(afterPartnerId);
+			afterBom = projectService.getIdentificationGridList(param, true);
+			if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+				afterDataFlag = true;
+			} else {
+				afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
+			}
+			if (afterDataFlag || afterBomList == null) {
+				return makeJsonResponseHeader(false, "1");
+			}
+			
+			resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList, "list"));
+			return makeJsonResponseHeader(true, "0" , resultMap);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, "1");
+		}
 	}
 }

@@ -411,7 +411,7 @@ public final class Url {
 		public static final String AUTO_REVIEW_PACKAGING = PATH + "/autoReviewPackaging";
 
 		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
-
+		public static final String CHANGE_PROJECT_STATUS = PATH + "/changeProjectStatus";
 	}
 	
 	public static final class VERIFICATION {
@@ -478,6 +478,8 @@ public final class Url {
 		public static final String LIST = PATH + "/list";
 		public static final String LIST_JSP = TILES_ROOT + PATH + "/list";
 		
+		public static final String IDENTIFICATION_ID = PATH + "/identification/{partnerId}";
+		
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		public static final String EDIT_ID =  PATH + "/edit/{partnerId}";
@@ -488,6 +490,11 @@ public final class Url {
 		
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		public static final String SAVE_BOM = PATH + "/saveBom";
+		public static final String SAVE_PARTY = PATH + "/saveParty";
+		
+		public static final String BOM_COMPARE = PATH  + "/bomCompare/{beforePartnerId}/{afterPartnerId}";
+		public static final String BOM_COMPARE_LIST_AJAX = PATH + "/bomCompare/listAjax";
 		
 		public static final String CHANGE_DIVISION_VIEW = PATH + "/changePartnerView/{code}";
 		
@@ -975,6 +982,9 @@ public final class Url {
 
 			/** API OSS List 조회 */
 			public static final String FOSSLIGHT_API_OSS_REGISTER				= "/oss";
+			
+			/** API Refine OSS Download Location */
+			public static final String FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION	= "/refine-download-location";
 
 
 		/** LICENSE */

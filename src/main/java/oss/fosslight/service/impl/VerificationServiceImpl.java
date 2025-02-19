@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -152,6 +154,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String deleteFlag = (String) map.get("deleteFlag");
 			String verifyFlag = (String) map.get("statusVerifyYn");
 			String deleteFiles = (String) map.get("deleteFiles");
+			String vulDocSkipYn = (String) map.get("vulDocSkipYn");
 			String deleteComment = "";
 			String uploadComment = "";
 			
@@ -273,6 +276,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
 					projectMapper.updateReadmeContent(prjParam); // README Clear
 					projectMapper.updateVerifyContents(prjParam); // File List, Banned List Clear
+				}
+
+				if(vulDocSkipYn != null) {
+					prjParam.setVulDocSkipYn(vulDocSkipYn);
+					projectMapper.updateVulDocSkipYn(prjParam);
 				}
 			}
 		} catch (Exception e) {
@@ -1340,6 +1348,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			//STEP 8 : Verify 동작 후 Except File Result DB 저장
 			log.info("VERIFY Read exceptFileContent file START -----------------");
+			File targetFile = new File(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result_" + packagingFileIdx);
+			if (targetFile.exists()) {
+				if (packagingFileIdx == 1) {
+					File copiedFile = new File(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result");
+					Files.copy(targetFile.toPath(), copiedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} else {
+					FileUtil.addFileContents(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result", VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result_" + packagingFileIdx);
+				}
+			}
 			
 			exceptFileContent = CommonFunction.getStringFromFile(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result", VERIFY_PATH_DECOMP +"/" + prjId +"/", checkExceptionWordsList, checkExceptionIgnoreWorksList);
 			
@@ -1358,7 +1375,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 서버 디렉토리를 replace한 내용으로 새로운 파일로 다시 쓴다.
 			if (!isEmpty(exceptFileContent)) {
 				log.info("VERIFY writeFile exceptFileContent file START -----------------");
-				
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
 				
 				log.info("VERIFY writeFile exceptFileContent file END -----------------");
@@ -1430,7 +1446,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setPackageFileId3(fileSeqs.size() >= 3 ? fileSeqs.get(2) : null);
 					prjParam.setPackageFileId4(fileSeqs.size() >= 4 ? fileSeqs.get(3) : null);
 
-					if (!isEmpty(prjInfo.getDestributionStatus())){
+					if (!isEmpty(prjInfo.getDistributionStatus())){
 						prjParam.setStatusVerifyYn("C");
 					} else {
 						prjParam.setStatusVerifyYn(CoConstDef.FLAG_YES);
@@ -1667,7 +1683,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Transactional
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
 		if (copyConfirmFlag) {
-			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
+			projectMapper.updateConfirmCopyVerificationDistributionStatus(project);
 		} else {
 			updateProjectStatus(project);
 		}
@@ -2764,7 +2780,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 
 			if (!isEmpty(bean.getAttribution())) {
-				bean.setAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getAttribution()))));
+				bean.setAttribution(CommonFunction.lineReplaceToBR(avoidNull(bean.getAttribution())));
 				attributionList.add(bean);
 			}
 		}
@@ -3209,6 +3225,48 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				project.setNoticeAppendFileId(null);
 				verificationMapper.updateNoticeAppendFile(project);
 			}
+		}
+	}
+
+	@Override
+	public void updateFileWhenVerificationCopyConfirm(Project project, Project copyProject, List<String> packageFileSeqList) throws IOException {
+		Project param = new Project();
+		param.setPrjId(project.getPrjId());
+		
+		// update package file seq
+		int fileSize = packageFileSeqList.size();
+		switch (fileSize) {
+			case 1 : param.setPackageFileId(packageFileSeqList.get(0));
+					param.setPackageFileType1(copyProject.getPackageFileType1());
+				break;
+			case 2 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1));
+					param.setPackageFileType2(copyProject.getPackageFileType2());
+				break;
+			case 3 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2));
+					param.setPackageFileType3(copyProject.getPackageFileType3());
+				break;
+			default : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2)); param.setPackageFileId4(packageFileSeqList.get(3));
+					param.setPackageFileType4(copyProject.getPackageFileType4());
+				break;
+		}
+		
+		verificationMapper.updatePackageFile(param);
+		
+		// update verify result file
+		param.setReadmeContent(copyProject.getReadmeContent());
+		param.setReadmeFileName(copyProject.getReadmeFileName());
+		param.setReadmeYn(copyProject.getReadmeYn());
+		param.setExceptFileContent(copyProject.getExceptFileContent());
+		param.setVerifyFileContent(copyProject.getVerifyFileContent());
+		
+		boolean isCopyDir = !isEmpty(param.getReadmeContent()) || !isEmpty(param.getExceptFileContent()) || !isEmpty(param.getVerifyFileContent());
+		if (isCopyDir) {
+			File srcDir = new File(VERIFY_PATH_OUTPUT + "/" + copyProject.getPrjId());
+			File destDir = new File(VERIFY_PATH_OUTPUT + "/" + param.getPrjId());
+			FileUtils.copyDirectory(srcDir, destDir);
+			
+			projectService.registReadmeContent(param);
+			projectService.registVerifyContents(param);
 		}
 	}
 }

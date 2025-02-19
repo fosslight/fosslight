@@ -10,3 +10,38 @@ mybatis-migrations:
   source name or path: "migration/mybatis-migrations-3.3.11"
   license: "Apache-2.0"
   download location: "https://mvnrepository.com/artifact/org.mybatis/mybatis-migrations"
+jqgrid:
+- version: "4.7.0"
+  source name or path:
+  - "src/main/resources/static/js/jqgrid4.7"
+  - "src/main/resources/static/js/plugins/grid.postext.js"
+  - "src/main/resources/static/js/i18n/grid.locale-en.js"
+  - "src/main/resources/static/js/plugins/ui.multiselect.js"
+  - "src/main/resources/static/js/plugins/ui.multiselect.js"
+  - "src/main/resources/static/js/plugins/jquery.searchFilter.js"
+  - "src/main/resources/static/js/plugins/grid.postext.js"
+  - "src/main/resources/static/js/plugins/jquery.contextmenu.js"
+  license: "MIT"
+  download location: "https://github.com/tonytomov/jqGrid"
+"-":
+- version: ""
+  license: LicenseRef-LGE-Proprietary
+  copyright text: Copyright 2022 LG Electronics Inc.
+  source name or path:
+  - "src/main/resources/messages/"
+  - "LICENSES/"
+  - "LICENSE"
+  - "gradle"
+  - "gradlew"
+  - "Dockerfile"
+  - "docker.env"
+  - "docker-compose.yml"
+  - "migration/migration/scripts/"
+  - "sbom-info.yaml"
+  - "docs/"
+  - "README.md"
+  - "CHANGELOG.md"
+  - "CONTRIBUTING.md"
+  - "RELEASE_NOTES.md"
+  - ".github/"
+

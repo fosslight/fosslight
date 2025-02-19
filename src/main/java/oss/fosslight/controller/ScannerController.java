@@ -6,6 +6,10 @@
 package oss.fosslight.controller;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -20,6 +24,7 @@ import oss.fosslight.common.Url;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.RequestUtil;
+import oss.fosslight.util.HttpsRequestUtil;
 import oss.fosslight.util.StringUtil;
 
 @RestController
@@ -48,12 +53,23 @@ public class ScannerController {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "Login User Email is not configured");
 			}
 			
-			MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-			parts.add("pid", prjId);
-			parts.add("link", wgetUrl);
-			parts.add("email", user.getEmail());
-			parts.add("admin", adminToken);
-			String resBody = RequestUtil.post(scanServiceUrl, parts);
+			String resBody = "";
+ 			if (scanServiceUrl.startsWith("https://")) {
+ 				Map<String, String> parts = new HashMap<>();
+ 				parts.put("pid", prjId);
+ 				parts.put("link", wgetUrl);
+ 				parts.put("email", user.getEmail());
+ 				parts.put("admin", adminToken);
+ 				resBody = HttpsRequestUtil.makePostRequest(scanServiceUrl, parts);
+ 			} else {
+ 				MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+ 				parts.add("pid", prjId);
+ 				parts.add("link", wgetUrl);
+ 				parts.add("email", user.getEmail());
+ 				parts.add("admin", adminToken);
+ 				resBody = RequestUtil.post(scanServiceUrl, parts);
+ 			}
+
 			log.info("fl scanner response : " + resBody);
 			
 			return responseService.getSuccessResult();

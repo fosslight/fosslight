@@ -295,6 +295,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					if (dependencyType.equals(DependencyType.MAVEN_CENTRAL) || dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
 						namespace = matcher.group(3);
 						name = matcher.group(4);
+					} else if (dependencyType.equals(DependencyType.NPM)) {
+						namespace = matcher.group(4);
+						name = matcher.group(5);
+					} else if (dependencyType.equals(DependencyType.NPM2)) {
+						namespace = "-";
+						name = matcher.group(4);
 					} else {
 						namespace = "-";
 						name = matcher.group(3);

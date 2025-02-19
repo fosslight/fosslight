@@ -13,12 +13,6 @@
                         <div class="row">
                         	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
                             <div class="float-right align-items-center mt-2" style="margin-left: auto;">
-                          <!-- 	<div class="float-right btn-group px-1">
-                                    <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
-                                    <div class="dropdown-menu mt-0" role="menu">
-                                        <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_BasicInfo_Main')|">How to use FossLight Hub</a>
-                                    </div>
-                                </div> -->
                                 <div class="float-right">
                                 	<th:block th:if="${!@CommonFunction.isAdmin() and project.dropYn == 'Y' and project.statusRequestYn == 'N'}">
                                 		<button type="button" th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-dark-04 btn-sm width-6rem px-1" th:text="Reopen"></button>
@@ -76,6 +70,7 @@
 							<input type="hidden" name="userComment" />
 							<input type="hidden" name="commId" />
 							<input type="hidden" name="statusRequestYn" />
+							<input type="hidden" name="publicYn" th:value="${project?.publicYn}"/>
 							<input type="hidden" name="division" th:value="${project?.division}"/>
 							<input type="hidden" id="refPartnerId" name="refPartnerId" th:value="${project?.refPartnerId}" />
 							<input type="hidden" id="identificationStatusConfFlag" th:value="${project?.identificationStatusConfFlag}" />
@@ -108,7 +103,6 @@
                                                 <div class="btn-group ml-2">
                                                     <button type="button" id="identificationStatus" class="btn text-sm btn-default width-14rem"></button>
                                                     <button type="button" id="verificationStatus" class="btn text-sm btn-default width-14rem"></button>
-<!--                                                    <button type="button" id="destributionStatus" class="btn text-sm btn-default width-14rem"></button>-->
                                                     <span id="downloadBtn"></span>
                                                 </div>
                                             </div>
@@ -123,10 +117,10 @@
                                                 <div class="col-sm-12">
                                                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                         <label class="btn btn-sm btn-onOff px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone" th:disabled="${isReadOnly}">
+                                                            <input type="radio" name="permissionRadio" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone" th:disabled="${isReadOnly}">
                                                         </label>
                                                         <label class="btn btn-sm btn-onOff active px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Editor'" th:disabled="${isReadOnly}">
+                                                            <input type="radio" name="permissionRadio" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Editor'" th:disabled="${isReadOnly}">
                                                         </label>
                                                     </div>
                                                 </div>
@@ -337,10 +331,6 @@
                                 	</div>
                                 </div>
                                 </th:block>
-<!--                            <div class="form-group" th:unless="${isReadOnly}">
-                                    <label for="comment" th:text="Comment"></label>
-                                    <textarea id="comment" rows="3"></textarea>
-                                </div> -->
                             </div>
                             </form>
                         </div>
