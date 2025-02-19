@@ -1,5 +1,68 @@
 # Changelog
 
+## v2.1.2 (01/01/1970)
+## Changes
+## 🚀 Features
+
+- Release version 2.2.0 @Min-Kyungsun (#1093)
+
+## 🐛 Hotfixes
+
+- Release version 2.2.0 @Min-Kyungsun (#1093)
+
+## 🔧 Maintenance
+
+- Release version 2.2.0 @Min-Kyungsun (#1093)
+- Use httpstatus class to print http status code @parkcoldroad (#863)
+
+---
+
+## v2.2.0 (19/02/2025)
+## What's Changed
+* Release version 2.2.0 by @FOSSLight-dev  @Min-Kyungsun @hyeinlee00 @parkcoldroad  in https://github.com/fosslight/fosslight/pull/1093
+
+## 🚀 New Features
+* 3rd Party
+  - Added 3rd Party Information
+  - Added 3rd Party Identification(3rd Party tab/ BOM tab)
+  - Implemented a 3rd Party BOM Compare feature
+
+* Project
+  - Added codelinaro type to Pre-review
+ 
+## Changes
+* Project
+  - Enabled the ability to change the status of multiple projects simultaneously.
+  - Updated BOM merge conditions:
+     - If OSS Name is “-”, merge if license, homepage, and download location are the same.
+  - Adjusted the Loaded list to display items in the order of most recently added.
+* Open Source
+  - OSS name can now only be changed through the edit button in the detailed screen.
+  - Changed the initial list display to sort by modified date in descending order.
+* License
+  - Changed the initial list display to sort by modified date in descending order.
+  - Modified the License text field to allow null values.
+  - Added a notification feature for users in the division (Code No: 200) when USE_YN is changed to N in Code Management.
+* Review Report
+  - Updated to include OSS Important Notes information in the output.
+  - Provided links to detailed screens when clicking on OSS and License names.
+* DataBase
+  -  Updated column names
+     - PROJECT_MASTER: DESTRIBUTION_STATUS > DISTRIBUTION_STATUS
+  - Deleted columns
+     - PRE_PROJECT_MASTER: OSS_TYPE, OS_TYPE_ETC, DISTRIBUTION_TYPE
+
+## 🐛 Hotfixes
+  - Fixed an issue where the banned list of all files would merge and display when multiple package files are uploaded in Packaging.
+  - Resolved an issue where existing data would change when saving a copied OSS with a new name (added logic to reset oss_common_id).
+  - Fixed an issue where information was not displayed correctly in the Statistics menu.
+  - Resolved an issue where the Vulnerability menu could not be queried.
+  - Fixed an issue where the column width would not be maintained after filtering in the Grid table.
+  - Addressed an issue where no email was sent when adding a new OSS version.
+
+**Full Changelog**: https://github.com/fosslight/fosslight/compare/v2.1.1...v2.2.0
+---
+
 ## v2.1.1 (13/12/2024)
 ## What's Changed
 * Release version 2.1.1 by @FOSSLight-dev  @Min-Kyungsun @hyeinlee00 in https://github.com/fosslight/fosslight/pull/1090
@@ -844,32 +907,3 @@
 
 - Fix a bug on clicking the Rename button @FOSSLight-dev (#489)
 - Update OSS Table > Validation Downloadlocation @FOSSLight-dev (#488)
-
----
-
-## v1.3.4 (22/04/2022)
-## 🚀 Features
-
-- Add a Rename button to the OSS Details tab. @FOSSLight-dev (#486)
-- Display the version-specific popup when click the cell of the ID column in the BOM @FOSSLight-dev (#480)
-- Mail > Print nickname changes when OSS version is changed. @FOSSLight-dev (#479)
-
-## 🐛 Hotfixes
-
-- Fix the error that the screen changes when user selects Reviewer from the User Setting, Project List, 3rd Party List. @FOSSLight-dev (#483)
-
-## 🔧 Maintenance
-
-- Update the comments and messages @soimkim (#484)
-- Update newLogo in login, signup, menu bar @MoonDD99 (#478)
-
----
-
-## v1.3.3 (15/04/2022)
-## 🚀 Features
-
-- Add statistics to menu @FOSSLight-dev (#475)
-
-## 🐛 Hotfixes
-
-- Fix the bug where the request button disappears when packaging rejects. @FOSSLight-dev (#476)
