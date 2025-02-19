@@ -21,7 +21,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('103', '741', '3rd comment 삭제', '', '205', 741, 'Y');
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('103', '742', '3rd Identification comment 수정', '', '205', 742, 'Y');
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('103', '743', '3rd Identification comment 삭제', '', '205', 743, 'Y');
-INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('903', '013', 'git.codelinaro.org', '', codelinaro url', 13, 'Y');
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('903', '013', 'git.codelinaro.org', '', 'codelinaro url', 13, 'Y');
 
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '130,132,230,233,340,341,430,431,530,531,650,651,740,741,742,743' WHERE CD_NO = '110' AND CD_DTL_NO = '36';
 
