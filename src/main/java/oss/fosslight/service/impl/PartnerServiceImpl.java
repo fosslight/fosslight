@@ -421,10 +421,14 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			downloadLocationUrl = bean.getDownloadLocation();
 			if (!StringUtil.isEmpty(downloadLocationUrl) && downloadLocationUrl.endsWith("/")) {
 				bean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
+			} else if (StringUtil.isEmpty(downloadLocationUrl)) {
+				bean.setDownloadLocation("");
 			}
 			homepageUrl = bean.getHomepage();
 			if (!StringUtil.isEmpty(homepageUrl) && homepageUrl.endsWith("/")) {
 				bean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
+			} else if (StringUtil.isEmpty(homepageUrl)) {
+				bean.setHomepage("");
 			}
 			
 			componentId = StringUtil.avoidNull(bean.getComponentId(), bean.getGridId());

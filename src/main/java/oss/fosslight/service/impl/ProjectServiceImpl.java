@@ -2695,10 +2695,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			downloadLocationUrl = ossBean.getDownloadLocation();
 			if (!StringUtil.isEmpty(downloadLocationUrl) && downloadLocationUrl.endsWith("/")) {
 				ossBean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
+			} else if (StringUtil.isEmpty(downloadLocationUrl)) {
+				ossBean.setDownloadLocation("");
 			}
 			homepageUrl = ossBean.getHomepage();
 			if (!StringUtil.isEmpty(homepageUrl) && homepageUrl.endsWith("/")) {
 				ossBean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
+			} else if (StringUtil.isEmpty(homepageUrl)) {
+				ossBean.setHomepage("");
 			}
 			if (avoidNull(ossBean.getTlsh()).equalsIgnoreCase("TNULL")) {
 				ossBean.setTlsh("0");
