@@ -494,6 +494,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
 						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.naturalOrder())
+						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 						.thenComparing(ProjectIdentification::getMergeOrder);
 
 				list.sort(compare);
@@ -889,7 +891,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.comparing(ProjectIdentification::getLicenseTypeIdx)
 						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
-						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()));
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.naturalOrder())
+						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder());
 
 				list.sort(compare);
 				
@@ -5611,20 +5615,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<ProjectIdentification> tempData = new ArrayList<ProjectIdentification>();
 		List<ProjectIdentification> resultGridData = new ArrayList<ProjectIdentification>();
 		String groupColumn = "";
-		boolean ossNameEmptyFlag = false;
+		boolean dashMergeFlag = false;
 		
 		for (ProjectIdentification info : gridData) {
 			if (isEmpty(groupColumn)) {
 				groupColumn = info.getOssName() + "-" + info.getOssVersion();
 			}
 			
-			if ("-".equals(info.getOssName())) {
-				if ("NA".equals(info.getLicenseType())) {
-					ossNameEmptyFlag = true;
-				}
+			if (info.getOssName().equals("-")) {
+				dashMergeFlag = true;
 			}
-			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) // 같은 groupColumn이면 데이터를 쌓음
-					&& (!("-".equals(info.getOssName()) && !"NA".equals(info.getLicenseType())) || ossNameEmptyFlag)) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
+			
+			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) || dashMergeFlag) {
+				// 같은 groupColumn이면 데이터를 쌓음
 				tempData.add(info);
 			} else { // 다른 grouping
 				setMergeData(tempData, resultGridData);
@@ -5633,7 +5636,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				tempData.add(info);
 			}
 			
-			ossNameEmptyFlag = false; // 초기화
+			dashMergeFlag = false; // 초기화
 		}
 		
 		setMergeData(tempData, resultGridData); // bom data의 loop가 끝났지만 tempData에 값이 있다면 해당 값도 merge를 함.
@@ -5667,10 +5670,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					continue;
 				}
 				
-				String key = temp.getOssName() + "-" + temp.getLicenseType();
-				
-				if ("--NA".equals(key)) {
-					if (!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
+				if ("-".equals(temp.getOssName())) {
+					boolean licenseSameFlag = false;
+					List<String> tempLicenses = Arrays.asList(temp.getLicenseName().split(","));
+					List<String> rtnBeanLicenses = Arrays.asList(rtnBean.getLicenseName().split(","));
+					List<String> matchLicenses = tempLicenses.stream().filter(e -> rtnBeanLicenses.stream().anyMatch(Predicate.isEqual(e))).collect(Collectors.toList());
+					
+					if (!CollectionUtils.isEmpty(matchLicenses) && matchLicenses.size() == tempLicenses.size()) {
+						licenseSameFlag = true;
+					}
+					
+					if (licenseSameFlag && temp.getDownloadLocation().equalsIgnoreCase(rtnBean.getDownloadLocation()) && temp.getHomepage().equalsIgnoreCase(rtnBean.getHomepage())) {
+					} else {
 						resultGridData.add(rtnBean);
 						rtnBean = temp;
 						continue;

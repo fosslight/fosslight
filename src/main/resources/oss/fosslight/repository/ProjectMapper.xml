@@ -1817,8 +1817,8 @@
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
 				<when test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
-				<when test="@oss.fosslight.util.StringUtil@equals('N', merge)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
-				<otherwise>CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </otherwise>
+				<when test="@oss.fosslight.util.StringUtil@equals('N', merge)">CASE WHEN RTN.OSS_NAME != '-' THEN CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) ELSE CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.LICENSE_NAME, '-', RTN.DOWNLOAD_LOCATION, '-', RTN.HOMEPAGE) END GROUPBY, </when>
+				<otherwise>CASE WHEN RTN.OSS_NAME != '-' THEN CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) ELSE CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.LICENSE_NAME, '-', RTN.DOWNLOAD_LOCATION, '-', RTN.HOMEPAGE) END GROUPBY, </otherwise>
 			</choose>
 			
 			CASE WHEN RTN.OSS_NAME = '-' THEN RTN.COMPONENT_ID ELSE CONCAT(RTN.OSS_NAME,RTN.OSS_VERSION,RTN.LICENSE_NAME) END AS GROUPING_COLUMN,
@@ -2086,8 +2086,8 @@
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
 				<when test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
-				<when test="@oss.fosslight.util.StringUtil@equals('N', merge)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
-				<otherwise>CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </otherwise>
+				<when test="@oss.fosslight.util.StringUtil@equals('N', merge)">CASE WHEN RTN.OSS_NAME = '-' THEN CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.LICENSE_NAME, '-', RTN.DOWNLOAD_LOCATION, '-', RTN.HOMEPAGE) ELSE CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) END GROUPBY, </when>
+				<otherwise>CASE WHEN RTN.OSS_NAME = '-' THEN CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.LICENSE_NAME, '-', RTN.DOWNLOAD_LOCATION, '-', RTN.HOMEPAGE) ELSE CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) END GROUPBY, </otherwise>
 			</choose>
 			
 			CASE WHEN RTN.OSS_NAME = '-' THEN RTN.COMPONENT_ID ELSE CONCAT(RTN.OSS_NAME,RTN.OSS_VERSION,RTN.LICENSE_NAME) END AS GROUPING_COLUMN,
