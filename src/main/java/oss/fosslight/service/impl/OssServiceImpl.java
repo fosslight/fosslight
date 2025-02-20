@@ -4952,29 +4952,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 			}
 			
-			if (downloadLocation.contains(".git")) {
-				if (downloadLocation.endsWith(".git")) {
-					downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-				} else {
-					if (downloadLocation.contains("#")) {
-						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
-						if (downloadLocation.endsWith(".git")) {
-							downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-						}
-					}
-				}
+			if (downloadLocation.contains(".git") && downloadLocation.endsWith(".git")) {
+				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
 			}
 			
-			if (downloadLocation.contains("#")) {
-				if (urlSearchSeq == 9) {
+			if (urlSearchSeq == 16) {
+				if (downloadLocation.contains("#")) {
 					String[] splitDownloadLocation = downloadLocation.split("[#]");
 					subPath = splitDownloadLocation[1];
+					downloadLocation = splitDownloadLocation[0];
 				}
-				downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
-			}
-			
-			if (downloadLocation.contains("@")) {
-				if (urlSearchSeq == 9) {
+				if (downloadLocation.contains("@")) {
 					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
 				}
 			}
@@ -4993,15 +4981,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			PackageURL purl = null;
-			if (urlSearchSeq == -1) {
-				if (downloadLocation.contains("+")) {
-					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
-				}
-				purlString = "link:" + downloadLocation;
-			} else if (urlSearchSeq == 10) {
-				if (downloadLocation.contains("+")) {
-					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
-				}
+			if (urlSearchSeq == -1 || urlSearchSeq == 16) {
 				purlString = "link:" + downloadLocation;
 			} else {
 				String[] splitDownloadLocation = downloadLocation.split("/");
@@ -5015,28 +4995,38 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
 							break;
 						case 1: // npm
-							if (downloadLocation.contains("/package/@")) addFlag = true;
+						case 2: // npm
+						case 3: // npm
+							if (downloadLocation.contains("/package/@")) {
+								addFlag = true;
+							}
 							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[2], null, null, null);
 							break;
-						case 2: // npm
-							if (downloadLocation.contains("/@")) addFlag = true;
+						case 4: // npm
+						case 5: // npm
+						case 6: // npm
+						case 7: // npm
+						case 8: // npm
+							if (downloadLocation.contains("/@")) {
+								addFlag = true;
+							}
 							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[1], null, null, null);
 							break;
-						case 3: // pypi
-						case 4: // pypi
+						case 9: // pypi
+						case 10: // pypi
 							purl = new PackageURL(StandardTypes.PYPI, null, splitDownloadLocation[2].replaceAll("_", "-"), null, null, null);
 							break;
-						case 5: // maven
-						case 6: // maven
+						case 11: // maven
+						case 12: // maven
 							purl = new PackageURL(StandardTypes.MAVEN, splitDownloadLocation[2], splitDownloadLocation[3], null, null, null);
 							break;
-						case 7: // cocoapod
+						case 13: // cocoapod
 							purl = new PackageURL("cocoapods", null, splitDownloadLocation[2], null, null, null);
 							break;
-						case 8: // gem
+						case 14: // gem
 							purl = new PackageURL(StandardTypes.GEM, null, splitDownloadLocation[2], null, null, null);
 							break;
-						case 9: // go
+						case 15: // go
 							int idx = 0;
 							for (String data : splitDownloadLocation) {
 								if (idx > 1) {
@@ -5048,7 +5038,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1]);
 							
 							break;
-						case 11:
+						case 17:
 							purl = new PackageURL("pub", null, splitDownloadLocation[2], null, null, null);
 							break;
 						default:
@@ -5064,7 +5054,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				} else {
 					if (purl != null) {
 						purlString = purl.toString();
-						if (urlSearchSeq == 9) {
+						if (urlSearchSeq == 16) {
 							purlString += namespace + subPath;
 						} else {
 							if (addFlag) {

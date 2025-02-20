@@ -37,3 +37,24 @@ INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) V
 INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Tips_Link', 'Main', NULL, 'https://www.youtube.com/@LGEOSPO', 'Y');
 
 ALTER TABLE `PROJECT_MASTER` CHANGE `DESTRIBUTION_STATUS` `DISTRIBUTION_STATUS` VARCHAR(6);
+
+DELETE `T2_CODE_DTL` WHERE CD_NO = '913';
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+	('913', '001', 'github.com', '', 'github', 1, 'Y'),
+	('913', '002', 'www.npmjs.com/package/', '', 'npm', 2, 'Y'),
+	('913', '003', 'npmjs.com/package/', '', 'npm', 3, 'Y'),
+	('913', '004', 'npmjs.org/package/', '', 'npm', 4, 'Y'),
+	('913', '005', 'registry.npmjs.org', '', 'npm', 5, 'Y'),
+	('913', '006', 'npmjs.com', '', 'npm', 6, 'Y'),
+	('913', '007', 'npmjs.org', '', 'npm', 7, 'Y'),
+	('913', '008', 'www.npmjs.com', '', 'npm', 8, 'Y'),
+	('913', '009', 'www.npmjs.org', '', 'npm', 9, 'Y'),
+	('913', '010', 'pypi.python.org/project/', '', 'pypi', 10, 'Y'),
+	('913', '011', 'pypi.org/project/', '', 'pypi', 11, 'Y'),
+	('913', '012', 'mvnrepository.com/artifact/', '', 'maven', 12, 'Y'),
+	('913', '013', 'repo.maven.apache.org/maven2/', '', 'maven', 13, 'Y'),
+	('913', '014', 'cocoapods.org/pods/', '', 'cocoapod', 14, 'Y'),
+	('913', '015', 'rubygems.org/gems/', '', 'gem', 15, 'Y'),
+	('913', '016', 'pkg.go.dev', '', 'go', 16, 'Y'),
+	('913', '017', 'android.googlesource.com', '', 'android', 17, 'Y'),
+	('913', '018', 'pub.dev/packages/', '', 'pub', 18, 'Y');
