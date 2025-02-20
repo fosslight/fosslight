@@ -2788,7 +2788,10 @@
                     $("#append").attr("disabled", !checked);
 					$("#noticeFileFormat").attr("disabled", !checked);
                     $("#fileFormatLabel").attr("style", "color: #212529;");
-					
+                    if ($(".select2-selection__choice").length == 1) {
+                    	$(".select2-selection__choice").attr("style", "border-color: #006fe6; background-color: #007bff;");
+                    }
+                    
                     if ($("#companyName").prop("checked")) {
                         $("#editCompanyName").attr("disabled", !checked);
                     } else {
@@ -2818,6 +2821,9 @@
                     $("#append").attr("disabled", !checked);
                     $("#noticeFileFormat").attr("disabled", !checked);
                     $("#fileFormatLabel").attr("style", "color: #6c757d;");
+                    if ($(".select2-selection__choice").length == 1) {
+                    	$(".select2-selection__choice").attr("style", "border-color: #6c757d; background-color: #6c757d;");
+                    }
                     
                     $("#editCompanyName").attr("disabled", !checked);
                     $("#editOssDistributionSite").attr("disabled", !checked);
