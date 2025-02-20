@@ -3799,7 +3799,7 @@
 		<foreach collection="ossComponentsIdList" item="item" open="AND COMPONENT_ID IN (" separator="," close=")">#{item}</foreach>
 	</select>
 	
-	<select id="selectOssComponentsLicenseThirdCopy" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponentsLicense">
+	<select id="selectOssComponentsIdLicenseList" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponentsLicense">
 		SELECT
 				COMPONENT_ID
 				, LICENSE_ID

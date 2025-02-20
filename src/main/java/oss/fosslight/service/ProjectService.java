@@ -233,4 +233,6 @@ public interface ProjectService extends HistoryConfig{
 	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
 	
 	public Map<String, Object> changeProjectStatus(Project project);
+
+	public void copyOssComponentsAfterRegistProject(Project project);
 }

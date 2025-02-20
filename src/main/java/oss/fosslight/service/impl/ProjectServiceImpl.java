@@ -1930,34 +1930,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				projectMapper.updateProjectMaster(newBean);
 			}
-			
-			//identification-components
-			project.setOldId(oldId);
-			List<ProjectIdentification> components = projectMapper.selectOssComponentsList(project);
-			List<OssComponentsLicense> licenses;
-			int componentIdx = 1;
-			
-			for (ProjectIdentification bean : components){
-				bean.setReferenceId(prjId);
-				bean.setReportFileId(null);
-				licenses = projectMapper.selectOssComponentsLicenseList(bean);
-				bean.setComponentIdx(String.valueOf(componentIdx++));
-				projectMapper.insertOssComponents(bean);
-				
-				for (OssComponentsLicense licenseBean : licenses){
-					licenseBean.setComponentId(bean.getComponentId());
-					
-					projectMapper.insertOssComponentsLicense(licenseBean);
-				}
-			}
-			
-			// Project - 3rd 매핑 정보 복사
-			List<PartnerMaster> partnerList = partnerMapper.selectThirdPartyMapList(oldId);
-			for (PartnerMaster bean : partnerList) {
-				bean.setPrjId(prjId);
-				
-				partnerMapper.insertPartnerMapList(bean);
-			}
 		} else {
 			boolean isNew = isEmpty(project.getPrjId());
 			
@@ -2085,6 +2057,117 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 
+	@Override
+	public void copyOssComponentsAfterRegistProject(Project project) {
+		String copyPrjId = project.getCopyPrjId();
+		String prjId = project.getPrjId();
+		project.setOldId(copyPrjId);
+		
+		List<ProjectIdentification> ossComponents = projectMapper.selectOssComponentsList(project);
+		
+		final List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
+		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
+		final List<PartnerMaster> insertPartnerMapList = new ArrayList<>();
+		Map<String, List<OssComponentsLicense>> refComponentIdLicenseMap = new HashMap<>();
+		List<String> ossComponentsIdList = new ArrayList<>();
+		int ossComponentIdx = 1;
+		
+		for (ProjectIdentification ossBean : ossComponents) {
+			ossBean.setReferenceId(prjId);
+			ossBean.setReportFileId(null);
+			ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
+			ossComponentsIdList.add(ossBean.getComponentId());
+			insertOssComponentList.add(ossBean);
+		}
+		
+		OssComponents param = new OssComponents();
+		param.setOssComponentsIdList(ossComponentsIdList);
+		List<OssComponentsLicense> ossComponentsIdLicenseList = projectMapper.selectOssComponentsIdLicenseList(param);
+		ossComponentsIdLicenseList.forEach(ocl -> {
+			String key = ocl.getComponentId();
+			List<OssComponentsLicense> refComponentIdLicenses = null;
+			if (refComponentIdLicenseMap.containsKey(key)) {
+				refComponentIdLicenses = refComponentIdLicenseMap.get(ocl.getComponentId());
+			} else {
+				refComponentIdLicenses = new ArrayList<>();
+			}
+			refComponentIdLicenses.add(ocl);
+			refComponentIdLicenseMap.put(key, refComponentIdLicenses);
+		});
+		
+		for (ProjectIdentification bean : insertOssComponentList) {
+			if (refComponentIdLicenseMap.containsKey(bean.getComponentId())) {
+				bean.setOssComponentsLicenseList(refComponentIdLicenseMap.get(bean.getComponentId()));
+			}
+		}
+		
+		// Project - 3rd 매핑 정보 복사
+		List<PartnerMaster> partnerList = partnerMapper.selectThirdPartyMapList(copyPrjId);
+		if (!CollectionUtils.isEmpty(partnerList)) {
+			for (PartnerMaster bean : partnerList) {
+				bean.setPrjId(prjId);
+				insertPartnerMapList.add(bean);	
+			}
+		}
+		
+		if (!insertOssComponentList.isEmpty()) {
+            try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+                ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+                int saveCnt = 0;
+                for (ProjectIdentification bean : insertOssComponentList) {
+                    mapper.insertSrcOssList(bean);
+                    if(saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                
+                if (saveCnt > 0) {
+                    sqlSession.flushStatements();
+                }
+                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+                
+                saveCnt = 0;
+                for (OssComponentsLicense bean : insertOssComponentLicenseList) {
+                    mapper.registComponentLicense(bean);
+                    if (saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                if (saveCnt > 0) {
+                    sqlSession.flushStatements();
+                }
+                sqlSession.commit();
+            }
+            
+            insertOssComponentList.clear();
+            insertOssComponentLicenseList.clear();
+            refComponentIdLicenseMap.clear();
+            ossComponentsIdList.clear();
+        }
+		
+		if (!insertPartnerMapList.isEmpty()) {
+			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+				PartnerMapper mapper = sqlSession.getMapper(PartnerMapper.class);
+                int saveCnt = 0;
+                for (PartnerMaster bean : insertPartnerMapList) {
+                    mapper.insertPartnerMapList(bean);
+                    if(saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                if (saveCnt > 0) {
+                    sqlSession.flushStatements();
+                }
+                sqlSession.commit();
+			}
+			
+			insertPartnerMapList.clear();
+		}
+	}
+	
 	@Transactional
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
@@ -2236,7 +2319,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				refOssComponentsMap.put(oc.getComponentId(), oc);
 			});
 			
-			List<OssComponentsLicense> refComponentIdLicenseList = projectMapper.selectOssComponentsLicenseThirdCopy(param);
+			List<OssComponentsLicense> refComponentIdLicenseList = projectMapper.selectOssComponentsIdLicenseList(param);
 			refComponentIdLicenseList.forEach(ocl -> {
 				String key = ocl.getComponentId();
 				List<OssComponentsLicense> refComponentIdLicenses = null;
