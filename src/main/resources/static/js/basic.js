@@ -2688,7 +2688,7 @@ function getBarChart(target, obj) {
 				tooltip: {
 					callbacks: {
 						label: function(context) {
-							let dataLabel = context.label || '';
+							let dataLabel = context.dataset.label || '';
 							let total = totals[context.dataIndex];
 							let currentValue = context.raw;
 							let percentage = 0;
@@ -2729,7 +2729,7 @@ function barChartOption(data) {
 			tooltip: {
 				callbacks: {
 					label: function(context) {
-						let dataLabel = context.label || '';
+						let dataLabel = context.dataset.label || '';
 						let total = totals[context.dataIndex];
 						let currentValue = context.raw;
 						let percentage = 0;
