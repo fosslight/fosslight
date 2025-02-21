@@ -210,7 +210,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public boolean checkReqEntrySecurity(Project project, String tabMenu);
 
-	public void copySecurityDataForProject(Project project);
+	public void copySecurityDataForProject(Project project, Project bean);
 	
 	public Map<String, Object> checkSelectDownloadFile(Project project);
 
@@ -234,5 +234,5 @@ public interface ProjectService extends HistoryConfig{
 	
 	public Map<String, Object> changeProjectStatus(Project project);
 
-	public void copyOssComponentsAfterRegistProject(Project project);
+	public void copyOssComponentList(Project project, boolean isBom);
 }

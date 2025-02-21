@@ -1172,7 +1172,7 @@ public class ProjectController extends CoTopComponent {
 				beforeBean.setWatcherList(projectService.getWatcherList(project));
 				projectService.registProject(project);
 				if (copy.equals("true")) {
-					projectService.copyOssComponentsAfterRegistProject(project);
+					projectService.copyOssComponentList(project, false);
 					if (project.getNoticeType() != null && project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 						projectService.copySrcAndroidNoticeFile(project);
 					}
@@ -1406,10 +1406,11 @@ public class ProjectController extends CoTopComponent {
 		if (copy.equals("true")) {
 			if (!isEmpty(project.getCopyPrjId())) {
 				if (!project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-					projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>(), new ArrayList<>(), project.getCopyPrjId(), true, false);
+					project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				} else {
-					projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>(), new ArrayList<>(), project.getCopyPrjId(), true, true);
+					project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 				}
+				projectService.copyOssComponentList(project, true);
 			}
 			
 			if (!confirmStatusCopy.equals("false")) {

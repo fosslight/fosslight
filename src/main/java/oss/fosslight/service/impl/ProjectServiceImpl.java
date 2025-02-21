@@ -2058,7 +2058,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	@Override
-	public void copyOssComponentsAfterRegistProject(Project project) {
+	public void copyOssComponentList(Project project, boolean isBom) {
 		String copyPrjId = project.getCopyPrjId();
 		String prjId = project.getPrjId();
 		project.setOldId(copyPrjId);
@@ -2067,7 +2067,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		final List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
 		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
-		final List<PartnerMaster> insertPartnerMapList = new ArrayList<>();
 		Map<String, List<OssComponentsLicense>> refComponentIdLicenseMap = new HashMap<>();
 		List<String> ossComponentsIdList = new ArrayList<>();
 		int ossComponentIdx = 1;
@@ -2101,21 +2100,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		// Project - 3rd 매핑 정보 복사
-		List<PartnerMaster> partnerList = partnerMapper.selectThirdPartyMapList(copyPrjId);
-		if (!CollectionUtils.isEmpty(partnerList)) {
-			for (PartnerMaster bean : partnerList) {
-				bean.setPrjId(prjId);
-				insertPartnerMapList.add(bean);	
-			}
-		}
-		
 		if (!insertOssComponentList.isEmpty()) {
             try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
                 ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
                 int saveCnt = 0;
                 for (ProjectIdentification bean : insertOssComponentList) {
-                    mapper.insertSrcOssList(bean);
+                	if (isBom) {
+                		mapper.registBomComponents(bean);
+                	} else {
+                		mapper.insertSrcOssList(bean);
+                	}
                     if(saveCnt++ == 1000) {
                         sqlSession.flushStatements();
                         saveCnt = 0;
@@ -2147,24 +2141,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             ossComponentsIdList.clear();
         }
 		
-		if (!insertPartnerMapList.isEmpty()) {
-			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-				PartnerMapper mapper = sqlSession.getMapper(PartnerMapper.class);
-                int saveCnt = 0;
-                for (PartnerMaster bean : insertPartnerMapList) {
-                    mapper.insertPartnerMapList(bean);
-                    if(saveCnt++ == 1000) {
-                        sqlSession.flushStatements();
-                        saveCnt = 0;
-                    }
-                }
-                if (saveCnt > 0) {
-                    sqlSession.flushStatements();
-                }
-                sqlSession.commit();
+		if (!isBom) {
+			final List<PartnerMaster> insertPartnerMapList = new ArrayList<>();
+			List<PartnerMaster> partnerList = partnerMapper.selectThirdPartyMapList(copyPrjId);
+			
+			if (!CollectionUtils.isEmpty(partnerList)) {
+				for (PartnerMaster bean : partnerList) {
+					bean.setPrjId(prjId);
+					insertPartnerMapList.add(bean);	
+				}
 			}
 			
-			insertPartnerMapList.clear();
+			if (!insertPartnerMapList.isEmpty()) {
+				try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+					PartnerMapper mapper = sqlSession.getMapper(PartnerMapper.class);
+	                int saveCnt = 0;
+	                for (PartnerMaster bean : insertPartnerMapList) {
+	                    mapper.insertPartnerMapList(bean);
+	                    if(saveCnt++ == 1000) {
+	                        sqlSession.flushStatements();
+	                        saveCnt = 0;
+	                    }
+	                }
+	                if (saveCnt > 0) {
+	                    sqlSession.flushStatements();
+	                }
+	                sqlSession.commit();
+				}
+				
+				insertPartnerMapList.clear();
+			}
 		}
 	}
 	
@@ -3719,6 +3725,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		identification.setSaveBomFlag(CoConstDef.FLAG_YES); // file path 를 groupping 하지 않고, 개별로 data 등록
 		Map<String, Object> mergeListMap = getIdentificationGridList(identification);
+		List<ProjectIdentification> bomComponentsList = new ArrayList<>();
 		
 		if (mergeListMap != null && mergeListMap.get("rows") != null) {
 			if (isCopyConfirm) {
@@ -3843,15 +3850,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				// 컴포넌트 마스터 인서트
-				projectMapper.registBomComponents(bean);
+				// projectMapper.registBomComponents(bean);
 				List<OssComponentsLicense> licenseList = CommonFunction.findOssLicenseIdAndName(bean.getOssId(), bean.getOssComponentsLicenseList());
+				bean.setOssComponentsLicenseList(licenseList);
+				bomComponentsList.add(bean);
 				
-				for (OssComponentsLicense licenseBean : licenseList) {
-					licenseBean.setComponentId(bean.getComponentId());
-					
-					projectMapper.registComponentLicense(licenseBean);
-				}
+//				for (OssComponentsLicense licenseBean : licenseList) {
+//					licenseBean.setComponentId(bean.getComponentId());
+//					projectMapper.registComponentLicense(licenseBean);
+//				}
 			}
+		}
+		
+		if (!CollectionUtils.isEmpty(bomComponentsList)) {
+			registBomComponents(bomComponentsList);
 		}
 		
 		if (!isPartner) {
@@ -3935,6 +3947,44 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 	
+	private void registBomComponents(List<ProjectIdentification> bomComponentsList) {
+		List<OssComponentsLicense> bomComponentsLicenseList = new ArrayList<>();
+		
+		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+            int saveCnt = 0;
+            for (ProjectIdentification bean : bomComponentsList) {
+                mapper.registBomComponents(bean);
+                if(saveCnt++ == 1000) {
+                    sqlSession.flushStatements();
+                    saveCnt = 0;
+                }
+            }
+            
+            if (saveCnt > 0) {
+                sqlSession.flushStatements();
+            }
+            
+            bomComponentsLicenseList.addAll(getInsertOssComponentLicenseList(bomComponentsList));
+            
+            saveCnt = 0;
+            for (OssComponentsLicense bean : bomComponentsLicenseList) {
+                mapper.registComponentLicense(bean);
+                if (saveCnt++ == 1000) {
+                    sqlSession.flushStatements();
+                    saveCnt = 0;
+                }
+            }
+            if (saveCnt > 0) {
+                sqlSession.flushStatements();
+            }
+            sqlSession.commit();
+        }
+		
+		bomComponentsList.clear();
+		bomComponentsLicenseList.clear();
+	}
+
 	@Override
 	public void checkProjectReviewer(Project project) {
 		Project param = projectMapper.selectProjectMaster2(project.getPrjId());
@@ -7647,9 +7697,15 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	}
 
 	@Override
-	public void copySecurityDataForProject(Project project) {
+	public void copySecurityDataForProject(Project project, Project bean) {
 		boolean copyFlag = projectMapper.copySecurityDataForProjectCnt(project) > 0 ? true : false;
-		if (copyFlag) projectMapper.copySecurityDataForProject(project);
+		if (copyFlag) {
+			projectMapper.copySecurityDataForProject(project);
+		}
+		
+		project.setCvssScoreMax(bean.getCvssScoreMax());
+		project.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+		projectMapper.updateProjectForSecurity(project);
 	}
 	
 	@Override
