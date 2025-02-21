@@ -763,46 +763,11 @@
 		save : function() {
 			fn.checkValidMsg();
 			
-			var confirmMsg = "";
-			var ossNotice = $("[name='noticeType']:checked").val();
-
-			var innerHtml = '<br><textarea id="prjSaveEditor"></textarea>';
-			if(!isCheckT && ossNotice == "99"){
-				confirmMsg  = "OSS 고지문 발급이 필요한 경우에는, 'Cancel' 클릭 후 OSS Notice 및 Distribution type을 다시 확인해주시기 바랍니다.";
-				confirmMsg += "<br><br>" + "If it is necessary to generate the OSS Notice, please click 'Cancel' and check the OSS Notice and Distributio type again.";
-				confirmMsg += "<br><br>If necessary, please enter a comment.";
-				confirmMsg += innerHtml;
+			if ('Y' == identificationStatusConfFlag){
+				fn.showCopyStatusConfirm();
 			} else {
-				confirmMsg = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
-				confirmMsg += innerHtml;
+				fn.beforeSaveSubmit("N");
 			}
-			
-			if (typeof alertify.prjSaveDialog === 'undefined') {
-				commonAlertifyDialog('prjSaveDialog');
-        	}
-			
-			alertify.prjSaveDialog()
-       		.set('onok', function(e) {
-       			if (e) {
-       				var editorVal = $("#prjSaveEditor").summernote('code');
-       				if ("" != $(editorVal).text().trim()) {
-						$("input[name='userComment']").val(editorVal);
-					}
-       				
-       				if ('Y' == identificationStatusConfFlag){
-       					fn.showCopyStatusConfirm();
-       				} else {
-       					fn.saveSubmit();
-       				}
-       			} else {
-       				return false;
-       			}
-       		})
-       		.set('onshow', function(e){
-       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-       		})
-       		.set('title', 'Save').setContent(confirmMsg)
-			.show();
 		},
 		tableRefresh : function() {
             setTimeout(function() {
@@ -1100,8 +1065,46 @@
 					}
 				});
 			},
+			beforeSaveSubmit : function(copyConfirmStatus) {
+				var confirmMsg = "";
+				var ossNotice = $("[name='noticeType']:checked").val();
+
+				var innerHtml = '<br><textarea id="prjSaveEditor"></textarea>';
+				if (!isCheckT && ossNotice == "99"){
+					confirmMsg  = "OSS 고지문 발급이 필요한 경우에는, 'Cancel' 클릭 후 OSS Notice 및 Distribution type을 다시 확인해주시기 바랍니다.";
+					confirmMsg += "<br><br>" + "If it is necessary to generate the OSS Notice, please click 'Cancel' and check the OSS Notice and Distributio type again.";
+					confirmMsg += "<br><br>If necessary, please enter a comment.";
+					confirmMsg += innerHtml;
+				} else {
+					confirmMsg = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+					confirmMsg += innerHtml;
+				}
+				
+				if (typeof alertify.prjSaveDialog === 'undefined') {
+					commonAlertifyDialog('prjSaveDialog');
+	        	}
+				
+				alertify.prjSaveDialog()
+	       		.set('onok', function(e) {
+	       			if (e) {
+	       				var editorVal = $("#prjSaveEditor").summernote('code');
+	       				if ("" != $(editorVal).text().trim()) {
+							$("input[name='userComment']").val(editorVal);
+						}
+	       				
+	       				fn.saveSubmit(copyConfirmStatus);
+	       			} else {
+	       				return false;
+	       			}
+	       		})
+	       		.set('onshow', function(e){
+	       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	       		})
+	       		.set('title', 'Save').setContent(confirmMsg)
+				.show();
+			},
 			// 저장
-			saveSubmit : function(){
+			saveSubmit : function(copyConfirmStatus){
 				var prjName = $('input[name=prjName]').val().trim().replace(/[ ]+/g, " "); // ASCII 160 convert -> ASCII 32
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
@@ -1142,8 +1145,8 @@
 
 				var confirmStatusCopyFlag = true;
 				var confirmStatusCopyVal = "";
-				if ($('input:radio[name="confirmStatusCopyRadio"]').is(':checked')) {
-					confirmStatusCopyVal = $('input:radio[name="confirmStatusCopyRadio"]:checked').val();
+				if ("N" != copyConfirmStatus) {
+					confirmStatusCopyVal = copyConfirmStatus;
 					fn.disabledVerificationConfirm(false);
 				} else {
 					confirmStatusCopyFlag = false;
@@ -2202,7 +2205,9 @@
 				$(".ajs-close").trigger("click");
 			},
 			copyConfirmSave : function() {
-				fn.saveSubmit();
+				let copyConfirmStatus = $('input:radio[name="confirmStatusCopyRadio"]:checked').val();
+				fn.closeAlertifyView();
+				fn.beforeSaveSubmit(copyConfirmStatus);
 				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
 			},
 			copyConfirmClose : function() {
