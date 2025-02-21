@@ -2277,6 +2277,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					checkName = String.join("-", name);
 					break;
+				case 13 :
+					checkName = "go:" + ossNameMatcher.group(3).split("@")[0];
+					break;
 				default:
 					break;
 			}
@@ -2350,6 +2353,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				break;
 			case 12 :
 				p = Pattern.compile("((http|https)://git.codelinaro.org/([^/]+)/([^/]+)/(.*))");
+				break;
+			case 13:
+				p = Pattern.compile("((http|https)://pkg.go.dev/(.*))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
