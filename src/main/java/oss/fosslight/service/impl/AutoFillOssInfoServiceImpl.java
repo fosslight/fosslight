@@ -13,7 +13,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -32,13 +31,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.DependencyType;
 import oss.fosslight.common.ExternalLicenseServiceType;
 import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.ProjectIdentification;
@@ -149,6 +146,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			
 			List<ProjectIdentification> prjOssLicenses;
 			String downloadLocation = oss.getDownloadLocation();
+			String dependencyTypeCheckUrl = "";
 			String ossVersion = oss.getOssVersion();
 			String currentLicense = getLicenseNameSort(oss.getLicenseName());
 			String checkedLicense = "";
@@ -179,25 +177,22 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 				
 				if (oss.getDownloadLocation().startsWith("www.")) {
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(4, oss.getDownloadLocation().length()));
 				}
 				
-				if (oss.getDownloadLocation().contains(".git")) {
-					if (oss.getDownloadLocation().endsWith(".git")) {
-						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
-					} else {
-						if (oss.getDownloadLocation().contains("#")) {
-							oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-							oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
-						}
-					}
+				if (oss.getDownloadLocation().contains(".git") && oss.getDownloadLocation().endsWith(".git")) {
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
 				}
 				
-				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
-				if (downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-				}
+//				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
+//				if (downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+//					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
+//				}
 				
+				dependencyTypeCheckUrl = oss.getDownloadLocation();
+				if (!dependencyTypeCheckUrl.startsWith("https://")) {
+					dependencyTypeCheckUrl = "https://" + dependencyTypeCheckUrl;
+				}
 				// Search Priority 2. find by oss download location and version
 				prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
 				checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
@@ -253,7 +248,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			// Search Priority 4. find by Clearly Defined And Github API
-			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
+			DependencyType dependencyType = DependencyType.downloadLocationToType(dependencyTypeCheckUrl);
 
 			if (dependencyType.equals(DependencyType.UNSUPPORTED) || !isExternalServiceEnable()) {
 				continue;
@@ -261,7 +256,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 			// Search Priority 4-1. Github API : empty oss version and download location
 			if (ossVersion.isEmpty() && ExternalLicenseServiceType.GITHUB.hasDependencyType(dependencyType) && isGitHubApiHealth) {
-				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
+				Matcher matcher = dependencyType.getPattern().matcher(dependencyTypeCheckUrl);
 				String owner = "", repo = "";
 
 				while (matcher.find()) {
@@ -285,25 +280,40 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 			// Search Priority 4-2. Clearly Defined : oss version and download location
 			if (!ossVersion.isEmpty() && ExternalLicenseServiceType.CLEARLY_DEFINED.hasDependencyType(dependencyType) && isClearlyDefinedApiHealth) {
-				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String type = dependencyType.getType();
 				String provider = dependencyType.getProvider();
 				String revision = ossVersion;
 				String namespace = "", name = "";
-
-				while (matcher.find()) {
-					if (dependencyType.equals(DependencyType.MAVEN_CENTRAL) || dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
-						namespace = matcher.group(3);
-						name = matcher.group(4);
-					} else if (dependencyType.equals(DependencyType.NPM)) {
-						namespace = matcher.group(4);
-						name = matcher.group(5);
-					} else if (dependencyType.equals(DependencyType.NPM2)) {
-						namespace = "-";
-						name = matcher.group(4);
-					} else {
-						namespace = "-";
-						name = matcher.group(3);
+				
+				if (dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
+					String urlPath = dependencyTypeCheckUrl.split("[#]")[1];
+					for (String pathString : urlPath.split("[:]")) {
+						if (isEmpty(namespace)) {
+							namespace = pathString;
+							continue;
+						}
+						if (isEmpty(name)) {
+							name = pathString;
+							break;
+						}
+					}
+				} else {
+					Matcher matcher = dependencyType.getPattern().matcher(dependencyTypeCheckUrl);
+					
+					while (matcher.find()) {
+						if (dependencyType.equals(DependencyType.MAVEN_CENTRAL) || dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
+							namespace = matcher.group(3);
+							name = matcher.group(4);
+						} else if (dependencyType.equals(DependencyType.NPM)) {
+							namespace = matcher.group(4);
+							name = matcher.group(5);
+						} else if (dependencyType.equals(DependencyType.NPM2)) {
+							namespace = "-";
+							name = matcher.group(4);
+						} else {
+							namespace = "-";
+							name = matcher.group(3);
+						}
 					}
 				}
 
@@ -321,10 +331,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 			}
 		}
-
 		// TODO : Request at once when using external API(Clearly Defined, Github API)
-
-
 
 		/* grouping same oss */
 		final Comparator<ProjectIdentification> comp = (p1, p2) -> p1.getDownloadLocation().compareTo(p2.getDownloadLocation());
