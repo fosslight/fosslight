@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -73,6 +74,7 @@ import org.springframework.context.annotation.PropertySources;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
+import com.itextpdf.layout.borders.Border;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -2127,7 +2129,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, Object> vulnerabilityMap =	vulnerabilityService.getVulnerabilityList(vulnerability, true);
 				
 				if (isMaximumRowCheck((int) vulnerabilityMap.get("records"))){
-					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityMap.get("rows"));
+					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityMap.get("rows"), false);
 				}
 				
 				break;
@@ -2140,7 +2142,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, Object> vulnerabilityPopupMap = vulnerabilityService.getVulnListByOssName(bean);
 
 				if (isMaximumRowCheck((int) vulnerabilityPopupMap.get("records"))){
-					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityPopupMap.get("rows"));
+					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityPopupMap.get("rows"), true);
 				}
 
 				break;
@@ -4615,7 +4617,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	}
 	
 	/* 2018-07-26 choye 추가 */
-	private static String getVulnerabilityExcel(List<Vulnerability> vulnerabilityList) throws Exception{
+	private static String getVulnerabilityExcel(List<Vulnerability> vulnerabilityList, boolean isPopup) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
 		String fileName = "VulnerabilityList";
@@ -4623,7 +4625,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		try (
 			FileInputStream inFile= new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
 		) {
-			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
+			try {
+				wb = new XSSFWorkbook(inFile);
+			} catch (IOException e) {
+				log.error(e.getMessage());
+			}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "vulnerabilityList");
 			
@@ -4645,7 +4651,19 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				rows.add(rowParam);
 			}
 			//시트 만들기
-			makeSheet(sheet, rows);
+			if (isPopup) {
+				CreationHelper creationHelper = wb.getCreationHelper();
+				CellStyle hyperLinkStyle = wb.createCellStyle();
+				Font hyperLinkFont = wb.createFont();
+				hyperLinkFont.setUnderline(Font.U_SINGLE);
+				hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
+				hyperLinkStyle.setFont(hyperLinkFont);
+				hyperLinkStyle.setBorderBottom(BorderStyle.THIN);
+				
+				makeVulnerabilityPopupSheet(creationHelper, hyperLinkStyle, sheet, rows);
+			} else {
+				makeSheet(sheet, rows);
+			}
 			if (ossName.size() == 1) {
 				fileName += "_" + ossName.toString().substring(1,ossName.toString().length()-1);
 			}
@@ -4653,6 +4671,44 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		return makeExcelFileId(wb, fileName);
+	}
+	
+	private static void makeVulnerabilityPopupSheet(CreationHelper creationHelper, CellStyle hyperLinkStyle, Sheet sheet, List<String[]> rows) {
+		int startRow= 1;
+		int startCol = 0;
+		int endCol = 0;
+		int templateRowNum = 1;
+		
+		if (rows.isEmpty()) {
+		} else {
+			endCol = rows.get(0).length-1;
+		}
+		
+		int shiftRowNum = rows.size();
+		
+		Row templateRow = sheet.getRow(templateRowNum);
+		Cell templateCell = templateRow.getCell(0);
+		CellStyle style = templateCell.getCellStyle();
+		
+		startRow = templateRow.getRowNum();		
+		
+		for (int i = startRow; i < startRow+shiftRowNum; i++) {
+			String[] rowParam = rows.get(i-startRow);
+			
+			Row row = sheet.createRow(i);
+			for (int colNum=startCol; colNum<=endCol; colNum++) {
+				Cell cell=row.createCell(colNum);
+				cell.setCellValue(rowParam[colNum]);
+				if (colNum == 2 && !StringUtil.isEmpty(rowParam[colNum])) {
+					Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.URL);
+					hyperlink.setAddress("https://nvd.nist.gov/vuln/detail/" + rowParam[colNum]);
+					cell.setHyperlink(hyperlink);
+					cell.setCellStyle(hyperLinkStyle);
+				} else {
+					cell.setCellStyle(style);
+				}
+			}
+		}
 	}
 	
 	private static boolean isMaximumRowCheck(int totalRow){
