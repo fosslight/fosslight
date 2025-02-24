@@ -5087,43 +5087,51 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 				break;
 			case 1: // npm
+			case 2: // npm
+			case 3: // npm
 				if (downloadlocationUrl.contains("/package/@")) {
 					p = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+)/([^/]+))");
-				}else {
+				} else {
 					p = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+))");
 				}
-			case 2: // npm
+			case 4: // npm
 				if (downloadlocationUrl.contains("/@")) {
 					p = Pattern.compile("((http|https)://registry.npmjs.(org|com)/([^/]+)/([^/]+))");
-				}else {
+				} else {
 					p = Pattern.compile("((http|https)://registry.npmjs.(org|com)/([^/]+))");
 				}
 				break;
-			case 3: // pypi
+			case 5: // npm
+			case 6: // npm
+			case 7: // npm
+			case 8: // npm
+				p = Pattern.compile("((http|https)://npmjs.(org|com)/([^/]+))");
+				break;
+			case 9: // pypi
 				p = Pattern.compile("((http|https)://pypi.python.org/project/([^/]+))");
 				break;
-			case 4: // pypi
+			case 10: // pypi
 				p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
 				break;
-			case 5: // maven
+			case 11: // maven
 				p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
 				break;
-			case 6: // maven
+			case 12: // maven
 				p = Pattern.compile("((http|https)://repo.maven.apache.org/maven2/([^/]+)/([^/]+))");
 				break;
-			case 7: // cocoapod
+			case 13: // cocoapod
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
 				break;
-			case 8: // gem
+			case 14: // gem
 				p = Pattern.compile("((http|https)://rubygems.org/gems/([^/]+))");
 				break;
-			case 9: // go
+			case 15: // go
 				p = Pattern.compile("((http|https)://pkg.go.dev/([^@]+)@?v?([^/]+))");
 				break;
-			case 10:
+			case 16:
 				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 				break;
-			case 11:
+			case 17:
 				p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
 				break;
 			default:
