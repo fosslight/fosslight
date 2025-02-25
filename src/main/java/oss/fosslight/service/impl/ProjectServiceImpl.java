@@ -5752,18 +5752,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<ProjectIdentification> tempData = new ArrayList<ProjectIdentification>();
 		List<ProjectIdentification> resultGridData = new ArrayList<ProjectIdentification>();
 		String groupColumn = "";
-		boolean dashMergeFlag = false;
 		
 		for (ProjectIdentification info : gridData) {
 			if (isEmpty(groupColumn)) {
 				groupColumn = info.getOssName() + "-" + info.getOssVersion();
 			}
-			
-			if (info.getOssName().equals("-")) {
-				dashMergeFlag = true;
-			}
-			
-			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) || dashMergeFlag) {
+			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion())) {
 				// 같은 groupColumn이면 데이터를 쌓음
 				tempData.add(info);
 			} else { // 다른 grouping
@@ -5772,8 +5766,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				tempData.clear();
 				tempData.add(info);
 			}
-			
-			dashMergeFlag = false; // 초기화
 		}
 		
 		setMergeData(tempData, resultGridData); // bom data의 loop가 끝났지만 tempData에 값이 있다면 해당 값도 merge를 함.
