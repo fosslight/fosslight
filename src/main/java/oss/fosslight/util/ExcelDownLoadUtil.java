@@ -1129,6 +1129,18 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		// Project Name
 		Cell nameCell = sheet.getRow(6).getCell(1);
 		nameCell.setCellType(CellType.STRING);
+		CellStyle hyperLinkStyle = wb.createCellStyle();
+		Font hyperLinkFont = wb.createFont();
+		hyperLinkFont.setUnderline(Font.U_SINGLE);
+		hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
+		hyperLinkStyle.setFont(hyperLinkFont);
+		hyperLinkStyle.setBorderTop(BorderStyle.THIN);
+		hyperLinkStyle.setBorderBottom(BorderStyle.THIN);
+		hyperLinkStyle.setBorderRight(BorderStyle.THIN);
+		Hyperlink hyperlink = wb.getCreationHelper().createHyperlink(HyperlinkType.URL);
+		hyperlink.setAddress(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + project.getPrjId());
+		nameCell.setHyperlink(hyperlink);
+		nameCell.setCellStyle(hyperLinkStyle);
 		nameCell.setCellValue(project.getPrjName());
 		// version
 		Cell versionCell = sheet.getRow(7).getCell(1);
