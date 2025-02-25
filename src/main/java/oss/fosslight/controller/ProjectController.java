@@ -1272,7 +1272,9 @@ public class ProjectController extends CoTopComponent {
 						log.error(e.getMessage(), e);
 					}
 				} else if (CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(mailType)){
-					String initMessage = "<p>" + "Copy with confirm status from [PRJ-" + beforeBean.getPrjId() + "] " + beforeBean.getPrjName();
+					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + beforeBean.getPrjId();
+					String _s = "<a href='" + linkUrl + "' class='urlLink2' target='_blank'>PRJ-" + beforeBean.getPrjId() + "</a>";
+					String initMessage = "<p>" + "Copy with confirm status from [" + _s + "] " + beforeBean.getPrjName();
 					if (!isEmpty(beforeBean.getPrjVersion())) {
 						initMessage += "_" + beforeBean.getPrjVersion();
 					}
