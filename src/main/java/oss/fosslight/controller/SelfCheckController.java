@@ -660,7 +660,26 @@ public class SelfCheckController extends CoTopComponent {
 				s = s.toUpperCase().trim();
 				
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(s)) {
-					resultList.add(CoCodeManager.LICENSE_INFO_UPPER.get(s));
+					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(s);
+					if (!isEmpty(licenseMaster.getRestriction())) {
+						String restrictionStr = "";
+						for (String restriction : licenseMaster.getRestriction().split(",")) {
+							if (isEmpty(restriction)) {
+								continue;
+							}
+							if (!isEmpty(restrictionStr)) {
+								restrictionStr += ", ";
+							}
+							restrictionStr += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restriction);
+							if (!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction))) {
+								restrictionStr += " (" + CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction) + ")";
+							}
+						}
+						if (!isEmpty(restrictionStr)) {
+							licenseMaster.setRestrictionStr(restrictionStr);
+						}
+					}
+					resultList.add(licenseMaster);
 				}
 			}
 		}

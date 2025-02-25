@@ -10,6 +10,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -145,18 +146,23 @@ public class LicenseController extends CoTopComponent {
 		if ("ROLE_ADMIN".equals(loginUserRole())) {
 			return "license/edit";
 		} else {
-			if (!isEmpty(licenseMaster.getRestriction())) {
-				List<String> restrictionList = Arrays.asList(licenseMaster.getRestriction().split(","));
+			if (!CollectionUtils.isEmpty(licenseMaster.getRestrictionCdNoList())) {
 				String restrictionStr = "";
-				for (String restriction : restrictionList) {
-					if (isEmpty(restriction)) continue;
-
+				for (String restriction : licenseMaster.getRestrictionCdNoList()) {
+					if (isEmpty(restriction)) {
+						continue;
+					}
 					if (!isEmpty(restrictionStr)) {
 						restrictionStr += ", ";
 					}
 					restrictionStr += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restriction);
+					if (!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction))) {
+						restrictionStr += " (" + CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction) + ")";
+					}
 				}
-				if (!isEmpty(restrictionStr)) licenseMaster.setRestriction(restrictionStr);
+				if (!isEmpty(restrictionStr)) {
+					licenseMaster.setRestriction(restrictionStr);
+				}
 			}
 
 			return "license/view";
