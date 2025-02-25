@@ -22,7 +22,7 @@
 									<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
 								</th:block>
 							</th:block>
-							<th:block th:if="${comment.creator == comment.loginUserName && comment.recentFlag == null}">
+							<th:block th:if="${comment.creator == comment.loginUserName && comment.recentFlag == null && comment.status != 'Created' && comment.status != 'Copied'}">
 								<span style="margin-left: auto;">
                						<span class="p-1 pointer"><i class="fas fa-pencil-alt" th:onclick="fn_comment.editComments([[${comment.commId}]], [[${comment.referenceDiv}]], [[${comment.referenceId}]])"></i></span>
                						<span class="p-1 pointer" th:onclick="fn_comment.deleteComments([[${comment.commId}]], [[${comment.referenceDiv}]], [[${comment.referenceId}]])"><i class="far fa-trash-alt"></i></span>

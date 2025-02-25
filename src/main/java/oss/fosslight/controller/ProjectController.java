@@ -1272,11 +1272,16 @@ public class ProjectController extends CoTopComponent {
 						log.error(e.getMessage(), e);
 					}
 				} else if (CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(mailType)){
-					String initMessage = "Project Created (by Copy)";
+					String initMessage = "<p>" + "Copy with confirm status from [PRJ-" + beforeBean.getPrjId() + "] " + beforeBean.getPrjName();
+					if (!isEmpty(beforeBean.getPrjVersion())) {
+						initMessage += "_" + beforeBean.getPrjVersion();
+					}
+					initMessage += "</p>";
 					CommentsHistory commHisBean = new CommentsHistory();
 					commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
 					commHisBean.setReferenceId(project.getPrjId());
 					commHisBean.setContents(initMessage);
+					commHisBean.setStatus("Copied");
 					commentService.registComment(commHisBean);
 				}
 			} catch (Exception e) {
@@ -1284,6 +1289,17 @@ public class ProjectController extends CoTopComponent {
 			}
 		} else {
 			try {
+				String initMessage = "<p>Project Created</p>";
+				if (!isEmpty(userComment)) {
+					initMessage += userComment;
+				}
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+				commHisBean.setReferenceId(project.getPrjId());
+				commHisBean.setContents(initMessage);
+				commHisBean.setStatus("Created");
+				commentService.registComment(commHisBean);
+				
 				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED);
 				mailBean.setParamPrjId(project.getPrjId());
 
@@ -4132,7 +4148,7 @@ public class ProjectController extends CoTopComponent {
 			if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(verificationStatus)) {
 				project.setVerificationStatusConfFlag(CoConstDef.FLAG_YES);
 			}
-		}else {
+		} else {
 			comment = "Copied from [PRJ-" + prjId + "] " + project.getPrjName();
 			
 			if (!isEmpty(project.getPrjVersion())) {
