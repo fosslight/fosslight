@@ -1247,10 +1247,10 @@ public class ProjectController extends CoTopComponent {
 				mailBean.setCompareDataBefore(beforeBean);
 				mailBean.setCompareDataAfter(afterBean);
 
-				if ("true".equals(copy)) {
-					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED));
-					userComment = avoidNull(userComment) + "<br />" + _tempComment;
-				}
+//				if ("true".equals(copy)) {
+//					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED));
+//					userComment = avoidNull(userComment) + "<br />" + _tempComment;
+//				}
 				mailBean.setComment(userComment);
 				
 				CoMailManager.getInstance().sendMail(mailBean);
