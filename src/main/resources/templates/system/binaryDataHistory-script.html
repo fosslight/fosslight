@@ -65,14 +65,14 @@ var evt = {
 		});
 		
 		$("#updateRange").daterangepicker()
-						.on('apply.daterangepicker', function(ev, picker) {
-							$("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
-							$("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
-						})
-						.on('cancel.daterangepicker', function(ev, picker) {
-							$("input[name='schStartDate']").val("");
-							$("input[name='schEndDate']").val("");
-						});
+		.on('apply.daterangepicker', function(ev, picker) {
+			$("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+			$("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+		})
+		.on('cancel.daterangepicker', function(ev, picker) {
+			$("input[name='schStartDate']").val("");
+			$("input[name='schEndDate']").val("");
+		});
 	}
 };
 
