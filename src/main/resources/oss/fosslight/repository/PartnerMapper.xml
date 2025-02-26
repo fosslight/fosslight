@@ -640,7 +640,7 @@
 	<select id="selectPartnerMaster" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
 	SELECT
 		t1.*
-		,t2.ORIG_NM AS FILE_NAME
+		, t2.ORIG_NM AS FILE_NAME
 		, t3.ORIG_NM AS FILE_NAME2
 		, t4.USER_NAME AS CREATOR_NAME
 		, t5.USER_NAME AS REVIEWER_NAME

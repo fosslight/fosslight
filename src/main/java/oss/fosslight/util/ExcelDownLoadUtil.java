@@ -1199,6 +1199,56 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 
+	private static void partnerReportSheet(Workbook wb, Sheet sheet, PartnerMaster partner) {
+		// About the report
+		// Creator
+		Cell authorCell = sheet.getRow(1).getCell(1);
+		authorCell.setCellType(CellType.STRING);
+		authorCell.setCellValue(partner.getCreatorName());
+		// Division of Creator
+		Cell divisionrCell = sheet.getRow(2).getCell(1);
+		divisionrCell.setCellType(CellType.STRING);
+		divisionrCell.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, partner.getDivision()));
+		// Report Creation Date
+		Cell dateCell = sheet.getRow(3).getCell(1);
+		dateCell.setCellType(CellType.STRING);
+		dateCell.setCellValue(CommonFunction.formatDate(partner.getCreatedDate()));
+		
+		// About the 3rd party
+		// 3rd Party Software Name
+		Cell partySoftwareNameCell = sheet.getRow(6).getCell(1);
+		partySoftwareNameCell.setCellType(CellType.STRING);
+		CellStyle hyperLinkStyle = wb.createCellStyle();
+		Font hyperLinkFont = wb.createFont();
+		hyperLinkFont.setUnderline(Font.U_SINGLE);
+		hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
+		hyperLinkStyle.setFont(hyperLinkFont);
+		hyperLinkStyle.setBorderTop(BorderStyle.THIN);
+		hyperLinkStyle.setBorderBottom(BorderStyle.THIN);
+		hyperLinkStyle.setBorderRight(BorderStyle.THIN);
+		Hyperlink hyperlink = wb.getCreationHelper().createHyperlink(HyperlinkType.URL);
+		hyperlink.setAddress(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + partner.getPartnerId());
+		partySoftwareNameCell.setHyperlink(hyperlink);
+		partySoftwareNameCell.setCellStyle(hyperLinkStyle);
+		partySoftwareNameCell.setCellValue(partner.getSoftwareName());
+		// 3rd Party Name
+		Cell partyName = sheet.getRow(7).getCell(1);
+		partyName.setCellType(CellType.STRING);
+		partyName.setCellValue(partner.getPartnerName());
+		// 3rd Party Software Version
+		Cell partySoftwareVersion = sheet.getRow(8).getCell(1);
+		partySoftwareVersion.setCellType(CellType.STRING);
+		partySoftwareVersion.setCellValue(avoidNull(partner.getSoftwareVersion()));
+		// Delivery Form
+		Cell deliveryForm = sheet.getRow(9).getCell(1);
+		deliveryForm.setCellType(CellType.STRING);
+		deliveryForm.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_PARTNER_DELIVERY_FORM, partner.getDeliveryForm()));
+		// Description
+		Cell description = sheet.getRow(10).getCell(1);
+		description.setCellType(CellType.STRING);
+		description.setCellValue(CommonFunction.html2text(partner.getDescription()));
+	}
+	
 	/**
 	 * 
 	 * @param licenseList
@@ -4314,18 +4364,22 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			inFile= new FileInputStream(new File(downloadpath+"/OssCheckList.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			
+			{
+				partnerReportSheet(wb, wb.getSheetAt(0), partnerInfo);
+			}
+			
 			//fosslight_report_[date]_3rd-[ID].xlsx
 			downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_3rd-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId);
 			
 			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
-				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER, wb.getSheetAt(0), projectService.getIdentificationGridList(ossListParam), null, false);
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER, wb.getSheetAt(1), projectService.getIdentificationGridList(ossListParam), null, false);
 			}
 			
 			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 				ossListParam.setMerge(CoConstDef.FLAG_NO);
-				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb.getSheetAt(1), projectService.getIdentificationGridList(ossListParam), null, false);
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb.getSheetAt(2), projectService.getIdentificationGridList(ossListParam), null, false);
 				reportSecuritySheet(isDemo, CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb, partnerInfo, partnerService.getSecurityGridList(isDemo, partnerInfo));
 			}
 		} catch (Exception e) {
@@ -4350,7 +4404,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			hyperLinkFont.setUnderline(Font.U_SINGLE);
 			hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
 			hyperLinkStyle.setFont(hyperLinkFont);
-			Sheet sheet = wb.getSheetAt(2);
+			Sheet sheet = wb.getSheetAt(3);
 			
 			if (securityGridList != null){
 				List<String[]> rowInfoData = new ArrayList<>();
