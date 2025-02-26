@@ -783,7 +783,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		if (!vr.getDiffMessageMap().isEmpty()) {
 			String gridId = "";
-			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				gridId = bean.getComponentId();
 			} else {
 				gridId = bean.getGridId();
