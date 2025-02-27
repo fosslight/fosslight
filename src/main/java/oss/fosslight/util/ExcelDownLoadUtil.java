@@ -249,6 +249,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			
 			wb.setSheetVisibility(8, SheetVisibility.VERY_HIDDEN);
+			
+			if (!isEmpty(type)) {
+				removeReportSheet(type, wb, wb.getNumberOfSheets());
+			}
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -260,6 +264,73 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 
 		return makeExcelFileId(wb,downloadFileName);
+	}
+	private static void removeReportSheet(String type, Workbook wb, int sheetCnt) {
+		boolean isRemoveSheet = false;
+		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
+			for (int i = 0; i < sheetCnt; i++) {
+				String sheetName = wb.getSheetName(i);
+				if (!sheetName.equalsIgnoreCase("3rd Party Info")) {
+					if (!sheetName.equalsIgnoreCase("3rd Party")) {
+						wb.removeSheetAt(i);
+						isRemoveSheet = true;
+					}
+					if (isRemoveSheet) {
+						break;
+					}
+				}
+			}
+		} else {
+			for (int i = 0; i < sheetCnt; i++) {
+				String sheetName = wb.getSheetName(i);
+				if (!sheetName.equalsIgnoreCase("Project Info") && !sheetName.equalsIgnoreCase("Model Info") && !sheetName.equalsIgnoreCase(".Data")) {
+					switch (type) {
+						case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER :
+							if (!sheetName.equalsIgnoreCase("3rd Party")) {
+								wb.removeSheetAt(i);
+								isRemoveSheet = true;
+							}
+							break;
+						case CoConstDef.CD_DTL_COMPONENT_ID_DEP :
+							if (!sheetName.equalsIgnoreCase("DEP")) {
+								wb.removeSheetAt(i);
+								isRemoveSheet = true;
+							}
+							break;
+						case CoConstDef.CD_DTL_COMPONENT_ID_SRC :
+							if (!sheetName.equalsIgnoreCase("SRC")) {
+								wb.removeSheetAt(i);
+								isRemoveSheet = true;
+							}
+							break;
+						case CoConstDef.CD_DTL_COMPONENT_ID_BIN :
+							if (!sheetName.equalsIgnoreCase("BIN")) {
+								wb.removeSheetAt(i);
+								isRemoveSheet = true;
+							}
+							break;
+						case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID :
+							if (!sheetName.equalsIgnoreCase("BIN (Android)") && !sheetName.equalsIgnoreCase("BIN (Yocto)")) {
+								wb.removeSheetAt(i);
+								isRemoveSheet = true;
+							}
+							break;
+						case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM :
+							if (!sheetName.equalsIgnoreCase("BIN (Android)") && !sheetName.equalsIgnoreCase("BIN (Yocto)") && !sheetName.equalsIgnoreCase("BOM")) {
+								wb.removeSheetAt(i);
+								isRemoveSheet = true;
+							}
+							break;
+					}
+					if (isRemoveSheet) {
+						break;
+					}
+				}
+			}
+		}
+		if (isRemoveSheet) {
+			removeReportSheet(type, wb, wb.getNumberOfSheets());
+		}
 	}
 	private static void reportProjectModelSheet(Sheet coverSheet, Sheet modelSheet, List<Project> modelList, Project projectInfo) {
 		List<String[]> rows = new ArrayList<>();
@@ -4382,6 +4453,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb.getSheetAt(2), projectService.getIdentificationGridList(ossListParam), null, false);
 				reportSecuritySheet(isDemo, CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb, partnerInfo, partnerService.getSecurityGridList(isDemo, partnerInfo));
 			}
+			
+			if (!isEmpty(type)) {
+				removeReportSheet(type, wb, wb.getNumberOfSheets());
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -4413,12 +4488,16 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date now = new Date();
 				String now_dt = format.format(now);
+				String creatorName = partnerMaster.getCreatorName();
+				if (!isEmpty(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, partnerMaster.getDivision()))) {
+					creatorName += " (" + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, partnerMaster.getDivision()) + ")";
+				}
 				
 				String[] rowInfoParam = {
 						now_dt
 						, partnerMaster.getPartnerName()
 						, partnerMaster.getSoftwareVersion()
-						, partnerMaster.getCreatorName() + " (" + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, partnerMaster.getDivision()) + ")"
+						, creatorName
 				};
 				
 				rowInfoData.add(rowInfoParam);
