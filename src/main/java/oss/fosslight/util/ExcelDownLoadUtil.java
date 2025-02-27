@@ -53,7 +53,7 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.cyclonedx.BomGeneratorFactory;
+import org.cyclonedx.generators.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema;
 import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
@@ -65,7 +65,7 @@ import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.OrganizationalContact;
 import org.cyclonedx.model.OrganizationalEntity;
-import org.cyclonedx.model.Tool;
+import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.model.vulnerability.Vulnerability.Source;
 import org.spdx.library.SpdxVerificationHelper;
 import org.springframework.context.annotation.PropertySource;
@@ -74,7 +74,6 @@ import org.springframework.context.annotation.PropertySources;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
-import com.itextpdf.layout.borders.Border;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -5312,6 +5311,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		List<OssComponents> dependenciesDataList = null;
 		Map<String, Object> packageInfo = null;
+		Project projectInfo = null;
+		PartnerMaster partner = null;
 		
 		String strPrjName = "";
 		String creator = "";
@@ -5321,7 +5322,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		try {
 			if (!thirdPartyCheckFlag) {
-				Project projectInfo = new Project();
+				projectInfo = new Project();
 				projectInfo.setPrjId(prjId);
 				
 				if (!selfCheckFlag) {
@@ -5355,7 +5356,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					packageInfo = selfCheckService.getExportDataForSBOMInfo(ossNotice);
 				}
 			} else {
-				PartnerMaster partner = new PartnerMaster();
+				partner = new PartnerMaster();
 				partner.setPartnerId(prjId);
 				partner = partnerService.getPartnerMasterOne(partner);
 				
@@ -5372,7 +5373,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			log.error(e.getMessage());
 		}
 		
-		Bom bom = generatorCycloneDXBOM(packageInfo, dependenciesDataList, timeStamp, creator, verifyFlag);
+		Bom bom = generatorCycloneDXBOM(packageInfo, dependenciesDataList, timeStamp, creator, verifyFlag, projectInfo, partner);
 		
 		UUID randomUUID = UUID.randomUUID();
 		String fileName = CommonFunction.replaceSlashToUnderline(downloadFileName);
@@ -5386,9 +5387,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		try {
 			fw = new FileWriter(excelFilePath + "/" + logiFileName, true);
 			if (type.toUpperCase().endsWith("JSON")) {
-				fw.write(BomGeneratorFactory.createJson(CycloneDxSchema.Version.VERSION_14, bom).toJsonString());
+				fw.write(BomGeneratorFactory.createJson(CycloneDxSchema.VERSION_LATEST, bom).toJsonString());
 			} else {
-				fw.write(BomGeneratorFactory.createXml(CycloneDxSchema.Version.VERSION_14, bom).toXmlString());
+				fw.write(BomGeneratorFactory.createXml(CycloneDxSchema.VERSION_LATEST, bom).toXmlString());
 			}
 			fileId = fileService.registFileDownload(excelFilePath, fileName + ext, logiFileName);
 		} catch (IOException | GeneratorException e) {
@@ -5405,8 +5406,22 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static Bom generatorCycloneDXBOM(Map<String, Object> packageInfo, List<OssComponents> dependenciesDataList, Date timeStamp, String creator, boolean verifyFlag) {
+	private static Bom generatorCycloneDXBOM(Map<String, Object> packageInfo, List<OssComponents> dependenciesDataList, Date timeStamp, String creator, boolean verifyFlag, Project prjInfo, PartnerMaster partnerInfo) {
 		Bom bom = new Bom();
+		
+		String id = "";
+		String name = "";
+		String version = "";
+		
+		if (prjInfo != null) {
+			id = prjInfo.getPrjId();
+			name = prjInfo.getPrjName();
+			version = prjInfo.getPrjVersion();
+		} else if (partnerInfo != null) {
+			id = "3rd_" + partnerInfo.getPartnerId();
+			name = partnerInfo.getSoftwareName();
+			version = partnerInfo.getSoftwareVersion();
+		}
 		
 		List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("noticeObligationList");
 		List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
@@ -5429,13 +5444,22 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Metadata meta = new Metadata();
 		meta.setTimestamp(timeStamp);
 		
-		List<Tool> tools = new ArrayList<>();
-		Tool tool = new Tool();
-		tool.setVendor("LG Electronics");
-		tool.setName("FOSSLIhgt Hub");
+		ToolInformation toolInfo = new ToolInformation();
+		List<Component> tools = new ArrayList<>();
+		Component tool = new Component();
+		tool.setType(org.cyclonedx.model.Component.Type.APPLICATION);
+		tool.setName("FOSSLight Hub");
 		tool.setVersion(CommonFunction.getProperty("project.version"));
 		tools.add(tool);
-		meta.setTools(tools);
+		toolInfo.setComponents(tools);
+		meta.setToolChoice(toolInfo);
+		
+		Component metaComponent = new Component();
+		metaComponent.setType(org.cyclonedx.model.Component.Type.APPLICATION);
+		metaComponent.setName(name);
+		metaComponent.setVersion(version);
+		metaComponent.setBomRef(id);
+		meta.setComponent(metaComponent);
 		
 		List<OrganizationalContact> authors = new ArrayList<>();
 		OrganizationalContact organizationalContract = new OrganizationalContact();
@@ -5455,6 +5479,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		List<String> checkCveIdList = new ArrayList<>();
 		List<Dependency> dependencyList = new ArrayList<>();
 		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+		OssMaster ossMaster = new OssMaster();
 		
 		for (OssComponents bean : noticeList) {
 			String ossName = bean.getOssName();
@@ -5475,6 +5500,18 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (!isEmpty(relationshipsKey)) {
 				relationshipsMap.put(relationshipsKey, bomRef);
 				component.setPurl(relationshipsKey);
+			}
+			if (!isEmpty(bean.getDownloadLocation())) {
+				for (String downloadLocation : bean.getDownloadLocation().split(",")) {
+					if (!isEmpty(downloadLocation)) {
+						ossMaster.setDownloadLocation(downloadLocation);
+						String purl = ossService.getPurlByDownloadLocation(ossMaster);
+						if (!isEmpty(purl)) {
+							component.setPurl(purl);
+						}
+						break;
+					}
+				}
 			}
 			
 			LicenseChoice licenseChoice = new LicenseChoice();
@@ -5508,7 +5545,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							} else {
 								li.setName(liMaster.getLicenseName());
 								String internalUrl = CommonFunction.makeLicenseInternalUrl(liMaster, distributionFlag);
-								if (!isEmpty(internalUrl)) li.setUrl(internalUrl);
+								if (!isEmpty(internalUrl)) {
+									li.setUrl(internalUrl);
+								}
 							}
 						} else {
 							li.setName(ossLicense.getLicenseName());
@@ -5527,7 +5566,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 								} else {
 									li.setName(liMaster.getLicenseName());
 									String internalUrl = CommonFunction.makeLicenseInternalUrl(liMaster, distributionFlag);
-									if (!isEmpty(internalUrl)) li.setUrl(internalUrl);
+									if (!isEmpty(internalUrl)) {
+										li.setUrl(internalUrl);
+									}
 								}
 							} else {
 								li.setName(license.trim());
@@ -5555,7 +5596,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			
 			licenseChoice.setLicenses(licenseList);
-			component.setLicenseChoice(licenseChoice);
+			component.setLicenses(licenseChoice);
 			
 			String copyrightText = StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762);
 			if (!copyrightText.isEmpty() && !copyrightText.equals("-")) {
@@ -5631,8 +5672,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		bom.setComponents(componentList);
-		if (!dependencyList.isEmpty()) bom.setDependencies(dependencyList);
-		if (!vulnerablityList.isEmpty()) bom.setVulnerabilities(vulnerablityList);
+		if (!dependencyList.isEmpty()) {
+			bom.setDependencies(dependencyList);
+		}
+		if (!vulnerablityList.isEmpty()) {
+			bom.setVulnerabilities(vulnerablityList);
+		}
 	
 		return bom;
 	}
