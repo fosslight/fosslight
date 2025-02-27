@@ -29,6 +29,48 @@ SPDX-License-Identifier: AGPL-3.0-only
 * License
   - Changed the initial list display to sort by modified date in descending order.
   - Modified the License text field to allow null values.
+* Review Report
+  - Updated to include OSS Important Notes information in the output.
+  - Provided links to detailed screens when clicking on OSS and License names.
+* DataBase
+  -  Updated column names
+     - PROJECT_MASTER: DESTRIBUTION_STATUS > DISTRIBUTION_STATUS
+  - Deleted columns
+     - PRE_PROJECT_MASTER: OSS_TYPE, OS_TYPE_ETC, DISTRIBUTION_TYPE
+* Mail
+  - Added a notification feature for users in the division (Code No: 200) when USE_YN is changed to N in Code Management.
+
+* **Bug fix**
+  - Fixed an issue where the banned list of all files would merge and display when multiple package files are uploaded in Packaging.
+  - Resolved an issue where existing data would change when saving a copied OSS with a new name (added logic to reset oss_common_id).
+  - Fixed an issue where information was not displayed correctly in the Statistics menu.
+  - Resolved an issue where the Vulnerability menu could not be queried.
+  - Fixed an issue where the column width would not be maintained after filtering in the Grid table.
+  - Addressed an issue where no email was sent when adding a new OSS version.
+
+## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
+
+### New
+* 3rd Party
+  - Added 3rd Party Information
+  - Added 3rd Party Identification(3rd Party tab/ BOM tab)
+  - Implemented a 3rd Party BOM Compare feature
+
+* Project
+  - Added codelinaro type to Pre-review
+ 
+### Changed
+* Project
+  - Enabled the ability to change the status of multiple projects simultaneously.
+  - Updated BOM merge conditions:
+     - If OSS Name is “-”, merge if license, homepage, and download location are the same.
+  - Adjusted the Loaded list to display items in the order of most recently added.
+* Open Source
+  - OSS name can now only be changed through the edit button in the detailed screen.
+  - Changed the initial list display to sort by modified date in descending order.
+* License
+  - Changed the initial list display to sort by modified date in descending order.
+  - Modified the License text field to allow null values.
   - Added a notification feature for users in the division (Code No: 200) when USE_YN is changed to N in Code Management.
 * Review Report
   - Updated to include OSS Important Notes information in the output.
