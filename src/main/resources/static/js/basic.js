@@ -1512,6 +1512,23 @@ var autoComplete = {
             .autocomplete("instance")._renderItem = function (ul, item) {
             return $("<li>").append("<div>" + item.label + "<strong> (" + item.type + ") </strong>" + item.obligation + item.restriction + "</div>").appendTo(ul);
         };
+        
+        $(".autoComDetectedLicense").autocomplete({
+            source: autoComplete.licenseTags, minLength: 0, //delay: 500,
+            open: function () {
+                $(this).attr('state', 'open');
+            }, close: function () {
+                $(this).attr('state', 'closed');
+            }
+        })
+            .focus(function () {
+                if ($(this).attr('state') != 'open') {
+                    $(this).autocomplete("search");
+                }
+            })
+            .autocomplete("instance")._renderItem = function (ul, item) {
+            return $("<li>").append("<div>" + item.label + "<strong> (" + item.type + ") </strong>" + item.obligation + item.restriction + "</div>").appendTo(ul);
+        };
 
         //hklee 2016 11 14
         $(".autoComLicenseLong").autocomplete({

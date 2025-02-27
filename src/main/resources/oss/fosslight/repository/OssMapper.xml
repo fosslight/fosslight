@@ -373,6 +373,7 @@
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'			/*Code Table*/
 		LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
 		LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON T1.OSS_COMMON_ID = T7.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON T1.OSS_ID = T8.OSS_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
@@ -436,6 +437,24 @@
 						</otherwise>
 					 </choose>
 				)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(detectedLicenseName)">
+			AND T8.LICENSE_ID IN (
+				SELECT LICENSE_ID
+				FROM LICENSE_MASTER
+				WHERE USE_YN = 'Y'
+                AND (
+                <choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(detectedLicenseNameAllSearchFlag,'Y')">
+						UPPER(LICENSE_NAME) = UPPER(#{detectedLicenseName}) OR UPPER(SHORT_IDENTIFIER) = UPPER(#{detectedLicenseName})
+					</when>
+					<otherwise>
+						UPPER(LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+						OR UPPER(SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				</choose>
+				)
+			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
@@ -776,6 +795,7 @@
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'				/*Code Table*/
 		LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
 		LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON T1.OSS_COMMON_ID = T7.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON T1.OSS_ID = T8.OSS_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
@@ -839,6 +859,24 @@
 					</otherwise>
 				 </choose>
 				)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(detectedLicenseName)">
+			AND T8.LICENSE_ID IN (
+				SELECT LICENSE_ID
+				FROM LICENSE_MASTER
+				WHERE USE_YN = 'Y'
+                AND (
+                <choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(detectedLicenseNameAllSearchFlag,'Y')">
+						UPPER(LICENSE_NAME) = UPPER(#{detectedLicenseName}) OR UPPER(SHORT_IDENTIFIER) = UPPER(#{detectedLicenseName})
+					</when>
+					<otherwise>
+						UPPER(LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+						OR UPPER(SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				</choose>
+				)
+			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
@@ -1145,6 +1183,7 @@
 		LEFT OUTER JOIN T2_CODE_DTL 	T4 ON T4.CD_NO = '201' AND T1.LICENSE_TYPE	= T4.CD_DTL_NO			/*Code Table*/
 		LEFT OUTER JOIN OSS_INCLUDE_CPE T5 ON T1.OSS_COMMON_ID = T5.OSS_COMMON_ID
 		LEFT OUTER JOIN OSS_EXCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_LICENSE_DETECTED T7 ON T1.OSS_ID = T7.OSS_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>			
@@ -1184,6 +1223,24 @@
 					</otherwise>
 				 </choose>
 				)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(detectedLicenseName)">
+			AND T7.LICENSE_ID IN (
+				SELECT LICENSE_ID
+				FROM LICENSE_MASTER
+				WHERE USE_YN = 'Y'
+                AND (
+                <choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(detectedLicenseNameAllSearchFlag,'Y')">
+						UPPER(LICENSE_NAME) = UPPER(#{detectedLicenseName}) OR UPPER(SHORT_IDENTIFIER) = UPPER(#{detectedLicenseName})
+					</when>
+					<otherwise>
+						UPPER(LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+						OR UPPER(SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				</choose>
+				)
+			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')

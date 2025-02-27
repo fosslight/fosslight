@@ -125,6 +125,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setLicenseNameAllSearchFlag(CoConstDef.FLAG_NO);
 		}
 
+		if (isEmpty(ossMaster.getDetectedLicenseNameAllSearchFlag())) {
+			ossMaster.setDetectedLicenseNameAllSearchFlag(CoConstDef.FLAG_NO);
+		}
+		
 		if (isEmpty(ossMaster.getHomepageAllSearchFlag())) {
 			ossMaster.setHomepageAllSearchFlag(CoConstDef.FLAG_NO);
 		}
