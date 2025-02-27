@@ -5,7 +5,48 @@ SPDX-License-Identifier: AGPL-3.0-only
 <p align='right'>
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
+## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
 
+### New
+* 3rd Party
+  - 3rd Party Information 추가
+  - 3rd Party Identification 추가 (3rd party / bom 탭 추가)
+  - 3rd party BOM Compare 기능 추가 
+* Project 
+  - Pre-Review > codelinaro type 추가
+
+### Changed
+* License
+  - License text에 null 값 저장 가능하도록 변경
+  - list 초기 화면에서 modified date 내림차순으로 정렬되도록 변경
+* Review Report
+  - OSS Important Notes 정보도 출력하도록 변경
+  - OSS, License 이름 클릭시 상세화면으로 이동하는 link 제공
+* Project 
+  - 여러개의 프로젝트를 “change status” 할 수 있도록 변경
+  - BOM merge 조건 변경
+     - OSS Name이 “-“인 경우, license, homepage, download location이 같으면 merge 하도록 변경
+  - Loaded list가 최근에 추가된 순서대로 보이도록 변경
+* API
+  - /api/v1/vulnerability_data, /api/v2/vulnerabilities의 response에 description 제외하고 oss info 추가됨
+* OSS
+  - OSS name 변경은, 상세 화면에서 edit 버튼을 통해서만 변경 가능함
+  - list 초기 화면에서 modified date 내림차순으로 정렬되도록 변경
+* DB
+  - Column 명 변경 
+    - PROJECT_MASTER : DESTRIBUTION_STATUS > DISTRIBUTION_STATUS
+  - Column 삭제
+   - PRE_PROJECT_MASTER : OSS_TYPE, OS_TYPE_ETC, DISTRIBUTION_TYPE
+* Mail
+  - Code Management에서 division(Code No : 200)의 USE_YN을 N으로 변경시, 해당 division의 user에게 알려주는 기능 추가
+* 버그 수정
+  - Packaging에서 업로드한 package file이 여러개인 경우, 모든 파일의 banned list가 merge되어 보이도록 수정
+  - OSS copy시 이름을 변경하여 저장하는 경우, 기존 데이터가 변경되는 이슈 수정(oss_common_id 초기화하는 로직 추가)
+  - Statistics 메뉴에 정보가 제대로 보여지지 않는 이슈 수정
+  - Vulnerability 메뉴가 조회되지 않는 이슈 수정
+  - Grid table에 filter 검색 후에도 column width가 유지되도록 수정
+  - OSS version 추가로 등록시 메일 발송되지 않는 이슈 수정
+    
 ## [2.1.1](https://github.com/fosslight/fosslight/releases/tag/v2.1.1) (2024-12-13)
 
 ### New
