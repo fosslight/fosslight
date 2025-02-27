@@ -5,6 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <p align='right'>
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
+
 ## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
 
 ### New
