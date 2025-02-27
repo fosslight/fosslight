@@ -1274,9 +1274,12 @@ public class ProjectController extends CoTopComponent {
 				} else if (CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(mailType)){
 					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + beforeBean.getPrjId();
 					String _s = "<a href='" + linkUrl + "' class='urlLink2' target='_blank'>PRJ-" + beforeBean.getPrjId() + "</a>";
-					String initMessage = "<p>" + "Copy with confirm status from [" + _s + "] " + beforeBean.getPrjName();
-					if (!isEmpty(beforeBean.getPrjVersion())) {
-						initMessage += "_" + beforeBean.getPrjVersion();
+					String initMessage = "<p>";
+					if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(beforeBean.getIdentificationStatus())) {
+						initMessage += "Copy with confirm status from [" + _s + "] " + beforeBean.getPrjName();
+					} else {
+						initMessage += "Copied from [" + _s + "] " + beforeBean.getPrjName();
+						initMessage += avoidNull(beforeBean.getPrjVersion()) + "_Copied";
 					}
 					initMessage += "</p>";
 					CommentsHistory commHisBean = new CommentsHistory();
@@ -4132,6 +4135,7 @@ public class ProjectController extends CoTopComponent {
 		String comment = "";
 		String identificationStatus = project.getIdentificationStatus();
 		String verificationStatus = project.getVerificationStatus();
+		boolean isPrjVersion = avoidNull(project.getPrjVersion()).equals("") ? false : true;
 		
 		project.setPrjName(project.getPrjName());
 		project.setPrjVersion(avoidNull(project.getPrjVersion()) + "_Copied");
@@ -4152,10 +4156,10 @@ public class ProjectController extends CoTopComponent {
 			}
 		} else {
 			comment = "Copied from [PRJ-" + prjId + "] " + project.getPrjName();
-			
-			if (!isEmpty(project.getPrjVersion())) {
-				comment += "_" + project.getPrjVersion();
+			if (isPrjVersion) {
+				comment += "_";
 			}
+			comment += project.getPrjVersion();
 		}
 		
 		project.setComment(comment);
