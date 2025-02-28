@@ -1,1 +1,3 @@
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('903', '014', 'pkg.go.dev', '', 'go url', 14, 'Y');
+
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('111', '460', 'Project Identification Confirmed Network Service Only', '', '<p>Network상의 이용을 배포로 간주하는 License (ex- AGPL-3.0)가 사용되지 않았음을 확인했으며, OSC Process 완료되었습니다.<br />The OSC Process is completed because the Network Copyleft License (ex- AGPL-3.0) is not used.</p>', 460, 'Y');
