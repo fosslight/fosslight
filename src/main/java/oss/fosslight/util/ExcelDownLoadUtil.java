@@ -5331,6 +5331,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					projectInfo = selfCheckService.getProjectDetail(projectInfo);
 				}
 				
+				ossNotice.setRefDiv(projectInfo.getReferenceDiv());
 				String createDate = projectInfo.getCreatedDate();
 				
 				timeStamp = sdformat.parse(createDate.replace(" ", "T") + ".000");
