@@ -99,7 +99,7 @@
 					let partnerId = [[${detail.partnerId}]];
 					if (partnerId != null) {
 						const parameter = {
-					    	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+					    	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER')}]],
 					       	"referenceId" : partnerId
 						}
 					    var draftUserComment = draftUserComments(parameter);
@@ -236,7 +236,7 @@
 		       		let partnerId = [[${detail.partnerId}]];
 					if (partnerId != null) {
 						const parameter = {
-					    	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+					    	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER')}]],
 					       	"referenceId" : partnerId
 						}
 					    var draftUserComment = draftUserComments(parameter);
