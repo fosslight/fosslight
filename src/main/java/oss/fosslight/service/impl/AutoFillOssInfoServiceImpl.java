@@ -637,23 +637,22 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())
 					|| CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
 				if (updateCnt >= 1) {
+					List<String> changeOssLicenseInfoList = new ArrayList<>();
 					String commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
 					String checkOssLicenseComment = "";
-					String changeOssLicenseInfo = "<p>" + paramBean.getOssName();
-
-					if (!paramBean.getOssVersion().isEmpty()) {
-						changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ") ";
-					} else {
-						changeOssLicenseInfo += " ";
+					String changeOssLicenseInfo = !isEmpty(paramBean.getOssName()) ? paramBean.getOssName() : "N/A";
+					if (!isEmpty(paramBean.getOssVersion())) {
+						changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ")";
 					}
-
-					changeOssLicenseInfo += paramBean.getDownloadLocation() + " "
-							+ paramBean.getLicenseName() + " => " + paramBean.getCheckLicense() + "</p>";
+					if (!isEmpty(paramBean.getDownloadLocation())) {
+						changeOssLicenseInfo = "<a href='" + paramBean.getDownloadLocation() + "' class='urlLink2' target='_blank'>" + changeOssLicenseInfo + "</a>";
+					}
+					changeOssLicenseInfo += "|" + avoidNull(paramBean.getLicenseName(), "N/A") + "|" + paramBean.getCheckLicense();
+					changeOssLicenseInfoList.add(changeOssLicenseInfo);
 					CommentsHistory commentInfo = null;
 
 					if (isEmpty(commentId)) {
-						checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
-						checkOssLicenseComment += changeOssLicenseInfo;
+						checkOssLicenseComment += CommonFunction.changeDataToTableFormat("license", CommonFunction.getCustomMessage("msg.common.change.name", "License Name"), changeOssLicenseInfoList);
 						CommentsHistory commHisBean = new CommentsHistory();
 						
 						if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
@@ -665,6 +664,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						}
 						
 						commHisBean.setContents(checkOssLicenseComment);
+						commHisBean.setStatus("pre-review > license");
 						commentInfo = commentService.registComment(commHisBean, false);
 					} else {
 						commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
@@ -672,8 +672,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						if (commentInfo != null) {
 							if (!isEmpty(commentInfo.getContents())) {
 								checkOssLicenseComment  = commentInfo.getContents();
-								checkOssLicenseComment += changeOssLicenseInfo;
+								checkOssLicenseComment += CommonFunction.changeDataToTableFormat("license", CommonFunction.getCustomMessage("msg.common.change.name", "License Name"), changeOssLicenseInfoList);
 								commentInfo.setContents(checkOssLicenseComment);
+								commentInfo.setStatus("pre-review > license");
 
 								commentService.updateComment(commentInfo, false);
 							}

@@ -1793,11 +1793,21 @@ var src_fn = {
 	},
 	// 닉네임 팝업 띄우기
 	makeNickNamePopup : function(obj, finalData) {
-		if(obj.validMsg && obj.validMsg.length != 0) {
+		if (obj.validMsg && obj.validMsg.length != 0) {
 			loading.hide();
-			alertify.confirm(obj.validMsg, function () {
-				src_fn.exeSave(finalData);
-			});
+			
+			if (typeof alertify.nicknameValidDialog === "undefined") {
+				basicAlertify('nicknameValidDialog');
+        	}
+			alertify.nicknameValidDialog()
+			.set('onok', function(e) {
+				if (e) {
+					src_fn.exeSave(finalData);
+				} else {
+					return false;
+				}
+			})
+			.setContent(obj.validMsg).show();
 		} else {
 			src_fn.exeSave(finalData);
 		}

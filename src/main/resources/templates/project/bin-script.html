@@ -444,11 +444,20 @@ var bin_fn = {
 	},	
 	// 닉네임 팝업 띄우기
 	makeNickNamePopup : function(obj, finalData){
-		if(obj.validMsg && obj.validMsg.length != 0){
-			alertify.confirm(obj.validMsg, function () {
-				bin_fn.exeSave(finalData, true);
-			});
-		}else{
+		if (obj.validMsg && obj.validMsg.length != 0) {
+			if (typeof alertify.nicknameValidDialog === "undefined") {
+				basicAlertify('nicknameValidDialog');
+        	}
+			alertify.nicknameValidDialog()
+			.set('onok', function(e) {
+				if (e) {
+					bin_fn.exeSave(finalData, true);
+				} else {
+					return false;
+				}
+			})
+			.setContent(obj.validMsg).show();
+		} else {
 			bin_fn.exeSave(finalData, false);
 		}
 	},

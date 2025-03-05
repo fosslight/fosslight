@@ -3515,6 +3515,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<ProjectIdentification> adminCheckList = projectMapper.selectAdminCheckList(prjId);
 		List<String> refComponentIdList = new ArrayList<>();
 		List<String> ossNameVersionList = new ArrayList<>();
+		Map<String, String> ossComponentInfo = new HashMap<>();
 		
 		for (ProjectIdentification pi : adminCheckList) {
 			refComponentIdList.add(pi.getRefComponentId());
@@ -3526,6 +3527,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		for (ProjectIdentification bean : ossComponentList) {
 			String _ossName = avoidNull(bean.getOssName()).trim();
+			String _ossVersion = avoidNull(bean.getOssVersion().trim(), "N/A");
+			String _componentId = avoidNull(bean.getComponentId(), bean.getGridId());
+			ossComponentInfo.put(_componentId, _ossName + " (" + _ossVersion + ")");
 			
 			if (!isEmpty(_ossName) && !"-".equals(_ossName)) {
 				boolean adminCheckFlag = false;
@@ -3542,7 +3546,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			} else {
 				String _licenseName = avoidNull(bean.getLicenseName()).trim();
 				if (!isEmpty(_licenseName) && !licenseCheckParam.contains(_licenseName)) {
-					licenseCheckParam.add(_licenseName);
+					licenseCheckParam.add(_componentId + "|" + _licenseName);
 				}
 			}
 		}
@@ -3550,10 +3554,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// multi license의 경우 nickname check대상 추출
 		for (List<ProjectIdentification> licenseList : ossComponentLicenseList) {
 			for (ProjectIdentification licenseBean : licenseList) {
+				String _componentId = avoidNull(licenseBean.getComponentId(), licenseBean.getGridId());
 				String _licenseName = avoidNull(licenseBean.getLicenseName()).trim();
 				
 				if (!isEmpty(_licenseName) && !licenseCheckParam.contains(_licenseName)) {
-					licenseCheckParam.add(_licenseName);
+					licenseCheckParam.add(_componentId + "|" + _licenseName);
 				}
 			}
 		}
@@ -3567,8 +3572,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (ossNickNameList != null) {
 				for (OssMaster bean : ossNickNameList) {
-					String _disp = bean.getOssNickname() + " => " + bean.getOssName();
-					
+					String _disp = bean.getOssNickname() + "|" + bean.getOssName();
 					if (!ossNickNameCheckResult.contains(_disp)) {
 						ossNickNameCheckResult.add(_disp);
 					}
@@ -3577,22 +3581,48 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		if (!licenseCheckParam.isEmpty()) {
-			for (String licenseName : licenseCheckParam) {
+			Map<String, Map<String, String>> licenseCheckMap = new HashMap<>();
+			
+			for (String checkParam : licenseCheckParam) {
+				String componentId = checkParam.split("[|]")[0];
+				String licenseName = checkParam.split("[|]")[1];
+				String ossInfo = ossComponentInfo.get(componentId);
+				
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
 					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
 					if (licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
 						for (String s : licenseMaster.getLicenseNicknameList()) {
 							if (licenseName.equalsIgnoreCase(s)) {
-								String disp = licenseName + " => " + avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
-								
-								if (!licenseNickNameCheckResult.contains(disp)) {
-									licenseNickNameCheckResult.add(disp);
-									
-									break;
+								Map<String, String> checkMap = null;
+								if (licenseCheckMap.containsKey(ossInfo)) {
+									checkMap = licenseCheckMap.get(ossInfo);
+								} else {
+									checkMap = new HashMap<>();
 								}
+								checkMap.put(licenseName, avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
+								licenseCheckMap.put(ossInfo, checkMap);
 							}
 						}
-						
+					}
+				}
+			}
+			
+			if (!licenseCheckMap.isEmpty()) {
+				for (String ossInfo : licenseCheckMap.keySet()) {
+					Map<String, String> licenseMap = licenseCheckMap.get(ossInfo);
+					String nicknames = "";
+					String changeNames = "";
+					
+					for (String nickname : licenseMap.keySet()) {
+						nicknames += nickname + ",";
+						changeNames += licenseMap.get(nickname) + ",";
+					}
+					nicknames = nicknames.substring(0, nicknames.length()-1);
+					changeNames = changeNames.substring(0, changeNames.length()-1);
+					
+					String disp = ossInfo + "|" + nicknames + "|" + changeNames;
+					if (!licenseNickNameCheckResult.contains(disp)) {
+						licenseNickNameCheckResult.add(disp);
 					}
 				}
 			}

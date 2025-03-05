@@ -3901,6 +3901,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 	
 	public static List<List<ProjectIdentification>> setOssComponentLicense(List<ProjectIdentification> ossComponent, boolean excludeFlag) {
+		return setOssComponentLicense(ossComponent, excludeFlag, false);
+	}
+	
+	public static List<List<ProjectIdentification>> setOssComponentLicense(List<ProjectIdentification> ossComponent, boolean excludeFlag, boolean isNickValid) {
 		List<List<ProjectIdentification>> ossComponentLicense = new ArrayList<List<ProjectIdentification>>(); 
 		
 		for (ProjectIdentification pi : ossComponent) {
@@ -3930,9 +3934,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(nm.toUpperCase())) {
 							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(nm.toUpperCase());
-							
+							String licenseName = "";
+							if (!isNickValid) {
+								licenseName = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
+							} else {
+								licenseName = nm;
+							}
 							license.setLicenseId(licenseMaster.getLicenseId());
-							license.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
+							license.setLicenseName(licenseName);
 						} else {
 							license.setLicenseId("");
 							license.setLicenseName(nm);
@@ -3962,9 +3971,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(nm.toUpperCase())) {
 							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(nm.toUpperCase());
-							
+							String licenseName = "";
+							if (!isNickValid) {
+								licenseName = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
+							} else {
+								licenseName = nm;
+							}
 							license.setLicenseId(licenseMaster.getLicenseId());
-							license.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
+							license.setLicenseName(licenseName);
 						} else {
 							license.setLicenseId("");
 							license.setLicenseName(nm);
@@ -5863,6 +5877,116 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static void addSystemLogRecords(String prjId, String loginUserName) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		log.info("reset {} / {} / {}", prjId, loginUserName, sdf.format(System.currentTimeMillis()));
+	}
+	
+	public static String changeDataToTableFormat(String target, String msg, List<String> data) {
+		String rtnString = "";
+		String comment = "";
+		if (!isEmpty(msg)) {
+			comment = "<p><b>" + msg + "</b></p>";
+		}
+		String contents = 	"<div class=\"custom-layout card-body p-0\">";
+		if (isEmpty(msg) && !target.equals("nick")) {
+			if (target.equals("oss")) {
+				contents += "<b>Open Source</b>";
+			} else {
+				contents += "<b>License</b>";
+			}
+		}
+				contents += "	<table class=\"table table-bordered\">" +
+							"		<thead>";
+		if (target.equals("oss") || target.equals("nick")) {
+				contents += "			<tr>" +
+							"		    	<th class=\"text-center\">Before</th>" +
+							"               <th class=\"text-center\">After</th>" +
+							"			</tr>" +
+							"		</thead>" +
+							"		<tbody>";
+			
+			for (String key : data) {
+				String[] changeInfos = key.split("[|]");
+				String beforeValue = changeInfos[0];
+				String afterValue = changeInfos[1];
+				String value = "		<tr>" +
+								"			<td stlye=\"padding-left:0.75rem;\">"+ beforeValue.trim() + "</td>" +
+								"			<td>"+ afterValue.trim() + " </td>" +
+								"		</tr>";
+				contents += value;
+			}
+		} else {
+				contents += "			<tr>" +
+							"		    	<th class=\"text-center\">OSS</th>" +
+							"               <th class=\"text-center\">Before</th>" +
+							"               <th class=\"text-center\">After</th>" +
+							"			</tr>" +
+							"		</thead>" +
+							"		<tbody>";
+
+			for (String key : data) {
+				String[] comments = key.split("[|]");
+				String ossInfo = comments[0];
+				String beforeValue = comments[1];
+				String afterValue = comments[2];
+				
+				String value = "		<tr>" +
+								"			<td stlye=\"padding-left:0.75rem;\">"+ ossInfo.trim() + " </td>" +
+								"			<td>"+ beforeValue.trim() + "</td>" +
+								"			<td>"+ afterValue.trim() + "</td>" +
+								"		</tr>";
+				contents += value;
+			}
+		}
+		
+			contents += 	"		</tbody>" +
+							"	</table>" +
+							"</div>";
+		rtnString += comment + contents;
+		return rtnString;
+	}
+	
+	public static String getCommentForChangeNickname(String comment, List<String> beforeNicknames, List<String> afterNicknames) {
+		String customComment = comment;
+		
+		if (CollectionUtils.isEmpty(beforeNicknames) && !CollectionUtils.isEmpty(afterNicknames)) {
+			if (!isEmpty(customComment)) {
+				customComment += "<br>";
+			}
+			customComment += "[Nickname Added] " + String.join(",", afterNicknames);
+		} else if (!CollectionUtils.isEmpty(beforeNicknames) && CollectionUtils.isEmpty(afterNicknames)) {
+			if (!isEmpty(customComment)) {
+				customComment += "<br>";
+			}
+			customComment += "[Nickname Deleted] " + String.join(",", afterNicknames);
+		} else {
+			List<String> nonDuplicateListForAfter = afterNicknames.stream().filter(a -> beforeNicknames.stream().noneMatch(Predicate.isEqual(a))).collect(Collectors.toList());
+			List<String> nonDuplicateListForBefore = beforeNicknames.stream().filter(b -> afterNicknames.stream().noneMatch(Predicate.isEqual(b))).collect(Collectors.toList());
+			
+			if (beforeNicknames.size() == afterNicknames.size()) {
+				customComment += "[Nickname Change]<br>";
+				if (!CollectionUtils.isEmpty(nonDuplicateListForAfter) && !CollectionUtils.isEmpty(nonDuplicateListForBefore)) {
+					List<String> data = new ArrayList<>();
+					for (int i=0; i < nonDuplicateListForAfter.size(); i++) {
+						data.add(nonDuplicateListForBefore.get(i) + "|" + nonDuplicateListForAfter.get(i));
+					}
+					customComment += CommonFunction.changeDataToTableFormat("nick", "", data);
+				}
+			} else {
+				if (!CollectionUtils.isEmpty(nonDuplicateListForAfter)) {
+					if (!isEmpty(customComment)) {
+						customComment += "<br>";
+					}
+					customComment += "[Nickname Added] " + String.join(",", nonDuplicateListForAfter);
+				}
+				if (!CollectionUtils.isEmpty(nonDuplicateListForBefore)) {
+					if (!isEmpty(customComment)) {
+						customComment += "<br>";
+					}
+					customComment += "[Nickname Deleted] " + String.join(",", nonDuplicateListForBefore);
+				}
+			}
+		}
+		
+		return customComment;
 	}
 }
 

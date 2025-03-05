@@ -379,7 +379,7 @@ public class LicenseController extends CoTopComponent {
 	/**
 	 * LicenseBulkReg Save Post
 	 */
-	@PostMapping(value = Url.LICENSE.BULK_REG_AJAX)
+	@PostMapping(value = LICENSE.BULK_REG_AJAX)
 	public @ResponseBody
 	ResponseEntity<Object> saveAjaxJson(
 			@RequestBody List<LicenseMaster> licenseMasters

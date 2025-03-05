@@ -863,21 +863,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 	
 	private void ossNameMerge(OssMaster ossMaster, String changedOssName, String beforeOssName) {
-		String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-				"<div class=\"table-responsive\">\r\n" +
-				"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
-				"		<tbody>\r\n" +
-				"			<tr>\r\n" +
-				"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-				"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-				"			</tr>\r\n" +
-				"           <tr>\r\n" +
-				"               <td style=\"text-align:center;\">"+ beforeOssName + " (" + avoidNull(ossMaster.getOssVersion(), "N/A") + ") </td>\r\n" +
-				"               <td style=\"text-align:center;\">"+ changedOssName + " (" + avoidNull(ossMaster.getMergeOssVersion(), "N/A") + ") </td>\r\n" +
-				"          	</tr>\r\n" +
-				"		</tbody>\r\n" +
-				"	</table>" +
-				"</div>";
+		List<String> changeOssInfoList = new ArrayList<>();
+		String before = beforeOssName + " (" + avoidNull(ossMaster.getOssVersion(), "N/A") + ")";
+		String after = changedOssName + " (" + avoidNull(ossMaster.getMergeOssVersion(), "N/A") + ")";
+		changeOssInfoList.add(before + "|" + after);
+		String contents = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssInfoList);
 
 		// 3rdParty == 'CONF'
 		List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(ossMaster);
@@ -2491,8 +2481,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					valid.add(prj);
 				}
 			}
-			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
-					.collect(Collectors.toList()));
+			resMap.put("list", Stream.concat(valid.stream(), invalid.stream()).collect(Collectors.toList()));
 		}
 		return resMap;
 	}
@@ -2841,17 +2830,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 							if (updateCnt >= 1) {
 								String commentId = paramBean.getRefPrjId();
-								String checkOssNameComment = "";
-								String changeOssNameInfo = "<p>" + paramBean.getOssName() + " => " + paramBean.getCheckName() + "</p>";
+								String changeOssNameInfo = avoidNull(paramBean.getOssName(), "N/A") + "|" + paramBean.getCheckName();
+								List<String> changeOssNameInfoList = new ArrayList<>();
+								changeOssNameInfoList.add(changeOssNameInfo);
+								String checkOssNameComment = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssNameInfoList);
 								CommentsHistory commentInfo = null;
 
 								if (isEmpty(commentId)) {
-									checkOssNameComment = messageSource.getMessage("msg.oss.changed.by.checkossname",null, LocaleContextHolder.getLocale());
-									checkOssNameComment += changeOssNameInfo;
 									CommentsHistory commHisBean = new CommentsHistory();
 									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
 									commHisBean.setReferenceId(paramBean.getReferenceId());
 									commHisBean.setContents(checkOssNameComment);
+									commHisBean.setStatus("pre-review > open source");
 									commentInfo = commentService.registComment(commHisBean, false);
 								} else {
 									commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
@@ -2864,6 +2854,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 												checkOssNameComment  = commentInfo.getContents();
 												checkOssNameComment += changeOssNameInfo;
 												commentInfo.setContents(checkOssNameComment);
+												commentInfo.setStatus("pre-review > open source");
 
 												commentService.updateComment(commentInfo, false);
 											}
@@ -2884,17 +2875,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							
 							if (updateCnt >= 1) {
 								String commentId = paramBean.getReferenceId();
-								String checkOssNameComment = "";
-								String changeOssNameInfo = "<p>" + paramBean.getOssName() + " => " + paramBean.getCheckName() + "</p>";
+								String changeOssNameInfo = avoidNull(paramBean.getOssName(), "N/A") + "|" + paramBean.getCheckName();
+								List<String> changeOssNameInfoList = new ArrayList<>();
+								changeOssNameInfoList.add(changeOssNameInfo);
+								String checkOssNameComment = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssNameInfoList);
 								CommentsHistory commentInfo = null;
 
 								if (isEmpty(commentId)) {
-									checkOssNameComment = messageSource.getMessage("msg.oss.changed.by.checkossname",null, LocaleContextHolder.getLocale());
-									checkOssNameComment += changeOssNameInfo;
 									CommentsHistory commHisBean = new CommentsHistory();
 									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 									commHisBean.setReferenceId(paramBean.getRefPrjId());
 									commHisBean.setContents(checkOssNameComment);
+									commHisBean.setStatus("pre-review > open source");
 									commentInfo = commentService.registComment(commHisBean, false);
 								} else {
 									commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
@@ -2904,7 +2896,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 											checkOssNameComment  = commentInfo.getContents();
 											checkOssNameComment += changeOssNameInfo;
 											commentInfo.setContents(checkOssNameComment);
-
+											commentInfo.setStatus("pre-review > open source");
 											commentService.updateComment(commentInfo, false);
 										}
 									}
@@ -3007,7 +2999,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				boolean updateNvdFlag = false;
 				List<String> nicknames = null;
-				if (beforeBean.getOssNicknames() != null) nicknames = Arrays.asList(beforeBean.getOssNicknames());
+				if (beforeBean.getOssNicknames() != null) {
+					nicknames = Arrays.asList(beforeBean.getOssNicknames());
+				}
 				List<String> includeCpeList = ossMapper.selectOssIncludeCpeList(ossMaster);
 				List<String> excludeCpeList = ossMapper.selectOssExcludeCpeList(ossMaster);
 				
@@ -3023,7 +3017,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (ossMaster.getOssNicknames() != null) {
 					newNicknames = Arrays.asList(ossMaster.getOssNicknames());
 				}
-				
+				if (!CollectionUtils.isEmpty(nicknames) || !CollectionUtils.isEmpty(newNicknames)) {
+					String changeComment = CommonFunction.getCommentForChangeNickname(ossMaster.getComment(), nicknames, newNicknames);
+					if (!isEmpty(changeComment)) {
+						ossMaster.setComment(changeComment);
+					}
+				}
 				if (!Objects.equals(includeCpeList, newIncludeCpes) || !Objects.equals(excludeCpeList, newExcludeCpes) || !Objects.equals(nicknames, newNicknames)
 						|| !ossMaster.getOssName().equals(beforeBean.getOssName()) || !ossMaster.getOssVersion().equals(beforeBean.getOssVersion())) {
 					updateNvdFlag = true;
@@ -4235,21 +4234,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						try {
-							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-									"<div class=\"table-responsive\">\r\n" +
-									"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
-									"		<tbody>\r\n" +
-									"			<tr>\r\n" +
-									"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-									"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-									"			</tr>\r\n" +
-									"           <tr>\r\n" +
-									"                <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"                <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"           </tr>\r\n" +
-									"		</tbody>\r\n" +
-									"	</table>" +
-									"</div>";
+							List<String> changeOssInfoList = new ArrayList<>();
+							String before = beforeOssName + " (" + avoidNull(oc.getOssVersion(), "N/A") + ")";
+							String after = afterOssName + " (" + avoidNull(oc.getOssVersion(), "N/A") + ")";
+							changeOssInfoList.add(before + "|" + after);
+							String contents = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssInfoList);
 							
 							// partner Comment Regist
 							CommentsHistory historyBean = new CommentsHistory();
@@ -4288,21 +4277,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						try {
-							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-									"<div class=\"table-responsive\">\r\n" +
-									"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
-									"		<tbody>\r\n" +
-									"			<tr>\r\n" +
-									"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-									"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-									"			</tr>\r\n" +
-									"           <tr>\r\n" +
-									"                <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"                <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"           </tr>\r\n" +
-									"		</tbody>\r\n" +
-									"	</table>" +
-									"</div>";
+							List<String> changeOssInfoList = new ArrayList<>();
+							String before = beforeOssName + " (" + avoidNull(oc.getOssVersion(), "N/A") + ")";
+							String after = afterOssName + " (" + avoidNull(oc.getOssVersion(), "N/A") + ")";
+							changeOssInfoList.add(before + "|" + after);
+							String contents = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssInfoList);
 							
 							// Project > Identification comment regist
 							CommentsHistory historyBean = new CommentsHistory();

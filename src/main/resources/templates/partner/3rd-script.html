@@ -465,9 +465,18 @@ var fn = {
 		if (obj.validMsg && obj.validMsg.length != 0) {
 			loadingIden.hide();
 			
-			alertify.alert(obj.validMsg, function () {
-				fn.exeSave(finalData, false);
-			});
+			if (typeof alertify.nicknameValidDialog === "undefined") {
+				basicAlertify('nicknameValidDialog');
+        	}
+			alertify.nicknameValidDialog()
+			.set('onok', function(e) {
+				if (e) {
+					fn.exeSave(finalData, false);
+				} else {
+					return false;
+				}
+			})
+			.setContent(obj.validMsg).show();
 		} else {
 			fn.exeSave(finalData, false);
 		}

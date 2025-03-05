@@ -2600,20 +2600,17 @@ public class ProjectController extends CoTopComponent {
 		String prjId = (String) map.get("prjId");
 
 		Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponent = new ArrayList<ProjectIdentification>();try {
-		ossComponent = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);} catch (Exception e) {e.printStackTrace();}
+		List<ProjectIdentification> ossComponent = new ArrayList<ProjectIdentification>();
+		ossComponent = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
 		
 		List<List<ProjectIdentification>> ossComponentLicense = null;
 		if (code.equals(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) {
 			ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, true);
 		} else {
-			ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent);
+			ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, false, true);
 		}
 		
-		ossComponentLicense = CommonFunction.mergeGridAndSession(
-				CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense,
-				CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
-
+		ossComponentLicense = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense, CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
 		result = projectService.nickNameValid(prjId, ossComponent, ossComponentLicense);
 
 		StringBuffer resultSb = new StringBuffer();
@@ -2623,36 +2620,17 @@ public class ProjectController extends CoTopComponent {
 			List<String> ossNickList = result.get("OSS");
 			List<String> licenseNickList = result.get("LICENSE");
 
-			if ((ossNickList != null && !ossNickList.isEmpty()) || (licenseNickList != null && !licenseNickList.isEmpty())) {
-				resultSb.append(messageSource.getMessage("msg.oss.changed.by.system",null, LocaleContextHolder.getLocale()));
-				if (ossNickList != null) {
-					for (String s : ossNickList) {
-						if (hasOssNick) {
-							resultSb.append("<br>");
-						} else {
-							hasOssNick = true;
-							resultSb.append("<b>Open Source Name</b><br>");
-						}
-
-						resultSb.append(s);
-					}
-
-					if (hasOssNick) {
-						resultSb.append("<br><br>");
-					}
+			if (!CollectionUtils.isEmpty(ossNickList) || !CollectionUtils.isEmpty(licenseNickList)) {
+				resultSb.append("<p><b>" + getMessage("msg.oss.changed.by.system") + "</b></p>");
+				if (!CollectionUtils.isEmpty(ossNickList)) {
+					resultSb.append(CommonFunction.changeDataToTableFormat("oss", "", ossNickList));
 				}
 
-				if (licenseNickList != null) {
-					for (String s : licenseNickList) {
-						if (hasLicenseNick) {
-							resultSb.append("<br>");
-						} else {
-							hasLicenseNick = true;
-							resultSb.append("<b>License Names</b><br>");
-						}
-
-						resultSb.append(s);
+				if (!CollectionUtils.isEmpty(licenseNickList)) {
+					if (!CollectionUtils.isEmpty(ossNickList)) {
+						resultSb.append("<br>");
 					}
+					resultSb.append(CommonFunction.changeDataToTableFormat("license", "", licenseNickList));
 				}
 
 				putSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, code), resultSb.toString());
