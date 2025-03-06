@@ -1389,9 +1389,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 
 			log.info("VERIFY Read fosslight_binary result file START -----------------");
-			String binaryFile = VERIFY_PATH_OUTPUT +"/" + prjId + "/binary.txt";
+			String binaryFile = VERIFY_PATH_OUTPUT +"/" + prjId + "/binary_" + packagingFileIdx;
 			File f = new File(binaryFile);
-			if(f.exists() && !f.isDirectory()) {
+			if(f.exists()) {
+				for(File bFile : f.listFiles()){
+					if (packagingFileIdx == 1) {
+						File copiedFile = new File(VERIFY_PATH_OUTPUT +"/"+prjId+"/binary.txt");
+						Files.copy(bFile.toPath(), copiedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					} else {
+						FileUtil.addFileContents(VERIFY_PATH_OUTPUT +"/"+prjId+"/binary.txt", bFile.getPath());
+					}
+				}
+
 				project.setBinaryFileYn(CoConstDef.FLAG_YES);
 			} else {
 				project.setBinaryFileYn("");

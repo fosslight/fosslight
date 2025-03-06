@@ -74,4 +74,4 @@ chmod -R 777 $6/output/$2/verify_chk_list
 chmod -R 777 $6/output/$2/except_file_result_$5
 
 cd $7
-./bin/fosslight_binary -s -p $6/decompression/$2 -o $6/output/$2/binary.txt
+./bin/fosslight_binary -s -p $6/decompression/$2 -o $6/output/$2/binary_$5
