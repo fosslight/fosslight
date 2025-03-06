@@ -5962,7 +5962,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			List<String> nonDuplicateListForBefore = beforeNicknames.stream().filter(b -> afterNicknames.stream().noneMatch(Predicate.isEqual(b))).collect(Collectors.toList());
 			
 			if (beforeNicknames.size() == afterNicknames.size()) {
-				customComment += "[Nickname Change]<br>";
+				customComment += "[Nickname Changed]<br>";
 				if (!CollectionUtils.isEmpty(nonDuplicateListForAfter) && !CollectionUtils.isEmpty(nonDuplicateListForBefore)) {
 					List<String> data = new ArrayList<>();
 					for (int i=0; i < nonDuplicateListForAfter.size(); i++) {

@@ -137,7 +137,8 @@ var Ctrl_fn = {
 		
 		if(idArry.length > 0){
 			window.setTimeout(function(){
-				for(var i = 0 ; i < idArry.length ; i++){
+				var rowDatas = [];
+				for (var i = 0 ; i < idArry.length ; i++){
 					var rowId = idArry[i];
 
 					cleanErrMsg("ossList", rowId);
@@ -155,74 +156,92 @@ var Ctrl_fn = {
 						rowdata["refPrjId"] = commentId;
 						rowdata["referenceDiv"] = referenceDiv;
 					}
-
-					$.ajax({
-						url : '/oss/saveOssCheckLicense/' + targetName,
-						type : 'POST',
-						data : JSON.stringify(rowdata),
-						dataType : 'json',
-						cache : false,
-						async: false,
-						contentType : 'application/json',
-						success: function(resultData){
-							if(resultData.isValid == true){
-								$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'Y'); // popup grid Data change => success
-								$("#ossList").jqGrid('setCell', idArry[i], 'result', 'Y');
-							} else {
-								$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'N');
-								$("#ossList").jqGrid('setCell', idArry[i], 'result', 'N');
-								alertify.error([[#{msg.common.valid2}]], 0);
-								failFlag = true;
-							}
-
-							result.push(resultData);
-							if ("identification" == targetName || "partner" == targetName) {
-								commentId = resultData.commentId;
-							}
-
-							if(result.length == idArry.length){
-								if(!failFlag){
-									var successMsg = [[#{msg.project.check.license.success}]];
-
-									if ("self" == targetName) {
-										opener.location.href = '/selfCheck/edit/' + rowdata["referenceId"];
-									} else if ("partner" == targetName) {
-										opener.location.href = '/partner/identification/' + rowdata["referenceId"];
-									} else {
-										/**
-										 * identifcaiton tab order you're working on
-										 */
-										var identificationTabOrder;
-
-										/**
-										 * params["referenceDiv"] is id of identification type
-										 * 3RD, DEP, SRC, BIN, BIN-Android, BOM
-										 * 10 (3RD) -> tab index: 0
-										 * 16 (DEP) -> tab index: 1
-										 * 11 (SRC) -> tab index: 2
-										 * 15 (BIN) -> tab index: 3
-										 * 14 (ANDROID) -> tab index: 4
-										 * 13 (BOM) -> tab index: 5
-										 */
-										switch (rowdata["referenceDiv"]) {
-											case "10":    opener.party_evt.getPartGridData();			break;
-											case "16":    opener.dep_fn.getDepGridData();				break;
-										    case "11":    opener.src_fn.getSrcGridData();   			break;
-										    case "15":    opener.bin_fn.getBinGridData(); 	 			break;
-										    case "14":    opener.binAndroid_fn.getBinAndroidGridData();	break;
-										    case "13":    opener.bom_data.getJqGrid();    				break;
-										}
-									}
-									
-									alertify.success(successMsg, 5); // 5sec동안 message 출력
-								}
-
-								loading.hide();
-							}
-						},
-						error: function(resultData){}
-					});
+					
+					rowDatas.push(rowdata);
 				}
+				
+				var changeData = {"list" : JSON.stringify(rowDatas)};
+				
+				$.ajax({
+					url : '/oss/saveOssCheckLicense/' + targetName,
+					type : 'POST',
+					data : JSON.stringify(changeData),
+					dataType : 'json',
+					cache : false,
+					async: false,
+					contentType : 'application/json',
+					success: function(resultData){
+						if (resultData.isValid == true){
+							if (typeof resultData.successIds !== "undefined") {
+								let successIds = resultData.successIds;
+								for (var i in successIds) {
+									$("#ossList").jqGrid('setCell', successIds[i], 'changeFlag', 'Y'); // popup grid Data change => success
+									$("#ossList").jqGrid('setCell', successIds[i], 'result', 'Y');
+								}
+							}
+							if (typeof resultData.failIds !== "undefined") {
+								let failIds = resultData.failIds;
+								for (var i in failIds) {
+									$("#ossList").jqGrid('setCell', failIds[i], 'changeFlag', 'N');
+									$("#ossList").jqGrid('setCell', failIds[i], 'result', 'N');
+								}
+							}
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+							failFlag = true;
+						}
+
+						if ("identification" == targetName || "partner" == targetName) {
+							commentId = resultData.commentId;
+						}
+
+						if (!failFlag) {
+							var successMsg = [[#{msg.project.check.license.success}]];
+							var commentsParam = {referenceId : rowData["referenceId"]};
+
+							if ("self" == targetName) {
+								opener.location.href = '/selfCheck/edit/' + rowdata["referenceId"];
+							} else if ("partner" == targetName) {
+								commentsParam["referenceDiv"] = "3rd";
+								opener.location.href = '/partner/identification/' + rowdata["referenceId"];
+							} else {
+								/**
+								 * identifcaiton tab order you're working on
+								 */
+								var identificationTabOrder;
+								commentsParam["referenceDiv"] = "prj";
+
+								/**
+								 * params["referenceDiv"] is id of identification type
+								 * 3RD, DEP, SRC, BIN, BIN-Android, BOM
+								 * 10 (3RD) -> tab index: 0
+								 * 16 (DEP) -> tab index: 1
+								 * 11 (SRC) -> tab index: 2
+								 * 15 (BIN) -> tab index: 3
+								 * 14 (ANDROID) -> tab index: 4
+								 * 13 (BOM) -> tab index: 5
+								 */
+								switch (rowdata["referenceDiv"]) {
+									case "10":    opener.party_evt.getPartGridData();			break;
+									case "16":    opener.dep_fn.getDepGridData();				break;
+								    case "11":    opener.src_fn.getSrcGridData();   			break;
+								    case "15":    opener.bin_fn.getBinGridData(); 	 			break;
+								    case "14":    opener.binAndroid_fn.getBinAndroidGridData();	break;
+								    case "13":    opener.bom_data.getJqGrid();    				break;
+								}
+							}
+							
+							alertify.success(successMsg, 5); // 5sec동안 message 출력
+							
+							if ("self" != targetName) {
+								opener.fn_comment.getCommentList(commentsParam);
+							}
+						}
+
+						loading.hide();
+					},
+					error: function(resultData){}
+				});
 			}, 0);
 		} else {
 			alertify.alert([[#{msg.oss.required.select}]], function(){});
@@ -233,9 +252,9 @@ var Ctrl_fn = {
 var grid_fn = {
 		displayStatus : function(cellvalue, options, rowObject){
 			var display = "";
-			var changeFlag = rowObject.changeFlag || rowObject[9];
+			var changeFlag = rowObject.changeFlag || rowObject[10];
 			
-			if(changeFlag =="Y"){
+			if ("Y" == changeFlag) {
 				display += "<a class='btnPG wAnd onAnd'>Changed</a>";
 			}
 			return display;

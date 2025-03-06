@@ -2774,148 +2774,144 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@Transactional
 	@Override
-	public Map<String, Object> saveOssCheckName(ProjectIdentification paramBean, String targetName) {
+	public Map<String, Object> saveOssCheckName(List<ProjectIdentification> paramBeanList, String targetName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
 			List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
-			String[] downloadLocations = paramBean.getDownloadLocation().split("<br>");
+			List<String> changeOssNameInfoList = new ArrayList<>();
+			List<String> successIdList = new ArrayList<>();
+			List<String> failIdList = new ArrayList<>();
+			String referenceId = "";
+			String referenceDiv = "";
+			String commentId = "";
 			
-			// If there are multiple download paths > add
-			if (downloadLocations.length > 0) {
-				int updateCnt;
-				int urlSearchSeq;
-				int seq;
+			for (ProjectIdentification paramBean : paramBeanList) {
+				String rowId = paramBean.getGridId();
+				String[] downloadLocations = paramBean.getDownloadLocation().split("<br>");
+				
+				// If there are multiple download paths > add
+				if (downloadLocations.length > 0) {
+					int updateCnt;
+					int urlSearchSeq;
+					int seq;
 
-				for (String downloadLocation : downloadLocations) {
-					updateCnt = 0;
-					urlSearchSeq = -1;
-					seq = 0;
+					for (String downloadLocation : downloadLocations) {
+						updateCnt = 0;
+						urlSearchSeq = -1;
+						seq = 0;
 
-					paramBean.setDownloadLocation(downloadLocation);
+						paramBean.setDownloadLocation(downloadLocation);
 
-					for (String url : checkOssNameUrl) {
-						if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
-							urlSearchSeq = seq;
+						for (String url : checkOssNameUrl) {
+							if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
+								urlSearchSeq = seq;
 
-							break;
+								break;
+							}
+
+							seq++;
 						}
 
-						seq++;
-					}
-
-					if ( urlSearchSeq > -1 ) {
-						Pattern p = generatePattern(urlSearchSeq, downloadLocation);
-						Matcher m = p.matcher(downloadLocation);
-						while (m.find()) {
-							paramBean.setDownloadLocation(m.group(0));
+						if ( urlSearchSeq > -1 ) {
+							Pattern p = generatePattern(urlSearchSeq, downloadLocation);
+							Matcher m = p.matcher(downloadLocation);
+							while (m.find()) {
+								paramBean.setDownloadLocation(m.group(0));
+							}
 						}
-					}
 
-					List<String> componentIds = paramBean.getComponentIdList();
-					switch(targetName.toUpperCase()) {
-						case CoConstDef.CD_CHECK_OSS_SELF:
-							for (String componentId : componentIds) {
-								String[] gridId = componentId.split("-");
-								paramBean.setGridId(gridId[0]+"-"+gridId[1]);
-								paramBean.setComponentId(gridId[2]);
-								updateCnt += ossMapper.updateOssCheckNameBySelfCheck(paramBean);
-							}
-							
-							break;
-						case CoConstDef.CD_CHECK_OSS_PARTNER:
-							for (String componentId : componentIds) {
-								paramBean.setComponentId(componentId);
-								updateCnt += ossMapper.updateOssCheckNameByPartner(paramBean);
-							}
-
-							if (updateCnt >= 1) {
-								String commentId = paramBean.getRefPrjId();
-								String changeOssNameInfo = avoidNull(paramBean.getOssName(), "N/A") + "|" + paramBean.getCheckName();
-								List<String> changeOssNameInfoList = new ArrayList<>();
-								changeOssNameInfoList.add(changeOssNameInfo);
-								String checkOssNameComment = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssNameInfoList);
-								CommentsHistory commentInfo = null;
-
-								if (isEmpty(commentId)) {
-									CommentsHistory commHisBean = new CommentsHistory();
-									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
-									commHisBean.setReferenceId(paramBean.getReferenceId());
-									commHisBean.setContents(checkOssNameComment);
-									commHisBean.setStatus("pre-review > open source");
-									commentInfo = commentService.registComment(commHisBean, false);
-								} else {
-									commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
-
-									if (commentInfo != null) {
-										commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
-
-										if (commentInfo != null) {
-											if (!isEmpty(commentInfo.getContents())) {
-												checkOssNameComment  = commentInfo.getContents();
-												checkOssNameComment += changeOssNameInfo;
-												commentInfo.setContents(checkOssNameComment);
-												commentInfo.setStatus("pre-review > open source");
-
-												commentService.updateComment(commentInfo, false);
-											}
-										}
-									}
+						List<String> componentIds = paramBean.getComponentIdList();
+						switch(targetName.toUpperCase()) {
+							case CoConstDef.CD_CHECK_OSS_SELF:
+								for (String componentId : componentIds) {
+									String[] gridId = componentId.split("-");
+									paramBean.setGridId(gridId[0]+"-"+gridId[1]);
+									paramBean.setComponentId(gridId[2]);
+									updateCnt += ossMapper.updateOssCheckNameBySelfCheck(paramBean);
 								}
-								if (commentInfo != null) {
-									map.put("commentId", commentInfo.getCommId());
+								
+								break;
+							case CoConstDef.CD_CHECK_OSS_PARTNER:
+								for (String componentId : componentIds) {
+									paramBean.setComponentId(componentId);
+									updateCnt += ossMapper.updateOssCheckNameByPartner(paramBean);
 								}
-							}
 
-							break;
-						case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
-							for (String componentId : componentIds) {
-								paramBean.setComponentId(componentId);
-								updateCnt += ossMapper.updateOssCheckName(paramBean);
-							}
-							
-							if (updateCnt >= 1) {
-								String commentId = paramBean.getReferenceId();
-								String changeOssNameInfo = avoidNull(paramBean.getOssName(), "N/A") + "|" + paramBean.getCheckName();
-								List<String> changeOssNameInfoList = new ArrayList<>();
-								changeOssNameInfoList.add(changeOssNameInfo);
-								String checkOssNameComment = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssNameInfoList);
-								CommentsHistory commentInfo = null;
-
-								if (isEmpty(commentId)) {
-									CommentsHistory commHisBean = new CommentsHistory();
-									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-									commHisBean.setReferenceId(paramBean.getRefPrjId());
-									commHisBean.setContents(checkOssNameComment);
-									commHisBean.setStatus("pre-review > open source");
-									commentInfo = commentService.registComment(commHisBean, false);
-								} else {
-									commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
-
-									if (commentInfo != null) {
-										if (!isEmpty(commentInfo.getContents())) {
-											checkOssNameComment  = commentInfo.getContents();
-											checkOssNameComment += changeOssNameInfo;
-											commentInfo.setContents(checkOssNameComment);
-											commentInfo.setStatus("pre-review > open source");
-											commentService.updateComment(commentInfo, false);
-										}
+								if (updateCnt >= 1) {
+									commentId = paramBean.getRefPrjId();
+									changeOssNameInfoList.add(avoidNull(paramBean.getOssName(), "N/A") + "|" + paramBean.getCheckName());
+									
+									if (isEmpty(commentId)) {
+										referenceId = paramBean.getReferenceId();
+										referenceDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
 									}
 								}
 
-								if (commentInfo != null) {
-									map.put("commentId", commentInfo.getCommId());
+								break;
+							case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+								for (String componentId : componentIds) {
+									paramBean.setComponentId(componentId);
+									updateCnt += ossMapper.updateOssCheckName(paramBean);
 								}
-							}
+								
+								if (updateCnt >= 1) {
+									commentId = paramBean.getReferenceId();
+									changeOssNameInfoList.add(avoidNull(paramBean.getOssName(), "N/A") + "|" + paramBean.getCheckName());
 
-							break;
-					}
+									if (isEmpty(commentId)) {
+										referenceId = paramBean.getRefPrjId();
+										referenceDiv = CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS;
+									}
+								}
 
-					if (updateCnt >= 1) {
-						map.put("isValid", true);
-						map.put("returnType", "Success");
-					} else {
-						throw new Exception("update Cnt가 비정상적인 값임.");
+								break;
+						}
+
+						if (updateCnt >= 1) {
+							successIdList.add(rowId);
+						} else {
+							failIdList.add(rowId);
+						}
 					}
+				}
+			}
+			
+			if (!CollectionUtils.isEmpty(changeOssNameInfoList)) {
+				map.put("isValid", true);
+				map.put("returnType", "Success");
+				
+				String checkOssNameComment = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssNameInfoList);
+				CommentsHistory commentInfo = null;
+				
+				if (isEmpty(commentId) && !isEmpty(referenceId) && !isEmpty(referenceDiv)) {
+					CommentsHistory commHisBean = new CommentsHistory();
+					commHisBean.setReferenceDiv(referenceDiv);
+					commHisBean.setReferenceId(referenceId);
+					commHisBean.setContents(checkOssNameComment);
+					commHisBean.setStatus("pre-review > open source");
+					commentInfo = commentService.registComment(commHisBean, false);
+				} else {
+					commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+
+					if (commentInfo != null) {
+						if (!isEmpty(commentInfo.getContents())) {
+							String contents = commentInfo.getContents();
+							contents += checkOssNameComment;
+							commentInfo.setContents(contents);
+							commentInfo.setStatus("pre-review > open source");
+							commentService.updateComment(commentInfo, false);
+						}
+					}
+				}
+				
+				if (commentInfo != null) {
+					map.put("commentId", commentInfo.getCommId());
+				}
+				if (!successIdList.isEmpty()) {
+					map.put("successIds", successIdList);
+				}
+				if (!failIdList.isEmpty()) {
+					map.put("failIds", failIdList);
 				}
 			}
 		} catch (Exception e) {
@@ -2999,6 +2995,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				boolean updateNvdFlag = false;
 				List<String> nicknames = null;
+				String nickChangeComment = "";
 				if (beforeBean.getOssNicknames() != null) {
 					nicknames = Arrays.asList(beforeBean.getOssNicknames());
 				}
@@ -3018,22 +3015,24 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					newNicknames = Arrays.asList(ossMaster.getOssNicknames());
 				}
 				if (!CollectionUtils.isEmpty(nicknames) || !CollectionUtils.isEmpty(newNicknames)) {
-					String changeComment = CommonFunction.getCommentForChangeNickname(ossMaster.getComment(), nicknames, newNicknames);
-					if (!isEmpty(changeComment)) {
-						ossMaster.setComment(changeComment);
-					}
+					nickChangeComment = CommonFunction.getCommentForChangeNickname("", nicknames, newNicknames);
 				}
 				if (!Objects.equals(includeCpeList, newIncludeCpes) || !Objects.equals(excludeCpeList, newExcludeCpes) || !Objects.equals(nicknames, newNicknames)
 						|| !ossMaster.getOssName().equals(beforeBean.getOssName()) || !ossMaster.getOssVersion().equals(beforeBean.getOssVersion())) {
 					updateNvdFlag = true;
 				}
-				
 				if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
 					updateOssNameVersionDiffMergeObject = updateOssNameVersionDiff(ossMaster);
 				} else {
 					result = registOssMaster(ossMaster);
 				}
-				
+				if (!isEmpty(nickChangeComment)) {
+					CommentsHistory commentsParam = new CommentsHistory();
+					commentsParam.setReferenceId(ossMaster.getOssId());
+					commentsParam.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS_COMMON);
+					commentsParam.setContents(nickChangeComment);
+					commentService.registComment(commentsParam);
+				}
 //				if (updateNvdFlag) {
 //					updateVulnInfoByOssMaster(ossMaster, true);
 //				}

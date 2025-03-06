@@ -1490,14 +1490,19 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_LICENSE)
 	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(
-			@RequestBody ProjectIdentification paramBean
+			@RequestBody Map<String, Object> param
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model
 			, @PathVariable String targetName){
-		Map<String, Object> map = autoFillOssInfoService.saveOssCheckLicense(paramBean, targetName);
+		String json = (String) param.get("list");
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> paramBeanList = new ArrayList<>();
+		paramBeanList = (List<ProjectIdentification>) fromJson(json, collectionType);
+		Map<String, Object> map = autoFillOssInfoService.saveOssCheckLicense(paramBeanList, targetName);
 
 		return makeJsonResponseHeader(map);
 	}
@@ -1582,14 +1587,19 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_NAME)
 	public @ResponseBody ResponseEntity<Object> saveOssCheckName(
-			@RequestBody ProjectIdentification paramBean
+			@RequestBody Map<String, Object> param
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model
 			, @PathVariable String targetName){
-		Map<String, Object> map = ossService.saveOssCheckName(paramBean, targetName);
+		String json = (String) param.get("list");
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> paramBeanList = new ArrayList<>();
+		paramBeanList = (List<ProjectIdentification>) fromJson(json, collectionType);
+		Map<String, Object> map = ossService.saveOssCheckName(paramBeanList, targetName);
 		
 		return makeJsonResponseHeader(map);
 	}

@@ -90,7 +90,7 @@ public interface OssService extends HistoryConfig{
 	
 	List<ProjectIdentification> checkOssName(List<ProjectIdentification> list);
 	
-	Map<String, Object> saveOssCheckName(ProjectIdentification paramBean, String targetName);
+	Map<String, Object> saveOssCheckName(List<ProjectIdentification> paramBean, String targetName);
 	
 	Map<String, Object> saveOssNickname(ProjectIdentification paramBean);
 
