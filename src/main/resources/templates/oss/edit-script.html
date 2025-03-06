@@ -500,7 +500,7 @@
 				
 				let includeCpe = $("#input_includeCpe").val();
 				let cpeData = includeCpe.split(":");
-				if (cpeData.length < 2 || cpeData.length < 13 || cpeData.length > 13) {
+				if (cpeData.length != 2 && (cpeData.length < 2 || cpeData.length < 13 || cpeData.length > 13)) {
 					$(this).parent().prev().addClass("is-invalid");
 					$(this).parent().parent().parent().next().show();
 				} else {
@@ -524,7 +524,7 @@
 				
 				let excludeCpe = $("#input_excludeCpe").val();
 				let cpeData = excludeCpe.split(":");
-				if (cpeData.length < 2 || cpeData.length < 13 || cpeData.length > 13) {
+				if (cpeData.length != 2 && (cpeData.length < 2 || cpeData.length < 13 || cpeData.length > 13)) {
 					$(this).parent().prev().addClass("is-invalid");
 					$(this).parent().parent().parent().next().show();
 				} else {
