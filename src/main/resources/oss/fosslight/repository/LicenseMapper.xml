@@ -66,10 +66,24 @@
 			AND (T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%') OR T3.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%'))
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(creator,'NONE')">
+					AND T1.CREATOR IN ('oscAdmin', 'sungwon.yun')
+				</when>
+				<otherwise>
+					AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(modifier,'NONE')">
+					AND T1.MODIFIER IN ('oscAdmin', 'sungwon.yun')
+				</when>
+				<otherwise>
+					AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
 			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate} 
@@ -99,6 +113,14 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
 			AND T1.DISCLOSING_SRC = #{disclosingSrc}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.LICENSE_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE REFERENCE_DIV = '30'
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
 		</if>
 		/* 2018-07-25 choye 추가 */ 
 		<if test="arrRestriction != null">
@@ -188,10 +210,24 @@
 			AND (T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%') OR T3.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%'))
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(creator,'NONE')">
+					AND T1.CREATOR = 'oscAdmin'
+				</when>
+				<otherwise>
+					AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(modifier,'NONE')">
+					AND T1.MODIFIER IN ('oscAdmin', 'sungwon.yun')
+				</when>
+				<otherwise>
+					AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
 			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate} 
@@ -221,6 +257,14 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
 			AND T1.DISCLOSING_SRC = #{disclosingSrc}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.LICENSE_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE REFERENCE_DIV = '30'
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
 		</if>
 		<if test="arrRestriction != null">
 			AND

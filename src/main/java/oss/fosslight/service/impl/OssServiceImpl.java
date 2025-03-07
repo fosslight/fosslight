@@ -1424,9 +1424,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			updateLicenseDivDetail(ossMaster);
 			
-			if (ossCommonDeleteFlag) ossMapper.deleteOssDownloadLocation(ossMaster);
+			if (ossCommonDeleteFlag) {
+				ossMapper.deleteOssDownloadLocation(ossMaster);
+			}
 			ossMapper.deleteOssMaster(ossMaster);
-			if (ossCommonDeleteFlag) ossMapper.deleteOssCommonMaster(ossMaster);
+			if (ossCommonDeleteFlag) {
+				ossMapper.deleteOssCommonMaster(ossMaster);
+			}
 		} else {
 			// 동일한 oss에서 이동하는 경우, nick name을 별도로 등록하지 않음
 			OssMaster afterBean = getOssInfo(ossMaster.getNewOssId(), false);
@@ -1462,9 +1466,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			updateLicenseDivDetail(ossMaster);
 			
-			if (ossCommonDeleteFlag) ossMapper.deleteOssDownloadLocation(ossMaster);
+			if (ossCommonDeleteFlag) {
+				ossMapper.deleteOssDownloadLocation(ossMaster);
+			}
 			ossMapper.deleteOssMaster(ossMaster);
-			if (ossCommonDeleteFlag) ossMapper.deleteOssCommonMaster(ossMaster);
+			if (ossCommonDeleteFlag) {
+				ossMapper.deleteOssCommonMaster(ossMaster);
+			}
 		}
 	}
 

@@ -557,6 +557,17 @@
 			</if>
 			)
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
 			<![CDATA[
 			AND	CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
@@ -979,6 +990,17 @@
 			</if>
 			)
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
 			<![CDATA[
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
@@ -1324,6 +1346,17 @@
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
 			]]>
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
+		</if>
 		) T1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrRestriction)">
 			WHERE
@@ -1563,6 +1596,17 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
 			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
 		</if>
 		/*검색 쿼리 끝*/
 		GROUP BY T1.OSS_ID		
