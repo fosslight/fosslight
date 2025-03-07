@@ -1422,6 +1422,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
 		
 		List<String> deduplicatedkey = new ArrayList<>();
+		List<String> caseWithoutVersionKey = new ArrayList<>();
 		boolean activateFlag;
 		OssComponents oc = null;
 		String ossVersion = "";
@@ -1429,35 +1430,41 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		int gridIdx = 1;
 		
 		List<ProjectIdentification> list = projectMapper.selectSecurityListForProject(identification);
-		for (ProjectIdentification pi : list) {
-			Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
-			Map<String, String> patchLinkMap = new HashMap<>();
-			
-			if (!isDemo) {
-				List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
-				for (Map<String, Object> cpeInfo : cpeInfoList) {
-					String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
-					String key2 = (String) cpeInfo.get("cveId");
-					String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
-					
-					List<Map<String, Object>> cpeInfoMapList = null;
-					if (cpeInfoMap.containsKey(key)) {
-						cpeInfoMapList = cpeInfoMap.get(key);
-					} else {
-						cpeInfoMapList = new ArrayList<>();
-					}
-					cpeInfoMapList.add(cpeInfo);
-					cpeInfoMap.put(key, cpeInfoMapList);
-					
-					if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
-						patchLinkMap.put(key2, patchLink);
-					}
+		Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
+		Map<String, String> patchLinkMap = new HashMap<>();
+		
+		if (!isDemo) {
+			List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
+			for (Map<String, Object> cpeInfo : cpeInfoList) {
+				String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
+				String key2 = (String) cpeInfo.get("cveId");
+				String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
+				
+				List<Map<String, Object>> cpeInfoMapList = null;
+				if (cpeInfoMap.containsKey(key)) {
+					cpeInfoMapList = cpeInfoMap.get(key);
+				} else {
+					cpeInfoMapList = new ArrayList<>();
+				}
+				cpeInfoMapList.add(cpeInfo);
+				cpeInfoMap.put(key, cpeInfoMapList);
+				
+				if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
+					patchLinkMap.put(key2, patchLink);
 				}
 			}
-			
+		}
+		
+		for (ProjectIdentification pi : list) {
 			activateFlag = false;
 			if (isEmpty(pi.getOssVersion())) {
 				activateFlag = true;
+				String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
+				if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
+					caseWithoutVersionKey.add(keyWithoutVersion);
+				} else {
+					continue;
+				}
 			}
 			
 			String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
@@ -1498,10 +1505,18 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 						for (Map<String, Object> cpeInfo : matchCpeInfoList) {
 							Map<String, Object> paramMap = new HashMap<>();
 							paramMap = cpeInfo;
-							if (!paramMap.containsKey("verStartInc")) paramMap.put("verStartInc", "");
-							if (!paramMap.containsKey("verEndInc")) paramMap.put("verEndInc", "");
-							if (!paramMap.containsKey("verStartExc")) paramMap.put("verStartExc", "");
-							if (!paramMap.containsKey("verEndExc")) paramMap.put("verEndExc", "");
+							if (!paramMap.containsKey("verStartInc")) {
+								paramMap.put("verStartInc", "");
+							}
+							if (!paramMap.containsKey("verEndInc")) {
+								paramMap.put("verEndInc", "");
+							}
+							if (!paramMap.containsKey("verStartExc")) {
+								paramMap.put("verStartExc", "");
+							}
+							if (!paramMap.containsKey("verEndExc")) {
+								paramMap.put("verEndExc", "");
+							}
 							if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
 								continue;
 							}
