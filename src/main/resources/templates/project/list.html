@@ -119,10 +119,26 @@
                                             </div>
                                         </div>
                                         <div class="row">
+                                       		<div class="col-md-4">
+                                           		<div class="form-group mb-2">
+                                              		<input type="type" name="ossName" class="form-control save-value" th:placeholder="|OSS Name|" th:value="${searchBean?.ossName}">
+                                          		</div>
+                                        	</div>
+                                       		<div class="col-md-4">
+                                          		<div class="form-group mb-2">
+                                               		<input type="type" name="ossVersion" class="form-control autoComOssVersion save-value" th:placeholder="|OSS Version|" th:value="${searchBean?.ossVersion}">
+                                            	</div>
+                                        	</div>
+                                        	<div class="col-md-4">
+                                        		<div class="form-group mb-2">
+                                               		<input type="type" name="licenseName" class="form-control autoComLicense save-value" th:placeholder="|License Name|" th:value="${searchBean?.licenseName}">
+                                               	</div>
+                                        	</div>
+                                    	</div>
+                                        <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="select2 save-value" name="networkServerType" id="networkServerTypeSelect"
-                                                            style="width: 100%;">
+                                                    <select class="select2 save-value" name="networkServerType" id="networkServerTypeSelect" style="width: 100%;">
                                                         <option value=""></option>
                                                         <option value="Y" th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
                                                         <option value="N" th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
@@ -183,23 +199,6 @@
 												</div>
                                          	</div>
                                         </div>
-                                       	<div class="row">
-                                       		<div class="col-md-4">
-                                           		<div class="form-group mb-2">
-                                              		<input type="type" name="ossName" class="form-control save-value" th:placeholder="|OSS Name|" th:value="${searchBean?.ossName}">
-                                          		</div>
-                                        	</div>
-                                       		<div class="col-md-4">
-                                          		<div class="form-group mb-2">
-                                               		<input type="type" name="ossVersion" class="form-control autoComOssVersion save-value" th:placeholder="|OSS Version|" th:value="${searchBean?.ossVersion}">
-                                            	</div>
-                                        	</div>
-                                        	<div class="col-md-4">
-                                        		<div class="form-group mb-2">
-                                               		<input type="type" name="licenseName" class="form-control autoComLicense save-value" th:placeholder="|License Name|" th:value="${searchBean?.licenseName}">
-                                               	</div>
-                                        	</div>
-                                    	</div>
                                     	<div class="row">
                                        		<div class="col-md-4">
                                             	<div class="form-group mb-2">

@@ -43,10 +43,10 @@ $(document).ready(function () {
      	$('#schDateRange').attr('placeholder', 'Created Date');
   	});
     
-    var input = ["partnerName", "publicYn", "createdDate1", "createdDate2", "softwareName", "softwareVersion", "creator", "reviewer", "watchers", "ossName", "ossVersion", "licenseName"];
+    var input = ["partnerName", "publicYn", "createdDate1", "createdDate2", "softwareName", "softwareVersion", "creator", "reviewer", "watchers", "ossName", "ossVersion", "licenseName", "binaryName"];
 	var singleSelect = ["division"];
 	var multiSelect = ["status"];
-	var textarea = ["binaryName", "userComment", "description"];
+	var textarea = ["userComment", "description"];
     
     var optionSelectedFlag = false;
 	if (typeof sessionStorage.partnerSearchConditions !== "undefined") {
