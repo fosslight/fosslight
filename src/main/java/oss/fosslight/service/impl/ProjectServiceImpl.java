@@ -4333,10 +4333,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					// return validator result
 					if (!vr.isValid()) {
 						if (!vr.isDiff()) {
-//							return makeJsonResponseHeader(false, null, vr.getValidMessageMap(), vr.getDiffMessageMap());
-							resultMap.put("diffMap", vr.getDiffMessageMap());
+							resultMap.put("diffMap", vr.getDiffMessageMap(true));
 						}
-//						return makeJsonResponseHeader(false, null, vr.getValidMessageMap());
 						resultMap.put("validMap", vr.getValidMessageMap());
 						return resultMap;
 					}

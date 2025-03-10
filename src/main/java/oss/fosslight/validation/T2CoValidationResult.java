@@ -200,6 +200,10 @@ public class T2CoValidationResult {
     }
     
     public Map<String, String> getDiffMessageMap() {
+    	return getDiffMessageMap(false);
+    }
+    
+    public Map<String, String> getDiffMessageMap(boolean isAfterSort) {
     	Map<String, String> messageMap = new HashMap<>();
         Iterator<String> itr = diffMap.keySet().iterator();
         
@@ -216,8 +220,11 @@ public class T2CoValidationResult {
                 	camelKey = StringUtil.convertToCamelCase(camelKey);
             	}
             }
-            
-        	messageMap.put(camelKey, getDiffMessage(key));
+            String msg = getDiffMessage(key);
+            if (isAfterSort && msg.startsWith("errLv")) {
+            	msg = msg.split("[.]")[1];
+            }
+        	messageMap.put(camelKey, msg);
         }
 
         messageMap.put("isDiff", isDiff() ? "true" : "false");        

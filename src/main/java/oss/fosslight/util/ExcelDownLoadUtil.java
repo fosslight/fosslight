@@ -864,7 +864,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						message += "/";
 					}
 					
-					message += warningMsgCode((key.split("[.]")[0]).toUpperCase()) + vr.getDiffMessageMap().get(key) + "(FONT_BLUE)";
+					message += warningMsgCode((key.split("[.]")[0]).toUpperCase()) + vr.getDiffMessageMap(true).get(key) + "(FONT_BLUE)";
 				}
 			}
 		}

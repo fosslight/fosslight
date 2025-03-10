@@ -309,11 +309,9 @@ public class SelfCheckController extends CoTopComponent {
 			if (!vr.isValid()) {
 				Map<String, String> validMap = vr.getValidMessageMap();
 				map.put("validData", validMap);
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo(mainDataList, validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo(mainDataList, validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
 			} else {
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo(mainDataList, null, null, null, true, true));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo(mainDataList, null, null, null, true, true));
 			}
 			
 			if (!vr.isDiff()){

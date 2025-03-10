@@ -752,13 +752,12 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				partnerList.replace("rows", CommonFunction.identificationSortByValidInfo(
-						(List<ProjectIdentification>) partnerList.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+				partnerList.replace("rows", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) partnerList.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
 				if (!vr.isValid()) {
 					partnerList.put("validData", vr.getValidMessageMap());
 				}
 				if (!vr.isDiff()) {
-					partnerList.put("diffData", vr.getDiffMessageMap());
+					partnerList.put("diffData", vr.getDiffMessageMap(true));
 				}
 				if (vr.hasInfo()) {
 					partnerList.put("infoData", vr.getInfoMessageMap());

@@ -1755,6 +1755,22 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					String msg = validDiffMap.get(errKey);
 					String _key = errKey.substring(errKey.indexOf(".") + 1, errKey.length());
 					
+					if (!CommonFunction.isAdmin()) {
+						if ((errKey.startsWith("ossName") && (msg.startsWith("Deactivated") || msg.startsWith("Unconfirmed")))
+								|| (errKey.startsWith("ossVersion") && msg.startsWith("Unconfirmed"))
+								|| (errKey.startsWith("licenseName") && (msg.startsWith("Unconfirmed") || msg.startsWith("errLv")))) {
+							if (errorMap.containsKey(_key)) {
+								List<String> _list = errorMap.get(_key);
+								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+								errorMap.replace(_key, _list);
+							} else {
+								List<String> _list = new ArrayList<>();
+								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+								errorMap.put(_key, _list);
+							}
+						}
+					}
+					
 					// oss version warning message "This field is required" (Priority : 4)
 					if (errKey.startsWith("ossVersion") && msg.equals("This field is required.")) {
 						if (warningVerMap.containsKey(_key)) {

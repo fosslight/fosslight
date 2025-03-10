@@ -606,15 +606,14 @@ public class ProjectController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
 				
 				if (!vr.isValid()) {
 					map.put("validData", vr.getValidMessageMap());
 				}
 				
 				if (!vr.isDiff()) {
-					map.put("diffData", vr.getDiffMessageMap());
+					map.put("diffData", vr.getDiffMessageMap(true));
 				}
 				
 				if (vr.hasInfo()) {
@@ -630,8 +629,7 @@ public class ProjectController extends CoTopComponent {
 				if (CoConstDef.FLAG_YES.equals(identification.getLoadFromAndroidProjectFlag())) {
 					if (!isEmpty(identification.getAndroidNoticeFileId())) {
 						log.info("identification.getAndroidNoticeFileId() : OK");
-						noticeBinaryList = CommonFunction.getNoticeBinaryList(
-								fileService.selectFileInfoById(identification.getAndroidNoticeFileId()));
+						noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(identification.getAndroidNoticeFileId()));
 					}
 					
 					if (!isEmpty(identification.getAndroidResultFileId())) {
@@ -704,18 +702,15 @@ public class ProjectController extends CoTopComponent {
 					
 					if (prjInfo != null) {
 						if (!isEmpty(prjInfo.getSrcAndroidNoticeXmlId())) {
-							noticeBinaryList = CommonFunction.getNoticeBinaryList(
-									fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeXmlId()));
+							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeXmlId()));
 						}
 						
 						if (isEmpty(prjInfo.getSrcAndroidNoticeXmlId()) && !isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
-							noticeBinaryList = CommonFunction.getNoticeBinaryList(
-									fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
+							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
 						}
 
 						if (!isEmpty(prjInfo.getSrcAndroidResultFileId())) {
-							existsBinaryName = CommonFunction.getExistsBinaryNames(
-									fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
+							existsBinaryName = CommonFunction.getExistsBinaryNames(fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
 						}
 					}
 				}
@@ -738,13 +733,12 @@ public class ProjectController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
 				if (!vr.isValid()) {
 					map.put("validData", vr.getValidMessageMap());
 				}
 				if (!vr.isDiff()) {
-					map.put("diffData", vr.getDiffMessageMap());
+					map.put("diffData", vr.getDiffMessageMap(true));
 				}
 				if (vr.hasInfo()) {
 					map.put("infoData", vr.getInfoMessageMap());
@@ -761,8 +755,7 @@ public class ProjectController extends CoTopComponent {
 			
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
 				if (!CoConstDef.CD_DTL_COMPONENT_BAT.equals(code)){
-					map.replace("mainData", CommonFunction
-							.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
+					map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
 				}
 				
 				if (!vr.isValid()) {
@@ -770,7 +763,7 @@ public class ProjectController extends CoTopComponent {
 				}
 				
 				if (!vr.isDiff()) {
-					map.put("diffData", vr.getDiffMessageMap());
+					map.put("diffData", vr.getDiffMessageMap(true));
 				}
 				
 				if (vr.hasInfo()) {
@@ -788,8 +781,7 @@ public class ProjectController extends CoTopComponent {
 			
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
 				if (!isSortOnBom) {
-					map.replace("rows", CommonFunction
-							.identificationSortByValidInfo((List<ProjectIdentification>) map.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+					map.replace("rows", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
 				}
 				
 				if (!vr.isValid()) {
@@ -797,15 +789,14 @@ public class ProjectController extends CoTopComponent {
 				}
 				
 				if (!vr.isDiff()) {
-					map.put("diffData", vr.getDiffMessageMap());
+					map.put("diffData", vr.getDiffMessageMap(true));
 				}
 				
 				if (vr.hasInfo()) {
 					map.put("infoData", vr.getInfoMessageMap());
 				}
 			} else {
-				map.replace("rows", CommonFunction
-						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("rows"), null, null, null, false, true));
+				map.replace("rows", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("rows"), null, null, null, false, true));
 			}
 		} else if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(code)) {
 			PartnerMaster partnerInfo = new PartnerMaster();
@@ -835,13 +826,12 @@ public class ProjectController extends CoTopComponent {
 				T2CoValidationResult vr = pv.validate(new HashMap<>());
 				
 				if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-					map.replace("mainData", CommonFunction.identificationSortByValidInfo(
-							(List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+					map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
 					if (!vr.isValid()) {
 						map.put("validData", vr.getValidMessageMap());
 					}
 					if (!vr.isDiff()) {
-						map.put("diffData", vr.getDiffMessageMap());
+						map.put("diffData", vr.getDiffMessageMap(true));
 					}
 					if (vr.hasInfo()) {
 						map.put("infoData", vr.getInfoMessageMap());
@@ -858,13 +848,12 @@ public class ProjectController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData")
-						, vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
 				if (!vr.isValid()) {
 					map.put("validData", vr.getValidMessageMap());
 				}
 				if (!vr.isDiff()) {
-					map.put("diffData", vr.getDiffMessageMap());
+					map.put("diffData", vr.getDiffMessageMap(true));
 				}
 				if (vr.hasInfo()) {
 					map.put("infoData", vr.getInfoMessageMap());
