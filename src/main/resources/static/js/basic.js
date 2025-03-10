@@ -4287,7 +4287,7 @@ function basicAlertify(target) {
 			},
 			hooks: {
 				onshow: function() {
-					this.elements.dialog.style.maxWidth = 'none';
+					this.elements.dialog.style.maxWidth = '750px';
 					this.elements.dialog.style.width = '650px';
 				}
 			}
