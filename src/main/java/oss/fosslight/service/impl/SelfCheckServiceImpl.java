@@ -39,6 +39,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -746,7 +747,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if (downloadLocation != null && downloadLocation.endsWith("/")) {
 				ossComponent.get(i).setDownloadLocation(downloadLocation.substring(0, downloadLocation.length()-1));
 			}
-			
+			if (!isEmpty(ossComponent.get(i).getCopyrightText())) {
+				ossComponent.get(i).setCopyrightText(StringUtils.trimAllWhitespace(ossComponent.get(i).getCopyrightText()));
+			}
 			int componentLicenseId = 1;
 			//update
 			if (!StringUtil.contains(ossComponent.get(i).getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){

@@ -41,9 +41,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURL.StandardTypes;
@@ -80,7 +80,6 @@ import oss.fosslight.repository.VulnerabilityMapper;
 import oss.fosslight.service.*;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.StringUtil;
-import oss.fosslight.util.StringUtils;
 import oss.fosslight.validation.T2CoValidationConfig;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
@@ -1088,6 +1087,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			if (vulnRecheck) {
 				ossMaster.setVulnRecheck(CoConstDef.FLAG_YES);
+			}
+			if (!isEmpty(ossMaster.getCopyright())) {
+				ossMaster.setCopyright(StringUtils.trimAllWhitespace(ossMaster.getCopyright()));
 			}
 			
 			ossMaster.setModifier(ossMaster.getLoginUserName());

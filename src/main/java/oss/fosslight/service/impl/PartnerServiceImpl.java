@@ -23,6 +23,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -439,7 +440,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			} else {
 				bean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(bean, CoConstDef.LICENSE_DIV_SINGLE));
 			}
-			
+			if (!isEmpty(bean.getCopyrightText())) {
+				bean.setCopyrightText(StringUtils.trimAllWhitespace(bean.getCopyrightText()));
+			}
 			if (StringUtil.isEmpty(bean.getComponentIdx())) {
 				bean.setComponentIdx(Integer.toString(ossComponentIdx++));
 			}

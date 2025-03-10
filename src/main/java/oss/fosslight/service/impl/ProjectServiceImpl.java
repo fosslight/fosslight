@@ -41,6 +41,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -2804,7 +2805,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			} else {
 				ossBean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
 			}
-			
+			if (!isEmpty(ossBean.getCopyrightText())) {
+				ossBean.setCopyrightText(StringUtils.trimAllWhitespace(ossBean.getCopyrightText()));
+			}
 			// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
 			if(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
 				ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(ossBean.getOssComponentsLicenseList()));
