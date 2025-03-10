@@ -2886,10 +2886,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 			}
 			
+			map.put("isValid", true);
+			map.put("returnType", "Success");
+			
 			if (!CollectionUtils.isEmpty(changeOssNameInfoList)) {
-				map.put("isValid", true);
-				map.put("returnType", "Success");
-				
 				String checkOssNameComment = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssNameInfoList);
 				CommentsHistory commentInfo = null;
 				
