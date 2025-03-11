@@ -234,7 +234,7 @@ var dep_fn = {
 	makeNickNamePopup : function(obj, finalData) {
 		if (obj.validMsg && obj.validMsg.length != 0) {
 			if (typeof alertify.nicknameValidDialog === "undefined") {
-				basicAlertify('nicknameValidDialog');
+				com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
         	}
 			alertify.nicknameValidDialog()
 			.set('onok', function(e) {

@@ -1797,7 +1797,7 @@ var src_fn = {
 			loading.hide();
 			
 			if (typeof alertify.nicknameValidDialog === "undefined") {
-				basicAlertify('nicknameValidDialog');
+				com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
         	}
 			alertify.nicknameValidDialog()
 			.set('onok', function(e) {
@@ -3223,7 +3223,31 @@ var com_fn = {
 		}
 		
 		return reMakeArrObj;
-    }
+    },
+    nicknameAlertifyTemplate : function (target) {
+		alertify.dialog(target, function() {
+			return {
+				setup: function() {
+					var settings = alertify.confirm().settings;
+					
+					for (var prop in settings) {
+						this.settings[prop] = settings[prop];
+					}
+					
+					var setup = alertify.confirm().setup();
+					setup.focus.element = 0;
+
+					return setup;
+				},
+				hooks: {
+					onshow: function() {
+						this.elements.dialog.style.maxWidth = '750px';
+						this.elements.dialog.style.width = '650px';
+					}
+				}
+			};
+		}, false, 'alert');
+	}
 };
 
 var notice_evt = {

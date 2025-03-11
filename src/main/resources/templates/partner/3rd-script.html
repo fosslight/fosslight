@@ -466,7 +466,7 @@ var fn = {
 			loadingIden.hide();
 			
 			if (typeof alertify.nicknameValidDialog === "undefined") {
-				basicAlertify('nicknameValidDialog');
+				com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
         	}
 			alertify.nicknameValidDialog()
 			.set('onok', function(e) {
