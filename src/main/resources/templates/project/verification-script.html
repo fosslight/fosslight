@@ -2764,12 +2764,18 @@
             	
             	if (checked) {
             		$("#companyName").prop("checked", true);
+            		$("#editCompanyYn").val("Y");
                     $("#ossDistributionSite").prop("checked", true);
+                    $("#editDistributionSiteUrlYn").val("Y");
                     $("#email").prop("checked", true);
+                    $("#editEmailYn").val("Y");
             	} else {
             		$("#companyName").prop("checked", false);
+            		$("#editCompanyYn").val("N");
                     $("#ossDistributionSite").prop("checked", false);
+                    $("#editDistributionSiteUrlYn").val("N");
                     $("#email").prop("checked", false);
+                    $("#editEmailYn").val("N");
                     if (isHideOssVersion) {
                     	$("#hideOssVersion").trigger("click");
                     }
