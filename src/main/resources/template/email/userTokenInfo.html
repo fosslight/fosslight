@@ -35,6 +35,7 @@
 							<div th:if="${expireDate}">
 								Expired date : <span th:text="${expireDate}"></span>
 							</div>
+								<br>You can also check the Token value in 'User Settings' menu.
 							<div th:utext="${tokenInfo}"></div>
 						</th:block>
 						<th:block th:if="${mailType == '801'}">
