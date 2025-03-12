@@ -4,7 +4,7 @@
 <th:block th:replace="oss/ossBulkEditPopup-script :: contentScript"></th:block>
 <body>
 <div class="card-body">
-	<form name="bulkEditForm" id="bulkEditForm">
+	<form name="bulkEditForm" id="bulkEditForm" th:onsubmit="return false;">
 		<div class="row pl-2" style="width: 100%;">
 			<input type="hidden" id="rowId" name="rowId" th:value="${rowId}"/>
 			<input type="hidden" id="target" name="target" th:value="${target}"/>

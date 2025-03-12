@@ -44,24 +44,24 @@ $(document).ready(function() {
 		var mult = null;
 
 		for (var i in licenseNames){
-			if("" != val && val == licenseNames[i].value){
-				mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + licenseNames[i].value + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
-				if(licenseName != ""){
+			if ("" != val && val == licenseNames[i].value) {
+				mult = "<button class=\"btn btn-outline-secondary btn-sm ml-1 mt-2 mr-xm px-2\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick='fn.bulkEditDeleteLicense(this)'>x</span></button>";
+				if(licenseName != "") {
 					licenseName += "," + licenseNames[i].value;
 					$("#licenseName").val(licenseName);
-				}else{
+				} else {
 					$("#licenseName").val(licenseNames[i].value);
 				}
 				break;
 			}
 		}
 
-		if(mult == null){
-			mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + val + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
-			if(licenseName != ""){
+		if (mult == null) {
+			mult = "<button class=\"btn btn-outline-secondary btn-sm ml-1 mt-2 mr-xm px-2\">" + val + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick='fn.bulkEditDeleteLicense(this)'>x</span></button>";
+			if (licenseName != "") {
 				licenseName += "," + val;
 				$("#licenseName").val(licenseName);
-			}else{
+			} else {
 				$("#licenseName").val(val);
 			}
 		}
@@ -70,30 +70,30 @@ $(document).ready(function() {
 		$('#licenseNameSelect').val("");
 		
 	}).on("keypress", function(evt){
-		if(evt.keyCode == 13){
+		if (evt.keyCode == 13){
 			var val = $("#licenseNameSelect").val();
 			var licenseName = $("#licenseName").val();
 			var mult = null;
 
 			for (var i in licenseNames){
-				if("" != val && val == licenseNames[i].value){
-					mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + licenseNames[i].value + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
-					if(licenseName != ""){
+				if ("" != val && val == licenseNames[i].value) {
+					mult = "<button class=\"btn btn-outline-secondary btn-sm ml-1 mt-2 mr-xm px-2\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick='fn.bulkEditDeleteLicense(this)'>x</span></button>";
+					if (licenseName != "") {
 						licenseName += "," + licenseNames[i].value;
 						$("#licenseName").val(licenseName);
-					}else{
+					} else {
 						$("#licenseName").val(licenseNames[i].value);
 					}
 					break;
 				}
 			}
 
-			if(mult == null){
-				mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + val + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
-				if(licenseName != ""){
+			if (mult == null) {
+				mult = "<button class=\"btn btn-outline-secondary btn-sm ml-1 mt-2 mr-xm px-2\">" + val + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick='fn.bulkEditDeleteLicense(this)'>x</span></button>";
+				if (licenseName != "") {
 					licenseName += "," + licenseNames[i].value;
 					$("#licenseName").val(licenseName);
-				}else{
+				} else {
 					$("#licenseName").val(licenseNames[i].value);
 				}
 			}
