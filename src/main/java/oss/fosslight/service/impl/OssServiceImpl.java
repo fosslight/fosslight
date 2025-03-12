@@ -1089,7 +1089,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMaster.setVulnRecheck(CoConstDef.FLAG_YES);
 			}
 			if (!isEmpty(ossMaster.getCopyright())) {
-				ossMaster.setCopyright(StringUtils.trimAllWhitespace(ossMaster.getCopyright()));
+				ossMaster.setCopyright(StringUtils.trimWhitespace(ossMaster.getCopyright()));
 			}
 			
 			ossMaster.setModifier(ossMaster.getLoginUserName());

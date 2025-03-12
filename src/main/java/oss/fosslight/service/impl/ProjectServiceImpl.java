@@ -2807,7 +2807,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ossBean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
 			}
 			if (!isEmpty(ossBean.getCopyrightText())) {
-				ossBean.setCopyrightText(StringUtils.trimAllWhitespace(ossBean.getCopyrightText()));
+				ossBean.setCopyrightText(StringUtils.trimWhitespace(ossBean.getCopyrightText()));
 			}
 			// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
 			if(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {

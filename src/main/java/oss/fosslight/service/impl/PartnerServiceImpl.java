@@ -441,7 +441,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				bean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(bean, CoConstDef.LICENSE_DIV_SINGLE));
 			}
 			if (!isEmpty(bean.getCopyrightText())) {
-				bean.setCopyrightText(StringUtils.trimAllWhitespace(bean.getCopyrightText()));
+				bean.setCopyrightText(StringUtils.trimWhitespace(bean.getCopyrightText()));
 			}
 			if (StringUtil.isEmpty(bean.getComponentIdx())) {
 				bean.setComponentIdx(Integer.toString(ossComponentIdx++));
