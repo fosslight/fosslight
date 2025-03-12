@@ -5972,7 +5972,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			if (!isEmpty(customComment)) {
 				customComment += "<br>";
 			}
-			customComment += "[Nickname Deleted] " + String.join(",", afterNicknames);
+			customComment += "[Nickname Deleted] " + String.join(",", beforeNicknames);
 		} else {
 			List<String> nonDuplicateListForAfter = afterNicknames.stream().filter(a -> beforeNicknames.stream().noneMatch(Predicate.isEqual(a))).collect(Collectors.toList());
 			List<String> nonDuplicateListForBefore = beforeNicknames.stream().filter(b -> afterNicknames.stream().noneMatch(Predicate.isEqual(b))).collect(Collectors.toList());
