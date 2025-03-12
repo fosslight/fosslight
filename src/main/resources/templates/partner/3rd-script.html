@@ -1668,7 +1668,7 @@ var grid = {
 				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
 				{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
 				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
-				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : true, search : false,
+				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : true, search : false, hidden: true,
 					sorttype: function (cell, rowData) {
 						var rtnVal = rowData.obligationType;
 						if (rtnVal == '10' || rtnVal == '11') {
@@ -1678,7 +1678,7 @@ var grid = {
 						}
                     }
 				},
-				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : true, search : false,
+				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : true, search : false, hidden: true,
 					sorttype: function (cell, rowData) {
 						var rtnVal = rowData.obligationType;
 						if (rtnVal == '11') {

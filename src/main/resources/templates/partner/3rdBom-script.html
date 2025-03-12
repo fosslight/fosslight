@@ -317,10 +317,10 @@ var bom_fn = {
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var selectedVal = $("#"+id+"_notify").prop("selected", true).val();
 		
-		if(selectedVal) {
-			if(selectedVal == "N") {
-				$("#"+id+"_source").val("N");
-			}
+		if (selectedVal) {
+// 			if (selectedVal == "N") {
+// 				$("#"+id+"_source").val("N");
+// 			}
 			
 			$("#"+id+"_notify").parent().css("background", "");
 			
@@ -337,10 +337,10 @@ var bom_fn = {
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var selectedVal = $("#"+id+"_source").prop("selected", true).val();
 		
-		if(selectedVal) {
-			if(selectedVal == "Y") {
-				$("#"+id+"_notify").val("Y");
-			}
+		if (selectedVal) {
+// 			if (selectedVal == "Y") {
+// 				$("#"+id+"_notify").val("Y");
+// 			}
 			
 			$("#"+id+"_source").parent().css("background", "");
 			
