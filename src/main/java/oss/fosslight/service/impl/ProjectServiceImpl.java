@@ -2076,6 +2076,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			ossBean.setReferenceId(prjId);
 			ossBean.setReportFileId(null);
 			ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
+			ossBean.setCopyrightText(ossBean.getCopyright());
 			ossComponentsIdList.add(ossBean.getComponentId());
 			insertOssComponentList.add(ossBean);
 		}
