@@ -50,6 +50,7 @@ import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.OssNotice;
 import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
@@ -2747,7 +2748,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
-			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
+			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) {
+				bean.setHomepage("//" + bean.getHomepage());
+			}
 			
 			srcList.add(bean);
 		}
@@ -3284,5 +3287,53 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			projectService.registReadmeContent(param);
 			projectService.registVerifyContents(param);
 		}
+	}
+
+	@Override
+	public Map<String, Object> checkNoticeHtmlInfo(OssNotice ossNotice) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		List<String> rtnList = new ArrayList<>();
+		
+		String referenceDiv = !CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(ossNotice.getNoticeType()) ? CoConstDef.CD_DTL_COMPONENT_ID_BOM : CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(ossNotice.getPrjId());
+		identification.setReferenceDiv(referenceDiv);
+		identification.setMerge(CoConstDef.FLAG_NO);
+		Map<String, Object> map = projectService.getIdentificationGridList(identification, true);
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(referenceDiv)) {
+			map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+		}
+		
+		List<ProjectIdentification> bomList = (List<ProjectIdentification>) map.get("rows");
+		boolean notFoundFlag = false;
+		if (!CollectionUtils.isEmpty(bomList)) {
+			List<String> bomOssInfoList = bomList.stream().map(e -> (e.getOssName() + "_" + avoidNull(e.getOssVersion())).toUpperCase()).distinct().collect(Collectors.toList());
+			Map<String, Object> noticeHtmlInfo = getNoticeHtmlInfo(ossNotice, true);
+			List<OssComponents> noticeList = (List<OssComponents>) noticeHtmlInfo.get("noticeObligationList");
+			List<OssComponents> srcList = (List<OssComponents>) noticeHtmlInfo.get("disclosureObligationList");
+			
+			if (!CollectionUtils.isEmpty(noticeList)) {
+				for (OssComponents notice : noticeList) {
+					String key = (notice.getOssName() + "_" + avoidNull(avoidNull(notice.getOssVersion()))).toUpperCase();
+					if (!bomOssInfoList.contains(key)) {
+						notFoundFlag = true;
+						rtnList.add(notice.getOssName() + " (" + avoidNull(notice.getOssVersion(), "N/A") + ")");
+					}
+				}
+			}
+			if (!CollectionUtils.isEmpty(srcList)) {
+				for (OssComponents src : srcList) {
+					String key = (src.getOssName() + "_" + avoidNull(avoidNull(src.getOssVersion()))).toUpperCase();
+					if (!bomOssInfoList.contains(key)) {
+						notFoundFlag = true;
+						rtnList.add(src.getOssName() + " (" + avoidNull(src.getOssVersion(), "N/A") + ")");
+					}
+				}
+			}
+		}
+		
+		rtnMap.put("isValid", !notFoundFlag);
+		rtnMap.put("data", rtnList);
+		return rtnMap;
 	}
 }

@@ -613,7 +613,23 @@
                                     var result = jQuery.parseJSON(data);
 
                                     if (result.isValid == 'false') {
-                                        alertify.error([[#{msg.common.valid2}]], 0);
+                                    	if (typeof result.resultData !== "undefined") {
+                                    		let msg = [[#{msg.package.check.confirm.identification.retry}]];
+                                    		msg += "<br><br>";
+                                    		let msgData = [];
+                                    		msgData = result.resultData;
+                                    		if (msgData.length > 0) {
+                                    			for (let i=0; i < msgData.length; i++) {
+                                    				msg += "- " + msgData[i];
+                                    				if (i < msgData.length-1) {
+                                    					msg += "<br>";
+                                    				}
+                                    			}
+                                    		}
+                                    		alertify.alert(msg, function () {});
+                                    	} else {
+                                    		alertify.error([[#{msg.common.valid2}]], 0);
+                                    	}
                                     } else {
                                         reloadTabInframe('/project/list');
                                         loading.hide();

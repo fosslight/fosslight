@@ -95,4 +95,6 @@ public interface VerificationService {
 	void deleteFile(Map<Object, Object> map);
 
 	void updateFileWhenVerificationCopyConfirm(Project project, Project copyProject, List<String> packageFileSeqList) throws IOException;
+
+	Map<String, Object> checkNoticeHtmlInfo(OssNotice ossNotice);
 }

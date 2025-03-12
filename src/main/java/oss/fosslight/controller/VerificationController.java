@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
@@ -501,6 +502,7 @@ public class VerificationController extends CoTopComponent {
 		return makeJsonResponseHeader();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@PostMapping(value = VERIFICATION.NOTICE_AJAX)
 	public @ResponseBody ResponseEntity<Object>  getNoticeHtml(HttpServletRequest req,HttpServletResponse res, Model model,	//
 			@RequestParam(value="confirm", defaultValue="")String confirm, //
@@ -535,6 +537,16 @@ public class VerificationController extends CoTopComponent {
 			if ("conf".equals(confirm)){
 				boolean ignoreMailSend = false;
 				
+				List<OssComponents> list = verificationService.getVerifyOssList(prjMasterInfo);
+				boolean checkNoticeInfo = !CollectionUtils.isEmpty(list) ? true : false;
+				
+				if (checkNoticeInfo) {
+					Map<String, Object> checkMap = verificationService.checkNoticeHtmlInfo(ossNotice);
+					if (!(boolean) checkMap.get("isValid")) {
+						return makeJsonResponseHeader((boolean) checkMap.get("isValid"), null, (List<String>) checkMap.get("data"));
+					}
+				}
+				
 				String userComment = ossNotice.getUserComment();
 
 				//파일 만들기
@@ -549,9 +561,7 @@ public class VerificationController extends CoTopComponent {
 				boolean needResetPackageFile = false;
 				
 				{
-					Project projectMaster = projectService.getProjectBasicInfo(ossNotice.getPrjId());
-					if (!isEmpty(projectMaster.getPackageFileId())) {
-						List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
+					if (!isEmpty(prjMasterInfo.getPackageFileId())) {
 						needResetPackageFile = list.isEmpty();
 					}
 				}
