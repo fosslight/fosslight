@@ -2880,6 +2880,18 @@
                     var hideOssVersionYn = $("#hideOssVersion").val();
                     var editAppendedYn = $("#append").val();
 
+                    if (editCompanyYn == "Y") {
+                    	$("#companyName").trigger("click").attr("checked", true);
+                    }
+
+                    if (editDistributionSiteUrlYn == "Y") {
+                    	$("#ossDistributionSite").trigger("click").attr("checked", true);
+                    }
+
+                    if (editEmailYn == "Y") {
+                    	$("#email").trigger("click").attr("checked", true);
+                    }
+                    
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     var btn_Save = $("#save");
                     
@@ -2917,20 +2929,8 @@
                     }
 
                     if (editNoticeYn == "Y") {
-                        $("[name='btnEditOssNotice']").attr("checked", true);
+                    	$("[name='btnEditOssNotice']").trigger("click").attr("checked", true);
                         
-                        if (editCompanyYn == "Y") {
-                            $("#companyName").attr("checked", true);
-                        }
-
-                        if (editDistributionSiteUrlYn == "Y") {
-                            $("#ossDistributionSite").attr("checked", true);
-                        }
-
-                        if (editEmailYn == "Y") {
-                            $("#email").attr("checked", true);
-                        }
-
                         if (hideOssVersionYn == "Y") {
                             $("#hideOssVersion").trigger("click").attr("checked", true);
                         }
