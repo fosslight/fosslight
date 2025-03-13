@@ -66,6 +66,8 @@ import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.SPDXUtil2;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Service
 @Slf4j
@@ -3299,49 +3301,45 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		identification.setReferenceId(ossNotice.getPrjId());
 		identification.setReferenceDiv(referenceDiv);
 		identification.setMerge(CoConstDef.FLAG_NO);
+		
 		Map<String, Object> map = projectService.getIdentificationGridList(identification, true);
 		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(referenceDiv)) {
 			map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
 		}
 		
 		List<ProjectIdentification> bomList = (List<ProjectIdentification>) map.get("rows");
-		boolean notFoundFlag = false;
-		if (!CollectionUtils.isEmpty(bomList)) {
-			List<String> bomOssInfoList = bomList.stream().map(e -> (e.getOssName() + "_" + avoidNull(e.getOssVersion()))).distinct().collect(Collectors.toList());
-			for (String bomOssInfo : bomOssInfoList) {
-				if (!CoCodeManager.OSS_INFO_UPPER.containsKey(bomOssInfo.toUpperCase()) && !bomOssInfo.equals("-_")) {
-					notFoundFlag = true;
-					rtnList.add(bomOssInfo.split("[_]")[0] + " (" + avoidNull(bomOssInfo.split("[_]")[1]) + ")");
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+		pv.setAppendix("bomList", bomList);
+		
+		T2CoValidationResult vr = pv.validate(new HashMap<>());
+		boolean isValid = true;
+		if (!vr.isValid()) {
+			Map<String, String> customErrorMap = new HashMap<>();
+			for (String key : vr.getValidMessageMap().keySet()) {
+				if (!key.contains(".")) {
+					continue;
+				}
+				String message = vr.getValidMessageMap().get(key);
+				if (message.equalsIgnoreCase("Unconfirmed open source") || message.equalsIgnoreCase("Unconfirmed version")) {
+					isValid = false;
+					String componentId = key.split("[.]")[1];
+					customErrorMap.put(componentId, message);
 				}
 			}
-			Map<String, Object> noticeHtmlInfo = getNoticeHtmlInfo(ossNotice, true);
-			List<OssComponents> noticeList = (List<OssComponents>) noticeHtmlInfo.get("noticeObligationList");
-			List<OssComponents> srcList = (List<OssComponents>) noticeHtmlInfo.get("disclosureObligationList");
-			
-			if (!CollectionUtils.isEmpty(noticeList)) {
-				for (OssComponents notice : noticeList) {
-					String key = (notice.getOssName() + "_" + avoidNull(avoidNull(notice.getOssVersion()))).toUpperCase();
-					if (!bomOssInfoList.contains(key)) {
-						notFoundFlag = true;
-						rtnList.add(notice.getOssName() + " (" + avoidNull(notice.getOssVersion(), "N/A") + ")");
+			if (!isValid) {
+				for (ProjectIdentification pi : bomList) {
+					if (customErrorMap.containsKey(pi.getComponentId())) {
+						String ossInfo = pi.getOssName() + " (" + avoidNull(pi.getOssVersion(), "N/A") + ")";
+						if (!rtnList.contains(ossInfo)) {
+							rtnList.add(ossInfo);
+						}
 					}
 				}
-			}
-			if (!CollectionUtils.isEmpty(srcList)) {
-				for (OssComponents src : srcList) {
-					String key = (src.getOssName() + "_" + avoidNull(avoidNull(src.getOssVersion()))).toUpperCase();
-					if (!bomOssInfoList.contains(key)) {
-						notFoundFlag = true;
-						rtnList.add(src.getOssName() + " (" + avoidNull(src.getOssVersion(), "N/A") + ")");
-					}
-				}
-			}
-			if (!rtnList.isEmpty()) {
-				rtnList = rtnList.stream().distinct().collect(Collectors.toList());
 			}
 		}
 		
-		rtnMap.put("isValid", !notFoundFlag);
+		rtnMap.put("isValid", isValid);
 		rtnMap.put("data", rtnList);
 		return rtnMap;
 	}
