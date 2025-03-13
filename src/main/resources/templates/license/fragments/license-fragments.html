@@ -129,8 +129,8 @@
                 var display = "";
 
                 if (cellvalue != "" && cellvalue != undefined) {
-                    display =
-                        '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="bottom" title="' + cellvalue + '">R</span>';
+                	cellvalue = cellvalue.replaceAll("\"", "\'");
+                    display = '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="bottom" title="' + cellvalue + '">R</span>';
                 }
 
                 return display;
