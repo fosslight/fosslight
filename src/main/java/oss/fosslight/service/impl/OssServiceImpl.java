@@ -4164,6 +4164,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(ossMaster);
 		
 		History history;
+		String comment = ossMaster.getComment();
+		List<String> changeOssNameList = new ArrayList<>();
 		
 		for (OssMaster om : beforeOssMap.values()) {
 			if (!ossMaster.getOssVersion().equals(om.getOssVersion())) {
@@ -4179,7 +4181,21 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				history = work(om);
 				history.sethAction(CoConstDef.ACTION_CODE_UPDATE);
 				historyService.storeData(history);
+				
+				String before = beforeOssName + " (" + avoidNull(om.getOssVersion(), "N/A") + ")";
+				String after = afterOssName + " (" + avoidNull(om.getOssVersion(), "N/A") + ")";
+				changeOssNameList.add(before + "|" + after);
+				String contents = CommonFunction.changeDataToTableFormat("oss", CommonFunction.getCustomMessage("msg.common.change.name", "OSS Name"), changeOssNameList);
+				contents = comment + contents;
+				
+				CommentsHistory commentsHistory = new CommentsHistory();
+				commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+				commentsHistory.setReferenceId(om.getOssId());
+				commentsHistory.setContents(contents);
+				commentService.registComment(commentsHistory, false);
 			}
+			
+			changeOssNameList.clear();
 		}
 		
 		ossMaster.setOssName(beforeOssName);
