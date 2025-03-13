@@ -230,7 +230,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                 }
             }
 
-            if (rtnMap.containsKey("validError")) {
+            if (rtnMap != null && rtnMap.containsKey("validError")) {
                 return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, getMessage("api.dataValidationError.msg")); // data validation error
             }
 
