@@ -3307,7 +3307,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		List<ProjectIdentification> bomList = (List<ProjectIdentification>) map.get("rows");
 		boolean notFoundFlag = false;
 		if (!CollectionUtils.isEmpty(bomList)) {
-			List<String> bomOssInfoList = bomList.stream().map(e -> (e.getOssName() + "_" + avoidNull(e.getOssVersion())).toUpperCase()).distinct().collect(Collectors.toList());
+			List<String> bomOssInfoList = bomList.stream().map(e -> (e.getOssName() + "_" + avoidNull(e.getOssVersion()))).distinct().collect(Collectors.toList());
+			for (String bomOssInfo : bomOssInfoList) {
+				if (!CoCodeManager.OSS_INFO_UPPER.containsKey(bomOssInfo.toUpperCase()) && !bomOssInfo.equals("-_")) {
+					notFoundFlag = true;
+					rtnList.add(bomOssInfo.split("[_]")[0] + " (" + avoidNull(bomOssInfo.split("[_]")[1]) + ")");
+				}
+			}
 			Map<String, Object> noticeHtmlInfo = getNoticeHtmlInfo(ossNotice, true);
 			List<OssComponents> noticeList = (List<OssComponents>) noticeHtmlInfo.get("noticeObligationList");
 			List<OssComponents> srcList = (List<OssComponents>) noticeHtmlInfo.get("disclosureObligationList");
@@ -3329,6 +3335,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						rtnList.add(src.getOssName() + " (" + avoidNull(src.getOssVersion(), "N/A") + ")");
 					}
 				}
+			}
+			if (!rtnList.isEmpty()) {
+				rtnList = rtnList.stream().distinct().collect(Collectors.toList());
 			}
 		}
 		

@@ -537,14 +537,9 @@ public class VerificationController extends CoTopComponent {
 			if ("conf".equals(confirm)){
 				boolean ignoreMailSend = false;
 				
-				List<OssComponents> list = verificationService.getVerifyOssList(prjMasterInfo);
-				boolean checkNoticeInfo = !CollectionUtils.isEmpty(list) ? true : false;
-				
-				if (checkNoticeInfo) {
-					Map<String, Object> checkMap = verificationService.checkNoticeHtmlInfo(ossNotice);
-					if (!(boolean) checkMap.get("isValid")) {
-						return makeJsonResponseHeader((boolean) checkMap.get("isValid"), null, (List<String>) checkMap.get("data"));
-					}
+				Map<String, Object> checkMap = verificationService.checkNoticeHtmlInfo(ossNotice);
+				if (!(boolean) checkMap.get("isValid")) {
+					return makeJsonResponseHeader((boolean) checkMap.get("isValid"), null, (List<String>) checkMap.get("data"));
 				}
 				
 				String userComment = ossNotice.getUserComment();
@@ -562,6 +557,7 @@ public class VerificationController extends CoTopComponent {
 				
 				{
 					if (!isEmpty(prjMasterInfo.getPackageFileId())) {
+						List<OssComponents> list = verificationService.getVerifyOssList(prjMasterInfo);
 						needResetPackageFile = list.isEmpty();
 					}
 				}
