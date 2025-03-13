@@ -3392,7 +3392,8 @@ public class CoMailManager extends CoTopComponent {
 				
 				
 				if (CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO.equals(component)
-						&& !CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK.equals(prjBean.getObligationLicense()) ? prjBean.getObligationType() : prjBean.getObligationLicense())) {
+						&& !CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK.equals(prjBean.getObligationLicense()) ? prjBean.getObligationType() : prjBean.getObligationLicense())
+						&& !CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK.equals(prjBean.getObligationLicense()) ? prjBean.getObligationType() : prjBean.getObligationLicense())) {
 					continue;
 				}
 				

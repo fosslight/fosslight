@@ -3818,7 +3818,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								bean.setPreObligationType(gridData.getPreObligationType());
 								bean.setObligationType(gridData.getObligationType());
 							} else {
-								if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
+								if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_YES.equals(gridData.getSource())) {
+									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
+								} else if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
 									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
 								} else if (CoConstDef.FLAG_YES.equals(gridData.getNotify())) {
 									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
@@ -5948,7 +5950,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					rtnBean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
 					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(temp.getObligationType())
+				} else if (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(temp.getObligationType())){
+					rtnBean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
+					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
+					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
+				}else if (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(temp.getObligationType())
 						&& ("").equals(avoidNull(rtnBean.getObligationType(), ""))){
 					rtnBean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
@@ -7441,7 +7447,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			
 			// type
-			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
+			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(bean.getObligationType());
 			boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
 			
 			if (CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {

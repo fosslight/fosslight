@@ -95,14 +95,18 @@ var bom_fn = {
             }
  			
  			// obligationType 설정
- 			if(bomList.jqGrid('getCell',arr[i],'notify')=="Y") {
- 				if(bomList.jqGrid('getCell',arr[i],'source')=="Y") {
+ 			if (bomList.jqGrid('getCell',arr[i],'notify') == "Y") {
+ 				if (bomList.jqGrid('getCell',arr[i],'source') == "Y") {
  					bomList.jqGrid('setCell',arr[i],'obligationType', "11");
  				} else {
  					bomList.jqGrid('setCell',arr[i],'obligationType', "10");
  				}
  			} else {
- 				bomList.jqGrid('setCell',arr[i],'obligationType', "");
+ 				if (bomList.jqGrid('getCell',arr[i],'source') == "Y") {
+ 					bomList.jqGrid('setCell',arr[i],'obligationType', "12");
+ 				} else {
+ 					bomList.jqGrid('setCell',arr[i],'obligationType', "");
+ 				}
  			}
  			
  			if(bomList.jqGrid('getCell',arr[i],'adminCheck') == "Y") {
@@ -232,6 +236,11 @@ var bom_fn = {
 				if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
 					display="<i class=\"fas fa-check fa-2xs\"></i>";
 				}
+			} else if (adminCheck == true && obligationType == 12) {
+				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
+				+ '<option value="Y"">O</option>'
+				+ '<option value="N" selected="selected">X</option>'
+				+ '</select>';
 			} else if(obligationLicense == 90 || adminCheck == true) {
 				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
 					+ '<option value="Y" '+((obligationType=='10' || obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
@@ -264,6 +273,11 @@ var bom_fn = {
 			if (preObligationType == undefined && obligationType == 11){
 				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
+		} else if (adminCheck == true && obligationType == 12) {
+			display = '<select id="'+rowId+'_notify" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
+				+ '<option value="Y" selected="selected">O</option>'
+				+ '<option value="N"">X</option>'
+				+ '</select>';
 		} else if(obligationLicense == 90 || adminCheck == true) {
 			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
 				+ '<option value="Y" '+((obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'

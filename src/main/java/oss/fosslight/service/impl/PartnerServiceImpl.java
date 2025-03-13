@@ -377,7 +377,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			bean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
 			
 			if (CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK.equals(bean.getObligationLicense())) {
-				if (CoConstDef.FLAG_YES.equals(bean.getSource())) {
+				if (CoConstDef.FLAG_NO.equals(bean.getNotify()) && CoConstDef.FLAG_YES.equals(bean.getSource())) {
+					bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
+				} else if (CoConstDef.FLAG_YES.equals(bean.getSource())) {
 					bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
 				} else if (CoConstDef.FLAG_YES.equals(bean.getNotify())) {
 					bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
@@ -1110,7 +1112,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				componentKey += dashSeq++;
 			}
 			
-			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
+			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(bean.getObligationType());
 			boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
 			
 			boolean addDisclosure = srcInfo.containsKey(componentKey);

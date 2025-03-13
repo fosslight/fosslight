@@ -429,6 +429,7 @@ public class CoConstDef {
 	public static final String CD_OBLIGATION_TYPE = "217";
 	public static final String CD_DTL_OBLIGATION_NOTICE = "10";
 	public static final String CD_DTL_OBLIGATION_DISCLOSURE = "11";
+	public static final String CD_DTL_OBLIGATION_DISCLOSURE_ONLY = "12";
 	public static final String CD_DTL_OBLIGATION_NEEDSCHECK = "90";
 	public static final String CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED = "99"; // NEED CHECK와 동일하나, 사용자가 적용하지 않음을 선택한 경우
 	public static final String CD_DTL_OBLIGATION_NONE = "NONE"; // 검색조건으로만 사용됨
