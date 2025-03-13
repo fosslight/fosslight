@@ -2788,18 +2788,37 @@
             	} else {
             		$("#companyName").prop("checked", false);
             		$("#editCompanyYn").val("N");
+            		$("#editCompanyName").val("");
                     $("#ossDistributionSite").prop("checked", false);
                     $("#editDistributionSiteUrlYn").val("N");
+                    $("#editOssDistributionSite").val("");
                     $("#email").prop("checked", false);
                     $("#editEmailYn").val("N");
+                    $("#editEmail").val("");
                     if (isHideOssVersion) {
                     	$("#hideOssVersion").trigger("click");
                     }
                     if (isAppend) {
+                    	$(".appendFileUpload").empty();
+                    	$('input[name=noticeAppendFileId]').val("");
+                    	$("#editor2").summernote("code", "<p></p>");
                     	$("#append").trigger("click");
                     }
+                    fn.defaultFileFormat();
             	}
             	fn.defaultNotice(checked);
+            },
+            defaultFileFormat : function () {
+            	if ($(".select2-selection__choice").length > 1) {
+            		$(".select2-selection__choice").each(function(index, item) {
+            			if (index > 0) {
+            				$(item).find("span").click();
+            			}
+            		});
+            	}
+            	if ($(".select2-selection__choice").length > 1) {
+            		fn.defaultFileFormat();
+            	}
             },
             defaultNotice: function (checked, type) {
             	if (checked) {
