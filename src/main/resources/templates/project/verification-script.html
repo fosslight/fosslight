@@ -2778,24 +2778,15 @@
             	let isHideOssVersion = $("#hideOssVersion").prop("checked");
             	let isAppend = $("#append").prop("checked");
             	
-            	if (checked) {
-            		$("#companyName").prop("checked", true);
-            		$("#editCompanyYn").val("Y");
-                    $("#ossDistributionSite").prop("checked", true);
-                    $("#editDistributionSiteUrlYn").val("Y");
-                    $("#email").prop("checked", true);
-                    $("#editEmailYn").val("Y");
-            	} else {
-            		$("#companyName").prop("checked", false);
-            		$("#editCompanyYn").val("N");
-            		$("#editCompanyName").val("");
-                    $("#ossDistributionSite").prop("checked", false);
-                    $("#editDistributionSiteUrlYn").val("N");
-                    $("#editOssDistributionSite").val("");
-                    $("#email").prop("checked", false);
-                    $("#editEmailYn").val("N");
-                    $("#editEmail").val("");
-                    if (isHideOssVersion) {
+            	$("#companyName").prop("checked", true);
+        		$("#editCompanyYn").val("Y");
+                $("#ossDistributionSite").prop("checked", true);
+                $("#editDistributionSiteUrlYn").val("Y");
+                $("#email").prop("checked", true);
+                $("#editEmailYn").val("Y");
+            	
+            	if (!checked) {
+            		if (isHideOssVersion) {
                     	$("#hideOssVersion").trigger("click");
                     }
                     if (isAppend) {
