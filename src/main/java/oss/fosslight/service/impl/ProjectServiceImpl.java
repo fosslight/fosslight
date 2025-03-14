@@ -4144,19 +4144,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						if (!hasNotificationOss) {
-							if (!CoConstDef.FLAG_YES.equals(_projectBean.getExcludeYn()) && ("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) )) {
+							if (!CoConstDef.FLAG_YES.equals(_projectBean.getExcludeYn()) && ("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) || "12".equals(_projectBean.getObligationType()) )) {
 								hasNotificationOss = true;
 							}
 						}
 						
 						if (!hasSourceOss) {
-							if ("11".equals(_projectBean.getObligationType())){
+							if ("11".equals(_projectBean.getObligationType()) || "12".equals(_projectBean.getObligationType())){
 								hasSourceOss = true;
 							}
 						}
 						
 						if (!isNetworkRestriction) {
-							if (("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType())) && _projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
+							if (("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) || "12".equals(_projectBean.getObligationType())) && _projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
 								isNetworkRestriction = true;
 							}
 						}
@@ -4537,7 +4537,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						continue;
 					}
 					
-					if (CoConstDef.FLAG_YES.equals(bean.getAdminCheckYn()) && ("11".equals(bean.getObligationType()) || "10".equals(bean.getObligationType()))) {
+					if (CoConstDef.FLAG_YES.equals(bean.getAdminCheckYn()) 
+							&& (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType()) 
+									|| CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) 
+									|| CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(bean.getObligationType()))) {
 						componentList.add(bean.getComponentId()+"-"+bean.getAdminCheckYn());
 					}else {
 						componentList.add(bean.getComponentId());

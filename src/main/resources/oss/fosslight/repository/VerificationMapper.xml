@@ -60,7 +60,7 @@
 					AND A1.REFERENCE_DIV='50' 
 					AND A1.MERGE_PRE_DIV IS NULL 
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossNameMergeFlag)">
-					AND A1.OBLIGATION_TYPE = '11'
+					AND (A1.OBLIGATION_TYPE = '11' OR A1.OBLIGATION_TYPE = '12')
 				</if>
 		) T2
 		INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID

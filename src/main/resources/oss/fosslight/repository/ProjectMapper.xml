@@ -2054,7 +2054,7 @@
 	    			AND IFNULL(A1.OSS_VERSION, '') != ''
 	    		</if>
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">
-					AND A1.OBLIGATION_TYPE IN ('10', '11')
+					AND A1.OBLIGATION_TYPE IN ('10', '11', '12')
 			    </if>
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
 					<choose>
@@ -2242,7 +2242,7 @@
 	    			AND IFNULL(A1.OSS_VERSION, '') != ''
 	    		</if>
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">
-					AND A1.OBLIGATION_TYPE IN ('10', '11')
+					AND A1.OBLIGATION_TYPE IN ('10', '11', '12')
 			    </if>
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
 					<choose>

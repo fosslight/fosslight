@@ -209,7 +209,7 @@ var bom_fn = {
 			}
 		} else if (adminCheck == true && obligationType == 12) {
 			display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
-				+ '<option value="Y"">O</option>'
+				+ '<option value="Y">O</option>'
 				+ '<option value="N" selected="selected">X</option>'
 				+ '</select>';
 		} else if (obligationLicense == 90 || adminCheck == true) {
@@ -250,7 +250,7 @@ var bom_fn = {
 				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
 		} else if (adminCheck == true && obligationType == 12) {
-			display = '<select id="'+rowId+'_notify" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
+			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
 				+ '<option value="Y" selected="selected">O</option>'
 				+ '<option value="N">X</option>'
 				+ '</select>';
