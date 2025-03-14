@@ -2786,6 +2786,10 @@
                 $("#editEmailYn").val("Y");
             	
             	if (!checked) {
+            		$("#editCompanyName").val($("#defaultCompanyNameFull").val());
+            		$("#editOssDistributionSite").val($("#defaultDistributionSiteUrl").val());
+            		$("#editEmail").val($("#defaultEmail").val());
+            		
             		if (isHideOssVersion) {
                     	$("#hideOssVersion").trigger("click");
                     }

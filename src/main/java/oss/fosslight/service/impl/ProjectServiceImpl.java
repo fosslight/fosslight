@@ -1611,6 +1611,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			String prjId = project.getPrjId();
 			notice = verificationService.selectOssNoticeOne(prjId);
 			
+			String distributeType = avoidNull(project.getDistributeTarget(), CoConstDef.CD_DISTRIBUTE_SITE_SKS); // LGE, NA => LGE로 표기, SKS => SKS로 표기함.
+			String distributeCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributeType) ? CoConstDef.CD_NOTICE_DEFAULT_SKS : CoConstDef.CD_NOTICE_DEFAULT;
+			
 			if (isEmpty(notice.getCompanyNameFull()) 
 					&& isEmpty(notice.getDistributionSiteUrl()) 
 					&& isEmpty(notice.getEmail())
@@ -1631,9 +1634,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				notice.setHideOssVersionYn(CoConstDef.FLAG_NO);
 				notice.setEditAppendedYn(CoConstDef.FLAG_NO);
 				notice.setPrjId(project.getPrjId());
-				
-				String distributeType = avoidNull(project.getDistributeTarget(), CoConstDef.CD_DISTRIBUTE_SITE_SKS); // LGE, NA => LGE로 표기, SKS => SKS로 표기함.
-				String distributeCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributeType) ? CoConstDef.CD_NOTICE_DEFAULT_SKS : CoConstDef.CD_NOTICE_DEFAULT;
 				
 				if (isEmpty(notice.getCompanyNameFull())) {
 					notice.setCompanyNameFull(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_FULLNAME));
@@ -1681,6 +1681,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					notice.setEditNoticeYn(CoConstDef.FLAG_YES);
 				}
 			}
+			
+			notice.setDefaultCompanyNameFull(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_FULLNAME));
+			notice.setDefaultDistributionSiteUrl(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_DISTRIBUTE_SITE));
+			notice.setDefaultEmail(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_EMAIL));
 		} catch (Exception e) {e.printStackTrace();
 			log.error(e.getMessage(), e);
 		}

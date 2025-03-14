@@ -254,6 +254,10 @@
 											<input type="hidden" id="isSimpleNotice" name="isSimpleNotice">
 											<input type="hidden" name="previewOnly" id="previewOnly" th:value="N"/>
 											
+											<input type="hidden" class="form-control" id="defaultCompanyNameFull" th:value="${ossNotice?.defaultCompanyNameFull}"/>
+											<input type="hidden" class="form-control" id="defaultDistributionSiteUrl" th:value="${ossNotice?.defaultDistributionSiteUrl}"/>
+											<input type="hidden" class="form-control" id="defaultEmail" th:value="${ossNotice?.defaultEmail}"/>
+											
                                             <div class="row">
                                                 <div class="col-md-2 d-flex-align-left">
                                                     <div class="custom-control custom-checkbox">

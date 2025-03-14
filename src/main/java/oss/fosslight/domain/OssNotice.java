@@ -16,9 +16,12 @@ public class OssNotice extends ComBean implements Serializable {
 	private String noticeType = "10";
 	private String noticeTypeEtc;
 	private String companyNameFull;
+	private String defaultCompanyNameFull;
 	private String companyNameShort;
 	private String distributionSiteUrl;
+	private String defaultDistributionSiteUrl;
 	private String email;
+	private String defaultEmail;
 	private String appended;
 	private String appendedTEXT;
 	private String useCompanyNameTitle;
@@ -198,7 +201,6 @@ public class OssNotice extends ComBean implements Serializable {
 	public void setFileType(String fileType) {
 		this.fileType = fileType;
 	}
-	
 	public String getWithoutVerifyYn() {
 		return withoutVerifyYn;
 	}
@@ -289,42 +291,36 @@ public class OssNotice extends ComBean implements Serializable {
 	public void setIgnoreBinaryDbFlag(String ignoreBinaryDbFlag) {
 		this.ignoreBinaryDbFlag = ignoreBinaryDbFlag;
 	}
-	
 	public String getEditNoticeYn() {
 		return editNoticeYn;
 	}
 	public void setEditNoticeYn(String editNoticeYn) {
 		this.editNoticeYn = editNoticeYn;
 	}
-	
 	public String getEditCompanyYn() {
 		return editCompanyYn;
 	}
 	public void setEditCompanyYn(String editCompanyYn) {
 		this.editCompanyYn = editCompanyYn;
 	}
-	
 	public String getEditDistributionSiteUrlYn() {
 		return editDistributionSiteUrlYn;
 	}
 	public void setEditDistributionSiteUrlYn(String editDistributionSiteUrlYn) {
 		this.editDistributionSiteUrlYn = editDistributionSiteUrlYn;
 	}
-	
 	public String getEditEmailYn() {
 		return editEmailYn;
 	}
 	public void setEditEmailYn(String editEmailYn) {
 		this.editEmailYn = editEmailYn;
 	}
-	
 	public String getHideOssVersionYn() {
 		return hideOssVersionYn;
 	}
 	public void setHideOssVersionYn(String hideOssVersionYn) {
 		this.hideOssVersionYn = hideOssVersionYn;
 	}
-	
 	public String getEditAppendedYn() {
 		return editAppendedYn;
 	}
@@ -366,5 +362,23 @@ public class OssNotice extends ComBean implements Serializable {
 	}
 	public void setNoticeAppendFileId(String noticeAppendFileId) {
 		this.noticeAppendFileId = noticeAppendFileId;
+	}
+	public String getDefaultCompanyNameFull() {
+		return defaultCompanyNameFull;
+	}
+	public void setDefaultCompanyNameFull(String defaultCompanyNameFull) {
+		this.defaultCompanyNameFull = defaultCompanyNameFull;
+	}
+	public String getDefaultDistributionSiteUrl() {
+		return defaultDistributionSiteUrl;
+	}
+	public void setDefaultDistributionSiteUrl(String defaultDistributionSiteUrl) {
+		this.defaultDistributionSiteUrl = defaultDistributionSiteUrl;
+	}
+	public String getDefaultEmail() {
+		return defaultEmail;
+	}
+	public void setDefaultEmail(String defaultEmail) {
+		this.defaultEmail = defaultEmail;
 	}
 }
