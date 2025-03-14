@@ -494,9 +494,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.comparing(ProjectIdentification::getLicenseTypeIdx)
 						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
-						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
-						.thenComparing(ProjectIdentification::getHomepage, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 						.thenComparing(ProjectIdentification::getMergeOrder);
 
 				list.sort(compare);
@@ -892,9 +892,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.comparing(ProjectIdentification::getLicenseTypeIdx)
 						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
-						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
-						.thenComparing(ProjectIdentification::getHomepage, Comparator.reverseOrder());
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder());
 
 				list.sort(compare);
 				
@@ -4522,9 +4522,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					.comparing(ProjectIdentification::getLicenseTypeIdx)
 					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 					.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
-					.thenComparing(ProjectIdentification::getHomepage, Comparator.reverseOrder())
+					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+					.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 					.thenComparing(ProjectIdentification::getMergeOrder);
 
 			bomList.sort(compare);
@@ -4975,9 +4975,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
 				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
-				.thenComparing(ProjectIdentification::getHomepage, Comparator.reverseOrder())
+				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+				.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 				.thenComparing(ProjectIdentification::getMergeOrder);
 
 		list.sort(compare);
@@ -6785,9 +6785,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
 				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
-				.thenComparing(ProjectIdentification::getHomepage, Comparator.reverseOrder())
+				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+				.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 				.thenComparing(ProjectIdentification::getMergeOrder);
 
 		bomList.sort(compare);
@@ -6985,9 +6985,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
 				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
-				.thenComparing(ProjectIdentification::getHomepage, Comparator.reverseOrder())
+				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+				.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 				.thenComparing(ProjectIdentification::getMergeOrder);
 
 		bomList.sort(compare);
