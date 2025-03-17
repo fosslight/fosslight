@@ -6,6 +6,7 @@
 package oss.fosslight.controller;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -416,7 +417,65 @@ public class LicenseController extends CoTopComponent {
 			 * Set
 			 * HotYn, notice, source
 			 * */
-			license.setRestriction("");
+			boolean isNotExists = false;
+			String restrictionValue = license.getRestriction();
+			String restrictionCdNo = "";
+			List<CoCodeDtl> restrictionList = CoCodeManager.getCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION);
+			if (restrictionValue.contains(CoConstDef.CD_COMMA_CHAR)) {
+				for (String restriction : license.getRestriction().split(",")) {
+					if (!isEmpty(restriction)) {
+						List<CoCodeDtl> checkRestrictionList = restrictionList.stream().filter(e -> e.getCdDtlNm().equalsIgnoreCase(restriction)).collect(Collectors.toList());
+						if (!CollectionUtils.isEmpty(checkRestrictionList)) {
+							restrictionCdNo += checkRestrictionList.get(0).getCdDtlNo() + ",";
+						} else {
+							isNotExists = true;
+							break;
+						}
+					}
+				}
+			} else if (!isEmpty(restrictionValue)) {
+				List<CoCodeDtl> checkRestrictionList = restrictionList.stream().filter(e -> e.getCdDtlNm().equalsIgnoreCase(restrictionValue)).collect(Collectors.toList());
+				if (!CollectionUtils.isEmpty(checkRestrictionList)) {
+					restrictionCdNo = checkRestrictionList.get(0).getCdDtlNo();
+				} else {
+					isNotExists = true;
+				}
+			}
+			if (isNotExists) {
+				log.debug("Restriction not found.");
+				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (Restriction not found)");
+				licenseDataMapList.add(licenseDataMap);
+				continue;
+			} else {
+				if (!isEmpty(restrictionCdNo)) {
+					restrictionCdNo = restrictionCdNo.substring(0, restrictionCdNo.length()-1);
+					license.setRestriction(restrictionCdNo);
+				}
+			}
+			
+			isNotExists = false;
+			String disclosingSrcValue = license.getDisclosingSrc();
+			String disclosingSrcCdNo = "";
+			if (!isEmpty(disclosingSrcValue)) {
+				List<CoCodeDtl> disclosingSrcList = CoCodeManager.getCodeDtls(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE);
+				List<CoCodeDtl> checkDisclosingSrcList = disclosingSrcList.stream().filter(e -> e.getCdDtlNm().equalsIgnoreCase(disclosingSrcValue)).collect(Collectors.toList());
+				if (!CollectionUtils.isEmpty(checkDisclosingSrcList)) {
+					disclosingSrcCdNo = checkDisclosingSrcList.get(0).getCdDtlNo();
+				} else {
+					isNotExists = true;
+				}
+			}
+			if (isNotExists) {
+				log.debug("DisclosingSrc not found.");
+				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (DisclosingSrc not found)");
+				licenseDataMapList.add(licenseDataMap);
+				continue;
+			} else {
+				if (!isEmpty(disclosingSrcCdNo)) {
+					license.setDisclosingSrc(disclosingSrcCdNo);
+				}
+			}
+			
 			license.setHotYn(CoConstDef.FLAG_NO);
 			if (license.getObligationNotificationYn().equalsIgnoreCase("o")) {
 				license.setObligationNotificationYn(CoConstDef.FLAG_YES);
@@ -461,13 +520,13 @@ public class LicenseController extends CoTopComponent {
 			 * Check
 			 * LicenseText NPE
 			 * */
-			String licenseText = license.getLicenseText();
-			if (licenseText == null || licenseText.isEmpty()) {
-				log.debug("licenseText is null:" + license.getLicenseName());
-				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (Required missing)");
-				licenseDataMapList.add(licenseDataMap);
-				continue;
-			}
+//			String licenseText = license.getLicenseText();
+//			if (licenseText == null || licenseText.isEmpty()) {
+//				log.debug("licenseText is null:" + license.getLicenseName());
+//				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (Required missing)");
+//				licenseDataMapList.add(licenseDataMap);
+//				continue;
+//			}
 
 			/**
 			 * Check
@@ -560,6 +619,8 @@ public class LicenseController extends CoTopComponent {
 
 			Map<String, Object> result = licenseService.saveLicense(license);
 			if (result.get("resCd").equals("10")) {
+				license.setRestriction(restrictionValue);
+				license.setDisclosingSrc(disclosingSrcValue);
 				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), true, "O");
 				licenseDataMapList.add(licenseDataMap);
 			}
