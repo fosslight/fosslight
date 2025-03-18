@@ -730,10 +730,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		newPackagingFileIdList.add(fileSeqs.size() > 1 ? fileSeqs.get(1) : null);
 		newPackagingFileIdList.add(fileSeqs.size() > 2 ? fileSeqs.get(2) : null);
 		newPackagingFileIdList.add(fileSeqs.size() > 3 ? fileSeqs.get(3) : null);
+		newPackagingFileIdList.add(fileSeqs.size() > 4 ? fileSeqs.get(4) : null);
 		prjParam.setPackageFileId(newPackagingFileIdList.get(0));
 		prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 		prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
 		prjParam.setPackageFileId4(newPackagingFileIdList.get(3));
+		prjParam.setPackageFileId5(newPackagingFileIdList.get(4));
 		
 		for (String fileSeq : fileSeqs){
 			T2File paramT2File = new T2File();
@@ -793,6 +795,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			origPackagingFileIdList.add(project.getPackageFileId2());
 			origPackagingFileIdList.add(project.getPackageFileId3());
 			origPackagingFileIdList.add(project.getPackageFileId4());
+			origPackagingFileIdList.add(project.getPackageFileId5());
 			
 			int idx = 0;
 			

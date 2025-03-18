@@ -438,10 +438,12 @@
 	     , PACKAGE_FILE_ID2 = #{packageFileId2}
 	     , PACKAGE_FILE_ID3 = #{packageFileId3}
 	     , PACKAGE_FILE_ID4 = #{packageFileId4}
+	     , PACKAGE_FILE_ID5 = #{packageFileId5}
 	     , PACKAGE_FILE_TYPE1 = #{packageFileType1}
 	     , PACKAGE_FILE_TYPE2 = #{packageFileType2}
 	     , PACKAGE_FILE_TYPE3 = #{packageFileType3}
 	     , PACKAGE_FILE_TYPE4 = #{packageFileType4}
+	     , PACKAGE_FILE_TYPE5 = #{packageFileType5}
 	     <if test="!@oss.fosslight.util.StringUtil@isEmpty(statusVerifyYn)">
 	     , STATUS_VERIFY_YN = #{statusVerifyYn} 
 	     </if>
@@ -512,8 +514,14 @@
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId2)">
 		   AND PACKAGE_FILE_ID2 = #{packageFileId2}
 		 </if>
-		  <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId3)">
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId3)">
 		   AND PACKAGE_FILE_ID3 = #{packageFileId3}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId4)">
+		   AND PACKAGE_FILE_ID4 = #{packageFileId4}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId5)">
+		   AND PACKAGE_FILE_ID5 = #{packageFileId5}
 		 </if>
 		   AND STATUS_VERIFY_YN = 'Y'
 	</select>
@@ -549,6 +557,9 @@
 		 </if>
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId4)">
 		   AND T2.PACKAGING_FILE_ID != #{packageFileId4}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId5)">
+		   AND T2.PACKAGING_FILE_ID != #{packageFileId5}
 		 </if>
 	</update>
 	

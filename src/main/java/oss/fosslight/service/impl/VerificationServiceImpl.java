@@ -134,8 +134,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String packageFileId = fileSeqs.get(0);
 		String packageFileId2 = fileSeqs.size() > 1 ? fileSeqs.get(1) : null;
 		String packageFileId3 = fileSeqs.size() > 2 ? fileSeqs.get(2) : null;
+		String packageFileId4 = fileSeqs.size() > 3 ? fileSeqs.get(3) : null;
+		String packageFileId5 = fileSeqs.size() > 4 ? fileSeqs.get(4) : null;
 		
-		int result = verificationMapper.checkPackagingFileId(prjId,packageFileId, packageFileId2, packageFileId3);
+		int result = verificationMapper.checkPackagingFileId(prjId, packageFileId, packageFileId2, packageFileId3, packageFileId4, packageFileId5);
 
 		if (result > 0){
 			return false;
@@ -3079,7 +3081,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		if (fileSeq.equals("6")) {
 			prjParam.setNoticeAppendFileId(registFileId);
 			verificationMapper.updateNoticeAppendFile(prjParam);
-		} else if (fileSeq.equals("5")) {
+		} else if (fileSeq.equals("51")) {
 			prjParam.setPackageVulDocFileId(registFileId);
 			verificationMapper.updatePackageVulDocFile(prjParam);
 		} else {
@@ -3090,21 +3092,31 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
 				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
 				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+				prjParam.setPackageFileId5(project.getPackageFileId5() != null ? project.getPackageFileId5() : null);
 			} else if (fileSeq.equals("2")) {
 				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
 				prjParam.setPackageFileId2(registFileId);
 				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
 				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+				prjParam.setPackageFileId5(project.getPackageFileId5() != null ? project.getPackageFileId5() : null);
 			} else if (fileSeq.equals("3")) {
 				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
 				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
 				prjParam.setPackageFileId3(registFileId);
 				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
-			} else {
+				prjParam.setPackageFileId5(project.getPackageFileId5() != null ? project.getPackageFileId5() : null);
+			} else if (fileSeq.equals("4")) {
 				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
 				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
 				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
 				prjParam.setPackageFileId4(registFileId);
+				prjParam.setPackageFileId5(project.getPackageFileId5() != null ? project.getPackageFileId5() : null);
+			} else {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+				prjParam.setPackageFileId5(registFileId);
 			}
 					
 			List<String> fileSeqs = new ArrayList<String>(); 
@@ -3119,6 +3131,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			if (prjParam.getPackageFileId4() != null) {
 				fileSeqs.add(prjParam.getPackageFileId4()); 
+			}
+			if (prjParam.getPackageFileId5() != null) {
+				fileSeqs.add(prjParam.getPackageFileId5()); 
 			}
 			Map<Object, Object> map = new HashMap<Object, Object>();
 			map.put("prjId", prjId);

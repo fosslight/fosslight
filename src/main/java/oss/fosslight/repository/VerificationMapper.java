@@ -64,8 +64,8 @@ public interface VerificationMapper {
 	
 	int updateOssNotice(OssNotice ossNotice);
 	
-	int checkPackagingFileId(@Param("prjId") String prjId, @Param("packageFileId") String packageFileId
-							, @Param("packageFileId2") String packageFileId2, @Param("packageFileId3") String packageFileId3);
+	int checkPackagingFileId(@Param("prjId") String prjId, @Param("packageFileId") String packageFileId, @Param("packageFileId2") String packageFileId2
+							, @Param("packageFileId3") String packageFileId3, @Param("packageFileId4") String packageFileId4, @Param("packageFileId5") String packageFileId5);
 	
 	int setPackagingReuseMap(@Param("prjId") String prjId, @Param("fileSeq") String fileSeq
 							, @Param("refPrjId") String refPrjId, @Param("refFileSeq") String refFileSeq);

@@ -295,7 +295,9 @@
                             $('.verifyFile_1').hide();
                             $("#uploadAdd_1").show();
                             $("#uploadRemove_1").hide();
-                            if (!$('.uploadList_1').is("visible")) $('.uploadList_1').show();
+                            if (!$('.uploadList_1').is("visible")) {
+                            	$('.uploadList_1').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -336,7 +338,9 @@
                             $('.verifyFile_2').hide();
                             $("#uploadAdd_2").show();
                             $("#uploadRemove_2").hide();
-                            if (!$('.uploadList_2').is("visible")) $('.uploadList_2').show();
+                            if (!$('.uploadList_2').is("visible")) {
+                            	$('.uploadList_2').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -376,7 +380,9 @@
 
                             $('.verifyFile_3').hide();
                             $("#uploadRemove_3").hide();
-                            if (!$('.uploadList_3').is("visible")) $('.uploadList_3').show();
+                            if (!$('.uploadList_3').is("visible")) {
+                            	$('.uploadList_3').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -415,7 +421,50 @@
 
                             $('.verifyFile_4').hide();
                             $("#uploadRemove_4").hide();
-                            if (!$('.uploadList_4').is("visible")) $('.uploadList_4').show();
+                            if (!$('.uploadList_4').is("visible")) {
+                            	$('.uploadList_4').show();
+                            }
+
+                            // verified 초기화
+                            verified = false;
+
+                            evt.uploadStatus = true;
+
+                            fn.autoVerify();
+                        } else {
+                            $('.ajax-file-upload-statusbar').fadeOut('slow');
+                            $('.ajax-file-upload-statusbar').remove();
+                            alertify.alert(result[1], function () {});
+                        }
+                    },
+                });
+                
+                $('#registFile_5').uploadFile({
+                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=5&permission=' + [[${project.statusPermission}]],
+                    multiple: false,
+                    dragDrop: true,
+                    fileName: 'myfile',
+                    onSuccess: function (e, data) {
+                        var result = jQuery.parseJSON(data);
+                        
+                        if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
+                            result.forEach(function (item) {
+                                var appendHtml = '<br>' + item[0].createdDate;
+                                var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
+                                uploadFileTag += '<span class="badge bg-danger uploadFile4" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
+
+                                $('.uploadList_5 ul').append(uploadFileTag);
+                                $('input[name=fileSeq_5]').val(item[0].registSeq);
+                                $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                $('.ajax-file-upload-statusbar').remove();
+                            });
+
+                            $('.verifyFile_5').hide();
+                            $("#uploadRemove_5").hide();
+                            if (!$('.uploadList_5').is("visible")) {
+                            	$('.uploadList_5').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -1191,18 +1240,35 @@
 					fn.disabledSelect();
                 });
                 
+                $("#uploadAdd_4").click(function (e) {
+                	if (!$("[name='btnSavePath']").is(":visible")) {
+                		alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
+            			return false;
+                	}
+                	
+                    $(".multiSet > div:eq(4)").show();
+                    $("#registFileDiv_5").attr("style", "display: block;");
+                    $("#uploadAdd_4").hide();
+                    $("#uploadRemove_5").show();
+                    $("input[name='packageFileType5']").val("1");
+					fn.disabledSelect();
+                });
+                
                 $("#uploadRemove_1").click(function (e) {
                 	var fileSeq2 = $('input[name=fileSeq_2]').val();
                     var fileSeq3 = $('input[name=fileSeq_3]').val();
                     var fileSeq4 = $('input[name=fileSeq_4]').val();
+                    var fileSeq5 = $('input[name=fileSeq_5]').val();
                    
-                    if ("" != fileSeq2 && "" != fileSeq3 && "" != fileSeq4) {
+                    if ("" != fileSeq2 && "" != fileSeq3 && "" != fileSeq4 && "" != fileSeq5) {
                     	var fileType2 = $('input[name=packageFileType2]').val();
                     	var fileType3 = $('input[name=packageFileType3]').val();
                     	var fileType4 = $('input[name=packageFileType4]').val();
+                    	var fileType5 = $('input[name=packageFileType5]').val();
                     	
                     	$("#uploadRemove_1").hide();
                         $("#uploadAdd_1").hide();
+                        $("#projectSearch_1").hide();
 
                         var html = $('.uploadList_2 ul li').html();
                         $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
@@ -1246,18 +1312,91 @@
                         $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_3").find("span").removeClass("uploadFile4");
                         $(".uploadList_3").find("span").addClass("uploadFile3");
-                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"2\")");
+                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
                         
-                        $('input[name=fileSeq_4]').val("");
-                        $('input[name=packageFileType4]').val("");
-                        $(".multiSet > div:eq(3)").hide();
+                        $("#uploadRemove_4").hide();
+                        $("#uploadAdd_4").hide();
+                        
+                        var html = $('.uploadList_5 ul li').html();
+                        $('.uploadList_4 ul').empty();
+                        $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=packageFileType4]').val(fileType5);
+                        
+                        $('.verifyFile_4').hide();
+                        
+                        $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_4").find("span").removeClass("uploadFile5");
+                        $(".uploadList_4").find("span").addClass("uploadFile4");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        
+                        $('input[name=fileSeq_5]').val("");
+                        $('input[name=packageFileType5]').val("");
+                        $(".multiSet > div:eq(4)").hide();
                     } else {
-                    	if ("" != fileSeq2 && "" != fileSeq3) {
+                    	if ("" != fileSeq2 && "" != fileSeq3 && "" != fileSeq4) {
+                    		var fileType2 = $('input[name=packageFileType2]').val();
+                        	var fileType3 = $('input[name=packageFileType3]').val();
+                        	var fileType4 = $('input[name=packageFileType4]').val();
+                        	
+                        	$("#uploadRemove_1").hide();
+                            $("#uploadAdd_1").hide();
+                            $("#projectSearch_1").hide();
+
+                            var html = $('.uploadList_2 ul li').html();
+                            $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
+                            $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                            $('input[name=packageFileType1]').val(fileType2);
+
+                            $('.verifyFile_1').hide();
+                            
+                            $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_1").find("span").removeClass("uploadFile2");
+                            $(".uploadList_1").find("span").addClass("uploadFile1");
+                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                            
+                            $("#uploadRemove_2").hide();
+                            $("#uploadAdd_2").hide();
+                            
+                            var html = $('.uploadList_3 ul li').html();
+                            $('.uploadList_2 ul').empty();
+                            $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
+                            $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                            $('input[name=packageFileType2]').val(fileType3);
+                            
+                            $('.verifyFile_2').hide();
+                            
+                            $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_2").find("span").removeClass("uploadFile3");
+                            $(".uploadList_2").find("span").addClass("uploadFile2");
+                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                            
+                            $("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            
+                            var html = $('.uploadList_4 ul li').html();
+                            $('.uploadList_3 ul').empty();
+                            $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=packageFileType3]').val(fileType4);
+                            
+                            $('.verifyFile_3').hide();
+                            
+                            $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_3").find("span").removeClass("uploadFile4");
+                            $(".uploadList_3").find("span").addClass("uploadFile3");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            
+                            $('input[name=fileSeq_4]').val("");
+                            $('input[name=packageFileType4]').val("");
+                            $(".multiSet > div:eq(3)").hide();
+                    	} else if ("" != fileSeq2 && "" != fileSeq3) {
                     		var fileType2 = $('input[name=packageFileType2]').val();
                         	var fileType3 = $('input[name=packageFileType3]').val();
                         	
                         	$("#uploadRemove_1").hide();
                             $("#uploadAdd_1").hide();
+                            $("#projectSearch_1").hide();
 
                             var html = $('.uploadList_2 ul li').html();
                             $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
@@ -1295,6 +1434,7 @@
                     		
                     		$("#uploadRemove_1").hide();
                             $("#uploadAdd_1").hide();
+                            $("#projectSearch_1").hide();
 
                             var html = $('.uploadList_2 ul li').html();
                             $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
@@ -1321,11 +1461,64 @@
                 $("#uploadRemove_2").click(function (e) {
                     var fileSeq3 = $('input[name=fileSeq_3]').val();
                     var fileSeq4 = $('input[name=fileSeq_4]').val();
-					
-                    if ("" == fileSeq3 && "" == fileSeq4) {
-                    	$('input[name=packageFileType2]').val("");
-                        $(".multiSet > div:eq(1)").hide();
-                        $("#uploadAdd_1").show();
+                    var fileSeq5 = $('input[name=fileSeq_5]').val();
+                   
+                    if ("" != fileSeq3 && "" != fileSeq4 && "" != fileSeq5) {
+                    	var fileType3 = $('input[name=packageFileType3]').val();
+                    	var fileType4 = $('input[name=packageFileType4]').val();
+                    	var fileType5 = $('input[name=packageFileType5]').val();
+                    	
+                    	$("#uploadRemove_2").hide();
+                        $("#uploadAdd_2").hide();
+                        $("#projectSearch_2").hide();
+
+                        var html = $('.uploadList_3 ul li').html();
+                        $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
+                        $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                        $('input[name=packageFileType2]').val(fileType3);
+
+                        $('.verifyFile_2').hide();
+                        
+                        $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_2").find("span").removeClass("uploadFile3");
+                        $(".uploadList_2").find("span").addClass("uploadFile2");
+                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                        
+                        $("#uploadRemove_3").hide();
+                        $("#uploadAdd_3").hide();
+                        
+                        var html = $('.uploadList_4 ul li').html();
+                        $('.uploadList_3 ul').empty();
+                        $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                        $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                        $('input[name=packageFileType3]').val(fileType4);
+                        
+                        $('.verifyFile_3').hide();
+                        
+                        $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_3").find("span").removeClass("uploadFile4");
+                        $(".uploadList_3").find("span").addClass("uploadFile3");
+                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                        
+                        $("#uploadRemove_4").hide();
+                        $("#uploadAdd_4").hide();
+                        
+                        var html = $('.uploadList_5 ul li').html();
+                        $('.uploadList_4 ul').empty();
+                        $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=packageFileType4]').val(fileType5);
+                        
+                        $('.verifyFile_4').hide();
+                        
+                        $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_4").find("span").removeClass("uploadFile5");
+                        $(".uploadList_4").find("span").addClass("uploadFile4");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        
+                        $('input[name=fileSeq_5]').val("");
+                        $('input[name=packageFileType5]').val("");
+                        $(".multiSet > div:eq(4)").hide();
                     } else {
                     	if ("" != fileSeq3 && "" != fileSeq4) {
                     		var fileType3 = $('input[name=packageFileType3]').val();
@@ -1333,6 +1526,7 @@
                         	
                         	$("#uploadRemove_2").hide();
                             $("#uploadAdd_2").hide();
+                            $("#projectSearch_2").hide();
 
                             var html = $('.uploadList_3 ul li').html();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
@@ -1365,62 +1559,142 @@
                             $('input[name=fileSeq_4]').val("");
                             $('input[name=packageFileType4]').val("");
                             $(".multiSet > div:eq(3)").hide();
-                    	} else {
+                    	} else if ("" != fileSeq3) {
+                    		var fileType3 = $('input[name=packageFileType3]').val();
+                    		
                     		$("#uploadRemove_2").hide();
                             $("#uploadAdd_2").hide();
+                            $("#projectSearch_2").hide();
 
                             var html = $('.uploadList_3 ul li').html();
-                            $('.uploadList_2 ul').empty();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
                             $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
-                            $('input[name=packageFileType2]').val($('input[name=packageFileType3]').val());
+                            $('input[name=packageFileType2]').val(fileType3);
+                            $('input[name=fileSeq_3]').val("");
+                            $('input[name=packageFileType3]').val("");
                             
                             $('.verifyFile_2').hide();
+                            
                             $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_2").find("span").removeClass("uploadFile3");
                             $(".uploadList_2").find("span").addClass("uploadFile2");
                             $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
                             
-                            $('input[name=fileSeq_3]').val("");
-                            $('input[name=packageFileType3]').val("");
+                            $("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            
                             $(".multiSet > div:eq(2)").hide();
                     	}
                     }
                 });
 
                 $("#uploadRemove_3").click(function (e) {
-                	var fileSeq = $('input[name=fileSeq_4]').val();
+                	var fileSeq4 = $('input[name=fileSeq_4]').val();
+                	var fileSeq5 = $('input[name=fileSeq_5]').val();
                 	
-                	if ("" == fileSeq) {
+                	if ("" == fileSeq4 && "" == fileSeq5) {
                 		$('input[name=packageFileType3]').val("");
                         $(".multiSet > div:eq(2)").hide();
                         $("#uploadAdd_2").show();
                 	} else {
-                		$("#uploadRemove_3").hide();
-                        $("#uploadAdd_3").hide();
+                		if ("" != fileSeq4 && "" != fileSeq5) {
+                			var fileType4 = $('input[name=packageFileType4]').val();
+                        	var fileType5 = $('input[name=packageFileType5]').val();
+                        	
+                        	$("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            $("#projectSearch_3").hide();
 
-                        var html = $('.uploadList_4 ul li').html();
-                        $('.uploadList_3 ul').empty();
-                        $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                        $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
-                        $('input[name=packageFileType3]').val($('input[name=packageFileType4]').val());
-                        
-                        $('.verifyFile_3').hide();
-                        $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
-                        $(".uploadList_3").find("span").removeClass("uploadFile4");
-                        $(".uploadList_3").find("span").addClass("uploadFile4");
-                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"2\")");
-                        
-                        $('input[name=fileSeq_4]').val("");
-                        $('input[name=packageFileType4]').val("");
-                        $(".multiSet > div:eq(3)").hide();
+                            var html = $('.uploadList_4 ul li').html();
+                            $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=packageFileType3]').val(fileType4);
+
+                            $('.verifyFile_3').hide();
+                            
+                            $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_3").find("span").removeClass("uploadFile4");
+                            $(".uploadList_3").find("span").addClass("uploadFile3");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            
+                            $("#uploadRemove_4").hide();
+                            $("#uploadAdd_4").hide();
+                            $("#projectSearch_4").hide();
+                            
+                            var html = $('.uploadList_5 ul li').html();
+                            $('.uploadList_4 ul').empty();
+                            $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                            $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                            $('input[name=packageFileType4]').val(fileType5);
+                            
+                            $('.verifyFile_4').hide();
+                            
+                            $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_4").find("span").removeClass("uploadFile5");
+                            $(".uploadList_4").find("span").addClass("uploadFile4");
+                            $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                            
+                            $('input[name=fileSeq_5]').val("");
+                            $('input[name=packageFileType5]').val("");
+                            $(".multiSet > div:eq(4)").hide();
+                		} else {
+                			$("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            $("#projectSearch_3").hide();
+                            
+                            var html = $('.uploadList_4 ul li').html();
+                            $('.uploadList_3 ul').empty();
+                            $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=packageFileType3]').val($('input[name=packageFileType4]').val());
+                            
+                            $('.verifyFile_3').hide();
+                            $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_3").find("span").removeClass("uploadFile4");
+                            $(".uploadList_3").find("span").addClass("uploadFile3");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            
+                            $('input[name=fileSeq_4]').val("");
+                            $('input[name=packageFileType4]').val("");
+                            $(".multiSet > div:eq(3)").hide();
+                		}
                 	}
                 });
                 
                 $("#uploadRemove_4").click(function (e) {
-                	$('input[name=packageFileType4]').val("");
-                    $(".multiSet > div:eq(3)").hide();
-                    $("#uploadAdd_3").show();
+                	var fileSeq = $('input[name=fileSeq_5]').val();
+                	
+                	if ("" == fileSeq) {
+                		$('input[name=packageFileType4]').val("");
+                        $(".multiSet > div:eq(3)").hide();
+                        $("#uploadAdd_3").show();
+                	} else {
+                		$("#uploadRemove_4").hide();
+                        $("#uploadAdd_4").hide();
+                        $("#projectSearch_4").hide();
+
+                        var html = $('.uploadList_5 ul li').html();
+                        $('.uploadList_4 ul').empty();
+                        $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=packageFileType4]').val($('input[name=packageFileType5]').val());
+                        
+                        $('.verifyFile_4').hide();
+                        $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_4").find("span").removeClass("uploadFile5");
+                        $(".uploadList_4").find("span").addClass("uploadFile5");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        
+                        $('input[name=fileSeq_5]').val("");
+                        $('input[name=packageFileType5]').val("");
+                        $(".multiSet > div:eq(4)").hide();
+                	}
+                });
+                
+                $("#uploadRemove_5").click(function (e) {
+                	$('input[name=packageFileType5]').val("");
+                    $(".multiSet > div:eq(4)").hide();
+                    $("#uploadAdd_4").show();
                 });
                 
                 setTimeout(function() {
@@ -1766,15 +2040,12 @@
               	var fileSeq_2 = $("[name='fileSeq_2']").val();
               	var fileSeq_3 = $("[name='fileSeq_3']").val();
               	var fileSeq_4 = $("[name='fileSeq_4']").val();
+              	var fileSeq_5 = $("[name='fileSeq_5']").val();
 
                 $('.verifyFile_' + i).show();
                 $("#uploadAdd_" + i).hide();
 				
-                if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "")) {
-                	$("#uploadRemove_" + i).show();
-                }
-                
-             	if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "" && fileSeq_4 == "")) {
+                if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "" && fileSeq_4 == "" && fileSeq_5 == "")) {
               		$("#uploadRemove_" + i).show();
              	}
 
@@ -3164,7 +3435,15 @@
                 if ($('input[name=fileSeq_3]').val() != '') {
                     fileSeqs.push($('input[name=fileSeq_3]').val());
                 }
-
+                
+                if ($('input[name=fileSeq_4]').val() != '') {
+                    fileSeqs.push($('input[name=fileSeq_4]').val());
+                }
+                
+                if ($('input[name=fileSeq_5]').val() != '') {
+                    fileSeqs.push($('input[name=fileSeq_5]').val());
+                }
+                
                 gridCleanErrMsg("list"); // 기존 error message 삭제
 
                 if (!evt.uploadStatus && fileSeqs.join("").length <= 0) {
@@ -3496,10 +3775,28 @@
                     $("#uploadAdd_2").hide();
                     $("#uploadAdd_3").show();
                 }
+                
+                if (fileSeq_4) {
+                	$(".multiSet > div:eq(3)").show();
+                    $("#uploadAdd_1").hide();
+                    $("#uploadAdd_2").hide();
+                    $("#uploadAdd_3").hide();
+                    $("#uploadAdd_4").show();
+                }
 
+                if (fileSeq_5) {
+                	$(".multiSet > div:eq(4)").show();
+                    $("#uploadAdd_1").hide();
+                    $("#uploadAdd_2").hide();
+                    $("#uploadAdd_3").hide();
+                    $("#uploadAdd_4").hide();
+                }
+                
                 fn.changeSelectOption($("[name=selectOption_1]"), false);
 				fn.changeSelectOption($("[name=selectOption_2]"), false);
 				fn.changeSelectOption($("[name=selectOption_3]"), false);
+				fn.changeSelectOption($("[name=selectOption_4]"), false);
+				fn.changeSelectOption($("[name=selectOption_5]"), false);
             }
         }
 
