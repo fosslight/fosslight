@@ -222,7 +222,7 @@ public class T2CoValidationResult {
             }
             String msg = getDiffMessage(key);
             if (isAfterSort && msg.startsWith("errLv")) {
-            	msg = msg.split("[.]")[1];
+            	msg = msg.split("[|]")[1];
             }
         	messageMap.put(camelKey, msg);
         }

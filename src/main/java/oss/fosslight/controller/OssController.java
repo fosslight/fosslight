@@ -1475,7 +1475,7 @@ public class OssController extends CoTopComponent{
 			}
 			
 			if (!vr.isDiff()){
-				Map<String, String> diffMap = vr.getDiffMessageMap();
+				Map<String, String> diffMap = vr.getDiffMessageMap(true);
 				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
 				resMap.put("diffMap", diffMap);
 			}

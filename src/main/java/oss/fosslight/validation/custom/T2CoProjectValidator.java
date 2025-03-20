@@ -466,7 +466,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv.Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						}
 						// Declared License를 사용하지 않는 case
@@ -486,7 +486,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv.Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						} 
 						// Declared License를 사용하지 않는 case
@@ -529,7 +529,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv.Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						} 
 						// Declared License를 사용하지 않는 case
@@ -549,7 +549,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv.Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						} 
 						// Declared License를 사용하지 않는 case
@@ -2287,7 +2287,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv.Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						}
@@ -2312,7 +2312,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv.Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						}
@@ -2336,7 +2336,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 									errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 								} else {
 									if (!errMap.containsKey(LICENSE_KEY)) {
-										diffMap.put(LICENSE_KEY, "errLv.Declared : " + licenseText);
+										diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 									}
 								}
 							} 
@@ -2388,7 +2388,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv.Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						}
@@ -2415,7 +2415,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv.Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						} 
