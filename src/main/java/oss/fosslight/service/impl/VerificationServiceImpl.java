@@ -190,20 +190,24 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				newPackagingFileIdList.add(fileSeqs.size() > 1 ? fileSeqs.get(1) : null);
 				newPackagingFileIdList.add(fileSeqs.size() > 2 ? fileSeqs.get(2) : null);
 				newPackagingFileIdList.add(fileSeqs.size() > 3 ? fileSeqs.get(3) : null);
+				newPackagingFileIdList.add(fileSeqs.size() > 4 ? fileSeqs.get(4) : null);
 				prjParam.setPackageFileId(newPackagingFileIdList.get(0));
 				prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 				prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
 				prjParam.setPackageFileId4(newPackagingFileIdList.get(3));
+				prjParam.setPackageFileId5(newPackagingFileIdList.get(4));
 				
 				ArrayList<String> newPackagingFileTypeList = new ArrayList<String>();
 				newPackagingFileTypeList.add(fileTypeSeqs.size() > 0 ? fileTypeSeqs.get(0) : null);
 				newPackagingFileTypeList.add(fileTypeSeqs.size() > 1 ? fileTypeSeqs.get(1) : null);
 				newPackagingFileTypeList.add(fileTypeSeqs.size() > 2 ? fileTypeSeqs.get(2) : null);
 				newPackagingFileTypeList.add(fileTypeSeqs.size() > 3 ? fileTypeSeqs.get(3) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 4 ? fileTypeSeqs.get(4) : null);
 				prjParam.setPackageFileType1(newPackagingFileTypeList.get(0));
 				prjParam.setPackageFileType2(newPackagingFileTypeList.get(1));
 				prjParam.setPackageFileType3(newPackagingFileTypeList.get(2));
 				prjParam.setPackageFileType4(newPackagingFileTypeList.get(3));
+				prjParam.setPackageFileType5(newPackagingFileTypeList.get(4));
 				
 				if (deleteFiles.equals(CoConstDef.FLAG_YES)){
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
@@ -219,6 +223,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					origPackagingFileIdList.add(project.getPackageFileId2());
 					origPackagingFileIdList.add(project.getPackageFileId3());
 					origPackagingFileIdList.add(project.getPackageFileId4());
+					origPackagingFileIdList.add(project.getPackageFileId5());
 					
 					int idx = 0;
 					
