@@ -1402,7 +1402,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					if (bFile.exists()) {
 						isExistFile = true;
 						File copiedFile = new File(VERIFY_PATH_OUTPUT +"/"+prjId+"/binary.txt");
-						if (copiedFile.exists()) {
+						if (!copiedFile.exists()) {
+							Files.copy(bFile.toPath(), copiedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						} else {
 							FileUtil.addFileContents(VERIFY_PATH_OUTPUT +"/"+prjId+"/binary.txt", bFile.getPath());
 						}
 					}
