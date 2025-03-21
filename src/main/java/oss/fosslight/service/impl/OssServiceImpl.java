@@ -3081,19 +3081,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
 				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
 				if (isNewVersion) {
-					ossMaster.setExistOssNickNames(getOssNickNameListByOssName(ossMaster.getOssName()));
-					OssMaster ossBean = getOssInfo(null, ossMaster.getOssName(), true);
-					if (ossBean != null) {
-						ossMaster.setOssCommonId(ossBean.getOssCommonId());
-						ossMaster.setExistIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
-						ossMaster.setExistExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
-						ossMaster.setExistArrRestriction(ossBean.getRestriction() != null ? ossBean.getRestriction().split(",") : null);
-						ossMaster.setExistDownloadLocations(ossBean.getDownloadLocations());
-						ossMaster.setExistPurls(!isEmpty(ossBean.getPurl()) ? ossBean.getPurl().split(",") : null);
-						ossMaster.setExistHomepage(ossBean.getHomepage());
-						ossMaster.setExistSummaryDescription(ossBean.getSummaryDescription());
-						ossMaster.setExistImportantNotes(ossBean.getImportantNotes());
-					}
+					setExistedOssInfo(ossMaster);
 				} else {
 					ossMaster.setOssCommonId(null);
 				}
@@ -5159,5 +5147,22 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossBean.setPrjId(prjId);
 		ossBean.setCreator(loginUserName());
 		ossMapper.setOssAnalysisStatus(ossBean);
+	}
+
+	@Override
+	public void setExistedOssInfo(OssMaster ossMaster) {
+		ossMaster.setExistOssNickNames(getOssNickNameListByOssName(ossMaster.getOssName()));
+		OssMaster ossBean = getOssInfo(null, ossMaster.getOssName(), true);
+		if (ossBean != null) {
+			ossMaster.setOssCommonId(ossBean.getOssCommonId());
+			ossMaster.setExistIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+			ossMaster.setExistExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+			ossMaster.setExistArrRestriction(ossBean.getRestriction() != null ? ossBean.getRestriction().split(",") : null);
+			ossMaster.setExistDownloadLocations(ossBean.getDownloadLocations());
+			ossMaster.setExistPurls(!isEmpty(ossBean.getPurl()) ? ossBean.getPurl().split(",") : null);
+			ossMaster.setExistHomepage(ossBean.getHomepage());
+			ossMaster.setExistSummaryDescription(ossBean.getSummaryDescription());
+			ossMaster.setExistImportantNotes(ossBean.getImportantNotes());
+		}
 	}
 }

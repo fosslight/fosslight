@@ -2100,6 +2100,11 @@ public class OssController extends CoTopComponent{
 			mailBean.setParamOssId(resultOssId);
 
 			mailBean.setComment(resultData.getComment());
+			
+			if (isNewVersion && !isEmpty(resultData.getOssName())) {
+				ossService.setExistedOssInfo(resultData);
+				mailBean.setParamOssInfo(resultData);
+			}
 			CoMailManager.getInstance().sendMail(mailBean);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

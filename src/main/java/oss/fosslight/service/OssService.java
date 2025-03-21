@@ -163,4 +163,6 @@ public interface OssService extends HistoryConfig{
 	String getPurlByDownloadLocation(OssMaster ossMaster);
 	
 	void setOssAnalysisStatus(String prjId);
+
+	void setExistedOssInfo(OssMaster ossMaster);
 }
