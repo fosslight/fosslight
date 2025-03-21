@@ -1759,7 +1759,17 @@ var src_fn = {
 				_mainLastsel = -1;
 				
 				if("false" == data.isValid) {
-					srcValidMsgData = data.resultData;
+					if (typeof data.resultData !== "undefined") {
+						let result = data.resultData;
+						if (Array.isArray(result)) {
+							srcMainData = result;
+							$("#srcList").jqGrid('GridUnload');
+							src_grid.load();
+							fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+						} else {
+							srcValidMsgData = result;
+						}
+					}
 					
 					alertify.error([[#{msg.common.valid}]], 0);
 					

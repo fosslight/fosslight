@@ -536,7 +536,19 @@ var fn = {
 		
 		_mainLastsel = -1;
 		if ("false" == data.isValid) {
-			if("99" == data.resCd) { //중복 처리
+			if (typeof data.resultData !== "undefined") {
+				let result = data.resultData;
+				if (Array.isArray(result)) {
+					partyMainData = result;
+					$("#list").jqGrid('GridUnload');
+					grid.init();
+					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+				} else {
+					partyValidMsgData_e = result;
+				}
+			}
+			
+			if ("99" == data.resCd) { //중복 처리
 				alertify.alert([[#{msg.value.duplicate.partner}]]);
 				fn.partnerGridValidMsg(data.dupData);
 
@@ -550,11 +562,9 @@ var fn = {
 				return;
 			}
 			
-			if(data.ossFileId){
+			if (data.ossFileId) {
 				$("div.retxt.ossFileId").text(data.ossFileId).show();
 			}
-			
-			partyValidMsgData_e = data;
 			
 			alertify.error([[#{msg.common.valid}]], 0);
 		} else {

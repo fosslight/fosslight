@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -435,7 +436,18 @@ public class SelfCheckController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid()) {
-				return makeJsonResponseHeader(vr.getValidMessageMap());
+				if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), true)) {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
+				} else if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), false)) {
+					List<ProjectIdentification> exceedingMaxLengthList = CommonFunction.getItemsExceedingMaxLength(vr.getValidMessageMap(), ossComponents);
+					if (!CollectionUtils.isEmpty(exceedingMaxLengthList)) {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), exceedingMaxLengthList);
+					} else {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+					}
+				} else {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				}
 			}
 
 			Project project = new Project();

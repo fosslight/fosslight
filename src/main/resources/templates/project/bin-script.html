@@ -178,12 +178,22 @@ var bin_fn = {
 			success: function(data){
 				_mainLastsel = -1;
 				
-				if("false" == data.isValid) {
-					binValidMsgData = data.resultData;
+				if ("false" == data.isValid) {
+					if (typeof data.resultData !== "undefined") {
+						let result = data.resultData;
+						if (Array.isArray(result)) {
+							binMainData = result;
+							$("#binList").jqGrid('GridUnload');
+							bin_grid.load();
+							fn_grid_com.addEtcKeyDownEvent($('#binList'), binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
+						} else {
+							binValidMsgData = result;
+						}
+					}
 					
 					alertify.error([[#{msg.common.valid}]], 0);
 					
-					if(data.validMsg) {
+					if (data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
 					}
 				} else {

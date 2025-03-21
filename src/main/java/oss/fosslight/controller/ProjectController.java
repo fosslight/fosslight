@@ -2013,7 +2013,18 @@ public class ProjectController extends CoTopComponent {
 					T2CoValidationResult vr = pv.validate(new HashMap<>());
 					
 					if (!vr.isValid()) {
-						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+						if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), true)) {
+							return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
+						} else if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), false)) {
+							List<ProjectIdentification> exceedingMaxLengthList = CommonFunction.getItemsExceedingMaxLength(vr.getValidMessageMap(), ossComponents);
+							if (!CollectionUtils.isEmpty(exceedingMaxLengthList)) {
+								return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), exceedingMaxLengthList);
+							} else {
+								return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+							}
+						} else {
+							return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+						}
 					}
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
@@ -2288,9 +2299,16 @@ public class ProjectController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 
 			if (!vr.isValid()) {
-				if(CommonFunction.booleanOssNameFormatForValidMsg(vr.getValidMessageMap())) {
+				if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), true)) {
 					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
-				}else {
+				} else if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), false)) {
+					List<ProjectIdentification> exceedingMaxLengthList = CommonFunction.getItemsExceedingMaxLength(vr.getValidMessageMap(), ossComponents);
+					if (!CollectionUtils.isEmpty(exceedingMaxLengthList)) {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), exceedingMaxLengthList);
+					} else {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+					}
+				} else {
 					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
 				}
 			}
@@ -2458,7 +2476,18 @@ public class ProjectController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid()) {
-				return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), true)) {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
+				} else if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), false)) {
+					List<ProjectIdentification> exceedingMaxLengthList = CommonFunction.getItemsExceedingMaxLength(vr.getValidMessageMap(), ossComponents);
+					if (!CollectionUtils.isEmpty(exceedingMaxLengthList)) {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), exceedingMaxLengthList);
+					} else {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+					}
+				} else {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				}
 			}
 
 			Project project = new Project();

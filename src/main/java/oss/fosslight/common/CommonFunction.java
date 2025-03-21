@@ -3120,22 +3120,61 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		String rtnStr = "<b>Please check your entry and try again.</b><br />";
 		
 		if (validMessageMap != null) {
+			int ExceededCnt = 0;
 			for (String key : validMessageMap.keySet()) {
 				if ("isValid".equalsIgnoreCase(key)) {
 					continue;
 				}
 				String msg = removeLineSeparator(validMessageMap.get(key));
 				if (key.indexOf(".") > -1) {
-					rtnStr += "<br />" + key.substring(0, key.indexOf(".")) + " : " + msg;
+					if (key.startsWith("licenseName") && msg.contains("Exceeded max length")) {
+						ExceededCnt++;
+					} else {
+						rtnStr += "<br />" + key.substring(0, key.indexOf(".")) + " : " + msg;
+					}
 				} else {
 					rtnStr += "<br />" + key + " : " + msg;
 				}
+			}
+			if (ExceededCnt > 0) {
+				rtnStr += "<br />" + CommonFunction.getCustomMessage("msg.common.license.exceeded.max.length", String.valueOf(ExceededCnt));
 			}
 		}
 		
 		return rtnStr;
 	}
 
+	public static List<ProjectIdentification> getItemsExceedingMaxLength(Map<String, String> validMessageMap, List<ProjectIdentification> ossComponents) {
+		List<ProjectIdentification> exceedingMaxLengthList = new ArrayList<>();
+		List<String> exceedingMaxLengthGridIdList = new ArrayList<>();
+		if (validMessageMap != null) {
+			for (String key : validMessageMap.keySet()) {
+				if ("isValid".equalsIgnoreCase(key)) {
+					continue;
+				}
+				String msg = removeLineSeparator(validMessageMap.get(key));
+				if (key.indexOf(".") > -1) {
+					if (key.startsWith("licenseName") && msg.contains("Exceeded max length")) {
+						exceedingMaxLengthGridIdList.add(key.split("[.]")[1]);
+					}
+				}
+			}
+		}
+		if (!exceedingMaxLengthGridIdList.isEmpty()) {
+			List<ProjectIdentification> reorderList = new ArrayList<>();
+			for (ProjectIdentification bean : ossComponents) {
+				if (exceedingMaxLengthGridIdList.contains(bean.getGridId())) {
+					exceedingMaxLengthList.add(bean);
+				} else {
+					reorderList.add(bean);
+				}
+			}
+			exceedingMaxLengthList.addAll(reorderList);
+		}
+		
+		return exceedingMaxLengthList;
+	}
+	
 	public static String makeValidMsgTohtml(Map<String, String> validMessageMap, List<ProjectIdentification> ossComponents) {
 		List<String> rtnStrList = new ArrayList<>();
 		String rtnStr = getMessage("msg.oss.check.ossName.format");
@@ -3169,7 +3208,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return rtnStr;
 	}
 	
-	public static Boolean booleanOssNameFormatForValidMsg(Map<String, String> validMessageMap) {
+	public static Boolean booleanValidationFormatForValidMsg(Map<String, String> validMessageMap, boolean isCheckOssName) {
 		boolean validFlag = false;
 		
 		if (validMessageMap != null) {
@@ -3180,9 +3219,16 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				String msg = removeLineSeparator(validMessageMap.get(key));
 				if (key.indexOf(".") > -1) {
-					if (msg.contains("Formatting") && key.substring(0, key.indexOf(".")).equals("ossName")) {
-						validFlag = true;
-						break;
+					if (isCheckOssName) {
+						if (msg.contains("Formatting") && key.substring(0, key.indexOf(".")).equals("ossName")) {
+							validFlag = true;
+							break;
+						}
+					} else {
+						if (key.startsWith("licenseName") && msg.contains("Exceeded max length")) {
+							validFlag = true;
+							break;
+						}
 					}
 				}
 				

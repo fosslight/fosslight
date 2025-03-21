@@ -330,7 +330,18 @@ var src_fn = {
 				
 				if("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid}]], 0);
-					if(data.validMsg) {
+					if (typeof data.resultData !== "undefined") {
+						let result = data.resultData;
+						if (Array.isArray(result)) {
+							srcMainData = result;
+							$("#srcList").jqGrid('GridUnload');
+							src_grid.load();
+							fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
+						} else {
+							srcValidMsgData = result;
+						}
+					}
+					if (data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
 					}
 					

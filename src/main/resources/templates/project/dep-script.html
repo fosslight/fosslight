@@ -263,6 +263,11 @@ var dep_fn = {
 				
 				if("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid}]], 0);
+					
+					$("#depList").jqGrid('GridUnload');
+					dep_grid.load();
+					fn_grid_com.addEtcKeyDownEvent($('#depList'), depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
+					
 					if(data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
 					}
