@@ -1768,6 +1768,10 @@ var src_fn = {
 							fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
 						} else {
 							srcValidMsgData = result;
+							
+							if (srcValidMsgData) {
+								gridValidMsgNew(srcValidMsgData, "srcList");
+							}
 						}
 					}
 					
@@ -1775,10 +1779,6 @@ var src_fn = {
 					
 					if (data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
-					}
-					
-					if (srcValidMsgData) {
-						gridValidMsgNew(srcValidMsgData, "srcList");
 					}
 				} else {
 					if("10" == data.resCd){
