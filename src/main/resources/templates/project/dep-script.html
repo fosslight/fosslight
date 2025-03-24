@@ -263,21 +263,25 @@ var dep_fn = {
 				
 				if("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid}]], 0);
-					
-					$("#depList").jqGrid('GridUnload');
-					dep_grid.load();
-					fn_grid_com.addEtcKeyDownEvent($('#depList'), depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
-					
-					if(data.validMsg) {
+					if (typeof data.resultData !== "undefined") {
+						let result = data.resultData;
+						if (Array.isArray(result)) {
+							depMainData = result;
+							$("#depList").jqGrid('GridUnload');
+							dep_grid.load();
+							fn_grid_com.addEtcKeyDownEvent($('#depList'), depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
+						} else {
+							depValidMsgData = result;
+							if (depValidMsgData) {
+								gridValidMsgNew(depValidMsgData, "depList");
+							}
+							if (depDiffMsgData) {
+								gridDiffMsg(depDiffMsgData, "depList");
+							}
+						}
+					}
+					if (data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
-					}
-					
-					if(depValidMsgData) {
-						gridValidMsgNew(depValidMsgData, "depList");
-					}
-					
-					if(depDiffMsgData) {
-						gridDiffMsg(depDiffMsgData, "depList");
 					}
 				} else {
 					if("10" == data.resCd) {

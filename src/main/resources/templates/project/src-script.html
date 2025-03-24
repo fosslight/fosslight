@@ -339,18 +339,16 @@ var src_fn = {
 							fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
 						} else {
 							srcValidMsgData = result;
+							if (srcValidMsgData) {
+								gridValidMsgNew(srcValidMsgData, "srcList");
+							}
+							if(srcDiffMsgData) {
+								gridDiffMsg(srcDiffMsgData, "srcList");
+							}
 						}
 					}
 					if (data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
-					}
-					
-					if(srcValidMsgData) {
-						gridValidMsgNew(srcValidMsgData, "srcList");
-					}
-					
-					if(srcDiffMsgData) {
-						gridDiffMsg(srcDiffMsgData, "srcList");
 					}
 				} else {
 					if("10" == data.resCd) {
