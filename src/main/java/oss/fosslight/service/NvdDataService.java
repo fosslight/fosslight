@@ -105,13 +105,11 @@ public class NvdDataService {
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
 				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, rtnMap);
 				if (!(boolean) rtnMap.get("connectionFlag")) {
-					log.info("nvd meta api connection error");
 					schlog.info("nvd meta api connection error");
 					return "91";
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			schlog.error(e.getMessage(), e);
 			return "91";
 		}
@@ -127,7 +125,6 @@ public class NvdDataService {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			schlog.error(e.getMessage(), e);
 			return "92";
 		}
@@ -140,7 +137,6 @@ public class NvdDataService {
 		try {
 			nvdCveDataSyncJob(true);
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			schlog.error(e.getMessage(), e);
 			return "93";
 		}
@@ -163,7 +159,6 @@ public class NvdDataService {
 		Map<String, Object> cveInfo = null;
 		List<Map<String, Object>> cpe_match_all = null;
 		List<Map<String, Object>> cvePatchList = null;
-		log.info("nvdCveDataApiJob start");
 		schlog.info("nvdCveDataApiJob start");
 
 		nvdDataMapper.createTableNvdCveV3Temp();
@@ -186,7 +181,7 @@ public class NvdDataService {
 			final NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
 			
 			for(int limitIndex = 0; limitIndex <= totalCnt/API_CPE_CHUNK_SIZE; limitIndex++) {
-				log.info("getNvdCpeMatchData in progress {}/{}", API_CPE_CHUNK_SIZE*limitIndex, totalCnt);
+				schlog.info("getNvdCpeMatchData in progress {}/{}", API_CPE_CHUNK_SIZE*limitIndex, totalCnt);
 				for (int i = 0; i < 5; i++) {
 					responseMap = getDataForRestApiConnection(NVD_REST_BASE_URL + NVD_REST_CPE_URL, API_CPE_CHUNK_SIZE, API_CPE_CHUNK_SIZE * limitIndex, 1);
 					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
@@ -320,7 +315,7 @@ public class NvdDataService {
 										_patchInfo.put("cveId", cveId);
 										_patchInfo.put("patchLink", cvePatchInfo.get("url"));
 										_patchInfo.put("publDate", cveInfo.get("publDate"));
-                    mapper.insertNvdDataPatchLinkTemp(_patchInfo);
+										mapper.insertNvdDataPatchLinkTemp(_patchInfo);
 									}
 									cvePatchList = null;
 								}
@@ -367,7 +362,6 @@ public class NvdDataService {
 			
 			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
 			if (vendorProductNvdDataV3Cnt > 0) {
-				log.info("Vendor Product Nvd Data V3 Update Count : {}", vendorProductNvdDataV3Cnt);
 				schlog.info("Vendor Product Nvd Data V3 Update Count : {}", vendorProductNvdDataV3Cnt);
 				nvdDataMapper.updateVendorProductNvdDataV3();
 			}
@@ -379,7 +373,6 @@ public class NvdDataService {
 			param.put("modiDate", urlConnTimestamp);
 
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
-			log.info("nvdCveDataApiJob end");
 			schlog.info("nvdCveDataApiJob end");
 		}
 
@@ -499,7 +492,6 @@ public class NvdDataService {
 				responseMap.put("checkUrlFlag", nvdDataMapper.selectUseMetaDataUrlConnection(param).size() > 0 ? true : false);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
 			schlog.error(e.getMessage());
 			responseMap.put("connectionFlag", false);
 		}
@@ -518,7 +510,6 @@ public class NvdDataService {
 	@SuppressWarnings("unchecked")
 	@Transactional
 	public Map<String, Object> nvdMetaDataApiJob(String restApiUrl, Map<String, Object> rtnMap) throws JsonProcessingException, SSLException {
-		log.info("nvdMetaDataApiJob start");
 		schlog.info("nvdMetaDataApiJob start");
 		
 		final int totalResults = (int) rtnMap.get("totalResults");
@@ -545,7 +536,7 @@ public class NvdDataService {
 			nvdDataMapper.truncateCpeMatchNameTemp();
 			
 			for(int limitIndex = 0; limitIndex <= totalCnt/API_MATCH_CHUNK_SIZE; limitIndex++) {
-				log.info("getNvdCpeMatchData in progress {}/{}", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
+				schlog.info("getNvdCpeMatchData in progress {}/{}", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
 				
 				
 				for (int i = 0; i < 5; i++) {
@@ -645,7 +636,6 @@ public class NvdDataService {
 			sqlSession.commit();
 		}
 			
-		log.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
 		schlog.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
 		if (httpsUrlConnectionFlag && totalResults > 0) {
 			if (initializeFlag) {
@@ -669,7 +659,6 @@ public class NvdDataService {
 			param.put("modiDate", urlConnTimestamp);
 
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
-			log.info("nvdMetaDataApiJob end");
 			schlog.info("nvdMetaDataApiJob end");
 		}
 
@@ -705,12 +694,11 @@ public class NvdDataService {
 					connectionFlag = false;
 				}
 			} else {
-				log.error("httpsURLConnection error : " + HttpStatus.valueOf(httpsURLConnection.getResponseCode()));
 				schlog.error("httpsURLConnection error : " + HttpStatus.valueOf(httpsURLConnection.getResponseCode()));
 				connectionFlag = false;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			schlog.error(e.getMessage());
 			connectionFlag = false;
 		} finally {
 			if(httpsURLConnection != null) {
@@ -720,14 +708,14 @@ public class NvdDataService {
 				try {
 					Thread.sleep(1000 * 6);
 				} catch (InterruptedException e) {
-					log.error(e.getMessage());
+					schlog.error(e.getMessage());
 				}
 			} else {
 				try {
-					log.warn("Try again in 15 seconds...");
+					schlog.warn("Try again in 15 seconds...");
 					Thread.sleep(1000 * 15);
 				} catch (InterruptedException e) {
-					log.error(e.getMessage());
+					schlog.error(e.getMessage());
 				}
 			}
 		}
@@ -826,46 +814,46 @@ public class NvdDataService {
 			nvdDataMapper.insertNvdDataScoreV3();
 			nvdDataMapper.deleteNvdDataScoreV3Temp();
 
-			log.info("End CVE Data Sync Job");
+			schlog.info("End CVE Data Sync Job");
 		}
 
 		int nickNameMgrCnt = nvdDataMapper.selectNickNameMgrtNvdDataScoreV3();
 		if (nickNameMgrCnt > 0) {
-			log.info("Nickname Migration Count : " + nickNameMgrCnt);
+			schlog.info("Nickname Migration Count : " + nickNameMgrCnt);
 			// OSS_NICKNAME 기준으로 NVD_DATA_SCORE_V3에 NICKNAME을 추가함.
 			nvdDataMapper.insertNickNameMgrtNvdDataScoreV3();
 		}else{
-			log.info("Nickname Migration Count : 0");
+			schlog.info("Nickname Migration Count : 0");
 		}
 
 		int MaxCvssScoreCnt = nvdDataMapper.selectMaxCvssScoreNvdDataScoreV3();
 		if (MaxCvssScoreCnt > 0) {
-			log.info("MaxCvssScore Added Count : " + MaxCvssScoreCnt);
+			schlog.info("MaxCvssScore Added Count : " + MaxCvssScoreCnt);
 			// NVD_DATA_SCORE_V3에서 CVSS_SCORE MAX값을 기준으로 PRODUCT에서 VERSION이 없는 DATA를 추가함.
 			nvdDataMapper.insertMaxCvssScoreNvdDataScoreV3();
 		}else{
-			log.info("MaxCvssScore Added Count : 0");
+			schlog.info("MaxCvssScore Added Count : 0");
 		}
 
 		int diffCvssScoreCnt = nvdDataMapper.ossNameNickNameCvssScoreDiffCnt();
 		if (diffCvssScoreCnt > 0){
-			log.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
+			schlog.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
 			nvdDataMapper.ossNameToNickNameMgrtCvssScore();
 		} else{
-			log.info("NickName -> ossName cvssScore Diff Count : 0");
+			schlog.info("NickName -> ossName cvssScore Diff Count : 0");
 		}
 
 		int ossNameToNickDiffCvssScoreCnt = nvdDataMapper.ossNameToNickMgrtCvssScoreDiffCnt();
 		if (ossNameToNickDiffCvssScoreCnt > 0){
-			log.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
+			schlog.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
 			nvdDataMapper.nickNameToOssNameMgrtCvssScore();
 		} else{
-			log.info("ossName -> NickName cvssScore Diff Count : 0");
+			schlog.info("ossName -> NickName cvssScore Diff Count : 0");
 		}
 
 		int vendorProductNvdDataScoreV3Cnt = nvdDataMapper.selectVendorProductNvdDataScoreV3Cnt();
 		if (vendorProductNvdDataScoreV3Cnt > 0) {
-			log.info("Vendor Product NVD Data Score V3 Update Count : " + vendorProductNvdDataScoreV3Cnt);
+			schlog.info("Vendor Product NVD Data Score V3 Update Count : " + vendorProductNvdDataScoreV3Cnt);
 			nvdDataMapper.updateVendorProductNvdDataScoreV3();
 		}
 
