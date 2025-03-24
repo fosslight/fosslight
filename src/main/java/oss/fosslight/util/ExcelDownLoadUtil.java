@@ -4596,7 +4596,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				String[] rowParam = {
-						bean.getComponentId()
+						bean.getComponentIdx()
 						, bean.getReferenceDiv()
 						, dbBean != null ? dbBean.getOssName() : bean.getOssName()
 								, dbBean != null ? dbBean.getOssVersion() : bean.getOssVersion()
