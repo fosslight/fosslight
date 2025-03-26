@@ -259,6 +259,10 @@ public class CoMailManager extends CoTopComponent {
     			convertDataMap.put("vulnerability_diff_vendor_info", bean.getParamList());
     		}
     		
+    		if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNC_RESULT.equals(bean.getMsgType())) {
+    			convertDataMap.put("vulnerability_sync_result", bean.getParamMap());
+    		}
+    		
     		// ldap Search시 사용자 정보가 변경된 경우
     		if (CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO.equals(bean.getMsgType()) && bean.getParamList() != null) {
     			List<Map<String, Object>> userList = bean.getParamList();
@@ -797,6 +801,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
     		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF:
+    		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNC_RESULT:
 			case CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT:
     			bean.setToIds(selectAdminMailAddr());
     			break;

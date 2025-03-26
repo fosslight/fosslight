@@ -125,6 +125,8 @@ public class CoMail extends ComBean {
 	
 	private Map<String, OssMaster> paramOssInfoMap;
 	
+	private Map<String, Object> paramMap;
+	
 	private List<Map<String, Object>> paramList;
 	
 	/**  Informations *. */
@@ -969,5 +971,13 @@ public class CoMail extends ComBean {
 
 	public void setParamLicenseInfo(LicenseMaster paramLicenseInfo) {
 		this.paramLicenseInfo = paramLicenseInfo;
+	}
+
+	public Map<String, Object> getParamMap() {
+		return paramMap;
+	}
+
+	public void setParamMap(Map<String, Object> paramMap) {
+		this.paramMap = paramMap;
 	}
  } 

@@ -657,6 +657,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED = "94";
 	/* nvd data 중 vendor-product 가 다른 경우 */
 	public static final String CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF = "95";
+	/* nvd oss sync is success*/
+	public static final String CD_MAIL_TYPE_VULNERABILITY_SYNC_RESULT = "96";
 	public static final String CD_MAIL_TYPE_SYSTEM_ERROR = "99";
 
 	/** Mail Type엥 따른 공통 Components 구성 */

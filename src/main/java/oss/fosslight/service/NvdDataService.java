@@ -119,7 +119,6 @@ public class NvdDataService {
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
 				rtnMap = nvdCveDataApiJob(NVD_CVE_REST_URL, rtnMap);
 				if (!(boolean) rtnMap.get("connectionFlag")) {
-					log.info("nvd meta api connection error");
 					schlog.info("nvd meta api connection error");
 					return "91";
 				}
@@ -128,8 +127,8 @@ public class NvdDataService {
 			schlog.error(e.getMessage(), e);
 			return "92";
 		}
-    
-    if (initializeFlag) {
+	    
+	    if (initializeFlag) {
 			codeMapper.updateCodeDtlNm("990", "100", "N");
 			initializeFlag = false;
 		}
