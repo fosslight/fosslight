@@ -747,6 +747,10 @@
                             $('[data-toggle="tooltip"]').tooltip({html: true});
                             oss_lst_data.existTooltip = true;
                         }
+                        if (!document.getElementById("restrictionInfo")) {
+                        	$("#jqgh_list_restriction").append('<i class="fa fa-lg fa-info-circle icon-light-gray ml-1" data-toggle="tooltip" id="restrictionInfo" data-html="true" data-placement="right"></i>');
+                    		showHelpLink("License_List_Restriction_Info", "restrictionInfo");
+                        }
                         updateGridRowCount('list', 'pager');
                         
                         // grid complete 후 oss name auto complete 처리

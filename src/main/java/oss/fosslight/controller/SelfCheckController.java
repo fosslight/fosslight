@@ -672,6 +672,7 @@ public class SelfCheckController extends CoTopComponent {
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(s)) {
 					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(s);
 					if (!isEmpty(licenseMaster.getRestriction())) {
+						String restrictionString = CommonFunction.setLicenseRestrictionListById(null, licenseMaster.getRestriction());
 						String restrictionStr = "";
 						for (String restriction : licenseMaster.getRestriction().split(",")) {
 							if (isEmpty(restriction)) {
@@ -686,6 +687,9 @@ public class SelfCheckController extends CoTopComponent {
 							}
 						}
 						if (!isEmpty(restrictionStr)) {
+							if (!isEmpty(restrictionString)) {
+								restrictionStr += "|" + restrictionString.split("[|]")[1];
+							}
 							licenseMaster.setRestrictionStr(restrictionStr);
 						}
 					}

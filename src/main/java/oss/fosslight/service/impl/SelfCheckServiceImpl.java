@@ -442,6 +442,15 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			// license 정보 등록
 			for (ProjectIdentification bean : list) {
+				String licenseIds = "";
+				String ossRestriction = "";
+				if (!isEmpty(bean.getOssName())) {
+					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+					if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
+						ossRestriction = CoCodeManager.OSS_INFO_UPPER.get(key).getRestriction();
+					}
+				}
+				
 				if (bean.getComponentLicenseList()!=null){
 					String licenseCopy = "";
 						
@@ -489,12 +498,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					bean.setLicenseNameExistsYn(CommonFunction.existsLicenseName(bean.getComponentLicenseList()) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 					bean.setLicenseUserGuideStr(CommonFunction.checkLicenseUserGuide(bean.getComponentLicenseList()));
 					bean.setLicenseUserGuideYn(isEmpty(bean.getLicenseUserGuideStr()) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES);
-					bean.setRestriction(CommonFunction.setLicenseRestrictionList(bean.getComponentLicenseList()));
+					licenseIds = String.join(",", bean.getComponentLicenseList().stream().map(e -> e.getLicenseId()).distinct().collect(Collectors.toList()));
 					
 					// subGrid의 Item 추출을 위해 별도의 map으로 구성한다.
 					// 부몬의 component_id를 key로 관리한다.
 					subMap.put(bean.getGridId(), bean.getComponentLicenseList());
-				}	
+				}
+				bean.setRestriction(CommonFunction.setLicenseRestrictionListById(licenseIds, ossRestriction));
 			}
 			
 			// 다른 프로젝트에서 load한 경우 component id 초기화

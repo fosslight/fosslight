@@ -2759,7 +2759,17 @@ var src_grid = {
 						}
                     }
 				},
-				{name: 'restriction', index: 'restriction', width: 50, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
+				{name: 'restriction', index: 'restriction', width: 50, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false,
+					sorttype: function (cell, rowData) {
+						let restriction = rowData.restriction;
+						if ("" != restriction) {
+							let level = restriction.split("|")[1];
+							return level;
+						} else {
+							return 0;
+						}
+                    }
+				},
 				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false,
  					editoptions: {
 						dataInit:

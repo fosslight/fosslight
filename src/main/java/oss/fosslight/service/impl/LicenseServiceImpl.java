@@ -131,11 +131,10 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		List<LicenseMaster> list = licenseMapper.selectLicenseList(licenseMaster);
 		
 		for (LicenseMaster item : list){
-			if (!isEmpty(item.getRestriction())){
-				item.setRestriction(CommonFunction.setLicenseRestrictionList(item.getRestriction()));
+			if (!isEmpty(item.getRestriction())) {
+				item.setRestriction(CommonFunction.setLicenseRestrictionListById(null, item.getRestriction()));
 			}
-
-			if(!isEmpty(item.getWebpage())) {
+			if (!isEmpty(item.getWebpage())) {
 				if (!item.getWebpage().contains("http://") && !item.getWebpage().contains("https://")) {
 					item.setWebpage("http://" + item.getWebpage());
 				}

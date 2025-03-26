@@ -1232,7 +1232,17 @@ var bom_data = {
 							}
 	                    }
 					},
-					{name: 'restriction', index: 'restriction', width: 60, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
+					{name: 'restriction', index: 'restriction', width: 60, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : true, search : false,
+						sorttype: function (cell, rowData) {
+							let restriction = rowData.restriction;
+							if ("" != restriction) {
+								let level = restriction.split("|")[1];
+								return level;
+							} else {
+								return 0;
+							}
+	                    }
+					},
 					{name: 'licenseTypeIdx', index: 'licenseTypeIdx', width: 60, align: 'center', hidden:true},
 					{name: 'adminCheckYn', index: 'adminCheckYn', width: 50, align: 'center', hidden:true},
 					{name: 'adminCheck', index: 'adminCheck', width: 50, align: 'center', formatter: bom_fn.displayAdminCheck, unformat: bom_fn.unDisplayAdminCheck, sortable:false, search:false},
