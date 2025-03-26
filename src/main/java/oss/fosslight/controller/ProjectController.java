@@ -5415,7 +5415,7 @@ public class ProjectController extends CoTopComponent {
 									commentsHistory.setStatus("Request to Open");
 									commentService.registComment(commentsHistory);
 									
-									param.setCommId(prjBean.getCommId());
+									param.setCommId(commentsHistory.getCommId());
 									param.setStatusRequestYn(CoConstDef.FLAG_YES);
 									projectService.updateProjectMaster(param);
 								} else {
