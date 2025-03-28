@@ -4968,12 +4968,18 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, afterBean.getPriority()) + "</span></p>";
 			}
 			
-			String before = beforeBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
-			String after = afterBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
+			String before = "";
+			String after = "";
+			if (!isEmpty(beforeBean.getComment())) {
+				before = Jsoup.parse(beforeBean.getComment()).text();
+			}
+			if (!isEmpty(afterBean.getComment())) {
+				after = Jsoup.parse(afterBean.getComment()).text();
+			}
 			if (!before.equals(after)) {
 				comment += "<p><strong>Additional Information</strong><br />";
-				comment += "Before : <br/>" + before + "<br/>";
-				comment += "After : <span style='background-color:yellow'><br/>" + after + "</span></p>";
+				comment += "Before : <br/>" + beforeBean.getComment() + "<br/>";
+				comment += "After : <span style='background-color:yellow'><br/>" + afterBean.getComment() + "</span></p>";
 			}
 
 			before = avoidNull(beforeBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");

@@ -35,6 +35,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 
+import org.jsoup.Jsoup;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -2949,10 +2950,20 @@ public class CoMailManager extends CoTopComponent {
 	private String appendChangeStyleDiv(String before, String after) {
 		before = avoidNull(before).trim();
 		after = avoidNull(after).trim();
-		if (!avoidNull(before).equals(after)) {
-			if (isEmpty(after)){
+		
+		String parseBefore = "";
+		String parseAfter = "";
+		if (!isEmpty(before)) {
+			parseBefore = Jsoup.parse(before).text();
+		}
+		if (!isEmpty(after)) {
+			parseAfter = Jsoup.parse(after).text();
+		}
+		
+		if (!avoidNull(parseBefore).equals(parseAfter)) {
+			if (isEmpty(after)) {
 				after = changeStyleDiv(before,"del");
-			}else{
+			} else {
 				after = changeStyleDiv(after,"mod");
 			}
 		}
