@@ -6241,7 +6241,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			String key = bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName();
 			String licenseName = "";
 			
-			String _key = (bean.getOssName() + "|" + licenseName).toUpperCase();
+			String _key = (bean.getBinaryName() + "|" + bean.getOssName() + "|" + licenseName).toUpperCase();
 			if (!mergeOssCheckList.contains(_key)) {
 				mergeOssCheckList.add(_key);
 			} else {
