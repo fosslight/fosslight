@@ -64,6 +64,7 @@
                                                     <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
                                                         <select class="form-control select2 save-value" id="parStatusSelect" multiple="multiple" name="status" style="width: 100%;">
                                                             <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
+                                                            		th:if="${option.cdDtlNo != 'NA' and option.cdDtlNo != 'FREV'}"
                                                                     th:text="${option.cdDtlNm}"
                                                                     th:value="${option.cdDtlNo}"
                                                                     th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
