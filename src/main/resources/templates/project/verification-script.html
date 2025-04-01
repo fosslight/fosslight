@@ -453,7 +453,7 @@
                                 var appendHtml = '<br>' + item[0].createdDate;
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
-                                uploadFileTag += '<span class="badge bg-danger uploadFile4" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
+                                uploadFileTag += '<span class="badge bg-danger uploadFile5" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
 
                                 $('.uploadList_5 ul').append(uploadFileTag);
                                 $('input[name=fileSeq_5]').val(item[0].registSeq);
@@ -1585,6 +1585,10 @@
                             $("#uploadAdd_3").hide();
                             
                             $(".multiSet > div:eq(2)").hide();
+                    	} else {
+                    		$('input[name=packageFileType2]').val("");
+                            $(".multiSet > div:eq(1)").hide();
+                            $("#uploadAdd_1").show();
                     	}
                     }
                 });
@@ -2779,9 +2783,14 @@
                                     projectList_3.packagingLoad();
 
                                     break;
-                                case "3":
+                                case "4":
                                     projectList_4.load();
                                     projectList_4.packagingLoad();
+
+                                    break;
+                                case "5":
+                                    projectList_5.load();
+                                    projectList_5.packagingLoad();
 
                                     break;
                                 default:
@@ -4089,7 +4098,7 @@
                         rowList: [10, 20, 30],
                         editurl: 'clientArray',
                         autowidth: true,
-                        pager: '#pager_3',
+                        pager: '#pager_4',
                         gridview: true,
                         sortable: function (permutation) {
                         },
@@ -4126,6 +4135,87 @@
 
                             for (var i in row) {
                                 $("#packagingList_4").jqGrid('setCell', +i + 1, 'fileSeq', "<input type=\"button\" value=\"load\" class=\"btnCLight w55\" onclick=\"fn.loadReusePackagingFile('" + data.prjId + "', '" + row[i].fileSeq + "', '4')\">");
+                            }
+                            
+                            adjustPageGridSize();
+                        }
+                    });
+                }
+            };
+        
+        var projectList_5 = {
+                load: function (data) {
+                    $("#projectList_5").jqGrid({
+                        datatype: 'json',
+                        jsonReader: {
+                            repeatitems: false,
+                            root: function (obj) {
+                                return obj.rows;
+                            },
+                            page: function (obj) {
+                                return obj.page;
+                            },
+                            total: function (obj) {
+                                return obj.total;
+                            },
+                            records: function (obj) {
+                                return obj.records;
+                            }
+                        },
+                        colNames: ['ID', 'Project Name', 'Project<br>Version', 'Distribution<br>Type', 'Creator', 'Created<br>Date'],
+                        colModel: [
+                            {name: 'prjId', index: 'prjId', width: 80, align: 'center', sorttype: 'int'},
+                            {name: 'prjName', index: 'prjName', width: 243, align: 'left'},
+                            {name: 'prjVersion', index: 'prjVersion', width: 80, align: 'left'},
+                            {name: 'distributionType', index: 'distributionType', width: 130, align: 'left', sortable: true},
+                            {name: 'creator', index: 'creator', width: 100, align: 'left', sortable: true},
+                            {name: 'createdDate', index: 'createdDate', width: 100, align: 'center', formatter: 'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable: true}
+                        ],
+                        onSelectRow: function (id) {
+                            fn.projectPackagingSearch($(this).getCell(id, "prjId"), 5);
+                            $("#packaging_5").show();
+                        },
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
+                        editurl: 'clientArray',
+                        autowidth: true,
+                        pager: '#pager_5',
+                        gridview: true,
+                        sortable: function (permutation) {
+                        },
+                        viewrecords: true,
+                        sortorder: 'desc',
+                        height: 'auto',
+                        loadComplete: function () {
+                        	adjustPageGridSize();
+                        }
+                    });
+
+                    $("#projectList_5").jqGrid('navGrid', "#pager_5", {add: false, edit: false, del: false, search: false, refresh: false});
+                },
+                packagingLoad: function () {
+                    $("#packagingList_5").jqGrid({
+                        datatype: 'json',
+                        colNames: ['packaging File Name', ''],
+                        colModel: [
+                            {name: 'origNm', index: 'origNm', width: 300, align: 'left'},
+                            {name: 'fileSeq', index: 'fileSeq', width: 80, align: 'center'}
+                        ],
+                        onCellSelect: function (rowid, iCol, cellcontent, e) {
+                        },
+                        editurl: 'clientArray',
+                        autowidth: true,
+                        gridview: true,
+                        sortable: function (permutation) {
+                        },
+                        viewrecords: true,
+                        sortorder: 'desc',
+                        height: 'auto',
+                        loadComplete: function (data) {
+                            var row = data.rows;
+
+                            for (var i in row) {
+                                $("#packagingList_5").jqGrid('setCell', +i + 1, 'fileSeq', "<input type=\"button\" value=\"load\" class=\"btnCLight w55\" onclick=\"fn.loadReusePackagingFile('" + data.prjId + "', '" + row[i].fileSeq + "', '5')\">");
                             }
                             
                             adjustPageGridSize();

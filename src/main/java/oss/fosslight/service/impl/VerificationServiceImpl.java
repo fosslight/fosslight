@@ -1471,6 +1471,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setPackageFileId2(fileSeqs.size() >= 2 ? fileSeqs.get(1) : null);
 					prjParam.setPackageFileId3(fileSeqs.size() >= 3 ? fileSeqs.get(2) : null);
 					prjParam.setPackageFileId4(fileSeqs.size() >= 4 ? fileSeqs.get(3) : null);
+					prjParam.setPackageFileId5(fileSeqs.size() >= 5 ? fileSeqs.get(4) : null);
 
 					if (!isEmpty(prjInfo.getDistributionStatus())){
 						prjParam.setStatusVerifyYn("C");
@@ -3148,7 +3149,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			try {
 				packagingComment = fileService.setClearFiles(map);
-			}catch(Exception e) {
+			} catch(Exception e) {
 				log.error(e.getMessage(), e);
 			}
 			prjParam.setStatusVerifyYn("N");
