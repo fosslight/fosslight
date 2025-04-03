@@ -1468,10 +1468,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					Project prjParam = new Project();
 					prjParam.setPrjId(prjId);
 					prjParam.setPackageFileId(fileSeqs.get(0));
+					prjParam.setPackageFileType1("1");
 					prjParam.setPackageFileId2(fileSeqs.size() >= 2 ? fileSeqs.get(1) : null);
+					prjParam.setPackageFileType2(fileSeqs.size() >= 2 ? "1" : null);
 					prjParam.setPackageFileId3(fileSeqs.size() >= 3 ? fileSeqs.get(2) : null);
+					prjParam.setPackageFileType3(fileSeqs.size() >= 3 ? "1" : null);
 					prjParam.setPackageFileId4(fileSeqs.size() >= 4 ? fileSeqs.get(3) : null);
+					prjParam.setPackageFileType4(fileSeqs.size() >= 4 ? "1" : null);
 					prjParam.setPackageFileId5(fileSeqs.size() >= 5 ? fileSeqs.get(4) : null);
+					prjParam.setPackageFileType5(fileSeqs.size() >= 5 ? "1" : null);
 
 					if (!isEmpty(prjInfo.getDistributionStatus())){
 						prjParam.setStatusVerifyYn("C");
@@ -2113,6 +2118,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		if (!isEmpty(prjBean.getPackageFileId4())) {
 			packageFileIds.add(prjBean.getPackageFileId4());
+		}
+		
+		if (!isEmpty(prjBean.getPackageFileId5())) {
+			packageFileIds.add(prjBean.getPackageFileId5());
 		}
 
 		int fileSeq = 1;

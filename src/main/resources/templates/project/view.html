@@ -180,6 +180,11 @@
 																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File4"></i>
 															</span>
 														</th:block>
+														<th:block th:if="${project.packageFileId5 != '' and project.packageFileId5 != null}">
+															<span style="cursor:pointer;" th:onclick="fn.downloadPackageMulti(this, '5', [[${project.permission}]])">
+																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File5"></i>
+															</span>
+														</th:block>
 													</th:block>
 												</td>
 											</tr>

@@ -270,6 +270,7 @@ public class VerificationController extends CoTopComponent {
 		File packageFile2 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2());
 		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
 		File packageFile4 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId4());
+		File packageFile5 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId5());
 		List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(projectMaster.getNoticeAppendFileId());
 		
 		if (noticeAppendFile != null) {
@@ -277,25 +278,40 @@ public class VerificationController extends CoTopComponent {
 		}
 		
 		if (packageFile != null) {
-			if (!isEmpty(packageFile.getRefPrjId())) projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
+			if (!isEmpty(packageFile.getRefPrjId())) {
+				projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
+			}
 			existsFileFlag = true;
 		}
 		if (packageFile2 != null) {
-			if (!isEmpty(packageFile2.getRefPrjId())) projectMaster.setReuseRefPrjId2(packageFile2.getRefPrjId());
+			if (!isEmpty(packageFile2.getRefPrjId())) {
+				projectMaster.setReuseRefPrjId2(packageFile2.getRefPrjId());
+			}
 			existsFileFlag = true;
 		}
 		if (packageFile3 != null) {
-			if (!isEmpty(packageFile3.getRefPrjId())) projectMaster.setReuseRefPrjId3(packageFile3.getRefPrjId());
+			if (!isEmpty(packageFile3.getRefPrjId())) {
+				projectMaster.setReuseRefPrjId3(packageFile3.getRefPrjId());
+			}
 			existsFileFlag = true;
 		}
 		if (packageFile4 != null) {
-			if (!isEmpty(packageFile4.getRefPrjId())) projectMaster.setReuseRefPrjId4(packageFile4.getRefPrjId());
+			if (!isEmpty(packageFile4.getRefPrjId())) {
+				projectMaster.setReuseRefPrjId4(packageFile4.getRefPrjId());
+			}
+			existsFileFlag = true;
+		}
+		if (packageFile5 != null) {
+			if (!isEmpty(packageFile5.getRefPrjId())) {
+				projectMaster.setReuseRefPrjId5(packageFile5.getRefPrjId());
+			}
 			existsFileFlag = true;
 		}
 		files.add(packageFile);
 		files.add(packageFile2);
 		files.add(packageFile3);
 		files.add(packageFile4);
+		files.add(packageFile5);
 		
 		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
 			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());

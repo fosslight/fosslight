@@ -6878,6 +6878,17 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					fileSeqs.add(file4.get(0).getRegistSeq());
 				}
 			}
+			
+			if (!isEmpty(prj.getPackageFileId5())) {
+				List<UploadFile> file5 = fileService.setReusePackagingFile(prj.getPackageFileId5());
+				fileMap.put("refFileSeq", prj.getPackageFileId5());
+				fileMap.put("fileSeq", file5.get(0).getRegistSeq());
+				reuseCheck = verificationService.setReusePackagingFile(fileMap);
+				
+				if (reuseCheck) {
+					fileSeqs.add(file5.get(0).getRegistSeq());
+				}
+			}
 		}
 		
 		return fileSeqs;
@@ -7421,7 +7432,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(ossNotice.getPrjId());
-		identification.setReferenceDiv(!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(ossNotice.getRefDiv()) ? CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM : ossNotice.getRefDiv());
+		identification.setReferenceDiv(!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(ossNotice.getRefDiv()) ? CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM : CoConstDef.CD_DTL_COMPONENT_ID_DEP);
 		
 		List<OssComponents> ossComponentList = projectMapper.selectOssComponentsSbomList(identification);
 		
@@ -7455,11 +7466,12 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				}
 			}
 			
-			String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+//			String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+			String componentKey = bean.getPackageUrl().toUpperCase();
 			
-			if ("-".equals(bean.getOssName())) {
-				componentKey += dashSeq++;
-			}
+//			if ("-".equals(bean.getOssName())) {
+//				componentKey += dashSeq++;
+//			}
 			
 			// type
 			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(bean.getObligationType());
@@ -7539,10 +7551,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			for (OssComponents bean : addOssComponentList) {
 				if (isEmpty(bean.getLicenseName())) continue;
 				
-				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
-				if ("-".equals(bean.getOssName())) {
-					componentKey += dashSeq++;
-				}
+				String componentKey = bean.getPackageUrl().toUpperCase();
+//				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+//				if ("-".equals(bean.getOssName())) {
+//					componentKey += dashSeq++;
+//				}
 				
 				OssComponentsLicense license = new OssComponentsLicense();
 				license.setLicenseId(bean.getLicenseId());
