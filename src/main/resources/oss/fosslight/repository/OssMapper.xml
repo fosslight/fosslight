@@ -620,7 +620,7 @@
 		LEFT OUTER JOIN (
 				SELECT A1.OSS_COMMON_ID, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_COMMON_ID
 			) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
-		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
+		WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME <![CDATA[<>]]> #{ossName}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
 	    	<choose>
 	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
@@ -674,7 +674,7 @@
 		LEFT OUTER JOIN (
 				SELECT A1.OSS_COMMON_ID, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_COMMON_ID
 			) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
-		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
+		WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME <![CDATA[<>]]> #{ossName}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
 	    	<choose>
 	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
