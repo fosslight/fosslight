@@ -2650,7 +2650,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 										if (url.getDownloadLocation().equals(downloadlocationUrl) || url.getDownloadLocation().equals(downloadlocationUrl + "/")) {
 											checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 										} else {
-											redirectlocationUrl = oc.getURL().toString().split("//")[1];
+											if (oc.getURL().toString().indexOf("//") > -1) {
+												redirectlocationUrl = oc.getURL().toString().split("//")[1];
+											}
 											bean.setDownloadLocation(redirectlocationUrl);
 											bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
 											checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
