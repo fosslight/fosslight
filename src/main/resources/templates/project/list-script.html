@@ -2018,10 +2018,30 @@ var fn = {
 			success : function(data){
 				if ("10" == data.resCd) {
 					var message = "";
+					var noDelPrjIds = new Array();
+					if (typeof data.noDelPrjIds !== "undefined") {
+						noDelPrjIds = data.noDelPrjIds;
+					}
+					
+					if (noDelPrjIds.length > 0) {
+						if (notPermissions.length > 0) {
+							let filterNotPermissions = noDelPrjIds.filter(function(cur) {
+								return !notPermissions.includes(cur);
+							});
+							notPermissions = filterNotPermissions;
+						}
+						if (prjIds.length > 0) {
+							let filterPrjIds = noDelPrjIds.filter(function(cur) {
+								return !prjIds.includes(cur);
+							});
+							prjIds = filterPrjIds;
+						}
+					}
+					
 					var notPermissionsLength = notPermissions.length;
 					var permissionsLength = prjIds.length;
 					
-					if (notPermissionsLength > 0) {
+					if (notPermissionsLength > 0 && permissionsLength > 0) {
 						message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.success', 'projects')}]];
 						message += "<br>&emsp;- ";
 						prjIds.forEach (function (el, index) {
@@ -2041,11 +2061,36 @@ var fn = {
 							}
 						});
 					} else {
-						message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', 'projects')}]];
+						if (notPermissionsLength > 0) {
+							message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.fail', 'projects')}]];
+							message += "<br>&emsp;- ";
+							notPermissions.forEach (function (el, index) {
+								message += "PRJ-" + el;
+								if (index < notPermissionsLength-1) {
+									message += ", ";
+								}
+							});
+						} else if (permissionsLength > 0) {
+							message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', 'projects')}]];
+							message += "<br>&emsp;- ";
+							prjIds.forEach (function (el, index) {
+								message += "PRJ-" + el;
+								if (index < permissionsLength-1) {
+									message += ", ";
+								}
+							});
+						}
+					}
+					
+					if (noDelPrjIds.length > 0) {
+						if ("" != message) {
+							message += "<br><br>";
+						}
+						message += [[#{msg.project.cannot.deleted}]];
 						message += "<br>&emsp;- ";
-						prjIds.forEach (function (el, index) {
+						noDelPrjIds.forEach (function (el, index) {
 							message += "PRJ-" + el;
-							if (index < permissionsLength-1) {
+							if (index < noDelPrjIds.length-1) {
 								message += ", ";
 							}
 						});

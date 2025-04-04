@@ -1752,6 +1752,7 @@ public class ProjectController extends CoTopComponent {
 
 		String rtnFlag = "11"; // default error
 		HashMap<String, Object> resMap = new HashMap<>();
+		List<String> noDelPrjIds = new ArrayList<>();
 		
 		for (String prjId : project.getPrjIds()) {
 			Project param = new Project();
@@ -1759,6 +1760,11 @@ public class ProjectController extends CoTopComponent {
 			param.setUserComment(project.getUserComment());
 			
 			Project projectInfo = projectService.getProjectDetail(param);
+			if (CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE.equalsIgnoreCase(projectInfo.getStatus()) || CoConstDef.CD_DTL_PROJECT_STATUS_FINAL_REVIEW.equalsIgnoreCase(projectInfo.getStatus())) {
+				rtnFlag = "10";
+				noDelPrjIds.add(prjId);
+				continue;
+			}
 			
 			try {
 				History h = new History();
@@ -1797,6 +1803,9 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 		resMap.put("resCd", rtnFlag);
+		if (!noDelPrjIds.isEmpty()) {
+			resMap.put("noDelPrjIds", noDelPrjIds);
+		}
 		
 		return makeJsonResponseHeader(resMap);
 	}
@@ -4823,8 +4832,12 @@ public class ProjectController extends CoTopComponent {
 		map.put("commId", avoidNull(prjBean.getCommId(), ""));
 		map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
 		map.put("statusRequestYn", avoidNull(prjBean.getStatusRequestYn(), CoConstDef.FLAG_NO));
-		if (!isEmpty(prjBean.getCvssScoreMax())) map.put("cvssScoreMax", prjBean.getCvssScoreMax());
-		if (!isEmpty(prjBean.getVulnerabilityResolution())) map.put("vulnerabilityResolution", prjBean.getVulnerabilityResolution());
+		if (!isEmpty(prjBean.getCvssScoreMax())) {
+			map.put("cvssScoreMax", prjBean.getCvssScoreMax());
+		}
+		if (!isEmpty(prjBean.getVulnerabilityResolution())) {
+			map.put("vulnerabilityResolution", prjBean.getVulnerabilityResolution());
+		}
 		
 		return makeJsonResponseHeader(map);
 	}

@@ -326,20 +326,20 @@
 			$("#delete").click(function(){
 				fn.getProjectStatus();
 				
-				if (displayInfo.completeFlag == 'Y' || displayInfo.identificationStatus == "CONF") {
+				if ("COMP" == displayInfo.projectStatus || "FREV" == displayInfo.projectStatus) {
 					alertify.alert([[#{msg.project.warn.edit.delete}]], function(){});
 
 					return;
-				} else if ('REV' == displayInfo.projectStatus || 'PROC' == displayInfo.distributionStatus) { 
-					var msg = "";
-					if ("PROC" == displayInfo.distributionStatus){
-						msg = [[#{msg.project.distribution.loading}]];
-					} else {
-						msg = [[#{msg.project.warn.project.status}]];
-					}
-					alertify.alert(msg, function(){});
+// 				} else if ('REV' == displayInfo.projectStatus || 'PROC' == displayInfo.distributionStatus) { 
+// 					var msg = "";
+// 					if ("PROC" == displayInfo.distributionStatus){
+// 						msg = [[#{msg.project.distribution.loading}]];
+// 					} else {
+// 						msg = [[#{msg.project.warn.project.status}]];
+// 					}
+// 					alertify.alert(msg, function(){});
 
-					return false;
+// 					return false;
 				} else {
 					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
