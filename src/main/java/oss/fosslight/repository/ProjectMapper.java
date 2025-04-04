@@ -422,4 +422,6 @@ public interface ProjectMapper {
 	List<ProjectIdentification> selectOssComponentsThirdCopy(OssComponents ossComponents);
 	
 	List<OssComponentsLicense> selectOssComponentsIdLicenseList(OssComponents ossComponents);
+	
+	void copyProjectAddList(Project project);
 }

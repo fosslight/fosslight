@@ -1794,7 +1794,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void registProject(Project project) {
 		//copy 건
-		if ("true".equals(project.getCopy())){
+		if ("true".equals(project.getCopy())) {
 			String oldId = project.getPrjId();
 			project.setPrjId(null);
 			project.setCopyPrjId(oldId);
@@ -1839,7 +1839,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 
 			// project watcher insert
-
 			if (project.getWatchers()!= null) { // Project 신규 등록과 동일하게 watcher 추가
 				ArrayList<Map<String, String>> divisionList = new ArrayList<Map<String, String>>();
 				ArrayList<Map<String, String>> emailList = new ArrayList<Map<String, String>>();
@@ -1885,6 +1884,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				projectMapper.deleteProjectWatcher(project);
 			}
 			
+			{
+				projectMapper.copyProjectAddList(project);
+			}
+			
 			//나머지 프로젝트 마스터 테이블 카피
 			// Identification 관련 정보만 Copy한다.
 			// upload한 파일이 있는 경우는 파일 순번을 새롭게 취득하여 재등록한다. 물리파일은 복사하지 않고 공유한다.
@@ -1916,7 +1919,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					newBean.setDistributeSoftwareType(orgBean.getDistributeSoftwareType());
 				}
 				
-				if (!avoidNull(project.getDistributionType()).equals(orgBean.getDistributionType())) {}
+				if (!isEmpty(orgBean.getSrcCsvFileId())) {
+					newBean.setSrcCsvFileId(fileService.copyPhysicalFile(orgBean.getSrcCsvFileId(), null, true));
+				}
+				
+				if (!isEmpty(orgBean.getDepCsvFileId())) {
+					newBean.setDepCsvFileId(fileService.copyPhysicalFile(orgBean.getDepCsvFileId(), null, true));
+				}
+
+				if (!isEmpty(orgBean.getBinCsvFileId())) {
+					newBean.setBinCsvFileId(fileService.copyPhysicalFile(orgBean.getBinCsvFileId(), null, true));
+				}
 				
 				if (!isEmpty(orgBean.getSrcAndroidCsvFileId())) {
 					newBean.setSrcAndroidCsvFileId(fileService.copyFileInfo(orgBean.getSrcAndroidCsvFileId()));

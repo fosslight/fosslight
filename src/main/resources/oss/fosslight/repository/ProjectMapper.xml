@@ -2875,6 +2875,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcCsvFileId)">
 				, SRC_CSV_FILE_ID = #{srcCsvFileId}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(depCsvFileId)">
+				, DEP_CSV_FILE_ID = #{depCsvFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binCsvFileId)">
+				, BIN_CSV_FILE_ID = #{binCsvFileId}
+			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('14', referenceDiv)">
 				, SRC_ANDROID_CSV_FILE_ID = #{srcAndroidCsvFileId}
 				, SRC_ANDROID_NOTICE_FILE_ID = #{srcAndroidNoticeFileId}
@@ -4851,6 +4857,24 @@
 		 WHERE PRJ_ID = #{prjId}
 		   AND REFERENCE_DIV = #{referenceDiv}
 	</select>
+	
+	<insert id="copyProjectAddList" parameterType="oss.fosslight.domain.Project">
+	/* ProjectMapper copyProjectAddList */
+		INSERT INTO	PROJECT_ADDLIST (
+			PRJ_ID,
+			REFERENCE_ID,
+			REFERENCE_DIV,
+			COMPONENT_COUNT,
+			PRJ_REF_IDX
+		)
+		SELECT #{prjId}
+			, REFERENCE_ID
+			, REFERENCE_DIV
+			, COMPONENT_COUNT
+			, PRJ_REF_IDX
+		FROM PROJECT_ADDLIST
+		WHERE PRJ_ID = #{copyPrjId}
+	</insert>
 	
 	<select id="findIdentificationMaxNvdInfo" resultType="string">
 		SELECT CONCAT(TBL.PRODUCT,'@',TBL.VERSION,'@',TBL.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
