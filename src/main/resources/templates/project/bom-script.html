@@ -924,37 +924,47 @@ var bom_fn = {
 		}
     },
     selectDownloadFile : function(target) {
-    	// download file
-    	if (target === "report_sub") {
-        	bom_fn.downloadExcel();
-        } else {
-        	var identificationStatus = [[${project.identificationStatus}]];
-        	if ("CONF" != identificationStatus) {
-        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-    				if (e) {
-    					bom_fn.selectDownloadFileValidation(target);
-    				} else {
-    					return false;
-    				}
-    			});
-        	} else {
-        		bom_fn.selectDownloadFileValidation(target);
-        	}
-        }
+    	let obj = com_fn.checkSelectDownloadFile('BOM');
+    	if (typeof obj.overMaxLengthOssList !== "undefined") {
+    		let message = [[#{msg.common.check.maxlength.over.export}]];
+    		let list = obj.overMaxLengthOssList;
+    		list.forEach (function (el, index) {
+				message += "<br>&emsp;- " + el + " : copyright column";
+			});
+    		alertify.alert(message, function(){});
+    	} else {
+    		if (obj.isValid) {
+    			// download file
+    	    	if (target === "report_sub") {
+    	        	bom_fn.downloadExcel();
+    	        } else {
+    	        	var identificationStatus = [[${project.identificationStatus}]];
+    	        	if ("CONF" != identificationStatus) {
+    	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+    	    				if (e) {
+    	    					bom_fn.selectDownloadFileValidation(target);
+    	    				} else {
+    	    					return false;
+    	    				}
+    	    			});
+    	        	} else {
+    	        		bom_fn.selectDownloadFileValidation(target);
+    	        	}
+    	        }
+    		} else {
+    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    		}
+    	}
     },
     selectDownloadFileValidation : function(target) {
-    	if (com_fn.checkSelectDownloadFile('BOM')) {
-    		if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
-            else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
-            else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
-            else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
-            else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
-            else if (target === "YAML") com_fn.downloadYaml('BOM');
-            else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
-            else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
-    	} else {
-    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    	}
+    	if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
+        else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
+        else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
+        else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
+        else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
+        else if (target === "YAML") com_fn.downloadYaml('BOM');
+        else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
+        else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
     },
     downloadSpdxSpreadSheetExcel : function(){
     	loadingIden.show();

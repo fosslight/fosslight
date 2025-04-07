@@ -603,35 +603,47 @@ var dep_fn = {
 		$("#_depAddListContainer").show();
 	},
 	selectDownloadFile : function(target) {
-    	// download file
-        if (target === "report_sub") {
-        	dep_fn.downloadExcel();
-        } else {
-        	var identificationStatus = '${project.identificationStatus}';
-        	if ("CONF" != identificationStatus) {
-        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-    				if (e) {
-    					dep_fn.selectDownloadFileValidation();
-    				} else {
-    					return false;
-    				}
-    			});
-        	} else {
-        		dep_fn.selectDownloadFileValidation();
-        	}
-        }
-    },
-    selectDownloadFileValidation : function() {
-    	if (com_fn.checkSelectDownloadFile('DEP')) {
-    		com_fn.downloadYaml('DEP');
+loadingIden.show();
+    	
+    	let obj = com_fn.checkSelectDownloadFile('DEP');
+    	if (typeof obj.overMaxLengthOssList !== "undefined") {
+    		loadingIden.hide();
+    		
+    		let message = [[#{msg.common.check.maxlength.over.export}]];
+    		let list = obj.overMaxLengthOssList;
+    		list.forEach (function (el, index) {
+				message += "<br>&emsp;- " + el + " : copyright column";
+			});
+    		alertify.alert(message, function(){});
     	} else {
-    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    		if (obj.isValid) {
+    			// download file
+    	        if (target === "report_sub") {
+    	        	dep_fn.downloadExcel();
+    	        } else {
+    	        	loadingIden.hide();
+    	        	
+    	        	var identificationStatus = [[${project.identificationStatus}]];
+    	        	if ("CONF" != identificationStatus) {
+    	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+    	    				if (e) {
+    	    					com_fn.downloadYaml('DEP');
+    	    				} else {
+    	    					return false;
+    	    				}
+    	    			});
+    	        	} else {
+    	        		com_fn.downloadYaml('DEP');
+    	        	}
+    	        }
+    		} else {
+    			loadingIden.hide();
+    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    		}
     	}
     },
 	// 다운로드 엑셀
 	downloadExcel : function(){
-		loadingIden.show();
-		
 		$.ajax({
 			type: "POST",
 			url: '/exceldownload/getExcelPost',

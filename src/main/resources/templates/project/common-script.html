@@ -1995,7 +1995,7 @@ var com_fn = {
 		});
 	},
 	checkSelectDownloadFile : function (target) {
-		var checkEmptyFlag = false;
+		var rtnObj;
 		var referenceDiv = "";
 		var params = {'prjId':[[${project.prjId}]]};
 		
@@ -2015,16 +2015,14 @@ var com_fn = {
 			async : false,
 			contentType : 'application/json',
 			success: function (data) {
-				if (data.isValid) {
-					checkEmptyFlag = true;
-				}
+				rtnObj = data;
 			},
 			error: function(data){
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
     	});
     	
-    	return checkEmptyFlag;
+		return rtnObj;
 	},
 	bomReqeustStart : function () {
 		if (Bom_Save_Flg) {

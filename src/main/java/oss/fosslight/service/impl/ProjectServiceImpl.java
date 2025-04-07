@@ -7790,16 +7790,24 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	@Override
 	public Map<String, Object> checkSelectDownloadFile(Project project) {
 		Map<String, Object> resMap = new HashMap<>();
+		List<String> overMaxLengthOssList = new ArrayList<>();
 		boolean emptyCheckFlag = false;
 		
 		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(project.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(project.getReferenceDiv())) {
 			List<ProjectIdentification> list = projectMapper.checkSelectDownloadFileForBOM(project);
 			if (list != null) {
 				for (ProjectIdentification bean : list) {
-					if (!bean.getLicenseTypeIdx().equals("1")) continue;
+					if (!isEmpty(bean.getCopyright()) && bean.getCopyright().length() > 32767 && !isEmpty(bean.getOssName())) {
+						String key = bean.getOssName() + " (" + avoidNull(bean.getOssVersion(), "N/A") + ")";
+						if (!overMaxLengthOssList.contains(key)) {
+							overMaxLengthOssList.add(key);
+						}
+					}
+					if (!bean.getLicenseTypeIdx().equals("1")) {
+						continue;
+					}
 					if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
 						emptyCheckFlag = true;
-						break;
 					}
 				}
 			}
@@ -7807,9 +7815,14 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
 			if (list != null) {
 				for (OssComponents oss : list) {
+					if (!isEmpty(oss.getCopyrightText()) && oss.getCopyrightText().length() > 32767 && !isEmpty(oss.getOssName())) {
+						String key = oss.getOssName() + " (" + avoidNull(oss.getOssVersion(), "N/A") + ")";
+						if (!overMaxLengthOssList.contains(key)) {
+							overMaxLengthOssList.add(key);
+						}
+					}
 					if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
 						emptyCheckFlag = true;
-						break;
 					}
 				}
 			}
@@ -7819,6 +7832,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			resMap.put("isValid", false);
 		} else {
 			resMap.put("isValid", true);
+		}
+		if (!overMaxLengthOssList.isEmpty()) {
+			resMap.put("overMaxLengthOssList", overMaxLengthOssList);
 		}
 		
 		return resMap;
