@@ -1090,9 +1090,6 @@ public class OssController extends CoTopComponent{
 			LicenseMaster licenseMaster;
 			List<String> declaredLicenses = oss.getDeclaredLicenses();
 			String downloadLocation = oss.getDownloadLocation();
-			if (downloadLocation != null) {
-				oss.setDownloadLocations(downloadLocation.split(","));
-			}
 			boolean[] check = new boolean[declaredLicenses.size() + 1];
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
@@ -1109,7 +1106,41 @@ public class OssController extends CoTopComponent{
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
-
+			
+			OssMaster ossBean = ossService.getOssInfo(null, oss.getOssName(), true);
+			if (ossBean != null) {
+				List<String> downloadLocationList = new ArrayList<>();
+				List<String> purls = new ArrayList<>();
+				if (ossBean.getDownloadLocation() != null) {
+					OssMaster param = new OssMaster();
+					for (String location : ossBean.getDownloadLocation().split(",")) {
+						downloadLocationList.add(location);
+						param.setDownloadLocation(location);
+						String purl = ossService.getPurlByDownloadLocation(param);
+						if (!isEmpty(purl)) {
+							purls.add(purl);
+						}
+					}
+				}
+				if (downloadLocation != null) {
+					OssMaster param = new OssMaster();
+					for (String location : downloadLocation.split(",")) {
+						param.setDownloadLocation(location);
+						String purl = ossService.getPurlByDownloadLocation(param);
+						if (!purls.contains(purl)) {
+							downloadLocationList.add(location);
+						}
+					}
+				}
+				if (!downloadLocationList.isEmpty()) {
+					oss.setDownloadLocations(downloadLocationList.toArray(new String[downloadLocationList.size()]));
+				}
+			} else {
+				if (downloadLocation != null) {
+					oss.setDownloadLocations(downloadLocation.split(","));
+				}
+			}
+			
 			for (String licenseName : declaredLicenses) {
 				licenseMaster = new LicenseMaster();
 				licenseMaster.setLicenseName(licenseName);
