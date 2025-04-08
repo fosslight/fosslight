@@ -6048,7 +6048,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (mainData != null) {
 			emptyBinaryPathCnt = mainData.stream()
-											.filter(c -> isEmpty(c.getBinaryName()))
+											.filter(c -> isEmpty(c.getBinaryName()) && !CoConstDef.FLAG_YES.equals(avoidNull(c.getExcludeYn(), CoConstDef.FLAG_NO)))
 											.collect(Collectors.toList())
 											.size();
 		}
