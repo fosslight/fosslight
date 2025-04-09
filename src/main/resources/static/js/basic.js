@@ -2980,8 +2980,37 @@ var createTabNew = function (tabNm, tabLk) {
 			deleteTabNew(tabName);
 			createTabFnc(tabNm, tabName, tabLk);
 		} else {
-			$("#tab--" + tabName).trigger("click");
-       	 	$("#tab--" + tabName).focus();
+			if (!alertify.checkRefreshTab){
+				alertify.dialog('checkRefreshTab', function() {
+					var settings;
+					
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							
+							setup.focus.element = 1;
+							
+							return setup;
+						}
+					};
+				}, false, 'confirm');
+			}
+			
+			alertify.checkRefreshTab(tabMsg)
+			.set('onok', function(closeEvent){
+				deleteTabNew(tabName);
+				createTabFnc(tabNm, tabName, tabLk);
+			})
+			.set('oncancel', function(closeEvent){
+				$("#tab--" + tabName).trigger("click");
+       	 		$("#tab--" + tabName).focus();
+			});
 		}
     } else {
 		createTabFnc(tabNm, tabName, tabLk);
