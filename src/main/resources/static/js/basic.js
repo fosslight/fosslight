@@ -2980,6 +2980,9 @@ var createTabNew = function (tabNm, tabLk) {
 			deleteTabNew(tabName);
 			createTabFnc(tabNm, tabName, tabLk);
 		} else {
+			$("#tab--" + tabName).trigger("click");
+       	 	$("#tab--" + tabName).focus();
+		
 			if (!alertify.checkRefreshTab){
 				alertify.dialog('checkRefreshTab', function() {
 					var settings;
@@ -3006,10 +3009,6 @@ var createTabNew = function (tabNm, tabLk) {
 			.set('onok', function(closeEvent){
 				deleteTabNew(tabName);
 				createTabFnc(tabNm, tabName, tabLk);
-			})
-			.set('oncancel', function(closeEvent){
-				$("#tab--" + tabName).trigger("click");
-       	 		$("#tab--" + tabName).focus();
 			});
 		}
     } else {
