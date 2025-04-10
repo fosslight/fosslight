@@ -106,7 +106,7 @@ public final class PdfUtil extends CoTopComponent {
 
 
         Project project = projectMapper.selectProjectMaster2(prjId);
-        if(project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+        if (project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
             type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
         } else {
             type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
@@ -137,7 +137,7 @@ public final class PdfUtil extends CoTopComponent {
         List<ProjectIdentification> list = new ArrayList<ProjectIdentification>();
         list = (List<ProjectIdentification>) map.get("rows");
         for (ProjectIdentification projectIdentification : list) {
-            if (projectIdentification.getExcludeYn().equals("N")) {
+        	if (CoConstDef.FLAG_NO.equals(avoidNull(projectIdentification.getExcludeYn(), CoConstDef.FLAG_NO))) {
                 //OssMasterReview
                 OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(projectIdentification.getOssId());
                 if (oss != null && !isEmpty(oss.getOssName())) {
@@ -147,34 +147,32 @@ public final class PdfUtil extends CoTopComponent {
                         }
                     }
 
-                    if(!avoidNull(oss.getImportantNotes()).equals("")) {
+                    if (!avoidNull(oss.getImportantNotes()).equals("")) {
                         if(!ossMasterMapImportantNotes.containsKey(oss.getOssName().toUpperCase())) {
                             ossMasterMapImportantNotes.put(oss.getOssName().toUpperCase(), oss);
                         }
                     }
-
-                    //VulnerabilityReview
-                    projectIdentification.setOssName(oss.getOssName());
-                    projectIdentification.setOssVersion(oss.getOssVersion());
-                    ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
-                    if (prjOssMaster != null && prjOssMaster.getCvssScore() != null) {
-                        BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
-                        BigDecimal mailingScore = new BigDecimal(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
-
-                        if (bdScore.compareTo(mailingScore) >= 0) {
-                            Vulnerability vulnerability = new Vulnerability();
-                            vulnerability.setOssName(oss.getOssName());
-                            vulnerability.setVersion(oss.getOssVersion());
-                            vulnerability.setCvssScore(prjOssMaster.getCvssScore());
-                            String version = oss.getOssVersion();
-                            if (isEmpty(oss.getOssVersion())) {
-                                version = "-";
-                            }
-                            vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + version);
-                            vulnerabilityMap.put(oss.getOssName().toUpperCase() + "_" + oss.getOssVersion().toUpperCase(), vulnerability);
-                        }
-                    }
                 }
+                
+                //VulnerabilityReview
+                if (!isEmpty(projectIdentification.getCvssScore())) {
+            		BigDecimal bdScore = new BigDecimal(Float.parseFloat(projectIdentification.getCvssScore()));
+            		BigDecimal mailingScore = new BigDecimal(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
+            		
+            		if (bdScore.compareTo(mailingScore) >= 0) {
+                        Vulnerability vulnerability = new Vulnerability();
+                        vulnerability.setOssName(projectIdentification.getOssName());
+                        vulnerability.setVersion(projectIdentification.getOssVersion());
+                        vulnerability.setCvssScore(projectIdentification.getCvssScore());
+                        String version = projectIdentification.getOssVersion();
+                        if (isEmpty(projectIdentification.getOssVersion())) {
+                            version = "-";
+                        }
+                        vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + projectIdentification.getOssName() + "&ossVersion=" + version);
+                        vulnerabilityMap.put((projectIdentification.getOssName()+ "_" + projectIdentification.getOssVersion()).toUpperCase(), vulnerability);
+                    }
+            	}
+                
                 List<String> licenseList = Arrays.asList(projectIdentification.getLicenseName().split(","));
                 licenseList = licenseList.stream().distinct().collect(Collectors.toList());
 
