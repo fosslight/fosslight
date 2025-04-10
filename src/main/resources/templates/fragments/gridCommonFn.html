@@ -65,6 +65,11 @@
                                 }).on('autocompletechange', function () {
                                     var rowid = (e.id).split('_')[0];
                                     fn_grid_com.griOssIds(target, rowid, $('#' + rowid + '_ossName').val(), $('#' + rowid + '_ossVersion').val());
+                                }).on("keypress", function(evt){
+                                	if (evt.keyCode == 13) {
+                                		var rowid = (e.id).split('_')[0];
+                                        fn_grid_com.griOssIds(target, rowid, $('#' + rowid + '_ossName').val(), $('#' + rowid + '_ossVersion').val());
+                                	}
                                 });
                                 ossVersions = [];
                                 $(e).focus();
