@@ -536,9 +536,11 @@ var fn = {
 		
 		_mainLastsel = -1;
 		if ("false" == data.isValid) {
+			var listFlag = false;
 			if (typeof data.resultData !== "undefined") {
 				let result = data.resultData;
 				if (Array.isArray(result)) {
+					listFlag = true;
 					partyMainData = result;
 					$("#list").jqGrid('GridUnload');
 					grid.init();
@@ -555,10 +557,10 @@ var fn = {
 				return;
 			}
 
-			if ("" != data.validMsg) {
-				alertify.error([[#{msg.common.valid}]], 0);
-				fn.partnerGridValidMsg(data.resultData);
-				
+			if ("" != data.validMsg && !listFlag) {
+				alertify.error(data.validMsg, 0);
+//				fn.partnerGridValidMsg(data.resultData);
+				gridValidMsgNew(partyValidMsgData_e, "list");
 				return;
 			}
 			
