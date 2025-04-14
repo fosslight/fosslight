@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -3322,7 +3323,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 				}
 				
-				noticeList = verificationService.setMergeGridData(noticeList); // merge Data
+//				noticeList = verificationService.setMergeGridData(noticeList); // merge Data
 
 				int rowIdx = 1;
 
@@ -5438,7 +5439,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 		
-		noticeList = verificationService.setMergeGridData(noticeList); // merge Data
+		if (verifyFlag) {
+			noticeList = verificationService.setMergeGridData(noticeList); // merge Data
+		}
 		
 		Map<String, Object> relationshipsMap = new HashMap<>();
 		
@@ -5501,19 +5504,33 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (!isEmpty(relationshipsKey)) {
 				relationshipsMap.put(relationshipsKey, bomRef);
 				component.setPurl(relationshipsKey);
-			}
-			if (!isEmpty(bean.getDownloadLocation())) {
-				for (String downloadLocation : bean.getDownloadLocation().split(",")) {
-					if (!isEmpty(downloadLocation)) {
-						ossMaster.setDownloadLocation(downloadLocation);
-						String purl = ossService.getPurlByDownloadLocation(ossMaster);
-						if (!isEmpty(purl)) {
-							component.setPurl(purl);
+			} else {
+				if (!isEmpty(bean.getDownloadLocation())) {
+					for (String downloadLocation : bean.getDownloadLocation().split(",")) {
+						if (!isEmpty(downloadLocation)) {
+							ossMaster.setDownloadLocation(downloadLocation);
+							String purl = ossService.getPurlByDownloadLocation(ossMaster);
+							if (!isEmpty(purl)) {
+								relationshipsKey = purl;
+								component.setPurl(purl);
+							}
+							break;
 						}
-						break;
 					}
 				}
 			}
+//			if (!isEmpty(bean.getDownloadLocation())) {
+//				for (String downloadLocation : bean.getDownloadLocation().split(",")) {
+//					if (!isEmpty(downloadLocation)) {
+//						ossMaster.setDownloadLocation(downloadLocation);
+//						String purl = ossService.getPurlByDownloadLocation(ossMaster);
+//						if (!isEmpty(purl)) {
+//							component.setPurl(purl);
+//						}
+//						break;
+//					}
+//				}
+//			}
 			
 			LicenseChoice licenseChoice = new LicenseChoice();
 			List<License> licenseList = new ArrayList<>();
@@ -5654,20 +5671,24 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					String componentId = (String) relationshipsMap.get(key);
 					String[] dependencies = oss.getDependencies().split(",");
 					Dependency bomRefDep = new Dependency(componentId);
+					boolean isExists = false;
 					
 					for (String dependency : dependencies) {
 						if (relationshipsMap.containsKey(dependency)) {
+							isExists = true;
 							String relatedComponentId = (String) relationshipsMap.get(dependency);
 							Dependency dep = new Dependency(relatedComponentId);
 							bomRefDep.addDependency(dep);
 						}
 					}
-					
-					depList.add(bomRefDep);
+					if (isExists) {
+						depList.add(bomRefDep);
+					}
 				}
 				
-				if (depList != null) {
+				if (!CollectionUtils.isEmpty(depList)) {
 					dependencyList.addAll(depList);
+					depList = null;
 				}
 			}
 		}
