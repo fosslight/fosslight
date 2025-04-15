@@ -573,7 +573,7 @@
                         index: 'restriction',
                         width: 30,
                         align: 'center',
-                        formatter: oss_lst_fn.displayLicenseRestriction,
+                        formatter: fn_grid_com.displayLicenseRestriction,
                         unformat: fn_grid_com.unformatter,
                         sortable: false,
                         search: false
@@ -717,69 +717,6 @@
                         groupField: ['groupKey'],
                         groupColumnShow: [false]
                     }, // Enter the column name by group.
-                    gridComplete: function () {
-                        // add button in header
-                        if (!oss_lst_data.existTooltip) {
-                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
-                                .appendTo($("#jqgh_list_obligation"))
-                                .attr("title", oss_lst_data.obligationInformation)
-                                .tooltip({
-                                    content: function () {
-                                        return $(this).prop('title');
-                                    }
-                                }).on('inserted.bs.tooltip', function() {
-							        var tooltipId = 'gridHeaderTooltip';
-							        $('.tooltip').attr('id', tooltipId);
-							    });
-
-                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
-                                .attr("title", oss_lst_data.licenseTypeInformation)
-                                .tooltip({
-                                    content: function () {
-                                        return $(this).prop('title');
-                                    }
-                                }).on('inserted.bs.tooltip', function() {
-							        var tooltipId = 'gridHeaderTooltip';
-							        $('.tooltip').attr('id', tooltipId);
-							    });
-
-
-                            $('[data-toggle="tooltip"]').tooltip({html: true});
-                            oss_lst_data.existTooltip = true;
-                        }
-                        if (!document.getElementById("restrictionInfo")) {
-                        	$("#jqgh_list_restriction").append('<i class="fa fa-lg fa-info-circle icon-light-gray ml-1" data-toggle="tooltip" id="restrictionInfo" data-html="true" data-placement="right"></i>');
-                    		showHelpLink("License_List_Restriction_Info", "restrictionInfo");
-                        }
-                        updateGridRowCount('list', 'pager');
-                        
-                        // grid complete 후 oss name auto complete 처리
-                        if (autoComplete.ossTags.length == 0) {
-                        	commonAjax.getOssTags().success(function (data, status, headers, config) {
-                                if (data != null) {
-                                    data.forEach(function (obj) {
-                                        if (obj != null) {
-                                            autoComplete.ossTags.push(obj.ossName);
-                                        }
-                                    })
-                                }
-                            });
-                            
-                            $('input[name="ossName"]').autocomplete({
-                            	source : autoComplete.ossTags,
-                            	select : function (event, ui) {
-                            		$(this).val(ui.item.value);
-                            	},
-                            	focus : function(event, ui) {return false;},
-                            	minLength : 1,
-                            	autoFocus : false,
-                            	disable : false,
-                            	close : function(event) {
-                            		$(".search-field").val("");
-                            	}
-                            });
-                        }
-                    },
                     loadComplete: function (result) {
                         totalRow = result.records;
                         var rows = result.rows;
@@ -923,6 +860,69 @@
                         
                         adjustPageGridSize();
                     },
+                    gridComplete: function () {
+                        // add button in header
+                        if (!oss_lst_data.existTooltip) {
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
+                                .appendTo($("#jqgh_list_obligation"))
+                                .attr("title", oss_lst_data.obligationInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                }).on('inserted.bs.tooltip', function() {
+							        var tooltipId = 'gridHeaderTooltip';
+							        $('.tooltip').attr('id', tooltipId);
+							    });
+
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
+                                .attr("title", oss_lst_data.licenseTypeInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                }).on('inserted.bs.tooltip', function() {
+							        var tooltipId = 'gridHeaderTooltip';
+							        $('.tooltip').attr('id', tooltipId);
+							    });
+
+
+                            $('[data-toggle="tooltip"]').tooltip({html: true});
+                            oss_lst_data.existTooltip = true;
+                        }
+                        if (!document.getElementById("restrictionInfo")) {
+                        	$("#jqgh_list_restriction").append('<i class="fa fa-lg fa-info-circle icon-light-gray ml-1" data-toggle="tooltip" id="restrictionInfo" data-html="true" data-placement="right"></i>');
+                    		showHelpLink("License_List_Restriction_Info", "restrictionInfo");
+                        }
+                        updateGridRowCount('list', 'pager');
+                        
+                        // grid complete 후 oss name auto complete 처리
+                        if (autoComplete.ossTags.length == 0) {
+                        	commonAjax.getOssTags().success(function (data, status, headers, config) {
+                                if (data != null) {
+                                    data.forEach(function (obj) {
+                                        if (obj != null) {
+                                            autoComplete.ossTags.push(obj.ossName);
+                                        }
+                                    })
+                                }
+                            });
+                            
+                            $('input[name="ossName"]').autocomplete({
+                            	source : autoComplete.ossTags,
+                            	select : function (event, ui) {
+                            		$(this).val(ui.item.value);
+                            	},
+                            	focus : function(event, ui) {return false;},
+                            	minLength : 1,
+                            	autoFocus : false,
+                            	disable : false,
+                            	close : function(event) {
+                            		$(".search-field").val("");
+                            	}
+                            });
+                        }
+                    }
                 });
 
             }

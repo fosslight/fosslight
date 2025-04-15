@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,6 +32,7 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.LicenseMapper;
+import oss.fosslight.service.CodeService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.LicenseService;
@@ -49,6 +51,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 	@Autowired OssService ossService;
 	@Autowired CommentService commentService;
 	@Autowired HistoryService historyService;
+	@Autowired CodeService codeService;
 	
 	//Mapper
 	@Autowired LicenseMapper licenseMapper;
@@ -124,6 +127,19 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			}
 		}
 		
+		T2CodeDtl t2CodeDtl = new T2CodeDtl();
+		t2CodeDtl.setCdNo(CoConstDef.CD_LICENSE_RESTRICTION);
+		List<T2CodeDtl> t2CodeDtlList = null;
+		List<String> restrictionList = new ArrayList<>();
+		try {
+			t2CodeDtlList = codeService.getCodeDetailList(t2CodeDtl);
+			if (t2CodeDtlList != null) {
+				restrictionList = t2CodeDtlList.stream().map(e -> e.getCdDtlNo()).distinct().collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		int records = licenseMapper.selectLicenseMasterTotalCount(licenseMaster);
 		licenseMaster.setTotListSize(records);
@@ -132,7 +148,18 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		
 		for (LicenseMaster item : list){
 			if (!isEmpty(item.getRestriction())) {
-				item.setRestriction(CommonFunction.setLicenseRestrictionListById(null, item.getRestriction()));
+				String restrictionString = "";
+				for (String restriction : item.getRestriction().split(",")) {
+					if (!isEmpty(restriction) && restrictionList.contains(restriction)) {
+						restrictionString += restriction + ",";
+					}
+				}
+				if (!isEmpty(restrictionString)) {
+					restrictionString = restrictionString.substring(0, restrictionString.length()-1);
+					item.setRestriction(CommonFunction.setLicenseRestrictionListById(null, restrictionString));
+				} else {
+					item.setRestriction(restrictionString);
+				}
 			}
 			if (!isEmpty(item.getWebpage())) {
 				if (!item.getWebpage().contains("http://") && !item.getWebpage().contains("https://")) {

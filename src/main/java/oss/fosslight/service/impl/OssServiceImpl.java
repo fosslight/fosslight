@@ -212,7 +212,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 					}
 					if (!restrictionList.isEmpty()) {
-						bean.setRestriction(CommonFunction.setLicenseRestrictionList(restrictionList.stream().distinct().collect(Collectors.joining(","))));
+						bean.setRestriction(CommonFunction.setLicenseRestrictionListById(null, restrictionList.stream().distinct().collect(Collectors.joining(","))));
 					} else {
 						bean.setRestriction("");
 					}
@@ -1079,7 +1079,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							}
 							
 							List<OssMaster> filteredBeforeOssInfoList = beforeOssNameList.stream().filter(e -> !e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList());
-							if (filteredBeforeOssInfoList != null && !filteredBeforeOssInfoList.isEmpty()) beforeOssInfo = filteredBeforeOssInfoList.get(0);
+							if (filteredBeforeOssInfoList != null && !filteredBeforeOssInfoList.isEmpty()) {
+								beforeOssInfo = filteredBeforeOssInfoList.get(0);
+							}
 						}
 					}
 				}
