@@ -65,6 +65,14 @@
 		) T2
 		INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
 		WHERE 1=1
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals(noticeType, '80')">
+			 	AND REFERENCE_DIV = '14'
+			</when>
+			<otherwise>
+				AND REFERENCE_DIV NOT IN ('14')
+			</otherwise>
+		</choose>
 		<if test="@oss.fosslight.util.StringUtil@equals(networkServerType, 'Y')">
 		AND EXISTS (
 			SELECT 1 
