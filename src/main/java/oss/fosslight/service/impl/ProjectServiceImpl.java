@@ -7458,7 +7458,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		OssComponents ossComponent;
 		
 		for (OssComponents bean : ossComponentList) {
-			if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) continue;
+			if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName()) || isEmpty(bean.getPackageUrl())) {
+				continue;
+			}
 			
 			om.setOssNames(new String[] {bean.getOssName()});
 			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
@@ -7562,7 +7564,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		if (addOssComponentList != null) {
 			for (OssComponents bean : addOssComponentList) {
-				if (isEmpty(bean.getLicenseName())) continue;
+				if (isEmpty(bean.getLicenseName()) || !isEmpty(bean.getPackageUrl())) {
+					continue;
+				}
 				
 				String componentKey = bean.getPackageUrl().toUpperCase();
 //				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();

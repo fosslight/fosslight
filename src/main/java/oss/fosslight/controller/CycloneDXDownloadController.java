@@ -77,25 +77,10 @@ public class CycloneDXDownloadController extends CoTopComponent {
 					downloadId = prjBean.getCdxJsonFileId();
 				} else {
 					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isEmpty(dataStr) ? "verify" : "bom");
-					
-					T2File jsonFile = fileService.selectFileInfo(fileId);
-					String jsonFullPath = jsonFile.getLogiPath();
-					
-					if (!jsonFullPath.endsWith("/")) {
-						jsonFullPath += "/";
-					}
-					
-					jsonFullPath += jsonFile.getLogiNm();
-					
-					try {
-						File cycloneDXJsonFile = new File(jsonFullPath);
-						if (cycloneDXJsonFile.exists() && cycloneDXJsonFile.length() > 0) {
-							downloadId = fileId;
-						} else {
-							rtnMsg = getMessage("cyclonedx.json.failure");
-						}
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
+					if (!isEmpty(fileId)) {
+						downloadId = fileId;
+					} else {
+						rtnMsg = getMessage("cyclonedx.json.failure");
 					}
 				}
 			} else if ("cycloneDXXml".equals(type)) {
@@ -103,25 +88,10 @@ public class CycloneDXDownloadController extends CoTopComponent {
 					downloadId = prjBean.getCdxXmlFileId();
 				} else {
 					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isEmpty(dataStr) ? "verify" : "bom");
-					
-					T2File xmlFile = fileService.selectFileInfo(fileId);
-					String xmlFullPath = xmlFile.getLogiPath();
-					
-					if (!xmlFullPath.endsWith("/")) {
-						xmlFullPath += "/";
-					}
-					
-					xmlFullPath += xmlFile.getLogiNm();
-					
-					try {
-						File cycloneDXXmlFile = new File(xmlFullPath);
-						if (cycloneDXXmlFile.exists() && cycloneDXXmlFile.length() > 0) {
-							downloadId = fileId;
-						} else {
-							rtnMsg = getMessage("cyclonedx.xml.failure");
-						}
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
+					if (!isEmpty(fileId)) {
+						downloadId = fileId;
+					} else {
+						rtnMsg = getMessage("cyclonedx.xml.failure");
 					}
 				}
 			} else {
