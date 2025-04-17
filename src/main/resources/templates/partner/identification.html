@@ -182,7 +182,8 @@
     
     <th:block th:replace="partner/view/sheetSelectView"></th:block>
 	
-	<form id="partnerBulkEditForm" method="post" th:action="@{/oss/ossBulkEditPopup}" th:target="bulkEditViewProjectPopup">
+	<form></form>
+	<form id="partnerBulkEditForm" method="post" th:action="@{/oss/ossBulkEditPopup}" th:target="bulkEditViewPartnerPopup">
 		<input type="hidden" name="rowId" value=""/>
 		<input type="hidden" name="target" value=""/>
 	</form>
