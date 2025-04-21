@@ -395,6 +395,7 @@ var bom_fn = {
 				$("#bomList").jqGrid('setCell', id, 'notify', "10");
 			}
 			$("#bomList").jqGrid('setCell', id, 'source', "10");
+			$("#bomList").jqGrid("setCell", id, "adminCheckYn", "Y");
 			
 			var checkList = ["downloadLocation", "homepage", "copyrightText"];
 			var componentId = rowData["componentId"];
@@ -440,6 +441,7 @@ var bom_fn = {
 				}
 			});
 		} else {
+			$("#bomList").jqGrid("setCell", id, "adminCheckYn", "N");
 			$("#bomList").jqGrid('saveRow', id);
 		}
 
@@ -1276,8 +1278,21 @@ var bom_data = {
 			    	isSort = true;
 			    }
 				, loadComplete: function(data) {
+					if(bomValidMsgData) {
+						gridValidMsgNew(bomValidMsgData, "bomList");
+					}
+					
+					if(bomDiffMsgData) {
+						gridDiffMsg(bomDiffMsgData, "bomList");
+					}
+
+					if (bomInfoMsgData) {
+						gridInfoMsg(bomInfoMsgData, "bomList");
+					}
+					
 					$("#bomList_source").css({'border-right': '1px solid #cbc7bd'}); // restriction 을 추가하면서 css에서 마지막 th의 border를 삭제하는 처리의 차선책
 					var str= "";
+					var adminCheckYn = "";
 			 		var arr = [];
                     arr = bomList.jqGrid('getDataIDs');
 
@@ -1301,25 +1316,15 @@ var bom_data = {
 							$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
 							$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
 						}
+						
+						adminCheckYn = bomList.jqGrid('getCell', arr[i], 'adminCheckYn');
+						if ("Y" == adminCheckYn) {
+							bom_fn.onAdminCheckClick(arr[i]);
+						}
 					}
 					
 					// 그리드 클릭 해제
 					bomList.jqGrid("resetSelection");
-					
-					//------- 로드 된후 그룹 헤더 설정을 해야 사이즈가 깨지지 않음
-                    // 2024.02.26 버튼 클릭시 헤더가 반복 생성되는 이슈로 getJqGrid 함수에서 호출
-
-					if(bomValidMsgData) {
-						gridValidMsgNew(bomValidMsgData, "bomList");
-					}
-					
-					if(bomDiffMsgData) {
-						gridDiffMsg(bomDiffMsgData, "bomList");
-					}
-
-					if (bomInfoMsgData) {
-						gridInfoMsg(bomInfoMsgData, "bomList");
-					}
 					
 					var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
 					var strBomValidMsgData = Object.keys(bomValidMsgData||{}).join("");
