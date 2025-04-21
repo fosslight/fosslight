@@ -4497,11 +4497,10 @@
 	</select>
 	
 	<select id="getOssInfoByRestriction" parameterType="string" resultType="oss.fosslight.domain.OssMaster">
-		SELECT
-			OSS_NAME, OSS_VERSION, RESTRICTION
-		FROM
-			OSS_VERSION
-		WHERE
-			RESTRICTION LIKE CONCAT('%', #{restriction}, '%')
+		SELECT OC.OSS_NAME, OV.OSS_VERSION, OV.RESTRICTION
+		FROM OSS_COMMON OC
+		INNER JOIN OSS_VERSION OV
+		ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		WHERE OV.RESTRICTION LIKE CONCAT('%', #{restriction}, '%')
 	</select>
 </mapper>
