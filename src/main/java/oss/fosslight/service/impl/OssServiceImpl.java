@@ -168,10 +168,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 			List<OssLicense> licenseList = ossMapper.selectOssLicenseList(param);
 			
+			String ossLicenseText = "";
 			for (OssLicense licenseBean : licenseList) {
 				for (OssMaster bean : newList) {
 					if (licenseBean.getOssId().equals(bean.getOssId())) {
 						bean.addOssLicense(licenseBean);
+						ossLicenseText += licenseBean.getLicenseName() + ",";
 						break;
 					}
 				}
@@ -180,6 +182,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			for (OssMaster bean : newList) {
 				if (bean.getOssLicenses() != null && !bean.getOssLicenses().isEmpty()) {
 					bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
+					if (!isEmpty(ossLicenseText)) {
+						ossLicenseText = ossLicenseText.substring(0, ossLicenseText.length()-1);
+						bean.setOssLicenseText(ossLicenseText);
+					}
 				}
 				
 				// group by key 설정 grid 상에서 대소문자 구분되어 대문자로 모두 치화하여 그룹핑

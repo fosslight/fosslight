@@ -518,6 +518,7 @@
             	colNameArr.push("License Name");
             	colNameArr.push("License Type");
             	colNameArr.push("Restriction");
+            	colNameArr.push("OSS License Name");
             	colNameArr.push("Notice");
             	colNameArr.push("Source");
             	colNameArr.push("Download<br>Location");
@@ -578,6 +579,7 @@
                         sortable: false,
                         search: false
                     }
+                    , {name: 'ossLicenseText', index: 'ossLicenseText', hidden: true}
                     , {name: 'obligationNotificationYn', index: 'obligationNotificationYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeNoticeFormat, unformat: fn_grid_com.unformatter, sortable : true}
                     , {name: 'obligationDisclosingSrcYn', index: 'obligationDisclosingSrcYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeSourceCodeFormat, unformat: fn_grid_com.unformatter, sortable : true}
                     , {
