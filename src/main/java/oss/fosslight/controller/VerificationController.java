@@ -186,12 +186,6 @@ public class VerificationController extends CoTopComponent {
 		
 		//프로젝트 정보
 		model.addAttribute("project", projectMaster);
-
-		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
-			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
-			model.addAttribute("vulDocFile", file);
-		}
-
 		model.addAttribute("verify", verificationService.getVerificationOne(project));
 		model.addAttribute("ossList", list);
 		model.addAttribute("files", files);
@@ -210,9 +204,6 @@ public class VerificationController extends CoTopComponent {
 		project.setPrjId(prjId);
 		
 		Project projectMaster = projectService.getProjectDetail(project);
-		projectMaster.setVulDocInfo(CommonFunction.getMessageForVulDOC(req, "info"));
-		projectMaster.setVulDocInst(CommonFunction.getMessageForVulDOC(req, "inst").replace("<br />", " "));
-		
 		if (!StringUtil.isEmpty(projectMaster.getCreator())){
 			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
 		}
@@ -313,11 +304,6 @@ public class VerificationController extends CoTopComponent {
 		files.add(packageFile4);
 		files.add(packageFile5);
 		
-		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
-			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
-			model.addAttribute("vulDocFile", file);
-		}
-
 		model.addAttribute("verify", verificationService.getVerificationOne(project));
 		model.addAttribute("ossList", list);
 		model.addAttribute("files", files);
@@ -358,9 +344,6 @@ public class VerificationController extends CoTopComponent {
 				//파일 확장자 체크
 				String codeExp = "";
 				switch (fileSeq) {
-					case "51": 
-						codeExp = codeMapper.getCodeDetail("120", "40").getCdDtlExp();
-						break;
 					case "6": 
 						codeExp = codeMapper.getCodeDetail("120", "41").getCdDtlExp();
 						appendFileFlag = true;

@@ -730,7 +730,6 @@
 			, A.PACKAGE_FILE_TYPE3
 			, A.PACKAGE_FILE_TYPE4
 			, A.PACKAGE_FILE_TYPE5
-			, A.PACKAGE_VUL_DOC_FILE_ID
 	   		, A.NOTICE_APPEND_FILE_ID
 			, A.NOTICE_FILE_ID
 			, A.REVIEW_REPORT_FILE_ID
@@ -770,7 +769,6 @@
 		   , A.PUBLIC_YN
 	   	   , A.VULNERABILITY_RESOLUTION
 		   , A.CVSS_SCORE_MAX
-		   , A.VUL_DOC_SKIP_YN
 		   , (SELECT COUNT(1) 
 				FROM OSS_COMPONENTS OC 
 		  INNER JOIN OSS_COMPONENTS_LICENSE OCL 
@@ -3093,7 +3091,6 @@
 						, PACKAGE_FILE_ID3 = NULL
 						, PACKAGE_FILE_ID4 = NULL
 						, PACKAGE_FILE_ID5 = NULL
-						, PACKAGE_VUL_DOC_FILE_ID = NULL
 						, NOTICE_APPEND_FILE_ID = NULL
 						, NOTICE_FILE_ID = NULL
 						, NOTICE_TEXT_FILE_ID = NULL
@@ -3149,15 +3146,6 @@
 			PRJ_ID	= #{prjId}
 	</update>
 
-	<update id="updateVulDocSkipYn" parameterType="oss.fosslight.domain.Project">
-		UPDATE
-			PROJECT_MASTER
-		SET
-			VUL_DOC_SKIP_YN = #{vulDocSkipYn}
-		WHERE
-			PRJ_ID	= #{prjId}
-	</update>
-	
 	<select id="identificationSubGrid" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.ProjectIdentification">
 		/* ProjectMapper identificationSubGrid */
 		SELECT RESULT.* ,

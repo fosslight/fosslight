@@ -159,7 +159,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String deleteFlag = (String) map.get("deleteFlag");
 			String verifyFlag = (String) map.get("statusVerifyYn");
 			String deleteFiles = (String) map.get("deleteFiles");
-			String vulDocSkipYn = (String) map.get("vulDocSkipYn");
 			String deleteComment = "";
 			String uploadComment = "";
 			
@@ -286,11 +285,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
 					projectMapper.updateReadmeContent(prjParam); // README Clear
 					projectMapper.updateVerifyContents(prjParam); // File List, Banned List Clear
-				}
-
-				if(vulDocSkipYn != null) {
-					prjParam.setVulDocSkipYn(vulDocSkipYn);
-					projectMapper.updateVulDocSkipYn(prjParam);
 				}
 			}
 		} catch (Exception e) {
@@ -3096,9 +3090,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		if (fileSeq.equals("6")) {
 			prjParam.setNoticeAppendFileId(registFileId);
 			verificationMapper.updateNoticeAppendFile(prjParam);
-		} else if (fileSeq.equals("51")) {
-			prjParam.setPackageVulDocFileId(registFileId);
-			verificationMapper.updatePackageVulDocFile(prjParam);
 		} else {
 			Project project = projectMapper.selectProjectMaster(prjParam.getPrjId());
 			
@@ -3266,16 +3257,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// update file id
 		Project project = new Project();
 		project.setPrjId(prjId);
-		if (gubn.equals("VDF")) {
-			project.setPackageVulDocFileId(null);
-			verificationMapper.updatePackageVulDocFile(project);
-		} else {
-			Project prjInfo = projectMapper.getProjectBasicInfo(project);
-			List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(prjInfo.getNoticeAppendFileId());
-			if (noticeAppendFile == null || noticeAppendFile.isEmpty()) {
-				project.setNoticeAppendFileId(null);
-				verificationMapper.updateNoticeAppendFile(project);
-			}
+		Project prjInfo = projectMapper.getProjectBasicInfo(project);
+		List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(prjInfo.getNoticeAppendFileId());
+		if (noticeAppendFile == null || noticeAppendFile.isEmpty()) {
+			project.setNoticeAppendFileId(null);
+			verificationMapper.updateNoticeAppendFile(project);
 		}
 	}
 
@@ -3291,13 +3277,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					param.setPackageFileType1(copyProject.getPackageFileType1());
 				break;
 			case 2 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1));
-					param.setPackageFileType2(copyProject.getPackageFileType2());
+					param.setPackageFileType1(copyProject.getPackageFileType1()); param.setPackageFileType2(copyProject.getPackageFileType2());
 				break;
 			case 3 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2));
+					param.setPackageFileType1(copyProject.getPackageFileType1()); param.setPackageFileType2(copyProject.getPackageFileType2());
 					param.setPackageFileType3(copyProject.getPackageFileType3());
 				break;
-			default : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2)); param.setPackageFileId4(packageFileSeqList.get(3));
-					param.setPackageFileType4(copyProject.getPackageFileType4());
+			case 4 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2)); param.setPackageFileId4(packageFileSeqList.get(3));
+					param.setPackageFileType1(copyProject.getPackageFileType1()); param.setPackageFileType2(copyProject.getPackageFileType2());
+					param.setPackageFileType3(copyProject.getPackageFileType3()); param.setPackageFileType4(copyProject.getPackageFileType4());
+				break;
+			default : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2)); param.setPackageFileId4(packageFileSeqList.get(3)); param.setPackageFileId5(packageFileSeqList.get(4));
+					param.setPackageFileType1(copyProject.getPackageFileType1()); param.setPackageFileType2(copyProject.getPackageFileType2());
+					param.setPackageFileType3(copyProject.getPackageFileType3()); param.setPackageFileType4(copyProject.getPackageFileType4());
+					param.setPackageFileType5(copyProject.getPackageFileType5());
 				break;
 		}
 		

@@ -74,8 +74,6 @@ public interface VerificationMapper {
 
 	OssComponents checkOssNickName2(OssComponents bean);
 
-	void updatePackageVulDocFile(Project project);
-
 	void deletePackagingFileInfo(T2File file);
 
 	void deleteReuseFileInfo(T2File file);
