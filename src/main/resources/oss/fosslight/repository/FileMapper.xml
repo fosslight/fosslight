@@ -277,7 +277,7 @@
 	<select id="selectPackagingVulDOCFileInfo" parameterType="java.lang.String" resultType="oss.fosslight.domain.T2File">
 		SELECT T1.* 
 		  FROM T2_FILE T1
-		 INNER JOIN PROJECT_MASTER T2
+		 INNER JOIN PROJECT_PACKAGING_VULDOC T2
 		    ON T1.FILE_SEQ = T2.PACKAGE_VUL_DOC_FILE_ID
 		 WHERE T2.PRJ_ID = #{prjId}
 	</select>
