@@ -747,7 +747,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String publicUrl = appEnv.getProperty("upload.path", "/upload");
 		String packagingUrl = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 		List<T2File> result = fileMapper.selectPackagingFileInfo(prjId); // verify한 file을 select함.
-		T2File vulDOCFileInfo = fileMapper.selectPackagingVulDOCFileInfo(prjId);
 
 		if (result.size() > 0){
 			for (T2File res : result){
@@ -782,9 +781,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				}
 			}
 			
-			deleteFiles(packagingUrl, uploadFileInfos, prjId, vulDOCFileInfo); // 'upload/packaging/#{prjId}' 의 Directory가 있는지 체크 후 삭제 처리함.( 현재등록한 file을 제외한 나머지를 삭세처리 )
+			deleteFiles(packagingUrl, uploadFileInfos, prjId, null); // 'upload/packaging/#{prjId}' 의 Directory가 있는지 체크 후 삭제 처리함.( 현재등록한 file을 제외한 나머지를 삭세처리 )
 		} else {
-			deleteFiles(packagingUrl, uploadFileInfos, prjId, vulDOCFileInfo); // verify 한 file이 없을경우 packagingUrl도 같이 검사하여 delete를 함.
+			deleteFiles(packagingUrl, uploadFileInfos, prjId, null); // verify 한 file이 없을경우 packagingUrl도 같이 검사하여 delete를 함.
 		}
 		
 		// packaging File comment
