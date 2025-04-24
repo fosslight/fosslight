@@ -3105,16 +3105,18 @@ public class CoMailManager extends CoTopComponent {
 				return makeProjectBasicInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BOMOSSINFO:
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO:
+				Project project = new Project();
+				project.setPrjId(bean.getParamPrjId());
+				Project projectBean = projectService.getProjectDetail(project);
+				
 				ProjectIdentification ossListParam = new ProjectIdentification();
 				ossListParam.setReferenceId(bean.getParamPrjId());
-				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				ossListParam.setReferenceDiv(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(projectBean.getNoticeType())) ? CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM : CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				ossListParam.setMerge(CoConstDef.FLAG_NO);
 				Map<String, Object> mailComponentDataMap = projectService.getIdentificationGridList(ossListParam);
 				
 				if (CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO.equals(component)) {
-					Project project = new Project();
-					project.setPrjId(bean.getParamPrjId());
-					mailComponentDataMap.put("projectBean", projectService.getProjectDetail(project));
+					mailComponentDataMap.put("projectBean", projectBean);
 				}
 				return makeIdentificationOssListInfo(mailComponentDataMap, component);
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO:
