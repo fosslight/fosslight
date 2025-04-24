@@ -699,12 +699,8 @@
 	</update>
 
 	<update id="deleteMaster" parameterType="oss.fosslight.domain.PartnerMaster">
-	UPDATE
-		PARTNER_MASTER 
-	SET 
-		USE_YN = 'N'
-	WHERE 
-		PARTNER_ID = #{partnerId}
+		DELETE FROM PARTNER_MASTER 
+		WHERE PARTNER_ID = #{partnerId}
 	</update>
 	
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
@@ -2228,4 +2224,9 @@
 		WHERE
 			PARTNER_ID = #{partnerId}
 	</update>
+	
+	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
+		DELETE FROM T2_FILE
+		WHERE FILE_SEQ = #{fileSeq}
+	</delete>
 </mapper>

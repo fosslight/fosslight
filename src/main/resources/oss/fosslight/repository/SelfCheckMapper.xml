@@ -442,11 +442,7 @@
 	</insert>	
 	
 	<delete id="deleteProjectMaster" parameterType="oss.fosslight.domain.Project">
-		UPDATE PRE_PROJECT_MASTER 
-		   SET USE_YN = 'N'
-		      ,MODIFIER = #{loginUserName}
-		      ,DELETE_MEMO = #{deleteMemo}
-		 WHERE PRJ_ID = #{prjId}
+		DELETE FROM PRE_PROJECT_MASTER WHERE PRJ_ID = #{prjId}
 	</delete>
 	
 	<delete id="deleteProjectModel" parameterType="oss.fosslight.domain.Project">
@@ -897,9 +893,8 @@
 	</select>
 	
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
-		UPDATE T2_FILE 
-			SET DEL_YN = 'Y'
-		 WHERE FILE_SEQ = #{fileSeq}
+		DELETE FROM T2_FILE
+		WHERE FILE_SEQ = #{fileSeq}
 	</delete>
 	
 	<update id="updateFileBySeq" parameterType="oss.fosslight.domain.T2File">

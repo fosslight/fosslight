@@ -80,5 +80,7 @@ public interface SelfCheckService extends HistoryConfig{
 	public Map<String, Object> checkSelectDownloadFile(Project project);
 
 	public boolean checkUserPermissions(Project project, String userId);
+
+	public void deleteProjectRefFiles(Project project);
 	
 }

@@ -94,6 +94,25 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		result = partnerMapper.selectPartnerMaster(partnerMaster);
 		if (result != null) {
 			result.setCommentText(avoidNull(commentMapper.getContent(result.getComment())));
+			if (!isEmpty(result.getDocumentsFileId())) {
+				result.setDocumentsFile(partnerMapper.selectDocumentsFile(result.getDocumentsFileId()));
+			}
+			if (!isEmpty(result.getConfirmationFileId())) {
+				T2File confirmationFile = fileService.selectFileInfo(result.getConfirmationFileId());
+				if (confirmationFile != null) {
+					List<T2File> confirmationFileList = new ArrayList<>();
+					confirmationFileList.add(confirmationFile);
+					result.setConfirmationFile(confirmationFileList);
+				}
+			}
+			if (!isEmpty(result.getOssFileId())) {
+				T2File ossFile = fileService.selectFileInfo(result.getOssFileId());
+				if (ossFile != null) {
+					List<T2File> ossFileList = new ArrayList<>();
+					ossFileList.add(ossFile);
+					result.setOssFile(ossFileList);
+				}
+			}
 		}
 		
 		//파트너 와쳐
@@ -284,10 +303,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				if (!isEmpty(fileSeq)) {
 					T2File delFile = new T2File();
 					delFile.setFileSeq(fileSeq);
-					delFile.setGubn("A");
 
-					fileMapper.updateFileDelYnKessan(delFile);
-					fileService.deletePhysicalFile(delFile, "PARTNER");
+					partnerMapper.deleteFileBySeq(delFile);
+					fileService.deletePhysicalFile(delFile, CoConstDef.CD_CHECK_OSS_PARTNER);
 				}
 			}
 		}
@@ -299,15 +317,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				if (partnerMaster.getConfirmationFileId() == null || !partnerMaster.getConfirmationFileId().equals(beforePartner.getConfirmationFileId())) {
 					T2File delFile = new T2File();
 					delFile.setFileSeq(beforePartner.getConfirmationFileId());
-					fileService.deletePhysicalFile(delFile, "PARTNER");
-				}
-			}
-			
-			if (!isEmpty(beforePartner.getOssFileId())) {
-				if (partnerMaster.getOssFileId() == null || !partnerMaster.getOssFileId().equals(beforePartner.getOssFileId())) {
-					T2File delFile = new T2File();
-					delFile.setFileSeq(beforePartner.getOssFileId());
-					fileService.deletePhysicalFile(delFile, "PARTNER");
+					partnerMapper.deleteFileBySeq(delFile);
+					fileService.deletePhysicalFile(delFile, CoConstDef.CD_CHECK_OSS_PARTNER);
 				}
 			}
 		}
@@ -368,6 +379,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	public void registOss(PartnerMaster partnerMaster, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense) {
 		String refId = partnerMaster.getPartnerId();
 		String refDiv = CoConstDef.CD_DTL_COMPONENT_PARTNER;
+		
+		PartnerMaster partnerInfo = new PartnerMaster();
+		partnerInfo.setPartnerId(refDiv);
+		partnerInfo = getPartnerMasterOne(partnerInfo);
 		
 		ossComponents =  projectService.convertOssNickName(ossComponents);
 		ossComponentsLicense = projectService.convertLicenseNickName(ossComponentsLicense);
@@ -502,6 +517,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		{
 			partnerMapper.updateOssFileId(partnerMaster);
+			if ((isEmpty(partnerMaster.getOssFileId()) && !isEmpty(partnerInfo.getOssFileId()))
+					|| (!isEmpty(partnerMaster.getOssFileId()) && !isEmpty(partnerInfo.getOssFileId()) && !partnerMaster.getOssFileId().equals(partnerInfo.getOssFileId()))) {
+				deleteFiles(partnerInfo.getOssFile());
+			}
 		}
 		
 		{
@@ -576,10 +595,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Override
 	@CacheEvict(value="autocompletePartnerCache", allEntries=true)
 	public void deletePartnerMaster(PartnerMaster partnerMaster) {
-		//partnerMaster
-		partnerMapper.deleteMaster(partnerMaster);
 		//partnerWatcher
 		partnerMapper.deleteWatcher(partnerMaster);
+		//partnerMaster
+		partnerMapper.deleteMaster(partnerMaster);
 	}
 	
 	@Override
@@ -1650,6 +1669,22 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	@Override
+	public void deletePartnerRefFiles(PartnerMaster partnerMaster) {
+		deleteFiles(partnerMaster.getOssFile());
+		deleteFiles(partnerMaster.getConfirmationFile());
+		deleteFiles(partnerMaster.getDocumentsFile());
+	}
+	
+	private void deleteFiles(List<T2File> list) {
+		if (list != null) {
+			for (T2File fileInfo : list) {
+				partnerMapper.deleteFileBySeq(fileInfo);
+				fileService.deletePhysicalFile(fileInfo, CoConstDef.CD_CHECK_OSS_PARTNER);
 			}
 		}
 	}

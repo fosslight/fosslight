@@ -539,7 +539,15 @@ public class SelfCheckController extends CoTopComponent {
 	@PostMapping(value = SELF_CHECK.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
+		Project projectInfo = selfCheckService.getProjectDetail(project);
 		selfCheckService.deleteProject(project);
+		
+		try {
+			// Delete self_check ref files
+			selfCheckService.deleteProjectRefFiles(projectInfo);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		
 		HashMap<String, Object> resMap = new HashMap<>();
 		resMap.put("resCd", "10");

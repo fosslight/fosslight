@@ -1150,13 +1150,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		boolean isAndroidNoticeFolder = false;
 		String folderPath = "";
 		
-		if ("VERIFY".equalsIgnoreCase(flag)) {
+		if ("VERIFY".equalsIgnoreCase(flag) || CoConstDef.CD_CHECK_OSS_SELF.equals(flag) || CoConstDef.CD_CHECK_OSS_PARTNER.equals(flag)) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
 		} else {
 			T2File T2file = fileMapper.getFileInfo2(file);
 			if (T2file != null) {
 				filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
-				if(T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
+				if (T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
 					isAndroidNoticeFolder = true;
 					folderPath = T2file.getLogiPath();
 				}

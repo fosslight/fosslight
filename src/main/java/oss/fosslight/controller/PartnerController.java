@@ -972,29 +972,37 @@ public class PartnerController extends CoTopComponent{
 		HashMap<String, Object> resMap = new HashMap<>();
 		String resCd = "00";
 		
-		try{
+		PartnerMaster partnerInfo = new PartnerMaster();
+		partnerInfo.setPartnerId(partnerMaster.getPartnerId());
+		partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+		
+		try {
+			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
+			mailBean.setParamPartnerId(partnerMaster.getPartnerId());
+			if (!isEmpty(partnerMaster.getUserComment())) {
+				mailBean.setComment(partnerMaster.getUserComment());
+			}
+			CoMailManager.getInstance().sendMail(mailBean);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		try {
 			History h = partnerService.work(partnerMaster);
 			partnerService.deletePartnerMaster(partnerMaster);
-			h.sethAction(CoConstDef.ACTION_CODE_DELETE);	
+			h.sethAction(CoConstDef.ACTION_CODE_DELETE);
 			historyService.storeData(h);
 			
 			resCd="10";
 			
-		} catch (Exception e){
-			log.error(e.getMessage());
-		}
-		
-		if ("10".equals(resCd)) {
 			try {
-				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
-				mailBean.setParamPartnerId(partnerMaster.getPartnerId());
-				if (!isEmpty(partnerMaster.getUserComment())) {
-					mailBean.setComment(partnerMaster.getUserComment());
-				}
-				CoMailManager.getInstance().sendMail(mailBean);
+				// Delete partner ref files
+				partnerService.deletePartnerRefFiles(partnerInfo);
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
+		} catch (Exception e){
+			log.error(e.getMessage());
 		}
 
 		resMap.put("resCd", resCd);

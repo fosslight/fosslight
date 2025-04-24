@@ -679,7 +679,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void deleteProject(Project project) {
-		// project master
+		// self-check watcher master
+		selfCheckMapper.deleteProjectWatcher(project);
+		// self-check project master
 		selfCheckMapper.deleteProjectMaster(project);
 	}
 	
@@ -902,7 +904,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		if (project.getCsvFile() != null && project.getCsvFile().size() > 0) {
 			for (int i = 0; i < project.getCsvFile().size(); i++) {
 				selfCheckMapper.deleteFileBySeq(project.getCsvFile().get(i));
-				fileService.deletePhysicalFile(project.getCsvFile().get(i), "SELF");
+				fileService.deletePhysicalFile(project.getCsvFile().get(i), CoConstDef.CD_CHECK_OSS_SELF);
 			}
 		}
 		
@@ -2748,5 +2750,19 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		}
 		
 		return checkFlag;
+	}
+
+	@Override
+	public void deleteProjectRefFiles(Project project) {
+		deleteFiles(project.getCsvFile());
+	}
+	
+	private void deleteFiles(List<T2File> list) {
+		if (list != null) {
+			for (T2File fileInfo : list) {
+				selfCheckMapper.deleteFileBySeq(fileInfo);
+				fileService.deletePhysicalFile(fileInfo, CoConstDef.CD_CHECK_OSS_SELF);
+			}
+		}
 	}
 }
