@@ -3138,6 +3138,7 @@ public class CoMailManager extends CoTopComponent {
 				return makeBatResultInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ:
 				param.add(bean.getParamPrjId());
+				param.add(bean.getParamPrjId());
 				return makeVulnerabilityInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS:
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
