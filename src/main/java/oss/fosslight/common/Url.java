@@ -554,6 +554,8 @@ public final class Url {
 		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 		
 		public static final String SHARE_URL = PATH + "/shareUrl/{partnerId}";
+		
+		public static final String DELETE_FILES = PATH + "/deleteFiles";
 	}
 	
 	public static final class USER {
