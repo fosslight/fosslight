@@ -957,7 +957,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Cell cell=row.createCell(colNum);
 				cell.setCellStyle(style);
 				
-				cell.setCellValue(rowParam[colNum]);
+				if (!isEmpty(rowParam[colNum])) {
+					cell.setCellValue(rowParam[colNum]);
+				} else {
+					cell.setBlank();
+				}
 			}
 		}
 	}
@@ -1014,8 +1018,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				String cellValue = avoidNull(rowParam[colNum]);
-				cell.setCellValue(cellValue);
 				cell.setCellType(CellType.STRING);
+				if (!isEmpty(cellValue)) {
+					cell.setCellValue(cellValue);
+				} else {
+					cell.setBlank();
+				}
 			}
 		}
 	}
@@ -1067,6 +1075,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					cell.setCellType(CellType.BLANK);
 				}
 				
+				cell.setCellType(CellType.STRING);
 				// warning message의 경우 색상 처리
 				if (colNum == endCol) {
 					String cellValue = avoidNull(rowParam[colNum]);
@@ -1095,10 +1104,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					cell.setCellValue(messageStr);
 				} else {
 					String cellValue = avoidNull(rowParam[colNum]);
-					cell.setCellValue(cellValue);
+					if (!isEmpty(cellValue)) {
+						cell.setCellValue(cellValue);
+					} else {
+						cell.setBlank();
+					}
 				}
-				
-				cell.setCellType(CellType.STRING);
 			}
 		}
 	}
@@ -1131,8 +1142,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			for (int colNum=startCol; colNum<=endCol; colNum++){
 				Cell cell=row.createCell(colNum);
 				cell.setCellStyle(style);
-				cell.setCellValue(rowParam[colNum]);
 				cell.setCellType(CellType.STRING);
+				if (!isEmpty(rowParam[colNum])) {
+					cell.setCellValue(rowParam[colNum]);
+				} else {
+					cell.setBlank();
+				}
 			}
 		}
 	}
@@ -1169,8 +1184,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				if (CellType.FORMULA == cell.getCellType()) {
 					cell.setCellType(CellType.BLANK);
 				}
-				cell.setCellValue(avoidNull(rowParam[colNum]));
+				
 				cell.setCellType(CellType.STRING);
+				if (!isEmpty(avoidNull(rowParam[colNum]))) {
+					cell.setCellValue(avoidNull(rowParam[colNum]));
+				} else {
+					cell.setBlank();
+				}
 			}
 		}
 	}
@@ -2435,8 +2455,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			Row row = sheet.getRow(i);
 			Cell cell = getCell(row, 3);
 			cell.setCellStyle(st);
-			cell.setCellValue(rowParam[i-infoStartRow]);
 			cell.setCellType(CellType.STRING);
+			if (!isEmpty(rowParam[i-infoStartRow])) {
+				cell.setCellValue(rowParam[i-infoStartRow]);
+			} else {
+				cell.setBlank();
+			}
 		}
 		
 		if (!rows.isEmpty()) {
@@ -2451,8 +2475,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				for (int colNum=startCol; colNum<=endCol; colNum++){
 					Cell cell = row.createCell(colNum);
 					style.setWrapText(false);
+					String cellData = rows.get(rowIndex)[colNum];
+					
 					if (colNum == 7 || colNum == 8) {
-						String cellData = rows.get(rowIndex)[colNum];
 						if (!isEmpty(cellData)) {
 							if (cellData.contains(",")) {
 								String[] splitData = cellData.split(",");
@@ -2467,10 +2492,16 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							hyperlink.setAddress(cell.getStringCellValue());
 							cell.setCellValue(cellData);
 							cell.setCellStyle(hyperLinkStyle);
+						} else {
+							cell.setBlank();
 						}
 					} else {
-						cell.setCellValue(rows.get(rowIndex)[colNum]);
 						cell.setCellStyle(style);
+						if (!isEmpty(cellData)) {
+							cell.setCellValue(cellData);
+						} else {
+							cell.setBlank();
+						}
 					}
 				}
 				rowIndex++;
@@ -2480,7 +2511,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Row row = sheet.createRow(i);
 				for (int colNum=startCol; colNum<=endCol; colNum++){
 					Cell cell = row.createCell(colNum);
-					cell.setCellValue(rows.get(rowIndex)[colNum]);
+					String cellData = rows.get(rowIndex)[colNum];
+					if (!isEmpty(cellData)) {
+						cell.setCellValue(cellData);
+					} else {
+						cell.setBlank();
+					}
 					cell.setCellStyle(style);
 				}
 				rowIndex++;
@@ -4843,13 +4879,19 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			Row row = sheet.createRow(i);
 			for (int colNum=startCol; colNum<=endCol; colNum++) {
 				Cell cell=row.createCell(colNum);
-				cell.setCellValue(rowParam[colNum]);
-				if (colNum == 2 && !StringUtil.isEmpty(rowParam[colNum])) {
+				
+				if (colNum == 2 && !isEmpty(rowParam[colNum])) {
+					cell.setCellValue(rowParam[colNum]);
 					Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.URL);
 					hyperlink.setAddress("https://nvd.nist.gov/vuln/detail/" + rowParam[colNum]);
 					cell.setHyperlink(hyperlink);
 					cell.setCellStyle(hyperLinkStyle);
 				} else {
+					if (!isEmpty(rowParam[colNum])) {
+						cell.setCellValue(rowParam[colNum]);
+					} else {
+						cell.setBlank();
+					}
 					cell.setCellStyle(style);
 				}
 			}
