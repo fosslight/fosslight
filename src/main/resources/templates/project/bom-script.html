@@ -301,7 +301,7 @@ var bom_fn = {
 			display += 'disabled ';
 		}
 		
-		display += 'onclick="bom_fn.onAdminCheckClick('+options.rowId+')">';
+		display += 'onclick="bom_fn.onAdminCheckClick('+options.rowId+', true)">';
 		
 		return display;
 	},
@@ -319,14 +319,14 @@ var bom_fn = {
                 $(this).attr('value','Y');
                 $(this).prop('checked',true);
                 fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");
-                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId, true);
             });
         } else {
         	$("#"+target+" input[id*='_adminCheck']").each(function (idx){
                 $(this).attr('value','N');
                 $(this).prop('checked',false);
                 fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");
-                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId, true);
             });
         }
 	},
@@ -385,17 +385,19 @@ var bom_fn = {
 			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
 		}
 	},
-	onAdminCheckClick : function(rowId){
+	onAdminCheckClick : function(rowId, isClick){
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var adminCheckYn = $("#"+id+"_adminCheck").prop("checked");
 		
 		if (adminCheckYn && "ROLE_ADMIN" == userRole) {
 			var rowData = $("#bomList").getRowData(id);
-			if ("Y" != rowData.notAdminCheck) {
-				$("#bomList").jqGrid('setCell', id, 'notify', "10");
+			if (isClick) {
+				if ("Y" != rowData.notAdminCheck) {
+					$("#bomList").jqGrid('setCell', id, 'notify', "10");
+				}
+				$("#bomList").jqGrid('setCell', id, 'source', "10");
+				$("#bomList").jqGrid("setCell", id, "adminCheckYn", "Y");
 			}
-			$("#bomList").jqGrid('setCell', id, 'source', "10");
-			$("#bomList").jqGrid("setCell", id, "adminCheckYn", "Y");
 			
 			var checkList = ["downloadLocation", "homepage", "copyrightText"];
 			var componentId = rowData["componentId"];
@@ -1319,7 +1321,7 @@ var bom_data = {
 						
 						adminCheckYn = bomList.jqGrid('getCell', arr[i], 'adminCheckYn');
 						if ("Y" == adminCheckYn) {
-							bom_fn.onAdminCheckClick(arr[i]);
+							bom_fn.onAdminCheckClick(arr[i], false);
 						}
 					}
 					
