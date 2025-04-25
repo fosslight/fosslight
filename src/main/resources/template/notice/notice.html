@@ -161,7 +161,7 @@
 						<th:block th:if="${isSimpleNotice != 'N'}">
 							<p><b th:text="${attr.licenseName} + ' Attribution'"></b></p>
 						</th:block>
-						<p th:text="${attr.attribution}"></p>
+						<p th:utext="${attr.attribution}"></p>
 					</th:block>
 				</th:block>
 
@@ -174,7 +174,7 @@
 							<th:block th:if="${isSimpleNotice != 'N'}">
 								<p><b th:text="${ossname} + ' Attribution'"></b></p>
 							</th:block>
-							<p th:text="${attribution}"></p>
+							<p th:utext="${attribution}"></p>
 						</th:block>
 					</th:block>
 				</th:block>
