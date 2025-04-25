@@ -381,7 +381,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		String refDiv = CoConstDef.CD_DTL_COMPONENT_PARTNER;
 		
 		PartnerMaster partnerInfo = new PartnerMaster();
-		partnerInfo.setPartnerId(refDiv);
+		partnerInfo.setPartnerId(refId);
 		partnerInfo = getPartnerMasterOne(partnerInfo);
 		
 		ossComponents =  projectService.convertOssNickName(ossComponents);
