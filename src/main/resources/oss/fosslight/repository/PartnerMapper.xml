@@ -256,7 +256,7 @@
 		  AND DATE_FORMAT(A.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
-		   AND A.CD_DTL_NO LIKE CONCAT('%',#{division},'%')
+		   AND A.CD_DTL_NO = #{division}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 		   AND A.CREATOR_ID IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
