@@ -694,7 +694,8 @@ var party_evt = {
 				  , addListData = $("#_3rdAddList").jqGrid("getRowData")
 				  , partnerIds = [];
 				
-				for(var i = 0; i < rows.length; i++){
+				var loadFlag = rows.length > 0 ? true : false;
+				for (var i = 0; i < rows.length; i++){
 					if(addListData.length > 0){
 						partnerIds = $("#_3rdAddList").jqGrid("getRowData").map(function(a){return a.partnerId});
 						
@@ -716,6 +717,9 @@ var party_evt = {
 					}
 					
 					$('#_3rdAddList').jqGrid('addRowData', _tempRandId, newData);		
+				}
+				
+				if (loadFlag) {
 					party_evt.loadToList2(); // addList 등록후 list3에 등록 처리함.
 				}
 			},
