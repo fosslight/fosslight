@@ -3593,14 +3593,13 @@
                                     if (!curIdenStatus || 'PROG' == curIdenStatus) {
                                         $(".review").show();
                                     }
-
+                                    deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
                                     createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
                                 });
 
                                 verified = true;
                             } else {
-                                alertify.alert(json.resMsg, function () {
-                                });
+                                alertify.alert(json.resMsg, function () {});
                                 verified = false;
                             }
 
