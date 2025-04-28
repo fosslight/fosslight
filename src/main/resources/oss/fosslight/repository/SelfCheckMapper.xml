@@ -3144,11 +3144,14 @@
 		  AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
 	</select>
 	
-	<delete id="resetOssComponentsAndLicense" parameterType="oss.fosslight.domain.ProjectIdentification">
+	<delete id="resetOssComponentsAndLicense">
 		DELETE COMPONENT, LICENSE 
 		FROM PRE_OSS_COMPONENTS COMPONENT 
 		LEFT JOIN PRE_OSS_COMPONENTS_LICENSE LICENSE
 		ON CONCAT(COMPONENT.REFERENCE_ID, '-', COMPONENT.REFERENCE_DIV, '-', COMPONENT.COMPONENT_IDX) = LICENSE.COMPONENT_ID
-		WHERE COMPONENT.REFERENCE_ID = #{referenceId} AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+		WHERE COMPONENT.REFERENCE_ID = #{referenceId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+		</if>
 	</delete>
 </mapper>

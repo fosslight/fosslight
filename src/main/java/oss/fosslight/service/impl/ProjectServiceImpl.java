@@ -2205,6 +2205,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		projectMapper.deleteStatisticsMostUsedInfo(project);
 		projectMapper.deleteAddList(project);
 		projectMapper.deleteOssNotice(project.getPrjId());
+		projectMapper.resetOssComponentsAndLicense(project.getPrjId(), null);
 		projectMapper.deleteProjectMaster(project);
 	}
 	

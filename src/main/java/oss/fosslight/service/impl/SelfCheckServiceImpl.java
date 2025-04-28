@@ -679,6 +679,8 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void deleteProject(Project project) {
+		// delete self-check all components and license
+		selfCheckMapper.resetOssComponentsAndLicense(project.getPrjId(), null);
 		// self-check watcher master
 		selfCheckMapper.deleteProjectWatcher(project);
 		// self-check project master
@@ -695,10 +697,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Transactional
 	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
 		// 컴포넌트 마스터 라이센스 지우기
-		ProjectIdentification prj = new ProjectIdentification();
-		prj.setReferenceId(project.getPrjId());
-		prj.setReferenceDiv(refDiv);
-		selfCheckMapper.resetOssComponentsAndLicense(prj);
+		selfCheckMapper.resetOssComponentsAndLicense(project.getPrjId(), refDiv);
 		
 //		deletePreparedStatement(componentId);
 //		for (int i = 0; i < componentId.size(); i++) {
@@ -720,7 +719,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		Map<String, List<ProjectIdentification>> reconstOssComponentLicenseList = new HashMap<>();
 		List<ProjectIdentification> reconstAddOssComponentLicenseList = null;
+		
+		ProjectIdentification prj = new ProjectIdentification();
+		prj.setReferenceId(project.getPrjId());
+		prj.setReferenceDiv(refDiv);
+		
 		String licenseComponentId = "";
+		
 		int componentIdx = Integer.parseInt(selfCheckMapper.selectComponentIdx(prj));
 		int licenseComponentIdx = componentIdx;
 		

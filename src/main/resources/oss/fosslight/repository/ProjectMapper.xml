@@ -8418,8 +8418,10 @@
 		DELETE COMPONENT, LICENSE 
 		FROM OSS_COMPONENTS COMPONENT 
 			LEFT JOIN OSS_COMPONENTS_LICENSE LICENSE ON COMPONENT.COMPONENT_ID = LICENSE.COMPONENT_ID
-		WHERE
-		 COMPONENT.REFERENCE_ID = #{referenceId} AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+		WHERE COMPONENT.REFERENCE_ID = #{referenceId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+		</if>
 	</delete>
 	
 	<insert id="insertOssComponentListWithComponentId">

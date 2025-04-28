@@ -33,6 +33,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
@@ -1216,7 +1217,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		}
 		
-		if (orgFileInfoList != null && !orgFileInfoList.isEmpty()) {
+		if (!CollectionUtils.isEmpty(orgFileInfoList)) {
 			for (T2File orgFile : orgFileInfoList) {
 				String baseFile = orgFile.getLogiPath() + "/" + orgFile.getLogiNm();
 				

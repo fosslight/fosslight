@@ -592,9 +592,12 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		return insertOssComponentLicenseList;
 	}
 	
+	@Transactional
 	@Override
 	@CacheEvict(value="autocompletePartnerCache", allEntries=true)
 	public void deletePartnerMaster(PartnerMaster partnerMaster) {
+		// Delete partner all components and license
+		projectMapper.resetOssComponentsAndLicense(partnerMaster.getPartnerId(), null);
 		//partnerWatcher
 		partnerMapper.deleteWatcher(partnerMaster);
 		//partnerMaster
