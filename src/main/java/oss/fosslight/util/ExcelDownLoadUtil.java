@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -367,6 +368,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		if (listMap != null && (listMap.containsKey("mainData") || listMap.containsKey("rows") )) {
 			list = (List<ProjectIdentification>) listMap.get(listMap.containsKey("mainData") ? "mainData" : "rows");
 			List<String[]> rows = new ArrayList<>();
+			Map<String, List<String>> rowsMap = new HashMap<>();
 			//Excell export sort
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 
@@ -462,7 +464,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			} 
 			
 			String currentGroupKey = null;
-			
+			int idx = 1;
 			for (ProjectIdentification bean : list) {
 				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 					if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
@@ -641,7 +643,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
 						params.add(bean.getBinaryName()); // Binary Name
-					} else {
+					}
+					
+					if (!CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) && !CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
 						if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
 							params.add(bean.getPackageUrl());
 						} else {
@@ -795,9 +799,18 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 					
 					addColumnWarningMessage(type, bean, vr, params);
-					
+					rowsMap.put(String.valueOf(idx), params);
+//					rows.add(params.toArray(new String[params.size()]));
+				}
+				idx++;
+			}
+
+			if (!MapUtils.isEmpty(rowsMap)) {
+				for (String key : rowsMap.keySet()) {
+					List<String> params = rowsMap.get(key);
 					rows.add(params.toArray(new String[params.size()]));
 				}
+				rowsMap.clear();
 			}
 
 			//시트 만들기
