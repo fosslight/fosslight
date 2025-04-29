@@ -775,5 +775,18 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		resMap.put("licenseId", result);
 		return resMap;
 	}
+
+	@Override
+	public LicenseMaster getParamLicenseInfo(String licenseId, String domain) {
+		LicenseMaster licenseMaster = new LicenseMaster();
+		licenseMaster.setLicenseId(licenseId);
+		licenseMaster = getLicenseMasterOne(licenseMaster);
+		licenseMaster.setDomain(domain);
+		String internalUrl = CommonFunction.makeLicenseInternalUrl(licenseMaster, CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		if (!isEmpty(internalUrl)) {
+			licenseMaster.setInternalUrl(internalUrl);
+		}
+		return licenseMaster;
+	}
 }
 

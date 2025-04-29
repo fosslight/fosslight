@@ -310,13 +310,8 @@ public class LicenseController extends CoTopComponent {
 		mailBean.setParamLicenseId(commentsHistory.getReferenceId());
 		mailBean.setComment(commentsHistory.getContents());
 
-		LicenseMaster licenseMaster = new LicenseMaster();
-		licenseMaster.setLicenseId(commentsHistory.getReferenceId());
-		licenseMaster = licenseService.getLicenseMasterOne(licenseMaster);
-		licenseMaster.setDomain(CommonFunction.getDomain(req));
-		String internalUrl = CommonFunction.makeLicenseInternalUrl(licenseMaster, CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
-		if (!isEmpty(internalUrl)) {
-			licenseMaster.setInternalUrl(internalUrl);
+		LicenseMaster licenseMaster = licenseService.getParamLicenseInfo(commentsHistory.getReferenceId(), CommonFunction.getDomain(req));
+		if (licenseMaster != null) {
 			mailBean.setParamLicenseInfo(licenseMaster);
 		}
 		

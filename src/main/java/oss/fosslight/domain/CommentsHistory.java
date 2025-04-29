@@ -80,6 +80,8 @@ public class CommentsHistory extends ComBean implements Serializable{
 	
 	private String recentFlag;
 	
+	private String parameter;
+	
 	/**
 	 * Gets the comm id.
 	 *
@@ -409,6 +411,14 @@ public class CommentsHistory extends ComBean implements Serializable{
 
 	public void setRecentFlag(String recentFlag) {
 		this.recentFlag = recentFlag;
+	}
+
+	public String getParameter() {
+		return parameter;
+	}
+
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
 	}
 	
 }

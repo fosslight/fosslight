@@ -4106,10 +4106,21 @@ public class ProjectController extends CoTopComponent {
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT);
 				break;
 			case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
+			case CoConstDef.CD_DTL_COMMENT_SECURITY_HIS:
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT);
 				break;
 			case CoConstDef.CD_DTL_COMMENT_PROJECT_HIS:
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT);
+				break;
+			case CoConstDef.CD_DTL_COMMENT_LICENSE:
+				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT);
+				commentsHistory.setParameter(CommonFunction.getDomain(req));
+				break;
+			case CoConstDef.CD_DTL_COMMENT_OSS:
+				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT);
+				break;
+			case CoConstDef.CD_DTL_COMMENT_PARTNER_HIS:
+				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT);
 				break;
 			default:
 				break;

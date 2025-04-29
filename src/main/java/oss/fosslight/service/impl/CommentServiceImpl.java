@@ -18,13 +18,16 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.service.CommentService;
+import oss.fosslight.service.LicenseService;
 import oss.fosslight.util.StringUtil;
 
 @Service
 public class CommentServiceImpl implements CommentService {
+	@Autowired LicenseService licenseService;
 	@Autowired CommentMapper commentMapper;
 	
 	@Override
@@ -120,13 +123,26 @@ public class CommentServiceImpl implements CommentService {
 			|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT.equals(bean.getMailType())
 			|| CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT.equals(bean.getMailType())
 			|| CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT.equals(bean.getMailType())
-			|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMailType())) {
+			|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMailType())
+			|| CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMailType())
+			|| CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMailType())) {
 			CoMail mailBean = new CoMail(bean.getMailType());
 			
-			if (isPartner) {
-				mailBean.setParamPartnerId(bean.getReferenceId());
+			if (CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMailType())) {
+				mailBean.setParamOssId(bean.getReferenceId());
+				mailBean.setParamReferenceDiv(bean.getReferenceDiv());
+			} else if (CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMailType())) {
+				mailBean.setParamLicenseId(bean.getReferenceId());
+				LicenseMaster licenseMaster = licenseService.getParamLicenseInfo(bean.getReferenceId(), bean.getParameter());
+				if (licenseMaster != null) {
+					mailBean.setParamLicenseInfo(licenseMaster);
+				}
 			} else {
-				mailBean.setParamPrjId(bean.getReferenceId());
+				if (isPartner) {
+					mailBean.setParamPartnerId(bean.getReferenceId());
+				} else {
+					mailBean.setParamPrjId(bean.getReferenceId());
+				}
 			}
 			
 			mailBean.setComment(bean.getContents());
