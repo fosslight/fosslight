@@ -1757,21 +1757,21 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					String msg = validDiffMap.get(errKey);
 					String _key = errKey.substring(errKey.indexOf(".") + 1, errKey.length());
 					
-					if (!CommonFunction.isAdmin()) {
-						if ((errKey.startsWith("ossName") && (msg.startsWith("Deactivated") || msg.startsWith("Unconfirmed")))
-								|| (errKey.startsWith("ossVersion") && msg.startsWith("Unconfirmed"))
-								|| (errKey.startsWith("licenseName") && (msg.startsWith("Unconfirmed") || msg.startsWith("errLv")))) {
-							if (errorMap.containsKey(_key)) {
-								List<String> _list = errorMap.get(_key);
-								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
-								errorMap.replace(_key, _list);
-							} else {
-								List<String> _list = new ArrayList<>();
-								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
-								errorMap.put(_key, _list);
-							}
-						}
-					}
+//					if (!CommonFunction.isAdmin()) {
+//						if ((errKey.startsWith("ossName") && (msg.startsWith("Deactivated") || msg.startsWith("Unconfirmed")))
+//								|| (errKey.startsWith("ossVersion") && msg.startsWith("Unconfirmed"))
+//								|| (errKey.startsWith("licenseName") && (msg.startsWith("Unconfirmed") || msg.startsWith("errLv")))) {
+//							if (errorMap.containsKey(_key)) {
+//								List<String> _list = errorMap.get(_key);
+//								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+//								errorMap.replace(_key, _list);
+//							} else {
+//								List<String> _list = new ArrayList<>();
+//								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+//								errorMap.put(_key, _list);
+//							}
+//						}
+//					}
 					
 					// oss version warning message "This field is required" (Priority : 4)
 					if (errKey.startsWith("ossVersion") && msg.equals("This field is required.")) {
@@ -1917,10 +1917,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				// 0(1) : error level
 				if (errorMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(errorMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "0"), bean);
+					sortMap.put(makeValidSortKey(errorMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "0", null, validMap), bean);
 				} else if (checkMultiLicenseError(errorMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(errorMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(errorMap.get(_id), _id, "0"), bean);
+					sortMap.put(makeValidSortKey(errorMap.get(_id), _id, "0", null, validMap), bean);
 				} else if (CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK.equals(bean.getObligationLicense())) {
 					sortMap.put(makeValidSortKey(new ArrayList<String>(), avoidNull(bean.getGridId(), bean.getComponentId()) , "0", bean.getObligationLicense()), bean);
 				}
@@ -1932,53 +1932,53 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				// 3 : warning level
 				else if (warningMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(warningMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "3"), bean);
+					sortMap.put(makeValidSortKey(warningMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "3", null, validDiffMap), bean);
 				} else if (checkMultiLicenseError(warningMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(warningMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(warningMap.get(_id), _id, "3"), bean);
+					sortMap.put(makeValidSortKey(warningMap.get(_id), _id, "3", null, validDiffMap), bean);
 				}
 				// 4 : warning level (oss version)
 				else if (warningVerMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(warningVerMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "4"), bean);
+					sortMap.put(makeValidSortKey(warningVerMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "4", null, validDiffMap), bean);
 				} else if (checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(warningVerMap.get(_id), _id, "4"), bean);
+					sortMap.put(makeValidSortKey(warningVerMap.get(_id), _id, "4", null, validDiffMap), bean);
 				}
 				// 5 : info level (same binary > include license)
 				else if (infoSameMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoSameMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "5"), bean);
+					sortMap.put(makeValidSortKey(infoSameMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "5", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoSameMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoSameMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoSameMap.get(_id), _id, "5"), bean);
+					sortMap.put(makeValidSortKey(infoSameMap.get(_id), _id, "5", null, validInfoMap), bean);
 				}
 				// 6 : info level (new binary)
 				else if (infoBiMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoBiMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "6"), bean);
+					sortMap.put(makeValidSortKey(infoBiMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "6", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoBiMap.get(_id), _id, "6"), bean);
+					sortMap.put(makeValidSortKey(infoBiMap.get(_id), _id, "6", null, validInfoMap), bean);
 				}
 				// 7 : info level (Modified = new + tlsh > 120)
 				else if (infoModifyMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
-					sortMap.put(makeValidSortKey(infoModifyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "7"), bean);
+					sortMap.put(makeValidSortKey(infoModifyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "7", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoModifyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoModifyMap.get(_id), _id, "7"), bean);
+					sortMap.put(makeValidSortKey(infoModifyMap.get(_id), _id, "7", null, validInfoMap), bean);
 				}
 				// 8 : info level
 				else if (infoOnlyMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoOnlyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "8"), bean);
+					sortMap.put(makeValidSortKey(infoOnlyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "8", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "8"), bean);
+					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "8", null, validInfoMap), bean);
 				}
 				// 10 : info level (copyright)
 				else if (infoCopyrightMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
-					sortMap.put(makeValidSortKey(infoCopyrightMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "10"), bean);
+					sortMap.put(makeValidSortKey(infoCopyrightMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "10", null, validInfoMap), bean);
 				}
 				else {
 					sortListOk.add(bean);
@@ -2087,7 +2087,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return false;
 	}
 	
+	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey) {
+		return makeValidSortKey(list, _id, prevSortKey, null);
+	}
+	
 	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey, String obligationType) {
+		return makeValidSortKey(list, _id, prevSortKey, obligationType, null);
+	}
+
+	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey, String obligationType, Map<String, String> msgMap) {
 		String rtn = "";
 		// compareArray 순서대로 정렬된다.
 		// 정의되지 않은 경우는 정렬대상에서 제외
@@ -2096,7 +2104,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		int sortIdx = 0;
 		
 		for (String key : compareArray) {
-			compareSortMap.put(key, StringUtil.leftPad(Integer.toString(sortIdx++), 2, "0") );
+			compareSortMap.put(key, StringUtil.leftPad(Integer.toString(sortIdx++), 2, "0"));
 		}
 		
 		//String preSortKey = useNextSort ? "2" : "0";
@@ -2104,7 +2112,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		boolean hasErrorCode = false;
 		
 		for (String key : compareSortMap.keySet()) {
-			rtn += preSortKey + (list.contains(key) ? compareSortMap.get(key) : "99");
+			rtn += preSortKey;
+			if (list.contains(key)) {
+				rtn += makeValidSortValue(_id, key, compareSortMap, msgMap);
+			} else {
+				rtn += "999";
+			}
 			
 			if (list.contains(key)) {
 				hasErrorCode = true;
@@ -2117,7 +2130,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			rtn = "";
 			
 			for (String key : compareSortMap.keySet()) {
-				rtn += preSortKey + (list.contains(key) ? compareSortMap.get(key) : "99");
+				rtn += preSortKey + (list.contains(key) ? compareSortMap.get(key) + "0" : "999");
 			}
 		}
 		
@@ -2126,8 +2139,208 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return rtn;
 	}
 	
-	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey) {
-		return makeValidSortKey(list, _id, prevSortKey, null);
+	private static String makeValidSortValue(String _id, String key, Map<String, String> compareSortMap, Map<String, String> msgMap) {
+		String rtnVal = "";
+		if (msgMap != null) {
+			String msgVal = "";
+			switch (key) {
+				case "BINARYNOTICE" :
+					msgVal = msgMap.get("binaryNotice." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("NOTICE Should")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Found binary")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("Can't find")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else {
+							rtnVal += compareSortMap.get(key) + "6";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "9";
+					}
+					break;
+				case "BINARYNAME" :
+					msgVal = msgMap.get("binaryName." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Exists binary")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.contains("same binary")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.contains("similar binary")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.contains("binary has same OSS information")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else if (msgVal.equalsIgnoreCase("New")) {
+							rtnVal += compareSortMap.get(key) + "7";
+						} else {
+							rtnVal += compareSortMap.get(key) + "8";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "9";
+					}
+					break;
+				case "OSSNAME" :
+					msgVal = msgMap.get("ossName." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Unconfirmed")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Deactivated")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("Duplicated")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.startsWith("Already")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else {
+							rtnVal += compareSortMap.get(key) + "7";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "OSSVERSION" :
+					msgVal = msgMap.get("ossVersion." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Unconfirmed")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Duplicated")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("Already")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.startsWith("Version")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else {
+							rtnVal += compareSortMap.get(key) + "7";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "LICENSENAME" :
+					msgVal = msgMap.get("licenseName." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Unconfirmed")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Dual license")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("No license")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.startsWith("Specify")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else {
+							rtnVal += compareSortMap.get(key) + "7";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "LICENSETEXT" :
+					msgVal = msgMap.get("licenseText." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else {
+							rtnVal += compareSortMap.get(key) + "3";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "FILEPATH" :
+					msgVal = msgMap.get("filePath." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else {
+							rtnVal += compareSortMap.get(key) + "3";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "DOWNLOADLOCATION" :
+					msgVal = msgMap.get("downloadLocation." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("The address should be started")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Not the same")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else {
+							rtnVal += compareSortMap.get(key) + "4";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "HOMEPAGE" :
+					msgVal = msgMap.get("homepage." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("The address should be started")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Not the same")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else {
+							rtnVal += compareSortMap.get(key) + "4";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				default : 
+					rtnVal += compareSortMap.get(key) + "8";
+					break;
+			}
+		} else {
+			rtnVal += compareSortMap.get(key) + "9";
+		}
+		
+		return rtnVal;
 	}
 
 	private static String checkMultiLicenseError(Map<String, List<String>> addedIdList, List<ProjectIdentification> list) {
