@@ -1439,7 +1439,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						key = gridBean.getBinaryName() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" 
 								+ gridBean.getDownloadLocation() + "-" + gridBean.getHomepage() + "-" + gridBean.getCopyrightText() + "-" + gridBean.getExcludeYn();
-					}else {
+					} else {
 						if (isEmpty(gridBean.getFilePath()) && !isEmpty(gridBean.getBinaryName())) {
 							gridBean.setFilePath(gridBean.getBinaryName());
 						}
@@ -6055,6 +6055,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 		
 		return customComment;
+	}
+
+	public static String setSessionLogoutRedirectUrl(String redirectUri) {
+		if (CoConstDef.FLAG_YES.equals(CommonFunction.emptyCheckProperty("sso.useflag", CoConstDef.FLAG_NO))) {
+			return CommonFunction.emptyCheckProperty("sso.server.url", "") + "/logout";
+		} else {
+			return redirectUri;
+		}
 	}
 }
 

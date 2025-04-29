@@ -31,6 +31,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 
 import lombok.RequiredArgsConstructor;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.util.CookieUtil;
 import oss.fosslight.util.ResponseUtil;
 
@@ -81,7 +82,7 @@ public class SecurityConfig {
 									Authentication authentication) throws IOException, ServletException {
 			ResponseUtil.setDefaultLocalStorage(response);
 			cookieUtil.deleteCookie(request, response, "X-FOSS-AUTH-TOKEN");
-			response.sendRedirect(request.getContextPath() + AppConstBean.SECURITY_LOGOUT_SUCCESS_URL);
+			response.sendRedirect(CommonFunction.setSessionLogoutRedirectUrl(request.getContextPath() + AppConstBean.SECURITY_LOGOUT_SUCCESS_URL));
 		}
 	}
 }

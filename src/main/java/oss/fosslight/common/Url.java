@@ -25,6 +25,8 @@ public final class Url {
 		public static final String PATH = "/session";
 		
 		public static final String LOGIN = PATH + "/login";
+		public static final String LOGIN_MNG = PATH + "/loginManager";
+		public static final String LOGIN_PAGE = PATH + "/loginPage";
 		public static final String LOGIN_JSP = TILES + PATH + "/login";
 		
 		public static final String LOGIN_EXPIRED = PATH + "/loginExpired";
