@@ -56,6 +56,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.PropertyUtilsBean;
@@ -74,6 +75,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -6057,11 +6059,16 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return customComment;
 	}
 
-	public static String setSessionLogoutRedirectUrl(String redirectUri) {
-		if (CoConstDef.FLAG_YES.equals(CommonFunction.emptyCheckProperty("sso.useflag", CoConstDef.FLAG_NO))) {
-			return CommonFunction.emptyCheckProperty("sso.server.url", "") + "/logout";
-		} else {
-			return redirectUri;
+	public static void redirectLogoutSingleSignOn(HttpServletResponse response) {
+		String redirectUrl = UriComponentsBuilder.fromUriString(CommonFunction.emptyCheckProperty("sso.server.url", "") + "/logout")
+											.queryParam("scope", "email profile openid")
+											.queryParam("client_id", CommonFunction.emptyCheckProperty("sso.server.client.id", ""))
+											.queryParam("post_logout_redirect_uri", CommonFunction.emptyCheckProperty("server.domain", "") + "/login")
+											.build().toUriString();
+		try {
+			response.sendRedirect(redirectUrl);
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
 		}
 	}
 }

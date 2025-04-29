@@ -82,7 +82,11 @@ public class SecurityConfig {
 									Authentication authentication) throws IOException, ServletException {
 			ResponseUtil.setDefaultLocalStorage(response);
 			cookieUtil.deleteCookie(request, response, "X-FOSS-AUTH-TOKEN");
-			response.sendRedirect(CommonFunction.setSessionLogoutRedirectUrl(request.getContextPath() + AppConstBean.SECURITY_LOGOUT_SUCCESS_URL));
+			if (CoConstDef.FLAG_YES.equals(CommonFunction.emptyCheckProperty("sso.useflag", CoConstDef.FLAG_NO))) {
+				CommonFunction.redirectLogoutSingleSignOn(response);
+			} else {
+				response.sendRedirect(request.getContextPath() + AppConstBean.SECURITY_LOGOUT_SUCCESS_URL);
+			}
 		}
 	}
 }
