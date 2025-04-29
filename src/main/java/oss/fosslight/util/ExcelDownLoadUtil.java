@@ -639,12 +639,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						params.add(projectService.getPartnerFormatName(bean.getRefPartnerId(), false)); //3rd Party
 					}
 
-					if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)
-							|| CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type) ) {
+					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
 						params.add(bean.getBinaryName()); // Binary Name
-					}
-
-					if (!CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
+					} else {
 						if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
 							params.add(bean.getPackageUrl());
 						} else {
