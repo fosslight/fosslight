@@ -1670,10 +1670,11 @@ var com_fn = {
 			}
         }
 
-        if(rowCheckedArr.length > 0){
+        if (rowCheckedArr.length > 0) {
+        	com_fn.exitCell(_mainLastsel, targetGrid);
         	var _popup = null;
 			
-            if(_popup == null || _popup.closed){
+            if (_popup == null || _popup.closed) {
             	_popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
             	$("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
@@ -1691,7 +1692,7 @@ var com_fn = {
 				$("#bulkEditForm > input[name=target]").val(targetGird);
 				$("#bulkEditForm").submit();
             }
-        }else{
+        } else {
             alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
             return false;
         }
