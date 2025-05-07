@@ -1932,11 +1932,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				if (!isEmpty(orgBean.getSrcAndroidCsvFileId())) {
-					newBean.setSrcAndroidCsvFileId(fileService.copyFileInfo(orgBean.getSrcAndroidCsvFileId()));
+					newBean.setSrcAndroidCsvFileId(fileService.copyPhysicalFile(orgBean.getSrcAndroidCsvFileId(), null, true));
 				}
 				
 				if (!isEmpty(orgBean.getSrcAndroidNoticeFileId())) {
-					newBean.setSrcAndroidNoticeFileId(fileService.copyFileInfo(orgBean.getSrcAndroidNoticeFileId()));
+					newBean.setSrcAndroidNoticeFileId(fileService.copyPhysicalFile(orgBean.getSrcAndroidNoticeFileId(), null, true));
 				}
 				
 				if (!isEmpty(orgBean.getSrcAndroidResultFileId())) {
@@ -1945,6 +1945,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				// copy 시 distributeName 은 복사 되지 않도록 플래그 추가
 				newBean.setCopyFlag(CoConstDef.FLAG_YES);
+				
+				if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(orgBean.getNoticeType()))) {
+					newBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				}
 				
 				projectMapper.updateProjectMaster(newBean);
 			}
