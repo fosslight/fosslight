@@ -3355,6 +3355,8 @@ public class CoMailManager extends CoTopComponent {
 			bean.setPackageFileId((String) dataMap.get("PACKAGE_FILE_ID"));
 			bean.setPackageFileId2((String) dataMap.get("PACKAGE_FILE_ID2"));
 			bean.setPackageFileId3((String) dataMap.get("PACKAGE_FILE_ID3"));
+			bean.setPackageFileId4((String) dataMap.get("PACKAGE_FILE_ID4"));
+			bean.setPackageFileId5((String) dataMap.get("PACKAGE_FILE_ID5"));
 			bean.setNoticeFileId((String) dataMap.get("NOTICE_FILE_ID"));
 			
 			// code convert
