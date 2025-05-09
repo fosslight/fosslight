@@ -813,8 +813,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				String ossNameErrorMsg = errorMap.containsKey("ossName."+componentId) ? errorMap.get("ossName."+componentId) : "";
 				String ossVersionErrorMsg = errorMap.containsKey("ossVersion."+componentId) ? errorMap.get("ossVersion."+componentId) : "";
 				
-				if (ossNameErrorMsg.indexOf("Unconfirmed") > -1 
-						|| ossVersionErrorMsg.indexOf("Unconfirmed") > -1) {
+				if (ossNameErrorMsg.indexOf("New") > -1
+						|| ossVersionErrorMsg.indexOf("New") > -1) {
 					duplicateList.add(checkKey);
 					componentIdList.add(componentId);
 				}

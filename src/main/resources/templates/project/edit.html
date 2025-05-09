@@ -80,7 +80,7 @@
                                 	<div class="col-md-6 required">
                                 		<label for="inputName" th:text="#{msg.common.field.project.name}"></label><span class="text-orange">*</span>
                                     	<input type="text" id="prjName" name="prjName" class="form-control" th:value="${project?.prjName}" th:disabled="${isReadOnly}">
-                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
+                                    	<span class="retxt text-danger text-sm" th:text="'Required.'"></span>
                                 	</div>
                                     <div class="col-md-4">
                                         <label for="inputName" th:text="#{msg.common.field.project.version}"></label>

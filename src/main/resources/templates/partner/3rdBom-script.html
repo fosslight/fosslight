@@ -389,8 +389,8 @@ var bom_fn = {
 				if(checkList.includes(value)) {
 					var data = rowData[value];
 					if ("downloadLocation" == value){
-						if(data.indexOf("Not the same as property") > -1){
-							data = data.split("Not the same as property")[0];
+						if(data.indexOf("Different from DB") > -1){
+							data = data.split("Different from DB")[0];
 						} else if(data.indexOf("The address should be") > -1){
 							data = data.split("The address should be")[0];
 						}
@@ -407,8 +407,8 @@ var bom_fn = {
 						
 						data = data.substr(1);
 					} else if ("homepage" == value) {
-						if(data.indexOf("Not the same as property") > -1){
-							data = data.split("Not the same as property")[0];
+						if(data.indexOf("Different from DB") > -1){
+							data = data.split("Different from DB")[0];
 						} else if(data.indexOf("The address should be") > -1){
 							data = data.split("The address should be")[0];
 						}
@@ -446,7 +446,7 @@ var bom_fn = {
 					});
 
 					for(var i in msgData){
-					    if(bomValidMsgData[msgData[i]].toUpperCase() == "UNCONFIRMED LICENSE"){
+					    if(bomValidMsgData[msgData[i]].toUpperCase() == "NEW LICENSE"){
 					        success = false;
 
 					        break;

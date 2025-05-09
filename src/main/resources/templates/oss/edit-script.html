@@ -1885,7 +1885,7 @@
 		});
 
 		if(!nicknameFormatErrorFlag){
-			alertify.alert("Formatting error", function(){});
+			alertify.alert("Format error", function(){});
 			
 			return false;
 		}
@@ -2143,7 +2143,7 @@
 				});
 			} else if(json.validMsg == "deactivate"){
 				alertify.error([[#{msg.oss.deactivated}]], 0);
-			} else if(json.ossName == "Formatting error"){
+			} else if(json.ossName == "Format error"){
 				alertify.error([[#{msg.common.valid}]], 0);
 				// 커스텀 에러 메세지 
 				ossGridValidMsg(json, "_licenseChoice");
@@ -2999,7 +2999,7 @@
 			var targetVal = $(target).val();
 
 			if(targetVal.indexOf(",") > -1){
-				$(target).parent().next("span.retxt").html("Formatting error").show();
+				$(target).parent().next("span.retxt").html("Format error").show();
 			} else {
 				$(target).parent().next("span.retxt").hide();
 			}

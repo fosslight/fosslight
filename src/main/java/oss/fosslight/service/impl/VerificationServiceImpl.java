@@ -1438,7 +1438,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			resMap.put("verifyEmptySourcePath", emptySourcePathlist);
 			resMap.put("verifyValidMsg", "path not found.");
 			resMap.put("verifyCheckSourcePathMsg", getMessage("msg.package.check.source.code.path"));
-			resMap.put("verifyEmptySourcePathMsg", "This field is required");
+			resMap.put("verifyEmptySourcePathMsg", "Required");
 			resMap.put("fileCounts", gFileCountMap);
 			resMap.put("verifyReadme", readmeFileName);
 			resMap.put("verifyCheckList", !isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
@@ -3347,7 +3347,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					continue;
 				}
 				String message = vr.getValidMessageMap().get(key);
-				if (message.equalsIgnoreCase("Unconfirmed open source") || message.equalsIgnoreCase("Unconfirmed version")) {
+				if (message.equalsIgnoreCase("New open source") || message.equalsIgnoreCase("New version")) {
 					isValid = false;
 					String componentId = key.split("[.]")[1];
 					customErrorMap.put(componentId, message);

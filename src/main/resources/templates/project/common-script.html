@@ -113,7 +113,7 @@ var com_evt = {
 							
 							keys.forEach(function(obj){
 								var warningMsg = bomValidMsgData[obj];
-								if ("Unconfirmed license" == warningMsg) {
+								if ("New license" == warningMsg) {
 									unconfirmedLicenseCnt++;
 									return false;
 								}
@@ -1473,8 +1473,8 @@ var com_fn = {
 				if("gridId" != value){
 					var data = obj[value];
 					if(value == "downloadLocation" || value == "homepage"){
-						if(data.indexOf("Not the same as property") > -1){
-							data = data.split("Not the same as property")[0];
+						if(data.indexOf("Different from DB") > -1){
+							data = data.split("Different from DB")[0];
 						} else if(data.indexOf("The address should be") > -1){
 							data = data.split("The address should be")[0];
 						}

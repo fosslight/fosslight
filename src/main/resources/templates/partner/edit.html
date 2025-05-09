@@ -65,7 +65,7 @@
 									<div class="col-lg-6 required">
                                 		<label for="inputName" th:text="#{msg.common.field.3rdParty.name}"></label><span class="text-orange">*</span>
                                     	<input type="text" id="partnerName" name="partnerName" class="form-control autoComParty" th:value="${detail?.partnerName}" th:disabled="${detail.status == 'CONF'} ? 'disabled'">
-                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
+                                    	<span class="retxt text-danger text-sm" th:text="'Required.'"></span>
                                 	</div>
                                 	<div class="col-lg-6">
 										<label for="inputName" th:text="#{msg.common.field.deliveryForm}"></label>
@@ -80,7 +80,7 @@
 									<div class="col-lg-6 required">
                                 		<label for="inputName" th:text="#{msg.common.field.3rdParty.softwareName}"></label><span class="text-orange">*</span>
                                 		<input type="text" id="softwareName" name="softwareName" class="form-control autoComSwNm" th:value="${detail?.softwareName}" th:disabled="${detail.status == 'CONF'} ? 'disabled'">
-                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
+                                    	<span class="retxt text-danger text-sm" th:text="'Required.'"></span>
                                 	</div>
 									<div class="col-lg-6">
 										<label for="inputName" th:text="#{msg.common.field.3rdParty.softwareVersion}"></label>

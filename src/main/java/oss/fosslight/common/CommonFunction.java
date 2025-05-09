@@ -1750,7 +1750,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 
 		
-		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3) or oss version warning message "This field is required" (Priority : 4)
+		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3) or oss version warning message "Required" (Priority : 4)
 		if (validDiffMap != null && !validDiffMap.isEmpty()) {
 			for (String errKey : validDiffMap.keySet()) {
 				if (errKey.indexOf(".") > -1) {
@@ -1758,9 +1758,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					String _key = errKey.substring(errKey.indexOf(".") + 1, errKey.length());
 					
 //					if (!CommonFunction.isAdmin()) {
-//						if ((errKey.startsWith("ossName") && (msg.startsWith("Deactivated") || msg.startsWith("Unconfirmed")))
-//								|| (errKey.startsWith("ossVersion") && msg.startsWith("Unconfirmed"))
-//								|| (errKey.startsWith("licenseName") && (msg.startsWith("Unconfirmed") || msg.startsWith("errLv")))) {
+//						if ((errKey.startsWith("ossName") && (msg.startsWith("Deactivated") || msg.startsWith("")))
+//								|| (errKey.startsWith("ossVersion") && msg.startsWith(""))
+//								|| (errKey.startsWith("licenseName") && (msg.startsWith("") || msg.startsWith("errLv")))) {
 //							if (errorMap.containsKey(_key)) {
 //								List<String> _list = errorMap.get(_key);
 //								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
@@ -1773,8 +1773,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 //						}
 //					}
 					
-					// oss version warning message "This field is required" (Priority : 4)
-					if (errKey.startsWith("ossVersion") && msg.equals("This field is required.")) {
+					// oss version warning message "Required" (Priority : 4)
+					if (errKey.startsWith("ossVersion") && msg.equals("Required.")) {
 						if (warningVerMap.containsKey(_key)) {
 							List<String> _list = warningVerMap.get(_key);
 							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
@@ -2197,7 +2197,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (!isEmpty(msgVal)) {
 						if (msgVal.startsWith("This field")) {
 							rtnVal += compareSortMap.get(key) + "0";
-						} else if (msgVal.startsWith("Unconfirmed")) {
+						} else if (msgVal.startsWith("New")) {
 							rtnVal += compareSortMap.get(key) + "1";
 						} else if (msgVal.startsWith("Formatting")) {
 							rtnVal += compareSortMap.get(key) + "2";
@@ -2221,7 +2221,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (!isEmpty(msgVal)) {
 						if (msgVal.startsWith("This field")) {
 							rtnVal += compareSortMap.get(key) + "0";
-						} else if (msgVal.startsWith("Unconfirmed")) {
+						} else if (msgVal.startsWith("New")) {
 							rtnVal += compareSortMap.get(key) + "1";
 						} else if (msgVal.startsWith("Formatting")) {
 							rtnVal += compareSortMap.get(key) + "2";
@@ -2245,7 +2245,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (!isEmpty(msgVal)) {
 						if (msgVal.startsWith("This field")) {
 							rtnVal += compareSortMap.get(key) + "0";
-						} else if (msgVal.startsWith("Unconfirmed")) {
+						} else if (msgVal.startsWith("New")) {
 							rtnVal += compareSortMap.get(key) + "1";
 						} else if (msgVal.startsWith("Formatting")) {
 							rtnVal += compareSortMap.get(key) + "2";
@@ -2638,7 +2638,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 		}
 		
-		// license type이 NA가 아닌 라이선스가 포함되어 있거나, Unconfirmed license인 경우 false
+		// license type이 NA가 아닌 라이선스가 포함되어 있거나, New license인 경우 false
 		if (result) {
 			for (String license : avoidNull(licenseName).split(",")) {
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
@@ -5525,7 +5525,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					}
 				}
 				
-				// Check unconfirmed license, the actual message is (Declared : ~~), so check again registered license.
+				// Check New license, the actual message is (Declared : ~~), so check again registered license.
 				if (unclearObligationList.contains(bean.getGridId())
 						|| (!isEmpty(bean.getObligationType()) && (checkIncludeUnconfirmedLicense(bean.getComponentLicenseList()) || checkIncludeNotDeclaredLicense(bean.getOssName(), bean.getOssVersion(), bean.getComponentLicenseList())))) {
 					bean.setObligationGrayFlag(CoConstDef.FLAG_YES);

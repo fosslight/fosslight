@@ -1146,7 +1146,7 @@ public class OssController extends CoTopComponent{
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.debug("Unconfirmed license:" + licenseName);
+					log.debug("New license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
@@ -1179,14 +1179,14 @@ public class OssController extends CoTopComponent{
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.debug("Unconfirmed license:" + licenseName);
+					log.debug("New license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
 			}
 			if (licenseCheck) {
 				log.debug("Add failed due to declared license:" + oss.getOssName());
-				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Unconfirmed license)");
+				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (New license)");
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
