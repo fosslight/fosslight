@@ -268,7 +268,7 @@
 		                  		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 		                  			AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y'
 		                  		</if>
-		                  			AND X.REFERENCE_DIV != '20'
+		                  			AND X.REFERENCE_DIV NOT IN ('20', '23')
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 		                     		AND X.OSS_NAME = #{ossName}
 								</if>
@@ -545,7 +545,7 @@
 		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 		                  			AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y' 
 		              			</if>
-		              				AND X.REFERENCE_DIV != '20'
+		              				AND X.REFERENCE_DIV NOT IN ('20', '23')
 		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 		                        	AND X.OSS_NAME = #{ossName}
 								</if>
