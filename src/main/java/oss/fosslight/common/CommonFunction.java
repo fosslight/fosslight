@@ -6016,7 +6016,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					break;
 				}
 			}
-			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>CSG Task</a>";
+			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>SW Security Governance Team</a>";
 			if (lang.equals("en-US")) {
 				isInfo += "sensitive or credential information<a>";
 				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo, vulDocInfoLink});
@@ -6025,7 +6025,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo, vulDocInfoLink});
 			}
 		} else {
-			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>CSG Task</a>";
+			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>SW Security Governance Team</a>";
 			vulDocMsg = getMessage("msg.project.packaging.vuldoc.info" , new String[]{vulDocInfoLink});
 		}
 		
