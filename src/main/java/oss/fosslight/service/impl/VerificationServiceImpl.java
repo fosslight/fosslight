@@ -3248,21 +3248,33 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 	@Override
 	public void deleteFile(Map<Object, Object> map) {
-		String delFileSeq = (String) map.get("delFileSeq");
+		String delFileSeq = "";
 		String prjId = (String) map.get("prjId");
-		String gubn = (String) map.get("gubn");
-		T2File file = fileService.selectFileInfo(delFileSeq);
 		
-		// delete logical file
-		fileMapper.updateFileDelYn(new String[] {delFileSeq});
-		// delete physical file
-		fileService.deletePhysicalFile(file, "VERIFY");
+		if (map.containsKey("delFileId")) {
+			delFileSeq = (String) map.get("delFileId");
+			List<T2File> fileList = fileService.getFileInfoList(delFileSeq);
+			if (!CollectionUtils.isEmpty(fileList)) {
+				for (T2File file : fileList) {
+					fileMapper.updateFileDelYn(new String[] {file.getFileSeq()});
+					fileService.deletePhysicalFile(file, "VERIFY");
+				}
+			}
+		} else {
+			delFileSeq = (String) map.get("delFileSeq");
+			T2File file = fileService.selectFileInfo(delFileSeq);
+			// delete logical file
+			fileMapper.updateFileDelYn(new String[] {delFileSeq});
+			// delete physical file
+			fileService.deletePhysicalFile(file, "VERIFY");
+		}
+		
 		// update file id
 		Project project = new Project();
 		project.setPrjId(prjId);
 		Project prjInfo = projectMapper.getProjectBasicInfo(project);
 		List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(prjInfo.getNoticeAppendFileId());
-		if (noticeAppendFile == null || noticeAppendFile.isEmpty()) {
+		if (CollectionUtils.isEmpty(noticeAppendFile)) {
 			project.setNoticeAppendFileId(null);
 			verificationMapper.updateNoticeAppendFile(project);
 		}

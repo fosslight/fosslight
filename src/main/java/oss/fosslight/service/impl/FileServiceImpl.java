@@ -1357,4 +1357,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		}
 		return fileInfo;
 	}
+
+	@Override
+	public List<T2File> getFileInfoList(String fileId) {
+		return fileMapper.getFileInfoList(fileId);
+	}
 }
