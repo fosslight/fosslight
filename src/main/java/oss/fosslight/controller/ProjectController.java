@@ -1378,6 +1378,7 @@ public class ProjectController extends CoTopComponent {
 				
 				// 4. merge and save 처리
 				projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>(), new ArrayList<>()); // 신규생성이기 때문에 default Data가 없음.
+				projectService.updateSecurityDataForProject(project.getPrjId());
 				
 				// 5. validation check로 project status를 정리함.
 				ProjectIdentification identification = new ProjectIdentification();
