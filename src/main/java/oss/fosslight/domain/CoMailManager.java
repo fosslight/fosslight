@@ -3665,6 +3665,18 @@ public class CoMailManager extends CoTopComponent {
 					bean.setMultiLicenseFlag(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getLicenseDiv());
 				}
 				
+				if (!isEmpty((String) dataMap.get("INCLUDE_CPE"))) {
+					bean.setIncludeCpe(((String) dataMap.get("INCLUDE_CPE")).replaceAll(",", "<br>"));
+				}
+				
+				if (!isEmpty((String) dataMap.get("EXCLUDE_CPE"))) {
+					bean.setExcludeCpe(((String) dataMap.get("EXCLUDE_CPE")).replaceAll(",", "<br>"));
+				}
+				
+				if (!isEmpty((String) dataMap.get("OSS_VERSION_ALIAS"))) {
+					bean.setOssVersionAlias(((String) dataMap.get("OSS_VERSION_ALIAS")).replaceAll(",", "<br>"));
+				}
+				
 				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? (String) dataMap.get("DETECTED_LICENSE") : "";
 				bean.setDetectedLicense(detectedLicenses);
 			}
