@@ -4822,6 +4822,9 @@ public class ProjectController extends CoTopComponent {
 //			
 			model.addAttribute("permissionPrjIds", String.join(",", (List<String>) map.get("permissionPrjIds")));
 			model.addAttribute("notPermissionPrjIds", String.join(",", (List<String>) map.get("notPermissionPrjIds")));
+		} else if (code.equals("watcher")) {
+			model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+			model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		}
 		model.addAttribute("code", code);
 		return "project/view/projectChangeView";
