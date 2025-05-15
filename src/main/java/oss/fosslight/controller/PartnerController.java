@@ -1182,6 +1182,8 @@ public class PartnerController extends CoTopComponent{
 	@PostMapping(value = PARTNER.REMOVE_WATCHERS)
 	public @ResponseBody ResponseEntity<Object> removeWatchers(@RequestBody PartnerMaster project,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
 		try {
 			PartnerMaster param = new PartnerMaster();
 			
@@ -1200,11 +1202,13 @@ public class PartnerController extends CoTopComponent{
 					}
 				}
 			}
+			
+			resultMap.put("isValid", "true");
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, null);
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(resultMap);
 	}
 	
 	/**

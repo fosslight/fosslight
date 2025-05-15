@@ -528,6 +528,11 @@ var fn = {
 		fn.resetChangeWatcherPop();
 	},
 	changeWatcherAdd : function() {
+		if (changeWatcherArr.length == 0) {
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+			return false;
+		}
+		
 		var msg = "";
 		var notPermissionPartnerIds = [];
 		var permissionPartnerIds = [];
@@ -560,11 +565,6 @@ var fn = {
 		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
-				if (changeWatcherArr.length == 0) {
-					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
-					return false;
-				}
-				
 				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
 
 				$.ajax({
@@ -600,6 +600,11 @@ var fn = {
 		});
 	},
 	changeWatcherDelete : function() {
+		if (changeWatcherArr.length == 0) {
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+			return false;
+		}
+		
 		var msg = "";
 		var notPermissionPartnerIds = [];
 		var permissionPartnerIds = [];
@@ -632,11 +637,6 @@ var fn = {
 		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
-				if (changeWatcherArr.length == 0) {
-					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
-					return false;
-				}
-				
 				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
 				
 				$.ajax({
@@ -647,8 +647,12 @@ var fn = {
 					cache : false,
 					contentType : 'application/json',
 					success: function(resultData){
-						if(resultData.isValid == "true") {
-							alertify.success([[#{msg.common.success}]]);
+						if (resultData.isValid == "true") {
+							if ("" == msg) {
+								alertify.success([[#{msg.common.success}]]);
+							} else {
+								alertify.alert(msg, function(){});
+							}
 						} else {
 							alertify.error([[#{msg.common.valid2}]], 0);
 						}

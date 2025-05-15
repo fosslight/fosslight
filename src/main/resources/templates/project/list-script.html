@@ -1543,15 +1543,44 @@ var fn = {
 		});
 	},
 	changeWatcherDelete : function() {
+		if (changeWatcherArr.length == 0) {
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+			return false;
+		}
+		
+		var msg = "";
+		var notPermissionPrjIds = [];
+		var permissionPrjIds = [];
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		for (var i in prjIds) {
+			var gridData = $('#list').jqGrid('getRowData',prjIds[i]);
+			if ("1" == gridData.statusPermission) {
+				permissionPrjIds.push(prjIds[i]);
+			} else {
+				notPermissionPrjIds.push(prjIds[i]);
+			}
+		}
+		
+		if (notPermissionPrjIds.length > 0) {
+			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
+			msg += '<br/> - '
+			for (var i in notPermissionPrjIds) {
+				msg += 'PRJ-' + notPermissionPrjIds[i];
+				if(i < notPermissionPrjIds.length-1){
+					msg += ', ';
+				}
+			}
+		}
+		
+		if (permissionPrjIds.length == 0) {
+			alertify.alert(msg, function(){});
+			return false;
+		}
+		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
-				if (changeWatcherArr.length == 0) {
-					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
-					return false;
-				}
-				
-				var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
-				var data = {"prjIds" : prjIds, "changeWatcherList" : changeWatcherArr};
+				var data = {"prjIds" : permissionPrjIds, "changeWatcherList" : changeWatcherArr};
 				
 				$.ajax({
 					url : '/project/removeWatchers',
@@ -1561,8 +1590,12 @@ var fn = {
 					cache : false,
 					contentType : 'application/json',
 					success: function(resultData){
-						if(resultData.isValid == "true") {
-							alertify.success([[#{msg.common.success}]]);
+						if (resultData.isValid == "true") {
+							if ("" == msg) {
+								alertify.success([[#{msg.common.success}]]);
+							} else {
+								alertify.alert(msg, function(){});
+							}
 						} else {
 							alertify.error([[#{msg.common.valid2}]], 0);
 						}
@@ -2240,8 +2273,8 @@ var list = {
             {'Created Date': 'createdDate'},
             {'Modified Date': 'modifiedDate'},
             {'Reviewer': 'reviewer'}
-        ]
-        var defaultColNames = ['cb', 'prjId', 'prjName', 'status', 'progress', 'download']
+        ];
+        var defaultColNames = ['cb', 'prjId', 'prjName', 'status', 'progress', 'download'];
         
        	applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
 

@@ -3599,6 +3599,8 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value = PROJECT.REMOVE_WATCHERS)
 	public @ResponseBody ResponseEntity<Object> removeWatchers(@RequestBody Project project,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
 		try {
 			Project param = new Project();
 			
@@ -3617,11 +3619,13 @@ public class ProjectController extends CoTopComponent {
 					}
 				}
 			}
+			
+			resultMap.put("isValid", "true");
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, null);
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(resultMap);
 	}
 	
 	/**

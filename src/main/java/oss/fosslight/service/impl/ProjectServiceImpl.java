@@ -1147,11 +1147,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					if (bean.getCvssScoreMax() != null) {
 						String cveId = bean.getCvssScoreMax().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax());
+						if (!inCpeMatchCheckList.contains(cveId)) {
+							cvssScoreMaxList.add(bean.getCvssScoreMax());
+						}
 					}
 					if (bean.getCvssScoreMax1() != null) {
 						String cveId = bean.getCvssScoreMax1().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax1());
+						if (!inCpeMatchCheckList.contains(cveId)) {
+							cvssScoreMaxList.add(bean.getCvssScoreMax1());
+						}
 					}
 					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
 						if (cvssScoreMaxList.size() > 1) {
@@ -1478,6 +1482,48 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			newSortList.addAll(excludeList);
 			list = newSortList;
+			
+			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) {
+				List<ProjectIdentification> depTreeList = new ArrayList<>();
+				Map<String, ProjectIdentification> packageUrlInfo = new HashMap<>();
+				List<ProjectIdentification> depList = new ArrayList<>();
+				int idx = 1;
+				for (ProjectIdentification bean : list) {
+					if (!isEmpty(bean.getPackageUrl())) {
+						bean.setTreeId("p-" + idx);
+						packageUrlInfo.put(bean.getPackageUrl(), bean);
+						depList.add(bean);
+						idx++;
+					}
+				}
+				if (!CollectionUtils.isEmpty(depList)) {
+					idx = 1;
+					for (ProjectIdentification depInfo : depList) {
+						depTreeList.add(depInfo);
+						
+						if (!isEmpty(depInfo.getDependencies())) {
+							String[] dependencies = depInfo.getDependencies().split(",");
+							for (String dependency : dependencies) {
+								if (packageUrlInfo.containsKey(dependency)) {
+									ProjectIdentification dependencyBean = new ProjectIdentification();
+									ProjectIdentification bean = packageUrlInfo.get(dependency);
+									dependencyBean.setTreeParentId(depInfo.getTreeId());
+									dependencyBean.setTreeId("c-" + idx);
+									dependencyBean.setOssName(bean.getOssName());
+									dependencyBean.setOssVersion(bean.getOssVersion());
+									dependencyBean.setPackageUrl(bean.getPackageUrl());
+									dependencyBean.setCvssScore(bean.getCvssScore());
+									dependencyBean.setCveId(bean.getCveId());
+									dependencyBean.setDependencies(bean.getDependencies());
+									depTreeList.add(dependencyBean);
+									idx++;
+								}
+							}
+						}
+					}
+					map.put("depTreeData", depTreeList);
+				}
+			}
 			
 			map.put("subData", subMap);
 			map.put("mainData", list);
