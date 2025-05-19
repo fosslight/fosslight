@@ -1378,11 +1378,13 @@ var partnerList = {
 	                  	pageButtonArea.append(appendIcon);
 	            	}
 	            	
-	            	var setUpColumnButton = $('#setUpColumnButton');
+	            	var setUpColumnButton = $('#setUpColumnButtonPar');
 					/* columns licalization */
 					if (setUpColumnButton.length === 0) {
 						var savedColNames = [];
 						var userColumnsSettingMenuOptions = {
+							_btnId : "Par",
+		                    _targetId : "list",
 							_listType: listType,
 							_totalColInfos: totalColInfos,
 							_defaultColNames: defaultColNames,
@@ -1391,15 +1393,15 @@ var partnerList = {
 						pageButtonArea.append(createUserCoulmnsSettingButton(userColumnsSettingMenuOptions));
 
 						// Check for click events occurring inside the menu area
-						$("#setUpColumnMenu").on("click", function (event) {
+						$("#setUpColumnMenuPar").on("click", function (event) {
 							event.stopPropagation();
 						});
 
-						$('#setUpColumnButton').on("click", function (event) {
+						$('#setUpColumnButtonPar').on("click", function (event) {
 							event.stopPropagation();
-							$('#setUpColumnMenu').toggleClass("show");
+							$('#setUpColumnMenuPar').toggleClass("show");
 							$(this).toggleClass("show");
-						})
+						});
 					}
 					adjustPageGridSize();
 				}

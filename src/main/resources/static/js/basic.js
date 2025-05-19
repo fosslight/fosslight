@@ -3727,7 +3727,8 @@ let savedColNames = [];
 let selectedColumns = [];
 
 function createUserCoulmnsSettingButton(options) {
-	const { _listType, _totalColInfos, _defaultColNames, _savedColNames } = options;
+	const { _btnId, _targetId, _listType, _totalColInfos, _defaultColNames, _savedColNames } = options;
+	totalColInfos = _totalColInfos;
 	listType = _listType;
 	defaultColNames = _defaultColNames;
 	savedColNames = _savedColNames;
@@ -3738,7 +3739,7 @@ function createUserCoulmnsSettingButton(options) {
 	// Create the dropdown button
 	const newButton = $("<button></button>", {
 		type: "button",
-		id: "setUpColumnButton",
+		id: "setUpColumnButton" + _btnId,
 		"data-toggle": "dropdown",
 		html: '<i class="fas fa-cog"></i>'
 	}).addClass("btn btn-sm btn-grid-light-gray float-left mr-1");
@@ -3750,13 +3751,13 @@ function createUserCoulmnsSettingButton(options) {
 	});
 
 	const dropdownMenu = $("<div></div>", {
-		id: "setUpColumnMenu",
+		id: "setUpColumnMenu" + _btnId,
 		role: "menu"
 	}).addClass("dropdown-menu col-local");
 
 	dropdownMenu.append(titleArea);
 	dropdownMenu.append(createDivider());
-	dropdownMenu.append(createMenuItem('Restore Defaults', '#', 'dropdown-item', 'restoreDefaults()'));
+	dropdownMenu.append(createMenuItem('Restore Defaults', '#', 'dropdown-item', "restoreDefaults('" + _btnId + "')"));
 
 	const dropdownItemArea = $("<div></div>").css({
 		height: '300px',
@@ -3766,13 +3767,13 @@ function createUserCoulmnsSettingButton(options) {
 	_totalColInfos.forEach(colInfo => {
 		const label = Object.keys(colInfo)[0];
 		const id = colInfo[label];
-		dropdownItemArea.append(createCheckboxItem(label, id));
+		dropdownItemArea.append(createCheckboxItem(label, id, _btnId));
 		totalColInfos.push(id);
 	});
 
 	dropdownMenu.append(dropdownItemArea);
 	dropdownMenu.append(createDivider());
-	dropdownMenu.append(createButtonArea(listType));
+	dropdownMenu.append(createButtonArea(_totalColInfos, listType, _targetId, _btnId));
 
 	// Append the dropdown menu to the button
 	dropdownArea.append(newButton);
@@ -3789,7 +3790,7 @@ function attachEventHandler() {
   $(document).on("click", function(event) {
         if (!$(event.target).closest('.dropdown').length) {
             $('.dropdown-menu').removeClass('show');
-            $('#setUpColumnButton').removeClass('show');
+            $("[id^='setUpColumnButton']").removeClass('show');
         }
     });
 }
@@ -3815,13 +3816,13 @@ function createDivider(className) {
 	return hr;
 }
 
-function createCheckboxItem(label, id) {
+function createCheckboxItem(label, id, btnId) {
 	const dropdownItem = $("<span></span>").addClass('dropdown-item');
 	const divCustomCheckbox = $("<div></div>").addClass('custom-control custom-checkbox ml-1');
 	const inputCheckbox = $("<input>", {
 		class: 'custom-control-input',
 		type: 'checkbox',
-		id: 'col_option_' + id
+		id: btnId + '_col_option_' + id
 	});
 
 	if (defaultColNames.includes(id)) {
@@ -3834,7 +3835,7 @@ function createCheckboxItem(label, id) {
 
 	const labelCheckbox = $("<label></label>", {
 		class: 'custom-control-label',
-		for: 'col_option_' + id,
+		for: btnId + '_col_option_' + id,
 		style: 'padding-top: 2px; font-weight: 400;',
 		text: label
 	});
@@ -3845,27 +3846,44 @@ function createCheckboxItem(label, id) {
 	return dropdownItem;
 }
 
-function createButtonArea(listType) {
+function createButtonArea(_totalColInfos, listType, targetId, btnId) {
 	var buttonArea = $("<div></div>");
-	buttonArea.append(createButton('Save', 'btn btn-ivory float-right mr-1 text-sm', function() {
-		saveUserColumns(listType);
+	buttonArea.append(createButton('Save', 'btn btn-default float-right mr-1 text-sm', function() {
+		saveUserColumns(_totalColInfos, listType, targetId, btnId);
+		removeDropdownMenu(btnId);
 	}));
 	buttonArea.append(createButton('Cancel', 'btn btn-default float-right mr-1 text-sm', function() {
-		removeDropdownMenu(listType);
+		defaultCheckboxItem(_totalColInfos, btnId);
+		removeDropdownMenu(btnId);
 	}));
 	return buttonArea;
 }
-
 
 function createButton(text, className, clickFunction) {
 	var button = $("<button></button>").addClass(className).text(text).on("click", clickFunction);
 	return button;
 }
 
-function restoreDefaults() {
+function defaultCheckboxItem(_totalColInfos, btnId) {
+	let checkboxId = btnId + "_col_option_";
+	$("[id^=" + checkboxId + "]").prop("checked", false);
+	_totalColInfos.forEach(colInfo => {
+		let label = Object.keys(colInfo)[0];
+		let id = colInfo[label];
+		if (defaultColNames.includes(id)) {
+			$("#" + checkboxId + id).prop("checked", true).prop("disabled", true);
+		} else {
+			if (selectedColumns.includes(id)) {
+				$("#" + checkboxId + id).prop("checked", true);
+			}
+		}
+	});
+}
+
+function restoreDefaults(btnId) {
 	event.preventDefault();
 	$('.custom-control-input').each(function() {
-		const id = $(this).attr('id').replace('col_option_', '');
+		const id = $(this).attr('id').replace(btnId + '_col_option_', '');
 		if (defaultColNames.includes(id)) {
 			$(this).prop('checked', true);
 		} else {
@@ -3874,8 +3892,8 @@ function restoreDefaults() {
 	});
 }
 
-function removeDropdownMenu() {
-	$("#setUpColumnMenu").removeClass("show");
+function removeDropdownMenu(btnId) {
+	$("#setUpColumnMenu" + btnId).removeClass("show");
 }
 
 /** 
@@ -3919,26 +3937,30 @@ function applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNa
 	});
 	
 	$.each(colModelArr, function(index, colModelObj) {
-	    if (unselectedColumns.includes(colModelObj.name)) {
-	        colModelObj.hidden = true;
-	    }
+		if (unselectedColumns.includes(colModelObj.name)) {
+			colModelObj.hidden = true;
+		}
 	});
 }
 
-function saveUserColumns(listType) {
+function saveUserColumns(_totalColInfos, listType, targetId, btnId) {
 	loading.show();
 
 	const checkboxes = document.querySelectorAll('.custom-control-input:checked');
 	const checkedColNames = Array.from(checkboxes, checkbox => checkbox.id.replace('col_option_', ''));
 
 	var columns = "";
+	var idx = 0;
 	checkedColNames.forEach(function(colName, index) {
-		if (index == 0) {
-			columns = colName;
-		} else {
-			columns += '|' + colName
+		if (colName.startsWith(btnId + '_')) {
+			if (idx == 0) {
+				columns = colName.replace(btnId + '_', '');
+			} else {
+				columns += '|' + colName.replace(btnId + '_', '');
+			}
+			idx++;
 		}
-	})
+	});
 	var param = {
 		"columns": columns,
 		"listType": listType
@@ -3954,16 +3976,16 @@ function saveUserColumns(listType) {
 		error: fn.onError
 	});
 
-	applyUserColumnsToGrid();
+	applyUserColumnsToGrid(_totalColInfos, targetId, btnId);
 }
 
-function applyUserColumnsToGrid() {
+function applyUserColumnsToGrid(_totalColInfos, targetId, btnId) {
 	const uncheckedColNames = $('.custom-control-input:not(:checked)').map(function() {
-		return this.id.replace('col_option_', '');
+		return this.id.replace(btnId + '_col_option_', '');
 	}).get();
 
-	const grid = $("#list");
-	totalColInfos.forEach(colName => {
+	const grid = $("#" + targetId);
+	_totalColInfos.forEach(colName => {
 		if (uncheckedColNames.includes(colName)) {
 			grid.jqGrid('hideCol', colName);
 		} else {
@@ -3971,7 +3993,11 @@ function applyUserColumnsToGrid() {
 		}
 	});
 
-	adjustPageGridSize();
+	if ("list" == targetId) {
+		adjustPageGridSize();
+	} else {
+		adjustMultiPageGridSize();
+	}
 }
 
 function initPromise(event) {
@@ -4153,7 +4179,11 @@ function optimizeGridSizeAdjustmentMultiPage() {
 		}
     });
     
-    if(jqgridSetWidth < jqgridMinSetWidth) {
+    if (typeof jqGridSetElement === "undefined") {
+    	return false;
+    }
+    
+    if (jqgridSetWidth < jqgridMinSetWidth) {
 		return false;
 	}
 	

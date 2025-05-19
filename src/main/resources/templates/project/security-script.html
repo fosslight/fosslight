@@ -764,32 +764,54 @@ var total = {
 	},
 	loadSecurityGrid : function(){
 		var totalList = $("#totalList");
+		
+		var colModelArr = [];
+		var colModelObj = {name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
+						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+					, dataEvents:[{type:'change',
+						fn: function(e){
+							$("#totalList").jqGrid('saveRow', lastsel);
+							$("#totalList").jqGrid("resetSelection");
+							lastsel = -1;
+						}
+					}]
+				}
+			};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true};
+		colModelArr.push(colModelObj);
+		
+		// apply user columns setting on
+		var listType = 'SECURITY_NEED';
+		var totalColInfos = [
+				{'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'CVE ID' : 'cveId'}, {'CVSS SCORE' : 'cvssScore'}, {'Published Date' : 'publDate'}, {'Vulnerability Resolution' : 'vulnerabilityResolution'},
+				{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Security Comments' : 'securityComments'}
+	  	];
+		var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'securityComments'];
+		var defaultColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'vulnerabilityResolution'];
+		applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
+		
 		totalList.jqGrid({
 			datatype: 'local',
 			data: totalMainData,
 			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
-			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
-				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
-				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
-						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
-						, dataEvents:[{type:'change',
-							fn: function(e){
-								$("#totalList").jqGrid('saveRow', lastsel);
-								$("#totalList").jqGrid("resetSelection");
-								lastsel = -1;
-							}
-						}]
-					}
-				},
-				{name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false},
-				{name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true}
-			],
+			colModel: colModelArr,
 		   	editurl:'clientArray',
  			autowidth: true,
  			multiselect: true,
@@ -847,6 +869,7 @@ var total = {
 				}
 				
 				// append button event
+				var pageButtonArea = $('#totalList_toppager_left');
 				if ($("#totalList_toppager_left").find('button').length == 0) {
 	            	var appendBtn = "";
 	                
@@ -859,6 +882,32 @@ var total = {
 	                	                
 	                $("#totalList_toppager_left").append(appendBtn);
 	            }
+				
+				var setUpColumnButton = $('#setUpColumnButtonNeed');
+				/* columns licalization */
+                if (setUpColumnButton.length === 0) {
+                    var savedColNames = [];
+                    var dropdownMenuOptions = {
+                    	_btnId : "Need",
+                    	_targetId : "totalList",
+                        _listType: listType,
+                        _totalColInfos: totalColInfos,
+                        _defaultColNames: defaultColNames,
+                        _savedColNames: savedColNames
+                    };
+                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+                    // Check for click events occurring inside the menu area
+                    $("#setUpColumnMenuNeed").on("click", function(event) {
+                        event.stopPropagation();
+                    });
+
+                    $('#setUpColumnButtonNeed').on("click", function(event) {
+                        event.stopPropagation();
+                        $('#setUpColumnMenuNeed').toggleClass("show");
+                        $(this).toggleClass("show");
+                    });
+                }
 			},
 			gridComplete : function() {
 				if (totalValidMsgData) {
@@ -1006,32 +1055,54 @@ var total = {
 var fullDiscovered = {
 		loadSecurityGrid : function(){
 			var fullDiscoveredList = $("#fullDiscoveredList");
+			
+			var colModelArr = [];
+			var colModelObj = {name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false, template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false, template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false, template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false, template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false, template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
+							value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+						, dataEvents:[{type:'change',
+							fn: function(e){
+								$("#fullDiscoveredList").jqGrid('saveRow', lastsel);
+								$("#fullDiscoveredList").jqGrid("resetSelection");
+								lastsel = -1;
+							}
+						}]
+					}
+				};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true};
+			colModelArr.push(colModelObj);
+			
+			// apply user columns setting on
+			var listType = 'SECURITY_FULL';
+			var totalColInfos = [
+					{'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'CVE ID' : 'cveId'}, {'CVSS SCORE' : 'cvssScore'}, {'Published Date' : 'publDate'}, {'Vulnerability Resolution' : 'vulnerabilityResolution'},
+					{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Security Comments' : 'securityComments'}
+		  	];
+			var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'securityComments'];
+			var defaultColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'vulnerabilityResolution'];
+			applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
+			
 			fullDiscoveredList.jqGrid({ 
 				datatype: 'local',  
 				data: fullDiscoveredMainData,
 				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
-				colModel: [
-					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
-					{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
-					{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false, template: searchStringOptions},
-					{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false, template: searchStringOptions},
-					{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false, template: searchStringOptions},
-					{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false, template: searchStringOptions},
-					{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false, template: searchStringOptions},
-					{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
-						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
-							, dataEvents:[{type:'change',
-								fn: function(e){
-									$("#fullDiscoveredList").jqGrid('saveRow', lastsel);
-									$("#fullDiscoveredList").jqGrid("resetSelection");
-									lastsel = -1;
-								}
-							}]
-						}
-					},
-					{name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false},
-					{name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true}
-				],
+				colModel: colModelArr,
 				editurl:'clientArray',
 	 			autowidth: true,
 //	 			multiselect: true,
@@ -1088,12 +1159,39 @@ var fullDiscovered = {
 					}
 				
 					// append button event
+					var pageButtonArea = $('#fullDiscoveredList_toppager_left');
 					if ($("#fullDiscoveredList_toppager_left").find('button').length == 0) {
 		            	var appendBtn = "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.checkDownloadExcel('fullDiscovered')\"><i class=\"fas fa-download\"></i></button>";
 		                $("#fullDiscoveredList_toppager_left").append(appendBtn);
 		            }
 					
 					$("#fullDiscoveredList td[aria-describedby=totalList_officialPatchLink]").css("white-space", "nowrap");
+					
+					var setUpColumnButton = $('#setUpColumnButtonFull');
+					/* columns licalization */
+	                if (setUpColumnButton.length === 0) {
+	                    var savedColNames = [];
+	                    var dropdownMenuOptions = {
+	                    	_btnId : "Full",
+	                    	_targetId : "fullDiscoveredList",
+	                        _listType: listType,
+	                        _totalColInfos: totalColInfos,
+	                        _defaultColNames: defaultColNames,
+	                        _savedColNames: savedColNames
+	                    };
+	                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+	                    // Check for click events occurring inside the menu area
+	                    $("#setUpColumnMenuFull").on("click", function(event) {
+	                        event.stopPropagation();
+	                    });
+
+	                    $('#setUpColumnButtonFull').on("click", function(event) {
+	                        event.stopPropagation();
+	                        $('#setUpColumnMenuFull').toggleClass("show");
+	                        $(this).toggleClass("show");
+	                    });
+	                }
 				},
 				gridComplete : function() {
 					if (fullDiscoveredValidMsgData) {
@@ -1417,6 +1515,14 @@ var fn = {
     },
     closeAlertifyView : function () {
 		$(".ajs-close").trigger("click");
+	},
+	onUpdateSuccess : function(json, status){
+		loading.hide();
+	    if (json.resCd == '10'){
+	    	alertify.success([[#{msg.common.success}]]);
+	   	} else {
+	    	alertify.error([[#{msg.common.valid2}]], 0);
+	   	}
 	}
 }
 
