@@ -220,22 +220,6 @@
 								<button id="addEmail" type="button" class="btn btn btn-default" th:text="Add" th:onclick="|fn.addEmailFnc()|"></button>
 							</div>
 						</div>
-						<div class="row" th:if="${detail.viewOnlyFlag != 'Y'}">
-							<div class="col-4">
-								<select id="listKind" class="form-control select" style="width: 100%;">
-									<option th:value="''" th:text="'Select List'"></option>
-									<option th:if="${projectFlag}" th:text="'Project List'" th:value="prj"></option>
-									<option th:value="par" th:text="'3rd Party List'"></option>
-									<option th:if="${batFlag}" th:text="'BAT List'" th:value="bat"></option>
-								</select>
-							</div>
-							<div class="col-7">
-								<input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy" />
-							</div>
-							<div class="col-1">
-								<button id="addList" type="button" class="btn btn-default" th:text="Add" th:onclick="|fn.addListFnc()|"></button>
-							</div>
-						</div>
 						<div class="form-group mt-2">
 							<div id="multiDiv" class="external-events ml-1 multiTxtSet2 row"></div>
 						</div>
