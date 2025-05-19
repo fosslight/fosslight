@@ -454,6 +454,8 @@ public final class Url {
 		public static final String DELETE_FILE = PATH + "/deleteFile";
 
 		public static final String DEFAULT_NOTICE_INFO = PATH + "/getDefaultNoticeInfo";
+		
+		public static final String NOTICE_APPEND_INFO = PATH + "/getNoticeAppendInfo/{prjId}";
 	}
 	
 	public static final class DISTRIBUTION {

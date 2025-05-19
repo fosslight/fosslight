@@ -14,6 +14,20 @@
 			PRJ_ID = #{prjId}
 	</select>
 	
+	<select id="selectOssNoticeOne2" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssNotice">
+		SELECT
+			PRJ_ID, NOTICE_TYPE, NOTICE_TYPE_ETC, COMPANY_NAME_FULL, COMPANY_NAME_SHORT, DISTRIBUTION_SITE_URL, EMAIL, USE_COMPANY_NAME_TITLE, DISTRIBUTED_OTHER_COMPANY, MERGED_OTHER_OSS_NOTICE, ACCOMPANIED_SOURCE_CODE,
+			OSS_DISTRIBUTION_SITE, OSS_DISTRIBUTION_SITE_YN, EDIT_NOTICE_YN, EDIT_COMPANY_YN, EDIT_DISTRIBUTION_SITE_URL_YN, EDIT_EMAIL_YN, HIDE_OSS_VERSION_YN, EDIT_APPENDED_YN, NOTICE_APPEND_TYPE
+		FROM
+			OSS_NOTICE
+		WHERE
+			PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="selectNoticeAppendInfo" parameterType="string" resultType="string">
+		SELECT APPENDED FROM OSS_NOTICE WHERE PRJ_ID = #{prjId}
+	</select>
+	
 	<select id="selectVerifyOssList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
 	/* VerificationMapper.selectVerifyOssList */
 		SELECT

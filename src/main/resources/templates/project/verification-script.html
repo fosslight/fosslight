@@ -258,6 +258,8 @@
                 
                 commentsParam.height = $(window).height() - 120;
                 fn_comment.getCommentList(commentsParam);
+                
+                fn.initNoticeAppendInfo();
             }
         }
 
@@ -3690,6 +3692,23 @@
             	
             	$("#changePathPop").attr("style", "display: flex");
             	$("#blind_wrap").show();
+            },
+            initNoticeAppendInfo : function() {
+            	$.ajax({
+    				url : '/project/verification/getNoticeAppendInfo/' + [[${project.prjId}]],
+    				type : 'GET',
+    				dataType : 'json',
+    				cache : false,
+    				contentType : 'application/json',
+    				success: function(data) {
+    					if (data.isValid) {
+    						$("#editor2").summernote('code', data.appended);
+    					}
+    				},
+    				error: function(data){
+    					alertify.error([[#{msg.common.valid2}]], 0);
+    				}
+    			});
             }
         }
 
