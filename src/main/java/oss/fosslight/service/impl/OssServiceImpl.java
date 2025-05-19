@@ -4356,9 +4356,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			List<String> excludeCpeEnvironmentList = new ArrayList<>();
 			
 			List<String> includeCpeList = null;
-			if (ossMaster.getIncludeCpes() != null) includeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getIncludeCpes()));
+			if (ossMaster.getIncludeCpes() != null) {
+				includeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getIncludeCpes()));
+			}
 			List<String> excludeCpeList = null;
-			if (ossMaster.getExcludeCpes() != null) excludeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getExcludeCpes()));
+			if (ossMaster.getExcludeCpes() != null) {
+				excludeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getExcludeCpes()));
+			}
 			List<String> ossVersionAliasWithColon = new ArrayList<>();
 			List<String> ossVersionAliasWithoutColon = new ArrayList<>();
 			
@@ -4426,7 +4430,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				List<Vulnerability> list2 = vulnDataForNotIncludeCpeMatch(convertFlag, ossMaster, nicknameList, convertNameList, dashOssNameList, param);
 				if (list2 != null && !list2.isEmpty()) {
-					if (list == null) list = new ArrayList<>();
+					if (list == null) {
+						list = new ArrayList<>();
+					}
 					list.addAll(list2);
 				}
 			} else {
@@ -4434,11 +4440,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			if (list != null) {
-				if (!CoConstDef.FLAG_YES.equals(avoidNull(param.getVulnerabilityCheckFlag()))) list = checkVulnData(list, ossMaster.getOssNicknames());
+				if (!CoConstDef.FLAG_YES.equals(avoidNull(param.getVulnerabilityCheckFlag()))) {
+					list = checkVulnData(list, ossMaster.getOssNicknames());
+				}
 				list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
 				int idx = 1;
 				for (Vulnerability vuln : list) {
-					if (idx > 5) break;
+					if (idx > 5) {
+						break;
+					}
 					convertList.add(vuln);
 					idx++;
 				}
@@ -4448,7 +4458,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		ossMaster.setOssNameTemp(null);
-		if (convertFlag) ossMaster.setOssNicknames(nicknameList);
+		if (convertFlag) {
+			ossMaster.setOssNicknames(nicknameList);
+		}
 		
 		if (ossMaster.getOssVersion().equals("-")) {
 			ossMaster.setOssVersion("");

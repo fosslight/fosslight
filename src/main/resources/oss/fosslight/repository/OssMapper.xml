@@ -4156,54 +4156,34 @@
 	</select>
 	
 	<select id="getOssVulnerabilityList2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
-		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
-			SELECT T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE, T1.CRITERIA
-			FROM
-			(
-		</if>
-				SELECT DATA.PRODUCT
-					 , DATA.VERSION
-					 , CVE.CVSS_SCORE
-					 , CVE.CVE_ID
-					 , CVE.VULN_SUMMARY
-					 , CVE.MODI_DATE
-					 , DATA.CRITERIA
-				  FROM (
-				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID, NVD.CRITERIA
-				  		FROM
-				  		(SELECT REPLACE(PRODUCT, ' ', '_') AS PRODUCT
-				 			 , VERSION
-				 			 , CVE_ID
-				 			 , CONCAT(VENDOR, ':', PRODUCT) AS CRITERIA
-				  		  FROM NVD_DATA_V3
-				  		 WHERE (
-				  		 		PRODUCT = REPLACE(#{ossName}, ' ', '_')
-				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
-				  		 			OR PRODUCT = REPLACE(#{ossNameTemp}, ' ', '_')
-				  		 		</if>
-				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
-					  			    <foreach item="item" index="index" collection="ossNicknames">
-										OR PRODUCT = REPLACE(#{item}, ' ', '_')
-									</foreach>
-								</if>
-				 				)
-				 		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
-				 		   AND VERSION = #{ossVersion}
-				 		</if>
-				 		) NVD
-<!-- 			 		LEFT JOIN NVD_DATA_CONFIGURATIONS CONF
-				 		ON NVD.CVE_ID = CONF.CVE_ID
-				 		LEFT JOIN NVD_CPE_MATCH_NAMES MAT
-				 		ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID -->
-				 		GROUP BY NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
-				 	   ) DATA
-				 INNER JOIN NVD_CVE_V3 CVE
-				    ON DATA.CVE_ID = CVE.CVE_ID
-		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
-			) T1
-			GROUP BY T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
-		</if>
-			ORDER BY CVSS_SCORE DESC, MODI_DATE DESC LIMIT 20
+		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CRITERIA, CVE.CVE_ID, CVE.CVSS_SCORE, CVE.VULN_SUMMARY, CVE.MODI_DATE
+		FROM
+		(
+			SELECT REPLACE(NVD.PRODUCT, ' ', '_') AS PRODUCT
+				 	, NVD.VERSION
+				 	, NVD.CVE_ID
+					, CONCAT(NVD.VENDOR, ':', NVD.PRODUCT) AS CRITERIA
+			FROM NVD_DATA_V3 NVD
+			WHERE (
+				NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
+				 	OR NVD.PRODUCT = REPLACE(#{ossNameTemp}, ' ', '_')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+			 		<foreach item="item" index="index" collection="ossNicknames">
+						OR NVD.PRODUCT = REPLACE(#{item}, ' ', '_')
+					</foreach>
+				</if>
+			)
+			<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
+				AND NVD.VERSION = #{ossVersion}
+			</if>
+			GROUP BY NVD.CVE_ID
+		) NVD
+		INNER JOIN NVD_CVE_V3 CVE
+		ON NVD.CVE_ID = CVE.CVE_ID
+		ORDER BY CVE.CVSS_SCORE DESC, CVE.MODI_DATE DESC
+		LIMIT 20
 	</select>
 	
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
