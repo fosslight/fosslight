@@ -1655,7 +1655,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		try {
 			String prjId = project.getPrjId();
-			notice = verificationService.selectOssNoticeOne(prjId);
+			notice = verificationService.selectOssNoticeOne2(prjId);
 			
 			String distributeType = avoidNull(project.getDistributeTarget(), CoConstDef.CD_DISTRIBUTE_SITE_SKS); // LGE, NA => LGE로 표기, SKS => SKS로 표기함.
 			String distributeCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributeType) ? CoConstDef.CD_NOTICE_DEFAULT_SKS : CoConstDef.CD_NOTICE_DEFAULT;

@@ -832,11 +832,13 @@
                             $("#list_toppager_left").append(appendIcon);
                         }
 
-                        var setUpColumnButton = $('#setUpColumnButton');
+                        var setUpColumnButton = $('#setUpColumnButtonlistOss');
                         /* columns licalization */
                         if (setUpColumnButton.length === 0) {
                             var savedColNames = [];
                             var dropdownMenuOptions = {
+                            	_btnId : "Oss",
+                            	_targetId : "list",
                                 _listType: listType,
                                 _totalColInfos: totalColInfos,
                                 _defaultColNames: defaultColNames,
@@ -845,13 +847,13 @@
                             pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
 
                             // Check for click events occurring inside the menu area
-                            $("#setUpColumnMenu").on("click", function(event) {
+                            $("#setUpColumnMenulistOss").on("click", function(event) {
                                 event.stopPropagation();
                             });
 
-                            $('#setUpColumnButton').on("click", function(event) {
+                            $('#setUpColumnButtonlistOss').on("click", function(event) {
                                 event.stopPropagation();
-                                $('#setUpColumnMenu').toggleClass("show");
+                                $('#setUpColumnMenulistOss').toggleClass("show");
                                 $(this).toggleClass("show");
                             })
                         }

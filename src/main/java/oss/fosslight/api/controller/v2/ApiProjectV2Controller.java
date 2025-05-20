@@ -1221,7 +1221,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
 
         try {
-            var ossNotice = verificationService.selectOssNoticeOne(prjId);
+            OssNotice ossNotice = verificationService.selectOssNoticeOne(prjId);
 
             if (ossNotice == null) {
                 return responseService.errorResponse(HttpStatus.NOT_FOUND, "Notice has not been published for given project.");

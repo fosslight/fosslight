@@ -804,35 +804,67 @@ var part_grid = {
 			var ondblClickRowBln = false;
 			var partList = $("#list3");
 			
+			var colModelArr = [];
+			var colModelObj = {name: 'gridId', index: 'gridId', key:true, editable:false, hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refPartnerId', index: 'refPartnerId', width: 150, align: 'left', formatter:fn_grid_com.partnerFormat};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'filePath', index: 'filePath', width: 190, align: 'left'};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refPartnerId', index: 'refPartnerId', width: 29, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refPrjId', index: 'refPrjId', width: 29, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossName', index: 'ossName', width: 150, align: 'left'};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left'};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'licenseName', index: 'licenseName', width: 150, align: 'left', edittype:'text',formatter: fn_grid_com.displayLicense};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'homepage', index: 'homepage', width: 100, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'licenseId', index: 'licenseId', width: 29, align: 'center', edittype:'text',formatter: fn_grid_com.displayLicense, hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'copyrightText', index: 'copyrightText', width: 105, align: 'left', edittype:"textarea", editoptions:{rows:"2",cols:"24"},formatter: fn_grid_com.displayLicense};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : false};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'cveId', index: 'cveId', editable:false, hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'excludeYn', index: 'excludeYn', width: 60, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, sortable : false};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refComponentId', index: 'refComponentId', width: 40, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			
+			// apply user columns setting on
+			var listType = 'IDENTIFICATION_3RD';
+			var totalColInfos = [
+					{'ID' : 'componentIdx'}, {'3rd Party' : 'refPartnerId'}, {'Binary Name or Source Path' : 'filePath'}, {'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'License' : 'licenseName'},
+					{'Download Location' : 'downloadLocation'}, {'Homepage' : 'homepage'}, {'Copyright Text' : 'copyrightText'}, {'Vulnerability' : 'cvssScore'}, {'Exclude' : 'excludeYn'}
+	  		];
+			var defaultTotalColNames = ['componentIdx', 'refPartnerId', 'filePath', 'ossName', 'ossVersion', 'licenseName', 'downloadLocation', 'homepage', 'copyrightText', 'cvssScore', 'excludeYn'];
+			var defaultColNames = ['componentIdx', 'ossName', 'ossVersion', 'licenseName', 'downloadLocation', 'excludeYn'];
+			applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
+			
 			partList.jqGrid({
 				datatype: 'local',
 				data : partMainData,
 				colNames: ['gridId','ID_KEY','ID','3rd Party', 'Binary Name or Source Path','ReferenceId','RefPartnerId','RefPrjId','ReferenceDiv', 'OssId','OSS Name','OSS Version','License','Download Location'
 							, 'Homepage','LicenseId','Copyright Text', 'Vulnera<br/>bility', 'CVE ID'	
 							, '<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list3\');">Exclude', 'refComponentId'],
-				colModel: [
-					{name: 'gridId', index: 'gridId', key:true, editable:false, hidden:true},
-					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
-					{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
-					{name: 'refPartnerId', index: 'refPartnerId', width: 150, align: 'left', formatter:fn_grid_com.partnerFormat},
-					{name: 'filePath', index: 'filePath', width: 190, align: 'left'},
-					{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
-					{name: 'refPartnerId', index: 'refPartnerId', width: 29, align: 'center', hidden:true},
-					{name: 'refPrjId', index: 'refPrjId', width: 29, align: 'center', hidden:true},
-					{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
-					{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
-					{name: 'ossName', index: 'ossName', width: 150, align: 'left'},
-					{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left'},
-					{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', edittype:'text',formatter: fn_grid_com.displayLicense},
-					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter},
-					{name: 'homepage', index: 'homepage', width: 100, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
-					{name: 'licenseId', index: 'licenseId', width: 29, align: 'center', edittype:'text',formatter: fn_grid_com.displayLicense, hidden:true},
-					{name: 'copyrightText', index: 'copyrightText', width: 105, align: 'left', edittype:"textarea", editoptions:{rows:"2",cols:"24"},formatter: fn_grid_com.displayLicense},
-					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : false},
-					{name: 'cveId', index: 'cveId', editable:false, hidden:true},
-					{name: 'excludeYn', index: 'excludeYn', width: 60, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, sortable : false},
-					{name: 'refComponentId', index: 'refComponentId', width: 40, align: 'center', hidden:true},
-				],
+				colModel: colModelArr,
 				autoencode: true,
 				editurl:'clientArray',
 	 			autowidth: true,
@@ -874,6 +906,7 @@ var part_grid = {
 					}
 					
 					// append button event
+					var pageButtonArea = $('#list3_toppager_left');
 					if ($("#list3_toppager_left").find('button').length == 0) {
 	                	var appendBtn = "";
 	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3RD', 'list3', true)\"><i class=\"fas fa-plus gridIconDisabled\"></i></button>";
@@ -882,6 +915,32 @@ var part_grid = {
 	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 	                                        
 	                    $("#list3_toppager_left").append(appendBtn);
+	                }
+					
+					var setUpColumnButton = $('#setUpColumnButton3rd');
+					/* columns licalization */
+	                if (setUpColumnButton.length === 0) {
+	                    var savedColNames = [];
+	                    var dropdownMenuOptions = {
+	                    	_btnId : "3rd",
+	                    	_targetId : "list3",
+	                        _listType: listType,
+	                        _totalColInfos: totalColInfos,
+	                        _defaultColNames: defaultColNames,
+	                        _savedColNames: savedColNames
+	                    };
+	                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+	                    // Check for click events occurring inside the menu area
+	                    $("#setUpColumnMenu3rd").on("click", function(event) {
+	                        event.stopPropagation();
+	                    });
+
+	                    $('#setUpColumnButton3rd').on("click", function(event) {
+	                        event.stopPropagation();
+	                        $('#setUpColumnMenu3rd').toggleClass("show");
+	                        $(this).toggleClass("show");
+	                    });
 	                }
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {

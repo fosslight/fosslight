@@ -57,6 +57,7 @@ public class YamlUtil extends CoTopComponent {
 			case CoConstDef.CD_DTL_COMPONENT_ID_BIN:		// OSS Name, OSS version, License, Download location, Homepage, Copyright,Exclude 가 동일한 경우 Merge. > Source Name or Path, Binary Name, Binary Name or Source Path, Comment 
 			case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:	// Source Path, OSS Name, OSS version, License, Download location, Homepage, Copyright, Exclude 가 동일한 경우 Merge > Binary Name, Comment
 			case CoConstDef.CD_DTL_COMPONENT_ID_BOM:		// Merge 없음
+			case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM:
 				downloadFileId = makeYamlIdentification(dataStr, type);
 				
 				break;
@@ -85,17 +86,17 @@ public class YamlUtil extends CoTopComponent {
 		_param.setReferenceDiv(type);
 		_param.setReferenceId(projectBean.getPrjId());
 		
-		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
 			_param.setMerge(CoConstDef.FLAG_NO);
 		}
 		
 		Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
 		
-		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) ? "rows" : "mainData");
+		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) ? "rows" : "mainData");
 		String jsonStr = "";
 		
 		if (list != null) {
-			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
 				jsonStr = toJson(checkYamlFormat(projectService.setMergeGridData(list), type));
 			} else {
 				jsonStr = toJson(checkYamlFormat(setMergeData(list, type)));

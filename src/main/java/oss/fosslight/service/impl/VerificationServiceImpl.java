@@ -119,6 +119,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 	
 	@Override
+	public OssNotice selectOssNoticeOne2(String prjId) {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		return verificationMapper.selectOssNoticeOne2(project);
+	}
+	
+	@Override
 	public List<OssComponents> getVerifyOssList(Project projectMaster) {
 		List<OssComponents> componentList = verificationMapper.selectVerifyOssList(projectMaster);
 		
@@ -3380,5 +3388,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		rtnMap.put("isValid", isValid);
 		rtnMap.put("data", rtnList);
 		return rtnMap;
+	}
+
+	@Override
+	public String getNoticeAppendInfo(String prjId) {
+		return verificationMapper.selectNoticeAppendInfo(prjId);
 	}
 }

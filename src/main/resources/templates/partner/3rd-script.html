@@ -1355,6 +1355,14 @@ var fn = {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
+	},
+	onUpdateSuccess : function(json, status){
+		loading.hide();
+	    if (json.resCd == '10'){
+	    	alertify.success([[#{msg.common.success}]]);
+	   	} else {
+	    	alertify.error([[#{msg.common.valid2}]], 0);
+	   	}
 	}
 }
 
@@ -1379,30 +1387,32 @@ var grid = {
 		var ondblClickRowBln = false;
 		var partnerList = $("#list");
 		
-		partnerList.jqGrid({
-			datatype: 'local',
-			data : partyMainData,
-			colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Source or Binary Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
-					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notice','Source','Restriction','customBinaryYn', 'Tlsh', 'Check Sum'],
-			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
-				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
-				{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
-				{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
-				{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
-				{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
-				{name: 'binaryName', index: 'binaryName', width: 140, align: 'left', editable:true, template: searchStringOptions, 
-					editoptions: {
-						dataInit:
-							function (e) { 
-								$(e).on("change", function() {
-									var rowid = (e.id).split('_')[0];
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								});
-							}
-					}
-				},
-				{name: 'ossName', index: 'ossName', width: 140, align: 'left', editable:true, edittype:'text', template: searchStringOptions, 
+		var colModelArr = [];
+		var colModelObj = {name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'binaryName', index: 'binaryName', width: 140, align: 'left', editable:true, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									});
+								}
+						}
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossName', index: 'ossName', width: 140, align: 'left', editable:true, edittype:'text', template: searchStringOptions, 
 						editoptions: {
 							dataInit:
 								function (e) { 
@@ -1436,110 +1446,53 @@ var grid = {
 									currentOssName = e.value;
 								}
 						}
-				},
-				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center', editable:true, edittype:'text', template: searchStringOptions, 
-					editoptions: {
-						dataInit:
-							function (e) { 
-								fn_grid_com.griOssVersions(e, currentOssName, 'list');
-								
-								$(e).on( "autocompletechange", function() {
-									var rowid = (e.id).split('_')[0];
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								});
-							}
-					}
-				},
-				{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
-				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
-					editoptions: {
-						dataInit: function (e) {
-								var licenseNameId = $(e).attr("id").split('_')[0];
-								var licenseNameTd = $(e).parent();
-
-								var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
-								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
-								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
-								displayLicenseNameCell += '</div>';
-					
-								$(licenseNameTd).empty();
-								$(licenseNameTd).html(displayLicenseNameCell);
-								$('#'+licenseNameId+'_licenseNameDiv').append(e);
-							
-								// licenseName auto complete
-								$(e).autocomplete({
-									source: licenseNames
-									, minLength: 0
-									, open: function() { $(this).attr('state', 'open'); }
-									, close: function () { $(this).attr('state', 'closed'); }
-								}).focus(function() {
-									if ($(this).attr('state') != 'open') {
-										$(this).autocomplete("search");
-									}
-								});
-								
-								// set license data
-								$(e).on( "autocompletechange", function() {
-									var rowid = (e.id).split('_')[0];
-									var mult = null;
-									var multText = null;
-									let li = e.value;
+				};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center', editable:true, edittype:'text', template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									fn_grid_com.griOssVersions(e, currentOssName, 'list');
 									
-									for(var i in licenseNames){
-										if("" != e.value && e.value == licenseNames[i].value){
-											var licenseIds = $('#'+rowid+'_licenseId').val();
-											mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-
-											multText = licenseNames[i].value;
-											break;
+									$(e).on( "autocompletechange", function() {
+										var rowid = (e.id).split('_')[0];
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									});
+								}
+						}
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
+						editoptions: {
+							dataInit: function (e) {
+									var licenseNameId = $(e).attr("id").split('_')[0];
+									var licenseNameTd = $(e).parent();
+		
+									var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '</div>';
+						
+									$(licenseNameTd).empty();
+									$(licenseNameTd).html(displayLicenseNameCell);
+									$('#'+licenseNameId+'_licenseNameDiv').append(e);
+								
+									// licenseName auto complete
+									$(e).autocomplete({
+										source: licenseNames
+										, minLength: 0
+										, open: function() { $(this).attr('state', 'open'); }
+										, close: function () { $(this).attr('state', 'closed'); }
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
 										}
-									}
-									
-									if (mult == null) {
-										mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-
-										multText = e.value;
-									}
-									
-									var rowLicenseNames = [];
-									$('#'+rowid+'_licenseNameBtn').find('.btn.btn-outline-secondary.btn-sm').each(function(i, item){
-										var licenseName = $(this).text();
-										rowLicenseNames.push(licenseName.slice(0, -1));
 									});
 									
-									if (multText != null){
-										if(rowLicenseNames.length > 0){
-											var duplicateFlag = false;
-											for(var i in rowLicenseNames){
-												if(multText == rowLicenseNames[i]){
-													duplicateFlag = true;
-													break;
-												}
-											}
-											
-											if(!duplicateFlag){
-												$('#'+rowid+'_licenseNameBtn').append(mult);
-											}
-										} else {
-											$('#'+rowid+'_licenseNameBtn').append(mult);
-										}
-									}
-									
-									$('#'+rowid+'_licenseName').val("");
-									
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-									
-									if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
-										alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
-	                                        if (e) {
-	                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
-	                                        } else {
-	                                        	return false;
-	                                        }
-										});
-									}
-								}).on("keypress", function(evt){
-									if(evt.keyCode == 13){
+									// set license data
+									$(e).on( "autocompletechange", function() {
 										var rowid = (e.id).split('_')[0];
 										var mult = null;
 										var multText = null;
@@ -1548,14 +1501,16 @@ var grid = {
 										for(var i in licenseNames){
 											if("" != e.value && e.value == licenseNames[i].value){
 												var licenseIds = $('#'+rowid+'_licenseId').val();
-												mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>"
+												mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+		
 												multText = licenseNames[i].value;
 												break;
 											}
 										}
 										
-										if(mult == null && "" != e.value){
+										if (mult == null) {
 											mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+		
 											multText = e.value;
 										}
 										
@@ -1584,8 +1539,8 @@ var grid = {
 										}
 										
 										$('#'+rowid+'_licenseName').val("");
-
-										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
 										
 										if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
 											alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
@@ -1596,115 +1551,205 @@ var grid = {
 		                                        }
 											});
 										}
-									}
-								});
-							}
-					}
-				},
-				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
-					editoptions: {
+									}).on("keypress", function(evt){
+										if(evt.keyCode == 13){
+											var rowid = (e.id).split('_')[0];
+											var mult = null;
+											var multText = null;
+											let li = e.value;
+											
+											for(var i in licenseNames){
+												if("" != e.value && e.value == licenseNames[i].value){
+													var licenseIds = $('#'+rowid+'_licenseId').val();
+													mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>"
+													multText = licenseNames[i].value;
+													break;
+												}
+											}
+											
+											if(mult == null && "" != e.value){
+												mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+												multText = e.value;
+											}
+											
+											var rowLicenseNames = [];
+											$('#'+rowid+'_licenseNameBtn').find('.btn.btn-outline-secondary.btn-sm').each(function(i, item){
+												var licenseName = $(this).text();
+												rowLicenseNames.push(licenseName.slice(0, -1));
+											});
+											
+											if (multText != null){
+												if(rowLicenseNames.length > 0){
+													var duplicateFlag = false;
+													for(var i in rowLicenseNames){
+														if(multText == rowLicenseNames[i]){
+															duplicateFlag = true;
+															break;
+														}
+													}
+													
+													if(!duplicateFlag){
+														$('#'+rowid+'_licenseNameBtn').append(mult);
+													}
+												} else {
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
+											}
+											
+											$('#'+rowid+'_licenseName').val("");
+		
+											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+											
+											if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
+												alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
+			                                        if (e) {
+			                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
+			                                        } else {
+			                                        	return false;
+			                                        }
+												});
+											}
+										}
+									});
+								}
+						}
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+rowid+"_downloadLocation").val(value);
+										}
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("blur", function() {
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+e.id).val(value);
+										}
+									});
+								}
+						}
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+rowid+"_homepage").val(value);
+										}
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("blur", function() {
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+e.id).val(value);
+										}
+									});
+								}
+						}
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'copyrightText', index: 'copyrightText', width: 140, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
 						dataInit:
 							function (e) { 
 								$(e).on("change", function() {
 									var rowid = (e.id).split('_')[0];
-									var value = e.value;
 									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+rowid+"_downloadLocation").val(value);
-									}
-									
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								}).on("blur", function() {
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+e.id).val(value);
-									}
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e);
 								});
 							}
-					}
-				},
-				{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
-					editoptions: {
+						}
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float', template: searchNumberOptions};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'comments', index: 'comments', width: 150, align: 'left', editable:true, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
 						dataInit:
-							function (e) { 
+							function (e) {
 								$(e).on("change", function() {
 									var rowid = (e.id).split('_')[0];
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+rowid+"_homepage").val(value);
-									}
-									
-									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-								}).on("blur", function() {
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-										$("#"+e.id).val(value);
-									}
+			
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
 								});
 							}
-					}
-				},
-				{name: 'copyrightText', index: 'copyrightText', width: 140, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
-					dataInit:
-						function (e) { 
-							$(e).on("change", function() {
-								var rowid = (e.id).split('_')[0];
-								
-								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e);
-							});
 						}
-					}
-				},
-				
-				{name: 'cveId', index: 'cveId', hidden:true},
-				{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float', template: searchNumberOptions},
-				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false},
-				{name: 'comments', index: 'comments', width: 150, align: 'left', editable:true, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
-					dataInit:
-						function (e) {
-							$(e).on("change", function() {
-								var rowid = (e.id).split('_')[0];
-
-								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
-							});
-						}
-					}
-				},
-				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
-				{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
-				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
-				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : true, search : false, hidden: true,
-					sorttype: function (cell, rowData) {
-						var rtnVal = rowData.obligationType;
-						if (rtnVal == '10' || rtnVal == '11') {
-							return 0;
-						} else {
-							return 99;
-						}
-                    }
-				},
-				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : true, search : false, hidden: true,
-					sorttype: function (cell, rowData) {
-						var rtnVal = rowData.obligationType;
-						if (rtnVal == '11') {
-							return 0;
-						} else {
-							return 99;
-						}
-                    }
-				},
-				{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false, hidden : true},
-				{name: 'customBinaryYn', index: 'customBinaryYn', editable:false, hidden:true},
-				{name: 'tlsh', index: 'tlsh', editable:false, hidden:true},
-				{name: 'checkSum', index: 'checkSum', editable:false, hidden:true}
-			],
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : true, search : false, hidden: true,
+						sorttype: function (cell, rowData) {
+							var rtnVal = rowData.obligationType;
+							if (rtnVal == '10' || rtnVal == '11') {
+								return 0;
+							} else {
+								return 99;
+							}
+		                }
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : true, search : false, hidden: true,
+						sorttype: function (cell, rowData) {
+							var rtnVal = rowData.obligationType;
+							if (rtnVal == '11') {
+								return 0;
+							} else {
+								return 99;
+							}
+		                }
+					};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false, hidden : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'customBinaryYn', index: 'customBinaryYn', editable:false, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'tlsh', index: 'tlsh', editable:false, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'checkSum', index: 'checkSum', editable:false, hidden:true};
+		colModelArr.push(colModelObj);
+		
+		// apply user columns setting on
+		var listType = 'IDENTIFICATION_PARTNER';
+		var totalColInfos = [
+				{'ID' : 'componentIdx'}, {'Source or Binary Path' : 'binaryName'}, {'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'License' : 'licenseName'}, {'Download Location' : 'downloadLocation'},
+				{'Homepage' : 'homepage'}, {'Copyright Text' : 'copyrightText'}, {'Vulnerability' : 'cvssScore'}, {'Exclude' : 'excludeYn'}, {'Comment' : 'comments'}
+	  	];
+		var defaultTotalColNames = ['componentIdx', 'binaryName', 'ossName', 'ossVersion', 'licenseName', 'downloadLocation', 'homepage', 'copyrightText', 'cvssScore', 'excludeYn', 'comments'];
+		var defaultColNames = ['componentIdx', 'ossName', 'ossVersion', 'licenseName', 'downloadLocation', 'excludeYn'];
+		applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
+		
+		partnerList.jqGrid({
+			datatype: 'local',
+			data : partyMainData,
+			colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Source or Binary Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
+					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notice','Source','Restriction','customBinaryYn', 'Tlsh', 'Check Sum'],
+			colModel: colModelArr,
 			autoencode: true,
 			editurl:'clientArray',
 			autowidth: true,
@@ -1778,6 +1823,7 @@ var grid = {
 				}
 				
 				// append button event
+				var pageButtonArea = $('#list_toppager_left');
 				if ($("#list_toppager_left").find('button').length == 0) {
 					var permission = partnerData.statusPermission == 1 || partnerData.partnerId == null;
 					var status = partnerData.status;
@@ -1821,6 +1867,32 @@ var grid = {
 	               	
 	                $("#list_toppager_left").append(appendBtn);
 	            }
+				
+				var setUpColumnButton = $('#setUpColumnButtonPar');
+				/* columns licalization */
+                if (setUpColumnButton.length === 0) {
+                    var savedColNames = [];
+                    var dropdownMenuOptions = {
+                    	_btnId : "Par",
+                    	_targetId : "list",
+                        _listType: listType,
+                        _totalColInfos: totalColInfos,
+                        _defaultColNames: defaultColNames,
+                        _savedColNames: savedColNames
+                    };
+                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+                    // Check for click events occurring inside the menu area
+                    $("#setUpColumnMenuPar").on("click", function(event) {
+                        event.stopPropagation();
+                    });
+
+                    $('#setUpColumnButtonPar').on("click", function(event) {
+                        event.stopPropagation();
+                        $('#setUpColumnMenuPar').toggleClass("show");
+                        $(this).toggleClass("show");
+                    });
+                }
 			},
 			onSelectRow: function(rowid,status,eventObject) {
 			},

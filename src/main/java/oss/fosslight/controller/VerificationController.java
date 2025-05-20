@@ -315,6 +315,19 @@ public class VerificationController extends CoTopComponent {
 		return "project/verification";
 	}
 	
+	@GetMapping(value = VERIFICATION.NOTICE_APPEND_INFO)
+	public @ResponseBody ResponseEntity<Object> appendInfo(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		String appended = verificationService.getNoticeAppendInfo(prjId);
+		if (!isEmpty(appended)) {
+			rtnMap.put("isValid", true);
+			rtnMap.put("appended", appended);
+		} else {
+			rtnMap.put("isValid", false);
+		}
+		return makeJsonResponseHeader(rtnMap);
+	}
+	
 	@ResponseBody
 	@PostMapping(value=VERIFICATION.REGIST_FILE)
 	public String registFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,

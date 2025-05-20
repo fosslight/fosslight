@@ -3515,7 +3515,7 @@
     vulnListMore : function() {
         var product = $("input[name=ossName]").val();
         var version = $("input[name=ossVersion]").val() == "" ? "-" : $("input[name=ossVersion]").val();
-        var url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=N&ossName=' + product + '&ossVersion=' + version;
+        var url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=Y&ossName=' + product + '&ossVersion=' + version;
 
         var _popup = null;
 

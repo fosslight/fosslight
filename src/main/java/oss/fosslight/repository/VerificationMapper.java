@@ -22,6 +22,10 @@ import oss.fosslight.domain.T2File;
 public interface VerificationMapper {
 	OssNotice selectOssNoticeOne(Project project);
 	
+	OssNotice selectOssNoticeOne2(Project project);
+	
+	String selectNoticeAppendInfo(@Param("prjId") String prjId);
+	
 	List<OssComponents> selectVerifyOssList(Project project);
 
 	List<OssDto> selectSelfCheckVerifyOssList(String selfCheckId);

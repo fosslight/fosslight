@@ -3469,7 +3469,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						if (_ossBean != null) {
 							String licenseStr = CommonFunction.makeLicenseExpression(_ossBean.getOssLicenses(), false, true);
 							licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, false).replaceAll("\\(", "-").replaceAll("\\)", "");
-							
+							if (licenseStr.contains("++")) {
+								licenseStr = licenseStr.replaceAll("\\++", "\\+");
+							}
 							if (_ossBean.getOssLicenses().size() > 1) {
 								licenseStr = "(" + licenseStr + ")";
 							}
@@ -3514,8 +3516,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 									licenseStr = "LicenseRef-" + CommonFunction.removeSpecialCharacters(bean.getLicenseName(), true).replaceAll("\\(", "-").replaceAll("\\)", "");
 								}
 							}
-							
-							if (multiFlag) licenseStr = "(" + licenseStr + ")";
+							if (licenseStr.contains("++")) {
+								licenseStr = licenseStr.replaceAll("\\++", "\\+");
+							}
+							if (multiFlag) {
+								licenseStr = "(" + licenseStr + ")";
+							}
 							cellLicenseDeclared.setCellValue(licenseStr);
 							attributionText = bean.getAttribution();
 						}
@@ -3559,16 +3565,25 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					if (!bean.getOssComponentsLicense().isEmpty() && bean.getOssComponentsLicense().size() > 1) {
 						srtLicenseName = "(" + srtLicenseName + ")";
 					}
-
+					if (srtLicenseName.contains("++")) {
+						srtLicenseName = srtLicenseName.replaceAll("\\++", "\\+");
+					}
 					cellLicenseConcluded.setCellValue(srtLicenseName);
 
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
 
 					if (ossName.equals("-")) {
-						licenseInfoFromFiles.setCellValue(CommonFunction.licenseStrToSPDXLicenseFormat(CommonFunction.removeSpecialCharacters(bean.getLicenseName(), true).replaceAll("\\(", "-").replaceAll("\\)", "")));
+						String licenseInfoFromFilesString = CommonFunction.licenseStrToSPDXLicenseFormat(CommonFunction.removeSpecialCharacters(bean.getLicenseName(), true).replaceAll("\\(", "-").replaceAll("\\)", ""));
+						if (licenseInfoFromFilesString.contains("++")) {
+							licenseInfoFromFilesString = licenseInfoFromFilesString.replaceAll("\\++", "\\+");
+						}
+						licenseInfoFromFiles.setCellValue(licenseInfoFromFilesString);
 					} else if (_ossBean != null) {
 						String licenseInfo = CommonFunction.makeLicenseFromFiles(_ossBean, true);
+						if (licenseInfo.contains("++")) {
+							licenseInfo = licenseInfo.replaceAll("\\++", "\\+");
+						}
 						licenseInfoFromFiles.setCellValue(licenseInfo);
 					} else {
 						licenseInfoFromFiles.setCellValue(""); // OSS Info가 없으므로 빈값이 들어감.
@@ -3687,7 +3702,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 
 					String _licenseName = bean.getLicenseNameTemp().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
-
+					if (_licenseName.contains("++")) {
+						_licenseName = _licenseName.replaceAll("\\++", "\\+");
+					}
 					// Identifier
 					Cell cellIdentifier = getCell(row, cellIdx); cellIdx++;
 					cellIdentifier.setCellValue("LicenseRef-" + _licenseName);
