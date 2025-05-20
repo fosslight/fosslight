@@ -2212,7 +2212,7 @@
 						  FROM OSS_COMPONENTS E1
 						WHERE P.PRJ_ID = E1.REFERENCE_ID 
 						    AND IFNULL(E1.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
-						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15') 
+						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17') 
 						    AND (E1.OSS_ID = #{ossId} OR E1.OSS_NAME = #{ossName} AND IFNULL(E1.OSS_VERSION, '') = #{ossVersion}
 								OR EXISTS ( 
 									SELECT 1 FROM (
@@ -2320,7 +2320,7 @@
 						  FROM OSS_COMPONENTS E1
 						WHERE P.PRJ_ID = E1.REFERENCE_ID 
 						    AND IFNULL(E1.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
-						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15','16') 
+						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17') 
 						    AND E1.OSS_ID IN (SELECT T1.OSS_ID FROM (
 			SELECT
     			OV.OSS_ID,
