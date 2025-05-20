@@ -3991,7 +3991,7 @@
 		   AND EXISTS (SELECT 1
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PARTNER_ID = SUB1.REFERENCE_ID
-						  AND SUB1.REFERENCE_DIV = '20'
+						  AND SUB1.REFERENCE_DIV IN ('20', '23')
 						  AND SUB1.OSS_NAME = #{ossName}
 						  <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
 						  AND SUB1.OSS_VERSION = #{ossVersion}
@@ -4007,7 +4007,7 @@
 		   AND EXISTS (SELECT 1
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PRJ_ID = SUB1.REFERENCE_ID
-						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '16', '50')
+						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '16', '17', '50')
 						  AND SUB1.OSS_NAME = #{ossName}
 						  <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
 						  AND SUB1.OSS_VERSION = #{ossVersion}
@@ -4042,7 +4042,7 @@
     			</when>
     			<otherwise>
     				AND T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
-    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
+    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17','50')
     				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
     				AND T1.OSS_ID = #{ossId}
     				</if>
@@ -4090,7 +4090,7 @@
            AND T1.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
-           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
+           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17','50')
     		</otherwise>
     	</choose>
            AND T1.ADMIN_CHECK_YN	!= 'Y'
@@ -4148,7 +4148,7 @@
 		   		AND OC.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
-    			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
+    			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17','50')
     		</otherwise>
     	</choose>
     	  AND OC.OSS_NAME = #{ossName}
