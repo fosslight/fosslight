@@ -27,17 +27,6 @@ var bom_evt = {
 	}
 }
 
-var fn = {
-	onUpdateSuccess : function(json, status){
-		loading.hide();
-	    if (json.resCd == '10'){
-	    	alertify.success([[#{msg.common.success}]]);
-	   	} else {
-	    	alertify.error([[#{msg.common.valid2}]], 0);
-	   	}
-	}
-}
-
 var bom_fn = {
 	binaryDBSave : function() {
 		var param = {
