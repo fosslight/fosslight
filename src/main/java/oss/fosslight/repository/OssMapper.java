@@ -290,4 +290,6 @@ public interface OssMapper {
 	List<String> selectIncludeCpeMatchOssInfo();
 
 	List<OssMaster> getOssInfoByRestriction(@Param("restriction") String restriction);
+
+	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
 }

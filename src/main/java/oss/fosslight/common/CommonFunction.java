@@ -6284,5 +6284,29 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			log.error(e.getMessage(), e);
 		}
 	}
+
+	public static OssMaster getOssVulnerabilityInfo(String ossName, String ossVersion) {
+		OssMaster ossMaster = new OssMaster();
+		if (CoCodeManager.OSS_INFO_UPPER.containsKey((ossName + "_" + ossVersion).toUpperCase())) {
+			ossMaster = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + ossVersion).toUpperCase());
+			if (!isEmpty(ossMaster.getIncludeCpe())) {
+				String[] includeCpes = Arrays.stream(ossMaster.getIncludeCpe().split(",")).map(String::trim).toArray(String[]::new);
+				ossMaster.setIncludeCpes(includeCpes);
+			}
+			if (!isEmpty(ossMaster.getExcludeCpe())) {
+				String[] excludeCpes = Arrays.stream(ossMaster.getExcludeCpe().split(",")).map(String::trim).toArray(String[]::new);
+				ossMaster.setExcludeCpes(excludeCpes);
+			}
+			if (!isEmpty(ossMaster.getOssVersionAlias())) {
+				String[] ossVersionAliases = Arrays.stream(ossMaster.getOssVersionAlias().split(",")).map(String::trim).toArray(String[]::new);
+				ossMaster.setOssVersionAliases(ossVersionAliases);
+			}
+		} else {
+			ossMaster.setOssName(ossName);
+			ossMaster.setOssVersion(ossVersion);
+		}
+		ossMaster = ossService.getOssVulnerabilityInfo(ossMaster);
+		return ossMaster;
+	}
 }
 

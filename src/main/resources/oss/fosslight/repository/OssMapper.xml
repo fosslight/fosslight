@@ -4483,4 +4483,49 @@
 		ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 		WHERE OV.RESTRICTION LIKE CONCAT('%', #{restriction}, '%')
 	</select>
+	
+	<select id="getOssVulnerabilityInfo" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT NVD.CVE_ID, CVE.CVSS_SCORE
+		FROM NVD_DATA_V3 NVD
+		INNER JOIN NVD_CVE_V3 CVE
+		ON NVD.CVE_ID = CVE.CVE_ID
+		WHERE 1=1
+		AND (NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+			 	<foreach item="item" index="index" collection="ossNicknames">
+					OR NVD.PRODUCT = REPLACE(#{item}, ' ', '_')
+				</foreach>
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpes)">
+				<foreach item="item" index="index" collection="includeCpes">
+					OR NVD.VENDORPRODUCT = REPLACE(#{item}, ':', '-')
+				</foreach>
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpes)">
+				<foreach item="item" index="index" collection="excludeCpes">
+					OR NVD.VENDORPRODUCT != REPLACE(#{item}, ':', '-')
+				</foreach>
+			</if>
+		)
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+			AND (NVD.VERSION = #{ossVersion}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases)">
+				<foreach item="item" index="index" collection="ossVersionAliases">
+					OR NVD.VERSION = #{item}
+				</foreach>
+			</if>
+			)
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases)">
+				AND (
+				<foreach item="item" index="index" collection="ossVersionAliases" separator="OR">
+					NVD.VERSION = #{item}
+				</foreach>
+				)
+			</if>
+		</if>
+		ORDER BY CVE.CVSS_SCORE DESC
+		LIMIT 1
+	</select>
 </mapper>

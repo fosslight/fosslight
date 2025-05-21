@@ -5189,4 +5189,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setExistImportantNotes(ossBean.getImportantNotes());
 		}
 	}
+
+	@Override
+	public OssMaster getOssVulnerabilityInfo(OssMaster ossMaster) {
+		return ossMapper.getOssVulnerabilityInfo(ossMaster);
+	}
 }

@@ -165,4 +165,6 @@ public interface OssService extends HistoryConfig{
 	void setOssAnalysisStatus(String prjId);
 
 	void setExistedOssInfo(OssMaster ossMaster);
+
+	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
 }
