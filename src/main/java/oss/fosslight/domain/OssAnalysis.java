@@ -60,6 +60,7 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String analysisYn;
 	private String completeYn;
 	private String referenceOssId;
+	private String referenceDiv;
 	private String useYn;
 	private String ossType;
 	private String ossId;
@@ -82,5 +83,9 @@ public class OssAnalysis extends ComBean implements Serializable {
 
 	public void setDownloadLocation(String downloadLocation) {
 		this.downloadLocation = avoidNull(downloadLocation);
+	}
+
+	public String getReferenceDiv() {
+		return referenceDiv;
 	}
 }

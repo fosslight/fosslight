@@ -3668,6 +3668,7 @@
 			  , HOMEPAGE
 			  , ANALYSIS_YN
 			  , COMPLETE_YN
+			  , REFERENCE_DIV
 		)
 		SELECT OC.COMPONENT_ID
 		<choose>
@@ -3683,6 +3684,7 @@
 		  	 , REPLACE(OC.HOMEPAGE, '%40', '@') AS HOMEPAGE
 		  	 , 'N' AS ANALYSIS_YN
 		  	 , 'N' AS COMPLETE_YN
+			 , #{referenceDiv} AS REFERENCE_DIV
 	  	  FROM OSS_COMPONENTS OC
 	  	  LEFT JOIN OSS_COMPONENTS_LICENSE OCL
 	        ON OC.COMPONENT_ID = OCL.COMPONENT_ID
@@ -3708,6 +3710,7 @@
 		  	 , ANALYSIS_YN
 		  	 , COMPLETE_YN
 		  	 , REFERENCE_OSS_ID
+			 , REFERENCE_DIV
 		  FROM OSS_ANALYSIS_MAP
 		 WHERE REFERENCE_ID = #{prjId}
 		 <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(startAnalysisFlag,'Y')">

@@ -5149,6 +5149,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, param.getLicenseName()
 					, param.getDownloadLocation().replaceAll("%40", "@")
 					, param.getHomepage().replaceAll("%40", "@")
+						, param.getReferenceDiv()
 				};
 				
 				rows.add(rowParam);
