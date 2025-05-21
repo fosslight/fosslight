@@ -974,7 +974,7 @@ var fn = {
 			var prjId = $("#list").getGridParam("selrow");
 			var rowData = $("#list").getRowData(prjId);
 
-			if (parseInt(rowData["permission"]) > 0) {
+			if (parseInt(rowData["statusPermission"]) > 0) {
 				createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
 			} else {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
