@@ -2018,12 +2018,6 @@
 					ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 			 ) A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y' 
 				WHERE A1.REFERENCE_ID = #{referenceId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-	    			AND IFNULL(A1.OSS_VERSION, '') = ''
-	    		</if>
-	    		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-	    			AND IFNULL(A1.OSS_VERSION, '') != ''
-	    		</if>
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">
 					AND A1.OBLIGATION_TYPE IN ('10', '11', '12')
 			    </if>
@@ -2197,12 +2191,6 @@
 					ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 			 ) A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y' 
 				WHERE A1.REFERENCE_ID = #{referenceId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-	    			AND IFNULL(A1.OSS_VERSION, '') = ''
-	    		</if>
-	    		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-	    			AND IFNULL(A1.OSS_VERSION, '') != ''
-	    		</if>
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">
 					AND A1.OBLIGATION_TYPE IN ('10', '11', '12')
 			    </if>
@@ -3295,12 +3283,6 @@
 		</if>
 	  WHERE M.REFERENCE_DIV = #{referenceDiv}
 	    AND M.REFERENCE_ID = #{referenceId}
-	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-	    AND IFNULL(M.OSS_VERSION, '') = ''
-	    </if>
-	    <if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-	    AND IFNULL(M.OSS_VERSION, '') != ''
-	    </if>
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(componentId)">
 	    AND M.COMPONENT_ID = #{componentId}
 	    </if>

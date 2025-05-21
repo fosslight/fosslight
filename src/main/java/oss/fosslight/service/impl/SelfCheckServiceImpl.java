@@ -295,16 +295,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		HashMap<String, Object> subMap = new HashMap<String, Object>();
 			
 		list = selfCheckMapper.selectIdentificationGridList(identification);
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionOssComponentList = selfCheckMapper.selectIdentificationGridList(identification);;
-		if (notVersionOssComponentList != null) {
-			list.addAll(notVersionOssComponentList);
-		}
-		identification.setOssVersionEmptyFlag(null);
 		list.sort(Comparator.comparing(ProjectIdentification::getComponentIdx));
 		
 		if (list != null && !list.isEmpty()) {
-			List<String> cvssScoreMaxList = new ArrayList<>();
+			Map<String, Object> ossInfoCheckMap = new HashMap<>();
 			
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceDiv(identification.getReferenceDiv());
@@ -319,81 +313,29 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-				boolean setCveInfoFlag = false;
-				
-				// convert max score
-				if (bean.getCvssScoreMax() != null) {
-					String cveId = bean.getCvssScoreMax().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax());
-					}
-				}
-				if (bean.getCvssScoreMax1() != null) {
-					String cveId = bean.getCvssScoreMax1().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax1());
-					}
-				}
-				if (bean.getCvssScoreMax2() != null) {
-					String cveId = bean.getCvssScoreMax2().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax2());
-					}
-				}
-				if (bean.getCvssScoreMax3() != null) {
-					String cveId = bean.getCvssScoreMax3().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax3());
-					}
-				}
-				
-				if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-					if (cvssScoreMaxList.size() > 1) {
-						Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-							@Override
-							public int compare(String o1, String o2) {
-								if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-									return -1;
-								}else {
-									return 1;
-								}
-							}
-						});
-					}
-					
-					String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-					bean.setCvssScore(cveData[3]);
-					bean.setCveId(cveData[4]);
-					bean.setVulnYn(CoConstDef.FLAG_YES);
-				} else {
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, true);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						bean.setCvssScore(conversionCveData[3]);
-						bean.setCveId(conversionCveData[4]);
-						bean.setVulnYn(CoConstDef.FLAG_YES);
-					} else {
-						setCveInfoFlag = true;
-					}
-				}
-				
-				cvssScoreMaxList.clear();
-				
-				if (ossInfoMap.containsKey(key)) {
-					OssMaster om = ossInfoMap.get(key);
-					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
-						String cveId = om.getCveId();
-						String cvssScore = om.getCvssScore();
-						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-							bean.setCvssScore(cvssScore);
-							bean.setCveId(cveId);
-							bean.setVulnYn(CoConstDef.FLAG_YES);
-						}
-					}
+				String key = bean.getOssName() + "_" + avoidNull(bean.getOssVersion(), "-");
+				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !ossInfoCheckMap.containsKey(key)) {
+					ossInfoCheckMap.put(key, "");
 				}
 			}
+			
+			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
+			if (!ossInfoCheckMap.isEmpty()) {
+				for (String key : ossInfoCheckMap.keySet()) {
+					String ossName = key.split("_")[0];
+					String ossVersion = key.split("_")[1];
+					if (ossVersion.equals("-")) {
+						ossVersion = "";
+					}
+					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossName, ossVersion);
+					if (om != null && !isEmpty(om.getCvssScore())) {
+						vulnerabilityInfoMap.put((ossName + "_" + ossVersion).toUpperCase(), om);
+					}
+				}
 				
+				ossInfoCheckMap.clear();
+			}
+			
 			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
 			Map<String, OssMaster> componentOssInfoMap = null;
 			
@@ -444,11 +386,19 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			for (ProjectIdentification bean : list) {
 				String licenseIds = "";
 				String ossRestriction = "";
+				String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+				
 				if (!isEmpty(bean.getOssName())) {
-					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
 					if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
 						ossRestriction = CoCodeManager.OSS_INFO_UPPER.get(key).getRestriction();
 					}
+				}
+				
+				if (vulnerabilityInfoMap.containsKey(key)) {
+					OssMaster om = vulnerabilityInfoMap.get(key);
+					bean.setCveId(om.getCveId());
+					bean.setCvssScore(om.getCvssScore());
+					bean.setVulnYn(CoConstDef.FLAG_YES);
 				}
 				
 				if (bean.getComponentLicenseList()!=null){
@@ -933,9 +883,18 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			if (_ossList != null) {
 				for (ProjectIdentification targetBean : _ossList) {
-					if (targetBean != null && !CoConstDef.FLAG_YES.equals(targetBean.getExcludeYn()) && !isEmpty(targetBean.getCvssScore())) {
-						double _currentSccore = Double.parseDouble(targetBean.getCvssScore());
-						
+					if (targetBean != null && !CoConstDef.FLAG_YES.equals(avoidNull(targetBean.getExcludeYn())) && !isEmpty(targetBean.getOssName()) && !targetBean.getOssName().equals("-")) {
+						double _currentSccore = 0;
+						OssMaster om = CommonFunction.getOssVulnerabilityInfo(targetBean.getOssName(), targetBean.getOssVersion());
+						if (om != null && !isEmpty(om.getCvssScore())) {
+							_currentSccore = Double.parseDouble(om.getCvssScore());
+							if (CoCodeManager.OSS_INFO_UPPER.containsKey((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase())) {
+								OssMaster bean = CoCodeManager.OSS_INFO_UPPER.get((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase());
+								if (!isEmpty(bean.getCvssScore())) {
+									max_cvss_score = Double.parseDouble(bean.getCvssScore());
+								}
+							}
+						}
 						if (Double.compare(_currentSccore, max_cvss_score) > 0) {
 							max_cvss_score = _currentSccore;
 							max_vuln_ossName = targetBean.getOssName();

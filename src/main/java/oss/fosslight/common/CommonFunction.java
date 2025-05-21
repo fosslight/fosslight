@@ -6289,6 +6289,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		OssMaster ossMaster = new OssMaster();
 		if (CoCodeManager.OSS_INFO_UPPER.containsKey((ossName + "_" + ossVersion).toUpperCase())) {
 			ossMaster = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + ossVersion).toUpperCase());
+			String[] ossNicknameList = ossService.getOssNickNameListByOssName(ossName);
+			if (ossNicknameList != null && ossNicknameList.length > 0) {
+				ossMaster.setOssNicknames(ossNicknameList);
+			}
 			if (!isEmpty(ossMaster.getIncludeCpe())) {
 				List<String> includeCpeList = new ArrayList<>();
 				for (String includeCpe : ossMaster.getIncludeCpe().split(",")) {

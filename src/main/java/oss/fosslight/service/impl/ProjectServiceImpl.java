@@ -483,13 +483,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv())) {
 				list = projectMapper.selectBomList(identification);
-				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-				final List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);
-				if (!CollectionUtils.isEmpty(notVersionList)) {
-					list.addAll(notVersionList);
-				}
-				identification.setOssVersionEmptyFlag(null);
-				
 				final Comparator<ProjectIdentification> compare = Comparator
 						.comparing(ProjectIdentification::getLicenseTypeIdx)
 						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -498,7 +491,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 						.thenComparing(ProjectIdentification::getMergeOrder);
-
 				list.sort(compare);
 				
 				// For loading 3rd Party ID
@@ -534,12 +526,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
 					identification.setMerge(CoConstDef.FLAG_NO);
 					List<ProjectIdentification> bomBeforeList = projectMapper.selectBomList(identification);
-					identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-					List<ProjectIdentification> bomBeforeNotVersionList = projectMapper.selectBomList(identification);;
-					if (bomBeforeNotVersionList != null) {
-						bomBeforeList.addAll(bomBeforeNotVersionList);
-					}
-					identification.setOssVersionEmptyFlag(null);
 					bomBeforeList.sort(compare);
 					
 					if (bomBeforeList != null) {
@@ -552,9 +538,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				Map<String, ProjectIdentification> mergeDepMap = new HashMap<>();
 				Map<String, ProjectIdentification> batMergeSrcMap = new HashMap<>();
 				Map<String, ProjectIdentification> batMergePartnerMap = new HashMap<>();
-				
-				// convert max score
-				List<String> cvssScoreMaxList = new ArrayList<>();
 				
 				Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
 				List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
@@ -911,13 +894,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			} else {
 				list = projectMapper.selectOtherBomList(identification);
-				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-				final List<ProjectIdentification> notVersionList = projectMapper.selectOtherBomList(identification);
-				if (!CollectionUtils.isEmpty(notVersionList)) {
-					list.addAll(notVersionList);
-				}
-				identification.setOssVersionEmptyFlag(null);
-				
 				final Comparator<ProjectIdentification> compare = Comparator
 						.comparing(ProjectIdentification::getLicenseTypeIdx)
 						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -925,7 +901,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
 						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder());
-
 				list.sort(compare);
 				
 				Map<String, Object> ossInfoCheckMap = new HashMap<>();
@@ -1131,37 +1106,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			list = projectMapper.selectIdentificationGridList(identification);
-			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
-			if (!CollectionUtils.isEmpty(notVersionOssComponentList)) {
-				Map<String, String> nvdInfoWithOutVerMap = new HashMap<>();
-				List<ProjectIdentification> outVerOssComponentList = notVersionOssComponentList.stream().filter(CommonFunction.distinctByKey(e -> e.getOssName() + "_" + avoidNull(e.getOssVersion()))).collect(Collectors.toList());
-				for (ProjectIdentification pi : outVerOssComponentList) {
-					String ossInfoKey = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
-					if (CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoKey)) {
-						OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get(ossInfoKey);
-						String cvssScoreMaxString = projectMapper.selectNvdInfoWithOutVer(ossInfo);
-						if (!isEmpty(cvssScoreMaxString)) {
-							nvdInfoWithOutVerMap.put(ossInfoKey, cvssScoreMaxString);
-						}
-					}
-				}
-				for (ProjectIdentification pi : notVersionOssComponentList) {
-					String ossInfoKey = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
-					if (nvdInfoWithOutVerMap.containsKey(ossInfoKey)) {
-						pi.setCvssScoreMax(nvdInfoWithOutVerMap.get(ossInfoKey));
-					}
-				}
-				list.addAll(notVersionOssComponentList);
-				nvdInfoWithOutVerMap.clear();
-			}
-			identification.setOssVersionEmptyFlag(null);
-			
 			list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 			
 			if (list != null && !list.isEmpty()) {
-				String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
-				List<String> cvssScoreMaxList = new ArrayList<>();
 				Map<String, Object> ossInfoCheckMap = new HashMap<>();
 				
 				for (ProjectIdentification project : list){
@@ -3842,19 +3789,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			bomList = projectMapper.selectOtherBomList(identification);
 		}
 		
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		
-		List<ProjectIdentification> notVersionList = null;
-		if (!isAndroid && !isPartner) {
-			notVersionList = projectMapper.selectBomList(identification);
-		} else {
-			notVersionList = projectMapper.selectOtherBomList(identification);
-		}
-		if (notVersionList != null && !notVersionList.isEmpty()) {
-			bomList.addAll(notVersionList);
-		}
-		identification.setOssVersionEmptyFlag(null);
-		
 		List<String> adminCheckComponentIds = new ArrayList<>();
 		List<String> removeAdminCheckComponentIds = new ArrayList<>();
 		for (ProjectIdentification bomGridData : checkGridBomList) {
@@ -4669,14 +4603,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			bomParam.setNoticeFlag(CoConstDef.FLAG_YES); // notice 대상만 추출한다. (obligation type이 10, 11)
 			bomParam.setSaveBomFlag(CoConstDef.FLAG_YES);
 			bomParam.setBomWithAndroidFlag(project.getAndroidFlag()); // android Project
-			List<ProjectIdentification> bomList = projectMapper.selectBomList(bomParam);
-			bomParam.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			List<ProjectIdentification> notVersionList = projectMapper.selectBomList(bomParam);;
-			if (notVersionList != null) {
-				bomList.addAll(notVersionList);
-			}
-			bomParam.setOssVersionEmptyFlag(null);
 			
+			List<ProjectIdentification> bomList = projectMapper.selectBomList(bomParam);
 			Comparator<ProjectIdentification> compare = Comparator
 					.comparing(ProjectIdentification::getLicenseTypeIdx)
 					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -4685,7 +4613,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 					.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 					.thenComparing(ProjectIdentification::getMergeOrder);
-
 			bomList.sort(compare);
 			
 			// 일괄 등록을 위해 대상 data의 component id 만 추출한다.
@@ -5123,13 +5050,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public List<ProjectIdentification> getBomListExcel(ProjectIdentification bom) {
 		bom.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		List<ProjectIdentification> list = projectMapper.selectBomList(bom);
-		bom.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(bom);;
-		if (notVersionList != null) {
-			list.addAll(notVersionList);
-		}
-		bom.setOssVersionEmptyFlag(null);
-		
 		Comparator<ProjectIdentification> compare = Comparator
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
 				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -5138,7 +5058,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 				.thenComparing(ProjectIdentification::getMergeOrder);
-
 		list.sort(compare);
 		
 		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
@@ -6933,13 +6852,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	@Override
 	public void insertCopyConfirmStatusBomList(Project project, ProjectIdentification identification) {
 		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-		if (notVersionList != null) {
-			bomList.addAll(notVersionList);
-		}
-		identification.setOssVersionEmptyFlag(null);
-		
 		Comparator<ProjectIdentification> compare = Comparator
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
 				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -6948,7 +6860,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 				.thenComparing(ProjectIdentification::getMergeOrder);
-
 		bomList.sort(compare);
 		
 		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
@@ -7056,13 +6967,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	@Override
 	public List<ProjectIdentification> selectIdentificationGridList(ProjectIdentification identification) {
 		List<ProjectIdentification> list = projectMapper.selectIdentificationGridList(identification);
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);
-		if (notVersionOssComponentList != null) {
-			list.addAll(notVersionOssComponentList);
-			identification.setOssVersionEmptyFlag(null);
-		}
-		
 		list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 		
 		return list;
@@ -7144,13 +7048,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	public String checkOssNicknameList(ProjectIdentification identification) {
 		String referenceDivString = "";
 		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-		if (notVersionList != null) {
-			bomList.addAll(notVersionList);
-		}
-		identification.setOssVersionEmptyFlag(null);
-		
 		Comparator<ProjectIdentification> compare = Comparator
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
 				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -7159,7 +7056,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 				.thenComparing(ProjectIdentification::getMergeOrder);
-
 		bomList.sort(compare);
 		
 		if (bomList != null) {

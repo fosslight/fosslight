@@ -1383,7 +1383,8 @@
 			M.BAT_SCORE,
 			M.BAT_CHECKSUM,
 			IFNULL(L1.LICENSE_DIV, 'S') AS LICENSE_DIV,
-			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' THEN 
+			L1.OBLIGATION_TYPE
+<!-- 		CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' THEN 
 			(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
 					FROM NVD_DATA_V3 NVD
 					INNER JOIN NVD_CVE_V3 CVE
@@ -1457,7 +1458,7 @@
 						) TBL
 						WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
 					)
-			) ELSE NULL END CVSS_SCORE_MAX1, L1.OBLIGATION_TYPE
+			) ELSE NULL END CVSS_SCORE_MAX1 -->
 	   FROM PRE_OSS_COMPONENTS M
 	   LEFT OUTER JOIN (
 				SELECT
@@ -1493,12 +1494,6 @@
 		      AND L1.USE_YN = 'Y'
 	  WHERE M.REFERENCE_DIV = #{referenceDiv}
 	    AND M.REFERENCE_ID = #{referenceId}
-	<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-		AND IFNULL(M.OSS_VERSION, '') != ''
-	</if>
-	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-		AND IFNULL(M.OSS_VERSION, '') = ''
-	</if>
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(componentId)">
 	    AND M.COMPONENT_IDX = #{componentId}
 	    </if>
