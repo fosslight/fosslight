@@ -403,24 +403,41 @@ public class NvdDataService {
 		// CVSS V3가 없는 경우 V2 Score를 사용
 		String baseScore = "0";
 		String baseMetric = "";
-		if (metrics.containsKey("cvssMetricV31")) {
+		if (metrics.containsKey("cvssMetricV40")) {
+			List<Map<String, Object>> cvssMetricV4 = (List<Map<String, Object>>) metrics.get("cvssMetricV40");
+			Map<String, Object> cvssV4 = (Map<String, Object>) cvssMetricV4.get(0);
+			Map<String, Object> cvssData = (Map<String, Object>) cvssV4.get("cvssData");
+			if (cvssData.containsKey("baseScore")) {
+				baseScore = String.valueOf(cvssData.get("baseScore"));
+				baseMetric = "V4";	
+			}
+		}
+		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV31")) {
 			List<Map<String, Object>> cvssMetricV3 = (List<Map<String, Object>>) metrics.get("cvssMetricV31");
 			Map<String, Object> cvssV3 = (Map<String, Object>) cvssMetricV3.get(0);
 			Map<String, Object> cvssData = (Map<String, Object>) cvssV3.get("cvssData");
-			baseScore = String.valueOf(cvssData.get("baseScore"));
-			baseMetric = "V3";					
-		} else if (metrics.containsKey("cvssMetricV30")){
+			if (cvssData.containsKey("baseScore")) {
+				baseScore = String.valueOf(cvssData.get("baseScore"));
+				baseMetric = "V3";
+			}
+		}
+		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV30")){
 			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV30");
 			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
 			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-			baseScore = String.valueOf(cvssData.get("baseScore"));
-			baseMetric = "V3";
-		} else if (metrics.containsKey("cvssMetricV2")){
+			if (cvssData.containsKey("baseScore")) {
+				baseScore = String.valueOf(cvssData.get("baseScore"));
+				baseMetric = "V3";
+			}
+		}
+		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV2")){
 			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV2");
 			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
 			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-			baseScore = String.valueOf(cvssData.get("baseScore"));
-			baseMetric = "V2";
+			if (cvssData.containsKey("baseScore")) {
+				baseScore = String.valueOf(cvssData.get("baseScore"));
+				baseMetric = "V2";
+			}
 		}
 		
 		List<Map<String, String>> ossList = new ArrayList<>();
