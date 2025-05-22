@@ -6293,7 +6293,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			if (ossNicknameList != null && ossNicknameList.length > 0) {
 				ossMaster.setOssNicknames(ossNicknameList);
 			}
-			if (!isEmpty(ossMaster.getIncludeCpe())) {
+			if (!isEmpty(ossMaster.getIncludeCpe()) && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag()))) {
 				List<String> includeCpeList = new ArrayList<>();
 				for (String includeCpe : ossMaster.getIncludeCpe().split(",")) {
 					String[] splitIncludeCpe = includeCpe.split(":");
