@@ -557,7 +557,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				Map<String, Object> ossInfoCheckMap = new HashMap<>();
  				list.forEach(ll -> {
  					String key = ll.getOssName() + "_" + avoidNull(ll.getOssVersion(), "-");
- 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !ossInfoCheckMap.containsKey(key)) {
+ 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
  						ossInfoCheckMap.put(key, "");
  					}
  					
@@ -906,7 +906,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				Map<String, Object> ossInfoCheckMap = new HashMap<>();
 				list.forEach(ll -> {
  					String key = ll.getOssName() + "_" + avoidNull(ll.getOssVersion(), "-");
- 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !ossInfoCheckMap.containsKey(key)) {
+ 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
  						ossInfoCheckMap.put(key, "");
  					}
 				});
@@ -1125,7 +1125,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					project.setLicenseDiv(licenseDiv);
 					
 					String key = project.getOssName() + "_" + avoidNull(project.getOssVersion(), "-");
- 					if (!isEmpty(project.getOssName()) && !project.getOssName().equals("-") && !ossInfoCheckMap.containsKey(key)) {
+ 					if (!isEmpty(project.getOssName()) && !project.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(project.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
  						ossInfoCheckMap.put(key, "");
  					}
 					

@@ -314,7 +314,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}
 				
 				String key = bean.getOssName() + "_" + avoidNull(bean.getOssVersion(), "-");
-				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !ossInfoCheckMap.containsKey(key)) {
+				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
 					ossInfoCheckMap.put(key, "");
 				}
 			}
