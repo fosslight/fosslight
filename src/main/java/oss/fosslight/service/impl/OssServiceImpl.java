@@ -3164,12 +3164,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		if (includeCpeList != null && !includeCpeList.isEmpty()) {
 			generateIncludeCpeParam(param, includeCpeList, includeCpeEnvironmentList);
-			includeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByCpeInfo(param);
+			includeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByIncludeCpeInfo(param);
 		}
 		
 		if (excludeCpeList != null && !excludeCpeList.isEmpty()) {
 			generateExcludeCpeParam(param, excludeCpeList, excludeCpeEnvironmentList);
-			excludeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByCpeInfo(param);
+			excludeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByExcludeCpeInfo(param);
 		}
 		
 		List<Map<String, Object>> filteredVendorProductInfoList = new ArrayList<>();
@@ -3297,9 +3297,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	private void generateExcludeCpeParam(OssMaster ossMaster, List<String> excludeCpeList, List<String> excludeCpeEnvironmentList) {
-		ossMaster.setIncludeCpe(null);
-		ossMaster.setIncludeCpes(null);
-		
 		List<String> excludeCpes = new ArrayList<>();
 		String excludeCpeString = "\"";
 		int idx = 0;
@@ -4385,12 +4382,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				if (includeCpeList != null && !includeCpeList.isEmpty()) {
 					generateIncludeCpeParam(param, includeCpeList, includeCpeEnvironmentList);
-					includeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByCpeInfo(param);
+					includeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByIncludeCpeInfo(param);
 				}
 				
 				if (excludeCpeList != null && !excludeCpeList.isEmpty()) {
 					generateExcludeCpeParam(param, excludeCpeList, excludeCpeEnvironmentList);
-					excludeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByCpeInfo(param);
+					excludeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByExcludeCpeInfo(param);
 				}
 				
 				List<Map<String, Object>> filteredVendorProductInfoList = new ArrayList<>();
