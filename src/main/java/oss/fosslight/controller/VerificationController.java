@@ -415,6 +415,7 @@ public class VerificationController extends CoTopComponent {
 		log.info("URI: "+ "/project/verification/uploadVerification");
 		Project projectMaster = new Project();
 		projectMaster.setPrjId(req.getParameter("prjId"));
+		projectMaster.setNoticeType(verificationService.selectOssNoticeOne2(projectMaster.getPrjId()).getNoticeType());
 		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
 		list = verificationService.setMergeGridData(list);
 		

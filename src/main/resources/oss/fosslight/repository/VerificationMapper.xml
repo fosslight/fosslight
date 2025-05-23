@@ -84,7 +84,7 @@
 			 	AND REFERENCE_DIV = '14'
 			</when>
 			<otherwise>
-				AND REFERENCE_DIV NOT IN ('14')
+				AND REFERENCE_DIV NOT IN ('14', '17')
 			</otherwise>
 		</choose>
 		<if test="@oss.fosslight.util.StringUtil@equals(networkServerType, 'Y')">
