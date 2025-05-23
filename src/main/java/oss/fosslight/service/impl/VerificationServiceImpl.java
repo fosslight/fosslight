@@ -3325,8 +3325,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		param.setReadmeYn(copyProject.getReadmeYn());
 		param.setExceptFileContent(copyProject.getExceptFileContent());
 		param.setVerifyFileContent(copyProject.getVerifyFileContent());
+		param.setBinaryFileYn(copyProject.getBinaryFileYn());
 		
-		boolean isCopyDir = !isEmpty(param.getReadmeContent()) || !isEmpty(param.getExceptFileContent()) || !isEmpty(param.getVerifyFileContent());
+		boolean isCopyDir = !isEmpty(param.getReadmeContent()) || !isEmpty(param.getExceptFileContent()) || !isEmpty(param.getVerifyFileContent()) || !isEmpty(param.getBinaryFileYn());
 		if (isCopyDir) {
 			File srcDir = new File(VERIFY_PATH_OUTPUT + "/" + copyProject.getPrjId());
 			File destDir = new File(VERIFY_PATH_OUTPUT + "/" + param.getPrjId());
