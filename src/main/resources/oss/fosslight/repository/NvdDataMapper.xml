@@ -217,7 +217,7 @@
 	
 	<!-- V3.0 대응 -->
     <select id="selectOneCveInfoV3" parameterType="HashMap" resultType="HashMap">
-    	SELECT CVE_ID AS cveId, PUBL_DATE AS publDate, MODI_DATE AS modiDate, CVSS_SCORE AS cvssScore FROM NVD_CVE_V3 WHERE CVE_ID = #{cveId}
+    	SELECT CVE_ID AS cveId, PUBL_DATE AS publDate, MODI_DATE AS modiDate, CVSS_SCORE AS cvssScore, BASE_METRIC as baseMetric FROM NVD_CVE_V3 WHERE CVE_ID = #{cveId}
     </select>
     
     <!-- CVE 정보 등록 -->
@@ -821,4 +821,10 @@
 			WHERE T1.CVE_ID = #{cveId}
 		) A
     </insert>
+    
+    <update id="updateCveInfoV3" parameterType="HashMap">
+    	UPDATE NVD_CVE_V3 
+    	SET CVSS_SCORE = #{cvssScore}, BASE_METRIC = #{baseMetric}, VULN_SUMMARY = #{summary}, MODI_DATE = #{modiDate}, REG_DATE = NOW()
+    	WHERE CVE_ID = #{cveId}
+    </update>
 </mapper>

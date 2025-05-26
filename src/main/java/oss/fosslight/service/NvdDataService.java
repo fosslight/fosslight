@@ -3,6 +3,7 @@ package oss.fosslight.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.CertificateException;
@@ -24,6 +25,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -200,8 +202,43 @@ public class NvdDataService {
 								}
                 
 								cveId = (String) cveInfo.get("cveId");
-								
-								mapper.insertCveInfoV3Temp(cveInfo);
+								Map<String, Object> existCveInfo = mapper.selectOneCveInfoV3(cveInfo);
+								if (!MapUtils.isEmpty(existCveInfo)) {
+									String baseMetric = (String) cveInfo.get("baseMetric");
+									String existBaseMetric = (String) existCveInfo.get("baseMetric");
+									Map<String, Object> param = new HashMap<>();
+									param.put("cveId", cveInfo.get("cveId"));
+									boolean updateFlag = false;
+									if (StringUtil.isEmpty(existBaseMetric) && !StringUtil.isEmpty(baseMetric)) {
+										param.put("baseMetric", baseMetric);
+										param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+										param.put("summary", (String) cveInfo.get("summary"));
+										param.put("modiDate", cveInfo.get("modiDate"));
+										updateFlag = true;
+									} else if (!StringUtil.isEmpty(baseMetric) && !StringUtil.isEmpty(existBaseMetric)) {
+										if (baseMetric.equals(existBaseMetric)) {
+											if (new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) > 0
+													|| new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) < 0) {
+												param.put("baseMetric", baseMetric);
+												param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+												param.put("summary", (String) cveInfo.get("summary"));
+												param.put("modiDate", cveInfo.get("modiDate"));
+												updateFlag = true;
+											}
+										} else {
+											param.put("baseMetric", baseMetric);
+											param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+											param.put("summary", (String) cveInfo.get("summary"));
+											param.put("modiDate", cveInfo.get("modiDate"));
+											updateFlag = true;
+										}
+									}
+									if (updateFlag) {
+										mapper.updateCveInfoV3(param);
+									}
+								} else {
+									mapper.insertCveInfoV3Temp(cveInfo);
+								}
 								
 								cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
 								
@@ -405,38 +442,42 @@ public class NvdDataService {
 		String baseMetric = "";
 		if (metrics.containsKey("cvssMetricV40")) {
 			List<Map<String, Object>> cvssMetricV4 = (List<Map<String, Object>>) metrics.get("cvssMetricV40");
-			Map<String, Object> cvssV4 = (Map<String, Object>) cvssMetricV4.get(0);
-			Map<String, Object> cvssData = (Map<String, Object>) cvssV4.get("cvssData");
-			if (cvssData.containsKey("baseScore")) {
-				baseScore = String.valueOf(cvssData.get("baseScore"));
-				baseMetric = "V4";	
+			if (!CollectionUtils.isEmpty(cvssMetricV4)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV4);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V4";	
+				}
 			}
 		}
 		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV31")) {
 			List<Map<String, Object>> cvssMetricV3 = (List<Map<String, Object>>) metrics.get("cvssMetricV31");
-			Map<String, Object> cvssV3 = (Map<String, Object>) cvssMetricV3.get(0);
-			Map<String, Object> cvssData = (Map<String, Object>) cvssV3.get("cvssData");
-			if (cvssData.containsKey("baseScore")) {
-				baseScore = String.valueOf(cvssData.get("baseScore"));
-				baseMetric = "V3";
+			if (!CollectionUtils.isEmpty(cvssMetricV3)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV3);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V3";	
+				}
 			}
 		}
 		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV30")){
-			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV30");
-			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
-			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-			if (cvssData.containsKey("baseScore")) {
-				baseScore = String.valueOf(cvssData.get("baseScore"));
-				baseMetric = "V3";
+			List<Map<String, Object>> cvssMetricV30 = (List<Map<String, Object>>) metrics.get("cvssMetricV30");
+			if (!CollectionUtils.isEmpty(cvssMetricV30)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV30);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V3";
+				}
 			}
 		}
 		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV2")){
 			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV2");
-			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
-			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-			if (cvssData.containsKey("baseScore")) {
-				baseScore = String.valueOf(cvssData.get("baseScore"));
-				baseMetric = "V2";
+			if (!CollectionUtils.isEmpty(cvssMetricV2)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV2);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V2";
+				}
 			}
 		}
 		
@@ -487,6 +528,31 @@ public class NvdDataService {
 		return resultMap;
 	}
 
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> readToCvssMetric(List<Map<String, Object>> cvssMetricList) {
+		Map<String, Object> cvssData = null;
+		Map<String, Object> cvssObj = null;
+		if (cvssMetricList.size() > 1) {
+			for (Map<String, Object> cvssMetric : cvssMetricList) {
+				String source = String.valueOf(cvssMetric.get("source"));
+				String type = String.valueOf(cvssMetric.get("type"));
+				if (source.equalsIgnoreCase("nvd@nist.gov") && type.equalsIgnoreCase("Primary")) {
+					cvssObj = cvssMetric;
+					cvssData = (Map<String, Object>) cvssObj.get("cvssData");
+					break;
+				}
+			}
+			if (cvssObj == null) {
+				cvssObj = (Map<String, Object>) cvssMetricList.get(0);
+				cvssData = (Map<String, Object>) cvssObj.get("cvssData");
+			}
+		} else {
+			cvssObj = (Map<String, Object>) cvssMetricList.get(0);
+			cvssData = (Map<String, Object>) cvssObj.get("cvssData");
+		}
+		return cvssData;
+	}
+	
 	private Map<String, Object> nvdMetaDataApiCheckJob(String restApiUrl, int resultsPerPage, int startIndex) throws IOException {
 		Map<String, Object> responseMap = new HashMap<>();
 		String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
