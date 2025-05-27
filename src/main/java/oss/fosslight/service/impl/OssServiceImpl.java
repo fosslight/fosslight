@@ -3142,17 +3142,24 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	private void updateVulnInfoByOssMaster(OssMaster ossMaster, boolean delFlag) {
-		if (delFlag) vulnerabilityMapper.deleteOssVulnInfo(ossMaster.getOssId());
+		if (delFlag) {
+			vulnerabilityMapper.deleteOssVulnInfo(ossMaster.getOssId());
+		}
 		
 		List<String> includeCpeList = null;
-		if (ossMaster.getIncludeCpes() != null) includeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getIncludeCpes()));
+		if (ossMaster.getIncludeCpes() != null) {
+			includeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getIncludeCpes()));
+		}
 		List<String> excludeCpeList = null;
-		if (ossMaster.getExcludeCpes() != null) excludeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getExcludeCpes()));
+		if (ossMaster.getExcludeCpes() != null) {
+			excludeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getExcludeCpes()));
+		}
 		List<String> ossVersionAlias = new ArrayList<>();
 		ossVersionAlias.add(isEmpty(ossMaster.getOssVersion()) ? "-" : ossMaster.getOssVersion());
 		if (ossMaster.getOssVersionAliases() != null) {
 			ossVersionAlias.addAll(Arrays.asList(ossMaster.getOssVersionAliases()));
 		}
+		boolean isNoVersion = isEmpty(ossMaster.getOssVersion()) ? true : false;
 		
 		List<String> includeCpeEnvironmentList = new ArrayList<>();
 		List<String> excludeCpeEnvironmentList = new ArrayList<>();
@@ -3176,9 +3183,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		if (includeVendorProductInfoList != null && !includeVendorProductInfoList.isEmpty()) {
 			if (excludeVendorProductInfoList != null && !excludeVendorProductInfoList.isEmpty()) {
-				generateIncludeCpeMatchList(includeVendorProductInfoList, excludeVendorProductInfoList, includeCpeEnvironmentList, filteredVendorProductInfoList);
+				generateIncludeCpeMatchList(includeVendorProductInfoList, excludeVendorProductInfoList, includeCpeEnvironmentList, filteredVendorProductInfoList, isNoVersion);
 			} else {
-				generateIncludeCpeMatchList(includeVendorProductInfoList, null, includeCpeEnvironmentList, filteredVendorProductInfoList);
+				generateIncludeCpeMatchList(includeVendorProductInfoList, null, includeCpeEnvironmentList, filteredVendorProductInfoList, isNoVersion);
 			}
 		}
 		
@@ -3248,21 +3255,23 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	private void generateIncludeCpeMatchList(List<Map<String, Object>> includeVendorProductInfoList, List<Map<String, Object>> excludeVendorProductInfoList
-			, List<String> includeCpeEnvironmentList, List<Map<String, Object>> filteredVendorProductInfoList) {
+			, List<String> includeCpeEnvironmentList, List<Map<String, Object>> filteredVendorProductInfoList, boolean isNoVersion) {
 		List<String> filteredKeyList = null;
 		boolean excludeListFlag = false;
 		
 		if (excludeVendorProductInfoList != null) {
 			excludeListFlag = true;
-			filteredKeyList = excludeVendorProductInfoList
-										.stream()
-										.map(i -> ((String)i.get("PRODUCT") + "|" + (String)i.get("VERSION") + "|" + (String)i.get("VENDOR") + "|" + (String)i.get("CVE_ID")).toUpperCase())
-										.collect(Collectors.toList());
+			filteredKeyList = new ArrayList<>();
+			for (Map<String, Object> map : excludeVendorProductInfoList) {
+				String version = isNoVersion ? "-" : (String) map.get("VERSION");
+				filteredKeyList.add(((String) map.get("PRODUCT") + "|" + version + "|" + (String) map.get("VENDOR") + "|" + (String) map.get("CVE_ID")).toUpperCase());
+			}
 		}
 
 		for (Map<String, Object> includeVendorProductInfo : includeVendorProductInfoList) {
 			if (excludeListFlag) {
-				String key = (String)includeVendorProductInfo.get("PRODUCT") + "|" + (String)includeVendorProductInfo.get("VERSION") + "|" + (String)includeVendorProductInfo.get("VENDOR") + "|" + (String)includeVendorProductInfo.get("CVE_ID");
+				String version = isNoVersion ? "-" : (String)includeVendorProductInfo.get("VERSION");
+				String key = (String)includeVendorProductInfo.get("PRODUCT") + "|" + version + "|" + (String)includeVendorProductInfo.get("VENDOR") + "|" + (String)includeVendorProductInfo.get("CVE_ID");
 				if (!filteredKeyList.contains(key.toUpperCase())) {
 					checkIncludeCpeEnvironment(includeVendorProductInfo, includeCpeEnvironmentList, filteredVendorProductInfoList);
 				}
@@ -4349,6 +4358,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			param.setOssVersion(ossMaster.getOssVersion());
 			param.setOssNicknames(ossMaster.getOssNicknames());
 			
+			boolean isNoVersion = isEmpty(param.getOssVersion()) || param.getOssVersion().equals("-")? true : false;
 			List<String> includeCpeEnvironmentList = new ArrayList<>();
 			List<String> excludeCpeEnvironmentList = new ArrayList<>();
 			
@@ -4394,9 +4404,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				if (includeVendorProductInfoList != null && !includeVendorProductInfoList.isEmpty()) {
 					if (excludeVendorProductInfoList != null && !excludeVendorProductInfoList.isEmpty()) {
-						generateIncludeCpeMatchList(includeVendorProductInfoList, excludeVendorProductInfoList, includeCpeEnvironmentList, filteredVendorProductInfoList);
+						generateIncludeCpeMatchList(includeVendorProductInfoList, excludeVendorProductInfoList, includeCpeEnvironmentList, filteredVendorProductInfoList, isNoVersion);
 					} else {
-						generateIncludeCpeMatchList(includeVendorProductInfoList, null, includeCpeEnvironmentList, filteredVendorProductInfoList);
+						generateIncludeCpeMatchList(includeVendorProductInfoList, null, includeCpeEnvironmentList, filteredVendorProductInfoList, isNoVersion);
 					}
 				}
 				
