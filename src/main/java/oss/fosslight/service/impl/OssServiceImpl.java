@@ -2354,7 +2354,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
 				break;
 			case 7:
-				p = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
+				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 				break;
 			case 8:
 				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
