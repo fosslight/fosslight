@@ -199,10 +199,9 @@ public class ProjectController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
-		List<Project> list = projectService.getProjectNameList(project);
-		CustomXssFilter.projectFilter(list);
+		List<Map<String, String>> list = projectService.getProjectNameList(project);
+		CustomXssFilter.nameFilter(list);
 		return makeJsonResponseHeader(list);
-		
 	}
 	
 	@GetMapping(value = PROJECT.AUTOCOMPLETE_ID_AJAX)

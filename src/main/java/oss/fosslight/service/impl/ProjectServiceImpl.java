@@ -120,9 +120,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
-	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator, #project?.identificationStatus}")
-	public List<Project> getProjectNameList(Project project) {
-		return projectMapper.getProjectNameList(project);
+	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName}")
+	public List<Map<String, String>> getProjectNameList(Project project) {
+		List<Project> prjNameList = projectMapper.getProjectNameList(project);
+		List<Map<String, String>> prjNameMapList = prjNameList.stream().map(e -> {
+														Map<String, String> map = new HashMap<>();
+														map.put("prjName", e.getPrjName());
+														return map;
+													}).collect(Collectors.toList());
+		return prjNameMapList;
 	}
 	
 	@Override
@@ -1524,48 +1530,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			newSortList.addAll(excludeList);
 			list = newSortList;
-			
-			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) {
-				List<ProjectIdentification> depTreeList = new ArrayList<>();
-				Map<String, ProjectIdentification> packageUrlInfo = new HashMap<>();
-				List<ProjectIdentification> depList = new ArrayList<>();
-				int idx = 1;
-				for (ProjectIdentification bean : list) {
-					if (!isEmpty(bean.getPackageUrl())) {
-						bean.setTreeId("p-" + idx);
-						packageUrlInfo.put(bean.getPackageUrl(), bean);
-						depList.add(bean);
-						idx++;
-					}
-				}
-				if (!CollectionUtils.isEmpty(depList)) {
-					idx = 1;
-					for (ProjectIdentification depInfo : depList) {
-						depTreeList.add(depInfo);
-						
-						if (!isEmpty(depInfo.getDependencies())) {
-							String[] dependencies = depInfo.getDependencies().split(",");
-							for (String dependency : dependencies) {
-								if (packageUrlInfo.containsKey(dependency)) {
-									ProjectIdentification dependencyBean = new ProjectIdentification();
-									ProjectIdentification bean = packageUrlInfo.get(dependency);
-									dependencyBean.setTreeParentId(depInfo.getTreeId());
-									dependencyBean.setTreeId("c-" + idx);
-									dependencyBean.setOssName(bean.getOssName());
-									dependencyBean.setOssVersion(bean.getOssVersion());
-									dependencyBean.setPackageUrl(bean.getPackageUrl());
-									dependencyBean.setCvssScore(bean.getCvssScore());
-									dependencyBean.setCveId(bean.getCveId());
-									dependencyBean.setDependencies(bean.getDependencies());
-									depTreeList.add(dependencyBean);
-									idx++;
-								}
-							}
-						}
-					}
-					map.put("depTreeData", depTreeList);
-				}
-			}
 			
 			map.put("subData", subMap);
 			map.put("mainData", list);

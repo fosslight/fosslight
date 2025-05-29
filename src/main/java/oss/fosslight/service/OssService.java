@@ -26,7 +26,7 @@ public interface OssService extends HistoryConfig{
 	
 	Map<String,Object> getOssLicenseList(OssMaster ossMaster);
 	
-	List<OssMaster> getOssNameList();
+	List<Map<String, String>> getOssNameList();
 	
 	OssMaster getOssMasterOne(OssMaster ossMaster);
 	

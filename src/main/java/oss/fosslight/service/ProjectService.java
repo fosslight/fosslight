@@ -39,7 +39,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponents, List<PartnerMaster> thirdPartyList);
 	
-	public List<Project> getProjectNameList(Project project);
+	public List<Map<String, String>> getProjectNameList(Project project);
 	
 	public List<Project> getProjectModelNameList();
 	

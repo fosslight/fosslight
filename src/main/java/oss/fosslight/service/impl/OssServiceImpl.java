@@ -240,8 +240,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@Override
 	@Cacheable(value="autocompleteCache", key="#root.methodName")
-	public List<OssMaster> getOssNameList() {
-		return ossMapper.selectOssNameList();
+	public List<Map<String, String>> getOssNameList() {
+		List<OssMaster> ossNameList = ossMapper.selectOssNameList();
+		List<Map<String, String>> ossNameMapList = ossNameList.stream().map(e -> {
+														Map<String, String> map = new HashMap<>();
+														map.put("ossName", e.getOssName());
+														return map;
+													}).collect(Collectors.toList());
+		return ossNameMapList;
 	}
 	
 	@Override

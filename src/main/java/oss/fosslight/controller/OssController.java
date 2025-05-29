@@ -207,9 +207,9 @@ public class OssController extends CoTopComponent{
 			OssMaster ossMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
-		List<OssMaster> list = ossService.getOssNameList();
-		CustomXssFilter.ossMasterFilter(list);
+			, Model model) {
+		List<Map<String, String>> list = ossService.getOssNameList();
+		CustomXssFilter.nameFilter(list);
 		return makeJsonResponseHeader(list);
 	}
 
