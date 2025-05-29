@@ -4493,7 +4493,8 @@
 		INNER JOIN NVD_CVE_V3 CVE
 		ON NVD.CVE_ID = CVE.CVE_ID
 		WHERE 1=1
-		AND (NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
+		AND (
+			NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
 			 	<foreach item="item" index="index" collection="ossNicknames">
 					OR NVD.PRODUCT = REPLACE(#{item}, ' ', '_')
@@ -4504,12 +4505,13 @@
 					OR NVD.VENDORPRODUCT = REPLACE(#{item}, ':', '-')
 				</foreach>
 			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpes)">
-				<foreach item="item" index="index" collection="excludeCpes">
-					OR NVD.VENDORPRODUCT != REPLACE(#{item}, ':', '-')
-				</foreach>
-			</if>
 		)
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpes)">
+		AND
+			<foreach item="item" collection="excludeCpes" open="(" close=")" separator="OR">
+				NVD.VENDORPRODUCT != REPLACE(#{item}, ':', '-')
+			</foreach>
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
 			AND (NVD.VERSION = #{ossVersion}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases)">
