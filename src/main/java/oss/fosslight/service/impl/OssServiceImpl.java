@@ -2224,12 +2224,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			for (String list : androidPlatformList){
 				if (ossNameMatcher.group(3).equalsIgnoreCase(list)){
 					isValid = true;
-					android = list.split("/");
+					android = list.replaceAll("^platform/","").split("/");
 					break;
 				}
 			}
 			if(!isValid) {
-				android = ossNameMatcher.group(3).split("/");
+				android = ossNameMatcher.group(3).replaceAll("^platform/","").split("/");
 				bean.setCheckOssList("I");
 			}
 			checkName = "android-";
@@ -2570,6 +2570,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list){
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+		List<String> packageManagerUrl = new ArrayList<>();
+		for(String code : CoCodeManager.getCodes(CoConstDef.CD_CHECK_OSS_NAME_URL)) {
+			if(avoidNull(CoCodeManager.getSubCodeNo(CoConstDef.CD_CHECK_OSS_NAME_URL, code)).equals("1")) {
+				packageManagerUrl.add(CoCodeManager.getCodeString(CoConstDef.CD_CHECK_OSS_NAME_URL, code));
+			}
+		}
+
 		int urlSearchSeq = -1;
 		List<String> androidPlatformList = getAndroidPlatformList();
 		Map<String, String> ossInfoNames = CoCodeManager.OSS_INFO_UPPER_NAMES;
@@ -2589,6 +2596,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		for (ProjectIdentification bean : list) {
 			int seq = 0;
 			urlSearchSeq = -1;
+
+			for(String url : packageManagerUrl) {
+				if (!isEmpty(bean.getHomepage()) && bean.getHomepage().contains(url)) {
+					bean.setDownloadLocation(bean.getHomepage());
+				}
+			}
 
 			if (isEmpty(bean.getDownloadLocation())) {
 				continue;
