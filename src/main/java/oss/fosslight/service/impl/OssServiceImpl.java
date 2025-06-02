@@ -2360,7 +2360,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
 				break;
 			case 7:
-				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
+				p = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
 				break;
 			case 8:
 				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
@@ -2437,7 +2437,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	private List<String> getAndroidPlatformList(){
 		List<String> list = new ArrayList<String>();
-		Connection conn = Jsoup.connect("https://android.googlesource.com/platform/");
+		Connection conn = Jsoup.connect("https://android.googlesource.com/");
 		try{
 			Document document = conn.get();
 			Elements parsingDiv = document.getElementsByClass("RepoList-itemName");
@@ -5166,7 +5166,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://pkg.go.dev/([^@]+)@?v?([^/]+))");
 				break;
 			case 16:
-				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
+				p = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
 				break;
 			case 17:
 				p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
