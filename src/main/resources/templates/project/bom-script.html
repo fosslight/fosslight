@@ -60,60 +60,64 @@ var bom_fn = {
 		
 		var bomList = $("#bomList");
 		var str = "";
-		arr = bomList.jqGrid('getDataIDs');
+		var arr = bomList.jqGrid('getDataIDs');
+		var rowData = new Array();
 		var gridData = new Array();
 		var checkGridData = new Array();
 		
- 		for(var i in arr){
+ 		for (var i in arr) {
+ 			rowData.push(bomList.getRowData(arr[i]));
+ 		}
+ 		
+ 		for (var i in rowData) {
+ 			let row = rowData[i];
  			// mergePreDiv 설정
- 			str = bomList.jqGrid('getCell',arr[i],'referenceDiv').split("/");
+ 			str = row["referenceDiv"].replace(/(<([^>]+)>)/ig, "").split(",");
  			
- 			if(str[0] =="3rd") {
- 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "10");
+ 			if (str[0] =="3rd") {
+ 				row["referenceDiv"] = "10";
 
- 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99") {
- 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "10");
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row['mergePreDiv'] = "10";
  				}
- 			} else if(str[0] =="SRC") {
- 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "11");
+ 			} else if (str[0] =="SRC") {
+ 				row["referenceDiv"] = "11";
 
- 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
- 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "11");
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row["mergePreDiv"] = "11";
  				}
- 			} else if(str[0] =="BIN") {
- 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "15");
+ 			} else if (str[0] =="BIN") {
+ 				row["referenceDiv"] = "15";
 
- 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
- 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "15");
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row["mergePreDiv"] = "15";
  				}
- 			} else if(str[0] =="DEP") {
-                bomList.jqGrid('setCell',arr[i],'referenceDiv', "16");
+ 			} else if (str[0] =="DEP") {
+ 				row["referenceDiv"] = "16";
 
-                if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
-                    bomList.jqGrid('setCell',arr[i],'mergePreDiv', "16");
-                }
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row["mergePreDiv"] = "16";
+ 				}
             }
  			
  			// obligationType 설정
- 			if (bomList.jqGrid('getCell',arr[i],'notify') == "Y") {
- 				if (bomList.jqGrid('getCell',arr[i],'source') == "Y") {
- 					bomList.jqGrid('setCell',arr[i],'obligationType', "11");
+ 			if ("Y" == row["notify"]) {
+ 				if ("Y" == row["source"]) {
+ 					row["obligationType"] = "11";
  				} else {
- 					bomList.jqGrid('setCell',arr[i],'obligationType', "10");
+ 					row["obligationType"] = "10";
  				}
  			} else {
- 				if (bomList.jqGrid('getCell',arr[i],'source') == "Y") {
- 					bomList.jqGrid('setCell',arr[i],'obligationType', "12");
+ 				if ("Y" == row["source"]) {
+ 					row["obligationType"] = "12";
  				} else {
- 					bomList.jqGrid('setCell',arr[i],'obligationType', "");
+ 					row["obligationType"] = "";
  				}
  			}
  			
- 			if(bomList.jqGrid('getCell',arr[i],'adminCheck') == "Y") {
- 				bomList.jqGrid('setCell',arr[i],'adminCheckYn', 'Y');
- 				
- 				var adminCheckData = bomList.getRowData(arr[i]);
- 				var data = adminCheckData["downloadLocation"];
+ 			if ("Y" == row["adminCheck"]) {
+ 				row["adminCheckYn"] = "Y";
+ 				var data = row["downloadLocation"];
  				
  				if (data.includes("http://") || data.includes("https://")) {
 					data = data.replace(/http/g, ",http");
@@ -126,11 +130,10 @@ var bom_fn = {
 				}
 				
 				data = data.substr(1);
-				bomList.jqGrid('setCell', arr[i], 'downloadLocation', data + "[Collectionofstoreddata]");
- 				
-		 		gridData.push(bomList.getRowData(arr[i]));
+				row["downloadLocation"] = data + "[Collectionofstoreddata]";
+		 		gridData.push(row);
 			} else {
-				checkGridData.push(bomList.getRowData(arr[i]));
+				checkGridData.push(row);
 			}
  		}
  		

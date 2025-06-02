@@ -1020,6 +1020,8 @@ var src_grid = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true};
 		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true};
+		colModelArr.push(colModelObj);
 		colModelObj = {name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
 						editoptions: {
 							dataInit:
@@ -1337,9 +1339,8 @@ var src_grid = {
 		srcList.jqGrid({
 			datatype: 'local',
 			data : srcMainData,
-			colNames: ['gridId', 'ID_KEY', 'ID', 'Source Name or Path', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location'
-			           ,'Homepage','LicenseId','Copyright Text'
-			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'Comment'],
+			colNames: ['gridId', 'ID_KEY', 'ID', 'Source Path', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location','Homepage','LicenseId'
+						,'Copyright Text','CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'Comment'],
 			colModel: colModelArr,
 			autoencode: true,
 			editurl:'clientArray',
