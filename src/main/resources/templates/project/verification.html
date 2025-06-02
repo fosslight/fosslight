@@ -259,6 +259,8 @@
 											<input type="hidden" id="allowDownloadSPDXYamlYn" name="allowDownloadSPDXYamlYn" th:value="${project.allowDownloadSPDXYamlYn}" />
 											<input type="hidden" id="isSimpleNotice" name="isSimpleNotice">
 											<input type="hidden" name="previewOnly" id="previewOnly" th:value="N"/>
+											<input type="hidden" name="noticeAppendType" id="noticeAppendType" th:value="${ossNotice?.noticeAppendType}"/>
+											<input type="hidden" name="noticeAppendFileId" th:value="${project.noticeAppendFileId}"/>
 											
 											<input type="hidden" class="form-control" id="defaultCompanyNameFull" th:value="${ossNotice?.defaultCompanyNameFull}"/>
 											<input type="hidden" class="form-control" id="defaultDistributionSiteUrl" th:value="${ossNotice?.defaultDistributionSiteUrl}"/>
@@ -319,11 +321,48 @@
                                                         <label for="append" class="custom-control-label" th:text="Append"></label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6 text-lg-gray text-bold">
-                                                    <p style="font-size: .8rem;" th:text="'* Select if there is something to add to the OSS Notice.'"></p>
-                                                    <div id ="editAppend">
-                                                    	<textarea id="editor2" row="3"></textarea>
+                                                <div class="col-md-6">
+                                                	<p class="text-lg-gray text-bold" style="font-size: .8rem;" th:text="'* Please use file upload for large text over 3,000 lines.'"></p>
+                                                    <div class="align-items-center">
+                                                    	<div class="icheck-primary d-flex-align">
+                                                    		<input type="radio" name="btnNoticeAppendType" id="btnNoticeAppendType1" value="E"/>
+                                                			<label class="font-normal" th:for="btnNoticeAppendType1" th:text="Editor"></label>
+                                                    	</div>
+                                                    	<div class="icheck-primary d-flex-align ml-3">
+                                                    		<input type="radio" name="btnNoticeAppendType" id="btnNoticeAppendType2" value="F"/>
+                                                			<label class="font-normal" th:for="btnNoticeAppendType2" th:text="|File Upload|"></label>
+                                                    	</div>
                                                     </div>
+                                                </div>
+                                            </div>
+                                            <div class="row my-4" id="editAppend" style="display: none;">
+                                            	<div class="col-md-2"></div>
+                                            	<div class="col-md-6 text-lg-gray text-bold">
+                                                    <p style="font-size: .8rem;" th:text="'* Select if there is something to add to the OSS Notice.'"></p>
+                                                    <div>
+                                                   		<textarea id="editor2" row="3"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row my-4" id="editAppendFile" style="display: none;">
+                                            	<div class="col-md-2"></div>
+                                            	<div class="col-md-3 noticeAppendFileUpload">
+                                                    <div id="noticeAppendFile"></div>
+                                                </div>
+                                                <div class="col-md-7 noticeAppendFileUploadArea" th:style="${noticeAppendFile != null} ? 'display: block;' : 'display: none;'">
+                                                	<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+	                                                	<ul class="pl-0 appendFileUpload">
+	                                                		<th:block th:if="${noticeAppendFile != null}">
+	                                                			<th:block th:each="appendFile : ${noticeAppendFile}">
+	                                                				<ll th:if="${appendFile.delYn eq 'N'}">
+			                                                			<a class="ajax-file-upload-filename" th:text="${appendFile.origNm}" th:href="@{'/download/' + ${appendFile.fileSeq} + '/' + ${appendFile.logiNm}}"></a>
+																		<span th:if="${project.verificationStatus != 'CONF'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="fn.deleteAppendFile(this, [[${appendFile.fileSeq}]])" th:text="X"></span>
+																		[[${appendFile.createdDate}]]
+			                                                		</ll><br>
+	                                                			</th:block>
+	                                                		</th:block>
+	                                                	</ul>
+                                                	</div>
                                                 </div>
                                             </div>
                                             <div class="row mt-3">

@@ -19,7 +19,6 @@
         var tempHandler = "";
         var distributionStatus = [[${project.distributionStatus}]];
         var deleteFileList = new Array();
-        var isAndroid = [[${project.androidFlag}]];
         var appendReadOnlyFlag = false;
         var activeTab = null;
         var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
@@ -34,7 +33,11 @@
             
             // 버튼 컨트롤
             fn.btnCtl(userRole, curIdenStatus);
-            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+		    	if (event.keyCode == "9") {
+		        	event.preventDefault();
+		       	}
+		  	});
             
             $("#list").jqGrid({
                 datatype: 'local',
@@ -48,7 +51,7 @@
                     {name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden: true},
                     {name: 'ossName', index: 'ossName', width: 150, align: 'left', editable: false},
                     {name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable: false},
-                    {name: 'downloadLocation', index: 'downloadLocation', width: 70, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, align: 'left', editable: false},
+                    {name: 'downloadLocation', index: 'downloadLocation', width: 70, formatter:fn_grid_com.displayDownloadlocation, unformatter:fn_grid_com.unformatter, align: 'left', editable: false},
                     {name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: 'link2', editable: false},
                     {name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable: false},
                     {name: 'filePath', index: 'filePath', width: 250, align: 'left', editable: true, formatter: fn.textBox, unformat: fn.unformatterTextBox},
@@ -61,7 +64,6 @@
                 gridview: true,
                 sortable: function (permutation) {
                 },
-                viewrecords: true,
                 sortorder: 'desc',
                 height: 'auto',
                 toppager: true,
@@ -90,19 +92,24 @@
                         
                         $("#list_toppager_left").append(appendHtml);
                     }
-                }
+                },
+           		gridComplete : function() {
+					updateGridRowCount('list', 'pager');
+				}
             });
             
             $('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "500px"});
             $("#list").jqGrid('navGrid', "#pager", {add: false, edit: false, del: false, search: false, refresh: false});
 
             if (typeof datas.ossList !== "undefined" && datas.ossList != null && datas.ossList.length < 1) {
-                $("[name='btnSavePath']").hide();
-                $(".packageSelect").prop("disabled", true);
-                
-                if (isAdmin && $("#div_approve")) {
-                    $("#div_approve").hide();
-                } else if (datas.ossList.length > 1) {
+            	if (datas.ossList.length < 1) {
+            		$("[name='btnSavePath']").hide();
+                    $(".packageSelect").prop("disabled", true);
+                    
+                    if (isAdmin && $("#div_approve")) {
+                        $("#div_approve").hide();
+                    }
+            	} else if (datas.ossList.length > 1) {
             		if ($(".warningPop").length > 0 && "CONF" != curIdenStatus
                             && (!$('input[name=fileSeq_1]') || $('input[name=fileSeq_1]').val() == "")) {
                         	
@@ -172,11 +179,12 @@
     				alertify.alert([[#{msg.project.verification.confirm.package}]], function(){
     					$("#tabMenuNotice").click();
     					activeTab = "1";
-    					if ('CONF' == curIdenStatus) $("#save").hide();
+    					if ('CONF' == curIdenStatus) {
+    						$("#save").hide();
+    					}
     				});
-    			} else if("Notice" == tabId && isAndroid == "Y") {
-    				$("#tabMenuPackaging").click();
-    				fn.saveOrGetNotice('previewOnly');
+    			} else if ("Notice" == tabId) {
+    				activeTab = "1";
     			}
         		
         		if ("Packaging" == tabId) {
@@ -231,26 +239,7 @@
                 } else {
                     $("input[name=withoutVerifyYn]").val("N");
                 }
-/*
-                if ($("[name='fileSeq_1']").val()) {
-                    $("#fileUplWarnMessage_1").hide();
-                } else {
-                    $("#fileUplWarnMessage_1").show();
-                }
 
-                if ($("[name='fileSeq_2']").val()) {
-                    $("#fileUplWarnMessage_2").hide();
-                } else {
-                    $("#fileUplWarnMessage_2").show();
-                }
-
-                if ($("[name='fileSeq_3']").val()) {
-                    $("#fileUplWarnMessage_3").hide();
-                } else {
-                    $("#fileUplWarnMessage_3").show();
-                }
-*/
-                fn.appendEditVisible($("#append"));
                 fn.initNotice();
                 fn.initNoticeFileFormat();
 
@@ -483,6 +472,36 @@
                     },
                 });
                 
+                $('#noticeAppendFile').uploadFile({
+                	url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=6&fileId='+$('input[name=noticeAppendFileId]').val()+'&permission=' + [[${project.statusPermission}]],
+                    multiple: false,
+                    dragDrop: true,
+                    fileName: 'myfile',
+                    onSuccess: function (e, data) {
+                        var result = jQuery.parseJSON(data);
+                        
+                        if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
+                        	result.forEach(function (item) {
+                                var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
+                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteAppendFile(this,\'' + item[0].registSeq + '\')">X</span>' + item[0].createdDate + '</li>';
+
+                                $('.appendFileUpload').append(uploadFileTag);
+                                $('input[name=noticeAppendFileId]').val(item[0].registFileId);
+                                $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                $('.ajax-file-upload-statusbar').remove();
+                                $(".ajax-file-upload-container").show();
+    						});
+    						
+    						$(".noticeAppendFileUploadArea").show();
+                        } else {
+                        	$('.ajax-file-upload-statusbar').fadeOut('slow');
+    						$('.ajax-file-upload-statusbar').remove();
+    						alertify.alert(result[1], function () { });
+                        }
+                    },
+                });
+                
                 $("#btnChangePathCancel").click(function () {
                     $("#changePathPop").hide();
                     $("#blind_wrap").hide();
@@ -645,9 +664,8 @@
                					editorVal = "";
                				}
             				$("input[name='userComment']").val(editorVal);
-                        })
-                        .set('onshow', function(e){
-                        	if ($("#append").prop("checked")) {
+            				
+            				if ($("#append").prop("checked")) {
          						$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
          						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                             }
@@ -705,6 +723,17 @@
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 }
                             }).submit();
+                        })
+                        .set('onshow', function(e){
+                        	$("#verConfirmEditor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        	const parameter = {
+                               	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]],
+                               	"referenceId" : [[${project.prjId}]]
+                          	}
+                            var draftUserComment = draftUserComments(parameter);
+                            if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+                               	$("#verConfirmEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+                            }
                         })
                         .set('title', 'Confirm').setContent(innerHtml)
 						.show();
@@ -802,7 +831,8 @@
                             , "verificationStatus": "REV"
                             , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
                             , "userComment": [[${project.userComment}]]
-                            , "referenceDiv": "12"
+                            , "referenceDiv": [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]]
+                        	, "editNoticeYn": $("#editNoticeYn").val()
                             , "noticeFileFormat": datas.noticeFileFormat
                             , "withoutVerifyYn" : $("input[name='withoutVerifyYn']").val()
                         };
@@ -1051,6 +1081,55 @@
                     });
                 });
                 
+                $('#send_5').on('click', function () {
+                    var wgetUrl = $("#sendWgetUrl_5").val();
+                    var obj = {
+                        prjId: [[${project.prjId}]],
+                        wgetUrl: wgetUrl
+                    };
+
+                    $.ajax({
+                        url: '/project/verification/wgetUrl',
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        cache: false,
+                        data: JSON.stringify(obj),
+                        success: function (json) {
+                            var result = JSON.parse(json);
+                            var resultCode = result[0][0].wgetResult;
+
+                            if (resultCode == 0) {
+                                result.forEach(function (item) {
+                                	var appendHtml = '<br>' + item[0].createdDate;
+                                    var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                    var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
+                                    uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
+
+                                    $('.uploadList_5 ul').append(uploadFileTag);
+                                    $('input[name=fileSeq_5]').val(item[0].registSeq);
+                                    $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                    $('.ajax-file-upload-statusbar').remove();
+                                    $("#wgetUrl_5").hide();
+                                });
+
+                                $('.verifyFile_5').hide();
+                                $("#uploadRemove_5").hide();
+                                $("#sendWgetUrl_5").val("");
+                                
+                                if (!$('.uploadList_5').is("visible")) {
+                                	$('.uploadList_5').show();
+                                }
+                            } else {
+                                alertify.error([[#{msg.common.valid2}]], 0);
+                            }
+                        },
+                        error: function (data) {
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        }
+                    });
+                });
+                
                 // [Pakage Document Download START]
                 $('#packageDocDownload').click(function (e) {
                     var type = $('#docType option:selected').val();
@@ -1168,9 +1247,34 @@
                 $("#append").click(function (e) {
                     var checked = $(this).prop("checked");
                     $("#editAppendedYn").val(checked ? "Y" : "N");
-                    fn.appendEditVisible(this);
+                    var appendType = $("#noticeAppendType").val();
+                    if (!checked) {
+                    	$("[name='btnNoticeAppendType']").prop("checked", false);
+                    	fn.appendEditVisible(this);
+                    	
+                    	var cVal = $("[name='btnNoticeAppendType']:checked").val();
+                		$("#noticeAppendType").val(cVal);
+                		fn.customAppendEditVisible(true, cVal);
+                    } else {
+                    	var radioChecked = $("[name='btnNoticeAppendType']").prop("checked");
+                    	if (!radioChecked) {
+                    		if ("" == appendType || "E" == appendType) {
+                    			$("#btnNoticeAppendType1").trigger("click");
+                    		} else if ("F" == appendType) {
+                    			$("#btnNoticeAppendType2").trigger("click");
+                    		}
+                    	}
+                    }
                 });
 
+                $("[name='btnNoticeAppendType']").change(function (e) {
+                	if ($("#append").prop("checked", true)) {
+                		var cVal = $("[name='btnNoticeAppendType']:checked").val();
+                		$("#noticeAppendType").val(cVal);
+                		fn.customAppendEditVisible(false, cVal);
+                	}
+                });
+                
                 $("[name='btnEditOssNotice']").change(function (e) {
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     $("#editNoticeYn").val(checked ? "Y" : "N");
@@ -1760,7 +1864,9 @@
                         for (var i in arr) {
                             target.jqGrid('editRow', arr[i], true);
                             var _path = $("#" + arr[i] + "_filePath").val();
-                        	if ("undefined/" == _path) $("#" + arr[i] + "_filePath").val("");
+                        	if ("undefined/" == _path) {
+                        		$("#" + arr[i] + "_filePath").val("");
+                        	}
                         }
 
                         if (Object.keys(pathValidMsg).length !== 0) {
@@ -2124,12 +2230,15 @@
                         tempHandler = ""; // temp clear
                     } else {
                     	var _iframeUrl = "/project/verification/";
-                    	if (activeTab != null) _iframeUrl += "1/";
+                    	if (activeTab != null) {
+                    		_iframeUrl += "1/";
+                    	}
                     	_iframeUrl += [[${project.prjId}]];
                     	
                         alertify.alert([[#{msg.common.success}]], function () {
                         	activeDeleteTabInFrame();
 							createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
+							reloadTabInframe("/project/list");
                         });
                     }
                 }
@@ -2580,8 +2689,10 @@
 					$("#editAppendedYn").val("Y");
                 	
                 	if ("" != $("#append").prop("checked")) {
-                		$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
-     					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+                		if ("E" == $("#noticeAppendType").val()) {
+                			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+         					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+                		}
                 	}
                 } else {
                 	$("#editAppendedYn").val("N");
@@ -2649,10 +2760,15 @@
                             alertify.error([[#{msg.common.valid2}]], 0);
                         } else {
                             alertify.success([[#{msg.project.sent.comments.success}]]);
-                            $("#modifiedCommentInPjtEditor").summernote('code', '');
+                            $("#modifiedCommentInPjtEditor").summernote('code', '<p></p>');
                             $("#userContents").val('');
                             $('.ajs-close').trigger("click");
                             fn_comment.getCommentList(commentsParam);
+                            
+                            if (_popupComment == null || _popupComment.closed) {
+                            } else {
+                            	_popupComment.callbackFunction();
+                            }
                         }
                     },
                     error: function () {
@@ -2683,7 +2799,7 @@
                             alertify.success([[#{msg.common.success}]]);
                         }
                         $("#userContents").val(editorVal);
-                        editDailog.close();
+                        $('.ajs-close').trigger("click");
                     },
                     error: function () {
                         alertify.error([[#{msg.common.valid2}]], 0);
@@ -3060,10 +3176,30 @@
                 var checked = $(target).prop("checked");
 
                 if (checked || "CONF" == curIdenStatus) {
-                    $("#editAppend").show();
+                	if ("E" == noticeAppendType) {
+            			$("#btnNoticeAppendType1").trigger("click");
+            		} else {
+            			$("#btnNoticeAppendType2").trigger("click");
+            		}
                 } else {
-                    $("#editAppend").hide();
+                	 $("#editAppend").hide();
+                     $('#editor2').summernote('disable');
                 }
+            },
+            customAppendEditVisible : function (hideFlag, flag) {
+            	if ("E" == flag) {
+            		$("#editAppendFile").hide();
+            		$("#editAppend").show();
+                    $('#editor2').summernote('enable');
+            	} else {
+            		$("#editAppend").hide();
+                    $('#editor2').summernote('disable');
+                    $("#editAppendFile").show();
+            	}
+            	if (hideFlag) {
+            		$("#editAppend").hide();
+            		$("#editAppendFile").hide();
+            	}
             },
             changeNotice : function (checked) {
             	let isHideOssVersion = $("#hideOssVersion").prop("checked");
@@ -3113,6 +3249,7 @@
                     $("#email").attr("disabled", !checked);
                     $("#hideOssVersion").attr("disabled", !checked);
                     $("#append").attr("disabled", !checked);
+                    $("input[name='btnNoticeAppendType']").attr("disabled", !checked);
 					$("#noticeFileFormat").attr("disabled", !checked);
                     $("#fileFormatLabel").attr("style", "color: #212529;");
                     $(".select2-selection__choice").attr("style", "border-color: #006fe6; background-color: #007bff;");
@@ -3144,6 +3281,7 @@
                     $("#email").attr("disabled", !checked);
                     $("#hideOssVersion").attr("disabled", !checked);
                     $("#append").attr("disabled", !checked);
+                    $("input[name='btnNoticeAppendType']").attr("disabled", !checked);
                     $("#noticeFileFormat").attr("disabled", !checked);
                     $("#fileFormatLabel").attr("style", "color: #6c757d;");
                     $(".select2-selection__choice").attr("style", "border-color: #6c757d; background-color: #6c757d;");
@@ -3174,6 +3312,7 @@
                     var editEmailYn = $("#email").val();
                     var hideOssVersionYn = $("#hideOssVersion").val();
                     var editAppendedYn = $("#append").val();
+                    var noticeAppendType = $("#noticeAppendType").val();
 
                     if (editCompanyYn == "Y") {
                     	$("#companyName").trigger("click").attr("checked", true);
@@ -3191,16 +3330,38 @@
                     var btn_Save = $("#save");
                     
                     var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+                    
+                    if (editNoticeYn == "Y") {
+                        $("[name='btnEditOssNotice']").attr("checked", true);
+                        
+                    	if (hideOssVersionYn == "Y") {
+                            $("#hideOssVersion").trigger("click").attr("checked", true);
+                        }
 
+                        if (editAppendedYn == "Y") {
+                            $("#append").trigger("click").attr("checked", true);
+                            
+                            if (!appendReadOnlyFlag) {
+                            	$('#editor2').summernote('enable');
+                            }
+                            
+                            if ("F" == noticeAppendType) {
+                            	$("#btnNoticeAppendType2").trigger("click");
+                            } else {
+                            	$("#btnNoticeAppendType1").trigger("click");
+                            }
+                        }
+                    }
+                    
                     if (userRole == "ROLE_ADMIN") { // 관리자 권한 일 경우
                         switch (curIdenStatus) {
                             case "CONF":
                                 btn_Save.hide();
-                                $("[name='btnEditOssNotice']").attr("disabled", true)
+                                $("[name='btnEditOssNotice']").attr("disabled", true);
                                 fn.defaultNotice(false, "init");
 
                                 break;
-                            default:
+                            default:console.log(checked);
                               	if ("notice" == targetId) btn_Save.show();
                                 fn.defaultNotice(checked, "init");
 
@@ -3216,26 +3377,10 @@
                                 break;
                             default:
                                 btn_Save.hide();
-                                $("[name='btnEditOssNotice']").attr("disabled", true)
+                                $("[name='btnEditOssNotice']").attr("disabled", true);
                                 fn.defaultNotice(false, "init");
 
                                 break;
-                        }
-                    }
-
-                    if (editNoticeYn == "Y") {
-                    	$("[name='btnEditOssNotice']").attr("checked", true);
-                        
-                        if (hideOssVersionYn == "Y") {
-                            $("#hideOssVersion").trigger("click").attr("checked", true);
-                        }
-
-                        if (editAppendedYn == "Y") {
-                            $("#append").trigger("click").attr("checked", true);
-                            
-                            if (!appendReadOnlyFlag) {
-                            	$('#editor2').summernote('enable');
-                            }
                         }
                     }
                 }, 1);
@@ -3394,7 +3539,9 @@
                         $("#uploadAdd_" + targetSeq).show();
                         $("#uploadRemove_" + targetSeq).hide();
                         $("#projectSearch_" + targetSeq).hide();
-                        if (!$(".uploadList_" + targetSeq).is("visible")) $(".uploadList_" + targetSeq).show();
+                        if (!$(".uploadList_" + targetSeq).is("visible")) {
+                        	$(".uploadList_" + targetSeq).show();
+                        }
 						
                         verified = false;
                         evt.uploadStatus = true;
@@ -3407,7 +3554,7 @@
             },
             // Grid input cell button
             textBox: function (cellvalue, options, rowObject) {
-                if (!!rowObject.filePath || "Y" == isAndroid) {
+                if (!!rowObject.filePath) {
                     return rowObject.filePath;
                 } else {
                 	var textBox = "";
@@ -3693,6 +3840,25 @@
             	$("#changePathPop").attr("style", "display: flex");
             	$("#blind_wrap").show();
             },
+            deleteAppendFile : function (target, fileSeq) {
+            	var data = {"prjId" : [[${project.prjId}]], "delFileSeq" : fileSeq, "gubn" : "NAF"};
+    			$.ajax({
+    				url : '/project/verification/deleteFile',
+    				type : 'POST',
+    				data : JSON.stringify(data),
+    				dataType : 'json',
+    				cache : false,
+    				contentType : 'application/json',
+    				success: function(data){
+    					if('true' == data.isValid) {
+    						$(target).parent().remove();
+    					}
+    				},
+    				error: function(data){
+    					alertify.error([[#{msg.common.valid2}]], 0);
+    				}
+    			});
+            },
             initNoticeAppendInfo : function() {
             	$.ajax({
     				url : '/project/verification/getNoticeAppendInfo/' + [[${project.prjId}]],
@@ -3792,6 +3958,8 @@
                 var fileSeq_1 = $("[name='fileSeq_1']").val();
                 var fileSeq_2 = $("[name='fileSeq_2']").val();
                 var fileSeq_3 = $("[name='fileSeq_3']").val();
+                var fileSeq_4 = $("[name='fileSeq_4']").val();
+                var fileSeq_5 = $("[name='fileSeq_5']").val();
 
                 $(".multiSet > div:eq(0)").show();
 
