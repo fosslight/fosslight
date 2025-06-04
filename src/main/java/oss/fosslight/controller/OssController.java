@@ -1917,11 +1917,12 @@ public class OssController extends CoTopComponent{
 					param.setOssCommonId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssCommonId());
 					param.setOssName(oa.getOssName());
 					param.setOssVersion(oa.getOssVersion());
-					
-					OssMaster om = ossService.getOssMasterOne(param);
-					oa.setIncludeCpes(om.getIncludeCpes());
-					oa.setExcludeCpes(om.getExcludeCpes());
-					oa.setOssVersionAliases(om.getOssVersionAliases());
+					param.setOssVersionAliases(CoCodeManager.OSS_INFO_UPPER.get(key).getOssVersionAliases());
+				}
+				OssMaster ossBean = ossService.getOssInfo(null, oa.getOssName(), true);
+				if (ossBean != null) {
+					oa.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+					oa.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
 				}
 			}
 			
