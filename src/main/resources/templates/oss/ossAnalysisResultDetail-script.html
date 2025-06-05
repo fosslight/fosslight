@@ -147,19 +147,46 @@ var Ctrl_fn = {
 
 		if (typeof selectData.includeCpes !== "undefined") {
 			selectData.includeCpes.forEach(function(includeCpe){
-				
+				if ('' != includeCpe) {
+					let includeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
+					includeCpeHtml 			+= 		'<div class="form-group mb-0">';
+					includeCpeHtml 			+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'">';
+					includeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+					includeCpeHtml 			+=		'</div>';
+					includeCpeHtml 			+= 	'</div>';
+					
+					$(".multiTxtIncludeCpe" + seq).append(includeCpeHtml);
+				}
 			});
 		}
 		
 		if (typeof selectData.excludeCpes !== "undefined") {
 			selectData.excludeCpes.forEach(function(excludeCpe){
-				
+				if ('' != excludeCpe) {
+					let excludeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
+					excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
+					excludeCpeHtml 			+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'">';
+					excludeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+					excludeCpeHtml 			+=		'</div>';
+					excludeCpeHtml 			+= 	'</div>';
+					
+					$(".multiTxtExcludeCpe" + seq).append(excludeCpeHtml);
+				}
 			});
 		}
 		
 		if (typeof selectData.ossVersionAliases !== "undefined") {
 			selectData.ossVersionAliases.forEach(function(versionAlias){
-				
+				if ('' != versionAlias) {
+					let ossVersionAliasHtml 	= 	'<div class="col-md-12 mt-1">';
+					ossVersionAliasHtml 		+= 		'<div class="form-group mb-0">';
+					ossVersionAliasHtml 		+=			'<input class="form-control" name="ossVersionAliases" type="text" value="'+versionAlias+'">';
+					ossVersionAliasHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+					ossVersionAliasHtml 		+=		'</div>';
+					ossVersionAliasHtml 		+= 	'</div>';
+					
+					$(".multiTxtVersionAlias" + seq).append(ossVersionAliasHtml);
+				}
 			});
 		}
 		
