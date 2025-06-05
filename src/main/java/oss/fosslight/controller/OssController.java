@@ -1984,6 +1984,11 @@ public class OssController extends CoTopComponent{
 		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase());
 		if (isNewVersion) {
 			resultData.setExistOssNickNames(ossService.getOssNickNameListByOssName(resultData.getOssName()));
+			OssMaster ossBean = ossService.getOssInfo(null, analysisBean.getOssName(), true);
+			if (ossBean != null) {
+				resultData.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+				resultData.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+			}
 		}
 		
 		resultData.setGridId(analysisBean.getGridId());
