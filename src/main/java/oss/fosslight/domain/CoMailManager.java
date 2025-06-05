@@ -53,10 +53,7 @@ import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.ProjectService;
-import oss.fosslight.util.DateUtil;
-import oss.fosslight.util.FileUtil;
-import oss.fosslight.util.PdfUtil;
-import oss.fosslight.util.StringUtil;
+import oss.fosslight.util.*;
 
 /**
  * The Class CoMailManager.
@@ -3942,7 +3939,6 @@ public class CoMailManager extends CoTopComponent {
 					Map<String, Object> fileInfo = PdfUtil.getInstance().getPdfFilePath(coMail.getParamPrjId());
 					String fileName = (String) fileInfo.get("fileName");
 					String filePath = (String) fileInfo.get("filePath");
-					log.debug("filepath: " + fileInfo.get("filePath"));
 					DataSource dataSource = new FileDataSource(filePath);
 					helper.addAttachment(new String(fileName.getBytes("UTF-8"),"UTF-8"), dataSource);
 				}catch(Exception e){
@@ -3986,6 +3982,36 @@ public class CoMailManager extends CoTopComponent {
 				if(file.exists()) {
 					DataSource dataSource = new FileDataSource(banned);
 					helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+				}
+			}
+
+
+
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType()) ||
+					CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {
+				String type = "";
+				String id = "";
+				if (CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType())) {
+					type = "bom";
+					id = coMail.getParamPrjId();
+				} else if (CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {
+					type = "partnerBomList";
+					id = coMail.getParamPartnerId();
+				}
+
+				String downloadId = "";
+				downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, id, CommonFunction.emptyCheckProperty("export.template.path", "/template"));
+				if (!isEmpty(downloadId)) {
+					T2File fileInfo = fileService.selectFileInfo(downloadId);
+					String filePath = fileInfo.getLogiPath();
+
+					if (!filePath.endsWith("/")) {
+						filePath += "/";
+					}
+
+					filePath += fileInfo.getLogiNm();
+					DataSource dataSource = new FileDataSource(filePath);
+					helper.addAttachment(new String(fileInfo.getOrigNm().getBytes("UTF-8"), "UTF-8"), dataSource);
 				}
 			}
 
