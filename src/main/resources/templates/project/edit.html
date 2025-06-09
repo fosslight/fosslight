@@ -156,7 +156,7 @@
                                         <label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>
                                     	<select class="form-control select2" id="osType" name="osType" style="width: 100%;" th:disabled="${isReadOnly}">
                                    			<option value="" th:text="''"></option>
-                                   			<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
+                                   			<th:block th:each="option : ${@CoCodeManager.getCodeDtlsRegardlessUseYn(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
                                         		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.osType != null && option.cdDtlNo == project.osType}"></option>
                                        		</th:block>
                                     	</select>

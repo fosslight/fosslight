@@ -2385,8 +2385,14 @@
 				if(data.detail.osType == osTypeEtc){
 					$('#osTypeEtc').attr("disabled",false);
 					$('#osTypeEtc').val(data.detail.osTypeEtc);
+					$("#osTypeEtc").parent().show();
 				}
-				
+				if ($("#osType").find("option:selected").length == 0) {
+					$("#osType").val(osTypeEtc).prop("selected", true);
+					$('#osTypeEtc').attr("disabled",false);
+					$('#osTypeEtc').val("기타(ETC)");
+					$("#osTypeEtc").parent().show();
+				}
 				// 참조코드값이 삭제된 경우, change 이벤트 에서 val가 null로 등록되기 때문에 default로 다시 선택해준다.
 				if($('select[name=osType]').val() == null) {
 					$('select[name=osType]').val("").trigger('change');
