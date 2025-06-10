@@ -861,10 +861,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		for (Map<String, Object> map : list) {
 			Map<String, Object> modelMap = new HashMap<String, Object>();
 			String prjId = (String) map.get("prjId").toString();
+			String distributionName = (String) map.get("distributionName");
 			List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(prjId);
 			
 			modelMap.put("prjId", prjId);
 			modelMap.put("modelList", modelList);
+			modelMap.put("distributionName", distributionName);
 			contents.add(modelMap);
 		}
 		
