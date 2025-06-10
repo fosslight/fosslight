@@ -3,6 +3,9 @@
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
 var totalRow = 0;
+var compareData;
+var beforeParInfo;
+var afterParInfo;
 
 $(document).ready(function () {
 	$("#beforePartnerId").val([[${beforePartnerId}]]);
@@ -29,10 +32,20 @@ var evt = {
 		$('#search').click(function(){
 			bomCompareList.search();
 		});
+		
+		$('#change').click(function(){
+			fn.changeParameter();
+		});
 	}
 };
 
 var fn = {
+	changeParameter : function() {
+		let beforePartnerId = $("#beforePartnerId").val();
+		let afterPartnerId = $("#afterPartnerId").val();
+		$("#beforePartnerId").val(afterPartnerId);
+		$("#afterPartnerId").val(beforePartnerId);
+	},
 	// excel download function
 	downloadExcel : function(){
 		var bfPrjId = $("#beforePartnerId").val();
@@ -75,11 +88,11 @@ var fn = {
 };
 
 var setGrid = {
-	load: function(data){
+	load: function(){
 		//그리드 생성
 		$('#list').jqGrid({
 			datatype: 'local'
-			, data: data 
+			, data: compareData 
 			, colNames: ['Status', 'OSS_Before', 'License_Before', 'OSS_After', 'License_After']
 			, colModel: [
 				{name: 'status', index: 'status', width: 100, allign: 'center'},
@@ -96,7 +109,21 @@ var setGrid = {
 			, rowNum : 15
 			, rowList : [15, 30, 50]
 			, loadonce : true // reload 여부, true 로 설정하면 한번만 데이터를 받아오고 그 다음부터는 데이터를 받아오지 않는다
-			, gridComplete : function() { updateGridRowCount('list', 'pager'); }
+			, gridComplete : function() {
+				updateGridRowCount('list', 'pager');
+				
+				if (typeof beforeParInfo !== "undefined" && typeof afterParInfo !== "undefined") {
+					$('#list').jqGrid('setGroupHeaders', {
+						useColSpanStyle: true,
+						groupHeaders: [
+							{startColumnName:'beforeossname', numberOfColumns: 2, titleText: beforeParInfo},
+							{startColumnName:'afterossname', numberOfColumns: 2, titleText: afterParInfo}
+						]
+					});
+					
+					$('th[role="columnheader"]').css("padding", "12px 0");
+				}
+			}
 		});
 		
 		if ($("#list_toppager_left").find('button').length == 0) {
@@ -124,15 +151,23 @@ var bomCompareList = {
 				, success : function (data){
 					loading.hide();
 					
+					if (typeof data.resultData.beforeParInfo !== "undefined") {
+						beforeParInfo = data.resultData.beforeParInfo;
+					}
+					if (typeof data.resultData.afterParInfo !== "undefined") {
+						afterParInfo = data.resultData.afterParInfo;
+					}
+					
 					var isValid = data.isValid;
 					
 					if (isValid == "true"){
 						var contents = data.resultData.contents;
 						var validMsg = data.validMsg;
 						
-						$("#list").clearGridData();
-						$("#list").jqGrid('setGridParam', {data: contents}).trigger('reloadGrid');
-
+						$("#list").jqGrid('GridUnload');
+						compareData = contents;
+						setGrid.load();
+						
 						totalRow = contents.length;
 					}else{
 						$("#list").clearGridData();

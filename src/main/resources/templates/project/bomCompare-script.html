@@ -3,6 +3,9 @@
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
 var totalRow = 0;
+var compareData;
+var beforePrjInfo;
+var afterPrjInfo;
 
 $(document).ready(function () {
 	$("#beforePrjId").val([[${beforePrjId}]]);
@@ -29,10 +32,20 @@ var evt = {
 		$('#search').click(function(){
 			bomCompareList.search();
 		});
+		
+		$('#change').click(function(){
+			fn.changeParameter();
+		});
 	}
 };
 
 var fn = {
+	changeParameter : function() {
+		let beforePrjId = $("#beforePrjId").val();
+		let afterPrjId = $("#afterPrjId").val();
+		$("#beforePrjId").val(afterPrjId);
+		$("#afterPrjId").val(beforePrjId);
+	},
 	// excel download function
 	downloadExcel : function(){
 		var bfPrjId = $("#beforePrjId").val();
@@ -75,11 +88,11 @@ var fn = {
 };
 
 var setGrid = {
-	load: function(data){
+	load: function(){
 		//그리드 생성
 		$('#list').jqGrid({
 			datatype: 'local'
-			, data: data 
+			, data: compareData 
 			, colNames: ['Status', 'OSS_Before', 'License_Before', 'OSS_After', 'License_After']
 			, colModel: [
 				{name: 'status', index: 'status', width: 100, allign: 'center'},
@@ -96,7 +109,21 @@ var setGrid = {
 			, rowNum : 15
 			, rowList : [15, 30, 50]
 			, loadonce : true // reload 여부, true 로 설정하면 한번만 데이터를 받아오고 그 다음부터는 데이터를 받아오지 않는다
-			, gridComplete : function() { updateGridRowCount('list', 'pager'); }
+			, gridComplete : function() {
+				updateGridRowCount('list', 'pager');
+				
+				if (typeof beforePrjInfo !== "undefined" && typeof afterPrjInfo !== "undefined") {
+					$('#list').jqGrid('setGroupHeaders', {
+						useColSpanStyle: true,
+						groupHeaders: [
+							{startColumnName:'beforeossname', numberOfColumns: 2, titleText: beforePrjInfo},
+							{startColumnName:'afterossname', numberOfColumns: 2, titleText: afterPrjInfo}
+						]
+					});
+					
+					$('th[role="columnheader"]').css("padding", "12px 0");
+				}
+			}
 		});
 		
 		if ($("#list_toppager_left").find('button').length == 0) {
@@ -124,18 +151,26 @@ var bomCompareList = {
 				, success : function (data){
 					loading.hide();
 					
+					if (typeof data.resultData.beforePrjInfo !== "undefined") {
+						beforePrjInfo = data.resultData.beforePrjInfo;
+					}
+					if (typeof data.resultData.afterPrjInfo !== "undefined") {
+						afterPrjInfo = data.resultData.afterPrjInfo;
+					}
+					
 					var isValid = data.isValid;
 					
 					if (isValid == "true"){
 						var contents = data.resultData.contents;
 						var validMsg = data.validMsg;
 						
-						$("#list").clearGridData();
-						$("#list").jqGrid('setGridParam', {data: contents}).trigger('reloadGrid');
+						$("#list").jqGrid('GridUnload');
+						compareData = contents;
+						setGrid.load();
 
 						totalRow = contents.length;
-					}else{
-						$("#list").clearGridData();
+					} else {
+						$("#list").jqGrid('clearGridData');
 					}
 				}
 			});

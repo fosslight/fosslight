@@ -2018,6 +2018,25 @@ public class PartnerController extends CoTopComponent{
 				return makeJsonResponseHeader(false, "1");
 			}
 			
+			PartnerMaster partnerInfo = new PartnerMaster();
+			partnerInfo.setPartnerId(beforePartnerId);
+			partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+			
+			String beforeParInfoString = beforePartnerId + " - " + partnerInfo.getSoftwareName();
+			if (!isEmpty(partnerInfo.getSoftwareVersion())) {
+				beforeParInfoString += " (" + partnerInfo.getSoftwareVersion() + ")";
+			}
+			
+			partnerInfo.setPartnerId(afterPartnerId);
+			partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+			
+			String afterParInfoString = afterPartnerId + " - " + partnerInfo.getSoftwareName();
+			if (!isEmpty(partnerInfo.getSoftwareVersion())) {
+				afterParInfoString += " (" + partnerInfo.getSoftwareVersion() + ")";
+			}
+			
+			resultMap.put("beforeParInfo", beforeParInfoString);
+			resultMap.put("afterParInfo", afterParInfoString);
 			resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList, "list"));
 			return makeJsonResponseHeader(true, "0" , resultMap);
 		} catch (Exception e) {
