@@ -235,4 +235,6 @@ public interface ProjectService extends HistoryConfig{
 	public Map<String, Object> changeProjectStatus(Project project);
 
 	public void copyOssComponentList(Project project, boolean isBom);
+
+	public Map<String, Object> getDependencyTreeList(List<ProjectIdentification> ossComponents);
 }

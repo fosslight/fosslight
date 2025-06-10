@@ -5488,4 +5488,16 @@ public class ProjectController extends CoTopComponent {
 		
 		return makeJsonResponseHeader(rtnMap);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value=PROJECT.DEPENDENCY_TREE_POPUP)
+	public String dependencyTreePopup(@RequestParam Map<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
+		String mainDataString = (String) map.get("rows");
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
+		ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType);
+		Map<String, Object> dependencyTreeMap = projectService.getDependencyTreeList(ossComponents);
+		model.addAttribute("dependencyTreeMap", dependencyTreeMap);
+		return "project/fragments/dependencyTreePopup";
+	}
 }

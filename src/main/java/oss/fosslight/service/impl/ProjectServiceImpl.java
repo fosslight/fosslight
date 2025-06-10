@@ -19,9 +19,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -62,6 +64,7 @@ import oss.fosslight.domain.OssNotice;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.ProjectIdentificationTree;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
@@ -8299,5 +8302,99 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		resultMap.put("resCd", resCd);
 		return resultMap;
+	}
+
+	@Override
+	public Map<String, Object> getDependencyTreeList(List<ProjectIdentification> ossComponents) {
+		List<ProjectIdentificationTree> rtnDepTreeList = new LinkedList<>();
+		List<ProjectIdentificationTree> depTreeList = new ArrayList<>();
+		Map<String, String> packageUrlInfo = new HashMap<>();
+		
+		int length = 8;
+		String treeId = "";
+		String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		Random random = new Random();
+		StringBuilder sb = new StringBuilder();
+		
+		for (ProjectIdentification bean : ossComponents) {
+			if (!isEmpty(bean.getPackageUrl())) {
+				packageUrlInfo.put(bean.getPackageUrl(), !isEmpty(bean.getDependencies()) ? bean.getDependencies() : "");
+			}
+		}
+		
+		int level = 0;
+		for (ProjectIdentification bean : ossComponents) {
+			if (!isEmpty(bean.getPackageUrl())) {
+				for (int i = 0; i < length; i++) {
+					int index = random.nextInt(characters.length());
+					sb.append(characters.charAt(index));        
+				}
+				treeId = sb.toString();
+				sb = new StringBuilder();
+				
+				String dependencies = !isEmpty(bean.getDependencies()) ? bean.getDependencies() : "";
+				ProjectIdentificationTree tree = new ProjectIdentificationTree(treeId, "", String.valueOf(level), bean.getPackageUrl(), !isEmpty(bean.getDependencies()) ? bean.getDependencies() : "", avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
+				if (!isEmpty(dependencies)) {
+					depTreeList.add(tree);
+				}
+				rtnDepTreeList.add(tree);
+			}
+		}
+		
+		collectDependencyTreeData(level, depTreeList, rtnDepTreeList, packageUrlInfo);
+		Map<String, Object> rtnDepTreeMap = generateDependencyTreeMap(rtnDepTreeList);
+		return rtnDepTreeMap;
+	}
+
+	private void collectDependencyTreeData(int level, List<ProjectIdentificationTree> depTreeList, List<ProjectIdentificationTree> rtnDepTreeList, Map<String, String> packageUrlInfo) {
+		int lvl = level+1;
+		int length = 8;
+		String treeId = "";
+		String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		Random random = new Random();
+		StringBuilder sb = new StringBuilder();
+		List<ProjectIdentificationTree> addDepTreeList = new ArrayList<>();
+		
+		for (ProjectIdentificationTree depTree : depTreeList) {
+			if (!isEmpty(depTree.getDependencies())) {
+				for (String packageUrl : depTree.getDependencies().split(",")) {
+					for (int i = 0; i < length; i++) {
+						int index = random.nextInt(characters.length());
+						sb.append(characters.charAt(index));        
+					}
+					treeId = sb.toString();
+					sb = new StringBuilder();
+					
+					String dependencies = !isEmpty(packageUrlInfo.get(packageUrl)) ? packageUrlInfo.get(packageUrl) : ""; 
+					ProjectIdentificationTree tree = new ProjectIdentificationTree(treeId, depTree.getTreeId(), String.valueOf(lvl), packageUrl, dependencies, depTree.getExcludeYn());
+					if (!isEmpty(dependencies)) {
+						addDepTreeList.add(tree);
+					}
+					rtnDepTreeList.add(tree);
+				}
+			}
+		}
+		
+		if (!CollectionUtils.isEmpty(addDepTreeList)) {
+			collectDependencyTreeData(lvl, addDepTreeList, rtnDepTreeList, packageUrlInfo);
+		}
+	}
+	
+	private Map<String, Object> generateDependencyTreeMap(List<ProjectIdentificationTree> rtnDepTreeList) {
+		Map<String, Object> rtnTreeMap = new HashMap<>();
+		if (!CollectionUtils.isEmpty(rtnDepTreeList)) {
+			List<Integer> levelList = rtnDepTreeList.stream().distinct().map(e -> Integer.parseInt(e.getLevel())).collect(Collectors.toList());
+			Collections.sort(levelList, Collections.reverseOrder());
+			int maxLvl = levelList.get(0);
+			
+			rtnTreeMap.put("maxLvl", maxLvl);
+			for (int i=0; i<=maxLvl; i++) {
+				String lvl = String.valueOf(i);
+				List<ProjectIdentificationTree> lvlList = rtnDepTreeList.stream().filter(e -> e.getLevel().equals(lvl)).collect(Collectors.toList());
+				rtnTreeMap.put("lvl_" + lvl , lvlList);
+			}
+		}
+		
+		return rtnTreeMap;
 	}
 }

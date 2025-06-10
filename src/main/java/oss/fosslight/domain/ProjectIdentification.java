@@ -354,9 +354,6 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String tlsh;
 	private String checkSum;
 	
-	private String treeId;
-	private String treeParentId;
-	
 	private List<ProjectIdentification> deduplicatedComponentLicenseList;
 	
 	private Float standardScore;
@@ -2189,21 +2186,5 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setNotAdminCheck(String notAdminCheck) {
 		this.notAdminCheck = notAdminCheck;
-	}
-
-	public String getTreeId() {
-		return treeId;
-	}
-
-	public void setTreeId(String treeId) {
-		this.treeId = treeId;
-	}
-
-	public String getTreeParentId() {
-		return treeParentId;
-	}
-
-	public void setTreeParentId(String treeParentId) {
-		this.treeParentId = treeParentId;
 	}
 }
