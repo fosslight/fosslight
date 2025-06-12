@@ -43,12 +43,14 @@ import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -5197,6 +5199,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			String beforeId = "";
 			String afterId = "";
 			
+			String beforeCompareInfo = "";
+			String afterCompareInfo = "";
+			String beforeCompareUrl = "";
+			String afterCompareUrl = "";
+			
 			if (isProject) {
 				String beforePrjId = map.get("beforePrjId").toString();
 				String afterPrjId = map.get("afterPrjId").toString();			
@@ -5205,6 +5212,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				afterId = afterPrjId;
 				
 				Project beforePrjInfo = projectService.getProjectBasicInfo(beforePrjId);
+				beforeCompareInfo = beforePrjInfo.getPrjName();
+				if (!isEmpty(beforePrjInfo.getPrjVersion())) {
+					beforeCompareInfo += " (" + beforePrjInfo.getPrjVersion() + ")";
+				}
+				if (!isEmpty(beforeCompareInfo)) {
+					beforeCompareUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + beforeId;
+				}
 				String beforeReferenceDiv = "";
 				
 				ProjectIdentification beforeIdentification = new ProjectIdentification();
@@ -5220,6 +5234,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				Project afterPrjInfo = projectService.getProjectBasicInfo(afterPrjId);
+				afterCompareInfo = afterPrjInfo.getPrjName();
+				if (!isEmpty(afterPrjInfo.getPrjVersion())) {
+					afterCompareInfo += " (" + afterPrjInfo.getPrjVersion() + ")";
+				}
+				if (!isEmpty(afterCompareInfo)) {
+					afterCompareUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + afterId;
+				}
 				String afterReferenceDiv = "";
 				
 				ProjectIdentification AfterIdentification = new ProjectIdentification();
@@ -5264,7 +5285,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				String afterPartnerId = map.get("afterPartnerId").toString();
 				
 				beforeId = "3rd_" + beforePartnerId;
-				afterId = afterPartnerId;
+				afterId = "3rd_" + afterPartnerId;
 				
 				ProjectIdentification param = new ProjectIdentification();
 				param.setReferenceId(beforePartnerId);
@@ -5283,6 +5304,29 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				} else {
 					afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
 				}
+				
+				PartnerMaster partnerInfo = new PartnerMaster();
+				partnerInfo.setPartnerId(beforePartnerId);
+				partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+				
+				beforeCompareInfo = partnerInfo.getSoftwareName();
+				if (!isEmpty(partnerInfo.getSoftwareVersion())) {
+					beforeCompareInfo += " (" + partnerInfo.getSoftwareVersion() + ")";
+				}
+				if (!isEmpty(beforeCompareInfo)) {
+					beforeCompareUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + beforePartnerId;
+				}
+				
+				partnerInfo.setPartnerId(afterPartnerId);
+				partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+				
+				afterCompareInfo = partnerInfo.getSoftwareName();
+				if (!isEmpty(partnerInfo.getSoftwareVersion())) {
+					afterCompareInfo += " (" + partnerInfo.getSoftwareVersion() + ")";
+				}
+				if (!isEmpty(afterCompareInfo)) {
+					afterCompareUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + afterPartnerId;
+				}
 			}
 			
 			if (beforeBomList == null || afterBomList == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
@@ -5294,6 +5338,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			try {
 				inFile= new FileInputStream(new File(downloadpath + "/BOM_Compare.xlsx")); 
 				wb = new XSSFWorkbook(inFile);
+				CreationHelper creationHelper = wb.getCreationHelper();
+				CellStyle hyperLinkStyle = wb.createCellStyle();
+				hyperLinkStyle.setAlignment(HorizontalAlignment.CENTER);
+				hyperLinkStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+				Font hyperLinkFont = wb.createFont();
+				hyperLinkFont.setUnderline(Font.U_SINGLE);
+				hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
+				hyperLinkStyle.setFont(hyperLinkFont);
 				sheet = wb.getSheetAt(0); 
 				wb.setSheetName(0, "BOM_Compare_"+beforeId+"_"+afterId);
 			  
@@ -5311,7 +5363,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				//시트 만들기 
-				makeSheet(sheet, rows, 1); 
+				makeBomCompareSheet(sheet, rows, beforeCompareInfo, afterCompareInfo, beforeCompareUrl, afterCompareUrl, creationHelper, hyperLinkStyle); 
 			} catch (FileNotFoundException e) {
 				log.error(e.getMessage(), e); 
 			} finally { 
@@ -5329,6 +5381,73 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return null;
 	}
 	
+	private static void makeBomCompareSheet(Sheet sheet, List<String[]> rows, String beforeCompareInfo, String afterCompareInfo, String beforeCompareUrl, String afterCompareUrl, CreationHelper creationHelper, CellStyle hyperLinkStyle) {
+		int startRow = 2;
+		int startCol = 0;
+		int endCol = 0;
+		int templateRowNum = 2;
+		
+		if (rows.isEmpty()){
+		} else {
+			endCol = rows.get(0).length-1;
+		}
+		
+		int shiftRowNum = rows.size();
+		
+		Row templateRow = sheet.getRow(templateRowNum);
+		Cell templateCell = templateRow.getCell(0);
+		CellStyle style = templateCell.getCellStyle();
+		
+		Row headerRow = sheet.createRow(0);
+		Cell headerCell = headerRow.createCell(1);
+		headerCell.setCellStyle(style);
+		
+		if (!isEmpty(beforeCompareInfo)) {
+			if (!isEmpty(beforeCompareUrl)) {
+				Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.URL);
+				hyperlink.setAddress(beforeCompareUrl);
+				headerCell.setHyperlink(hyperlink);
+				headerCell.setCellStyle(hyperLinkStyle);
+			}
+			headerCell.setCellValue(beforeCompareInfo);
+		} else {
+			headerCell.setBlank();
+		}
+		
+		Cell headerCell2 = headerRow.createCell(3);
+		headerCell2.setCellStyle(style);
+		
+		if (!isEmpty(afterCompareInfo)) {
+			if (!isEmpty(afterCompareUrl)) {
+				Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.URL);
+				hyperlink.setAddress(afterCompareUrl);
+				headerCell2.setHyperlink(hyperlink);
+				headerCell2.setCellStyle(hyperLinkStyle);
+			}
+			headerCell2.setCellValue(afterCompareInfo);
+		} else {
+			headerCell2.setBlank();
+		}
+		
+		startRow = templateRow.getRowNum();		
+		
+		for (int i = startRow; i < startRow+shiftRowNum; i++){
+			String[] rowParam = rows.get(i-startRow);
+			
+			Row row = sheet.createRow(i);
+			for (int colNum=startCol; colNum<=endCol; colNum++){
+				
+				Cell cell=row.createCell(colNum);
+				cell.setCellStyle(style);
+				
+				if (!isEmpty(rowParam[colNum])) {
+					cell.setCellValue(rowParam[colNum]);
+				} else {
+					cell.setBlank();
+				}
+			}
+		}
+	}
 	private static String makeBomCompareExcelFileId(String beforePrjId, String afterPrjId, Workbook wb, String target, String exp) throws IOException {
 		String fileName = CommonFunction.replaceSlashToUnderline(target) + "_" + beforePrjId + "_" + afterPrjId + "_" + CommonFunction.getCurrentDateTime();
 		String logiFileName = fileName + "." + exp;
