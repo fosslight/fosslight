@@ -1036,23 +1036,31 @@ loadingIden.show();
     dependencyTreePopup : function() {
     	if (depMainData.length > 0) {
     		var _popup = null;
-        	
-        	if (_popup == null || _popup.closed) {
-            	_popup = window.open("", "dependencyTreePopup", "width=1000, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
+    		var dependencyTreeData = new Array();
+    		dependencyTreeData = depMainData.filter(function(cur) {
+				return cur.comments.indexOf("direct") > 0;
+			});
+    		
+    		if (dependencyTreeData.length > 0) {
+    			if (_popup == null || _popup.closed) {
+                	_popup = window.open("", "dependencyTreePopup", "width=1000, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
-            	$("#dependencyTreeForm > input[name=rows]").val(JSON.stringify(depMainData));
-    			$("#dependencyTreeForm").submit();
+                	$("#dependencyTreeForm > input[name=rows]").val(JSON.stringify(dependencyTreeData));
+        			$("#dependencyTreeForm").submit();
 
-                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-                    alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+                    if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+                        alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+                    }
+                } else {
+                    _popup.close();
+                    _popup = window.open("", "dependencyTreePopup", "width=1000, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+                    $("#dependencyTreeForm > input[name=rows]").val(JSON.stringify(dependencyTreeData));
+        			$("#dependencyTreeForm").submit();
                 }
-            } else {
-                _popup.close();
-                _popup = window.open("", "dependencyTreePopup", "width=1000, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
-
-                $("#dependencyTreeForm > input[name=rows]").val(JSON.stringify(depMainData));
-    			$("#dependencyTreeForm").submit();
-            }
+    		} else {
+    			alertify.alert("There is no data to display as a dependency tree.", function(){});
+    		}
     	}
     }
 }
