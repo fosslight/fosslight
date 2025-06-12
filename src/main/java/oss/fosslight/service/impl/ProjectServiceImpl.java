@@ -8324,7 +8324,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		int level = 0;
 		for (ProjectIdentification bean : ossComponents) {
-			if (!isEmpty(bean.getPackageUrl())) {
+			if (!isEmpty(bean.getPackageUrl()) && avoidNull(bean.getComments()).contains("direct")) {
 				for (int i = 0; i < length; i++) {
 					int index = random.nextInt(characters.length());
 					sb.append(characters.charAt(index));        
@@ -8333,7 +8333,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				sb = new StringBuilder();
 				
 				String dependencies = !isEmpty(bean.getDependencies()) ? bean.getDependencies() : "";
-				ProjectIdentificationTree tree = new ProjectIdentificationTree(treeId, "", String.valueOf(level), bean.getPackageUrl(), !isEmpty(bean.getDependencies()) ? bean.getDependencies() : "", avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
+				ProjectIdentificationTree tree = new ProjectIdentificationTree(treeId, "", String.valueOf(level), bean.getPackageUrl(), dependencies, avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
 				if (!isEmpty(dependencies)) {
 					depTreeList.add(tree);
 				}
