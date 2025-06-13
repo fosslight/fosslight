@@ -36,7 +36,7 @@ public class ApiCodeV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-    @ApiOperation(value = "Search Code Info", notes = "code 조회")
+    @ApiOperation(value = "Search Code Info", notes = "Search Code Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_CODE_SEARCH})
     public ResponseEntity<Map<String, Object>> getVulnerabilityData(
             @ApiParam(hidden=true) @RequestHeader String authorization,

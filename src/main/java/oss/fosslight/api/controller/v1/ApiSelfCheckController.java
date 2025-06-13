@@ -87,7 +87,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 
 	private final FileService fileService;
 
-	@ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
+	@ApiOperation(value = "Create SelfCheck", notes = "Create New SelfCheck")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })

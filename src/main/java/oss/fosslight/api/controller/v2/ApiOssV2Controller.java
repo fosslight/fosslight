@@ -55,7 +55,7 @@ public class ApiOssV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
 
-    @ApiOperation(value = "Search OSS List", notes = "OSS 조회")
+    @ApiOperation(value = "Search OSS List", notes = "Search OSS Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_SEARCH})
     public @ResponseBody ResponseEntity<ListOssDto.Result> getOssInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -92,7 +92,7 @@ public class ApiOssV2Controller extends CoTopComponent {
     }
 
 
-    @ApiOperation(value = "Search License Info", notes = "License Info 조회")
+    @ApiOperation(value = "Search License Info", notes = "Search License Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
     public @ResponseBody ResponseEntity<ListLicenseDto.Result> getLicenseInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -187,7 +187,7 @@ public class ApiOssV2Controller extends CoTopComponent {
 //        }
 //    }
 
-    @ApiOperation(value = "Register New OSS", notes = "신규 OSS 등록")
+    @ApiOperation(value = "Register New OSS", notes = "Register New OSS")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REGISTER})
     public ResponseEntity<Map<String, Object>> registerOss(
             @ApiParam(hidden=true) @RequestHeader String authorization,

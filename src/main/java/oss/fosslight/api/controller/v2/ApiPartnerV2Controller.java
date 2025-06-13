@@ -56,7 +56,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-    @ApiOperation(value = "3rd Party Search", notes = "3rd party 조회")
+    @ApiOperation(value = "3rd Party Search", notes = "Search 3rd Party Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_SEARCH})
     public ResponseEntity<Map<String, Object>> getPartners(
             @ApiParam(hidden=true) @RequestHeader String authorization,

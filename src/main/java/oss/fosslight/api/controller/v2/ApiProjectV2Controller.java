@@ -90,7 +90,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
 
-    @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @ApiOperation(value = "Search Project List", notes = "Search Project Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -142,7 +142,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Retrieve the model list of the project", notes = "Project의 모델 정보 조회")
+    @ApiOperation(value = "Retrieve the model list of the project", notes = "Retrieve Project Model Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -265,7 +265,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 //		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
     }
 
-    @ApiOperation(value = "Create Project", notes = "project 생성")
+    @ApiOperation(value = "Create Project", notes = "Create New Project")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
             @ApiParam(hidden=true) @RequestHeader String authorization,
