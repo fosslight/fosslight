@@ -8324,7 +8324,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		int level = 0;
 		for (ProjectIdentification bean : ossComponents) {
-			if (!isEmpty(bean.getPackageUrl()) && avoidNull(bean.getComments()).contains("direct")) {
+			if (!isEmpty(bean.getPackageUrl()) && avoidNull(bean.getComments()).trim().contains("direct")) {
 				for (int i = 0; i < length; i++) {
 					int index = random.nextInt(characters.length());
 					sb.append(characters.charAt(index));        
@@ -8375,7 +8375,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 		}
 		
-		if (!CollectionUtils.isEmpty(addDepTreeList)) {
+		if (lvl <= 4 && !CollectionUtils.isEmpty(addDepTreeList)) {
 			collectDependencyTreeData(lvl, addDepTreeList, rtnDepTreeList, packageUrlInfo);
 		}
 	}
