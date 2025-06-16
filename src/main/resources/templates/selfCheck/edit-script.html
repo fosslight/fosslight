@@ -2823,12 +2823,11 @@ var src_grid = {
 			colNames: ['gridId', 'ID', 'ReferenceId', 'ReferenceDiv', 'ComponentIdx', 'Binary Name or Source Path', 'OssId', 'OSS Name','OSS Version','License', 'OSS Name Exists', 'License Exists'
 			           ,'LicenseId','Download Location','Homepage','Copyright Text','OSS Detail','License Detail','User<br/>Guide','CVE ID'
 			           ,'Vulnera<br/>bility','Obligation','Notice','Source','Restriction','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'licenseUserGuideYn', 'licenseUserGuideStr','obligationGrayFlag', 'obligationMsg'],
-			colModel: colModelArr,,
+			colModel: colModelArr,
 			autoencode: true,
 			editurl:'clientArray',
  			autowidth: true,
 			height: 'auto',
-            shrinkToFit:false,
 			gridview: true,
 		   	pager: '#srcPager',
 			rowNum: 200,
@@ -2838,7 +2837,7 @@ var src_grid = {
 			loadonce:true,
 			cellEdit : false,
 			cellsubmit : 'clientArray',
-			ignoreCase: true,
+			ignoreCase: false,
 			multiselect: true,
             multiselectWidth: 35,
 		    onSortCol: function (index, columnIndex, sortOrder) {
