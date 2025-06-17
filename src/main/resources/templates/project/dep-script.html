@@ -1034,10 +1034,21 @@ loadingIden.show();
 		});
     },
     dependencyTreePopup : function() {
-    	if (depMainData.length > 0) {
-    		var _popup = null;
+		var _popup = null;
+		
+    	if (typeof depMainData !== "undefined") {
+    		var depTreeDirectData = depMainData.filter(function(cur){
+    			let comments = $.trim(cur.comments);
+    			return comments.indexOf("direct") > -1;
+    		});
     		
-    		if (depMainData.length > 0) {
+    		var depTreeDependsOnData = depMainData.filter(function(cur){
+    			return "" != cur.dependencies;
+    		});
+    		
+    		if (depTreeDirectData.length == 0 || depTreeDependsOnData.length == 0) {
+    			alertify.alert([[#{msg.project.cannot.print.identification.dependency}]], function(){});
+    		} else {
     			if (_popup == null || _popup.closed) {
                 	_popup = window.open("", "dependencyTreePopup", "width=1000, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
@@ -1054,9 +1065,9 @@ loadingIden.show();
                     $("#dependencyTreeForm > input[name=rows]").val(JSON.stringify(depMainData));
         			$("#dependencyTreeForm").submit();
                 }
-    		} else {
-    			alertify.alert("There is no data to display as a dependency tree.", function(){});
     		}
+    	} else {
+    		alertify.alert([[#{msg.project.cannot.print.identification.dependency}]], function(){});
     	}
     }
 }
@@ -1439,7 +1450,7 @@ var dep_grid = {
 		    },
 			loadComplete: function(data) {
 				_mainLastsel = -1;
-				var isDependencies = false;
+				
 				if(data.records > 0) {
 					var multRowIds = []; 
 					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
@@ -1451,9 +1462,7 @@ var dep_grid = {
 						if (className.indexOf('jqgrow') !== -1) {
 							rowid = row.id;
 							rowData = data.rows[rowIdx++];
-							if (!isDependencies && "" != rowData.dependencies) {
-								isDependencies = true;
-							}
+							
 							if(rowData.licenseDiv != "M") {
 								className = className + ' singleLicenseClass';
 								$("#" + rowid).next("tr.ui-subgrid").hide();
@@ -1519,10 +1528,8 @@ var dep_grid = {
                 	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
                 	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"dep_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
                 	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"dep_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span></div>";
-                	if (isDependencies) {
-                		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"dependency tree\" onclick=\"dep_fn.dependencyTreePopup()\">";
-                 		appendBtn += "<i class=\"fas fa-list-ul\"></i></button>";
-                 	}
+                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"dependency tree\" onclick=\"dep_fn.dependencyTreePopup()\">";
+             		appendBtn += "<i class=\"fas fa-list-ul\"></i></button>";
                 	
                     $("#depList_toppager_left").append(appendBtn);
                 }
