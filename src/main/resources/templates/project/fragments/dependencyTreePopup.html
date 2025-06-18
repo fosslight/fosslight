@@ -65,26 +65,28 @@
 				    		let parentId = item.parentTreeId;
 				    		let packageUrl = item.packageUrl;
 				    		let level = item.level;
-				    		let childs = item.childs;
+				    		let isExist = item.existDependency;
 				    		let style = 'style="padding-left : ';
 				    		if (typeof parentId === "undefined" || parentId == null || "" == parentId) {
 				    			parentId = "";
 				    			style += '3rem!important"';
 				    		} else {
 				    			style += parseInt(level)*3+3 + 'rem!important"';
-				    			packageUrl = '<i class="fas fa-angle-right mr-2" style="color: #6c757d;"></i>' + packageUrl;
+				    			if (isExist) {
+				    				packageUrl = '<i class="fas fa-angle-right mr-2" style="color: #6c757d;"></i>' + packageUrl;
+				    			}
 				    		}
 				    		if ("Y" == item.excludeYn) {
 				    			previousId = id;
 				    		}
 				    		appendTreeHtml += '<tr class="collapTr" id="' + id + '" data-id="' + id + '" data-parent="' + parentId + '" data-level="' + level;
 				    		if ("Y" == item.excludeYn) {
-				    			appendTreeHtml += '" style="background-color:#ada9a9;">';
+				    			appendTreeHtml += '" style="background-color:#ada9a9; cursor: pointer;">';
 				    		} else {
-				    			appendTreeHtml += '">';
+				    			appendTreeHtml += '" style="cursor: pointer;">';
 				    		}
 				    		appendTreeHtml += '<td class="b-right text-center"></td>';
-				    		appendTreeHtml += '<td class="b-left" ' + style + '>' + packageUrl + '</td></tr>';
+				    		appendTreeHtml += '<td class="b-left" ' + style + ' onclick="dep_tree_fn.displayDependencyTree(this)">' + packageUrl + '</td></tr>';
 				    		if ("" == parentId) {
 				    			$("#collaptableBody").append(appendTreeHtml);
 				    		} else {
@@ -106,11 +108,14 @@
 		}
 		
 		var dep_tree_fn = {
-			dependencyTreeExpandAll : function () {
+			dependencyTreeExpandAll : function() {
 				$(".act-more.act-collapsed").trigger("click");
 			},
-			dependencyTreeCollapseAll : function () {
+			dependencyTreeCollapseAll : function() {
 				$(".act-more.act-expanded").trigger("click");
+			},
+			displayDependencyTree : function(obj) {
+				$(obj).parent().find("a").trigger("click");
 			}
 		}
 	</script>

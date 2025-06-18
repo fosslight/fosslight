@@ -23,6 +23,8 @@ public class ProjectIdentificationTree implements Serializable {
 	
 	private String excludeYn;
 	
+	private boolean existDependency;
+	
 	public ProjectIdentificationTree(String treeId, String parentTreeId, String level, String packageUrl, String dependencies, String excludeYn) {
 		this.treeId = treeId;
 		this.parentTreeId = parentTreeId;
@@ -44,6 +46,10 @@ public class ProjectIdentificationTree implements Serializable {
 		return level;
 	}
 	
+	public void setPackageUrl(String packageUrl) {
+		this.packageUrl = packageUrl;
+	}
+	
 	public String getPackageUrl() {
 		return packageUrl;
 	}
@@ -58,5 +64,13 @@ public class ProjectIdentificationTree implements Serializable {
 
 	public void setExcludeYn(String excludeYn) {
 		this.excludeYn = excludeYn;
+	}
+
+	public boolean isExistDependency() {
+		return existDependency;
+	}
+
+	public void setExistDependency(boolean existDependency) {
+		this.existDependency = existDependency;
 	}
 }

@@ -8335,7 +8335,10 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				String dependencies = !isEmpty(bean.getDependencies()) ? bean.getDependencies() : "";
 				ProjectIdentificationTree tree = new ProjectIdentificationTree(treeId, "", String.valueOf(level), bean.getPackageUrl(), dependencies, avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
 				if (!isEmpty(dependencies)) {
+					tree.setExistDependency(true);
 					depTreeList.add(tree);
+				} else {
+					tree.setExistDependency(false);
 				}
 				rtnDepTreeList.add(tree);
 			}
@@ -8368,14 +8371,21 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					String dependencies = !isEmpty(packageUrlInfo.get(packageUrl)) ? packageUrlInfo.get(packageUrl) : ""; 
 					ProjectIdentificationTree tree = new ProjectIdentificationTree(treeId, depTree.getTreeId(), String.valueOf(lvl), packageUrl, dependencies, depTree.getExcludeYn());
 					if (!isEmpty(dependencies)) {
-						addDepTreeList.add(tree);
+						tree.setExistDependency(true);
+						if (lvl <= 4) {
+							addDepTreeList.add(tree);
+						} else {
+							tree.setPackageUrl(tree.getPackageUrl() + " ...");
+						}
+					} else {
+						tree.setExistDependency(false);
 					}
 					rtnDepTreeList.add(tree);
 				}
 			}
 		}
 		
-		if (lvl <= 4 && !CollectionUtils.isEmpty(addDepTreeList)) {
+		if (lvl <= 4) {
 			collectDependencyTreeData(lvl, addDepTreeList, rtnDepTreeList, packageUrlInfo);
 		}
 	}
