@@ -1192,13 +1192,13 @@ var bom_data = {
 			var colModelArr = [];
 			var colModelObj = {name: 'componentIdx', index: 'componentIdx', width: 20, align: 'center', search : false, sorttype: 'number',
 								cellattr: function(rowId, tv, rawObject, cm, rdata) {
-									return ' style="display:none;"';
+									return ' colspan=2';
 								}
 							};
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'group', width: 40, align: 'center', search : false, sorttype: 'number',
 						    cellattr: function(rowId, tv, rawObject, cm, rdata) {
-						        return ' colspan=2';
+						    	return ' style="display:none;"';
 						    }
 						};
 			colModelArr.push(colModelObj);
