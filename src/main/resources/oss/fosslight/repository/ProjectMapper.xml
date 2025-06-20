@@ -685,9 +685,10 @@
 			, A.USE_YN
 		    , A.SECMAIL_YN
 		    , A.SECMAIL_DESC
+		    , A.SECPERSON
 			, A.COPY_PRJ_ID
 			, A.WITHOUT_VERIFY_YN
-			
+			, T3.USER_NAME AS secPersonNm
 			/* 다운로드 허용 플래그 */
 			<![CDATA[
 			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x01, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_HTML_YN
@@ -787,6 +788,8 @@
 		                   
             LEFT OUTER JOIN T2_USERS R
                             ON A.REVIEWER = R.USER_ID
+			LEFT OUTER JOIN T2_USERS T3
+		                    ON A.SECPERSON = T3.USER_ID
 		 WHERE A.PRJ_ID = #{prjId} 
 	</select>
 	
@@ -864,6 +867,7 @@
 			, PUBLIC_YN
 			, SECMAIL_YN
 			, SECMAIL_DESC
+			, SECPERSON
 			, PRIORITY
 			, DIVISION
 		)
@@ -894,6 +898,7 @@
 			, #{publicYn}
 			, #{secMailYn}
 			, #{secMailDesc}
+			, #{secPerson}
 			, #{priority}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
 		) ON DUPLICATE KEY UPDATE
@@ -915,6 +920,7 @@
 		    , PUBLIC_YN                   = #{publicYn}
 		    , SECMAIL_YN                  = #{secMailYn}
 		    , SECMAIL_DESC                = #{secMailDesc}
+			, SECPERSON                   = #{secPerson}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR                    = #{creator}
 			</if>
@@ -2682,7 +2688,6 @@
 		SELECT T1.*,
 			   T2.NOTICE_TYPE,
 			   T2.NOTICE_TYPE_ETC,
-			 
 			 /* 다운로드 허용 플래그 */
 			 <![CDATA[
 			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x01, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_HTML_YN,
@@ -2699,7 +2704,7 @@
 			 ]]>
 		  FROM PROJECT_MASTER T1
 		  LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
-		 WHERE T1.USE_YN = 'Y'
+		WHERE T1.USE_YN = 'Y'
 		   AND T1.PRJ_ID = #{prjId}
 	</select>
 	
@@ -2878,6 +2883,9 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secMailDesc)">
 			, SECMAIL_DESC = #{secMailDesc}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secPerson)">
+			, SECPERSON = #{secPerson}
 			</if>
 			/* 2018-07-20 choye 추가 */
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">

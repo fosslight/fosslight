@@ -68,6 +68,12 @@
 												</td>
 											</tr>
 											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.security.person}"></th>
+												<td>
+													<span th:text="${project?.secPersonNm}"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.OS}"></th>
 												<td>
 													<th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">

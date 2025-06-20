@@ -1090,6 +1090,7 @@
 			, A.DROP_YN
 			, A.SECMAIL_YN
 		    , A.SECMAIL_DESC
+		    , A.SECPERSON
 			, A.REVIEWER 
 			, A.USE_YN 
 			, A.COPY_PRJ_ID

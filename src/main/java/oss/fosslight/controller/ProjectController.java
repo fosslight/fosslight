@@ -1123,6 +1123,24 @@ public class ProjectController extends CoTopComponent {
 					}
 				}
 			}
+
+			if (!isEmpty(project.getSecPersonNm())) {
+				List<T2Users> userList = userService.getUserListByName(project.getSecPersonNm());
+
+				if (userList != null) {
+					for (T2Users _bean : userList) {
+						if (_bean.getUserId().equals(project.getSecPerson())) {
+							creatorIdByName = _bean.getUserId();
+
+							if (!creatorIdByName.equals(project.getSecPerson())) {
+								project.setSecPerson(_bean.getUserId());
+							}
+
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		// validation check
@@ -5515,4 +5533,5 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("dependencyTreeMap", dependencyTreeMap);
 		return "project/fragments/dependencyTreePopup";
 	}
+
 }

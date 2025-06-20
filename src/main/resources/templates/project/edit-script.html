@@ -546,6 +546,12 @@
 					$("[name='creator']").val("");
 				}
 			});
+
+            $("[name='secPersonNm']").on("keyup", function(e) {
+                if(e.keyCode != 13) {
+                    $("[name='secPerson']").val("");
+                }
+            });
 			
 			$(".cal").on("keyup", function(e) {
 				calValidation(this, e);
@@ -1111,6 +1117,28 @@
 				if ("" != $('#additionalInformation').summernote('code')) {
 					$('input[name=comment]').val($('#additionalInformation').summernote('code'));
 				}
+
+                // secPerson 필드 검증
+                var secPersonValue = $('input[name=secPersonNm]').val();
+
+                if (secPersonValue && secPersonValue.trim() !== "") {
+                    // autoComSecPerson 자동완성 목록에서 선택된 값인지 확인
+                    var isValidSecPerson = false;
+                    if (autoComplete.secPersonTag && autoComplete.secPersonTag.length > 0) {
+                        for (var i = 0; i < autoComplete.secPersonTag.length; i++) {
+                            if (autoComplete.secPersonTag[i].label === secPersonValue) {
+                                isValidSecPerson = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isValidSecPerson) {
+                        alertify.alert([[#{msg.common.field.security.person.warning}]], function(){});
+                        $('input[name=secPersonNm]').focus();
+                        return false;
+                    }
+                }
 				
 				cleanErrMsg("_modelList");
 

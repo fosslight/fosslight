@@ -1157,6 +1157,7 @@ var autoComplete = {
     creatorTag: [],
     reviewerTag: ['N/A'],
     creatorDivisionTag: [],
+    secPersonTag : [],
     load: function () {
         if ($(".autoComLicense").length > 0) {
             commonAjax.getLicenseTags().success(function (data, status, headers, config) {
@@ -1489,6 +1490,25 @@ var autoComplete = {
                             }
 
                             autoComplete.creatorDivisionTag.push(tag);
+                        }
+                    });
+                }
+            });
+        }
+        if ($(".autoComSecPerson").length > 0) {
+            commonAjax.getCreatorDivisionTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    var tag = "";
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            tag = {
+                                value: obj.userName,
+                                label: obj.userName,
+                                division: obj.division,
+                                id: obj.userId
+                            }
+
+                            autoComplete.secPersonTag.push(tag);
                         }
                     });
                 }
@@ -1883,6 +1903,34 @@ var autoComplete = {
             },
             select: function (event, ui) {
                 $(this).parent().find('input[name=creator]').val(ui.item.id);
+            }
+        })
+            .focus(function () {
+                if ($(this).attr('state') != 'open') {
+                    $(this).autocomplete("search");
+                }
+            })
+            .autocomplete("instance")._renderItem = function (ul, item) {
+            if (item.division) {
+                return $("<li>").append("<div>" + item.division + ' > ' + item.label + "(" + item.id + ")" + "</div>").appendTo(ul);
+            } else {
+                return $("<li>").append("<div>" + item.label + "(" + item.id + ")" + "</div>").appendTo(ul);
+            }
+
+        };
+
+        $(".autoComSecPerson").autocomplete({
+            source: autoComplete.secPersonTag, minLength: 0,
+            open: function () {
+                $(this).attr('state', 'open');
+            }, close: function () {
+                $(this).attr('state', 'closed');
+                if ($(this).parent().find('input[name=secPersonNm]').val() == "") {
+                    $(this).parent().find('input[name=secPerson]').val('');
+                }
+            },
+            select: function (event, ui) {
+                $(this).parent().find('input[name=secPerson]').val(ui.item.id);
             }
         })
             .focus(function () {

@@ -702,6 +702,10 @@ public class Project extends ComBean implements Serializable {
 	private String secMailYn;
 
 	private String secMailDesc;
+
+	private String secPerson;
+
+	private String secPersonNm;
 	
 	/** The viewOnlyFlag. */
 	private String viewOnlyFlag;
@@ -3940,7 +3944,23 @@ public class Project extends ComBean implements Serializable {
 	public void setSecMailDesc(String secMailDesc) {
 		this.secMailDesc = secMailDesc;
 	}
+
+	public String getSecPerson() {
+		return secPerson;
+	}
+
+	public void setSecPerson(String secPerson) {
+		this.secPerson = secPerson;
+	}
 	
+	public String getSecPersonNm() {
+		return secPersonNm;
+	}
+
+	public void setSecPersonNm(String secPersonNm) {
+		this.secPersonNm = secPersonNm;
+	}
+
 	public String getViewOnlyFlag() {
 		return viewOnlyFlag;
 	}

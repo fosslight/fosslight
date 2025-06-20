@@ -110,7 +110,7 @@
                                     </div>
                                 </div>
                                 <div th:if="${project.viewOnlyFlag != 'Y'}" class="row">
-                                    <div class="col-md-6 mb-0">
+                                    <div class="col-md-3 mb-0">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.permission}"></label>
                                             <div class="form-group">
@@ -127,7 +127,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6 mb-0">
+                                    <div class="col-md-3 mb-0">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.security.mail}"></label>
                                             <div class="form-group">
@@ -147,6 +147,11 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="secPersonNm" th:text="#{msg.common.field.security.person}"></label>
+                                        <input type="text" id="secPersonNm" name="secPersonNm" th:value="${project?.secPersonNm}" class="form-control autoComSecPerson" th:disabled="${isReadOnly}">
+                                        <input type="hidden" name="secPerson" th:value="${project?.secPerson}" />
                                     </div>
                                 </div>
                                 <input type="hidden" name="distributeTarget" value="NA"/>

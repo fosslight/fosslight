@@ -5205,6 +5205,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "Before : " + (beforeBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + before+ ")") + "<br />";
 				comment += "After : <span style='background-color:yellow'>" + (afterBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + after + ")") + "</span><br /></p>";
 			}
+
+			before = avoidNull(beforeBean.getSecPersonNm()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+			after = avoidNull(afterBean.getSecPersonNm()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+
+			if (!avoidNull(beforeBean.getSecPersonNm()).equals(avoidNull(afterBean.getSecPersonNm())) || !before.equals(after)) {
+				comment += "<p><strong>Security Responsible</strong><br />";
+				comment += "Before : " + beforeBean.getSecPersonNm() + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + afterBean.getSecPersonNm() + "</span><br /></p>";
+			}
 			
 			// Model Information
 			if (!CollectionUtils.isEmpty(beforeBean.getModelList()) || !CollectionUtils.isEmpty(afterBean.getModelList())) {

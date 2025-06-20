@@ -356,7 +356,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		project.setNoticeType(avoidNull((String) NoticeInfo.get("noticeType"), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL));
 		project.setNoticeTypeEtc(avoidNull((String) NoticeInfo.get("noticeTypeEtc")));
 		project.setAndroidFlag(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(project.getNoticeType())) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-		
 		// watcher
 		List<Project> watcherList = projectMapper.selectWatchersList(project);
 		if (!CollectionUtils.isEmpty(watcherList)) {
@@ -2030,7 +2029,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			} else {
 				project.setSecMailDesc(avoidNull(project.getSecMailDesc()));
 			}
-			
+			project.setSecPerson(avoidNull(project.getSecPerson()));
 			// if complete value equals 'Y', set
 			if (!isNew) {
 				final Project prjBean = projectMapper.selectProjectMaster(project.getPrjId());
