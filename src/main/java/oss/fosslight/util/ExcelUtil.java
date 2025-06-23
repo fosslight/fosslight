@@ -2059,7 +2059,8 @@ public class ExcelUtil extends CoTopComponent {
 		List<Project> modelDeleteList = projectMapper.selectDeleteModelList(prjId);
 
 		Map<String, Project> osddModelInfo = new HashMap<>();
-		String modelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+//		String modelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+		String modelCode = CoConstDef.CD_MODEL_TYPE;
 
 		if (modelList != null) {
 			for (Project bean : modelList) {

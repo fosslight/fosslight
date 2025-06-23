@@ -1781,7 +1781,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		try {
 			inFile= new FileInputStream(new File(downloadpath+ (CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? "/SKS_ModelList.xlsx" : "/ModelList.xlsx") ));
 			wb = WorkbookFactory.create(inFile);
-			String mainModelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+//			String mainModelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+			String mainModelCode = CoConstDef.CD_MODEL_TYPE;
 			
 			// category sheet 생성
 			sheet = wb.getSheetAt(1);

@@ -3317,7 +3317,8 @@ public class CoMailManager extends CoTopComponent {
 				list = new ArrayList<>();
 			}
 			if (isEmpty(distributeTargetCode)) {
-				distributeTargetCode = CoConstDef.CD_DTL_DISTRIBUTE_SKS.equals(avoidNull( (String) dataMap.get("DISTRIBUTE_TARGET"), CoConstDef.CD_DTL_DISTRIBUTE_LGE)) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+//				distributeTargetCode = CoConstDef.CD_DTL_DISTRIBUTE_SKS.equals(avoidNull( (String) dataMap.get("DISTRIBUTE_TARGET"), CoConstDef.CD_DTL_DISTRIBUTE_LGE)) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+				distributeTargetCode = CoConstDef.CD_MODEL_TYPE;
 			}
 			bean = new Project();
 			bean.setPrjId((String) dataMap.get("PRJ_ID"));

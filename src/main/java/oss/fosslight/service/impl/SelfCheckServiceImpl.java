@@ -2047,7 +2047,8 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		ossAttributionList.addAll(ossAttributionTreeMap.values());
 		
 		// 배포 사이트 구분에 따라 참조 코드가 달라짐
-		String noticeInfoCode = CoConstDef.CD_DTL_DISTRIBUTE_SKS.equals(avoidNull(distributeSite, CoConstDef.CD_DTL_DISTRIBUTE_LGE)) ? CoConstDef.CD_NOTICE_DEFAULT_SKS : CoConstDef.CD_NOTICE_DEFAULT;
+//		String noticeInfoCode = CoConstDef.CD_DTL_DISTRIBUTE_SKS.equals(avoidNull(distributeSite, CoConstDef.CD_DTL_DISTRIBUTE_LGE)) ? CoConstDef.CD_NOTICE_DEFAULT_SKS : CoConstDef.CD_NOTICE_DEFAULT;
+		String noticeInfoCode = CoConstDef.CD_NOTICE_DEFAULT;
 
 		noticeType = avoidNull(ossNotice.getNoticeType(), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL);
 		

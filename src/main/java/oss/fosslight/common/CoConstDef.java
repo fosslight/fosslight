@@ -436,7 +436,7 @@ public class CoConstDef {
 	/** Distribute Code - 218 */
 	public static final String CD_DISTRIBUTE_CODE = "218";
 	public static final String CD_DTL_DISTRIBUTE_LGE = "LGE";
-	public static final String CD_DTL_DISTRIBUTE_SKS = "SKS";
+//	public static final String CD_DTL_DISTRIBUTE_SKS = "SKS";
 	public static final String CD_DTL_DISTRIBUTE_NA = "NA";
 	public static final String DISTRIBUTE_CHECK_URL = "/pservice/osAvailCheck";
 	public static final String DISTRIBUTE_DEPLOY_URL = "/pservice/distribute";
@@ -489,7 +489,7 @@ public class CoConstDef {
 	/** Model 타입 코드 - 500 */
 	public static final String CD_MODEL_TYPE = "500";
 	/** Model 타입 코드 - 550 */
-	public static final String CD_MODEL_TYPE2 = "550";
+//	public static final String CD_MODEL_TYPE2 = "550";
 	/** External Link 코드 - 600 */
 	public static final String CD_EXTERNAL_LINK = "600";
 
