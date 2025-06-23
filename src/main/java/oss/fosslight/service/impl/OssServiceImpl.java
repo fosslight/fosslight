@@ -3059,7 +3059,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					nickChangeComment = CommonFunction.getCommentForChangeNickname("", nicknames, newNicknames);
 				}
 				if (!Objects.equals(includeCpeList, newIncludeCpes) || !Objects.equals(excludeCpeList, newExcludeCpes) || !Objects.equals(nicknames, newNicknames)
-						|| !ossMaster.getOssName().equals(beforeBean.getOssName()) || !ossMaster.getOssVersion().equals(beforeBean.getOssVersion())) {
+						|| !avoidNull(ossMaster.getOssName()).equals(avoidNull(beforeBean.getOssName())) || !ossMaster.getOssVersion().equals(beforeBean.getOssVersion())) {
 					updateNvdFlag = true;
 				}
 				if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
