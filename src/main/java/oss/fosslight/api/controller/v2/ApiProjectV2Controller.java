@@ -634,7 +634,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
-            @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames) {
+            @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames,
+            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String bomSave) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
@@ -751,6 +753,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     }
                 }
             }
+
+            if(bomSave.equals(CoConstDef.FLAG_YES)) {
+                projectService.registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
+            }
+
             if (resultMap.isEmpty()) {
                 // 정상처리된 경우 세션 삭제
                 switch(tabName) {
