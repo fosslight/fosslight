@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
@@ -96,4 +97,5 @@ public interface ApiProjectService {
 
 	public Map<String, Object> registProjectOssComponent(Map<String, Object> param, String referenceDiv);
 
+	public void processResetTab(String tabName, Project project, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense);
 }

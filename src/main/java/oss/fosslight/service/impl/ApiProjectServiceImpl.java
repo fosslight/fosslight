@@ -3468,4 +3468,35 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	    return responseMap;
 	}
+
+	public void processResetTab(String tabName, Project projectMaster, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense) {
+		Project project = new Project();
+		project.setPrjId(projectMaster.getPrjId());
+		switch(tabName) {
+			case "DEP":
+				project.setIdentificationSubStatusDep("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+				project.setCsvFile(projectMaster.getDepCsvFile());
+				project.setDepCsvFileId("");
+				projectService.registDepOss(ossComponents, ossComponentsLicense, project);
+
+				break;
+			case "SRC":
+				project.setIdentificationSubStatusSrc("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+				project.setCsvFile(projectMaster.getCsvFile());
+				project.setSrcCsvFileId("");
+				projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
+				break;
+			case "BIN":
+				project.setIdentificationSubStatusBin("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+				project.setCsvFile(projectMaster.getBinCsvFile());
+				project.setBinCsvFileId("");
+				projectService.registBinOss(ossComponents, ossComponentsLicense, project);
+				break;
+		}
+		projectService.existsAddList(project);
+		projectService.insertAddList(new ArrayList<Project>());
+	}
 }

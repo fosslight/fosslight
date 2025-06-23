@@ -580,8 +580,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> identificationReset(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
-            @ApiParam( value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
-            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name="tab_name") String tabName
+            @ApiParam( value = "Upload Target Tab Name (Valid Input: dep, src, bin, all)", required = true, allowableValues = "dep, src, bin, all")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin", "all"}) @PathVariable(name="tab_name") String tabName
     ){
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reset called by %s",prjId,tabName, userInfo.getUserId()));
@@ -609,36 +609,17 @@ public class ApiProjectV2Controller extends CoTopComponent {
         project.setCsvFileSeq(new ArrayList<T2File>());
 
         switch(tabName) {
+            case "ALL" :
+                apiProjectService.processResetTab("DEP", projectMaster, ossComponents, ossComponentsLicense);
+                apiProjectService.processResetTab("SRC", projectMaster, ossComponents, ossComponentsLicense);
+                apiProjectService.processResetTab("BIN", projectMaster, ossComponents, ossComponentsLicense);
+                break;
             case "DEP":
-                project.setIdentificationSubStatusDep("Y");
-                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-                project.setCsvFile(projectMaster.getDepCsvFile());
-                project.setDepCsvFileId("");
-                projectService.registDepOss(ossComponents, ossComponentsLicense, project);
-
-                break;
             case "SRC":
-                project.setIdentificationSubStatusSrc("Y");
-                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
-                project.setCsvFile(projectMaster.getCsvFile());
-                project.setSrcCsvFileId("");
-                projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
-                break;
             case "BIN":
-                project.setIdentificationSubStatusBin("Y");
-                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
-                project.setCsvFile(projectMaster.getBinCsvFile());
-                project.setBinCsvFileId("");
-                projectService.registBinOss(ossComponents, ossComponentsLicense, project);
+                apiProjectService.processResetTab(tabName, projectMaster, ossComponents, ossComponentsLicense);
                 break;
         }
-
-//        projectService.deleteUploadFile(project);
-
-        // reset load list
-        projectService.existsAddList(project);
-        projectService.insertAddList(new ArrayList<Project>());
-
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
