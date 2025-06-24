@@ -1944,7 +1944,13 @@
                                 } else {
                                     alertify.alert([[#{msg.common.success}]], function () {
                                     	activeDeleteTabInFrame();
-                                        createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
+                                    	
+                                    	let callBackUrl = '/project/verification/';
+                                    	if (!$(".comment-area").is(":visible")) {
+                                    		callBackUrl += "2/";
+                                    	}
+                                    	callBackUrl += [[${project.prjId}]];
+                                        createTabInFrame([[${project.prjId}]] + '_Packaging', callBackUrl);
                                     });
                                 }
                             },
@@ -3904,7 +3910,7 @@
                 $("#verifyCreator").text(vCreated);
 
                 var initDiv = [[${initDiv}]];
-                var tabDefaultIdx = (datas.ossList.length < 1 || initDiv != null) ? "1" : "0";
+                var tabDefaultIdx = (datas.ossList.length < 1 || (initDiv != null && "1" == initDiv)) ? "1" : "0";
                 
     			if ("1" == tabDefaultIdx) {
     				$("#tabMenuNotice").click();
@@ -3918,6 +3924,10 @@
     				$("#btnSavePath").show();
     				$("#verify").show();
     				$("#save").hide();
+    			}
+    			
+    			if (initDiv != null && "2" == initDiv) {
+    				fn_comment.activateCommentArea();
     			}
             },
             checkStatus : function(){
