@@ -2238,6 +2238,8 @@
                     	var _iframeUrl = "/project/verification/";
                     	if (activeTab != null) {
                     		_iframeUrl += "1/";
+                    	} else if (!$(".comment-area").is(":visible")) {
+                    		_iframeUrl += "2/";
                     	}
                     	_iframeUrl += [[${project.prjId}]];
                     	
