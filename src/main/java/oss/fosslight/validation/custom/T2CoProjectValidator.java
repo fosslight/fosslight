@@ -1600,7 +1600,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	private boolean hasOssLicense2(OssMaster ossMaster, List<ProjectIdentification> list, boolean detectedLicenseCheck) {
 		// license nick name을 포함한 라이선스 명 list를 구성
 		List<String> checkLicenseNameList = new ArrayList<>(); // declared License
-		List<String> detectedLicenseList = ossMaster.getDetectedLicenses(); // detected License
+		List<String> detectedLicenseList = ossMaster != null ? ossMaster.getDetectedLicenses() : null; // detected License
 		
 		if (detectedLicenseList == null) {
 			detectedLicenseList = new ArrayList<>();
