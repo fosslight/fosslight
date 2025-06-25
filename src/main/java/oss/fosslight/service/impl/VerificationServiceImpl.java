@@ -129,6 +129,25 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public List<OssComponents> getVerifyOssList(Project projectMaster) {
 		List<OssComponents> componentList = verificationMapper.selectVerifyOssList(projectMaster);
+		if (!CollectionUtils.isEmpty(componentList) && CoConstDef.FLAG_YES.equals(avoidNull(projectMaster.getNetworkServerFlag()))) {
+			List<OssComponents> collateOssComponentList = null;
+			for (OssComponents ossComponent : componentList) {
+				String restrictionStr = ossComponent.getRestriction();
+				if (!isEmpty(restrictionStr)) {
+					String[] restrictions = restrictionStr.split(",");
+					for (String restriction : restrictions) {
+						if (CoConstDef.CD_LICENSE_NETWORK_RESTRICTION.equals(restriction.trim())) {
+							if (collateOssComponentList == null) {
+								collateOssComponentList = new ArrayList<>();
+							}
+							collateOssComponentList.add(ossComponent);
+							break;
+						}
+					}
+				}
+			}
+			componentList = collateOssComponentList;
+		}
 		
 		if (componentList != null && !componentList.isEmpty() && componentList.get(0) == null) {
 			componentList = new ArrayList<>();
@@ -1700,10 +1719,28 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public boolean checkNetworkServer(String prjId) {
 		OssNotice ossNotice = new OssNotice();
 		ossNotice.setPrjId(prjId);
-		ossNotice.setNetworkServerFlag(CoConstDef.FLAG_YES);
 		List<OssComponents> ossComponentList = verificationMapper.selectVerificationNotice(ossNotice);
 		
-		return ossComponentList == null || ossComponentList.isEmpty();
+		List<OssComponents> collateOssComponentList = null;
+		if (!CollectionUtils.isEmpty(ossComponentList)) {
+			for (OssComponents ossComponent : ossComponentList) {
+				String restrictionStr = ossComponent.getRestriction();
+				if (!isEmpty(restrictionStr)) {
+					String[] restrictions = restrictionStr.split(",");
+					for (String restriction : restrictions) {
+						if (!isEmpty(restriction) && CoConstDef.CD_LICENSE_NETWORK_RESTRICTION.equals(restriction.trim())) {
+							if (collateOssComponentList == null) {
+								collateOssComponentList = new ArrayList<>();
+							}
+							collateOssComponentList.add(ossComponent);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return CollectionUtils.isEmpty(collateOssComponentList);
 	}
 	
 	@Transactional
@@ -2458,6 +2495,27 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 		
 		List<OssComponents> ossComponentList = verificationMapper.selectVerificationNotice(ossNotice);
+		if (CoConstDef.FLAG_YES.equals(avoidNull(ossNotice.getNetworkServerFlag()))) {
+			List<OssComponents> collateOssComponentList = null;
+			if (!CollectionUtils.isEmpty(ossComponentList)) {
+				for (OssComponents ossComponent : ossComponentList) {
+					String restrictionStr = ossComponent.getRestriction();
+					if (!isEmpty(restrictionStr)) {
+						String[] restrictions = restrictionStr.split(",");
+						for (String restriction : restrictions) {
+							if (CoConstDef.CD_LICENSE_NETWORK_RESTRICTION.equals(restriction.trim())) {
+								if (collateOssComponentList == null) {
+									collateOssComponentList = new ArrayList<>();
+								}
+								collateOssComponentList.add(ossComponent);
+								break;
+							}
+						}
+					}
+				}
+				ossComponentList = collateOssComponentList;
+			}
+		}
 		
 		// TYPE별 구분
 		Map<String, OssComponents> noticeInfo = new HashMap<>();

@@ -39,12 +39,6 @@ public interface LicenseMapper {
 	
 	int deleteLicenseNickname(LicenseMaster licenseMaster);									//특정 라이센스 닉네임 전체 삭제
 	
-	String existNetworkServerLicense(String licenseId);
-	
-	int insertNetworkServerLicense(String licenseId);
-	
-	int deleteNetworkServerLicense(String licenseId);
-	
 	List<String> getOssListWithLicenseForTypeCheck(String licenseId);
 	
 	void insertLicenseMaster(LicenseMaster licenseMaster);									//라이센스 등록

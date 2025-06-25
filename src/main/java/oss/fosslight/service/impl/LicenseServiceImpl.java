@@ -297,36 +297,6 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			
 			log.info("OSDD license update result : " + avoidNull(result));
 		}
-		
-		if (avoidNull(bean.getRestriction()).contains(CoConstDef.CD_LICENSE_NETWORK_RESTRICTION)){
-			registNetworkServerLicense(bean.getLicenseId(), "DEL");
-		}
-	}
-	
-	@Override
-	public void registNetworkServerLicense(String licenseId, String type) {
-		String CD_DTL_NO = licenseMapper.existNetworkServerLicense(licenseId);
-		
-		switch(type){
-			case "NEW":
-				licenseMapper.insertNetworkServerLicense(licenseId);
-				
-				break;
-			case "INS":
-				if (isEmpty(CD_DTL_NO)){
-					licenseMapper.insertNetworkServerLicense(licenseId);
-				}
-				
-				break;
-			case "DEL":
-				if (!isEmpty(CD_DTL_NO)){
-					licenseMapper.deleteNetworkServerLicense(licenseId);
-				}
-				
-				break;
-			default:
-				break;
-		}
 	}
 	
 	@Override
@@ -744,31 +714,6 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			CoMailManager.getInstance().sendMail(mailBean);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-		}
-
-		try{
-			// RESTRICTION(2) => Network Redistribution
-			String netWorkRestriction = CoConstDef.CD_LICENSE_NETWORK_RESTRICTION;
-
-			if(isNew) {
-				if(licenseMaster.getRestriction().contains(netWorkRestriction)){
-					registNetworkServerLicense(licenseMaster.getLicenseId(), "NEW");
-				}
-			} else {
-				String type = "";
-
-				if(beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "";
-				}else if(beforeBean.getRestriction().contains(netWorkRestriction) && !afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "DEL";
-				}else if(!beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "INS";
-				}
-
-				registNetworkServerLicense(licenseMaster.getLicenseId(), type);
-			}
-		} catch (Exception e){
-
 		}
 
 		resMap.put("resCd", resCd);

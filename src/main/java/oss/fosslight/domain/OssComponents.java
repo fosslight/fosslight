@@ -120,6 +120,7 @@ public class OssComponents extends ComBean implements Serializable {
 	private String refOssName;
 	
 	private String packageUrl;
+	private String restriction;
 	
 	public String getPublDate() {
 		return publDate;
@@ -729,5 +730,13 @@ public class OssComponents extends ComBean implements Serializable {
 
 	public void setPackageUrl(String packageUrl) {
 		this.packageUrl = packageUrl;
+	}
+
+	public String getRestriction() {
+		return restriction;
+	}
+
+	public void setRestriction(String restriction) {
+		this.restriction = restriction;
 	}
 }

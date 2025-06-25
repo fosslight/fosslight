@@ -31,8 +31,6 @@ public interface LicenseService extends HistoryConfig{
 	
 	void deleteDistributeLicense(LicenseMaster bean, boolean distributionFlag);
 	
-	void registNetworkServerLicense(String licenseId, String type);
-	
 	List<OssMaster> updateOssLicenseType(String licenseId);
 	
 	boolean distributeLicense(String licenseId, boolean distributionFlag);
