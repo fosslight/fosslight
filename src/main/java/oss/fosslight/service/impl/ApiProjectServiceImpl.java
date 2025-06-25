@@ -106,7 +106,6 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
 				map.put("EDITORS", map.get("editors") == null ? "" : map.get("editors").toString());
-//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
 			}
 		}
 		
