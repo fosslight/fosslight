@@ -761,14 +761,17 @@
 	<update id="truncateNvdDataV3Temp">TRUNCATE TABLE NVD_DATA_V3_TEMP</update>
 	<update id="truncateNvdDataConfigurationsTemp">TRUNCATE TABLE NVD_DATA_CONFIGURATIONS_TEMP</update>
 	<update id="truncateNvdDataPatchLinkTemp">TRUNCATE TABLE NVD_DATA_PATCH_LINK_TEMP</update>
+	<update id="truncateNvdDataRunningOnWithTemp">TRUNCATE TABLE NVD_DATA_RUNNING_ON_WITH_TEMP</update>
 	
     <update id="truncateNvdDataConfigurations">TRUNCATE TABLE NVD_DATA_CONFIGURATIONS</update>
     <update id="truncateNvdDataPatchLink">TRUNCATE TABLE NVD_DATA_PATCH_LINK</update>
+    <update id="truncateNvdDataRunningOnWith">TRUNCATE TABLE NVD_DATA_RUNNING_ON_WITH</update>
     
 	<insert id="copyNvdCveV3FromTemp">INSERT INTO NVD_CVE_V3 SELECT * FROM NVD_CVE_V3_TEMP</insert>
 	<insert id="copyNvdDataV3FromTemp">INSERT INTO NVD_DATA_V3 SELECT * FROM NVD_DATA_V3_TEMP</insert>
 	<insert id="copyNvdDataConfigurationsFromTemp">INSERT INTO NVD_DATA_CONFIGURATIONS SELECT * FROM NVD_DATA_CONFIGURATIONS_TEMP</insert>
 	<insert id="copyNvdDataPatchLinkFromTemp">INSERT INTO NVD_DATA_PATCH_LINK SELECT * FROM NVD_DATA_PATCH_LINK_TEMP</insert>
+	<insert id="copyNvdDataRunningOnWithFromTemp">INSERT INTO NVD_DATA_RUNNING_ON_WITH SELECT * FROM NVD_DATA_RUNNING_ON_WITH_TEMP</insert>
 	
 	<update id="createTableNvdDavaScoreV3Temp">CREATE TABLE IF NOT EXISTS NVD_DATA_SCORE_V3_TEMP LIKE NVD_DATA_SCORE_V3</update>
 	
@@ -827,4 +830,31 @@
     	SET CVSS_SCORE = #{cvssScore}, BASE_METRIC = #{baseMetric}, VULN_SUMMARY = #{summary}, MODI_DATE = #{modiDate}, REG_DATE = NOW()
     	WHERE CVE_ID = #{cveId}
     </update>
+    
+    <insert id="insertNvdDataRunningOnWithTemp" parameterType="HashMap">
+    	INSERT INTO NVD_DATA_RUNNING_ON_WITH_TEMP (
+    		MATCH_CRITERIA_ID
+    		, CVE_ID
+    		, VENDOR
+    		, PRODUCT
+    		, REL_MATCH_CRITERIA
+    	) VALUE (
+    		#{matchCriteriaId}
+    		, #{cveId}
+    		, #{vendor}
+    		, #{product}
+    		, #{relMatchCriteria}
+    	) ON DUPLICATE KEY UPDATE
+    		MATCH_CRITERIA_ID = #{matchCriteriaId}
+    		, CVE_ID = #{cveId}
+    		, VENDOR = #{vendor}
+    		, PRODUCT = #{product}
+    		, REL_MATCH_CRITERIA = #{relMatchCriteria}
+    </insert>
+    
+    <delete id="deleteNvdDataRunningOnWithExistingInTemp">
+    	DELETE T1
+    	FROM NVD_DATA_RUNNING_ON_WITH T1
+    	WHERE EXISTS (SELECT 1 FROM NVD_DATA_RUNNING_ON_WITH_TEMP TMP WHERE TMP.CVE_ID = T1.CVE_ID) 
+    </delete>
 </mapper>

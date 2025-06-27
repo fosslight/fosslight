@@ -422,4 +422,6 @@ public interface ProjectMapper {
 	List<OssComponentsLicense> selectOssComponentsIdLicenseList(OssComponents ossComponents);
 	
 	void copyProjectAddList(Project project);
+
+	List<String> getVersionsForCpeNames(@Param("matchCriteriaId") String matchCriteriaId);
 }

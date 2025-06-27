@@ -159,6 +159,7 @@ public class NvdDataService {
 		List<Map<String, Object>> vulnerabilities = null;
 		Map<String, Object> cveInfo = null;
 		List<Map<String, Object>> cpe_match_all = null;
+		List<String> cpe_match_running_on_with = null;
 		List<Map<String, Object>> cvePatchList = null;
 		schlog.info("nvdCveDataApiJob start");
 
@@ -249,11 +250,6 @@ public class NvdDataService {
 								List<String> matchCriteriaIdDuplicatedList = new ArrayList<>();
 
 								for (Map<String, Object> cpe_match_data : cpe_match_all) {
-									boolean vulnerable = (boolean) cpe_match_data.get("vulnerable");
-									if (!vulnerable) {
-										continue;
-									}
-									
 									// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
 									// Version Range 조건 취득
 									// 검색 조건 설정
@@ -267,7 +263,7 @@ public class NvdDataService {
 									// configurations의 operator (AND/OR)에 따라 동일한 CVE ID에 matchCriteriaId 가 여러번 등장할 수 있음
 									// FL-Hub에서는 operator 조건을 확인하지 않기 때문에, CVEID + matchCriteriaId를 PK로 사용하는 경우 중복 오류가 발생할 수 있음
 									// ex) https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2001-1104
-									if(matchCriteriaIdDuplicatedList.contains(cveId + "-" + matchCriteriaId)) {
+									if (matchCriteriaIdDuplicatedList.contains(cveId + "-" + matchCriteriaId)) {
 										continue;
 									}
 									matchCriteriaIdDuplicatedList.add(cveId + "-" + matchCriteriaId);
@@ -344,6 +340,27 @@ public class NvdDataService {
 									mapper.insertNvdDataConfigurationsTemp(configurationInsertParam);
 								}
 
+								cpe_match_running_on_with = (List<String>) cveInfo.get("cpe_match_running_on_with");
+								if (!CollectionUtils.isEmpty(cpe_match_running_on_with)) {
+									for (String key : cpe_match_running_on_with) {
+										String vulnerableKey = key.split("[|]")[0];
+										String notVulnerableCriteria = key.split("[|]")[1];
+										
+										final Map<String, Object> notVulnInsertParam = new HashMap<>();
+										final String[] criteriaArr = notVulnerableCriteria.split(":");
+										
+										notVulnInsertParam.put("matchCriteriaId", vulnerableKey);
+										notVulnInsertParam.put("cveId", cveId);
+										notVulnInsertParam.put("vendor", criteriaArr[3]);
+										notVulnInsertParam.put("product", criteriaArr[4]);
+										notVulnInsertParam.put("relMatchCriteria", notVulnerableCriteria);
+										
+										mapper.insertNvdDataRunningOnWithTemp(notVulnInsertParam);
+									}
+									
+									cpe_match_running_on_with = null;
+								}
+								
 								cvePatchList = (List<Map<String, Object>>) cveInfo.get("cvePatchList");
 								if (!CollectionUtils.isEmpty(cvePatchList)) {
 									for (Map<String, Object> cvePatchInfo : cvePatchList) {
@@ -379,22 +396,26 @@ public class NvdDataService {
 				nvdDataMapper.resetNvdDataV3();
 				nvdDataMapper.truncateNvdDataConfigurations();
 				nvdDataMapper.truncateNvdDataPatchLink();
+				nvdDataMapper.truncateNvdDataRunningOnWith();
 			} else {
 				// 최신정보 재등록을 위한 Copy 대상 data 삭제
 				nvdDataMapper.deleteNvdCveV3ExistingInTemp();
 				nvdDataMapper.deleteNvdDataV3ExistingInTemp();
 				nvdDataMapper.deleteNvdDataConfigurationsExistingInTemp();
 				nvdDataMapper.deleteNvdDataPatchLinkExistingInTemp();
+				nvdDataMapper.deleteNvdDataRunningOnWithExistingInTemp();
 			}
 			nvdDataMapper.copyNvdCveV3FromTemp();
 			nvdDataMapper.copyNvdDataV3FromTemp();
 			nvdDataMapper.copyNvdDataConfigurationsFromTemp();
 			nvdDataMapper.copyNvdDataPatchLinkFromTemp();
+			nvdDataMapper.copyNvdDataRunningOnWithFromTemp();
 
 			nvdDataMapper.truncateNvdCveV3Temp();
 			nvdDataMapper.truncateNvdDataV3Temp();
 			nvdDataMapper.truncateNvdDataConfigurationsTemp();
 			nvdDataMapper.truncateNvdDataPatchLinkTemp();
+			nvdDataMapper.truncateNvdDataRunningOnWithTemp();
 			
 			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
 			if (vendorProductNvdDataV3Cnt > 0) {
@@ -483,14 +504,38 @@ public class NvdDataService {
 		
 		List<Map<String, String>> ossList = new ArrayList<>();
 		List<Map<String, Object>> cpe_match_all = new ArrayList<>();
-	
+		List<String> cpe_match_running_on_with_list = new ArrayList<>();
+		
 		if (cveItem.containsKey("configurations")) {
 			for (Map<String, Object> configurations : (List<Map<String, Object>>) cveItem.get("configurations")) {
+				List<String> vulnMatchCrtrIdList = new ArrayList<>();
+				List<String> notVulnMatchCriteriaList = new ArrayList<>();
+				
 				// 정의된 모든 cpe match 정보
 				for (Map<String, Object> node_data : (List<Map<String, Object>>) configurations.get("nodes")) {
 					// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
 					if (node_data.containsKey("cpeMatch")) {
-						cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpeMatch"));
+						List<Map<String, Object>> cpeMatchList = (List<Map<String, Object>>) node_data.get("cpeMatch");
+						for (Map<String, Object> cpeMatch : cpeMatchList) {
+							String matchCriteriaId = (String) cpeMatch.get("matchCriteriaId");
+							if ((boolean) cpeMatch.get("vulnerable")) {
+								vulnMatchCrtrIdList.add(matchCriteriaId);
+								cpe_match_all.add(cpeMatch);
+							} else {
+								notVulnMatchCriteriaList.add((String) cpeMatch.get("criteria"));
+							}
+						}
+					}
+				}
+				
+				if (!CollectionUtils.isEmpty(notVulnMatchCriteriaList)) {
+					for (String vulnMatchCrtrId : vulnMatchCrtrIdList) {
+						for (String notVulnMatchCriteria : notVulnMatchCriteriaList) {
+							String key = vulnMatchCrtrId + "|" + notVulnMatchCriteria;
+							if (!cpe_match_running_on_with_list.contains(key)) {
+								cpe_match_running_on_with_list.add(key);
+							}
+						}
 					}
 				}
 			}
@@ -523,6 +568,7 @@ public class NvdDataService {
 		resultMap.put("summary", descriptionStr);
 		resultMap.put("baseMetric", baseMetric);
 		resultMap.put("cpe_match_all", cpe_match_all);
+		resultMap.put("cpe_match_running_on_with", cpe_match_running_on_with_list);
 		resultMap.put("cvePatchList", cvePatchList);
     
 		return resultMap;
