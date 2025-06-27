@@ -5,6 +5,7 @@
 
 package oss.fosslight.controller;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -754,5 +755,10 @@ public class LicenseController extends CoTopComponent {
 		}
 
 		return makeJsonResponseHeader();
+	}
+
+	@GetMapping(value = LICENSE.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String licenseId) throws IOException {
+		res.sendRedirect(req.getContextPath() + "/license/edit/" + licenseId);
 	}
 }

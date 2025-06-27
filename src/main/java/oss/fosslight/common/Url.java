@@ -112,6 +112,7 @@ public final class Url {
 		public static final String LICENSE_BULK_REG_JSP = TILES_ROOT + PATH + "/licenseBulkReg";
 		public static final String CSV_FILE = PATH + "/csvFile";
 		public static final String BULK_VALIDATION = PATH + "/bulkValidation";
+		public static final String SHARE_URL = PATH + "/shareUrl/{licenseId}";
 	}
 	
 	public static final class EXCELDOWNLOAD {
@@ -264,6 +265,7 @@ public final class Url {
 		
 		public static final String CHECK_OSS_VERSION_DIFF = PATH + "/checkOssVersionDiff";
 		public static final String CHECK_OSS_NAME_DIFF = PATH + "/checkOssNameDiff";
+		public static final String SHARE_URL = PATH + "/shareUrl/{ossId}";
 	}
 	
 	public static final class PROJECT {

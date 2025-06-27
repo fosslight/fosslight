@@ -2758,6 +2758,57 @@
 	}
 
 	var fn = {
+        shareUrl : function(){
+            var copyUrl = "";
+            var protocol = window.location.protocol;
+            var host =  window.location.host;
+            copyUrl = protocol + "//" + host + "/oss/shareUrl/" + [[${ossId}]];
+            copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
+            $("#copyUrl").val(copyUrl);
+
+            //launch it.
+            var btnHtml 	= 	'<div class="row form-group">';
+            btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+            btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+            btnHtml 		+= 	'	</div>';
+            btnHtml 		+= 	'</div>';
+            btnHtml 		+= 	'<div class="row float-right custom-layout">';
+            btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+            btnHtml 		+= 	'</div>';
+
+            if(!alertify.myAlert){
+                //define a new dialog
+                alertify.dialog('myAlert',function factory(){
+                    return{
+                        main:function(message){
+                            this.message = message;
+                        },
+                        setup:function(){
+                            return {
+                                focus: { element:0 }
+                            };
+                        },
+                        prepare:function(){
+                            this.setContent(this.message);
+                        }
+                    }});
+            }
+
+            alertify.myAlert(btnHtml);
+        },
+        copyUrl : function(target){
+            $('#copyUrl').attr('type', 'text');
+            $('#copyUrl').select();
+            var copyFlag = document.execCommand('copy');
+            $('#copyUrl').attr('type', 'hidden');
+
+            if (copyFlag) {
+                $('.ajs-close').trigger("click");
+                alertify.success([[#{msg.common.success}]]);
+            } else {
+                alertify.error([[#{msg.common.valid}]]);
+            }
+        },
 		urlDuplication : function(target){
 			var value = $(target).val().trim();
 			$(target).val(value);

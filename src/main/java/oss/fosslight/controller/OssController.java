@@ -5,6 +5,7 @@
 
 package oss.fosslight.controller;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -2451,5 +2452,10 @@ public class OssController extends CoTopComponent{
 		resMap.put("res", true);
 		resMap.put("value", ossWithStatusList);
 		return makeJsonResponseHeader(resMap);
+	}
+
+	@GetMapping(value = OSS.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String ossId) throws IOException {
+		res.sendRedirect(req.getContextPath() + "/oss/edit/" + ossId);
 	}
 }
