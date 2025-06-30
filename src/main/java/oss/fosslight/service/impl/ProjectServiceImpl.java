@@ -4970,12 +4970,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public Map<String, Object> getPartnerOssList(OssComponents ossComponents) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
+		String referenceId = ossComponents.getReferenceId();
 		
 		ossComponents.setReferenceDiv(avoidNull(ossComponents.getReferenceDiv(), CoConstDef.CD_DTL_COMPONENT_PARTNER));
 		List<OssComponents> list = projectMapper.getPartnerOssList(ossComponents);
 		ProjectIdentification param = new ProjectIdentification();
 		
 		for (OssComponents oc : list){
+			if (!isEmpty(referenceId) && isEmpty(oc.getRefPartnerId())) {
+				oc.setRefPartnerId(referenceId);
+			}
 			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())){
 				param.addComponentIdList(oc.getComponentId());
 			}
@@ -6789,7 +6793,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		OssComponents component = new OssComponents();
 		component.setReferenceId(project.getRefPartnerId());
-		component.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		component.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 		
 		// select partner Data
 		Map<String, Object> resultMap = getPartnerOssList(component);
