@@ -150,6 +150,7 @@
                                     </div>
                                     <div class="col-md-5">
                                         <label for="secPersonNm" th:text="#{msg.common.field.security.person}"></label>
+                                        <i class="fas fa-info-circle fa-lg ml-1 icon-light-gray" id="helpLink_securityPerson" data-html="true" data-placement="right"></i>
                                         <input type="text" id="secPersonNm" name="secPersonNm" th:value="${project?.secPersonNm}" class="form-control autoComSecPerson" th:disabled="${isReadOnly}">
                                         <input type="hidden" name="secPerson" th:value="${project?.secPerson}" />
                                     </div>

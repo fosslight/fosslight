@@ -49,3 +49,11 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_RUNNING_ON_WITH` (
 	`REL_MATCH_CRITERIA` VARCHAR(128) NOT NULL,
 	PRIMARY KEY (`MATCH_CRITERIA_ID`, `CVE_ID`, `VENDOR`, `PRODUCT`, `REL_MATCH_CRITERIA`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `USE_YN`, `URL`) VALUES ('Project_List_BasicInfo_Security_Person', 'Project_List', '<div style="background:#eeeeee; border:1px solid #cccccc; padding:5px 10px">&bull; 입력한 값으로 PSMS에서 생성되는 이슈의 assignee가 설정됩니다.<br />
+&bull; FOSSLight Hub에서 발송되는 Security 메일을 받으실 수 있습니다.</div>
+
+<p>&nbsp;</p>
+
+<div style="background:#eeeeee; border:1px solid #cccccc; padding:5px 10px">&bull;The assignee of the issue created in PSMS is set with the entered value.<br />
+&bull; You can receive Security emails sent from FOSSLight Hub.</div>', 'Y', NULL);
