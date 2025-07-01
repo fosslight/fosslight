@@ -1095,6 +1095,7 @@
 			, A.SECMAIL_YN
 		    , A.SECMAIL_DESC
 		    , A.SECPERSON
+		    , E.USER_NAME AS secPersonNm
 			, A.REVIEWER 
 			, A.USE_YN 
 			, A.COPY_PRJ_ID
@@ -1179,6 +1180,7 @@
 		                    ON A.DIVISION = D.CD_DTL_NO
 						   AND D.CD_NO = '200'
 						   AND D.USE_YN = 'Y'
+			LEFT JOIN T2_USERS E ON A.SECPERSON = E.USER_ID
 		 WHERE A.PRJ_ID = #{prjId} 
 	</select>
 	
@@ -1186,7 +1188,7 @@
 		SELECT T1.*,
 			   T2.NOTICE_TYPE,
 			   T2.NOTICE_TYPE_ETC,
-			 
+			   T3.USER_NAME AS secPersonNm,
 			 /* 다운로드 허용 플래그 */
 			 <![CDATA[
 			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x01, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_HTML_YN,
@@ -1201,6 +1203,7 @@
 			 ]]>
 		  FROM PROJECT_MASTER T1
 		  LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
+		  LEFT JOIN T2_USERS T3 ON T1.SECPERSON = T3.USER_ID
 		 WHERE T1.USE_YN = 'Y'
 		   AND T1.PRJ_ID = #{prjId}
 	</select>

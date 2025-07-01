@@ -2690,7 +2690,8 @@
 		SELECT T1.*,
 			   T2.NOTICE_TYPE,
 			   T2.NOTICE_TYPE_ETC,
-			 /* 다운로드 허용 플래그 */
+			   T3.USER_NAME AS secPersonNm,
+			/* 다운로드 허용 플래그 */
 			 <![CDATA[
 			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x01, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_HTML_YN,
 			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x02, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_TEXT_YN,
@@ -2706,6 +2707,7 @@
 			 ]]>
 		  FROM PROJECT_MASTER T1
 		  LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
+		  LEFT JOIN T2_USERS T3 ON T1.SECPERSON = T3.USER_ID
 		WHERE T1.USE_YN = 'Y'
 		   AND T1.PRJ_ID = #{prjId}
 	</select>
@@ -5182,7 +5184,11 @@
 	</select>
 	
 	<select id="getProjectBasicInfo" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
-		SELECT * FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}
+		SELECT A.*,
+		       B.USER_NAME AS secPersonNm
+		FROM PROJECT_MASTER A
+		    LEFT JOIN T2_USERS B ON A.SECPERSON = B.USER_ID
+		WHERE PRJ_ID = #{prjId}
 	</select>
 	
 	<select id="selectModelInfoList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">

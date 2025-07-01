@@ -1104,7 +1104,8 @@ public class ProjectController extends CoTopComponent {
 		String copy = req.getParameter("copy");
 		String confirmStatusCopy = req.getParameter("confirmStatusCopy");
 		String creatorIdByName = null;
-		
+		String secIdByName = null;
+
 		if (CommonFunction.isAdmin() && !isNew && !"true".equals(copy)) {
 			if (!isEmpty(project.getCreatorNm())) {
 				List<T2Users> userList = userService.getUserListByName(project.getCreatorNm());
@@ -1130,9 +1131,9 @@ public class ProjectController extends CoTopComponent {
 				if (userList != null) {
 					for (T2Users _bean : userList) {
 						if (_bean.getUserId().equals(project.getSecPerson())) {
-							creatorIdByName = _bean.getUserId();
+							secIdByName = _bean.getUserId();
 
-							if (!creatorIdByName.equals(project.getSecPerson())) {
+							if (!secIdByName.equals(project.getSecPerson())) {
 								project.setSecPerson(_bean.getUserId());
 							}
 

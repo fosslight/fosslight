@@ -5210,9 +5210,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			after = avoidNull(afterBean.getSecPersonNm()).replaceAll("(\r\n|\r|\n|\n\r)", "");
 
 			if (!avoidNull(beforeBean.getSecPersonNm()).equals(avoidNull(afterBean.getSecPersonNm())) || !before.equals(after)) {
-				comment += "<p><strong>Security Responsible</strong><br />";
-				comment += "Before : " + beforeBean.getSecPersonNm() + "<br />";
-				comment += "After : <span style='background-color:yellow'>" + afterBean.getSecPersonNm() + "</span><br /></p>";
+				comment += "<p><strong>Security Responsible Person</strong><br />";
+				comment += "Before : " + avoidNull(beforeBean.getSecPersonNm()) + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + avoidNull(afterBean.getSecPersonNm()) + "</span><br /></p>";
 			}
 			
 			// Model Information
