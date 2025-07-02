@@ -2569,7 +2569,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						&& isEmpty(bean.getOssVersion())) {
 					if (!errMap.containsKey("OSS_VERSION." + bean.getGridId())) {
 						if (CoCodeManager.OSS_INFO_UPPER.containsKey((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
-							if (CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase()).getOssType().endsWith("1")) {
+							if (avoidNull(CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase()).getOssType()).contains("V")) {
 								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.REQUIRED");
 							}
 						}
