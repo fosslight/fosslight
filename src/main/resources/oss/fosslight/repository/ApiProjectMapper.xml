@@ -77,10 +77,18 @@
 					)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
-				AND EXISTS (SELECT 1 
-		                             FROM PROJECT_MODEL M 
-		                           WHERE T1.PRJ_ID = M.PRJ_ID 
-		                               AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+					AND EXISTS (SELECT 1 
+					                     FROM PROJECT_MODEL M 
+					                   WHERE T1.PRJ_ID = M.PRJ_ID 
+					                       AND MODEL_NAME = #{modelName})
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+					AND EXISTS (SELECT 1 
+					                     FROM PROJECT_MODEL M 
+					                   WHERE T1.PRJ_ID = M.PRJ_ID 
+					                       AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+				</if>
 			</if>
 		) A
 		WHERE 1=1
@@ -184,10 +192,18 @@
 			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
-			AND EXISTS (SELECT 1
-			FROM PROJECT_MODEL M
-			WHERE T1.PRJ_ID = M.PRJ_ID
-			AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+				AND EXISTS (SELECT 1
+				FROM PROJECT_MODEL M
+				WHERE T1.PRJ_ID = M.PRJ_ID
+				AND MODEL_NAME = #{modelName})
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+				AND EXISTS (SELECT 1
+				FROM PROJECT_MODEL M
+				WHERE T1.PRJ_ID = M.PRJ_ID
+				AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+			</if>
 		</if>
 		) A
 		LEFT JOIN (

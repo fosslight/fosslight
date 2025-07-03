@@ -1034,8 +1034,12 @@ public final class Url {
 			/** API Project Add Editor */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_EDITOR		= "/projects/{id}/editors";
 
+			/** API Project Add Security Person */
+			public static final String FOSSLIGHT_API_PROJECT_ADD_SECURITY_PERSON		= "/projects/{id}/security-person";
 
-			/** API OSS Report upload */
+			/** API Project Set Security Mail */
+			public static final String FOSSLIGHT_API_PROJECT_SET_SECURITY_MAIL		= "/projects/{id}/security-mail";
+
 			public static final String FOSSLIGHT_API_IDENTIFICATION_RESET = "/projects/{id}/{tab_name}/reset";
 
 			/** API OSS Report upload */
