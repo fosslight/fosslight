@@ -112,7 +112,7 @@ var setGrid = {
 			, gridComplete : function() {
 				updateGridRowCount('list', 'pager');
 				
-				if (typeof beforePrjInfo !== "undefined" && typeof afterPrjInfo !== "undefined") {
+				if (typeof beforePrjInfo !== "undefined" && typeof afterPrjInfo !== "undefined" && $(".ui-state-default.ui-th-column-header.ui-th-ltr").length == 0) {
 					$('#list').jqGrid('setGroupHeaders', {
 						useColSpanStyle: true,
 						groupHeaders: [
