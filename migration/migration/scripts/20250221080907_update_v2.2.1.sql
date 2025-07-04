@@ -57,3 +57,5 @@ INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `USE_YN`, `URL`) V
 
 <div style="background:#eeeeee; border:1px solid #cccccc; padding:5px 10px">&bull;You can receive security emails from FOSSLight Hub with creator and editors.<br />
 &bull; You can receive Security emails sent from FOSSLight Hub.</div>', 'Y', NULL);
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+('104', '200', 'project_basic_info', '', 'SELECT T1.*, T3.USER_NAME AS SECPERSON_NM , T2.NOTICE_TYPE FROM PROJECT_MASTER T1 LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID LEFT JOIN T2_USERS T3 ON T1.SECPERSON = T3.USER_ID WHERE T1.PRJ_ID = ?', 3, 'Y');

@@ -3475,6 +3475,7 @@ public class CoMailManager extends CoTopComponent {
 			bean.setDivision(avoidNull((String) dataMap.get("DIVISION")));
 			bean.setSecMailYn(avoidNull((String) dataMap.get("SECMAIL_YN")));
 			bean.setSecMailDesc(avoidNull((String) dataMap.get("SECMAIL_DESC")));
+			bean.setSecPersonNm(avoidNull((String) dataMap.get("SECPERSON_NM")));
 			
 			packageFileName = (String) dataMap.get("PACKAGE_FILE_ID");
 			packageFileName2 = (String) dataMap.get("PACKAGE_FILE_ID2");
