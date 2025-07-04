@@ -832,7 +832,7 @@
                             $("#list_toppager_left").append(appendIcon);
                         }
 
-                        var setUpColumnButton = $('#setUpColumnButtonlistOss');
+                        var setUpColumnButton = $('#setUpColumnButtonOss');
                         /* columns licalization */
                         if (setUpColumnButton.length === 0) {
                             var savedColNames = [];
@@ -847,13 +847,13 @@
                             pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
 
                             // Check for click events occurring inside the menu area
-                            $("#setUpColumnMenulistOss").on("click", function(event) {
+                            $("#setUpColumnMenuOss").on("click", function(event) {
                                 event.stopPropagation();
                             });
 
-                            $('#setUpColumnButtonlistOss').on("click", function(event) {
+                            $('#setUpColumnButtonOss').on("click", function(event) {
                                 event.stopPropagation();
-                                $('#setUpColumnMenulistOss').toggleClass("show");
+                                $('#setUpColumnMenuOss').toggleClass("show");
                                 $(this).toggleClass("show");
                             })
                         }
