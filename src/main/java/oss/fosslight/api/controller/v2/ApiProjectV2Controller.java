@@ -1211,8 +1211,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         userService.changeSession(userInfo.getUserId());
 
-        // 프로젝트에 대한 편집 권한 확인
-        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
@@ -1292,8 +1291,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         userService.changeSession(userInfo.getUserId());
 
-        // 프로젝트에 대한 편집 권한 확인
-        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
