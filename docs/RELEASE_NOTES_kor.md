@@ -47,7 +47,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Vulnerability 메뉴가 조회되지 않는 이슈 수정
   - Grid table에 filter 검색 후에도 column width가 유지되도록 수정
   - OSS version 추가로 등록시 메일 발송되지 않는 이슈 수정
-    
+
 ## [2.1.1](https://github.com/fosslight/fosslight/releases/tag/v2.1.1) (2024-12-13)
 
 ### New
