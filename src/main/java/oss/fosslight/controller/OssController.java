@@ -2039,6 +2039,7 @@ public class OssController extends CoTopComponent{
 			
 			resultData.setLicenseName(analysisBean.getLicenseName());
 			resultData.setOssLicenses(ossLicenseList);
+			analysisBean.setOssLicenses(ossLicenseList);
 		} else {
 			resultData.setLicenseName("");
 		}

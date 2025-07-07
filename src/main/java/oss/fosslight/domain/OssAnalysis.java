@@ -6,6 +6,7 @@
 package oss.fosslight.domain;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +45,7 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String ossVersion;
 	private String licenseName;
 	private String licenseDiv;
+	private List<OssLicense> ossLicenses;
 	private String concludedLicense;
 	private String askalonoLicense;
 	private String scancodeLicense;

@@ -2147,6 +2147,10 @@
 				alertify.error([[#{msg.common.valid}]], 0);
 				// 커스텀 에러 메세지 
 				ossGridValidMsg(json, "_licenseChoice");
+			} else if (json.licenseName) {
+				alertify.error(json.licenseName, 0);
+				// 커스텀 에러 메세지 
+				ossGridValidMsg(json, "_licenseChoice");
 			} else {
 				alertify.error([[#{msg.oss.duplicated}]], 0);
 				// 커스텀 에러 메세지 
