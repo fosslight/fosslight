@@ -164,7 +164,11 @@ public class SessionController extends CoTopComponent{
 						T2Users user = userService.getUser(accountInfo);
 						String token = jwtTokenProvider.generateToken(user);
 						cookieUtil.addCookie(res, "X-FOSS-AUTH-TOKEN", token, 60*60*24);
-						res.sendRedirect(SSO_REDIRECT_URL + "/");
+						if (!isEmpty(user.getDefaultLocale())) {
+							res.sendRedirect(SSO_REDIRECT_URL + "/index?lang="+user.getDefaultLocale());
+						} else {
+							res.sendRedirect(SSO_REDIRECT_URL);
+						}
 					} else {
 						res.sendRedirect(redirectUrl);
 					}
