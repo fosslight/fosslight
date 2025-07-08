@@ -52,6 +52,7 @@ import oss.fosslight.repository.MailManagerMapper;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.FileService;
+import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.*;
 
@@ -68,6 +69,7 @@ public class CoMailManager extends CoTopComponent {
 	private static MailManagerMapper	mailManagerMapper;
 	private static T2UserMapper	userMapper;
 	private static ProjectService projectService;
+	private static PartnerService partnerService;
 	private static FileService fileService;
 	private static OssMapper ossMapper;
 	
@@ -103,6 +105,7 @@ public class CoMailManager extends CoTopComponent {
         	mailManagerMapper = (MailManagerMapper) getWebappContext().getBean(MailManagerMapper.class);
         	userMapper = (T2UserMapper) getWebappContext().getBean(T2UserMapper.class);
         	projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
+			partnerService = (PartnerService) getWebappContext().getBean(PartnerService.class);
         	fileService = (FileService) getWebappContext().getBean(FileService.class);
         	ossMapper = (OssMapper) getWebappContext().getBean(OssMapper.class);
             DEFAULT_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bcc"));
@@ -4006,29 +4009,49 @@ public class CoMailManager extends CoTopComponent {
 					CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {
 				String type = "";
 				String id = "";
+				ProjectIdentification prjBean = new ProjectIdentification();
+				Boolean isAttached = true;
+
 				if (CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType())) {
 					type = "bom";
 					id = coMail.getParamPrjId();
+					prjBean.setReferenceId(id);
+					prjBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					List<ProjectIdentification> list = projectService.getBomListExcel(prjBean);
+					if(list.size() == 0) {
+						isAttached = false;
+					}
 				} else if (CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {
 					type = "partnerBomList";
 					id = coMail.getParamPartnerId();
+					prjBean.setReferenceId(id);
+					prjBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+
+					Map<String, Object> map = partnerService.getIdentificationGridList(prjBean);
+					List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+					if(mainData.size() == 0 ) {
+						isAttached = false;
+					}
 				}
 
-				String downloadId = "";
-				downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, id, CommonFunction.emptyCheckProperty("export.template.path", "/template"));
-				if (!isEmpty(downloadId)) {
-					T2File fileInfo = fileService.selectFileInfo(downloadId);
-					String filePath = fileInfo.getLogiPath();
+				if(isAttached) {
+					String downloadId = "";
+					downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, id, CommonFunction.emptyCheckProperty("export.template.path", "/template"));
+					if (!isEmpty(downloadId)) {
+						T2File fileInfo = fileService.selectFileInfo(downloadId);
+						String filePath = fileInfo.getLogiPath();
 
-					if (!filePath.endsWith("/")) {
-						filePath += "/";
+						if (!filePath.endsWith("/")) {
+							filePath += "/";
+						}
+
+						filePath += fileInfo.getLogiNm();
+						DataSource dataSource = new FileDataSource(filePath);
+						helper.addAttachment(new String(fileInfo.getOrigNm().getBytes("UTF-8"), "UTF-8"), dataSource);
 					}
-
-					filePath += fileInfo.getLogiNm();
-					DataSource dataSource = new FileDataSource(filePath);
-					helper.addAttachment(new String(fileInfo.getOrigNm().getBytes("UTF-8"), "UTF-8"), dataSource);
 				}
 			}
+
 
 			// Email Send
 			mailSender.send(message);
