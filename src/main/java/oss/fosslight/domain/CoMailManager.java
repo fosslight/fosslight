@@ -2300,8 +2300,8 @@ public class CoMailManager extends CoTopComponent {
 			after.setSecMailDesc(appendChangeStyle(avoidNull(before.getSecMailDesc()), avoidNull(after.getSecMailDesc())));
 			after.setSecPersonNm(appendChangeStyle(avoidNull(before.getSecPersonNm()), avoidNull(after.getSecPersonNm())));
 			after.setPublicYn(appendChangeStyle(avoidNull(before.getPublicYn()), avoidNull(after.getPublicYn())));
-			
-			if (before.getModelList().size() > 0 || after.getModelList().size() > 0) {
+
+			if ((before.getModelList()!=null && before.getModelList().size() > 0)|| (after.getModelList() != null && after.getModelList().size() > 0)) {
 				String distributeTargetString = "";
 				List<String> _beforeList = new ArrayList<>();
 				if (before.getModelList().size() > 0){
@@ -2411,7 +2411,7 @@ public class CoMailManager extends CoTopComponent {
 				after.setModelListInfo(_newAfterList);
 			}
 			//watcher
-			if (before.getWatcherList().size() > 0 || after.getWatchers() != null) {
+			if ((before.getWatcherList() != null && before.getWatcherList().size() > 0) || (after.getWatcherList() != null && after.getWatchers() != null)) {
 
 				List<String> _beforeList = new ArrayList<>();
 				if (before.getWatcherList().size() > 0){
