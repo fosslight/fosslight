@@ -6,6 +6,54 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [2.3.0](https://github.com/fosslight/fosslight/releases/tag/v2.3.0) (2025-07-09)
+
+### New
+* 3rd Party
+  - FOSSLight Report export시 3rd party information sheet가 추가
+* Project
+  - Project Information에 보안 담당자를 입력할 수 있는 필드가 새롭게 추가
+    - Creator와 Editor와 함께 보안 담당자는 FOSSLight Hub에서 발송되는 vulnerability 관련 메일을 수신할 수 있음
+  - OSORI DB 정보 추가
+    - Pre-Review > Open Source, License 탭에 오소리(Osori)의 DB 정보를 참조할 수 있도록 추가
+  - DEP 탭 Dependency Tree View 제공
+    - FOSSLight Dependency Scanner를 통해 분석된 경우 각 의존성(dependency)의 관계를 트리 구조로 시각화하여 확인할 수 있음
+* API
+  - Security Responsible Person을 업데이트 할 수 있는 API 추가 (/api/v2/projects/{id}/security-person)
+  - Security Mail을 disable/enable 할 수 있는 API 추가.(/api/v2/projects/{id}/security-mail)
+* Common
+  - Custom Column 확대 적용
+    - Security 탭, Project/3rd Party Identification, Self-Check에 Custom Column 기능이 추가
+  - 탭 새로고침
+    - 상단에 열린 탭 클릭이 아닌 다른 방법으로 탭 진입시, refresh 팝업이 뜸
+
+### Changed
+* Project
+  - Packaging
+    - 기존에는 OSS Package 파일을 최대 4개까지 업로드 할 수 있었으나, 이번 업데이트를 통하여 업로드 가능한 파일의 개수가 5개로 확장
+  - SPDX, CycloneDX
+    - SPDX와 CycloneDX 문서가 생성될 때, DEP 탭의 Package URL 기준으로 출력이 되도록 변경
+    - OSS Name과 OSS Version이 같더라도, Package URL이 다르면 각각 출력이 되어 모든 Relationship이 표시
+  - CycloneDX 1.6 지원
+* API
+  - 사용자가 발급받은 Token 정보를 메일 뿐만 아니라, FOSSLight Hub 내 User Setting 메뉴에서도 확인
+  - GEP /api/v2/projects API의 return 값에 security mail, security person, editors, publicYn 정보 추가
+  - /api/v2/projects/{id}/{tab_name}/reports API에 bom탭을 save할 수 있는 "bomSave" parameter 추가
+  - GET /api/v2/projects API에 modelName과 exact match하는 정보를 찾을 수 있는 "modelNameExactYn" parameter 추가 
+  - /api/v2/projects/{id}/reset API에 모든 탭을 reset 할 수 있는 "all" 옵션 추가
+* License, OSS
+  - Share URL 버튼 추가
+  - level에 따른 Restirciton 아이콘 색깔 변경
+* Security
+  - cpe 하위에 보이는 Running on/with는 OS 정보가 표시되도록 추가
+* DataBase
+  - Column 추가
+  - PROJECT_MASTER: PACKAGE_FILE_ID5
+  - Column 삭제
+    - PROJECT_MASTER: PACKAGE_VUL_DOC_FILE_ID, VUL_DOC_SKIP_YN
+  - Table 추가
+    - NVD_DATA_RUNNING_ON_WITH_TEMP, NVD_DATA_RUNNING_ON_WITH
+
 ## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
 
 ### New

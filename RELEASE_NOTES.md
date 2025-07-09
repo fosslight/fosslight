@@ -6,6 +6,52 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.3.0](https://github.com/fosslight/fosslight/releases/tag/v2.3.0) (2025-07-09)
+
+### New
+* 3rd Party
+  - Added 3rd Party Information Sheet when exporting the FOSSLight Report.
+* Project
+  - A new field has been added to Project Information for specifying the Security Responsible Person.
+    - They will also receive security-related emails from FOSSLight Hub with creator and editors.
+  - OSORI DB Information Addition
+    - In the Pre-Review > Open Source and License tabs, users can now see  data from the OSORI database.
+  - DEP Tab Dependency Tree View
+    - When analysis is performed using the FOSSLight Dependency Scanner, the relationships between each dependency can be visualized in a tree structure.
+* API
+  - Added API to update the Security Responsible Person information.(/api/v2/projects/{id}/security-person)
+  - Added API to update the Security Mail information.(/api/v2/projects/{id}/security-mail)
+* Common
+  - Expanded Custom Column Feature
+    - The Custom Column feature is now available in the Security tab, Project/3rd Party Identification, and Self-Check sections.
+  - Tab refresh
+    - If you enter a tab in any way other than clicking on the open tab at the top, a refresh pop-up will appear. 
+
+### Changed
+* Project
+  - Packaging
+    - Previously, up to 4 OSS Package files could be uploaded, but with this update, the number of uploadable files has been increased to 5.
+  - SPDX, CycloneDX 
+    - When SPDX and CycloneDX documents are generated, the output will be based on the package URL in the DEP tab. 
+    - Even if the OSS Name and OSS Version are the same, each will be output separately if the package URLs are different, allowing all relationships to be displayed.
+  - Support CycloneDX 1.6
+* API
+  - In addition to email, the user can now check their issued Token information in the User Settings menu within the FOSSLight Hub.
+  - Added security mail, security person, editors and publicYn information in GEP /api/v2/projects API
+  - Added bomSave parameter in /api/v2/projects/{id}/{tab_name}/reports API
+  - Added modelNameExactYn parameter in GET /api/v2/projects API
+  - Added reset all option in /api/v2/projects/{id}/reset API
+* License, OSS
+  - Added Share URL button
+  - Change color of Restriction icon based on the level
+가* DataBase
+  -  Added column
+    - PROJECT_MASTER: PACKAGE_FILE_ID5
+  - Deleted columns
+    - PROJECT_MASTER: PACKAGE_VUL_DOC_FILE_ID, VUL_DOC_SKIP_YN
+  - Added table  
+    - NVD_DATA_RUNNING_ON_WITH_TEMP, NVD_DATA_RUNNING_ON_WITH 
+
 ## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
 
 ### New
