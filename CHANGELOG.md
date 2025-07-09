@@ -1,20 +1,35 @@
 # Changelog
 
-## v2.1.2 (01/01/1970)
-## Changes
-## 🚀 Features
+## v2.3.0 (09/07/2025)
+## What Changes
+- Release version 2.3.0  by @Min-Kyungsun, @FOSSLight-dev(#1096)
 
-- Release version 2.2.0 @Min-Kyungsun (#1093)
+## 🚀 Features
+- Added Security Responsible Person and Security Mail functionality in Project Information
+- Added Share Url in OSS, License
+- Added OSORI DB in Pre-Review > OpenSource, License 
+- Added Depedendency Tree View in DEP tab when using fosslight dependency scanner
+- Added 3rd party info sheet when export
+- Added Important Notes for OSS in the Review Report.
+- In packaging step,  the number of uploadable files has been increased to 5.
+- The user can now check their issued Token information in the User Settings menu within the FOSSLight Hub.
+- When SPDX and CycloneDX documents are generated, the output will be based on the package URL in the DEP tab.
+- The Custom Column feature is now available in the Security tab, Project/3rd Party Identification, and Self-Check sections.
+- Support CycloneDX 1.6
+- Added API to add security responsible person and to set security mail
+- Add tab refresh function
 
 ## 🐛 Hotfixes
-
-- Release version 2.2.0 @Min-Kyungsun (#1093)
+- Bug fix where saving duplicated license
+- Improved vulnerability data collection, synchronization, and mailing logic
+- Bug fix when export yaml file and spdx file
+- Fixed various management features including project/3rd party lists, copy, delete, permissions, search conditions
+- Improved multiple features related to 3rd party data loading, identification, status search, BOM comparison, Excel export
+- Fixed multiple bugs in OSS save, merge, bulk registration, license validation, NVD synchronization
 
 ## 🔧 Maintenance
-
-- Release version 2.2.0 @Min-Kyungsun (#1093)
-- Use httpstatus class to print http status code @parkcoldroad (#863)
-
+- Cleanup legacy file/code
+- Add physical file deletion logic when deleting project/3rd party
 ---
 
 ## v2.2.0 (19/02/2025)
