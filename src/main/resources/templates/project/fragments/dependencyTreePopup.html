@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<header>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- Google Fonts - Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome - Icon Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- AdminLTE - Free Bootstrap Admin Template -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
+    <!-- custom -->
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    
+	<!-- jQuery - JavaScript Library -->
+	<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    
+	<script th:src="@{/js/jquery.aCollapTable.min.js}"></script>
+</header>
+<body class="hold-transition sidebar-mini">
+	<div class="wrapper">
+    	<div class="custom-layout p-2">
+        	<div class="row p-3">
+        		<label for="inputName" class="ml-3" th:text="'The Dependency Tree supports a maximum depth of 5 levels.'"></label>
+            	<div class="col-md-12">
+                	<table class="table table-bordered collaptable" id="collaptable">
+                    	<thead>
+                        	<tr>
+                         		<th class="b-right" style="width: 60px;"></th>
+                         		<th class="b-left text-center">Dependency Tree (Package Url)
+                         			<button type="button" class="btn btn-light-blue btn-sm float-right mr-2 px-2" th:onclick="|dep_tree_fn.dependencyTreeCollapseAll()|"><i class="fas fa-minus mr-2"></i>Collapse All</button>
+                         			<button type="button" class="btn btn-light-blue btn-sm float-right mr-2 px-2" th:onclick="|dep_tree_fn.dependencyTreeExpandAll()|"><i class="fas fa-plus mr-2"></i>Expand All</button>
+                         		</th>
+	                     	</tr>
+                     	</thead>
+                        <tbody id="collaptableBody">
+                        </tbody>
+                 	</table>
+            	</div>
+        	</div>
+        	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+    	</div>
+    </div>
+    <script th:inline="javascript">
+    	$("#loading_wrap").show();
+    
+		$(function() {
+			dep_tree.load();
+		});
+	
+		var dep_tree = {
+			load : function () {
+				let treeData = [[${dependencyTreeMap}]];
+				if (typeof treeData.maxLvl !== "undefined") {
+					$("#collaptableBody").empty();
+					
+					let maxLvl = parseInt(treeData.maxLvl);
+					for (let i=0; i<=maxLvl; i++) {
+						let key = "lvl_" + i;
+						let tree = treeData[key];
+						
+						tree.forEach(function(item) {
+							let appendTreeHtml = "";
+							let id = item.treeId;
+				    		let parentId = item.parentTreeId;
+				    		let packageUrl = item.packageUrl;
+				    		let level = item.level;
+				    		let isExist = item.existDependency;
+				    		let style = 'style="padding-left : ';
+				    		if (typeof parentId === "undefined" || parentId == null || "" == parentId) {
+				    			parentId = "";
+				    			style += '3rem!important"';
+				    		} else {
+				    			style += parseInt(level)*3+3 + 'rem!important"';
+				    			if (isExist) {
+				    				packageUrl = '<i class="fas fa-angle-right mr-2" style="color: #6c757d;"></i>' + packageUrl;
+				    			}
+				    		}
+				    		if ("Y" == item.excludeYn) {
+				    			previousId = id;
+				    		}
+				    		appendTreeHtml += '<tr class="collapTr" id="' + id + '" data-id="' + id + '" data-parent="' + parentId + '" data-level="' + level;
+				    		if ("Y" == item.excludeYn) {
+				    			appendTreeHtml += '" style="background-color:#ada9a9; cursor: pointer;">';
+				    		} else {
+				    			appendTreeHtml += '" style="cursor: pointer;">';
+				    		}
+				    		appendTreeHtml += '<td class="b-right text-center"></td>';
+				    		appendTreeHtml += '<td class="b-left" ' + style + ' onclick="dep_tree_fn.displayDependencyTree(this)">' + packageUrl + '</td></tr>';
+				    		if ("" == parentId) {
+				    			$("#collaptableBody").append(appendTreeHtml);
+				    		} else {
+				    			$("#collaptableBody").find("#" + parentId).after(appendTreeHtml);
+				    		}
+						});
+					}
+					
+					$('#collaptable').aCollapTable({
+			    		startCollapsed: true,
+			    	    addColumn: false,
+			    	    plusButton: '<i class="fas fa-plus" style="color:#6c757d;"></i>',
+			    	    minusButton: '<i class="fas fa-minus" style="color:#6c757d;"></i>'
+			  		});
+				}
+				
+				$("#loading_wrap").hide();
+			}
+		}
+		
+		var dep_tree_fn = {
+			dependencyTreeExpandAll : function() {
+				$(".act-more.act-collapsed").trigger("click");
+			},
+			dependencyTreeCollapseAll : function() {
+				$(".act-more.act-expanded").trigger("click");
+			},
+			displayDependencyTree : function(obj) {
+				$(obj).parent().find("a").trigger("click");
+			}
+		}
+	</script>
+</body> 
+</html>

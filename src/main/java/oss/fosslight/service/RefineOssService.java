@@ -117,7 +117,7 @@ public class RefineOssService {
 				itemTotalCnt = PROC_CHUNK_SIZE;
 			}
 			
-			for (int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
+			for (int limitIndex = 0; limitIndex <= itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
 				final List<Map<String, Object>> ossCommonList = refineOssMapper.selectRefineOssCommonList(schOssName, "updateDownloadLocation", limitIndex*PROC_CHUNK_SIZE, PROC_CHUNK_SIZE);
 				String ossCommonId;
 				String ossName;
@@ -133,7 +133,7 @@ public class RefineOssService {
 					String downloadLocationFormat = downloadlocationFormatter(downloadLocation, checkOssNameUrl);
 					if (!StringUtil.isEmpty(downloadLocationFormat) && !downloadLocation.equalsIgnoreCase(downloadLocationFormat)) {
 						updateOssCommon = true;
-						ossCommonRefinedItem = MessageFormat.format("{0}>{1}", downloadLocation, downloadLocationFormat);
+						ossCommonRefinedItem = MessageFormat.format("{0}:{1}", downloadLocation, downloadLocationFormat);
 						if (doUpdateFlag) {
 							refineOssMapper.updateOssCommonDownloadLocation(ossCommonId, downloadLocationFormat);
 						}
@@ -148,7 +148,8 @@ public class RefineOssService {
 								String downloadLocationFormat2 = downloadlocationFormatter(n.get(FIELD_DOWNLOAD_LOCATION), checkOssNameUrl);
 								if (!StringUtil.isEmpty(downloadLocationFormat2) && !fieldDownloadLocation.equalsIgnoreCase(downloadLocationFormat2)) {
 									n.put(FIELD_DOWNLOAD_LOCATION, downloadLocationFormat2);
-									refinedItemList.add(MessageFormat.format("{0}>{1}", fieldDownloadLocation, downloadLocationFormat2));
+									reFineTotalCnt++;
+									refinedItemList.add(MessageFormat.format("{0}:{1}", fieldDownloadLocation, downloadLocationFormat2));
 								}
 							}
 						}
@@ -158,8 +159,8 @@ public class RefineOssService {
 								refineOssMapper.deleteOssDownloadLocation(ossCommonId);
 								refineOssMapper.insertOssDownloadLocation(ossCommonId, ossDownloadLocationList);
 							}
-							reFineTotalCnt++;
-							if (updateOssCommon) {
+							if (updateOssCommon && !refinedItemList.contains(ossCommonRefinedItem)) {
+								reFineTotalCnt++;
 								refinedItemList.add(ossCommonRefinedItem);
 								updateOssCommon = false;
 							}
@@ -167,7 +168,7 @@ public class RefineOssService {
 						}
 					}
 					
-					if (updateOssCommon) {
+					if (updateOssCommon && !refinedItemList.contains(ossCommonRefinedItem)) {
 						reFineTotalCnt++;
 						refinedItemList.add(ossCommonRefinedItem);
 						reFineItems.put(ossName, refinedItemList);
@@ -175,7 +176,7 @@ public class RefineOssService {
 				}
 				
 				sqlSession.flushStatements();
-				log.info(LOG_FORMAT_INPROGRESS, (limitIndex*PROC_CHUNK_SIZE) + PROC_CHUNK_SIZE, itemTotalCnt);
+				log.info(LOG_FORMAT_INPROGRESS, (limitIndex*PROC_CHUNK_SIZE) + PROC_CHUNK_SIZE > itemTotalCnt ? itemTotalCnt : (limitIndex*PROC_CHUNK_SIZE) + PROC_CHUNK_SIZE, itemTotalCnt);
 			}
 		}
 		
@@ -575,14 +576,14 @@ public class RefineOssService {
 		List<Map<String, String>> ossDownloadLocationList;
 		List<Map<String, String>> checkedOssDownloadLocationList;
 		if (itemTotalCnt > 0) {
-			if(itemTotalCnt < PROC_CHUNK_SIZE) {
+			if (itemTotalCnt < PROC_CHUNK_SIZE) {
 				itemTotalCnt = PROC_CHUNK_SIZE;
 			}
-			for(int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
+			for (int limitIndex = 0; limitIndex <= itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
 				final List<Map<String, Object>> ossCommonList = refineOssMapper.selectRefineOssCommonList(schOssName, null, limitIndex*PROC_CHUNK_SIZE, PROC_CHUNK_SIZE);
 				String ossCommonId;
 				String ossName;
-				for(Map<String, Object> ossCommonInfo : ossCommonList) {
+				for (Map<String, Object> ossCommonInfo : ossCommonList) {
 					refinedItemList = new ArrayList<>();
 					ossCommonId = Integer.toString((int)ossCommonInfo.get(FIELD_OSS_COMMON_ID));
 					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
@@ -591,15 +592,15 @@ public class RefineOssService {
 					checkedOssDownloadLocationList = new ArrayList<>();
 					
 					// 만약 oss_common table에만 존재하고, download_location table에 등록되어 있지 않은 경우 (Data Migration 누락 Case)
-					if(CollectionUtils.isEmpty(ossDownloadLocationList)) {
+					if (CollectionUtils.isEmpty(ossDownloadLocationList)) {
 //						if(!StringUtil.isEmpty(ossCommonInfo.get("downloadLocation"))) {
 //							Map<String, String> itemMap = new HashMap<>();
 //							itemMap.put("downloadLocation", ossCommonInfo.get("downloadLocation"));
 //							checkedOssDownloadLocationList.add(itemMap);
 //						}
 					} else {
-						for(Map<String, String> n : ossDownloadLocationList) {
-							if(!checkDuplicationUrl(checkedOssDownloadLocationList,ossDownloadLocationList, n)) {
+						for (Map<String, String> n : ossDownloadLocationList) {
+							if (!checkDuplicationUrl(checkedOssDownloadLocationList,ossDownloadLocationList, n)) {
 								checkedOssDownloadLocationList.add(n);
 							} else {
 								// 중복으로 판단된 경우
@@ -608,8 +609,8 @@ public class RefineOssService {
 						}
 					}
 					
-					if(checkedOssDownloadLocationList.size() != ossDownloadLocationList.size()) {
-						if(doUpdateFlag) {
+					if (checkedOssDownloadLocationList.size() != ossDownloadLocationList.size()) {
+						if (doUpdateFlag) {
 							refineOssMapper.deleteOssDownloadLocation(ossCommonId);
 							refineOssMapper.insertOssDownloadLocation(ossCommonId, checkedOssDownloadLocationList);
 						}
@@ -619,7 +620,7 @@ public class RefineOssService {
 				}
 
 				sqlSession.flushStatements();
-				log.info(LOG_FORMAT_INPROGRESS, (limitIndex*PROC_CHUNK_SIZE) + PROC_CHUNK_SIZE, itemTotalCnt);
+				log.info(LOG_FORMAT_INPROGRESS, (limitIndex*PROC_CHUNK_SIZE) + PROC_CHUNK_SIZE > itemTotalCnt ? itemTotalCnt : (limitIndex*PROC_CHUNK_SIZE) + PROC_CHUNK_SIZE, itemTotalCnt);
 			}
 		}
 		
@@ -994,6 +995,15 @@ public class RefineOssService {
 				break;
 			case 9:
 				p = Pattern.compile("((http|https)://stackoverflow.com/revisions/([^/]+)/([^/]+))");
+				break;
+			case 11:
+				p = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
+				break;
+			case 12 :
+				p = Pattern.compile("((http|https)://git.codelinaro.org/([^/]+)/([^/]+)/(.*))");
+				break;
+			case 13:
+				p = Pattern.compile("((http|https)://pkg.go.dev/(.*))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");

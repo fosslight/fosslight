@@ -77,10 +77,18 @@
 					)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
-				AND EXISTS (SELECT 1 
-		                             FROM PROJECT_MODEL M 
-		                           WHERE T1.PRJ_ID = M.PRJ_ID 
-		                               AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+					AND EXISTS (SELECT 1 
+					                     FROM PROJECT_MODEL M 
+					                   WHERE T1.PRJ_ID = M.PRJ_ID 
+					                       AND MODEL_NAME = #{modelName})
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+					AND EXISTS (SELECT 1 
+					                     FROM PROJECT_MODEL M 
+					                   WHERE T1.PRJ_ID = M.PRJ_ID 
+					                       AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+				</if>
 			</if>
 		) A
 		WHERE 1=1
@@ -119,12 +127,18 @@
 		, A.SRC_CSV_FILE_ID
 		, A.BIN_CSV_FILE_ID
 		, A.BIN_BINARY_FILE_ID
+		, A.PUBLIC_YN
+		, A.SECPERSON
+		, A.SECMAIL_YN
+		, W.WATCHER AS EDITORS
 		FROM (
 		SELECT T1.PRJ_ID
 		, T1.PRJ_NAME
 		, T1.PRJ_VERSION
 		, T1.CREATED_DATE
 		, T1.MODIFIED_DATE
+		, T1.SECPERSON
+		, T1.SECMAIL_YN
 		, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
 		, CASE
 		WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
@@ -144,6 +158,7 @@
 		, T1.SRC_CSV_FILE_ID
 		, T1.BIN_CSV_FILE_ID
 		, T1.BIN_BINARY_FILE_ID
+		, T1.PUBLIC_YN
 		, T3.CD_DTL_NM
 		, T3.CD_DTL_NO
 		, IF(T1.NETWORK_SERVER_TYPE IS NULL OR T1.NETWORK_SERVER_TYPE = '', 'NO', 'YES') AS NETWORK_SERVER_TYPE
@@ -181,12 +196,26 @@
 			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
-			AND EXISTS (SELECT 1
-			FROM PROJECT_MODEL M
-			WHERE T1.PRJ_ID = M.PRJ_ID
-			AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+				AND EXISTS (SELECT 1
+				FROM PROJECT_MODEL M
+				WHERE T1.PRJ_ID = M.PRJ_ID
+				AND MODEL_NAME = #{modelName})
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@equals('Y', modelNameExactYn)">
+				AND EXISTS (SELECT 1
+				FROM PROJECT_MODEL M
+				WHERE T1.PRJ_ID = M.PRJ_ID
+				AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+			</if>
 		</if>
 		) A
+		LEFT JOIN (
+			SELECT PRJ_ID, GROUP_CONCAT(CONCAT(USER_ID, EMAIL)) AS WATCHER
+			FROM PROJECT_WATCHER
+			GROUP BY PRJ_ID
+		) W
+		ON A.PRJ_ID = W.PRJ_ID
 		WHERE 1=1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
 			AND A.STATUS = #{status}
@@ -482,9 +511,11 @@
 		SELECT CONCAT(MAIN_CD.CD_DTL_NM, ' > ', SUB_CD.CD_DTL_NM) AS CATEGORY
 			 , A.MODEL_NAME
 			 , A.RELEASE_DATE
+			, PM.DISTRIBUTE_NAME
 		  FROM PROJECT_MODEL A
 		 INNER JOIN T2_CODE_DTL MAIN_CD ON MAIN_CD.CD_NO = '500' AND A.CATEGORY = MAIN_CD.CD_DTL_NO
 		 INNER JOIN T2_CODE_DTL SUB_CD ON SUB_CD.CD_NO = MAIN_CD.CD_SUB_NO AND A.SUBCATEGORY = SUB_CD.CD_DTL_NO
+		 LEFT JOIN PROJECT_MASTER PM ON PM.PRJ_ID = #{prjId}
 		 WHERE A.PRJ_ID = #{prjId} AND A.DEL_YN <![CDATA[<>]]> 'Y'
 		 ORDER BY A.CATEGORY, A.MODEL_NAME
 	</select>
@@ -1088,6 +1119,8 @@
 			, A.DROP_YN
 			, A.SECMAIL_YN
 		    , A.SECMAIL_DESC
+		    , A.SECPERSON
+		    , E.USER_NAME AS secPersonNm
 			, A.REVIEWER 
 			, A.USE_YN 
 			, A.COPY_PRJ_ID
@@ -1172,6 +1205,7 @@
 		                    ON A.DIVISION = D.CD_DTL_NO
 						   AND D.CD_NO = '200'
 						   AND D.USE_YN = 'Y'
+			LEFT JOIN T2_USERS E ON A.SECPERSON = E.USER_ID
 		 WHERE A.PRJ_ID = #{prjId} 
 	</select>
 	
@@ -1179,7 +1213,7 @@
 		SELECT T1.*,
 			   T2.NOTICE_TYPE,
 			   T2.NOTICE_TYPE_ETC,
-			 
+			   T3.USER_NAME AS secPersonNm,
 			 /* 다운로드 허용 플래그 */
 			 <![CDATA[
 			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x01, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_HTML_YN,
@@ -1194,6 +1228,7 @@
 			 ]]>
 		  FROM PROJECT_MASTER T1
 		  LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
+		  LEFT JOIN T2_USERS T3 ON T1.SECPERSON = T3.USER_ID
 		 WHERE T1.USE_YN = 'Y'
 		   AND T1.PRJ_ID = #{prjId}
 	</select>

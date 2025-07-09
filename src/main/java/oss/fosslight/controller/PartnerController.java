@@ -801,7 +801,18 @@ public class PartnerController extends CoTopComponent{
 			
 			// return validator result
 			if (!vr.isValid()) {
-				return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), true)) {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
+				} else if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), false)) {
+					List<ProjectIdentification> exceedingMaxLengthList = CommonFunction.getItemsExceedingMaxLength(vr.getValidMessageMap(), ossComponents);
+					if (!CollectionUtils.isEmpty(exceedingMaxLengthList)) {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), exceedingMaxLengthList);
+					} else {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+					}
+				} else {
+					return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				}
 			}
 			
 			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
@@ -961,29 +972,37 @@ public class PartnerController extends CoTopComponent{
 		HashMap<String, Object> resMap = new HashMap<>();
 		String resCd = "00";
 		
-		try{
+		PartnerMaster partnerInfo = new PartnerMaster();
+		partnerInfo.setPartnerId(partnerMaster.getPartnerId());
+		partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+		
+		try {
+			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
+			mailBean.setParamPartnerId(partnerMaster.getPartnerId());
+			if (!isEmpty(partnerMaster.getUserComment())) {
+				mailBean.setComment(partnerMaster.getUserComment());
+			}
+			CoMailManager.getInstance().sendMail(mailBean);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		try {
 			History h = partnerService.work(partnerMaster);
 			partnerService.deletePartnerMaster(partnerMaster);
-			h.sethAction(CoConstDef.ACTION_CODE_DELETE);	
+			h.sethAction(CoConstDef.ACTION_CODE_DELETE);
 			historyService.storeData(h);
 			
 			resCd="10";
 			
-		} catch (Exception e){
-			log.error(e.getMessage());
-		}
-		
-		if ("10".equals(resCd)) {
 			try {
-				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
-				mailBean.setParamPartnerId(partnerMaster.getPartnerId());
-				if (!isEmpty(partnerMaster.getUserComment())) {
-					mailBean.setComment(partnerMaster.getUserComment());
-				}
-				CoMailManager.getInstance().sendMail(mailBean);
+				// Delete partner ref files
+				partnerService.deletePartnerRefFiles(partnerInfo);
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
+		} catch (Exception e){
+			log.error(e.getMessage());
 		}
 
 		resMap.put("resCd", resCd);
@@ -1163,6 +1182,8 @@ public class PartnerController extends CoTopComponent{
 	@PostMapping(value = PARTNER.REMOVE_WATCHERS)
 	public @ResponseBody ResponseEntity<Object> removeWatchers(@RequestBody PartnerMaster project,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
 		try {
 			PartnerMaster param = new PartnerMaster();
 			
@@ -1181,11 +1202,13 @@ public class PartnerController extends CoTopComponent{
 					}
 				}
 			}
+			
+			resultMap.put("isValid", "true");
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, null);
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(resultMap);
 	}
 	
 	/**
@@ -1995,6 +2018,25 @@ public class PartnerController extends CoTopComponent{
 				return makeJsonResponseHeader(false, "1");
 			}
 			
+			PartnerMaster partnerInfo = new PartnerMaster();
+			partnerInfo.setPartnerId(beforePartnerId);
+			partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+			
+			String beforeParInfoString = beforePartnerId + " - " + partnerInfo.getSoftwareName();
+			if (!isEmpty(partnerInfo.getSoftwareVersion())) {
+				beforeParInfoString += " (" + partnerInfo.getSoftwareVersion() + ")";
+			}
+			
+			partnerInfo.setPartnerId(afterPartnerId);
+			partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+			
+			String afterParInfoString = afterPartnerId + " - " + partnerInfo.getSoftwareName();
+			if (!isEmpty(partnerInfo.getSoftwareVersion())) {
+				afterParInfoString += " (" + partnerInfo.getSoftwareVersion() + ")";
+			}
+			
+			resultMap.put("beforeParInfo", beforeParInfoString);
+			resultMap.put("afterParInfo", afterParInfoString);
 			resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList, "list"));
 			return makeJsonResponseHeader(true, "0" , resultMap);
 		} catch (Exception e) {

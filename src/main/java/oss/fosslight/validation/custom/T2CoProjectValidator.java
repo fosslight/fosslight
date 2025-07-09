@@ -297,7 +297,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						if (isAdmin && !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
 							errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
 						} else if (!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
+							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|LICENSE_NAME.UNCONFIRMED");
 						}
 						break;
 					}
@@ -439,13 +439,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 						if (isAdmin) {
 							errMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
 						} else {
-							diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
+							diffMap.put("OSS_VERSION." + bean.getComponentId(), "errLv|OSS_VERSION.UNCONFIRMED");
 						}
 					} else {
 						if (isAdmin) {
 							errMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
 						} else {
-							diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
+							diffMap.put("OSS_NAME." + bean.getComponentId(), "errLv|OSS_NAME.UNCONFIRMED");
 						}
 					}
 				}
@@ -466,7 +466,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						}
 						// Declared License를 사용하지 않는 case
@@ -486,7 +486,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						} 
 						// Declared License를 사용하지 않는 case
@@ -508,7 +508,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						if (isAdmin) {
 							errMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
 						} else {
-							diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
+							diffMap.put("OSS_VERSION." + bean.getComponentId(), "errLv|OSS_VERSION.UNCONFIRMED");
 						}
 					}
 				}
@@ -529,7 +529,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						} 
 						// Declared License를 사용하지 않는 case
@@ -549,7 +549,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
 							}
 						} 
 						// Declared License를 사용하지 않는 case
@@ -583,7 +583,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								&& !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
 							errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
 						} else if (!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
+							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|LICENSE_NAME.UNCONFIRMED");
 						}
 						
 						break;
@@ -803,7 +803,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
 							} else {
-								diffMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
+								diffMap.put(basicKey + "." + bean.getComponentId(), "errLv|LICENSE_NAME.UNCONFIRMED");
 								diffMapLicense = true;
 							}
 						} else if (CommonFunction.checkLicense(bean.getLicenseName())) {
@@ -875,6 +875,33 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 			}
 			
+			// 관리되지 않은 라이선스가 포함되어 있는 경우
+			if (bean.getOssComponentsLicenseList() != null) {
+				for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
+					if (CoConstDef.FLAG_YES.equals(license.getExcludeYn())) {
+						continue;
+					}
+					
+					if (isEmpty(license.getLicenseName())) {
+						errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.REQUIRED");
+						
+						break;
+					}
+					
+					if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())
+							&& !ossInfoByName.containsKey(checkKey)) {
+						if (isAdmin) {
+							errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
+						} else {
+							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
+							diffMapLicense = true;
+						}
+						
+						break;
+					}
+				}
+			}
+			
 			// oss 등록 여부 체크
 			if (!CommonFunction.isIgnoreLicense(bean.getLicenseName())) {
 				// oss 등록 여부 체크
@@ -914,18 +941,32 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-								diffMapLicense = true;
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
+									diffMapLicense = true;
+								}
 							}
 						} 
 						// Declared License를 사용하지 않는 case
 						else if (!hasOssLicense(checkOSSMaster, bean.getOssComponentsLicenseList(), false)) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-							diffMapLicense = true;
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+									diffMapLicense = true;
+								}
+							}
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeComponents(checkOSSMaster, bean.getOssComponentsLicenseList())) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
+							}
 						}
 					} else if (ossComponentLicenseListMap != null
 							&& ossComponentLicenseListMap.containsKey(bean.getComponentId())) {
@@ -936,18 +977,32 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-								diffMapLicense = true;
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
+									diffMapLicense = true;
+								}
 							}
 						}
 						// Declared License를 사용하지 않는 case
 						else if (!hasOssLicense2(checkOSSMaster, licenseList, false)) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
+							}
 							diffMapLicense = true;
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeProject(checkOSSMaster, licenseList)) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
+							}
 						}
 					}
 				}
@@ -960,7 +1015,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						if (isAdmin) {
 							errMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
 						} else {
-							diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
+							diffMap.put("OSS_VERSION." + bean.getComponentId(), "errLv|OSS_VERSION.UNCONFIRMED");
 						}
 					}
 				}
@@ -981,18 +1036,32 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-								diffMapLicense = true;
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
+									diffMapLicense = true;
+								}
 							}
 						}
 						// Declared License를 사용하지 않는 case
 						else if (!hasOssLicense(checkOSSMaster, bean.getOssComponentsLicenseList(), false)) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
+							}
 							diffMapLicense = true;
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeComponents(checkOSSMaster, bean.getOssComponentsLicenseList())) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
+							}
 						}
 					} else if (ossComponentLicenseListMap != null
 							&& ossComponentLicenseListMap.containsKey(bean.getComponentId())) {
@@ -1003,18 +1072,32 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							} else {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-								diffMapLicense = true;
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "errLv|Declared : " + licenseText);
+									diffMapLicense = true;
+								}
 							}
 						}
 						// Declared License를 사용하지 않는 case
 						else if (!hasOssLicense2(checkOSSMaster, licenseList, false)) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
+							}
 							diffMapLicense = true;
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeProject(checkOSSMaster, licenseList)) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (isAdmin) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							} else {
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
+							}
 						}
 					}
 				}
@@ -1028,33 +1111,6 @@ public class T2CoProjectValidator extends T2CoValidator {
 						if (ossService.checkOssVersionDiff(bean.getOssName()) > 0) {
 							diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.REQUIRED");
 						}
-					}
-				}
-			}
-			
-			// 관리되지 않은 라이선스가 포함되어 있는 경우
-			if (bean.getOssComponentsLicenseList() != null) {
-				for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
-					if (CoConstDef.FLAG_YES.equals(license.getExcludeYn())) {
-						continue;
-					}
-					
-					if (isEmpty(license.getLicenseName())) {
-						errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.REQUIRED");
-						
-						break;
-					}
-					
-					if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())
-							&& !ossInfoByName.containsKey(checkKey)) {
-						if (isAdmin) {
-							errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
-						} else {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
-							diffMapLicense = true;
-						}
-						
-						break;
 					}
 				}
 			}
@@ -1544,7 +1600,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	private boolean hasOssLicense2(OssMaster ossMaster, List<ProjectIdentification> list, boolean detectedLicenseCheck) {
 		// license nick name을 포함한 라이선스 명 list를 구성
 		List<String> checkLicenseNameList = new ArrayList<>(); // declared License
-		List<String> detectedLicenseList = ossMaster.getDetectedLicenses(); // detected License
+		List<String> detectedLicenseList = ossMaster != null ? ossMaster.getDetectedLicenses() : null; // detected License
 		
 		if (detectedLicenseList == null) {
 			detectedLicenseList = new ArrayList<>();
@@ -1880,7 +1936,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				{
 					basicKey = "LICENSE_NAME";
 					gridKey = StringUtil.convertToCamelCase(basicKey);
-					if (bean.getLicenseName().split(",").length > 1) {
+					if (!isEmpty(bean.getLicenseName()) && bean.getLicenseName().split(",").length > 1) {
 						errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
 					} else {
 						// 기본체크
@@ -1894,7 +1950,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							if (isAdmin) {
 								errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
 							} else {
-								diffMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
+								diffMap.put(basicKey + "." + bean.getGridId(), "errLv|LICENSE_NAME.UNCONFIRMED");
 							}
 						} else if (bean.getComponentLicenseList() != null) {
 							if (bean.getComponentLicenseList().size() > 1) {
@@ -2287,7 +2343,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						}
@@ -2299,7 +2355,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
 						}
 					} else if (ossComponentLicenseListMap != null
 							&& ossComponentLicenseListMap.containsKey(bean.getGridId())) {
@@ -2312,7 +2370,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						}
@@ -2324,7 +2382,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
-							diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+							if (!errMap.containsKey(LICENSE_KEY)) {
+								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+							}
 						}
 					} else if (ossComponentLicenseListMap == null) {
 						if (PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)) {
@@ -2336,7 +2396,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 									errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 								} else {
 									if (!errMap.containsKey(LICENSE_KEY)) {
-										diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+										diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 									}
 								}
 							} 
@@ -2350,7 +2410,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 							}
 							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 							else if (hasOssLicenseTypeSingle(ossmaster, bean.getLicenseName())) {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								}
 							}
 						}
 					}
@@ -2388,7 +2450,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						}
@@ -2402,7 +2464,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
-							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
 						}
 					} else if (ossComponentLicenseListMap != null
 							&& ossComponentLicenseListMap.containsKey(bean.getGridId())) {
@@ -2415,7 +2479,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 							} else {
 								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
 								}
 							}
 						} 
@@ -2427,7 +2491,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 						}
 						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
 						else if (hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
-							diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+							if (!errMap.containsKey(LICENSE_KEY)) {
+								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+							}
 						}
 					}
 				}
@@ -2449,7 +2515,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 
-				if(!diffMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !errMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !isEmpty(bean.getLicenseName())) {
+				if (!diffMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !errMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !isEmpty(bean.getLicenseName())) {
 					String licenseText = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
 					if(!isEmpty(licenseText)) {
 						diffMap.put("LICENSE_NAME." + bean.getGridId(), "Recommended : " + licenseText );
@@ -2503,7 +2569,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						&& isEmpty(bean.getOssVersion())) {
 					if (!errMap.containsKey("OSS_VERSION." + bean.getGridId())) {
 						if (CoCodeManager.OSS_INFO_UPPER.containsKey((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
-							if (CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase()).getOssType().endsWith("1")) {
+							if (avoidNull(CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase()).getOssType()).contains("V")) {
 								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.REQUIRED");
 							}
 						}

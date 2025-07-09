@@ -5,6 +5,7 @@
 
 package oss.fosslight.controller;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -207,9 +208,9 @@ public class OssController extends CoTopComponent{
 			OssMaster ossMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
-		List<OssMaster> list = ossService.getOssNameList();
-		CustomXssFilter.ossMasterFilter(list);
+			, Model model) {
+		List<Map<String, String>> list = ossService.getOssNameList();
+		CustomXssFilter.nameFilter(list);
 		return makeJsonResponseHeader(list);
 	}
 
@@ -325,8 +326,12 @@ public class OssController extends CoTopComponent{
 				componentsPartner = partnerMapper.selectOssRefPartnerList(ossMaster);
 			}
 			
-			if (components != null && !components.isEmpty()) model.addAttribute("components", components);
-			if (componentsPartner != null && !componentsPartner.isEmpty()) model.addAttribute("componentsPartner", componentsPartner);
+			if (components != null && !components.isEmpty()) {
+				model.addAttribute("components", components);
+			}
+			if (componentsPartner != null && !componentsPartner.isEmpty()) {
+				model.addAttribute("componentsPartner", componentsPartner);
+			}
 		}
 		
 		model.addAttribute("projectListFlag", projectListFlag);
@@ -1086,9 +1091,6 @@ public class OssController extends CoTopComponent{
 			LicenseMaster licenseMaster;
 			List<String> declaredLicenses = oss.getDeclaredLicenses();
 			String downloadLocation = oss.getDownloadLocation();
-			if (downloadLocation != null) {
-				oss.setDownloadLocations(downloadLocation.split(","));
-			}
 			boolean[] check = new boolean[declaredLicenses.size() + 1];
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
@@ -1105,13 +1107,47 @@ public class OssController extends CoTopComponent{
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
-
+			
+			OssMaster ossBean = ossService.getOssInfo(null, oss.getOssName(), true);
+			if (ossBean != null) {
+				List<String> downloadLocationList = new ArrayList<>();
+				List<String> purls = new ArrayList<>();
+				if (ossBean.getDownloadLocation() != null) {
+					OssMaster param = new OssMaster();
+					for (String location : ossBean.getDownloadLocation().split(",")) {
+						downloadLocationList.add(location);
+						param.setDownloadLocation(location);
+						String purl = ossService.getPurlByDownloadLocation(param);
+						if (!isEmpty(purl)) {
+							purls.add(purl);
+						}
+					}
+				}
+				if (downloadLocation != null) {
+					OssMaster param = new OssMaster();
+					for (String location : downloadLocation.split(",")) {
+						param.setDownloadLocation(location);
+						String purl = ossService.getPurlByDownloadLocation(param);
+						if (!purls.contains(purl)) {
+							downloadLocationList.add(location);
+						}
+					}
+				}
+				if (!downloadLocationList.isEmpty()) {
+					oss.setDownloadLocations(downloadLocationList.toArray(new String[downloadLocationList.size()]));
+				}
+			} else {
+				if (downloadLocation != null) {
+					oss.setDownloadLocations(downloadLocation.split(","));
+				}
+			}
+			
 			for (String licenseName : declaredLicenses) {
 				licenseMaster = new LicenseMaster();
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.debug("Unconfirmed license:" + licenseName);
+					log.debug("New license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
@@ -1144,14 +1180,14 @@ public class OssController extends CoTopComponent{
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.debug("Unconfirmed license:" + licenseName);
+					log.debug("New license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
 			}
 			if (licenseCheck) {
 				log.debug("Add failed due to declared license:" + oss.getOssName());
-				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Unconfirmed license)");
+				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (New license)");
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
@@ -1475,7 +1511,7 @@ public class OssController extends CoTopComponent{
 			}
 			
 			if (!vr.isDiff()){
-				Map<String, String> diffMap = vr.getDiffMessageMap();
+				Map<String, String> diffMap = vr.getDiffMessageMap(true);
 				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
 				resMap.put("diffMap", diffMap);
 			}
@@ -1490,14 +1526,19 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_LICENSE)
 	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(
-			@RequestBody ProjectIdentification paramBean
+			@RequestBody Map<String, Object> param
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model
 			, @PathVariable String targetName){
-		Map<String, Object> map = autoFillOssInfoService.saveOssCheckLicense(paramBean, targetName);
+		String json = (String) param.get("list");
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> paramBeanList = new ArrayList<>();
+		paramBeanList = (List<ProjectIdentification>) fromJson(json, collectionType);
+		Map<String, Object> map = autoFillOssInfoService.saveOssCheckLicense(paramBeanList, targetName);
 
 		return makeJsonResponseHeader(map);
 	}
@@ -1582,14 +1623,19 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_NAME)
 	public @ResponseBody ResponseEntity<Object> saveOssCheckName(
-			@RequestBody ProjectIdentification paramBean
+			@RequestBody Map<String, Object> param
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model
 			, @PathVariable String targetName){
-		Map<String, Object> map = ossService.saveOssCheckName(paramBean, targetName);
+		String json = (String) param.get("list");
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> paramBeanList = new ArrayList<>();
+		paramBeanList = (List<ProjectIdentification>) fromJson(json, collectionType);
+		Map<String, Object> map = ossService.saveOssCheckName(paramBeanList, targetName);
 		
 		return makeJsonResponseHeader(map);
 	}
@@ -1872,11 +1918,12 @@ public class OssController extends CoTopComponent{
 					param.setOssCommonId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssCommonId());
 					param.setOssName(oa.getOssName());
 					param.setOssVersion(oa.getOssVersion());
-					
-					OssMaster om = ossService.getOssMasterOne(param);
-					oa.setIncludeCpes(om.getIncludeCpes());
-					oa.setExcludeCpes(om.getExcludeCpes());
-					oa.setOssVersionAliases(om.getOssVersionAliases());
+					param.setOssVersionAliases(CoCodeManager.OSS_INFO_UPPER.get(key).getOssVersionAliases());
+				}
+				OssMaster ossBean = ossService.getOssInfo(null, oa.getOssName(), true);
+				if (ossBean != null) {
+					oa.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+					oa.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
 				}
 			}
 			
@@ -1938,6 +1985,11 @@ public class OssController extends CoTopComponent{
 		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase());
 		if (isNewVersion) {
 			resultData.setExistOssNickNames(ossService.getOssNickNameListByOssName(resultData.getOssName()));
+			OssMaster ossBean = ossService.getOssInfo(null, analysisBean.getOssName(), true);
+			if (ossBean != null) {
+				resultData.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+				resultData.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+			}
 		}
 		
 		resultData.setGridId(analysisBean.getGridId());
@@ -1987,6 +2039,7 @@ public class OssController extends CoTopComponent{
 			
 			resultData.setLicenseName(analysisBean.getLicenseName());
 			resultData.setOssLicenses(ossLicenseList);
+			analysisBean.setOssLicenses(ossLicenseList);
 		} else {
 			resultData.setLicenseName("");
 		}
@@ -2090,6 +2143,11 @@ public class OssController extends CoTopComponent{
 			mailBean.setParamOssId(resultOssId);
 
 			mailBean.setComment(resultData.getComment());
+			
+			if (isNewVersion && !isEmpty(resultData.getOssName())) {
+				ossService.setExistedOssInfo(resultData);
+				mailBean.setParamOssInfo(resultData);
+			}
 			CoMailManager.getInstance().sendMail(mailBean);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -2395,5 +2453,10 @@ public class OssController extends CoTopComponent{
 		resMap.put("res", true);
 		resMap.put("value", ossWithStatusList);
 		return makeJsonResponseHeader(resMap);
+	}
+
+	@GetMapping(value = OSS.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String ossId) throws IOException {
+		res.sendRedirect(req.getContextPath() + "/oss/edit/" + ossId);
 	}
 }

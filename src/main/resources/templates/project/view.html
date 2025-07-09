@@ -68,6 +68,12 @@
 												</td>
 											</tr>
 											<tr class="text-smaller">
+												<th><span th:text="#{msg.common.field.security.person}"></span><i class="fas fa-info-circle fa-lg ml-1 text-light-gray" id="helpLink_securityPerson" data-html="true" data-placement="right"></i></th>
+												<td>
+													<span th:text="${project?.secPersonNm}"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.OS}"></th>
 												<td>
 													<th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
@@ -178,6 +184,11 @@
 														<th:block th:if="${project.packageFileId4 != '' and project.packageFileId4 != null}">
 															<span style="cursor:pointer;" th:onclick="fn.downloadPackageMulti(this, '4', [[${project.permission}]])">
 																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File4"></i>
+															</span>
+														</th:block>
+														<th:block th:if="${project.packageFileId5 != '' and project.packageFileId5 != null}">
+															<span style="cursor:pointer;" th:onclick="fn.downloadPackageMulti(this, '5', [[${project.permission}]])">
+																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File5"></i>
 															</span>
 														</th:block>
 													</th:block>

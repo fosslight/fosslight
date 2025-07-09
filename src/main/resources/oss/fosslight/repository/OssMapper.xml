@@ -373,6 +373,7 @@
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'			/*Code Table*/
 		LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
 		LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON T1.OSS_COMMON_ID = T7.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON T1.OSS_ID = T8.OSS_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
@@ -436,6 +437,24 @@
 						</otherwise>
 					 </choose>
 				)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(detectedLicenseName)">
+			AND T8.LICENSE_ID IN (
+				SELECT LICENSE_ID
+				FROM LICENSE_MASTER
+				WHERE USE_YN = 'Y'
+                AND (
+                <choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(detectedLicenseNameAllSearchFlag,'Y')">
+						UPPER(LICENSE_NAME) = UPPER(#{detectedLicenseName}) OR UPPER(SHORT_IDENTIFIER) = UPPER(#{detectedLicenseName})
+					</when>
+					<otherwise>
+						UPPER(LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+						OR UPPER(SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				</choose>
+				)
+			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
@@ -538,6 +557,17 @@
 			</if>
 			)
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
 			<![CDATA[
 			AND	CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
@@ -590,7 +620,7 @@
 		LEFT OUTER JOIN (
 				SELECT A1.OSS_COMMON_ID, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_COMMON_ID
 			) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
-		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
+		WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME <![CDATA[<>]]> #{ossName}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
 	    	<choose>
 	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
@@ -644,7 +674,7 @@
 		LEFT OUTER JOIN (
 				SELECT A1.OSS_COMMON_ID, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_COMMON_ID
 			) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
-		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
+		WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME <![CDATA[<>]]> #{ossName}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
 	    	<choose>
 	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
@@ -776,6 +806,7 @@
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'				/*Code Table*/
 		LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
 		LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON T1.OSS_COMMON_ID = T7.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON T1.OSS_ID = T8.OSS_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
@@ -839,6 +870,24 @@
 					</otherwise>
 				 </choose>
 				)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(detectedLicenseName)">
+			AND T8.LICENSE_ID IN (
+				SELECT LICENSE_ID
+				FROM LICENSE_MASTER
+				WHERE USE_YN = 'Y'
+                AND (
+                <choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(detectedLicenseNameAllSearchFlag,'Y')">
+						UPPER(LICENSE_NAME) = UPPER(#{detectedLicenseName}) OR UPPER(SHORT_IDENTIFIER) = UPPER(#{detectedLicenseName})
+					</when>
+					<otherwise>
+						UPPER(LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+						OR UPPER(SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				</choose>
+				)
+			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
@@ -939,6 +988,17 @@
 			<if test="@oss.fosslight.util.StringUtil@contains(ossTypeSearch, 'V')">
 				OR OSS_TYPE LIKE '__1'
 			</if>
+			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
 			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
@@ -1145,6 +1205,7 @@
 		LEFT OUTER JOIN T2_CODE_DTL 	T4 ON T4.CD_NO = '201' AND T1.LICENSE_TYPE	= T4.CD_DTL_NO			/*Code Table*/
 		LEFT OUTER JOIN OSS_INCLUDE_CPE T5 ON T1.OSS_COMMON_ID = T5.OSS_COMMON_ID
 		LEFT OUTER JOIN OSS_EXCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_LICENSE_DETECTED T7 ON T1.OSS_ID = T7.OSS_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>			
@@ -1184,6 +1245,24 @@
 					</otherwise>
 				 </choose>
 				)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(detectedLicenseName)">
+			AND T7.LICENSE_ID IN (
+				SELECT LICENSE_ID
+				FROM LICENSE_MASTER
+				WHERE USE_YN = 'Y'
+                AND (
+                <choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(detectedLicenseNameAllSearchFlag,'Y')">
+						UPPER(LICENSE_NAME) = UPPER(#{detectedLicenseName}) OR UPPER(SHORT_IDENTIFIER) = UPPER(#{detectedLicenseName})
+					</when>
+					<otherwise>
+						UPPER(LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+						OR UPPER(SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{detectedLicenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				</choose>
+				)
+			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
@@ -1266,6 +1345,17 @@
 			<![CDATA[
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
 			]]>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
 		</if>
 		) T1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrRestriction)">
@@ -1506,6 +1596,17 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
 			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			AND T1.CVE_ID LIKE CONCAT('%',#{cveId},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.OSS_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE (REFERENCE_DIV = '40' OR REFERENCE_DIV = '42')
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
 		</if>
 		/*검색 쿼리 끝*/
 		GROUP BY T1.OSS_ID		
@@ -2111,7 +2212,7 @@
 						  FROM OSS_COMPONENTS E1
 						WHERE P.PRJ_ID = E1.REFERENCE_ID 
 						    AND IFNULL(E1.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
-						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15') 
+						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17') 
 						    AND (E1.OSS_ID = #{ossId} OR E1.OSS_NAME = #{ossName} AND IFNULL(E1.OSS_VERSION, '') = #{ossVersion}
 								OR EXISTS ( 
 									SELECT 1 FROM (
@@ -2219,7 +2320,7 @@
 						  FROM OSS_COMPONENTS E1
 						WHERE P.PRJ_ID = E1.REFERENCE_ID 
 						    AND IFNULL(E1.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
-						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15','16') 
+						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17') 
 						    AND E1.OSS_ID IN (SELECT T1.OSS_ID FROM (
 			SELECT
     			OV.OSS_ID,
@@ -3567,6 +3668,7 @@
 			  , HOMEPAGE
 			  , ANALYSIS_YN
 			  , COMPLETE_YN
+			  , REFERENCE_DIV
 		)
 		SELECT OC.COMPONENT_ID
 		<choose>
@@ -3582,6 +3684,7 @@
 		  	 , REPLACE(OC.HOMEPAGE, '%40', '@') AS HOMEPAGE
 		  	 , 'N' AS ANALYSIS_YN
 		  	 , 'N' AS COMPLETE_YN
+			 , OC.REF_DIV AS REFERENCE_DIV
 	  	  FROM OSS_COMPONENTS OC
 	  	  LEFT JOIN OSS_COMPONENTS_LICENSE OCL
 	        ON OC.COMPONENT_ID = OCL.COMPONENT_ID
@@ -3607,6 +3710,7 @@
 		  	 , ANALYSIS_YN
 		  	 , COMPLETE_YN
 		  	 , REFERENCE_OSS_ID
+			 , REFERENCE_DIV
 		  FROM OSS_ANALYSIS_MAP
 		 WHERE REFERENCE_ID = #{prjId}
 		 <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(startAnalysisFlag,'Y')">
@@ -3890,7 +3994,7 @@
 		   AND EXISTS (SELECT 1
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PARTNER_ID = SUB1.REFERENCE_ID
-						  AND SUB1.REFERENCE_DIV = '20'
+						  AND SUB1.REFERENCE_DIV IN ('20', '23')
 						  AND SUB1.OSS_NAME = #{ossName}
 						  <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
 						  AND SUB1.OSS_VERSION = #{ossVersion}
@@ -3906,7 +4010,7 @@
 		   AND EXISTS (SELECT 1
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PRJ_ID = SUB1.REFERENCE_ID
-						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '16', '50')
+						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '16', '17', '50')
 						  AND SUB1.OSS_NAME = #{ossName}
 						  <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
 						  AND SUB1.OSS_VERSION = #{ossVersion}
@@ -3941,7 +4045,7 @@
     			</when>
     			<otherwise>
     				AND T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
-    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
+    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17','50')
     				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
     				AND T1.OSS_ID = #{ossId}
     				</if>
@@ -3989,7 +4093,7 @@
            AND T1.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
-           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
+           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17','50')
     		</otherwise>
     	</choose>
            AND T1.ADMIN_CHECK_YN	!= 'Y'
@@ -4047,7 +4151,7 @@
 		   		AND OC.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
-    			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
+    			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','16','17','50')
     		</otherwise>
     	</choose>
     	  AND OC.OSS_NAME = #{ossName}
@@ -4055,54 +4159,34 @@
 	</select>
 	
 	<select id="getOssVulnerabilityList2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
-		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
-			SELECT T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE, T1.CRITERIA
-			FROM
-			(
-		</if>
-				SELECT DATA.PRODUCT
-					 , DATA.VERSION
-					 , CVE.CVSS_SCORE
-					 , CVE.CVE_ID
-					 , CVE.VULN_SUMMARY
-					 , CVE.MODI_DATE
-					 , DATA.CRITERIA
-				  FROM (
-				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID, NVD.CRITERIA
-				  		FROM
-				  		(SELECT REPLACE(PRODUCT, ' ', '_') AS PRODUCT
-				 			 , VERSION
-				 			 , CVE_ID
-				 			 , CONCAT(VENDOR, ':', PRODUCT) AS CRITERIA
-				  		  FROM NVD_DATA_V3
-				  		 WHERE (
-				  		 		PRODUCT = REPLACE(#{ossName}, ' ', '_')
-				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
-				  		 			OR PRODUCT = REPLACE(#{ossNameTemp}, ' ', '_')
-				  		 		</if>
-				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
-					  			    <foreach item="item" index="index" collection="ossNicknames">
-										OR PRODUCT = REPLACE(#{item}, ' ', '_')
-									</foreach>
-								</if>
-				 				)
-				 		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
-				 		   AND VERSION = #{ossVersion}
-				 		</if>
-				 		) NVD
-<!-- 			 		LEFT JOIN NVD_DATA_CONFIGURATIONS CONF
-				 		ON NVD.CVE_ID = CONF.CVE_ID
-				 		LEFT JOIN NVD_CPE_MATCH_NAMES MAT
-				 		ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID -->
-				 		GROUP BY NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
-				 	   ) DATA
-				 INNER JOIN NVD_CVE_V3 CVE
-				    ON DATA.CVE_ID = CVE.CVE_ID
-		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
-			) T1
-			GROUP BY T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
-		</if>
-			ORDER BY CVSS_SCORE DESC, MODI_DATE DESC LIMIT 20
+		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CRITERIA, CVE.CVE_ID, CVE.CVSS_SCORE, CVE.VULN_SUMMARY, CVE.MODI_DATE
+		FROM
+		(
+			SELECT REPLACE(NVD.PRODUCT, ' ', '_') AS PRODUCT
+				 	, NVD.VERSION
+				 	, NVD.CVE_ID
+					, CONCAT(NVD.VENDOR, ':', NVD.PRODUCT) AS CRITERIA
+			FROM NVD_DATA_V3 NVD
+			WHERE (
+				NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
+				 	OR NVD.PRODUCT = REPLACE(#{ossNameTemp}, ' ', '_')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+			 		<foreach item="item" index="index" collection="ossNicknames">
+						OR NVD.PRODUCT = REPLACE(#{item}, ' ', '_')
+					</foreach>
+				</if>
+			)
+			<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
+				AND NVD.VERSION = #{ossVersion}
+			</if>
+			GROUP BY NVD.CVE_ID
+		) NVD
+		INNER JOIN NVD_CVE_V3 CVE
+		ON NVD.CVE_ID = CVE.CVE_ID
+		ORDER BY CVE.CVSS_SCORE DESC, CVE.MODI_DATE DESC
+		LIMIT 20
 	</select>
 	
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
@@ -4396,11 +4480,57 @@
 	</select>
 	
 	<select id="getOssInfoByRestriction" parameterType="string" resultType="oss.fosslight.domain.OssMaster">
-		SELECT
-			OSS_NAME, OSS_VERSION, RESTRICTION
-		FROM
-			OSS_VERSION
-		WHERE
-			RESTRICTION LIKE CONCAT('%', #{restriction}, '%')
+		SELECT OC.OSS_NAME, OV.OSS_VERSION, OV.RESTRICTION
+		FROM OSS_COMMON OC
+		INNER JOIN OSS_VERSION OV
+		ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		WHERE OV.RESTRICTION LIKE CONCAT('%', #{restriction}, '%')
+	</select>
+	
+	<select id="getOssVulnerabilityInfo" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT NVD.CVE_ID, CVE.CVSS_SCORE
+		FROM NVD_DATA_V3 NVD
+		INNER JOIN NVD_CVE_V3 CVE
+		ON NVD.CVE_ID = CVE.CVE_ID
+		WHERE 1=1
+		AND (
+			NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+			 	<foreach item="item" index="index" collection="ossNicknames">
+					OR NVD.PRODUCT = REPLACE(#{item}, ' ', '_')
+				</foreach>
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpes)">
+				<foreach item="item" index="index" collection="includeCpes">
+					OR NVD.VENDORPRODUCT = REPLACE(#{item}, ':', '-')
+				</foreach>
+			</if>
+		)
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpes)">
+		AND
+			<foreach item="item" collection="excludeCpes" open="(" close=")" separator="OR">
+				NVD.VENDORPRODUCT != REPLACE(#{item}, ':', '-')
+			</foreach>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+			AND (NVD.VERSION = #{ossVersion}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases)">
+				<foreach item="item" index="index" collection="ossVersionAliases">
+					OR NVD.VERSION = #{item}
+				</foreach>
+			</if>
+			)
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases)">
+				AND (
+				<foreach item="item" index="index" collection="ossVersionAliases" separator="OR">
+					NVD.VERSION = #{item}
+				</foreach>
+				)
+			</if>
+		</if>
+		ORDER BY CVE.CVSS_SCORE DESC
+		LIMIT 1
 	</select>
 </mapper>

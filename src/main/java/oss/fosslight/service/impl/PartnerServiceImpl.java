@@ -23,6 +23,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -93,6 +94,25 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		result = partnerMapper.selectPartnerMaster(partnerMaster);
 		if (result != null) {
 			result.setCommentText(avoidNull(commentMapper.getContent(result.getComment())));
+			if (!isEmpty(result.getDocumentsFileId())) {
+				result.setDocumentsFile(partnerMapper.selectDocumentsFile(result.getDocumentsFileId()));
+			}
+			if (!isEmpty(result.getConfirmationFileId())) {
+				T2File confirmationFile = fileService.selectFileInfo(result.getConfirmationFileId());
+				if (confirmationFile != null) {
+					List<T2File> confirmationFileList = new ArrayList<>();
+					confirmationFileList.add(confirmationFile);
+					result.setConfirmationFile(confirmationFileList);
+				}
+			}
+			if (!isEmpty(result.getOssFileId())) {
+				T2File ossFile = fileService.selectFileInfo(result.getOssFileId());
+				if (ossFile != null) {
+					List<T2File> ossFileList = new ArrayList<>();
+					ossFileList.add(ossFile);
+					result.setOssFile(ossFileList);
+				}
+			}
 		}
 		
 		//파트너 와쳐
@@ -283,10 +303,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				if (!isEmpty(fileSeq)) {
 					T2File delFile = new T2File();
 					delFile.setFileSeq(fileSeq);
-					delFile.setGubn("A");
 
-					fileMapper.updateFileDelYnKessan(delFile);
-					fileService.deletePhysicalFile(delFile, "PARTNER");
+					partnerMapper.deleteFileBySeq(delFile);
+					fileService.deletePhysicalFile(delFile, CoConstDef.CD_CHECK_OSS_PARTNER);
 				}
 			}
 		}
@@ -298,15 +317,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				if (partnerMaster.getConfirmationFileId() == null || !partnerMaster.getConfirmationFileId().equals(beforePartner.getConfirmationFileId())) {
 					T2File delFile = new T2File();
 					delFile.setFileSeq(beforePartner.getConfirmationFileId());
-					fileService.deletePhysicalFile(delFile, "PARTNER");
-				}
-			}
-			
-			if (!isEmpty(beforePartner.getOssFileId())) {
-				if (partnerMaster.getOssFileId() == null || !partnerMaster.getOssFileId().equals(beforePartner.getOssFileId())) {
-					T2File delFile = new T2File();
-					delFile.setFileSeq(beforePartner.getOssFileId());
-					fileService.deletePhysicalFile(delFile, "PARTNER");
+					partnerMapper.deleteFileBySeq(delFile);
+					fileService.deletePhysicalFile(delFile, CoConstDef.CD_CHECK_OSS_PARTNER);
 				}
 			}
 		}
@@ -368,6 +380,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		String refId = partnerMaster.getPartnerId();
 		String refDiv = CoConstDef.CD_DTL_COMPONENT_PARTNER;
 		
+		PartnerMaster partnerInfo = new PartnerMaster();
+		partnerInfo.setPartnerId(refId);
+		partnerInfo = getPartnerMasterOne(partnerInfo);
+		
 		ossComponents =  projectService.convertOssNickName(ossComponents);
 		ossComponentsLicense = projectService.convertLicenseNickName(ossComponentsLicense);
 		
@@ -376,7 +392,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			bean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
 			
 			if (CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK.equals(bean.getObligationLicense())) {
-				if (CoConstDef.FLAG_YES.equals(bean.getSource())) {
+				if (CoConstDef.FLAG_NO.equals(bean.getNotify()) && CoConstDef.FLAG_YES.equals(bean.getSource())) {
+					bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
+				} else if (CoConstDef.FLAG_YES.equals(bean.getSource())) {
 					bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
 				} else if (CoConstDef.FLAG_YES.equals(bean.getNotify())) {
 					bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
@@ -439,7 +457,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			} else {
 				bean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(bean, CoConstDef.LICENSE_DIV_SINGLE));
 			}
-			
+			if (!isEmpty(bean.getCopyrightText())) {
+				bean.setCopyrightText(StringUtils.trimWhitespace(bean.getCopyrightText()));
+			}
 			if (StringUtil.isEmpty(bean.getComponentIdx())) {
 				bean.setComponentIdx(Integer.toString(ossComponentIdx++));
 			}
@@ -497,6 +517,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		{
 			partnerMapper.updateOssFileId(partnerMaster);
+			if ((isEmpty(partnerMaster.getOssFileId()) && !isEmpty(partnerInfo.getOssFileId()))
+					|| (!isEmpty(partnerMaster.getOssFileId()) && !isEmpty(partnerInfo.getOssFileId()) && !partnerMaster.getOssFileId().equals(partnerInfo.getOssFileId()))) {
+				deleteFiles(partnerInfo.getOssFile());
+			}
 		}
 		
 		{
@@ -568,13 +592,16 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		return insertOssComponentLicenseList;
 	}
 	
+	@Transactional
 	@Override
 	@CacheEvict(value="autocompletePartnerCache", allEntries=true)
 	public void deletePartnerMaster(PartnerMaster partnerMaster) {
-		//partnerMaster
-		partnerMapper.deleteMaster(partnerMaster);
+		// Delete partner all components and license
+		projectMapper.resetOssComponentsAndLicense(partnerMaster.getPartnerId(), null);
 		//partnerWatcher
 		partnerMapper.deleteWatcher(partnerMaster);
+		//partnerMaster
+		partnerMapper.deleteMaster(partnerMaster);
 	}
 	
 	@Override
@@ -749,13 +776,12 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				partnerList.replace("rows", CommonFunction.identificationSortByValidInfo(
-						(List<ProjectIdentification>) partnerList.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+				partnerList.replace("rows", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) partnerList.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
 				if (!vr.isValid()) {
 					partnerList.put("validData", vr.getValidMessageMap());
 				}
 				if (!vr.isDiff()) {
-					partnerList.put("diffData", vr.getDiffMessageMap());
+					partnerList.put("diffData", vr.getDiffMessageMap(true));
 				}
 				if (vr.hasInfo()) {
 					partnerList.put("infoData", vr.getInfoMessageMap());
@@ -787,8 +813,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				String ossNameErrorMsg = errorMap.containsKey("ossName."+componentId) ? errorMap.get("ossName."+componentId) : "";
 				String ossVersionErrorMsg = errorMap.containsKey("ossVersion."+componentId) ? errorMap.get("ossVersion."+componentId) : "";
 				
-				if (ossNameErrorMsg.indexOf("Unconfirmed") > -1 
-						|| ossVersionErrorMsg.indexOf("Unconfirmed") > -1) {
+				if (ossNameErrorMsg.indexOf("New") > -1
+						|| ossVersionErrorMsg.indexOf("New") > -1) {
 					duplicateList.add(checkKey);
 					componentIdList.add(componentId);
 				}
@@ -821,13 +847,6 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		HashMap<String, Object> subMap = new HashMap<String, Object>();
 			
 		list = projectMapper.selectIdentificationGridList(identification);
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
-		if (notVersionOssComponentList != null) {
-			list.addAll(notVersionOssComponentList);
-			identification.setOssVersionEmptyFlag(null);
-		}
-		
 		list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 		
 		if (list != null && !list.isEmpty()) {
@@ -1108,7 +1127,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				componentKey += dashSeq++;
 			}
 			
-			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
+			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(bean.getObligationType());
 			boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
 			
 			boolean addDisclosure = srcInfo.containsKey(componentKey);
@@ -1422,6 +1441,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
 		
 		List<String> deduplicatedkey = new ArrayList<>();
+		List<String> caseWithoutVersionKey = new ArrayList<>();
 		boolean activateFlag;
 		OssComponents oc = null;
 		String ossVersion = "";
@@ -1429,35 +1449,41 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		int gridIdx = 1;
 		
 		List<ProjectIdentification> list = projectMapper.selectSecurityListForProject(identification);
-		for (ProjectIdentification pi : list) {
-			Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
-			Map<String, String> patchLinkMap = new HashMap<>();
-			
-			if (!isDemo) {
-				List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
-				for (Map<String, Object> cpeInfo : cpeInfoList) {
-					String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
-					String key2 = (String) cpeInfo.get("cveId");
-					String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
-					
-					List<Map<String, Object>> cpeInfoMapList = null;
-					if (cpeInfoMap.containsKey(key)) {
-						cpeInfoMapList = cpeInfoMap.get(key);
-					} else {
-						cpeInfoMapList = new ArrayList<>();
-					}
-					cpeInfoMapList.add(cpeInfo);
-					cpeInfoMap.put(key, cpeInfoMapList);
-					
-					if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
-						patchLinkMap.put(key2, patchLink);
-					}
+		Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
+		Map<String, String> patchLinkMap = new HashMap<>();
+		
+		if (!isDemo) {
+			List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
+			for (Map<String, Object> cpeInfo : cpeInfoList) {
+				String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
+				String key2 = (String) cpeInfo.get("cveId");
+				String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
+				
+				List<Map<String, Object>> cpeInfoMapList = null;
+				if (cpeInfoMap.containsKey(key)) {
+					cpeInfoMapList = cpeInfoMap.get(key);
+				} else {
+					cpeInfoMapList = new ArrayList<>();
+				}
+				cpeInfoMapList.add(cpeInfo);
+				cpeInfoMap.put(key, cpeInfoMapList);
+				
+				if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
+					patchLinkMap.put(key2, patchLink);
 				}
 			}
-			
+		}
+		
+		for (ProjectIdentification pi : list) {
 			activateFlag = false;
 			if (isEmpty(pi.getOssVersion())) {
 				activateFlag = true;
+				String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
+				if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
+					caseWithoutVersionKey.add(keyWithoutVersion);
+				} else {
+					continue;
+				}
 			}
 			
 			String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
@@ -1498,10 +1524,18 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 						for (Map<String, Object> cpeInfo : matchCpeInfoList) {
 							Map<String, Object> paramMap = new HashMap<>();
 							paramMap = cpeInfo;
-							if (!paramMap.containsKey("verStartInc")) paramMap.put("verStartInc", "");
-							if (!paramMap.containsKey("verEndInc")) paramMap.put("verEndInc", "");
-							if (!paramMap.containsKey("verStartExc")) paramMap.put("verStartExc", "");
-							if (!paramMap.containsKey("verEndExc")) paramMap.put("verEndExc", "");
+							if (!paramMap.containsKey("verStartInc")) {
+								paramMap.put("verStartInc", "");
+							}
+							if (!paramMap.containsKey("verEndInc")) {
+								paramMap.put("verEndInc", "");
+							}
+							if (!paramMap.containsKey("verStartExc")) {
+								paramMap.put("verStartExc", "");
+							}
+							if (!paramMap.containsKey("verEndExc")) {
+								paramMap.put("verEndExc", "");
+							}
 							if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
 								continue;
 							}
@@ -1631,6 +1665,22 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	@Override
+	public void deletePartnerRefFiles(PartnerMaster partnerMaster) {
+		deleteFiles(partnerMaster.getOssFile());
+		deleteFiles(partnerMaster.getConfirmationFile());
+		deleteFiles(partnerMaster.getDocumentsFile());
+	}
+	
+	private void deleteFiles(List<T2File> list) {
+		if (list != null) {
+			for (T2File fileInfo : list) {
+				partnerMapper.deleteFileBySeq(fileInfo);
+				fileService.deletePhysicalFile(fileInfo, CoConstDef.CD_CHECK_OSS_PARTNER);
 			}
 		}
 	}

@@ -65,6 +65,11 @@
                                 }).on('autocompletechange', function () {
                                     var rowid = (e.id).split('_')[0];
                                     fn_grid_com.griOssIds(target, rowid, $('#' + rowid + '_ossName').val(), $('#' + rowid + '_ossVersion').val());
+                                }).on("keypress", function(evt){
+                                	if (evt.keyCode == 13) {
+                                		var rowid = (e.id).split('_')[0];
+                                        fn_grid_com.griOssIds(target, rowid, $('#' + rowid + '_ossName').val(), $('#' + rowid + '_ossVersion').val());
+                                	}
                                 });
                                 ossVersions = [];
                                 $(e).focus();
@@ -1692,17 +1697,22 @@
                 target.jqGrid('saveRow', rowid);
 
                 var licenseName = target.jqGrid('getCell', rowid, 'licenseName');
-                if (licenseName.indexOf("<a class=") > -1) {
-                    licenseName = $(licenseName).text();
-                }
-                if (licenseName.indexOf("<div class=") > -1) {
-                    licenseName = licenseName.substring(0, licenseName.indexOf("<div class="));
-                }
-                if (licenseName.indexOf("+") > -1) {
-                    licenseName = licenseName.replace(/\+/g, "%2B");
-                }
-                if (licenseName.indexOf("&") > -1) {
-                    licenseName = licenseName.replace(/&/g, "%26");
+                let ossLicenseText = target.jqGrid('getCell', rowid, 'ossLicenseText');
+                if (ossLicenseText) {
+                	licenseName = ossLicenseText;
+                } else {
+                	if (licenseName.indexOf("<a class=") > -1) {
+                        licenseName = $(licenseName).text();
+                    }
+                    if (licenseName.indexOf("<div class=") > -1) {
+                        licenseName = licenseName.substring(0, licenseName.indexOf("<div class="));
+                    }
+                    if (licenseName.indexOf("+") > -1) {
+                        licenseName = licenseName.replace(/\+/g, "%2B");
+                    }
+                    if (licenseName.indexOf("&") > -1) {
+                        licenseName = licenseName.replace(/&/g, "%26");
+                    }
                 }
                 target.jqGrid('editRow', rowid);
 

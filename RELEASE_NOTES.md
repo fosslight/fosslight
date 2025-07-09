@@ -6,6 +6,94 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.3.0](https://github.com/fosslight/fosslight/releases/tag/v2.3.0) (2025-07-09)
+
+### New
+* 3rd Party
+  - Added 3rd Party Information Sheet when exporting the FOSSLight Report.
+* Project
+  - A new field has been added to Project Information for specifying the Security Responsible Person.
+    - They will also receive security-related emails from FOSSLight Hub with creator and editors.
+  - OSORI DB Information Addition
+    - In the Pre-Review > Open Source and License tabs, users can now see  data from the OSORI database.
+  - DEP Tab Dependency Tree View
+    - When analysis is performed using the FOSSLight Dependency Scanner, the relationships between each dependency can be visualized in a tree structure.
+* API
+  - Added API to update the Security Responsible Person information.(/api/v2/projects/{id}/security-person)
+  - Added API to update the Security Mail information.(/api/v2/projects/{id}/security-mail)
+* Common
+  - Expanded Custom Column Feature
+    - The Custom Column feature is now available in the Security tab, Project/3rd Party Identification, and Self-Check sections.
+  - Tab refresh
+    - If you enter a tab in any way other than clicking on the open tab at the top, a refresh pop-up will appear. 
+
+### Changed
+* Project
+  - Packaging
+    - Previously, up to 4 OSS Package files could be uploaded, but with this update, the number of uploadable files has been increased to 5.
+  - SPDX, CycloneDX 
+    - When SPDX and CycloneDX documents are generated, the output will be based on the package URL in the DEP tab. 
+    - Even if the OSS Name and OSS Version are the same, each will be output separately if the package URLs are different, allowing all relationships to be displayed.
+  - Support CycloneDX 1.6
+* API
+  - In addition to email, the user can now check their issued Token information in the User Settings menu within the FOSSLight Hub.
+  - Added security mail, security person, editors and publicYn information in GEP /api/v2/projects API
+  - Added bomSave parameter in /api/v2/projects/{id}/{tab_name}/reports API
+  - Added modelNameExactYn parameter in GET /api/v2/projects API
+  - Added reset all option in /api/v2/projects/{id}/reset API
+* License, OSS
+  - Added Share URL button
+  - Change color of Restriction icon based on the level
+가* DataBase
+  -  Added column
+    - PROJECT_MASTER: PACKAGE_FILE_ID5
+  - Deleted columns
+    - PROJECT_MASTER: PACKAGE_VUL_DOC_FILE_ID, VUL_DOC_SKIP_YN
+  - Added table  
+    - NVD_DATA_RUNNING_ON_WITH_TEMP, NVD_DATA_RUNNING_ON_WITH 
+
+## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
+
+### New
+* 3rd Party
+  - Added 3rd Party Information
+  - Added 3rd Party Identification(3rd Party tab/ BOM tab)
+  - Implemented a 3rd Party BOM Compare feature
+
+* Project
+  - Added codelinaro type to Pre-review
+ 
+### Changed
+* Project
+  - Enabled the ability to change the status of multiple projects simultaneously.
+  - Updated BOM merge conditions:
+     - If OSS Name is “-”, merge if license, homepage, and download location are the same.
+  - Adjusted the Loaded list to display items in the order of most recently added.
+* Open Source
+  - OSS name can now only be changed through the edit button in the detailed screen.
+  - Changed the initial list display to sort by modified date in descending order.
+* License
+  - Changed the initial list display to sort by modified date in descending order.
+  - Modified the License text field to allow null values.
+* Review Report
+  - Updated to include OSS Important Notes information in the output.
+  - Provided links to detailed screens when clicking on OSS and License names.
+* DataBase
+  -  Updated column names
+     - PROJECT_MASTER: DESTRIBUTION_STATUS > DISTRIBUTION_STATUS
+  - Deleted columns
+     - PRE_PROJECT_MASTER: OSS_TYPE, OS_TYPE_ETC, DISTRIBUTION_TYPE
+* Mail
+  - Added a notification feature for users in the division (Code No: 200) when USE_YN is changed to N in Code Management.
+
+* **Bug fix**
+  - Fixed an issue where the banned list of all files would merge and display when multiple package files are uploaded in Packaging.
+  - Resolved an issue where existing data would change when saving a copied OSS with a new name (added logic to reset oss_common_id).
+  - Fixed an issue where information was not displayed correctly in the Statistics menu.
+  - Resolved an issue where the Vulnerability menu could not be queried.
+  - Fixed an issue where the column width would not be maintained after filtering in the Grid table.
+  - Addressed an issue where no email was sent when adding a new OSS version.
+
 ## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
 
 ### New

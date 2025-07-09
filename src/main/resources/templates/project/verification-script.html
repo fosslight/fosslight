@@ -19,7 +19,6 @@
         var tempHandler = "";
         var distributionStatus = [[${project.distributionStatus}]];
         var deleteFileList = new Array();
-        var isAndroid = [[${project.androidFlag}]];
         var appendReadOnlyFlag = false;
         var activeTab = null;
         var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
@@ -34,7 +33,11 @@
             
             // 버튼 컨트롤
             fn.btnCtl(userRole, curIdenStatus);
-            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+		    	if (event.keyCode == "9") {
+		        	event.preventDefault();
+		       	}
+		  	});
             
             $("#list").jqGrid({
                 datatype: 'local',
@@ -48,7 +51,7 @@
                     {name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden: true},
                     {name: 'ossName', index: 'ossName', width: 150, align: 'left', editable: false},
                     {name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable: false},
-                    {name: 'downloadLocation', index: 'downloadLocation', width: 70, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, align: 'left', editable: false},
+                    {name: 'downloadLocation', index: 'downloadLocation', width: 70, formatter:fn_grid_com.displayDownloadlocation, unformatter:fn_grid_com.unformatter, align: 'left', editable: false},
                     {name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: 'link2', editable: false},
                     {name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable: false},
                     {name: 'filePath', index: 'filePath', width: 250, align: 'left', editable: true, formatter: fn.textBox, unformat: fn.unformatterTextBox},
@@ -61,7 +64,6 @@
                 gridview: true,
                 sortable: function (permutation) {
                 },
-                viewrecords: true,
                 sortorder: 'desc',
                 height: 'auto',
                 toppager: true,
@@ -90,19 +92,24 @@
                         
                         $("#list_toppager_left").append(appendHtml);
                     }
-                }
+                },
+           		gridComplete : function() {
+					updateGridRowCount('list', 'pager');
+				}
             });
             
             $('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "500px"});
             $("#list").jqGrid('navGrid', "#pager", {add: false, edit: false, del: false, search: false, refresh: false});
 
             if (typeof datas.ossList !== "undefined" && datas.ossList != null && datas.ossList.length < 1) {
-                $("[name='btnSavePath']").hide();
-                $(".packageSelect").prop("disabled", true);
-                
-                if (isAdmin && $("#div_approve")) {
-                    $("#div_approve").hide();
-                } else if (datas.ossList.length > 1) {
+            	if (datas.ossList.length < 1) {
+            		$("[name='btnSavePath']").hide();
+                    $(".packageSelect").prop("disabled", true);
+                    
+                    if (isAdmin && $("#div_approve")) {
+                        $("#div_approve").hide();
+                    }
+            	} else if (datas.ossList.length > 1) {
             		if ($(".warningPop").length > 0 && "CONF" != curIdenStatus
                             && (!$('input[name=fileSeq_1]') || $('input[name=fileSeq_1]').val() == "")) {
                         	
@@ -172,11 +179,12 @@
     				alertify.alert([[#{msg.project.verification.confirm.package}]], function(){
     					$("#tabMenuNotice").click();
     					activeTab = "1";
-    					if ('CONF' == curIdenStatus) $("#save").hide();
+    					if ('CONF' == curIdenStatus) {
+    						$("#save").hide();
+    					}
     				});
-    			} else if("Notice" == tabId && isAndroid == "Y") {
-    				$("#tabMenuPackaging").click();
-    				fn.saveOrGetNotice('previewOnly');
+    			} else if ("Notice" == tabId) {
+    				activeTab = "1";
     			}
         		
         		if ("Packaging" == tabId) {
@@ -231,26 +239,7 @@
                 } else {
                     $("input[name=withoutVerifyYn]").val("N");
                 }
-/*
-                if ($("[name='fileSeq_1']").val()) {
-                    $("#fileUplWarnMessage_1").hide();
-                } else {
-                    $("#fileUplWarnMessage_1").show();
-                }
 
-                if ($("[name='fileSeq_2']").val()) {
-                    $("#fileUplWarnMessage_2").hide();
-                } else {
-                    $("#fileUplWarnMessage_2").show();
-                }
-
-                if ($("[name='fileSeq_3']").val()) {
-                    $("#fileUplWarnMessage_3").hide();
-                } else {
-                    $("#fileUplWarnMessage_3").show();
-                }
-*/
-                fn.appendEditVisible($("#append"));
                 fn.initNotice();
                 fn.initNoticeFileFormat();
 
@@ -258,6 +247,8 @@
                 
                 commentsParam.height = $(window).height() - 120;
                 fn_comment.getCommentList(commentsParam);
+                
+                fn.initNoticeAppendInfo();
             }
         }
 
@@ -295,7 +286,9 @@
                             $('.verifyFile_1').hide();
                             $("#uploadAdd_1").show();
                             $("#uploadRemove_1").hide();
-                            if (!$('.uploadList_1').is("visible")) $('.uploadList_1').show();
+                            if (!$('.uploadList_1').is("visible")) {
+                            	$('.uploadList_1').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -336,7 +329,9 @@
                             $('.verifyFile_2').hide();
                             $("#uploadAdd_2").show();
                             $("#uploadRemove_2").hide();
-                            if (!$('.uploadList_2').is("visible")) $('.uploadList_2').show();
+                            if (!$('.uploadList_2').is("visible")) {
+                            	$('.uploadList_2').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -376,7 +371,9 @@
 
                             $('.verifyFile_3').hide();
                             $("#uploadRemove_3").hide();
-                            if (!$('.uploadList_3').is("visible")) $('.uploadList_3').show();
+                            if (!$('.uploadList_3').is("visible")) {
+                            	$('.uploadList_3').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -414,8 +411,11 @@
                             });
 
                             $('.verifyFile_4').hide();
+                            $("#uploadAdd_4").show();
                             $("#uploadRemove_4").hide();
-                            if (!$('.uploadList_4').is("visible")) $('.uploadList_4').show();
+                            if (!$('.uploadList_4').is("visible")) {
+                            	$('.uploadList_4').show();
+                            }
 
                             // verified 초기화
                             verified = false;
@@ -427,6 +427,77 @@
                             $('.ajax-file-upload-statusbar').fadeOut('slow');
                             $('.ajax-file-upload-statusbar').remove();
                             alertify.alert(result[1], function () {});
+                        }
+                    },
+                });
+                
+                $('#registFile_5').uploadFile({
+                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=5&permission=' + [[${project.statusPermission}]],
+                    multiple: false,
+                    dragDrop: true,
+                    fileName: 'myfile',
+                    onSuccess: function (e, data) {
+                        var result = jQuery.parseJSON(data);
+                        
+                        if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
+                            result.forEach(function (item) {
+                                var appendHtml = '<br>' + item[0].createdDate;
+                                var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
+                                uploadFileTag += '<span class="badge bg-danger uploadFile5" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
+
+                                $('.uploadList_5 ul').append(uploadFileTag);
+                                $('input[name=fileSeq_5]').val(item[0].registSeq);
+                                $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                $('.ajax-file-upload-statusbar').remove();
+                            });
+
+                            $('.verifyFile_5').hide();
+                            $("#uploadRemove_5").hide();
+                            if (!$('.uploadList_5').is("visible")) {
+                            	$('.uploadList_5').show();
+                            }
+
+                            // verified 초기화
+                            verified = false;
+
+                            evt.uploadStatus = true;
+
+                            fn.autoVerify();
+                        } else {
+                            $('.ajax-file-upload-statusbar').fadeOut('slow');
+                            $('.ajax-file-upload-statusbar').remove();
+                            alertify.alert(result[1], function () {});
+                        }
+                    },
+                });
+                
+                $('#noticeAppendFile').uploadFile({
+                	url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=6&fileId='+$('input[name=noticeAppendFileId]').val()+'&permission=' + [[${project.statusPermission}]],
+                    multiple: false,
+                    dragDrop: true,
+                    fileName: 'myfile',
+                    onSuccess: function (e, data) {
+                        var result = jQuery.parseJSON(data);
+                        
+                        if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
+                        	result.forEach(function (item) {
+                                var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
+                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteAppendFile(this,\'' + item[0].registSeq + '\')">X</span>' + item[0].createdDate + '</li>';
+
+                                $('.appendFileUpload').append(uploadFileTag);
+                                $('input[name=noticeAppendFileId]').val(item[0].registFileId);
+                                $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                $('.ajax-file-upload-statusbar').remove();
+                                $(".ajax-file-upload-container").show();
+    						});
+    						
+    						$(".noticeAppendFileUploadArea").show();
+                        } else {
+                        	$('.ajax-file-upload-statusbar').fadeOut('slow');
+    						$('.ajax-file-upload-statusbar').remove();
+    						alertify.alert(result[1], function () { });
                         }
                     },
                 });
@@ -593,9 +664,8 @@
                					editorVal = "";
                				}
             				$("input[name='userComment']").val(editorVal);
-                        })
-                        .set('onshow', function(e){
-                        	if ($("#append").prop("checked")) {
+            				
+            				if ($("#append").prop("checked")) {
          						$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
          						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                             }
@@ -613,7 +683,23 @@
                                     var result = jQuery.parseJSON(data);
 
                                     if (result.isValid == 'false') {
-                                        alertify.error([[#{msg.common.valid2}]], 0);
+                                    	if (typeof result.resultData !== "undefined") {
+                                    		let msg = [[#{msg.package.check.confirm.identification.retry}]];
+                                    		msg += "<br><br>";
+                                    		let msgData = [];
+                                    		msgData = result.resultData;
+                                    		if (msgData.length > 0) {
+                                    			for (let i=0; i < msgData.length; i++) {
+                                    				msg += "- " + msgData[i];
+                                    				if (i < msgData.length-1) {
+                                    					msg += "<br>";
+                                    				}
+                                    			}
+                                    		}
+                                    		alertify.alert(msg, function () {});
+                                    	} else {
+                                    		alertify.error([[#{msg.common.valid2}]], 0);
+                                    	}
                                     } else {
                                         reloadTabInframe('/project/list');
                                         loading.hide();
@@ -637,6 +723,17 @@
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 }
                             }).submit();
+                        })
+                        .set('onshow', function(e){
+                        	$("#verConfirmEditor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        	const parameter = {
+                               	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]],
+                               	"referenceId" : [[${project.prjId}]]
+                          	}
+                            var draftUserComment = draftUserComments(parameter);
+                            if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+                               	$("#verConfirmEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+                            }
                         })
                         .set('title', 'Confirm').setContent(innerHtml)
 						.show();
@@ -734,7 +831,8 @@
                             , "verificationStatus": "REV"
                             , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
                             , "userComment": [[${project.userComment}]]
-                            , "referenceDiv": "12"
+                            , "referenceDiv": [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]]
+                        	, "editNoticeYn": $("#editNoticeYn").val()
                             , "noticeFileFormat": datas.noticeFileFormat
                             , "withoutVerifyYn" : $("input[name='withoutVerifyYn']").val()
                         };
@@ -983,6 +1081,55 @@
                     });
                 });
                 
+                $('#send_5').on('click', function () {
+                    var wgetUrl = $("#sendWgetUrl_5").val();
+                    var obj = {
+                        prjId: [[${project.prjId}]],
+                        wgetUrl: wgetUrl
+                    };
+
+                    $.ajax({
+                        url: '/project/verification/wgetUrl',
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        cache: false,
+                        data: JSON.stringify(obj),
+                        success: function (json) {
+                            var result = JSON.parse(json);
+                            var resultCode = result[0][0].wgetResult;
+
+                            if (resultCode == 0) {
+                                result.forEach(function (item) {
+                                	var appendHtml = '<br>' + item[0].createdDate;
+                                    var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                    var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
+                                    uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
+
+                                    $('.uploadList_5 ul').append(uploadFileTag);
+                                    $('input[name=fileSeq_5]').val(item[0].registSeq);
+                                    $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                    $('.ajax-file-upload-statusbar').remove();
+                                    $("#wgetUrl_5").hide();
+                                });
+
+                                $('.verifyFile_5').hide();
+                                $("#uploadRemove_5").hide();
+                                $("#sendWgetUrl_5").val("");
+                                
+                                if (!$('.uploadList_5').is("visible")) {
+                                	$('.uploadList_5').show();
+                                }
+                            } else {
+                                alertify.error([[#{msg.common.valid2}]], 0);
+                            }
+                        },
+                        error: function (data) {
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        }
+                    });
+                });
+                
                 // [Pakage Document Download START]
                 $('#packageDocDownload').click(function (e) {
                     var type = $('#docType option:selected').val();
@@ -1100,9 +1247,34 @@
                 $("#append").click(function (e) {
                     var checked = $(this).prop("checked");
                     $("#editAppendedYn").val(checked ? "Y" : "N");
-                    fn.appendEditVisible(this);
+                    var appendType = $("#noticeAppendType").val();
+                    if (!checked) {
+                    	$("[name='btnNoticeAppendType']").prop("checked", false);
+                    	fn.appendEditVisible(this);
+                    	
+                    	var cVal = $("[name='btnNoticeAppendType']:checked").val();
+                		$("#noticeAppendType").val(cVal);
+                		fn.customAppendEditVisible(true, cVal);
+                    } else {
+                    	var radioChecked = $("[name='btnNoticeAppendType']").prop("checked");
+                    	if (!radioChecked) {
+                    		if ("" == appendType || "E" == appendType) {
+                    			$("#btnNoticeAppendType1").trigger("click");
+                    		} else if ("F" == appendType) {
+                    			$("#btnNoticeAppendType2").trigger("click");
+                    		}
+                    	}
+                    }
                 });
 
+                $("[name='btnNoticeAppendType']").change(function (e) {
+                	if ($("#append").prop("checked", true)) {
+                		var cVal = $("[name='btnNoticeAppendType']:checked").val();
+                		$("#noticeAppendType").val(cVal);
+                		fn.customAppendEditVisible(false, cVal);
+                	}
+                });
+                
                 $("[name='btnEditOssNotice']").change(function (e) {
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     $("#editNoticeYn").val(checked ? "Y" : "N");
@@ -1175,18 +1347,35 @@
 					fn.disabledSelect();
                 });
                 
+                $("#uploadAdd_4").click(function (e) {
+                	if (!$("[name='btnSavePath']").is(":visible")) {
+                		alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
+            			return false;
+                	}
+                	
+                    $(".multiSet > div:eq(4)").show();
+                    $("#registFileDiv_5").attr("style", "display: block;");
+                    $("#uploadAdd_4").hide();
+                    $("#uploadRemove_5").show();
+                    $("input[name='packageFileType5']").val("1");
+					fn.disabledSelect();
+                });
+                
                 $("#uploadRemove_1").click(function (e) {
                 	var fileSeq2 = $('input[name=fileSeq_2]').val();
                     var fileSeq3 = $('input[name=fileSeq_3]').val();
                     var fileSeq4 = $('input[name=fileSeq_4]').val();
+                    var fileSeq5 = $('input[name=fileSeq_5]').val();
                    
-                    if ("" != fileSeq2 && "" != fileSeq3 && "" != fileSeq4) {
+                    if ("" != fileSeq2 && "" != fileSeq3 && "" != fileSeq4 && "" != fileSeq5) {
                     	var fileType2 = $('input[name=packageFileType2]').val();
                     	var fileType3 = $('input[name=packageFileType3]').val();
                     	var fileType4 = $('input[name=packageFileType4]').val();
+                    	var fileType5 = $('input[name=packageFileType5]').val();
                     	
                     	$("#uploadRemove_1").hide();
                         $("#uploadAdd_1").hide();
+                        $("#projectSearch_1").hide();
 
                         var html = $('.uploadList_2 ul li').html();
                         $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
@@ -1230,18 +1419,91 @@
                         $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_3").find("span").removeClass("uploadFile4");
                         $(".uploadList_3").find("span").addClass("uploadFile3");
-                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"2\")");
+                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
                         
-                        $('input[name=fileSeq_4]').val("");
-                        $('input[name=packageFileType4]').val("");
-                        $(".multiSet > div:eq(3)").hide();
+                        $("#uploadRemove_4").hide();
+                        $("#uploadAdd_4").hide();
+                        
+                        var html = $('.uploadList_5 ul li').html();
+                        $('.uploadList_4 ul').empty();
+                        $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=packageFileType4]').val(fileType5);
+                        
+                        $('.verifyFile_4').hide();
+                        
+                        $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_4").find("span").removeClass("uploadFile5");
+                        $(".uploadList_4").find("span").addClass("uploadFile4");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        
+                        $('input[name=fileSeq_5]').val("");
+                        $('input[name=packageFileType5]').val("");
+                        $(".multiSet > div:eq(4)").hide();
                     } else {
-                    	if ("" != fileSeq2 && "" != fileSeq3) {
+                    	if ("" != fileSeq2 && "" != fileSeq3 && "" != fileSeq4) {
+                    		var fileType2 = $('input[name=packageFileType2]').val();
+                        	var fileType3 = $('input[name=packageFileType3]').val();
+                        	var fileType4 = $('input[name=packageFileType4]').val();
+                        	
+                        	$("#uploadRemove_1").hide();
+                            $("#uploadAdd_1").hide();
+                            $("#projectSearch_1").hide();
+
+                            var html = $('.uploadList_2 ul li').html();
+                            $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
+                            $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                            $('input[name=packageFileType1]').val(fileType2);
+
+                            $('.verifyFile_1').hide();
+                            
+                            $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_1").find("span").removeClass("uploadFile2");
+                            $(".uploadList_1").find("span").addClass("uploadFile1");
+                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                            
+                            $("#uploadRemove_2").hide();
+                            $("#uploadAdd_2").hide();
+                            
+                            var html = $('.uploadList_3 ul li').html();
+                            $('.uploadList_2 ul').empty();
+                            $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
+                            $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                            $('input[name=packageFileType2]').val(fileType3);
+                            
+                            $('.verifyFile_2').hide();
+                            
+                            $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_2").find("span").removeClass("uploadFile3");
+                            $(".uploadList_2").find("span").addClass("uploadFile2");
+                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                            
+                            $("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            
+                            var html = $('.uploadList_4 ul li').html();
+                            $('.uploadList_3 ul').empty();
+                            $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=packageFileType3]').val(fileType4);
+                            
+                            $('.verifyFile_3').hide();
+                            
+                            $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_3").find("span").removeClass("uploadFile4");
+                            $(".uploadList_3").find("span").addClass("uploadFile3");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            
+                            $('input[name=fileSeq_4]').val("");
+                            $('input[name=packageFileType4]').val("");
+                            $(".multiSet > div:eq(3)").hide();
+                    	} else if ("" != fileSeq2 && "" != fileSeq3) {
                     		var fileType2 = $('input[name=packageFileType2]').val();
                         	var fileType3 = $('input[name=packageFileType3]').val();
                         	
                         	$("#uploadRemove_1").hide();
                             $("#uploadAdd_1").hide();
+                            $("#projectSearch_1").hide();
 
                             var html = $('.uploadList_2 ul li').html();
                             $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
@@ -1279,6 +1541,7 @@
                     		
                     		$("#uploadRemove_1").hide();
                             $("#uploadAdd_1").hide();
+                            $("#projectSearch_1").hide();
 
                             var html = $('.uploadList_2 ul li').html();
                             $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
@@ -1305,11 +1568,64 @@
                 $("#uploadRemove_2").click(function (e) {
                     var fileSeq3 = $('input[name=fileSeq_3]').val();
                     var fileSeq4 = $('input[name=fileSeq_4]').val();
-					
-                    if ("" == fileSeq3 && "" == fileSeq4) {
-                    	$('input[name=packageFileType2]').val("");
-                        $(".multiSet > div:eq(1)").hide();
-                        $("#uploadAdd_1").show();
+                    var fileSeq5 = $('input[name=fileSeq_5]').val();
+                   
+                    if ("" != fileSeq3 && "" != fileSeq4 && "" != fileSeq5) {
+                    	var fileType3 = $('input[name=packageFileType3]').val();
+                    	var fileType4 = $('input[name=packageFileType4]').val();
+                    	var fileType5 = $('input[name=packageFileType5]').val();
+                    	
+                    	$("#uploadRemove_2").hide();
+                        $("#uploadAdd_2").hide();
+                        $("#projectSearch_2").hide();
+
+                        var html = $('.uploadList_3 ul li').html();
+                        $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
+                        $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                        $('input[name=packageFileType2]').val(fileType3);
+
+                        $('.verifyFile_2').hide();
+                        
+                        $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_2").find("span").removeClass("uploadFile3");
+                        $(".uploadList_2").find("span").addClass("uploadFile2");
+                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                        
+                        $("#uploadRemove_3").hide();
+                        $("#uploadAdd_3").hide();
+                        
+                        var html = $('.uploadList_4 ul li').html();
+                        $('.uploadList_3 ul').empty();
+                        $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                        $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                        $('input[name=packageFileType3]').val(fileType4);
+                        
+                        $('.verifyFile_3').hide();
+                        
+                        $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_3").find("span").removeClass("uploadFile4");
+                        $(".uploadList_3").find("span").addClass("uploadFile3");
+                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                        
+                        $("#uploadRemove_4").hide();
+                        $("#uploadAdd_4").hide();
+                        
+                        var html = $('.uploadList_5 ul li').html();
+                        $('.uploadList_4 ul').empty();
+                        $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=packageFileType4]').val(fileType5);
+                        
+                        $('.verifyFile_4').hide();
+                        
+                        $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_4").find("span").removeClass("uploadFile5");
+                        $(".uploadList_4").find("span").addClass("uploadFile4");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        
+                        $('input[name=fileSeq_5]').val("");
+                        $('input[name=packageFileType5]').val("");
+                        $(".multiSet > div:eq(4)").hide();
                     } else {
                     	if ("" != fileSeq3 && "" != fileSeq4) {
                     		var fileType3 = $('input[name=packageFileType3]').val();
@@ -1317,6 +1633,7 @@
                         	
                         	$("#uploadRemove_2").hide();
                             $("#uploadAdd_2").hide();
+                            $("#projectSearch_2").hide();
 
                             var html = $('.uploadList_3 ul li').html();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
@@ -1349,62 +1666,146 @@
                             $('input[name=fileSeq_4]').val("");
                             $('input[name=packageFileType4]').val("");
                             $(".multiSet > div:eq(3)").hide();
-                    	} else {
+                    	} else if ("" != fileSeq3) {
+                    		var fileType3 = $('input[name=packageFileType3]').val();
+                    		
                     		$("#uploadRemove_2").hide();
                             $("#uploadAdd_2").hide();
+                            $("#projectSearch_2").hide();
 
                             var html = $('.uploadList_3 ul li').html();
-                            $('.uploadList_2 ul').empty();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
                             $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
-                            $('input[name=packageFileType2]').val($('input[name=packageFileType3]').val());
+                            $('input[name=packageFileType2]').val(fileType3);
+                            $('input[name=fileSeq_3]').val("");
+                            $('input[name=packageFileType3]').val("");
                             
                             $('.verifyFile_2').hide();
+                            
                             $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_2").find("span").removeClass("uploadFile3");
                             $(".uploadList_2").find("span").addClass("uploadFile2");
                             $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
                             
-                            $('input[name=fileSeq_3]').val("");
-                            $('input[name=packageFileType3]').val("");
+                            $("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            
                             $(".multiSet > div:eq(2)").hide();
+                    	} else {
+                    		$('input[name=packageFileType2]').val("");
+                            $(".multiSet > div:eq(1)").hide();
+                            $("#uploadAdd_1").show();
                     	}
                     }
                 });
 
                 $("#uploadRemove_3").click(function (e) {
-                	var fileSeq = $('input[name=fileSeq_4]').val();
+                	var fileSeq4 = $('input[name=fileSeq_4]').val();
+                	var fileSeq5 = $('input[name=fileSeq_5]').val();
                 	
-                	if ("" == fileSeq) {
+                	if ("" == fileSeq4 && "" == fileSeq5) {
                 		$('input[name=packageFileType3]').val("");
                         $(".multiSet > div:eq(2)").hide();
                         $("#uploadAdd_2").show();
                 	} else {
-                		$("#uploadRemove_3").hide();
-                        $("#uploadAdd_3").hide();
+                		if ("" != fileSeq4 && "" != fileSeq5) {
+                			var fileType4 = $('input[name=packageFileType4]').val();
+                        	var fileType5 = $('input[name=packageFileType5]').val();
+                        	
+                        	$("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            $("#projectSearch_3").hide();
 
-                        var html = $('.uploadList_4 ul li').html();
-                        $('.uploadList_3 ul').empty();
-                        $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                        $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
-                        $('input[name=packageFileType3]').val($('input[name=packageFileType4]').val());
-                        
-                        $('.verifyFile_3').hide();
-                        $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
-                        $(".uploadList_3").find("span").removeClass("uploadFile4");
-                        $(".uploadList_3").find("span").addClass("uploadFile4");
-                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"2\")");
-                        
-                        $('input[name=fileSeq_4]').val("");
-                        $('input[name=packageFileType4]').val("");
-                        $(".multiSet > div:eq(3)").hide();
+                            var html = $('.uploadList_4 ul li').html();
+                            $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=packageFileType3]').val(fileType4);
+
+                            $('.verifyFile_3').hide();
+                            
+                            $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_3").find("span").removeClass("uploadFile4");
+                            $(".uploadList_3").find("span").addClass("uploadFile3");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            
+                            $("#uploadRemove_4").hide();
+                            $("#uploadAdd_4").hide();
+                            $("#projectSearch_4").hide();
+                            
+                            var html = $('.uploadList_5 ul li').html();
+                            $('.uploadList_4 ul').empty();
+                            $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                            $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                            $('input[name=packageFileType4]').val(fileType5);
+                            
+                            $('.verifyFile_4').hide();
+                            
+                            $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_4").find("span").removeClass("uploadFile5");
+                            $(".uploadList_4").find("span").addClass("uploadFile4");
+                            $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                            
+                            $('input[name=fileSeq_5]').val("");
+                            $('input[name=packageFileType5]').val("");
+                            $(".multiSet > div:eq(4)").hide();
+                		} else {
+                			$("#uploadRemove_3").hide();
+                            $("#uploadAdd_3").hide();
+                            $("#projectSearch_3").hide();
+                            
+                            var html = $('.uploadList_4 ul li').html();
+                            $('.uploadList_3 ul').empty();
+                            $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
+                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=packageFileType3]').val($('input[name=packageFileType4]').val());
+                            
+                            $('.verifyFile_3').hide();
+                            $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_3").find("span").removeClass("uploadFile4");
+                            $(".uploadList_3").find("span").addClass("uploadFile3");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            
+                            $('input[name=fileSeq_4]').val("");
+                            $('input[name=packageFileType4]').val("");
+                            $(".multiSet > div:eq(3)").hide();
+                		}
                 	}
                 });
                 
                 $("#uploadRemove_4").click(function (e) {
-                	$('input[name=packageFileType4]').val("");
-                    $(".multiSet > div:eq(3)").hide();
-                    $("#uploadAdd_3").show();
+                	var fileSeq = $('input[name=fileSeq_5]').val();
+                	
+                	if ("" == fileSeq) {
+                		$('input[name=packageFileType4]').val("");
+                        $(".multiSet > div:eq(3)").hide();
+                        $("#uploadAdd_3").show();
+                	} else {
+                		$("#uploadRemove_4").hide();
+                        $("#uploadAdd_4").hide();
+                        $("#projectSearch_4").hide();
+
+                        var html = $('.uploadList_5 ul li').html();
+                        $('.uploadList_4 ul').empty();
+                        $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
+                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=packageFileType4]').val($('input[name=packageFileType5]').val());
+                        
+                        $('.verifyFile_4').hide();
+                        $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_4").find("span").removeClass("uploadFile5");
+                        $(".uploadList_4").find("span").addClass("uploadFile5");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        
+                        $('input[name=fileSeq_5]').val("");
+                        $('input[name=packageFileType5]').val("");
+                        $(".multiSet > div:eq(4)").hide();
+                	}
+                });
+                
+                $("#uploadRemove_5").click(function (e) {
+                	$('input[name=packageFileType5]').val("");
+                    $(".multiSet > div:eq(4)").hide();
+                    $("#uploadAdd_4").show();
                 });
                 
                 setTimeout(function() {
@@ -1463,7 +1864,9 @@
                         for (var i in arr) {
                             target.jqGrid('editRow', arr[i], true);
                             var _path = $("#" + arr[i] + "_filePath").val();
-                        	if ("undefined/" == _path) $("#" + arr[i] + "_filePath").val("");
+                        	if ("undefined/" == _path) {
+                        		$("#" + arr[i] + "_filePath").val("");
+                        	}
                         }
 
                         if (Object.keys(pathValidMsg).length !== 0) {
@@ -1490,6 +1893,10 @@
                             fileSeqs.push($('input[name=fileSeq_4]').val());
                         }
                         
+                        if ($('input[name=fileSeq_5]').val() != '') {
+                            fileSeqs.push($('input[name=fileSeq_5]').val());
+                        }
+                        
                         if ($('input[name="packageFileType1"]').val() != '') {
                         	fileTypeSeqs.push($('input[name="packageFileType1"]').val());
                         }
@@ -1504,6 +1911,10 @@
                         
                         if ($('input[name="packageFileType4"]').val() != '') {
                         	fileTypeSeqs.push($('input[name="packageFileType4"]').val());
+                        }
+                        
+                        if ($('input[name="packageFileType5"]').val() != '') {
+                        	fileTypeSeqs.push($('input[name="packageFileType5"]').val());
                         }
                         
                         var obj = {
@@ -1533,7 +1944,13 @@
                                 } else {
                                     alertify.alert([[#{msg.common.success}]], function () {
                                     	activeDeleteTabInFrame();
-                                        createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
+                                    	
+                                    	let callBackUrl = '/project/verification/';
+                                    	if (!$(".comment-area").is(":visible")) {
+                                    		callBackUrl += "2/";
+                                    	}
+                                    	callBackUrl += [[${project.prjId}]];
+                                        createTabInFrame([[${project.prjId}]] + '_Packaging', callBackUrl);
                                     });
                                 }
                             },
@@ -1750,15 +2167,12 @@
               	var fileSeq_2 = $("[name='fileSeq_2']").val();
               	var fileSeq_3 = $("[name='fileSeq_3']").val();
               	var fileSeq_4 = $("[name='fileSeq_4']").val();
+              	var fileSeq_5 = $("[name='fileSeq_5']").val();
 
                 $('.verifyFile_' + i).show();
                 $("#uploadAdd_" + i).hide();
 				
-                if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "")) {
-                	$("#uploadRemove_" + i).show();
-                }
-                
-             	if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "" && fileSeq_4 == "")) {
+                if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "" && fileSeq_4 == "" && fileSeq_5 == "")) {
               		$("#uploadRemove_" + i).show();
              	}
 
@@ -1822,12 +2236,17 @@
                         tempHandler = ""; // temp clear
                     } else {
                     	var _iframeUrl = "/project/verification/";
-                    	if (activeTab != null) _iframeUrl += "1/";
+                    	if (activeTab != null) {
+                    		_iframeUrl += "1/";
+                    	} else if (!$(".comment-area").is(":visible")) {
+                    		_iframeUrl += "2/";
+                    	}
                     	_iframeUrl += [[${project.prjId}]];
                     	
                         alertify.alert([[#{msg.common.success}]], function () {
                         	activeDeleteTabInFrame();
 							createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
+							reloadTabInframe("/project/list");
                         });
                     }
                 }
@@ -2278,8 +2697,10 @@
 					$("#editAppendedYn").val("Y");
                 	
                 	if ("" != $("#append").prop("checked")) {
-                		$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
-     					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+                		if ("E" == $("#noticeAppendType").val()) {
+                			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+         					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+                		}
                 	}
                 } else {
                 	$("#editAppendedYn").val("N");
@@ -2347,10 +2768,15 @@
                             alertify.error([[#{msg.common.valid2}]], 0);
                         } else {
                             alertify.success([[#{msg.project.sent.comments.success}]]);
-                            $("#modifiedCommentInPjtEditor").summernote('code', '');
+                            $("#modifiedCommentInPjtEditor").summernote('code', '<p></p>');
                             $("#userContents").val('');
                             $('.ajs-close').trigger("click");
                             fn_comment.getCommentList(commentsParam);
+                            
+                            if (_popupComment == null || _popupComment.closed) {
+                            } else {
+                            	_popupComment.callbackFunction();
+                            }
                         }
                     },
                     error: function () {
@@ -2381,7 +2807,7 @@
                             alertify.success([[#{msg.common.success}]]);
                         }
                         $("#userContents").val(editorVal);
-                        editDailog.close();
+                        $('.ajs-close').trigger("click");
                     },
                     error: function () {
                         alertify.error([[#{msg.common.valid2}]], 0);
@@ -2483,9 +2909,14 @@
                                     projectList_3.packagingLoad();
 
                                     break;
-                                case "3":
+                                case "4":
                                     projectList_4.load();
                                     projectList_4.packagingLoad();
+
+                                    break;
+                                case "5":
+                                    projectList_5.load();
+                                    projectList_5.packagingLoad();
 
                                     break;
                                 default:
@@ -2753,31 +3184,71 @@
                 var checked = $(target).prop("checked");
 
                 if (checked || "CONF" == curIdenStatus) {
-                    $("#editAppend").show();
+                	if ("E" == noticeAppendType) {
+            			$("#btnNoticeAppendType1").trigger("click");
+            		} else {
+            			$("#btnNoticeAppendType2").trigger("click");
+            		}
                 } else {
-                    $("#editAppend").hide();
+                	 $("#editAppend").hide();
+                     $('#editor2').summernote('disable');
                 }
+            },
+            customAppendEditVisible : function (hideFlag, flag) {
+            	if ("E" == flag) {
+            		$("#editAppendFile").hide();
+            		$("#editAppend").show();
+                    $('#editor2').summernote('enable');
+            	} else {
+            		$("#editAppend").hide();
+                    $('#editor2').summernote('disable');
+                    $("#editAppendFile").show();
+            	}
+            	if (hideFlag) {
+            		$("#editAppend").hide();
+            		$("#editAppendFile").hide();
+            	}
             },
             changeNotice : function (checked) {
             	let isHideOssVersion = $("#hideOssVersion").prop("checked");
             	let isAppend = $("#append").prop("checked");
             	
-            	if (checked) {
-            		$("#companyName").prop("checked", true);
-                    $("#ossDistributionSite").prop("checked", true);
-                    $("#email").prop("checked", true);
-            	} else {
-            		$("#companyName").prop("checked", false);
-                    $("#ossDistributionSite").prop("checked", false);
-                    $("#email").prop("checked", false);
-                    if (isHideOssVersion) {
+            	$("#companyName").prop("checked", true);
+        		$("#editCompanyYn").val("Y");
+                $("#ossDistributionSite").prop("checked", true);
+                $("#editDistributionSiteUrlYn").val("Y");
+                $("#email").prop("checked", true);
+                $("#editEmailYn").val("Y");
+            	
+            	if (!checked) {
+            		$("#editCompanyName").val($("#defaultCompanyNameFull").val());
+            		$("#editOssDistributionSite").val($("#defaultDistributionSiteUrl").val());
+            		$("#editEmail").val($("#defaultEmail").val());
+            		
+            		if (isHideOssVersion) {
                     	$("#hideOssVersion").trigger("click");
                     }
                     if (isAppend) {
+                    	$(".appendFileUpload").empty();
+                    	$('input[name=noticeAppendFileId]').val("");
+                    	$("#editor2").summernote("code", "<p></p>");
                     	$("#append").trigger("click");
                     }
+                    fn.defaultFileFormat();
             	}
             	fn.defaultNotice(checked);
+            },
+            defaultFileFormat : function () {
+            	if ($(".select2-selection__choice").length > 1) {
+            		$(".select2-selection__choice").each(function(index, item) {
+            			if (index > 0) {
+            				$(item).find("span").click();
+            			}
+            		});
+            	}
+            	if ($(".select2-selection__choice").length > 1) {
+            		fn.defaultFileFormat();
+            	}
             },
             defaultNotice: function (checked, type) {
             	if (checked) {
@@ -2786,9 +3257,11 @@
                     $("#email").attr("disabled", !checked);
                     $("#hideOssVersion").attr("disabled", !checked);
                     $("#append").attr("disabled", !checked);
+                    $("input[name='btnNoticeAppendType']").attr("disabled", !checked);
 					$("#noticeFileFormat").attr("disabled", !checked);
                     $("#fileFormatLabel").attr("style", "color: #212529;");
-					
+                    $(".select2-selection__choice").attr("style", "border-color: #006fe6; background-color: #007bff;");
+                    
                     if ($("#companyName").prop("checked")) {
                         $("#editCompanyName").attr("disabled", !checked);
                     } else {
@@ -2816,8 +3289,10 @@
                     $("#email").attr("disabled", !checked);
                     $("#hideOssVersion").attr("disabled", !checked);
                     $("#append").attr("disabled", !checked);
+                    $("input[name='btnNoticeAppendType']").attr("disabled", !checked);
                     $("#noticeFileFormat").attr("disabled", !checked);
                     $("#fileFormatLabel").attr("style", "color: #6c757d;");
+                    $(".select2-selection__choice").attr("style", "border-color: #6c757d; background-color: #6c757d;");
                     
                     $("#editCompanyName").attr("disabled", !checked);
                     $("#editOssDistributionSite").attr("disabled", !checked);
@@ -2845,21 +3320,56 @@
                     var editEmailYn = $("#email").val();
                     var hideOssVersionYn = $("#hideOssVersion").val();
                     var editAppendedYn = $("#append").val();
+                    var noticeAppendType = $("#noticeAppendType").val();
 
+                    if (editCompanyYn == "Y") {
+                    	$("#companyName").trigger("click").attr("checked", true);
+                    }
+
+                    if (editDistributionSiteUrlYn == "Y") {
+                    	$("#ossDistributionSite").trigger("click").attr("checked", true);
+                    }
+
+                    if (editEmailYn == "Y") {
+                    	$("#email").trigger("click").attr("checked", true);
+                    }
+                    
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     var btn_Save = $("#save");
                     
                     var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+                    
+                    if (editNoticeYn == "Y") {
+                        $("[name='btnEditOssNotice']").attr("checked", true);
+                        
+                    	if (hideOssVersionYn == "Y") {
+                            $("#hideOssVersion").trigger("click").attr("checked", true);
+                        }
 
+                        if (editAppendedYn == "Y") {
+                            $("#append").trigger("click").attr("checked", true);
+                            
+                            if (!appendReadOnlyFlag) {
+                            	$('#editor2').summernote('enable');
+                            }
+                            
+                            if ("F" == noticeAppendType) {
+                            	$("#btnNoticeAppendType2").trigger("click");
+                            } else {
+                            	$("#btnNoticeAppendType1").trigger("click");
+                            }
+                        }
+                    }
+                    
                     if (userRole == "ROLE_ADMIN") { // 관리자 권한 일 경우
                         switch (curIdenStatus) {
                             case "CONF":
                                 btn_Save.hide();
-                                $("[name='btnEditOssNotice']").attr("disabled", true)
+                                $("[name='btnEditOssNotice']").attr("disabled", true);
                                 fn.defaultNotice(false, "init");
 
                                 break;
-                            default:
+                            default:console.log(checked);
                               	if ("notice" == targetId) btn_Save.show();
                                 fn.defaultNotice(checked, "init");
 
@@ -2875,38 +3385,10 @@
                                 break;
                             default:
                                 btn_Save.hide();
-                                $("[name='btnEditOssNotice']").attr("disabled", true)
+                                $("[name='btnEditOssNotice']").attr("disabled", true);
                                 fn.defaultNotice(false, "init");
 
                                 break;
-                        }
-                    }
-
-                    if (editNoticeYn == "Y") {
-                        $("[name='btnEditOssNotice']").trigger("click").attr("checked", true);
-                        
-                        if (editCompanyYn == "Y") {
-                            $("#companyName").trigger("click").attr("checked", true);
-                        }
-
-                        if (editDistributionSiteUrlYn == "Y") {
-                            $("#ossDistributionSite").trigger("click").attr("checked", true);
-                        }
-
-                        if (editEmailYn == "Y") {
-                            $("#email").trigger("click").attr("checked", true);
-                        }
-
-                        if (hideOssVersionYn == "Y") {
-                            $("#hideOssVersion").trigger("click").attr("checked", true);
-                        }
-
-                        if (editAppendedYn == "Y") {
-                            $("#append").trigger("click").attr("checked", true);
-                            
-                            if (!appendReadOnlyFlag) {
-                            	$('#editor2').summernote('enable');
-                            }
                         }
                     }
                 }, 1);
@@ -3065,7 +3547,9 @@
                         $("#uploadAdd_" + targetSeq).show();
                         $("#uploadRemove_" + targetSeq).hide();
                         $("#projectSearch_" + targetSeq).hide();
-                        if (!$(".uploadList_" + targetSeq).is("visible")) $(".uploadList_" + targetSeq).show();
+                        if (!$(".uploadList_" + targetSeq).is("visible")) {
+                        	$(".uploadList_" + targetSeq).show();
+                        }
 						
                         verified = false;
                         evt.uploadStatus = true;
@@ -3078,7 +3562,7 @@
             },
             // Grid input cell button
             textBox: function (cellvalue, options, rowObject) {
-                if (!!rowObject.filePath || "Y" == isAndroid) {
+                if (!!rowObject.filePath) {
                     return rowObject.filePath;
                 } else {
                 	var textBox = "";
@@ -3126,7 +3610,15 @@
                 if ($('input[name=fileSeq_3]').val() != '') {
                     fileSeqs.push($('input[name=fileSeq_3]').val());
                 }
-
+                
+                if ($('input[name=fileSeq_4]').val() != '') {
+                    fileSeqs.push($('input[name=fileSeq_4]').val());
+                }
+                
+                if ($('input[name=fileSeq_5]').val() != '') {
+                    fileSeqs.push($('input[name=fileSeq_5]').val());
+                }
+                
                 gridCleanErrMsg("list"); // 기존 error message 삭제
 
                 if (!evt.uploadStatus && fileSeqs.join("").length <= 0) {
@@ -3171,7 +3663,7 @@
                         var errRow = $("#" + emptyIds[idx] + " > td[aria-describedby='list_filePath']");
 
                         if (errRow) {
-                            errRow.append('<div class=\"list_filePath_' + emptyIds[idx] + ' retxt"\">This field is required</div>');
+                            errRow.append('<div class=\"list_filePath_' + emptyIds[idx] + ' retxt"\">Required</div>');
                         }
                     }
 
@@ -3258,14 +3750,13 @@
                                     if (!curIdenStatus || 'PROG' == curIdenStatus) {
                                         $(".review").show();
                                     }
-
+                                    deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
                                     createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
                                 });
 
                                 verified = true;
                             } else {
-                                alertify.alert(json.resMsg, function () {
-                                });
+                                alertify.alert(json.resMsg, function () {});
                                 verified = false;
                             }
 
@@ -3356,6 +3847,42 @@
             	
             	$("#changePathPop").attr("style", "display: flex");
             	$("#blind_wrap").show();
+            },
+            deleteAppendFile : function (target, fileSeq) {
+            	var data = {"prjId" : [[${project.prjId}]], "delFileSeq" : fileSeq, "gubn" : "NAF"};
+    			$.ajax({
+    				url : '/project/verification/deleteFile',
+    				type : 'POST',
+    				data : JSON.stringify(data),
+    				dataType : 'json',
+    				cache : false,
+    				contentType : 'application/json',
+    				success: function(data){
+    					if('true' == data.isValid) {
+    						$(target).parent().remove();
+    					}
+    				},
+    				error: function(data){
+    					alertify.error([[#{msg.common.valid2}]], 0);
+    				}
+    			});
+            },
+            initNoticeAppendInfo : function() {
+            	$.ajax({
+    				url : '/project/verification/getNoticeAppendInfo/' + [[${project.prjId}]],
+    				type : 'GET',
+    				dataType : 'json',
+    				cache : false,
+    				contentType : 'application/json',
+    				success: function(data) {
+    					if (data.isValid) {
+    						$("#editor2").summernote('code', data.appended);
+    					}
+    				},
+    				error: function(data){
+    					alertify.error([[#{msg.common.valid2}]], 0);
+    				}
+    			});
             }
         }
 
@@ -3385,7 +3912,7 @@
                 $("#verifyCreator").text(vCreated);
 
                 var initDiv = [[${initDiv}]];
-                var tabDefaultIdx = (datas.ossList.length < 1 || initDiv != null) ? "1" : "0";
+                var tabDefaultIdx = (datas.ossList.length < 1 || (initDiv != null && "1" == initDiv)) ? "1" : "0";
                 
     			if ("1" == tabDefaultIdx) {
     				$("#tabMenuNotice").click();
@@ -3399,6 +3926,10 @@
     				$("#btnSavePath").show();
     				$("#verify").show();
     				$("#save").hide();
+    			}
+    			
+    			if (initDiv != null && "2" == initDiv) {
+    				fn_comment.activateCommentArea();
     			}
             },
             checkStatus : function(){
@@ -3439,6 +3970,8 @@
                 var fileSeq_1 = $("[name='fileSeq_1']").val();
                 var fileSeq_2 = $("[name='fileSeq_2']").val();
                 var fileSeq_3 = $("[name='fileSeq_3']").val();
+                var fileSeq_4 = $("[name='fileSeq_4']").val();
+                var fileSeq_5 = $("[name='fileSeq_5']").val();
 
                 $(".multiSet > div:eq(0)").show();
 
@@ -3458,10 +3991,28 @@
                     $("#uploadAdd_2").hide();
                     $("#uploadAdd_3").show();
                 }
+                
+                if (fileSeq_4) {
+                	$(".multiSet > div:eq(3)").show();
+                    $("#uploadAdd_1").hide();
+                    $("#uploadAdd_2").hide();
+                    $("#uploadAdd_3").hide();
+                    $("#uploadAdd_4").show();
+                }
 
+                if (fileSeq_5) {
+                	$(".multiSet > div:eq(4)").show();
+                    $("#uploadAdd_1").hide();
+                    $("#uploadAdd_2").hide();
+                    $("#uploadAdd_3").hide();
+                    $("#uploadAdd_4").hide();
+                }
+                
                 fn.changeSelectOption($("[name=selectOption_1]"), false);
 				fn.changeSelectOption($("[name=selectOption_2]"), false);
 				fn.changeSelectOption($("[name=selectOption_3]"), false);
+				fn.changeSelectOption($("[name=selectOption_4]"), false);
+				fn.changeSelectOption($("[name=selectOption_5]"), false);
             }
         }
 
@@ -3745,7 +4296,7 @@
                         rowList: [10, 20, 30],
                         editurl: 'clientArray',
                         autowidth: true,
-                        pager: '#pager_3',
+                        pager: '#pager_4',
                         gridview: true,
                         sortable: function (permutation) {
                         },
@@ -3782,6 +4333,87 @@
 
                             for (var i in row) {
                                 $("#packagingList_4").jqGrid('setCell', +i + 1, 'fileSeq', "<input type=\"button\" value=\"load\" class=\"btnCLight w55\" onclick=\"fn.loadReusePackagingFile('" + data.prjId + "', '" + row[i].fileSeq + "', '4')\">");
+                            }
+                            
+                            adjustPageGridSize();
+                        }
+                    });
+                }
+            };
+        
+        var projectList_5 = {
+                load: function (data) {
+                    $("#projectList_5").jqGrid({
+                        datatype: 'json',
+                        jsonReader: {
+                            repeatitems: false,
+                            root: function (obj) {
+                                return obj.rows;
+                            },
+                            page: function (obj) {
+                                return obj.page;
+                            },
+                            total: function (obj) {
+                                return obj.total;
+                            },
+                            records: function (obj) {
+                                return obj.records;
+                            }
+                        },
+                        colNames: ['ID', 'Project Name', 'Project<br>Version', 'Distribution<br>Type', 'Creator', 'Created<br>Date'],
+                        colModel: [
+                            {name: 'prjId', index: 'prjId', width: 80, align: 'center', sorttype: 'int'},
+                            {name: 'prjName', index: 'prjName', width: 243, align: 'left'},
+                            {name: 'prjVersion', index: 'prjVersion', width: 80, align: 'left'},
+                            {name: 'distributionType', index: 'distributionType', width: 130, align: 'left', sortable: true},
+                            {name: 'creator', index: 'creator', width: 100, align: 'left', sortable: true},
+                            {name: 'createdDate', index: 'createdDate', width: 100, align: 'center', formatter: 'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable: true}
+                        ],
+                        onSelectRow: function (id) {
+                            fn.projectPackagingSearch($(this).getCell(id, "prjId"), 5);
+                            $("#packaging_5").show();
+                        },
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
+                        editurl: 'clientArray',
+                        autowidth: true,
+                        pager: '#pager_5',
+                        gridview: true,
+                        sortable: function (permutation) {
+                        },
+                        viewrecords: true,
+                        sortorder: 'desc',
+                        height: 'auto',
+                        loadComplete: function () {
+                        	adjustPageGridSize();
+                        }
+                    });
+
+                    $("#projectList_5").jqGrid('navGrid', "#pager_5", {add: false, edit: false, del: false, search: false, refresh: false});
+                },
+                packagingLoad: function () {
+                    $("#packagingList_5").jqGrid({
+                        datatype: 'json',
+                        colNames: ['packaging File Name', ''],
+                        colModel: [
+                            {name: 'origNm', index: 'origNm', width: 300, align: 'left'},
+                            {name: 'fileSeq', index: 'fileSeq', width: 80, align: 'center'}
+                        ],
+                        onCellSelect: function (rowid, iCol, cellcontent, e) {
+                        },
+                        editurl: 'clientArray',
+                        autowidth: true,
+                        gridview: true,
+                        sortable: function (permutation) {
+                        },
+                        viewrecords: true,
+                        sortorder: 'desc',
+                        height: 'auto',
+                        loadComplete: function (data) {
+                            var row = data.rows;
+
+                            for (var i in row) {
+                                $("#packagingList_5").jqGrid('setCell', +i + 1, 'fileSeq', "<input type=\"button\" value=\"load\" class=\"btnCLight w55\" onclick=\"fn.loadReusePackagingFile('" + data.prjId + "', '" + row[i].fileSeq + "', '5')\">");
                             }
                             
                             adjustPageGridSize();

@@ -357,6 +357,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private List<ProjectIdentification> deduplicatedComponentLicenseList;
 	
 	private Float standardScore;
+	private String linkToPopup;
 	
 	public String getRedirectLocation() {
 		return redirectLocation;
@@ -2186,5 +2187,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setNotAdminCheck(String notAdminCheck) {
 		this.notAdminCheck = notAdminCheck;
+	}
+
+	public String getLinkToPopup() {
+		return linkToPopup;
+	}
+
+	public void setLinkToPopup(String linkToPopup) {
+		this.linkToPopup = linkToPopup;
 	}
 }

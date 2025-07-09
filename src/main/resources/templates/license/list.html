@@ -153,7 +153,14 @@
 											</div>
 										</div>
 									</div>
-									<div class="row">
+									<div th:if="${@CommonFunction.isAdmin()}" class="row">
+                                 		<div class="col-md-4">
+                                 			<div class="form-group mb-2">
+                                                <input type="text" class="form-control" id="comment" name="comment" placeholder="Comment (Admin Only)"/>
+                                            </div>
+                                 		</div>
+                                 	</div>
+									<div class="row mt-2">
 										<div class="col-md-12">
 											<div class="p-2 text-center">
 												<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('licenseSearch')|" data-toggle="tooltip" data-placement="right" type="button">

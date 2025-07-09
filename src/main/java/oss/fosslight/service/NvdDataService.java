@@ -3,6 +3,7 @@ package oss.fosslight.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.CertificateException;
@@ -24,6 +25,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -105,13 +107,11 @@ public class NvdDataService {
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
 				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, rtnMap);
 				if (!(boolean) rtnMap.get("connectionFlag")) {
-					log.info("nvd meta api connection error");
 					schlog.info("nvd meta api connection error");
 					return "91";
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			schlog.error(e.getMessage(), e);
 			return "91";
 		}
@@ -121,18 +121,16 @@ public class NvdDataService {
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
 				rtnMap = nvdCveDataApiJob(NVD_CVE_REST_URL, rtnMap);
 				if (!(boolean) rtnMap.get("connectionFlag")) {
-					log.info("nvd meta api connection error");
 					schlog.info("nvd meta api connection error");
 					return "91";
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			schlog.error(e.getMessage(), e);
 			return "92";
 		}
-    
-    if (initializeFlag) {
+	    
+	    if (initializeFlag) {
 			codeMapper.updateCodeDtlNm("990", "100", "N");
 			initializeFlag = false;
 		}
@@ -140,7 +138,6 @@ public class NvdDataService {
 		try {
 			nvdCveDataSyncJob(true);
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			schlog.error(e.getMessage(), e);
 			return "93";
 		}
@@ -162,8 +159,8 @@ public class NvdDataService {
 		List<Map<String, Object>> vulnerabilities = null;
 		Map<String, Object> cveInfo = null;
 		List<Map<String, Object>> cpe_match_all = null;
+		List<String> cpe_match_running_on_with = null;
 		List<Map<String, Object>> cvePatchList = null;
-		log.info("nvdCveDataApiJob start");
 		schlog.info("nvdCveDataApiJob start");
 
 		nvdDataMapper.createTableNvdCveV3Temp();
@@ -186,7 +183,7 @@ public class NvdDataService {
 			final NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
 			
 			for(int limitIndex = 0; limitIndex <= totalCnt/API_CPE_CHUNK_SIZE; limitIndex++) {
-				log.info("getNvdCpeMatchData in progress {}/{}", API_CPE_CHUNK_SIZE*limitIndex, totalCnt);
+				schlog.info("getNvdCpeMatchData in progress {}/{}", API_CPE_CHUNK_SIZE*limitIndex, totalCnt);
 				for (int i = 0; i < 5; i++) {
 					responseMap = getDataForRestApiConnection(NVD_REST_BASE_URL + NVD_REST_CPE_URL, API_CPE_CHUNK_SIZE, API_CPE_CHUNK_SIZE * limitIndex, 1);
 					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
@@ -206,8 +203,43 @@ public class NvdDataService {
 								}
                 
 								cveId = (String) cveInfo.get("cveId");
-								
-								mapper.insertCveInfoV3Temp(cveInfo);
+								Map<String, Object> existCveInfo = mapper.selectOneCveInfoV3(cveInfo);
+								if (!MapUtils.isEmpty(existCveInfo)) {
+									String baseMetric = (String) cveInfo.get("baseMetric");
+									String existBaseMetric = (String) existCveInfo.get("baseMetric");
+									Map<String, Object> param = new HashMap<>();
+									param.put("cveId", cveInfo.get("cveId"));
+									boolean updateFlag = false;
+									if (StringUtil.isEmpty(existBaseMetric) && !StringUtil.isEmpty(baseMetric)) {
+										param.put("baseMetric", baseMetric);
+										param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+										param.put("summary", (String) cveInfo.get("summary"));
+										param.put("modiDate", cveInfo.get("modiDate"));
+										updateFlag = true;
+									} else if (!StringUtil.isEmpty(baseMetric) && !StringUtil.isEmpty(existBaseMetric)) {
+										if (baseMetric.equals(existBaseMetric)) {
+											if (new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) > 0
+													|| new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) < 0) {
+												param.put("baseMetric", baseMetric);
+												param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+												param.put("summary", (String) cveInfo.get("summary"));
+												param.put("modiDate", cveInfo.get("modiDate"));
+												updateFlag = true;
+											}
+										} else {
+											param.put("baseMetric", baseMetric);
+											param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+											param.put("summary", (String) cveInfo.get("summary"));
+											param.put("modiDate", cveInfo.get("modiDate"));
+											updateFlag = true;
+										}
+									}
+									if (updateFlag) {
+										mapper.updateCveInfoV3(param);
+									}
+								} else {
+									mapper.insertCveInfoV3Temp(cveInfo);
+								}
 								
 								cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
 								
@@ -218,11 +250,6 @@ public class NvdDataService {
 								List<String> matchCriteriaIdDuplicatedList = new ArrayList<>();
 
 								for (Map<String, Object> cpe_match_data : cpe_match_all) {
-									boolean vulnerable = (boolean) cpe_match_data.get("vulnerable");
-									if (!vulnerable) {
-										continue;
-									}
-									
 									// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
 									// Version Range 조건 취득
 									// 검색 조건 설정
@@ -236,7 +263,7 @@ public class NvdDataService {
 									// configurations의 operator (AND/OR)에 따라 동일한 CVE ID에 matchCriteriaId 가 여러번 등장할 수 있음
 									// FL-Hub에서는 operator 조건을 확인하지 않기 때문에, CVEID + matchCriteriaId를 PK로 사용하는 경우 중복 오류가 발생할 수 있음
 									// ex) https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2001-1104
-									if(matchCriteriaIdDuplicatedList.contains(cveId + "-" + matchCriteriaId)) {
+									if (matchCriteriaIdDuplicatedList.contains(cveId + "-" + matchCriteriaId)) {
 										continue;
 									}
 									matchCriteriaIdDuplicatedList.add(cveId + "-" + matchCriteriaId);
@@ -313,6 +340,27 @@ public class NvdDataService {
 									mapper.insertNvdDataConfigurationsTemp(configurationInsertParam);
 								}
 
+								cpe_match_running_on_with = (List<String>) cveInfo.get("cpe_match_running_on_with");
+								if (!CollectionUtils.isEmpty(cpe_match_running_on_with)) {
+									for (String key : cpe_match_running_on_with) {
+										String vulnerableKey = key.split("[|]")[0];
+										String notVulnerableCriteria = key.split("[|]")[1];
+										
+										final Map<String, Object> notVulnInsertParam = new HashMap<>();
+										final String[] criteriaArr = notVulnerableCriteria.split(":");
+										
+										notVulnInsertParam.put("matchCriteriaId", vulnerableKey);
+										notVulnInsertParam.put("cveId", cveId);
+										notVulnInsertParam.put("vendor", criteriaArr[3]);
+										notVulnInsertParam.put("product", criteriaArr[4]);
+										notVulnInsertParam.put("relMatchCriteria", notVulnerableCriteria);
+										
+										mapper.insertNvdDataRunningOnWithTemp(notVulnInsertParam);
+									}
+									
+									cpe_match_running_on_with = null;
+								}
+								
 								cvePatchList = (List<Map<String, Object>>) cveInfo.get("cvePatchList");
 								if (!CollectionUtils.isEmpty(cvePatchList)) {
 									for (Map<String, Object> cvePatchInfo : cvePatchList) {
@@ -320,7 +368,7 @@ public class NvdDataService {
 										_patchInfo.put("cveId", cveId);
 										_patchInfo.put("patchLink", cvePatchInfo.get("url"));
 										_patchInfo.put("publDate", cveInfo.get("publDate"));
-                    mapper.insertNvdDataPatchLinkTemp(_patchInfo);
+										mapper.insertNvdDataPatchLinkTemp(_patchInfo);
 									}
 									cvePatchList = null;
 								}
@@ -348,26 +396,29 @@ public class NvdDataService {
 				nvdDataMapper.resetNvdDataV3();
 				nvdDataMapper.truncateNvdDataConfigurations();
 				nvdDataMapper.truncateNvdDataPatchLink();
+				nvdDataMapper.truncateNvdDataRunningOnWith();
 			} else {
 				// 최신정보 재등록을 위한 Copy 대상 data 삭제
 				nvdDataMapper.deleteNvdCveV3ExistingInTemp();
 				nvdDataMapper.deleteNvdDataV3ExistingInTemp();
 				nvdDataMapper.deleteNvdDataConfigurationsExistingInTemp();
 				nvdDataMapper.deleteNvdDataPatchLinkExistingInTemp();
+				nvdDataMapper.deleteNvdDataRunningOnWithExistingInTemp();
 			}
 			nvdDataMapper.copyNvdCveV3FromTemp();
 			nvdDataMapper.copyNvdDataV3FromTemp();
 			nvdDataMapper.copyNvdDataConfigurationsFromTemp();
 			nvdDataMapper.copyNvdDataPatchLinkFromTemp();
+			nvdDataMapper.copyNvdDataRunningOnWithFromTemp();
 
 			nvdDataMapper.truncateNvdCveV3Temp();
 			nvdDataMapper.truncateNvdDataV3Temp();
 			nvdDataMapper.truncateNvdDataConfigurationsTemp();
 			nvdDataMapper.truncateNvdDataPatchLinkTemp();
+			nvdDataMapper.truncateNvdDataRunningOnWithTemp();
 			
 			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
 			if (vendorProductNvdDataV3Cnt > 0) {
-				log.info("Vendor Product Nvd Data V3 Update Count : {}", vendorProductNvdDataV3Cnt);
 				schlog.info("Vendor Product Nvd Data V3 Update Count : {}", vendorProductNvdDataV3Cnt);
 				nvdDataMapper.updateVendorProductNvdDataV3();
 			}
@@ -379,7 +430,6 @@ public class NvdDataService {
 			param.put("modiDate", urlConnTimestamp);
 
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
-			log.info("nvdCveDataApiJob end");
 			schlog.info("nvdCveDataApiJob end");
 		}
 
@@ -411,36 +461,81 @@ public class NvdDataService {
 		// CVSS V3가 없는 경우 V2 Score를 사용
 		String baseScore = "0";
 		String baseMetric = "";
-		if (metrics.containsKey("cvssMetricV31")) {
+		if (metrics.containsKey("cvssMetricV40")) {
+			List<Map<String, Object>> cvssMetricV4 = (List<Map<String, Object>>) metrics.get("cvssMetricV40");
+			if (!CollectionUtils.isEmpty(cvssMetricV4)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV4);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V4";	
+				}
+			}
+		}
+		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV31")) {
 			List<Map<String, Object>> cvssMetricV3 = (List<Map<String, Object>>) metrics.get("cvssMetricV31");
-			Map<String, Object> cvssV3 = (Map<String, Object>) cvssMetricV3.get(0);
-			Map<String, Object> cvssData = (Map<String, Object>) cvssV3.get("cvssData");
-			baseScore = String.valueOf(cvssData.get("baseScore"));
-			baseMetric = "V3";					
-		} else if (metrics.containsKey("cvssMetricV30")){
-			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV30");
-			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
-			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-			baseScore = String.valueOf(cvssData.get("baseScore"));
-			baseMetric = "V3";
-		} else if (metrics.containsKey("cvssMetricV2")){
+			if (!CollectionUtils.isEmpty(cvssMetricV3)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV3);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V3";	
+				}
+			}
+		}
+		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV30")){
+			List<Map<String, Object>> cvssMetricV30 = (List<Map<String, Object>>) metrics.get("cvssMetricV30");
+			if (!CollectionUtils.isEmpty(cvssMetricV30)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV30);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V3";
+				}
+			}
+		}
+		if (baseMetric.equals("") && metrics.containsKey("cvssMetricV2")){
 			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV2");
-			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
-			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-			baseScore = String.valueOf(cvssData.get("baseScore"));
-			baseMetric = "V2";
+			if (!CollectionUtils.isEmpty(cvssMetricV2)) {
+				Map<String, Object> cvssData = readToCvssMetric(cvssMetricV2);
+				if (!MapUtils.isEmpty(cvssData) && cvssData.containsKey("baseScore")) {
+					baseScore = String.valueOf(cvssData.get("baseScore"));
+					baseMetric = "V2";
+				}
+			}
 		}
 		
 		List<Map<String, String>> ossList = new ArrayList<>();
 		List<Map<String, Object>> cpe_match_all = new ArrayList<>();
-	
+		List<String> cpe_match_running_on_with_list = new ArrayList<>();
+		
 		if (cveItem.containsKey("configurations")) {
 			for (Map<String, Object> configurations : (List<Map<String, Object>>) cveItem.get("configurations")) {
+				List<String> vulnMatchCrtrIdList = new ArrayList<>();
+				List<String> notVulnMatchCriteriaList = new ArrayList<>();
+				
 				// 정의된 모든 cpe match 정보
 				for (Map<String, Object> node_data : (List<Map<String, Object>>) configurations.get("nodes")) {
 					// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
 					if (node_data.containsKey("cpeMatch")) {
-						cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpeMatch"));
+						List<Map<String, Object>> cpeMatchList = (List<Map<String, Object>>) node_data.get("cpeMatch");
+						for (Map<String, Object> cpeMatch : cpeMatchList) {
+							String matchCriteriaId = (String) cpeMatch.get("matchCriteriaId");
+							if ((boolean) cpeMatch.get("vulnerable")) {
+								vulnMatchCrtrIdList.add(matchCriteriaId);
+								cpe_match_all.add(cpeMatch);
+							} else {
+								notVulnMatchCriteriaList.add((String) cpeMatch.get("criteria"));
+							}
+						}
+					}
+				}
+				
+				if (!CollectionUtils.isEmpty(notVulnMatchCriteriaList)) {
+					for (String vulnMatchCrtrId : vulnMatchCrtrIdList) {
+						for (String notVulnMatchCriteria : notVulnMatchCriteriaList) {
+							String key = vulnMatchCrtrId + "|" + notVulnMatchCriteria;
+							if (!cpe_match_running_on_with_list.contains(key)) {
+								cpe_match_running_on_with_list.add(key);
+							}
+						}
 					}
 				}
 			}
@@ -473,11 +568,37 @@ public class NvdDataService {
 		resultMap.put("summary", descriptionStr);
 		resultMap.put("baseMetric", baseMetric);
 		resultMap.put("cpe_match_all", cpe_match_all);
+		resultMap.put("cpe_match_running_on_with", cpe_match_running_on_with_list);
 		resultMap.put("cvePatchList", cvePatchList);
     
 		return resultMap;
 	}
 
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> readToCvssMetric(List<Map<String, Object>> cvssMetricList) {
+		Map<String, Object> cvssData = null;
+		Map<String, Object> cvssObj = null;
+		if (cvssMetricList.size() > 1) {
+			for (Map<String, Object> cvssMetric : cvssMetricList) {
+				String source = String.valueOf(cvssMetric.get("source"));
+				String type = String.valueOf(cvssMetric.get("type"));
+				if (source.equalsIgnoreCase("nvd@nist.gov") && type.equalsIgnoreCase("Primary")) {
+					cvssObj = cvssMetric;
+					cvssData = (Map<String, Object>) cvssObj.get("cvssData");
+					break;
+				}
+			}
+			if (cvssObj == null) {
+				cvssObj = (Map<String, Object>) cvssMetricList.get(0);
+				cvssData = (Map<String, Object>) cvssObj.get("cvssData");
+			}
+		} else {
+			cvssObj = (Map<String, Object>) cvssMetricList.get(0);
+			cvssData = (Map<String, Object>) cvssObj.get("cvssData");
+		}
+		return cvssData;
+	}
+	
 	private Map<String, Object> nvdMetaDataApiCheckJob(String restApiUrl, int resultsPerPage, int startIndex) throws IOException {
 		Map<String, Object> responseMap = new HashMap<>();
 		String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
@@ -499,7 +620,6 @@ public class NvdDataService {
 				responseMap.put("checkUrlFlag", nvdDataMapper.selectUseMetaDataUrlConnection(param).size() > 0 ? true : false);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
 			schlog.error(e.getMessage());
 			responseMap.put("connectionFlag", false);
 		}
@@ -518,7 +638,6 @@ public class NvdDataService {
 	@SuppressWarnings("unchecked")
 	@Transactional
 	public Map<String, Object> nvdMetaDataApiJob(String restApiUrl, Map<String, Object> rtnMap) throws JsonProcessingException, SSLException {
-		log.info("nvdMetaDataApiJob start");
 		schlog.info("nvdMetaDataApiJob start");
 		
 		final int totalResults = (int) rtnMap.get("totalResults");
@@ -545,7 +664,7 @@ public class NvdDataService {
 			nvdDataMapper.truncateCpeMatchNameTemp();
 			
 			for(int limitIndex = 0; limitIndex <= totalCnt/API_MATCH_CHUNK_SIZE; limitIndex++) {
-				log.info("getNvdCpeMatchData in progress {}/{}", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
+				schlog.info("getNvdCpeMatchData in progress {}/{}", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
 				
 				
 				for (int i = 0; i < 5; i++) {
@@ -645,7 +764,6 @@ public class NvdDataService {
 			sqlSession.commit();
 		}
 			
-		log.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
 		schlog.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
 		if (httpsUrlConnectionFlag && totalResults > 0) {
 			if (initializeFlag) {
@@ -669,7 +787,6 @@ public class NvdDataService {
 			param.put("modiDate", urlConnTimestamp);
 
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
-			log.info("nvdMetaDataApiJob end");
 			schlog.info("nvdMetaDataApiJob end");
 		}
 
@@ -705,12 +822,11 @@ public class NvdDataService {
 					connectionFlag = false;
 				}
 			} else {
-				log.error("httpsURLConnection error : " + HttpStatus.valueOf(httpsURLConnection.getResponseCode()));
 				schlog.error("httpsURLConnection error : " + HttpStatus.valueOf(httpsURLConnection.getResponseCode()));
 				connectionFlag = false;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			schlog.error(e.getMessage());
 			connectionFlag = false;
 		} finally {
 			if(httpsURLConnection != null) {
@@ -720,14 +836,14 @@ public class NvdDataService {
 				try {
 					Thread.sleep(1000 * 6);
 				} catch (InterruptedException e) {
-					log.error(e.getMessage());
+					schlog.error(e.getMessage());
 				}
 			} else {
 				try {
-					log.warn("Try again in 15 seconds...");
+					schlog.warn("Try again in 15 seconds...");
 					Thread.sleep(1000 * 15);
 				} catch (InterruptedException e) {
-					log.error(e.getMessage());
+					schlog.error(e.getMessage());
 				}
 			}
 		}
@@ -826,46 +942,46 @@ public class NvdDataService {
 			nvdDataMapper.insertNvdDataScoreV3();
 			nvdDataMapper.deleteNvdDataScoreV3Temp();
 
-			log.info("End CVE Data Sync Job");
+			schlog.info("End CVE Data Sync Job");
 		}
 
 		int nickNameMgrCnt = nvdDataMapper.selectNickNameMgrtNvdDataScoreV3();
 		if (nickNameMgrCnt > 0) {
-			log.info("Nickname Migration Count : " + nickNameMgrCnt);
+			schlog.info("Nickname Migration Count : " + nickNameMgrCnt);
 			// OSS_NICKNAME 기준으로 NVD_DATA_SCORE_V3에 NICKNAME을 추가함.
 			nvdDataMapper.insertNickNameMgrtNvdDataScoreV3();
 		}else{
-			log.info("Nickname Migration Count : 0");
+			schlog.info("Nickname Migration Count : 0");
 		}
 
 		int MaxCvssScoreCnt = nvdDataMapper.selectMaxCvssScoreNvdDataScoreV3();
 		if (MaxCvssScoreCnt > 0) {
-			log.info("MaxCvssScore Added Count : " + MaxCvssScoreCnt);
+			schlog.info("MaxCvssScore Added Count : " + MaxCvssScoreCnt);
 			// NVD_DATA_SCORE_V3에서 CVSS_SCORE MAX값을 기준으로 PRODUCT에서 VERSION이 없는 DATA를 추가함.
 			nvdDataMapper.insertMaxCvssScoreNvdDataScoreV3();
 		}else{
-			log.info("MaxCvssScore Added Count : 0");
+			schlog.info("MaxCvssScore Added Count : 0");
 		}
 
 		int diffCvssScoreCnt = nvdDataMapper.ossNameNickNameCvssScoreDiffCnt();
 		if (diffCvssScoreCnt > 0){
-			log.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
+			schlog.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
 			nvdDataMapper.ossNameToNickNameMgrtCvssScore();
 		} else{
-			log.info("NickName -> ossName cvssScore Diff Count : 0");
+			schlog.info("NickName -> ossName cvssScore Diff Count : 0");
 		}
 
 		int ossNameToNickDiffCvssScoreCnt = nvdDataMapper.ossNameToNickMgrtCvssScoreDiffCnt();
 		if (ossNameToNickDiffCvssScoreCnt > 0){
-			log.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
+			schlog.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
 			nvdDataMapper.nickNameToOssNameMgrtCvssScore();
 		} else{
-			log.info("ossName -> NickName cvssScore Diff Count : 0");
+			schlog.info("ossName -> NickName cvssScore Diff Count : 0");
 		}
 
 		int vendorProductNvdDataScoreV3Cnt = nvdDataMapper.selectVendorProductNvdDataScoreV3Cnt();
 		if (vendorProductNvdDataScoreV3Cnt > 0) {
-			log.info("Vendor Product NVD Data Score V3 Update Count : " + vendorProductNvdDataScoreV3Cnt);
+			schlog.info("Vendor Product NVD Data Score V3 Update Count : " + vendorProductNvdDataScoreV3Cnt);
 			nvdDataMapper.updateVendorProductNvdDataScoreV3();
 		}
 

@@ -43,7 +43,7 @@ public class ApiCodeController extends CoTopComponent {
 	private final ApiCodeService apiCodeService;
 	
 	
-	@ApiOperation(value = "Search Code Info", notes = "code 조회")
+	@ApiOperation(value = "Search Code Info", notes = "Search Code Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })

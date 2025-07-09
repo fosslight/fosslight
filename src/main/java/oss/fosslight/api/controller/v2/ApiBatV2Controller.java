@@ -38,7 +38,7 @@ public class ApiBatV2Controller extends CoTopComponent {
 
     private final ApiBatService apibatService;
 
-    @ApiOperation(value = "Search Binary List", notes = "Binary Info 조회")
+    @ApiOperation(value = "Search Binary List", notes = "Search Binary Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_BINARY_SEARCH})
     public ResponseEntity<Map<String, Object>> getBinaryInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,

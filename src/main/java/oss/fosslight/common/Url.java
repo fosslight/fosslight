@@ -25,6 +25,8 @@ public final class Url {
 		public static final String PATH = "/session";
 		
 		public static final String LOGIN = PATH + "/login";
+		public static final String LOGIN_MNG = PATH + "/loginManager";
+		public static final String LOGIN_PAGE = PATH + "/loginPage";
 		public static final String LOGIN_JSP = TILES + PATH + "/login";
 		
 		public static final String LOGIN_EXPIRED = PATH + "/loginExpired";
@@ -110,6 +112,7 @@ public final class Url {
 		public static final String LICENSE_BULK_REG_JSP = TILES_ROOT + PATH + "/licenseBulkReg";
 		public static final String CSV_FILE = PATH + "/csvFile";
 		public static final String BULK_VALIDATION = PATH + "/bulkValidation";
+		public static final String SHARE_URL = PATH + "/shareUrl/{licenseId}";
 	}
 	
 	public static final class EXCELDOWNLOAD {
@@ -262,6 +265,7 @@ public final class Url {
 		
 		public static final String CHECK_OSS_VERSION_DIFF = PATH + "/checkOssVersionDiff";
 		public static final String CHECK_OSS_NAME_DIFF = PATH + "/checkOssNameDiff";
+		public static final String SHARE_URL = PATH + "/shareUrl/{ossId}";
 	}
 	
 	public static final class PROJECT {
@@ -412,6 +416,7 @@ public final class Url {
 
 		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
 		public static final String CHANGE_PROJECT_STATUS = PATH + "/changeProjectStatus";
+		public static final String DEPENDENCY_TREE_POPUP = PATH + "/dependencyTreePopup";
 	}
 	
 	public static final class VERIFICATION {
@@ -452,6 +457,8 @@ public final class Url {
 		public static final String DELETE_FILE = PATH + "/deleteFile";
 
 		public static final String DEFAULT_NOTICE_INFO = PATH + "/getDefaultNoticeInfo";
+		
+		public static final String NOTICE_APPEND_INFO = PATH + "/getNoticeAppendInfo/{prjId}";
 	}
 	
 	public static final class DISTRIBUTION {
@@ -554,6 +561,8 @@ public final class Url {
 		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 		
 		public static final String SHARE_URL = PATH + "/shareUrl/{partnerId}";
+		
+		public static final String DELETE_FILES = PATH + "/deleteFiles";
 	}
 	
 	public static final class USER {
@@ -1025,8 +1034,12 @@ public final class Url {
 			/** API Project Add Editor */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_EDITOR		= "/projects/{id}/editors";
 
+			/** API Project Add Security Person */
+			public static final String FOSSLIGHT_API_PROJECT_ADD_SECURITY_PERSON		= "/projects/{id}/security-person";
 
-			/** API OSS Report upload */
+			/** API Project Set Security Mail */
+			public static final String FOSSLIGHT_API_PROJECT_SET_SECURITY_MAIL		= "/projects/{id}/security-mail";
+
 			public static final String FOSSLIGHT_API_IDENTIFICATION_RESET = "/projects/{id}/{tab_name}/reset";
 
 			/** API OSS Report upload */

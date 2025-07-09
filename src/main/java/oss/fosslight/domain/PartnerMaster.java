@@ -56,6 +56,10 @@ public class PartnerMaster extends ComBean implements Serializable{
 	/** The related DocumentFile file. */
 	private List<T2File> documentsFile; // Related documents 파일 객체
 	
+	private List<T2File> confirmationFile;
+	
+	private List<T2File> ossFile;
+	
 	private String documentsFileCnt;
 	
 	private String documentsFileId;
@@ -1263,5 +1267,20 @@ public class PartnerMaster extends ComBean implements Serializable{
 	public void setOssFileSheetNo(String ossFileSheetNo) {
 		this.ossFileSheetNo = ossFileSheetNo;
 	}
-	
+
+	public List<T2File> getConfirmationFile() {
+		return confirmationFile;
+	}
+
+	public void setConfirmationFile(List<T2File> confirmationFile) {
+		this.confirmationFile = confirmationFile;
+	}
+
+	public List<T2File> getOssFile() {
+		return ossFile;
+	}
+
+	public void setOssFile(List<T2File> ossFile) {
+		this.ossFile = ossFile;
+	}
 }

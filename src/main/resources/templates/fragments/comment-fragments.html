@@ -30,7 +30,7 @@
                                 </td>
                                 <td class="text-right py-0 align-middle">
                                 <td class="text-right py-0 align-middle">
-                                    <div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName}">
+                                    <div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName && comment.status != 'Created' && comment.status != 'Copied'}">
                                         <button class="btn btn-sm" type="button" th:data-commId="${comment.commId}" th:data-referenceDiv="${comment.referenceDiv}" th:onclick="|fn_comment.commentModify(this)|" name="commentModifyBtn">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>

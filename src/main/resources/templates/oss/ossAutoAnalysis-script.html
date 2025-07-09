@@ -150,14 +150,7 @@ var Ctrl_fn = {
 					}
 				},
 				{name: 'summaryDescription', index: 'summaryDescription', width: 50, height: 50, align: 'left'},
-				{name: 'comment', index: 'comment', width: 150, editable: true, edittype:"textarea", editoptions:{rows:"3",cols:"25"},
-					formatter: function radio(cellvalue, options, rowObject) {
-						return (rowObject.comment||"")
-												.split("\\n").join("\n")
-												.split("<").join("&lt;")
-												.split(">").join("&gt;");
-					}
-				},
+				{name: 'comment', index: 'comment', width: 150, editable: true, edittype:"textarea", formatter: fn_grid.displayComment, editoptions:{rows:"3",cols:"25"}},
 				{name: 'detectedLicense', index: 'detectedLicense', width: 0, hidden:true},
 				{name: 'completeYn', index: 'completeYn', width: 0, hidden:true},
 				{name: 'groupId', index: 'groupId', width:1, hidden:true
@@ -682,6 +675,19 @@ var Ctrl_fn = {
 		}, 0);
 	}
 };
+var fn_grid = {
+	displayComment : function (cellvalue, options, rowObject) {
+	   	var comment = "";
+	   	if (cellvalue != null) {
+	   		comment = cellvalue;
+	   		if (comment.indexOf("target='_blank'") > -1) {
+	   			comment = comment.replaceAll("target='_blank'", "class='urlLink' target='_blank'");
+	   		}
+	   		comment = comment.replaceAll("<br>", "\n").replaceAll("\\n", "\n");
+	   	}
+	   	return comment;
+	}
+}
 </script>
 </th:block>
 </html>

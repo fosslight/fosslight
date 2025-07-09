@@ -57,4 +57,6 @@ public interface FileService {
 	public String copyPhysicalFile(String fileId, String prjId, boolean isFileId);
 
 	T2File uploadSingleFile(MultipartFile mFile, String fileId ,String fileGubn, Path of, boolean useRandomFileName);
+	
+	public List<T2File> getFileInfoList(String fileId);
 }

@@ -56,6 +56,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.PropertyUtilsBean;
@@ -74,6 +75,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -1439,7 +1441,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						key = gridBean.getBinaryName() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" 
 								+ gridBean.getDownloadLocation() + "-" + gridBean.getHomepage() + "-" + gridBean.getCopyrightText() + "-" + gridBean.getExcludeYn();
-					}else {
+					} else {
 						if (isEmpty(gridBean.getFilePath()) && !isEmpty(gridBean.getBinaryName())) {
 							gridBean.setFilePath(gridBean.getBinaryName());
 						}
@@ -1586,7 +1588,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 	
 	public static String makeCategoryFormat(String distributeTarget, String mainCategoryCd, String subCategoryCode) {
-		String categoryCode = CoConstDef.CD_DTL_DISTRIBUTE_SKS.equals(avoidNull(distributeTarget, CoConstDef.CD_DTL_DISTRIBUTE_LGE)) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+		String categoryCode = CoConstDef.CD_MODEL_TYPE;
 		
 		return  CoCodeManager.getCodeString(categoryCode, mainCategoryCd) + " > " + CoCodeManager.getCodeString(CoCodeManager.getSubCodeNo(categoryCode, mainCategoryCd), subCategoryCode);
 	}
@@ -1748,15 +1750,31 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 
 		
-		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3) or oss version warning message "This field is required" (Priority : 4)
+		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3) or oss version warning message "Required" (Priority : 4)
 		if (validDiffMap != null && !validDiffMap.isEmpty()) {
 			for (String errKey : validDiffMap.keySet()) {
 				if (errKey.indexOf(".") > -1) {
 					String msg = validDiffMap.get(errKey);
 					String _key = errKey.substring(errKey.indexOf(".") + 1, errKey.length());
 					
-					// oss version warning message "This field is required" (Priority : 4)
-					if (errKey.startsWith("ossVersion") && msg.equals("This field is required.")) {
+//					if (!CommonFunction.isAdmin()) {
+//						if ((errKey.startsWith("ossName") && (msg.startsWith("Deactivated") || msg.startsWith("")))
+//								|| (errKey.startsWith("ossVersion") && msg.startsWith(""))
+//								|| (errKey.startsWith("licenseName") && (msg.startsWith("") || msg.startsWith("errLv")))) {
+//							if (errorMap.containsKey(_key)) {
+//								List<String> _list = errorMap.get(_key);
+//								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+//								errorMap.replace(_key, _list);
+//							} else {
+//								List<String> _list = new ArrayList<>();
+//								_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+//								errorMap.put(_key, _list);
+//							}
+//						}
+//					}
+					
+					// oss version warning message "Required" (Priority : 4)
+					if (errKey.startsWith("ossVersion") && msg.equals("Required.")) {
 						if (warningVerMap.containsKey(_key)) {
 							List<String> _list = warningVerMap.get(_key);
 							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
@@ -1899,10 +1917,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				// 0(1) : error level
 				if (errorMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(errorMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "0"), bean);
+					sortMap.put(makeValidSortKey(errorMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "0", null, validMap), bean);
 				} else if (checkMultiLicenseError(errorMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(errorMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(errorMap.get(_id), _id, "0"), bean);
+					sortMap.put(makeValidSortKey(errorMap.get(_id), _id, "0", null, validMap), bean);
 				} else if (CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK.equals(bean.getObligationLicense())) {
 					sortMap.put(makeValidSortKey(new ArrayList<String>(), avoidNull(bean.getGridId(), bean.getComponentId()) , "0", bean.getObligationLicense()), bean);
 				}
@@ -1914,53 +1932,53 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				// 3 : warning level
 				else if (warningMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(warningMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "3"), bean);
+					sortMap.put(makeValidSortKey(warningMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "3", null, validDiffMap), bean);
 				} else if (checkMultiLicenseError(warningMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(warningMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(warningMap.get(_id), _id, "3"), bean);
+					sortMap.put(makeValidSortKey(warningMap.get(_id), _id, "3", null, validDiffMap), bean);
 				}
 				// 4 : warning level (oss version)
 				else if (warningVerMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(warningVerMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "4"), bean);
+					sortMap.put(makeValidSortKey(warningVerMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "4", null, validDiffMap), bean);
 				} else if (checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(warningVerMap.get(_id), _id, "4"), bean);
+					sortMap.put(makeValidSortKey(warningVerMap.get(_id), _id, "4", null, validDiffMap), bean);
 				}
 				// 5 : info level (same binary > include license)
 				else if (infoSameMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoSameMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "5"), bean);
+					sortMap.put(makeValidSortKey(infoSameMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "5", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoSameMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoSameMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoSameMap.get(_id), _id, "5"), bean);
+					sortMap.put(makeValidSortKey(infoSameMap.get(_id), _id, "5", null, validInfoMap), bean);
 				}
 				// 6 : info level (new binary)
 				else if (infoBiMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoBiMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "6"), bean);
+					sortMap.put(makeValidSortKey(infoBiMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "6", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoBiMap.get(_id), _id, "6"), bean);
+					sortMap.put(makeValidSortKey(infoBiMap.get(_id), _id, "6", null, validInfoMap), bean);
 				}
 				// 7 : info level (Modified = new + tlsh > 120)
 				else if (infoModifyMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
-					sortMap.put(makeValidSortKey(infoModifyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "7"), bean);
+					sortMap.put(makeValidSortKey(infoModifyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "7", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoModifyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoModifyMap.get(_id), _id, "7"), bean);
+					sortMap.put(makeValidSortKey(infoModifyMap.get(_id), _id, "7", null, validInfoMap), bean);
 				}
 				// 8 : info level
 				else if (infoOnlyMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoOnlyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "8"), bean);
+					sortMap.put(makeValidSortKey(infoOnlyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "8", null, validInfoMap), bean);
 				} else if (checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "8"), bean);
+					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "8", null, validInfoMap), bean);
 				}
 				// 10 : info level (copyright)
 				else if (infoCopyrightMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
-					sortMap.put(makeValidSortKey(infoCopyrightMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "10"), bean);
+					sortMap.put(makeValidSortKey(infoCopyrightMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "10", null, validInfoMap), bean);
 				}
 				else {
 					sortListOk.add(bean);
@@ -2069,7 +2087,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return false;
 	}
 	
+	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey) {
+		return makeValidSortKey(list, _id, prevSortKey, null);
+	}
+	
 	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey, String obligationType) {
+		return makeValidSortKey(list, _id, prevSortKey, obligationType, null);
+	}
+
+	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey, String obligationType, Map<String, String> msgMap) {
 		String rtn = "";
 		// compareArray 순서대로 정렬된다.
 		// 정의되지 않은 경우는 정렬대상에서 제외
@@ -2078,7 +2104,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		int sortIdx = 0;
 		
 		for (String key : compareArray) {
-			compareSortMap.put(key, StringUtil.leftPad(Integer.toString(sortIdx++), 2, "0") );
+			compareSortMap.put(key, StringUtil.leftPad(Integer.toString(sortIdx++), 2, "0"));
 		}
 		
 		//String preSortKey = useNextSort ? "2" : "0";
@@ -2086,7 +2112,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		boolean hasErrorCode = false;
 		
 		for (String key : compareSortMap.keySet()) {
-			rtn += preSortKey + (list.contains(key) ? compareSortMap.get(key) : "99");
+			rtn += preSortKey;
+			if (list.contains(key)) {
+				rtn += makeValidSortValue(_id, key, compareSortMap, msgMap);
+			} else {
+				rtn += "999";
+			}
 			
 			if (list.contains(key)) {
 				hasErrorCode = true;
@@ -2099,7 +2130,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			rtn = "";
 			
 			for (String key : compareSortMap.keySet()) {
-				rtn += preSortKey + (list.contains(key) ? compareSortMap.get(key) : "99");
+				rtn += preSortKey + (list.contains(key) ? compareSortMap.get(key) + "0" : "999");
 			}
 		}
 		
@@ -2108,8 +2139,208 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return rtn;
 	}
 	
-	private static String makeValidSortKey(List<String> list, String _id, String prevSortKey) {
-		return makeValidSortKey(list, _id, prevSortKey, null);
+	private static String makeValidSortValue(String _id, String key, Map<String, String> compareSortMap, Map<String, String> msgMap) {
+		String rtnVal = "";
+		if (msgMap != null) {
+			String msgVal = "";
+			switch (key) {
+				case "BINARYNOTICE" :
+					msgVal = msgMap.get("binaryNotice." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("NOTICE Should")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Found binary")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("Can't find")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else {
+							rtnVal += compareSortMap.get(key) + "6";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "9";
+					}
+					break;
+				case "BINARYNAME" :
+					msgVal = msgMap.get("binaryName." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Exists binary")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.contains("same binary")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.contains("similar binary")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.contains("binary has same OSS information")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else if (msgVal.equalsIgnoreCase("New")) {
+							rtnVal += compareSortMap.get(key) + "7";
+						} else {
+							rtnVal += compareSortMap.get(key) + "8";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "9";
+					}
+					break;
+				case "OSSNAME" :
+					msgVal = msgMap.get("ossName." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("New")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Deactivated")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("Duplicated")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.startsWith("Already")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else {
+							rtnVal += compareSortMap.get(key) + "7";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "OSSVERSION" :
+					msgVal = msgMap.get("ossVersion." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("New")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Duplicated")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("Already")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.startsWith("Version")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else {
+							rtnVal += compareSortMap.get(key) + "7";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "LICENSENAME" :
+					msgVal = msgMap.get("licenseName." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("New")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Dual license")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "4";
+						} else if (msgVal.startsWith("No license")) {
+							rtnVal += compareSortMap.get(key) + "5";
+						} else if (msgVal.startsWith("Specify")) {
+							rtnVal += compareSortMap.get(key) + "6";
+						} else {
+							rtnVal += compareSortMap.get(key) + "7";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "LICENSETEXT" :
+					msgVal = msgMap.get("licenseText." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else {
+							rtnVal += compareSortMap.get(key) + "3";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "FILEPATH" :
+					msgVal = msgMap.get("filePath." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Formatting")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else {
+							rtnVal += compareSortMap.get(key) + "3";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "DOWNLOADLOCATION" :
+					msgVal = msgMap.get("downloadLocation." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("The address should be started")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Not the same")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else {
+							rtnVal += compareSortMap.get(key) + "4";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				case "HOMEPAGE" :
+					msgVal = msgMap.get("homepage." + _id);
+					if (!isEmpty(msgVal)) {
+						if (msgVal.startsWith("This field")) {
+							rtnVal += compareSortMap.get(key) + "0";
+						} else if (msgVal.startsWith("Exceeded")) {
+							rtnVal += compareSortMap.get(key) + "1";
+						} else if (msgVal.startsWith("The address should be started")) {
+							rtnVal += compareSortMap.get(key) + "2";
+						} else if (msgVal.startsWith("Not the same")) {
+							rtnVal += compareSortMap.get(key) + "3";
+						} else {
+							rtnVal += compareSortMap.get(key) + "4";
+						}
+					} else {
+						rtnVal += compareSortMap.get(key) + "8";
+					}
+					break;
+				default : 
+					rtnVal += compareSortMap.get(key) + "8";
+					break;
+			}
+		} else {
+			rtnVal += compareSortMap.get(key) + "9";
+		}
+		
+		return rtnVal;
 	}
 
 	private static String checkMultiLicenseError(Map<String, List<String>> addedIdList, List<ProjectIdentification> list) {
@@ -2407,7 +2638,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 		}
 		
-		// license type이 NA가 아닌 라이선스가 포함되어 있거나, Unconfirmed license인 경우 false
+		// license type이 NA가 아닌 라이선스가 포함되어 있거나, New license인 경우 false
 		if (result) {
 			for (String license : avoidNull(licenseName).split(",")) {
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
@@ -3104,22 +3335,61 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		String rtnStr = "<b>Please check your entry and try again.</b><br />";
 		
 		if (validMessageMap != null) {
+			int ExceededCnt = 0;
 			for (String key : validMessageMap.keySet()) {
 				if ("isValid".equalsIgnoreCase(key)) {
 					continue;
 				}
 				String msg = removeLineSeparator(validMessageMap.get(key));
 				if (key.indexOf(".") > -1) {
-					rtnStr += "<br />" + key.substring(0, key.indexOf(".")) + " : " + msg;
+					if (key.startsWith("licenseName") && msg.contains("Exceeded max length")) {
+						ExceededCnt++;
+					} else {
+						rtnStr += "<br />" + key.substring(0, key.indexOf(".")) + " : " + msg;
+					}
 				} else {
 					rtnStr += "<br />" + key + " : " + msg;
 				}
+			}
+			if (ExceededCnt > 0) {
+				rtnStr += "<br />" + CommonFunction.getCustomMessage("msg.common.license.exceeded.max.length", String.valueOf(ExceededCnt));
 			}
 		}
 		
 		return rtnStr;
 	}
 
+	public static List<ProjectIdentification> getItemsExceedingMaxLength(Map<String, String> validMessageMap, List<ProjectIdentification> ossComponents) {
+		List<ProjectIdentification> exceedingMaxLengthList = new ArrayList<>();
+		List<String> exceedingMaxLengthGridIdList = new ArrayList<>();
+		if (validMessageMap != null) {
+			for (String key : validMessageMap.keySet()) {
+				if ("isValid".equalsIgnoreCase(key)) {
+					continue;
+				}
+				String msg = removeLineSeparator(validMessageMap.get(key));
+				if (key.indexOf(".") > -1) {
+					if (key.startsWith("licenseName") && msg.contains("Exceeded max length")) {
+						exceedingMaxLengthGridIdList.add(key.split("[.]")[1]);
+					}
+				}
+			}
+		}
+		if (!exceedingMaxLengthGridIdList.isEmpty()) {
+			List<ProjectIdentification> reorderList = new ArrayList<>();
+			for (ProjectIdentification bean : ossComponents) {
+				if (exceedingMaxLengthGridIdList.contains(bean.getGridId())) {
+					exceedingMaxLengthList.add(bean);
+				} else {
+					reorderList.add(bean);
+				}
+			}
+			exceedingMaxLengthList.addAll(reorderList);
+		}
+		
+		return exceedingMaxLengthList;
+	}
+	
 	public static String makeValidMsgTohtml(Map<String, String> validMessageMap, List<ProjectIdentification> ossComponents) {
 		List<String> rtnStrList = new ArrayList<>();
 		String rtnStr = getMessage("msg.oss.check.ossName.format");
@@ -3153,7 +3423,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return rtnStr;
 	}
 	
-	public static Boolean booleanOssNameFormatForValidMsg(Map<String, String> validMessageMap) {
+	public static Boolean booleanValidationFormatForValidMsg(Map<String, String> validMessageMap, boolean isCheckOssName) {
 		boolean validFlag = false;
 		
 		if (validMessageMap != null) {
@@ -3164,9 +3434,16 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				String msg = removeLineSeparator(validMessageMap.get(key));
 				if (key.indexOf(".") > -1) {
-					if (msg.contains("Formatting") && key.substring(0, key.indexOf(".")).equals("ossName")) {
-						validFlag = true;
-						break;
+					if (isCheckOssName) {
+						if (msg.contains("Formatting") && key.substring(0, key.indexOf(".")).equals("ossName")) {
+							validFlag = true;
+							break;
+						}
+					} else {
+						if (key.startsWith("licenseName") && msg.contains("Exceeded max length")) {
+							validFlag = true;
+							break;
+						}
 					}
 				}
 				
@@ -3901,6 +4178,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 	
 	public static List<List<ProjectIdentification>> setOssComponentLicense(List<ProjectIdentification> ossComponent, boolean excludeFlag) {
+		return setOssComponentLicense(ossComponent, excludeFlag, false);
+	}
+	
+	public static List<List<ProjectIdentification>> setOssComponentLicense(List<ProjectIdentification> ossComponent, boolean excludeFlag, boolean isNickValid) {
 		List<List<ProjectIdentification>> ossComponentLicense = new ArrayList<List<ProjectIdentification>>(); 
 		
 		for (ProjectIdentification pi : ossComponent) {
@@ -3930,9 +4211,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(nm.toUpperCase())) {
 							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(nm.toUpperCase());
-							
+							String licenseName = "";
+							if (!isNickValid) {
+								licenseName = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
+							} else {
+								licenseName = nm;
+							}
 							license.setLicenseId(licenseMaster.getLicenseId());
-							license.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
+							license.setLicenseName(licenseName);
 						} else {
 							license.setLicenseId("");
 							license.setLicenseName(nm);
@@ -3962,9 +4248,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(nm.toUpperCase())) {
 							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(nm.toUpperCase());
-							
+							String licenseName = "";
+							if (!isNickValid) {
+								licenseName = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
+							} else {
+								licenseName = nm;
+							}
 							license.setLicenseId(licenseMaster.getLicenseId());
-							license.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
+							license.setLicenseName(licenseName);
 						} else {
 							license.setLicenseId("");
 							license.setLicenseName(nm);
@@ -4892,12 +5183,18 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, afterBean.getPriority()) + "</span></p>";
 			}
 			
-			String before = beforeBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
-			String after = afterBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
+			String before = "";
+			String after = "";
+			if (!isEmpty(beforeBean.getComment())) {
+				before = Jsoup.parse(beforeBean.getComment()).text();
+			}
+			if (!isEmpty(afterBean.getComment())) {
+				after = Jsoup.parse(afterBean.getComment()).text();
+			}
 			if (!before.equals(after)) {
 				comment += "<p><strong>Additional Information</strong><br />";
-				comment += "Before : <br/>" + before + "<br/>";
-				comment += "After : <span style='background-color:yellow'><br/>" + after + "</span></p>";
+				comment += "Before : <br/>" + beforeBean.getComment() + "<br/>";
+				comment += "After : <span style='background-color:yellow'><br/>" + afterBean.getComment() + "</span></p>";
 			}
 
 			before = avoidNull(beforeBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");
@@ -4907,6 +5204,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "<p><strong>Security Mail</strong><br />";
 				comment += "Before : " + (beforeBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + before+ ")") + "<br />";
 				comment += "After : <span style='background-color:yellow'>" + (afterBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + after + ")") + "</span><br /></p>";
+			}
+
+			before = avoidNull(beforeBean.getSecPersonNm()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+			after = avoidNull(afterBean.getSecPersonNm()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+
+			if (!avoidNull(beforeBean.getSecPersonNm()).equals(avoidNull(afterBean.getSecPersonNm())) || !before.equals(after)) {
+				comment += "<p><strong>Security Responsible Person</strong><br />";
+				comment += "Before : " + avoidNull(beforeBean.getSecPersonNm()) + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + avoidNull(afterBean.getSecPersonNm()) + "</span><br /></p>";
 			}
 			
 			// Model Information
@@ -5228,7 +5534,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					}
 				}
 				
-				// Check unconfirmed license, the actual message is (Declared : ~~), so check again registered license.
+				// Check New license, the actual message is (Declared : ~~), so check again registered license.
 				if (unclearObligationList.contains(bean.getGridId())
 						|| (!isEmpty(bean.getObligationType()) && (checkIncludeUnconfirmedLicense(bean.getComponentLicenseList()) || checkIncludeNotDeclaredLicense(bean.getOssName(), bean.getOssVersion(), bean.getComponentLicenseList())))) {
 					bean.setObligationGrayFlag(CoConstDef.FLAG_YES);
@@ -5719,7 +6025,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					break;
 				}
 			}
-			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>CSG Task</a>";
+			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>SW Security Governance Team</a>";
 			if (lang.equals("en-US")) {
 				isInfo += "sensitive or credential information<a>";
 				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo, vulDocInfoLink});
@@ -5728,7 +6034,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo, vulDocInfoLink});
 			}
 		} else {
-			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>CSG Task</a>";
+			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>SW Security Governance Team</a>";
 			vulDocMsg = getMessage("msg.project.packaging.vuldoc.info" , new String[]{vulDocInfoLink});
 		}
 		
@@ -5863,6 +6169,177 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static void addSystemLogRecords(String prjId, String loginUserName) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		log.info("reset {} / {} / {}", prjId, loginUserName, sdf.format(System.currentTimeMillis()));
+	}
+	
+	public static String changeDataToTableFormat(String target, String msg, List<String> data) {
+		String rtnString = "";
+		String comment = "";
+		if (!isEmpty(msg)) {
+			comment = "<p><b>" + msg + "</b></p>";
+		}
+		String contents = 	"<div class=\"custom-layout card-body p-0\">";
+		if (isEmpty(msg) && !target.equals("nick")) {
+			if (target.equals("oss")) {
+				contents += "<b>Open Source</b>";
+			} else {
+				contents += "<b>License</b>";
+			}
+		}
+				contents += "	<table class=\"table table-bordered\">" +
+							"		<thead>";
+		if (target.equals("oss") || target.equals("nick")) {
+				contents += "			<tr>" +
+							"		    	<th class=\"text-center\">Before</th>" +
+							"               <th class=\"text-center\">After</th>" +
+							"			</tr>" +
+							"		</thead>" +
+							"		<tbody>";
+			
+			for (String key : data) {
+				String[] changeInfos = key.split("[|]");
+				String beforeValue = changeInfos[0];
+				String afterValue = changeInfos[1];
+				String value = "		<tr>" +
+								"			<td stlye=\"padding-left:0.75rem;\">"+ beforeValue.trim() + "</td>" +
+								"			<td>"+ afterValue.trim() + " </td>" +
+								"		</tr>";
+				contents += value;
+			}
+		} else {
+				contents += "			<tr>" +
+							"		    	<th class=\"text-center\">OSS</th>" +
+							"               <th class=\"text-center\">Before</th>" +
+							"               <th class=\"text-center\">After</th>" +
+							"			</tr>" +
+							"		</thead>" +
+							"		<tbody>";
+
+			for (String key : data) {
+				String[] comments = key.split("[|]");
+				String ossInfo = comments[0];
+				String beforeValue = comments[1];
+				String afterValue = comments[2];
+				
+				String value = "		<tr>" +
+								"			<td stlye=\"padding-left:0.75rem;\">"+ ossInfo.trim() + " </td>" +
+								"			<td>"+ beforeValue.trim() + "</td>" +
+								"			<td>"+ afterValue.trim() + "</td>" +
+								"		</tr>";
+				contents += value;
+			}
+		}
+		
+			contents += 	"		</tbody>" +
+							"	</table>" +
+							"</div>";
+		rtnString += comment + contents;
+		return rtnString;
+	}
+	
+	public static String getCommentForChangeNickname(String comment, List<String> beforeNicknames, List<String> afterNicknames) {
+		String customComment = comment;
+		
+		if (CollectionUtils.isEmpty(beforeNicknames) && !CollectionUtils.isEmpty(afterNicknames)) {
+			if (!isEmpty(customComment)) {
+				customComment += "<br>";
+			}
+			customComment += "[Nickname Added] " + String.join(",", afterNicknames);
+		} else if (!CollectionUtils.isEmpty(beforeNicknames) && CollectionUtils.isEmpty(afterNicknames)) {
+			if (!isEmpty(customComment)) {
+				customComment += "<br>";
+			}
+			customComment += "[Nickname Deleted] " + String.join(",", beforeNicknames);
+		} else {
+			List<String> nonDuplicateListForAfter = afterNicknames.stream().filter(a -> beforeNicknames.stream().noneMatch(Predicate.isEqual(a))).collect(Collectors.toList());
+			List<String> nonDuplicateListForBefore = beforeNicknames.stream().filter(b -> afterNicknames.stream().noneMatch(Predicate.isEqual(b))).collect(Collectors.toList());
+			
+			if (beforeNicknames.size() == afterNicknames.size()) {
+				if (!CollectionUtils.isEmpty(nonDuplicateListForAfter) && !CollectionUtils.isEmpty(nonDuplicateListForBefore)) {
+					customComment += "[Nickname Changed]<br>";
+					List<String> data = new ArrayList<>();
+					for (int i=0; i < nonDuplicateListForAfter.size(); i++) {
+						data.add(nonDuplicateListForBefore.get(i) + "|" + nonDuplicateListForAfter.get(i));
+					}
+					customComment += CommonFunction.changeDataToTableFormat("nick", "", data);
+				}
+			} else {
+				if (!CollectionUtils.isEmpty(nonDuplicateListForAfter)) {
+					if (!isEmpty(customComment)) {
+						customComment += "<br>";
+					}
+					customComment += "[Nickname Added] " + String.join(",", nonDuplicateListForAfter);
+				}
+				if (!CollectionUtils.isEmpty(nonDuplicateListForBefore)) {
+					if (!isEmpty(customComment)) {
+						customComment += "<br>";
+					}
+					customComment += "[Nickname Deleted] " + String.join(",", nonDuplicateListForBefore);
+				}
+			}
+		}
+		
+		return customComment;
+	}
+
+	public static void redirectLogoutSingleSignOn(HttpServletResponse response) {
+		String redirectUrl = UriComponentsBuilder.fromUriString(CommonFunction.emptyCheckProperty("sso.server.url", "") + "/logout")
+											.queryParam("scope", "email profile openid")
+											.queryParam("client_id", CommonFunction.emptyCheckProperty("sso.server.client.id", ""))
+											.queryParam("post_logout_redirect_uri", CommonFunction.emptyCheckProperty("server.domain", "") + "/login")
+											.build().toUriString();
+		try {
+			response.sendRedirect(redirectUrl);
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+	public static OssMaster getOssVulnerabilityInfo(String ossName, String ossVersion) {
+		OssMaster ossMaster = new OssMaster();
+		if (CoCodeManager.OSS_INFO_UPPER.containsKey((ossName + "_" + ossVersion).toUpperCase())) {
+			ossMaster = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + ossVersion).toUpperCase());
+			String[] ossNicknameList = ossService.getOssNickNameListByOssName(ossName);
+			if (ossNicknameList != null && ossNicknameList.length > 0) {
+				ossMaster.setOssNicknames(ossNicknameList);
+			}
+			if (!isEmpty(ossMaster.getIncludeCpe()) && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag()))) {
+				List<String> includeCpeList = new ArrayList<>();
+				for (String includeCpe : ossMaster.getIncludeCpe().split(",")) {
+					String[] splitIncludeCpe = includeCpe.split(":");
+					if (splitIncludeCpe.length > 2 && splitIncludeCpe.length == 13) {
+						includeCpeList.add(splitIncludeCpe[3] + ":" + splitIncludeCpe[4]);
+					} else {
+						includeCpeList.add(includeCpe);
+					}
+				}
+				if (!includeCpeList.isEmpty()) {
+					ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
+				}
+			}
+			if (!isEmpty(ossMaster.getExcludeCpe())) {
+				List<String> excludeCpeList = new ArrayList<>();
+				for (String excludeCpe : ossMaster.getExcludeCpe().split(",")) {
+					String[] splitExcludeCpe = excludeCpe.split(":");
+					if (splitExcludeCpe.length > 2 && splitExcludeCpe.length == 13) {
+						excludeCpeList.add(splitExcludeCpe[3] + ":" + splitExcludeCpe[4]);
+					} else {
+						excludeCpeList.add(excludeCpe);
+					}
+				}
+				if (!excludeCpeList.isEmpty()) {
+					ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
+				}
+			}
+			if (!isEmpty(ossMaster.getOssVersionAlias())) {
+				String[] ossVersionAliases = Arrays.stream(ossMaster.getOssVersionAlias().split(",")).map(String::trim).toArray(String[]::new);
+				ossMaster.setOssVersionAliases(ossVersionAliases);
+			}
+		} else {
+			ossMaster.setOssName(ossName);
+			ossMaster.setOssVersion(ossVersion);
+		}
+		ossMaster = ossService.getOssVulnerabilityInfo(ossMaster);
+		return ossMaster;
 	}
 }
 

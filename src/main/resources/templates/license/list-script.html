@@ -596,21 +596,6 @@
                     height: 'auto',
                     multiselect : true,
                     multiselectWidth: 35,
-                    gridComplete: function () {
-
-                        if (!data.existTooltip) {
-                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
-                                .attr("title", data.tooltipCont).tooltip({
-                                content: function () {
-                                    return $(this).prop('title');
-                                }
-                            }).on('inserted.bs.tooltip', function() {
-						        var tooltipId = 'gridHeaderTooltip';
-						        $('.tooltip').attr('id', tooltipId);
-						    });
-                            data.existTooltip = true;
-                        }
-                    },
                     loadComplete: function (result) {
                         totalRow = result.records;
                         // 헤더에 버튼 추가
@@ -645,11 +630,13 @@
                             pageButtonArea.append(appendIcon);
                         }
                         
-                        var setUpColumnButton = $('#setUpColumnButton');
+                        var setUpColumnButton = $('#setUpColumnButtonLic');
                         /* columns licalization */
                         if (setUpColumnButton.length === 0) {
                             var savedColNames = [];
                             var userColumnsSettingMenuOptions = {
+                            	_btnId : "Lic",
+                                _targetId : "list",
                                 _listType: listType,
                                 _totalColInfos: totalColInfos,
                                 _defaultColNames: defaultColNames,
@@ -658,13 +645,13 @@
                             pageButtonArea.append(createUserCoulmnsSettingButton(userColumnsSettingMenuOptions));
 
                             // Check for click events occurring inside the menu area
-                            $("#setUpColumnMenu").on("click", function(event) {
+                            $("#setUpColumnMenuLic").on("click", function(event) {
                                 event.stopPropagation();
                             });
 
-                            $('#setUpColumnButton').on("click", function(event) {
+                            $('#setUpColumnButtonLic').on("click", function(event) {
                                 event.stopPropagation();
-                                $('#setUpColumnMenu').toggleClass("show");
+                                $('#setUpColumnMenuLic').toggleClass("show");
                                 $(this).toggleClass("show");
                             })
                         }
@@ -675,7 +662,23 @@
                         $('#' + id + 'description').width(130).height(140);
                     },
                 	gridComplete : function() {
-						 updateGridRowCount('list', 'pager'); 
+                		if (!data.existTooltip) {
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
+                                .attr("title", data.tooltipCont).tooltip({
+                                content: function () {
+                                    return $(this).prop('title');
+                                }
+                            }).on('inserted.bs.tooltip', function() {
+						        var tooltipId = 'gridHeaderTooltip';
+						        $('.tooltip').attr('id', tooltipId);
+						    });
+                            data.existTooltip = true;
+                        }
+                		if (!document.getElementById("restrictionInfo")) {
+                			$("#jqgh_list_restriction").append('<i class="fa fa-lg fa-info-circle icon-light-gray ml-1" data-toggle="tooltip" id="restrictionInfo" data-html="true" data-placement="right"></i>');
+                    		showHelpLink("License_List_Restriction_Info", "restrictionInfo");
+                		}
+                		updateGridRowCount('list', 'pager'); 
 					}
                 });
             }

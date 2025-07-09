@@ -84,5 +84,11 @@ public interface NvdDataMapper {
 	void copyNvdDataV3FromTemp();
 	void createTableNvdDataV3Temp();
 	void truncateNvdDataV3Temp();
+	void updateCveInfoV3(Map<String, Object> param);
 	
+	void insertNvdDataRunningOnWithTemp(Map<String, Object> param);
+	void deleteNvdDataRunningOnWithExistingInTemp();
+	void truncateNvdDataRunningOnWithTemp();
+	void truncateNvdDataRunningOnWith();
+	void copyNvdDataRunningOnWithFromTemp();
 }

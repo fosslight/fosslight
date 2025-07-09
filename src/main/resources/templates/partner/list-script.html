@@ -43,10 +43,10 @@ $(document).ready(function () {
      	$('#schDateRange').attr('placeholder', 'Created Date');
   	});
     
-    var input = ["partnerName", "publicYn", "createdDate1", "createdDate2", "softwareName", "softwareVersion", "creator", "reviewer", "watchers", "ossName", "ossVersion", "licenseName"];
+    var input = ["partnerName", "publicYn", "createdDate1", "createdDate2", "softwareName", "softwareVersion", "creator", "reviewer", "watchers", "ossName", "ossVersion", "licenseName", "binaryName"];
 	var singleSelect = ["division"];
 	var multiSelect = ["status"];
-	var textarea = ["binaryName", "userComment", "description"];
+	var textarea = ["userComment", "description"];
     
     var optionSelectedFlag = false;
 	if (typeof sessionStorage.partnerSearchConditions !== "undefined") {
@@ -517,7 +517,7 @@ var fn = {
 						}, false, 'confirm');
                 	}
 					
-					alertify.changeWatcherDialog(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '400');
+					alertify.changeWatcherDialog(res).set('title', 'Change Edit Permission').set('resizable', true).resizeTo('1000', '400');
 				}
 			});
 		} else {
@@ -528,6 +528,11 @@ var fn = {
 		fn.resetChangeWatcherPop();
 	},
 	changeWatcherAdd : function() {
+		if (changeWatcherArr.length == 0) {
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+			return false;
+		}
+		
 		var msg = "";
 		var notPermissionPartnerIds = [];
 		var permissionPartnerIds = [];
@@ -560,11 +565,6 @@ var fn = {
 		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
-				if (changeWatcherArr.length == 0) {
-					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
-					return false;
-				}
-				
 				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
 
 				$.ajax({
@@ -600,6 +600,11 @@ var fn = {
 		});
 	},
 	changeWatcherDelete : function() {
+		if (changeWatcherArr.length == 0) {
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+			return false;
+		}
+		
 		var msg = "";
 		var notPermissionPartnerIds = [];
 		var permissionPartnerIds = [];
@@ -632,11 +637,6 @@ var fn = {
 		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
-				if (changeWatcherArr.length == 0) {
-					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
-					return false;
-				}
-				
 				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
 				
 				$.ajax({
@@ -647,8 +647,12 @@ var fn = {
 					cache : false,
 					contentType : 'application/json',
 					success: function(resultData){
-						if(resultData.isValid == "true") {
-							alertify.success([[#{msg.common.success}]]);
+						if (resultData.isValid == "true") {
+							if ("" == msg) {
+								alertify.success([[#{msg.common.success}]]);
+							} else {
+								alertify.alert(msg, function(){});
+							}
 						} else {
 							alertify.error([[#{msg.common.valid2}]], 0);
 						}
@@ -1374,11 +1378,13 @@ var partnerList = {
 	                  	pageButtonArea.append(appendIcon);
 	            	}
 	            	
-	            	var setUpColumnButton = $('#setUpColumnButton');
+	            	var setUpColumnButton = $('#setUpColumnButtonPar');
 					/* columns licalization */
 					if (setUpColumnButton.length === 0) {
 						var savedColNames = [];
 						var userColumnsSettingMenuOptions = {
+							_btnId : "Par",
+		                    _targetId : "list",
 							_listType: listType,
 							_totalColInfos: totalColInfos,
 							_defaultColNames: defaultColNames,
@@ -1387,15 +1393,15 @@ var partnerList = {
 						pageButtonArea.append(createUserCoulmnsSettingButton(userColumnsSettingMenuOptions));
 
 						// Check for click events occurring inside the menu area
-						$("#setUpColumnMenu").on("click", function (event) {
+						$("#setUpColumnMenuPar").on("click", function (event) {
 							event.stopPropagation();
 						});
 
-						$('#setUpColumnButton').on("click", function (event) {
+						$('#setUpColumnButtonPar').on("click", function (event) {
 							event.stopPropagation();
-							$('#setUpColumnMenu').toggleClass("show");
+							$('#setUpColumnMenuPar').toggleClass("show");
 							$(this).toggleClass("show");
-						})
+						});
 					}
 					adjustPageGridSize();
 				}

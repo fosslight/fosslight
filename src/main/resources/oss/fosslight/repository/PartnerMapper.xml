@@ -256,7 +256,7 @@
 		  AND DATE_FORMAT(A.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
-		   AND A.CD_DTL_NO LIKE CONCAT('%',#{division},'%')
+		   AND A.CD_DTL_NO = #{division}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 		   AND A.CREATOR_ID IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
@@ -640,7 +640,7 @@
 	<select id="selectPartnerMaster" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
 	SELECT
 		t1.*
-		,t2.ORIG_NM AS FILE_NAME
+		, t2.ORIG_NM AS FILE_NAME
 		, t3.ORIG_NM AS FILE_NAME2
 		, t4.USER_NAME AS CREATOR_NAME
 		, t5.USER_NAME AS REVIEWER_NAME
@@ -699,12 +699,8 @@
 	</update>
 
 	<update id="deleteMaster" parameterType="oss.fosslight.domain.PartnerMaster">
-	UPDATE
-		PARTNER_MASTER 
-	SET 
-		USE_YN = 'N'
-	WHERE 
-		PARTNER_ID = #{partnerId}
+		DELETE FROM PARTNER_MASTER 
+		WHERE PARTNER_ID = #{partnerId}
 	</update>
 	
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
@@ -803,8 +799,10 @@
 		DELETE COMPONENT, LICENSE 
 		FROM OSS_COMPONENTS COMPONENT 
 			LEFT JOIN OSS_COMPONENTS_LICENSE LICENSE ON COMPONENT.COMPONENT_ID = LICENSE.COMPONENT_ID
-		WHERE
-		 COMPONENT.REFERENCE_ID = #{referenceId} AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+		WHERE COMPONENT.REFERENCE_ID = #{referenceId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+		</if>
 	</delete>
 	
 	<insert id="insertOssComponents" parameterType="oss.fosslight.domain.OssComponents">
@@ -1868,7 +1866,8 @@
 		                              	LEFT OUTER JOIN OSS_VERSION OV
 		                              	ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 		                              ) SUB1 
-								  	 WHERE  SUB1.OSS_ID = #{ossId}
+								  	 WHERE SUB1.OSS_NAME = #{ossName}
+								  	 AND SUB1.OSS_VERSION = #{ossVersion}
                                      UNION ALL 
                                     SELECT SUB1.OSS_ID 
                                          , SUB2.OSS_NICKNAME AS OSS_NAME 
@@ -1879,10 +1878,16 @@
 		                              	LEFT OUTER JOIN OSS_VERSION OV
 		                              	ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 		                              ) SUB1 
-                                     INNER JOIN OSS_NICKNAME SUB2 ON SUB1.OSS_COMMON_ID = SUB2.OSS_COMMON_ID 
-                                     WHERE SUB1.OSS_ID = #{ossId}) B ON A.OSS_NAME = B.OSS_NAME AND IFNULL(B.OSS_VERSION, '') = IFNULL(A.OSS_VERSION, '') 
+                                     INNER JOIN OSS_NICKNAME SUB2 
+                                     ON SUB1.OSS_COMMON_ID = SUB2.OSS_COMMON_ID 
+                                     WHERE SUB1.OSS_NAME = #{ossName}
+                                     AND SUB1.OSS_VERSION = #{ossVersion}
+                                     ) B 
+                                     ON A.OSS_ID = B.OSS_ID
+                                     AND A.OSS_NAME = B.OSS_NAME
+                                     AND IFNULL(B.OSS_VERSION, '') = IFNULL(A.OSS_VERSION, '') 
 		                WHERE T1.PARTNER_ID = A.REFERENCE_ID 
-		                  AND A.REFERENCE_DIV IN ( '20' ) 
+		                  AND A.REFERENCE_DIV = '20' 
 		                  AND A.EXCLUDE_YN = 'N') 
 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 				AND (
@@ -2223,4 +2228,9 @@
 		WHERE
 			PARTNER_ID = #{partnerId}
 	</update>
+	
+	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
+		DELETE FROM T2_FILE
+		WHERE FILE_SEQ = #{fileSeq}
+	</delete>
 </mapper>

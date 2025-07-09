@@ -113,7 +113,7 @@ var com_evt = {
 							
 							keys.forEach(function(obj){
 								var warningMsg = bomValidMsgData[obj];
-								if ("Unconfirmed license" == warningMsg) {
+								if ("New license" == warningMsg) {
 									unconfirmedLicenseCnt++;
 									return false;
 								}
@@ -1473,8 +1473,8 @@ var com_fn = {
 				if("gridId" != value){
 					var data = obj[value];
 					if(value == "downloadLocation" || value == "homepage"){
-						if(data.indexOf("Not the same as property") > -1){
-							data = data.split("Not the same as property")[0];
+						if(data.indexOf("Different from DB") > -1){
+							data = data.split("Different from DB")[0];
 						} else if(data.indexOf("The address should be") > -1){
 							data = data.split("The address should be")[0];
 						}
@@ -1670,10 +1670,11 @@ var com_fn = {
 			}
         }
 
-        if(rowCheckedArr.length > 0){
+        if (rowCheckedArr.length > 0) {
+        	com_fn.exitCell(_mainLastsel, targetGrid);
         	var _popup = null;
 			
-            if(_popup == null || _popup.closed){
+            if (_popup == null || _popup.closed) {
             	_popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
             	$("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
@@ -1691,7 +1692,7 @@ var com_fn = {
 				$("#bulkEditForm > input[name=target]").val(targetGird);
 				$("#bulkEditForm").submit();
             }
-        }else{
+        } else {
             alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
             return false;
         }
@@ -1995,7 +1996,7 @@ var com_fn = {
 		});
 	},
 	checkSelectDownloadFile : function (target) {
-		var checkEmptyFlag = false;
+		var rtnObj;
 		var referenceDiv = "";
 		var params = {'prjId':[[${project.prjId}]]};
 		
@@ -2015,16 +2016,14 @@ var com_fn = {
 			async : false,
 			contentType : 'application/json',
 			success: function (data) {
-				if (data.isValid) {
-					checkEmptyFlag = true;
-				}
+				rtnObj = data;
 			},
 			error: function(data){
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
     	});
     	
-    	return checkEmptyFlag;
+		return rtnObj;
 	},
 	bomReqeustStart : function () {
 		if (Bom_Save_Flg) {
@@ -2382,6 +2381,30 @@ var com_fn = {
 		} else if ("Bom" == tab) {
 			bom_fn.reset();
 		}
+	},
+	nicknameAlertifyTemplate : function (target) {
+		alertify.dialog(target, function() {
+			return {
+				setup: function() {
+					var settings = alertify.confirm().settings;
+					
+					for (var prop in settings) {
+						this.settings[prop] = settings[prop];
+					}
+					
+					var setup = alertify.confirm().setup();
+					setup.focus.element = 0;
+
+					return setup;
+				},
+				hooks: {
+					onshow: function() {
+						this.elements.dialog.style.maxWidth = '750px';
+						this.elements.dialog.style.width = 'none';
+					}
+				}
+			};
+		}, false, 'alert');
 	}
 }
 

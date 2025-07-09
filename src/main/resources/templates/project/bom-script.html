@@ -60,56 +60,64 @@ var bom_fn = {
 		
 		var bomList = $("#bomList");
 		var str = "";
-		arr = bomList.jqGrid('getDataIDs');
+		var arr = bomList.jqGrid('getDataIDs');
+		var rowData = new Array();
 		var gridData = new Array();
 		var checkGridData = new Array();
 		
- 		for(var i in arr){
+ 		for (var i in arr) {
+ 			rowData.push(bomList.getRowData(arr[i]));
+ 		}
+ 		
+ 		for (var i in rowData) {
+ 			let row = rowData[i];
  			// mergePreDiv 설정
- 			str = bomList.jqGrid('getCell',arr[i],'referenceDiv').split("/");
+ 			str = row["referenceDiv"].replace(/(<([^>]+)>)/ig, "").split(",");
  			
- 			if(str[0] =="3rd") {
- 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "10");
+ 			if (str[0] =="3rd") {
+ 				row["referenceDiv"] = "10";
 
- 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99") {
- 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "10");
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row['mergePreDiv'] = "10";
  				}
- 			} else if(str[0] =="SRC") {
- 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "11");
+ 			} else if (str[0] =="SRC") {
+ 				row["referenceDiv"] = "11";
 
- 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
- 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "11");
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row["mergePreDiv"] = "11";
  				}
- 			} else if(str[0] =="BIN") {
- 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "15");
+ 			} else if (str[0] =="BIN") {
+ 				row["referenceDiv"] = "15";
 
- 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
- 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "15");
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row["mergePreDiv"] = "15";
  				}
- 			} else if(str[0] =="DEP") {
-                bomList.jqGrid('setCell',arr[i],'referenceDiv', "16");
+ 			} else if (str[0] =="DEP") {
+ 				row["referenceDiv"] = "16";
 
-                if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
-                    bomList.jqGrid('setCell',arr[i],'mergePreDiv', "16");
-                }
+ 				if ("99" == row["mergePreDiv"]) {
+ 					row["mergePreDiv"] = "16";
+ 				}
             }
  			
  			// obligationType 설정
- 			if(bomList.jqGrid('getCell',arr[i],'notify')=="Y") {
- 				if(bomList.jqGrid('getCell',arr[i],'source')=="Y") {
- 					bomList.jqGrid('setCell',arr[i],'obligationType', "11");
+ 			if ("Y" == row["notify"]) {
+ 				if ("Y" == row["source"]) {
+ 					row["obligationType"] = "11";
  				} else {
- 					bomList.jqGrid('setCell',arr[i],'obligationType', "10");
+ 					row["obligationType"] = "10";
  				}
  			} else {
- 				bomList.jqGrid('setCell',arr[i],'obligationType', "");
+ 				if ("Y" == row["source"]) {
+ 					row["obligationType"] = "12";
+ 				} else {
+ 					row["obligationType"] = "";
+ 				}
  			}
  			
- 			if(bomList.jqGrid('getCell',arr[i],'adminCheck') == "Y") {
- 				bomList.jqGrid('setCell',arr[i],'adminCheckYn', 'Y');
- 				
- 				var adminCheckData = bomList.getRowData(arr[i]);
- 				var data = adminCheckData["downloadLocation"];
+ 			if ("Y" == row["adminCheck"]) {
+ 				row["adminCheckYn"] = "Y";
+ 				var data = row["downloadLocation"];
  				
  				if (data.includes("http://") || data.includes("https://")) {
 					data = data.replace(/http/g, ",http");
@@ -122,11 +130,10 @@ var bom_fn = {
 				}
 				
 				data = data.substr(1);
-				bomList.jqGrid('setCell', arr[i], 'downloadLocation', data + "[Collectionofstoreddata]");
- 				
-		 		gridData.push(bomList.getRowData(arr[i]));
+				row["downloadLocation"] = data + "[Collectionofstoreddata]";
+		 		gridData.push(row);
 			} else {
-				checkGridData.push(bomList.getRowData(arr[i]));
+				checkGridData.push(row);
 			}
  		}
  		
@@ -232,6 +239,11 @@ var bom_fn = {
 				if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
 					display="<i class=\"fas fa-check fa-2xs\"></i>";
 				}
+			} else if (adminCheck == true && obligationType == 12) {
+				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
+				+ '<option value="Y">O</option>'
+				+ '<option value="N" selected="selected">X</option>'
+				+ '</select>';
 			} else if(obligationLicense == 90 || adminCheck == true) {
 				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
 					+ '<option value="Y" '+((obligationType=='10' || obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
@@ -264,6 +276,11 @@ var bom_fn = {
 			if (preObligationType == undefined && obligationType == 11){
 				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
+		} else if (adminCheck == true && obligationType == 12) {
+			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
+				+ '<option value="Y" selected="selected">O</option>'
+				+ '<option value="N">X</option>'
+				+ '</select>';
 		} else if(obligationLicense == 90 || adminCheck == true) {
 			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
 				+ '<option value="Y" '+((obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
@@ -287,7 +304,7 @@ var bom_fn = {
 			display += 'disabled ';
 		}
 		
-		display += 'onclick="bom_fn.onAdminCheckClick('+options.rowId+')">';
+		display += 'onclick="bom_fn.onAdminCheckClick('+options.rowId+', true)">';
 		
 		return display;
 	},
@@ -305,14 +322,14 @@ var bom_fn = {
                 $(this).attr('value','Y');
                 $(this).prop('checked',true);
                 fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");
-                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId, true);
             });
         } else {
         	$("#"+target+" input[id*='_adminCheck']").each(function (idx){
                 $(this).attr('value','N');
                 $(this).prop('checked',false);
                 fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");
-                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId, true);
             });
         }
 	},
@@ -335,10 +352,10 @@ var bom_fn = {
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var selectedVal = $("#"+id+"_notify").prop("selected", true).val();
 		
-		if(selectedVal) {
-			if(selectedVal == "N") {
-				$("#"+id+"_source").val("N");
-			}
+		if (selectedVal) {
+// 			if (selectedVal == "N") {
+// 				$("#"+id+"_source").val("N");
+// 			}
 			
 			$("#"+id+"_notify").parent().css("background", "");
 			
@@ -355,10 +372,10 @@ var bom_fn = {
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var selectedVal = $("#"+id+"_source").prop("selected", true).val();
 		
-		if(selectedVal) {
-			if(selectedVal == "Y") {
-				$("#"+id+"_notify").val("Y");
-			}
+		if (selectedVal) {
+// 			if (selectedVal == "Y") {
+// 				$("#"+id+"_notify").val("Y");
+// 			}
 			
 			$("#"+id+"_source").parent().css("background", "");
 			
@@ -371,16 +388,19 @@ var bom_fn = {
 			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
 		}
 	},
-	onAdminCheckClick : function(rowId){
+	onAdminCheckClick : function(rowId, isClick){
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var adminCheckYn = $("#"+id+"_adminCheck").prop("checked");
 		
 		if (adminCheckYn && "ROLE_ADMIN" == userRole) {
 			var rowData = $("#bomList").getRowData(id);
-			if ("Y" != rowData.notAdminCheck) {
-				$("#bomList").jqGrid('setCell', id, 'notify', "10");
+			if (isClick) {
+				if ("Y" != rowData.notAdminCheck) {
+					$("#bomList").jqGrid('setCell', id, 'notify', "10");
+				}
+				$("#bomList").jqGrid('setCell', id, 'source', "10");
+				$("#bomList").jqGrid("setCell", id, "adminCheckYn", "Y");
 			}
-			$("#bomList").jqGrid('setCell', id, 'source', "10");
 			
 			var checkList = ["downloadLocation", "homepage", "copyrightText"];
 			var componentId = rowData["componentId"];
@@ -394,8 +414,8 @@ var bom_fn = {
 				if(checkList.includes(value)) {
 					var data = rowData[value];
 					if ("downloadLocation" == value){
-						if(data.indexOf("Not the same as property") > -1){
-							data = data.split("Not the same as property")[0];
+						if(data.indexOf("Different from DB") > -1){
+							data = data.split("Different from DB")[0];
 						} else if(data.indexOf("The address should be") > -1){
 							data = data.split("The address should be")[0];
 						}
@@ -410,8 +430,8 @@ var bom_fn = {
 							data = data.replace(/git/g, ",git");
 						}
 					} else if ("homepage" == value) {
-						if(data.indexOf("Not the same as property") > -1){
-							data = data.split("Not the same as property")[0];
+						if(data.indexOf("Different from DB") > -1){
+							data = data.split("Different from DB")[0];
 						} else if(data.indexOf("The address should be") > -1){
 							data = data.split("The address should be")[0];
 						}
@@ -426,6 +446,7 @@ var bom_fn = {
 				}
 			});
 		} else {
+			$("#bomList").jqGrid("setCell", id, "adminCheckYn", "N");
 			$("#bomList").jqGrid('saveRow', id);
 		}
 
@@ -449,7 +470,7 @@ var bom_fn = {
 					});
 
 					for(var i in msgData){
-					    if(bomValidMsgData[msgData[i]].toUpperCase() == "UNCONFIRMED LICENSE"){
+					    if(bomValidMsgData[msgData[i]].toUpperCase() == "NEW LICENSE"){
 					        success = false;
 
 					        break;
@@ -910,37 +931,47 @@ var bom_fn = {
 		}
     },
     selectDownloadFile : function(target) {
-    	// download file
-    	if (target === "report_sub") {
-        	bom_fn.downloadExcel();
-        } else {
-        	var identificationStatus = [[${project.identificationStatus}]];
-        	if ("CONF" != identificationStatus) {
-        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-    				if (e) {
-    					bom_fn.selectDownloadFileValidation(target);
-    				} else {
-    					return false;
-    				}
-    			});
-        	} else {
-        		bom_fn.selectDownloadFileValidation(target);
-        	}
-        }
+    	let obj = com_fn.checkSelectDownloadFile('BOM');
+    	if (typeof obj.overMaxLengthOssList !== "undefined") {
+    		let message = [[#{msg.common.check.maxlength.over.export}]];
+    		let list = obj.overMaxLengthOssList;
+    		list.forEach (function (el, index) {
+				message += "<br>&emsp;- " + el + " : copyright column";
+			});
+    		alertify.alert(message, function(){});
+    	} else {
+    		if (obj.isValid) {
+    			// download file
+    	    	if (target === "report_sub") {
+    	        	bom_fn.downloadExcel();
+    	        } else {
+    	        	var identificationStatus = [[${project.identificationStatus}]];
+    	        	if ("CONF" != identificationStatus) {
+    	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+    	    				if (e) {
+    	    					bom_fn.selectDownloadFileValidation(target);
+    	    				} else {
+    	    					return false;
+    	    				}
+    	    			});
+    	        	} else {
+    	        		bom_fn.selectDownloadFileValidation(target);
+    	        	}
+    	        }
+    		} else {
+    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    		}
+    	}
     },
     selectDownloadFileValidation : function(target) {
-    	if (com_fn.checkSelectDownloadFile('BOM')) {
-    		if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
-            else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
-            else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
-            else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
-            else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
-            else if (target === "YAML") com_fn.downloadYaml('BOM');
-            else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
-            else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
-    	} else {
-    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    	}
+    	if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
+        else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
+        else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
+        else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
+        else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
+        else if (target === "YAML") com_fn.downloadYaml('BOM');
+        else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
+        else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
     },
     downloadSpdxSpreadSheetExcel : function(){
     	loadingIden.show();
@@ -1158,73 +1189,125 @@ var bom_data = {
 		},
 		loadBomGrid : function(){
 			var bomList = $('#bomList');
+			var colModelArr = [];
+			var colModelObj = {name: 'componentIdx', index: 'componentIdx', width: 20, align: 'center', search : false, sorttype: 'number',
+								cellattr: function(rowId, tv, rawObject, cm, rdata) {
+									return ' colspan=2';
+								}
+							};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'group', width: 40, align: 'center', search : false, sorttype: 'number',
+						    cellattr: function(rowId, tv, rawObject, cm, rdata) {
+						    	return ' style="display:none;"';
+						    }
+						};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true, key:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'groupingColumn', width: 20, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refComponentId', width: 20, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refComponentIdx', width: 20, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refDiv', width: 20, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'mergePreDiv', index: 'mergePreDiv', width: 29, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'referenceDiv', index: 'referenceDiv', width: 50, align: 'center', formatter: bom_fn.displayReferenceDiv, hidden:false, search : false, sortable : false};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossId', index: 'ossId', width: 29, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossName', index: 'ossName', width: 100, align: 'left', template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'licenseName', index: 'licenseName', width: 100, align: 'left', template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter: fn_grid_com.displayDownloadlocation, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'licenseId', index: 'licenseId', width: 50, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'copyrightText', index: 'copyrightText', width: 170, align: 'left', edittype:"textarea", template: searchStringOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', sorttype:'float', formatter:bom_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'dependencies', index: 'dependencies', width: 60, align: 'center', formatter: bom_fn.displayDependencies, unformatter:fn_grid_com.unformatter, search : false, hidden: true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'preObligationType', index: 'preObligationType', width: 40, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'notify', index: 'notify', width: 40, align: 'center', formatter: bom_fn.displayNotify, unformat: bom_fn.unDisplayNotify, sortable : true, search : false,
+							sorttype: function (cell, rowData) {
+								var rtnVal = rowData.obligationType;
+								if (rtnVal == '10' || rtnVal == '11') {
+									return 0;
+								} else {
+									return 99;
+								}
+		                    }
+						};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'source', index: 'source', width: 40, align: 'center', formatter: bom_fn.displaySource, unformat: bom_fn.unDisplaySource, sortable : true, search : false,
+							sorttype: function (cell, rowData) {
+								var rtnVal = rowData.obligationType;
+								if (rtnVal == '11') {
+									return 0;
+								} else {
+									return 99;
+								}
+		                    }
+						};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'restriction', index: 'restriction', width: 60, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : true, search : false,
+							sorttype: function (cell, rowData) {
+								let restriction = rowData.restriction;
+								if ("" != restriction) {
+									let level = restriction.split("|")[1];
+									return level;
+								} else {
+									return 0;
+								}
+		                    }
+						};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'licenseTypeIdx', index: 'licenseTypeIdx', width: 60, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'adminCheckYn', index: 'adminCheckYn', width: 50, align: 'center', hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'adminCheck', index: 'adminCheck', width: 50, align: 'center', formatter: bom_fn.displayAdminCheck, unformat: bom_fn.unDisplayAdminCheck, sortable:false, search:false};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'notAdminCheck', index: 'notAdminCheck', width: 30, hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refOssName', index: 'refOssName', width: 50, hidden:true};
+			colModelArr.push(colModelObj);
+			
+			// apply user columns setting on
+			var listType = 'IDENTIFICATION_BOM';
+			var totalColInfos = [
+					{'ID' : 'group'}, {'ReferenceDiv' : 'referenceDiv'}, {'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'License' : 'licenseName'}, {'Download Location' : 'downloadLocation'},
+					{'Homepage' : 'homepage'}, {'Copyright Text' : 'copyrightText'}, {'Vulnerability' : 'cvssScore'}, {'Notice' : 'notify'}, {'Source' : 'source'}, {'Restriction' : 'restriction'}, {'Admin check' : 'adminCheck'}
+	  		];
+			var defaultTotalColNames = ['group', 'referenceDiv', 'ossName', 'ossVersion', 'licenseName', 'downloadLocation', 'homepage', 'copyrightText', 'cvssScore', 'notify', 'source', 'restriction', 'adminCheck'];
+			var defaultColNames = ['group', 'ossName', 'ossVersion', 'licenseName', 'downloadLocation', 'notify', 'source', 'restriction'];
+			applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
+			
 			bomList.jqGrid({
 				  datatype: 'local'
 				, data : bomMainData
 				, colNames: ['','ID','ID_KEY','groupingColumn','refComponentId','refComponentIdx','refDiv','ReferenceId','MergePreDiv','ReferenceDiv','OSS ID','OSS Name','OSS Version','License'
-		             ,'Download Location','Homepage','LicenseId','Copyright Text'
-		             ,'CVE ID' ,'Vulnera<br/>bility','Depends On','obligationLicense','ObligationType','preObligationType','Notice','Source','Restriction','licenseTypeIdx','adminCheckYn'
+		             ,'Download Location','Homepage','LicenseId','Copyright Text','CVE ID','Vulnera<br/>bility','Depends On','obligationLicense','ObligationType','preObligationType','Notice','Source','Restriction','licenseTypeIdx','adminCheckYn'
 		             ,'admin<br>check<br><input type="checkbox" onclick="bom_fn.onCboxClickAll(this,\'bomList\');">','notAdminCheck','refOssName']
-				, colModel : [
-					{name: 'componentIdx', index: 'componentIdx', width: 20, align: 'center', search : false, sorttype: 'number',
-					    cellattr: function(rowId, tv, rawObject, cm, rdata) {
-					        return ' style="display:none;"';
-					    }
-					},
-					{name: 'group', width: 40, align: 'center', search : false, sorttype: 'number',
-					    cellattr: function(rowId, tv, rawObject, cm, rdata) {
-					        return ' colspan=2';
-					    }
-					},
-					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true, key:true},
-					{name: 'groupingColumn', width: 20, align: 'center', hidden:true},
-					{name: 'refComponentId', width: 20, align: 'center', hidden:true},
-					{name: 'refComponentIdx', width: 20, align: 'center', hidden:true},
-					{name: 'refDiv', width: 20, align: 'center', hidden:true},
-					{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
-					{name: 'mergePreDiv', index: 'mergePreDiv', width: 29, align: 'center', hidden:true},
-					{name: 'referenceDiv', index: 'referenceDiv', width: 50, align: 'center', formatter: bom_fn.displayReferenceDiv, hidden:false, search : false, sortable : false},
-					{name: 'ossId', index: 'ossId', width: 29, align: 'center', hidden:true},
-					{name: 'ossName', index: 'ossName', width: 100, align: 'left', template: searchStringOptions},
-					{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', template: searchStringOptions},
-					{name: 'licenseName', index: 'licenseName', width: 100, align: 'left', template: searchStringOptions},
-					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, template: searchStringOptions},
-					{name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions},
-					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', hidden:true},
-					{name: 'copyrightText', index: 'copyrightText', width: 170, align: 'left', template: searchStringOptions},
-					{name: 'cveId', index: 'cveId', hidden:true},
-					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', sorttype:'float', formatter:bom_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions},
-					{name: 'dependencies', index: 'dependencies', width: 60, align: 'center', formatter: bom_fn.displayDependencies, unformatter:fn_grid_com.unformatter, search : false, hidden: true},
-					{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
-					{name: 'preObligationType', index: 'preObligationType', width: 40, align: 'center', hidden:true},
-					{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
-					{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: bom_fn.displayNotify, unformat: bom_fn.unDisplayNotify, sortable : true, search : false,
-						sorttype: function (cell, rowData) {
-							var rtnVal = rowData.obligationType;
-							if(rtnVal == '10' || rtnVal == '11') {
-								return 0;
-							} else {
-								return 99;
-							}
-	                    }
-					},
-					{name: 'source', index: 'source', width: 40, align: 'center', formatter: bom_fn.displaySource, unformat: bom_fn.unDisplaySource, sortable : true, search : false,
-						sorttype: function (cell, rowData) {
-							var rtnVal = rowData.obligationType;
-							if(rtnVal == '11') {
-								return 0;
-							} else {
-								return 99;
-							}
-	                    }
-					},
-					{name: 'restriction', index: 'restriction', width: 60, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
-					{name: 'licenseTypeIdx', index: 'licenseTypeIdx', width: 60, align: 'center', hidden:true},
-					{name: 'adminCheckYn', index: 'adminCheckYn', width: 50, align: 'center', hidden:true},
-					{name: 'adminCheck', index: 'adminCheck', width: 50, align: 'center', formatter: bom_fn.displayAdminCheck, unformat: bom_fn.unDisplayAdminCheck, sortable:false, search:false},
-					{name: 'notAdminCheck', index: 'notAdminCheck', width: 30, hidden:true},
-					{name: 'refOssName', index: 'refOssName', width: 50, hidden:true}
-				]
+				, colModel : colModelArr
 				, rowNum: 200
 				, rowList: [200, 500, 1000, 5000]
 				, autoencode: true
@@ -1242,8 +1325,21 @@ var bom_data = {
 			    	isSort = true;
 			    }
 				, loadComplete: function(data) {
+					if(bomValidMsgData) {
+						gridValidMsgNew(bomValidMsgData, "bomList");
+					}
+					
+					if(bomDiffMsgData) {
+						gridDiffMsg(bomDiffMsgData, "bomList");
+					}
+
+					if (bomInfoMsgData) {
+						gridInfoMsg(bomInfoMsgData, "bomList");
+					}
+					
 					$("#bomList_source").css({'border-right': '1px solid #cbc7bd'}); // restriction 을 추가하면서 css에서 마지막 th의 border를 삭제하는 처리의 차선책
 					var str= "";
+					var adminCheckYn = "";
 			 		var arr = [];
                     arr = bomList.jqGrid('getDataIDs');
 
@@ -1267,25 +1363,15 @@ var bom_data = {
 							$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
 							$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
 						}
+						
+						adminCheckYn = bomList.jqGrid('getCell', arr[i], 'adminCheckYn');
+						if ("Y" == adminCheckYn) {
+							bom_fn.onAdminCheckClick(arr[i], false);
+						}
 					}
 					
 					// 그리드 클릭 해제
 					bomList.jqGrid("resetSelection");
-					
-					//------- 로드 된후 그룹 헤더 설정을 해야 사이즈가 깨지지 않음
-                    // 2024.02.26 버튼 클릭시 헤더가 반복 생성되는 이슈로 getJqGrid 함수에서 호출
-
-					if(bomValidMsgData) {
-						gridValidMsgNew(bomValidMsgData, "bomList");
-					}
-					
-					if(bomDiffMsgData) {
-						gridDiffMsg(bomDiffMsgData, "bomList");
-					}
-
-					if (bomInfoMsgData) {
-						gridInfoMsg(bomInfoMsgData, "bomList");
-					}
 					
 					var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
 					var strBomValidMsgData = Object.keys(bomValidMsgData||{}).join("");
@@ -1316,6 +1402,7 @@ var bom_data = {
 					}
 					
 					// append button event
+					var pageButtonArea = $('#bomList_toppager_left');
 					if (arr.length > 0 && $("#bomList_toppager_left").find('button').length == 0) {
 	                	var appendBtn = "";
 	                    
@@ -1335,6 +1422,32 @@ var bom_data = {
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX ((XML)</span></div>";
 	                                        
 	                    $("#bomList_toppager_left").append(appendBtn);
+	                }
+					
+					var setUpColumnButton = $('#setUpColumnButtonBom');
+					/* columns licalization */
+	                if (setUpColumnButton.length === 0) {
+	                    var savedColNames = [];
+	                    var dropdownMenuOptions = {
+	                    	_btnId : "Bom",
+	                    	_targetId : "bomList",
+	                        _listType: listType,
+	                        _totalColInfos: totalColInfos,
+	                        _defaultColNames: defaultColNames,
+	                        _savedColNames: savedColNames
+	                    };
+	                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+	                    // Check for click events occurring inside the menu area
+	                    $("#setUpColumnMenuBom").on("click", function(event) {
+	                        event.stopPropagation();
+	                    });
+
+	                    $('#setUpColumnButtonBom').on("click", function(event) {
+	                        event.stopPropagation();
+	                        $('#setUpColumnMenuBom').toggleClass("show");
+	                        $(this).toggleClass("show");
+	                    });
 	                }
                 }
 				, onSelectRow: function(rowid,status,eventObject) {}

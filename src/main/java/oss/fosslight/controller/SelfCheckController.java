@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -309,11 +310,9 @@ public class SelfCheckController extends CoTopComponent {
 			if (!vr.isValid()) {
 				Map<String, String> validMap = vr.getValidMessageMap();
 				map.put("validData", validMap);
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo(mainDataList, validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo(mainDataList, validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
 			} else {
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo(mainDataList, null, null, null, true, true));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo(mainDataList, null, null, null, true, true));
 			}
 			
 			if (!vr.isDiff()){
@@ -437,7 +436,18 @@ public class SelfCheckController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid()) {
-				return makeJsonResponseHeader(vr.getValidMessageMap());
+				if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), true)) {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
+				} else if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), false)) {
+					List<ProjectIdentification> exceedingMaxLengthList = CommonFunction.getItemsExceedingMaxLength(vr.getValidMessageMap(), ossComponents);
+					if (!CollectionUtils.isEmpty(exceedingMaxLengthList)) {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), exceedingMaxLengthList);
+					} else {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+					}
+				} else {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				}
 			}
 
 			Project project = new Project();
@@ -529,7 +539,15 @@ public class SelfCheckController extends CoTopComponent {
 	@PostMapping(value = SELF_CHECK.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
+		Project projectInfo = selfCheckService.getProjectDetail(project);
 		selfCheckService.deleteProject(project);
+		
+		try {
+			// Delete self_check ref files
+			selfCheckService.deleteProjectRefFiles(projectInfo);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		
 		HashMap<String, Object> resMap = new HashMap<>();
 		resMap.put("resCd", "10");
@@ -660,7 +678,30 @@ public class SelfCheckController extends CoTopComponent {
 				s = s.toUpperCase().trim();
 				
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(s)) {
-					resultList.add(CoCodeManager.LICENSE_INFO_UPPER.get(s));
+					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(s);
+					if (!isEmpty(licenseMaster.getRestriction())) {
+						String restrictionString = CommonFunction.setLicenseRestrictionListById(null, licenseMaster.getRestriction());
+						String restrictionStr = "";
+						for (String restriction : licenseMaster.getRestriction().split(",")) {
+							if (isEmpty(restriction)) {
+								continue;
+							}
+							if (!isEmpty(restrictionStr)) {
+								restrictionStr += ", ";
+							}
+							restrictionStr += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restriction);
+							if (!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction))) {
+								restrictionStr += " (" + CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction) + ")";
+							}
+						}
+						if (!isEmpty(restrictionStr)) {
+							if (!isEmpty(restrictionString)) {
+								restrictionStr += "|" + restrictionString.split("[|]")[1];
+							}
+							licenseMaster.setRestrictionStr(restrictionStr);
+						}
+					}
+					resultList.add(licenseMaster);
 				}
 			}
 		}

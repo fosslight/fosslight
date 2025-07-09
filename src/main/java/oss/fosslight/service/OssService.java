@@ -26,7 +26,7 @@ public interface OssService extends HistoryConfig{
 	
 	Map<String,Object> getOssLicenseList(OssMaster ossMaster);
 	
-	List<OssMaster> getOssNameList();
+	List<Map<String, String>> getOssNameList();
 	
 	OssMaster getOssMasterOne(OssMaster ossMaster);
 	
@@ -90,7 +90,7 @@ public interface OssService extends HistoryConfig{
 	
 	List<ProjectIdentification> checkOssName(List<ProjectIdentification> list);
 	
-	Map<String, Object> saveOssCheckName(ProjectIdentification paramBean, String targetName);
+	Map<String, Object> saveOssCheckName(List<ProjectIdentification> paramBean, String targetName);
 	
 	Map<String, Object> saveOssNickname(ProjectIdentification paramBean);
 
@@ -163,4 +163,8 @@ public interface OssService extends HistoryConfig{
 	String getPurlByDownloadLocation(OssMaster ossMaster);
 	
 	void setOssAnalysisStatus(String prjId);
+
+	void setExistedOssInfo(OssMaster ossMaster);
+
+	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
 }

@@ -33,6 +33,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
@@ -730,10 +731,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		newPackagingFileIdList.add(fileSeqs.size() > 1 ? fileSeqs.get(1) : null);
 		newPackagingFileIdList.add(fileSeqs.size() > 2 ? fileSeqs.get(2) : null);
 		newPackagingFileIdList.add(fileSeqs.size() > 3 ? fileSeqs.get(3) : null);
+		newPackagingFileIdList.add(fileSeqs.size() > 4 ? fileSeqs.get(4) : null);
 		prjParam.setPackageFileId(newPackagingFileIdList.get(0));
 		prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 		prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
 		prjParam.setPackageFileId4(newPackagingFileIdList.get(3));
+		prjParam.setPackageFileId5(newPackagingFileIdList.get(4));
 		
 		for (String fileSeq : fileSeqs){
 			T2File paramT2File = new T2File();
@@ -745,7 +748,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String publicUrl = appEnv.getProperty("upload.path", "/upload");
 		String packagingUrl = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 		List<T2File> result = fileMapper.selectPackagingFileInfo(prjId); // verify한 file을 select함.
-		T2File vulDOCFileInfo = fileMapper.selectPackagingVulDOCFileInfo(prjId);
 
 		if (result.size() > 0){
 			for (T2File res : result){
@@ -780,9 +782,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				}
 			}
 			
-			deleteFiles(packagingUrl, uploadFileInfos, prjId, vulDOCFileInfo); // 'upload/packaging/#{prjId}' 의 Directory가 있는지 체크 후 삭제 처리함.( 현재등록한 file을 제외한 나머지를 삭세처리 )
+			deleteFiles(packagingUrl, uploadFileInfos, prjId, null); // 'upload/packaging/#{prjId}' 의 Directory가 있는지 체크 후 삭제 처리함.( 현재등록한 file을 제외한 나머지를 삭세처리 )
 		} else {
-			deleteFiles(packagingUrl, uploadFileInfos, prjId, vulDOCFileInfo); // verify 한 file이 없을경우 packagingUrl도 같이 검사하여 delete를 함.
+			deleteFiles(packagingUrl, uploadFileInfos, prjId, null); // verify 한 file이 없을경우 packagingUrl도 같이 검사하여 delete를 함.
 		}
 		
 		// packaging File comment
@@ -793,6 +795,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			origPackagingFileIdList.add(project.getPackageFileId2());
 			origPackagingFileIdList.add(project.getPackageFileId3());
 			origPackagingFileIdList.add(project.getPackageFileId4());
+			origPackagingFileIdList.add(project.getPackageFileId5());
 			
 			int idx = 0;
 			
@@ -1148,13 +1151,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		boolean isAndroidNoticeFolder = false;
 		String folderPath = "";
 		
-		if ("VERIFY".equalsIgnoreCase(flag)) {
+		if ("VERIFY".equalsIgnoreCase(flag) || CoConstDef.CD_CHECK_OSS_SELF.equals(flag) || CoConstDef.CD_CHECK_OSS_PARTNER.equals(flag)) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
 		} else {
 			T2File T2file = fileMapper.getFileInfo2(file);
 			if (T2file != null) {
 				filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
-				if(T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
+				if (T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
 					isAndroidNoticeFolder = true;
 					folderPath = T2file.getLogiPath();
 				}
@@ -1214,7 +1217,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		}
 		
-		if (orgFileInfoList != null && !orgFileInfoList.isEmpty()) {
+		if (!CollectionUtils.isEmpty(orgFileInfoList)) {
 			for (T2File orgFile : orgFileInfoList) {
 				String baseFile = orgFile.getLogiPath() + "/" + orgFile.getLogiNm();
 				
@@ -1353,5 +1356,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			log.warn("MultipartFile is empty");
 		}
 		return fileInfo;
+	}
+
+	@Override
+	public List<T2File> getFileInfoList(String fileId) {
+		return fileMapper.getFileInfoList(fileId);
 	}
 }

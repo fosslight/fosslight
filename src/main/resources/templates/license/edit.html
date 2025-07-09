@@ -33,6 +33,8 @@
 								<div class="card-header">
 									<h3 class="card-title" th:text="'License Information'"></h3>
 									<div class="card-tools">
+										<button th:if="${detail != null}" class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Share" type="button" th:onclick="|fn.shareUrl()|"><i class="fas fa-share-alt customIcon2"></i></button>
+										<input type="hidden" id="copyUrl"/>
 										<button th:if="${detail != null}" class="btn btn-tool" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete">
 											<i class="fas fa-trash-alt customIcon2"></i>
 										</button>

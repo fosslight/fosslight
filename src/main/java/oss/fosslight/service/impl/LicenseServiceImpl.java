@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,6 +32,7 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.LicenseMapper;
+import oss.fosslight.service.CodeService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.LicenseService;
@@ -49,6 +51,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 	@Autowired OssService ossService;
 	@Autowired CommentService commentService;
 	@Autowired HistoryService historyService;
+	@Autowired CodeService codeService;
 	
 	//Mapper
 	@Autowired LicenseMapper licenseMapper;
@@ -124,6 +127,19 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			}
 		}
 		
+		T2CodeDtl t2CodeDtl = new T2CodeDtl();
+		t2CodeDtl.setCdNo(CoConstDef.CD_LICENSE_RESTRICTION);
+		List<T2CodeDtl> t2CodeDtlList = null;
+		List<String> restrictionList = new ArrayList<>();
+		try {
+			t2CodeDtlList = codeService.getCodeDetailList(t2CodeDtl);
+			if (t2CodeDtlList != null) {
+				restrictionList = t2CodeDtlList.stream().map(e -> e.getCdDtlNo()).distinct().collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		int records = licenseMapper.selectLicenseMasterTotalCount(licenseMaster);
 		licenseMaster.setTotListSize(records);
@@ -131,11 +147,21 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		List<LicenseMaster> list = licenseMapper.selectLicenseList(licenseMaster);
 		
 		for (LicenseMaster item : list){
-			if (!isEmpty(item.getRestriction())){
-				item.setRestriction(CommonFunction.setLicenseRestrictionList(item.getRestriction()));
+			if (!isEmpty(item.getRestriction())) {
+				String restrictionString = "";
+				for (String restriction : item.getRestriction().split(",")) {
+					if (!isEmpty(restriction) && restrictionList.contains(restriction)) {
+						restrictionString += restriction + ",";
+					}
+				}
+				if (!isEmpty(restrictionString)) {
+					restrictionString = restrictionString.substring(0, restrictionString.length()-1);
+					item.setRestriction(CommonFunction.setLicenseRestrictionListById(null, restrictionString));
+				} else {
+					item.setRestriction(restrictionString);
+				}
 			}
-
-			if(!isEmpty(item.getWebpage())) {
+			if (!isEmpty(item.getWebpage())) {
 				if (!item.getWebpage().contains("http://") && !item.getWebpage().contains("https://")) {
 					item.setWebpage("http://" + item.getWebpage());
 				}
@@ -270,36 +296,6 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			result = "";
 			
 			log.info("OSDD license update result : " + avoidNull(result));
-		}
-		
-		if (avoidNull(bean.getRestriction()).contains(CoConstDef.CD_LICENSE_NETWORK_RESTRICTION)){
-			registNetworkServerLicense(bean.getLicenseId(), "DEL");
-		}
-	}
-	
-	@Override
-	public void registNetworkServerLicense(String licenseId, String type) {
-		String CD_DTL_NO = licenseMapper.existNetworkServerLicense(licenseId);
-		
-		switch(type){
-			case "NEW":
-				licenseMapper.insertNetworkServerLicense(licenseId);
-				
-				break;
-			case "INS":
-				if (isEmpty(CD_DTL_NO)){
-					licenseMapper.insertNetworkServerLicense(licenseId);
-				}
-				
-				break;
-			case "DEL":
-				if (!isEmpty(CD_DTL_NO)){
-					licenseMapper.deleteNetworkServerLicense(licenseId);
-				}
-				
-				break;
-			default:
-				break;
 		}
 	}
 	
@@ -720,34 +716,22 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			log.error(e.getMessage(), e);
 		}
 
-		try{
-			// RESTRICTION(2) => Network Redistribution
-			String netWorkRestriction = CoConstDef.CD_LICENSE_NETWORK_RESTRICTION;
-
-			if(isNew) {
-				if(licenseMaster.getRestriction().contains(netWorkRestriction)){
-					registNetworkServerLicense(licenseMaster.getLicenseId(), "NEW");
-				}
-			} else {
-				String type = "";
-
-				if(beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "";
-				}else if(beforeBean.getRestriction().contains(netWorkRestriction) && !afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "DEL";
-				}else if(!beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "INS";
-				}
-
-				registNetworkServerLicense(licenseMaster.getLicenseId(), type);
-			}
-		} catch (Exception e){
-
-		}
-
 		resMap.put("resCd", resCd);
 		resMap.put("licenseId", result);
 		return resMap;
+	}
+
+	@Override
+	public LicenseMaster getParamLicenseInfo(String licenseId, String domain) {
+		LicenseMaster licenseMaster = new LicenseMaster();
+		licenseMaster.setLicenseId(licenseId);
+		licenseMaster = getLicenseMasterOne(licenseMaster);
+		licenseMaster.setDomain(domain);
+		String internalUrl = CommonFunction.makeLicenseInternalUrl(licenseMaster, CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		if (!isEmpty(internalUrl)) {
+			licenseMaster.setInternalUrl(internalUrl);
+		}
+		return licenseMaster;
 	}
 }
 

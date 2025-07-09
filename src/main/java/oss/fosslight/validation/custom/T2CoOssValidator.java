@@ -5,16 +5,21 @@
 
 package oss.fosslight.validation.custom;
 
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import com.google.gson.reflect.TypeToken;
 
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.OssService;
 import oss.fosslight.util.StringUtil;
@@ -268,6 +273,66 @@ public class T2CoOssValidator extends T2CoValidator {
 					errMap.put(targetName, MessageFormat.format(getCustomMessage(targetName + ".DUPLICATEDNICK"), map.get(targetName), result.getOssId(), result.getOssId(), result.getOssName()));
 				}
 			}
+			
+			// 중복 license 체크
+			targetName = "LICENSE_NAME";
+			if (!errMap.containsKey(targetName) && map.containsKey("OSS_LICENSES_JSON")) {
+				Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();
+				List<OssLicense> list = (List<OssLicense>) fromJson(map.get("OSS_LICENSES_JSON"), collectionType);
+				
+				if (!CollectionUtils.isEmpty(list)) {
+					Map<Integer, List<String>> licenseIds = new HashMap<>();
+					List<String> andLicenseIds = null;
+					int idx = 0;
+					for (OssLicense ol : list) {
+						if (!isEmpty(ol.getOssLicenseComb())) {
+							if (ol.getOssLicenseComb().equals("OR")) {
+								idx++;
+								licenseIds.put(idx, andLicenseIds);
+								andLicenseIds = new ArrayList<>();
+								andLicenseIds.add(ol.getLicenseId());
+							} else {
+								andLicenseIds.add(ol.getLicenseId());
+							}
+						} else {
+							if (andLicenseIds == null) {
+								andLicenseIds = new ArrayList<>();
+							}
+							andLicenseIds.add(ol.getLicenseId());
+						}
+					}
+					
+					if (!CollectionUtils.isEmpty(andLicenseIds)) {
+						idx++;
+						licenseIds.put(idx, andLicenseIds);
+					}
+					
+					if (!licenseIds.isEmpty()) {
+						for (int key : licenseIds.keySet()) {
+							List<String> licenseList = licenseIds.get(key);
+							Collections.sort(licenseList);
+							
+							if (licenseList.size() != licenseList.stream().distinct().count()) {
+								errMap.put(targetName, MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED_SHORT"), null, null, null, null));
+								break;
+							}
+							
+							licenseIds.replace(key, licenseList);
+						}
+						
+						List<String> chkLicenseIdList = new ArrayList<>();
+						for (List<String> licenseId : licenseIds.values()) {
+							String strLicenseId = String.join(",", licenseId);
+							if (!chkLicenseIdList.contains(strLicenseId)) {
+								chkLicenseIdList.add(strLicenseId);
+							}
+						}
+						if (chkLicenseIdList.size() != licenseIds.size()) {
+							errMap.put(targetName, MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED_SHORT"), null, null, null, null));
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -368,6 +433,62 @@ public class T2CoOssValidator extends T2CoValidator {
 							break;
 						}
 					}	
+				}
+			}
+			
+			// 중복 license 체크
+			if (!errMap.containsKey(basicKey + (useGridSeq ? "."+ossBean.getGridId() : "")) && !CollectionUtils.isEmpty(ossBean.getOssLicenses())) {
+				if (!CollectionUtils.isEmpty(ossBean.getOssLicenses())) {
+					Map<Integer, List<String>> licenseIds = new HashMap<>();
+					List<String> andLicenseIds = null;
+					int idx = 0;
+					for (OssLicense ol : ossBean.getOssLicenses()) {
+						if (!isEmpty(ol.getOssLicenseComb())) {
+							if (ol.getOssLicenseComb().equals("OR")) {
+								idx++;
+								licenseIds.put(idx, andLicenseIds);
+								andLicenseIds = new ArrayList<>();
+								andLicenseIds.add(ol.getLicenseId());
+							} else {
+								andLicenseIds.add(ol.getLicenseId());
+							}
+						} else {
+							if (andLicenseIds == null) {
+								andLicenseIds = new ArrayList<>();
+							}
+							andLicenseIds.add(ol.getLicenseId());
+						}
+					}
+					
+					if (!CollectionUtils.isEmpty(andLicenseIds)) {
+						idx++;
+						licenseIds.put(idx, andLicenseIds);
+					}
+					
+					if (!licenseIds.isEmpty()) {
+						for (int key : licenseIds.keySet()) {
+							List<String> licenseList = licenseIds.get(key);
+							Collections.sort(licenseList);
+							
+							if (licenseList.size() != licenseList.stream().distinct().count()) {
+								errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATED_SHORT");
+								break;
+							}
+							
+							licenseIds.replace(key, licenseList);
+						}
+						
+						List<String> chkLicenseIdList = new ArrayList<>();
+						for (List<String> licenseId : licenseIds.values()) {
+							String strLicenseId = String.join(",", licenseId);
+							if (!chkLicenseIdList.contains(strLicenseId)) {
+								chkLicenseIdList.add(strLicenseId);
+							}
+						}
+						if (chkLicenseIdList.size() != licenseIds.size()) {
+							errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATED_SHORT");
+						}
+					}
 				}
 			}
 			
@@ -649,6 +770,62 @@ public class T2CoOssValidator extends T2CoValidator {
 							break;
 						}
 					}	
+				}
+			}
+			
+			// 중복 license 체크
+			if (!errMap.containsKey(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : "")) && !CollectionUtils.isEmpty(analysisBean.getOssLicenses())) {
+				if (!CollectionUtils.isEmpty(analysisBean.getOssLicenses())) {
+					Map<Integer, List<String>> licenseIds = new HashMap<>();
+					List<String> andLicenseIds = null;
+					int idx = 0;
+					for (OssLicense ol : analysisBean.getOssLicenses()) {
+						if (!isEmpty(ol.getOssLicenseComb())) {
+							if (ol.getOssLicenseComb().equals("OR")) {
+								idx++;
+								licenseIds.put(idx, andLicenseIds);
+								andLicenseIds = new ArrayList<>();
+								andLicenseIds.add(ol.getLicenseId());
+							} else {
+								andLicenseIds.add(ol.getLicenseId());
+							}
+						} else {
+							if (andLicenseIds == null) {
+								andLicenseIds = new ArrayList<>();
+							}
+							andLicenseIds.add(ol.getLicenseId());
+						}
+					}
+					
+					if (!CollectionUtils.isEmpty(andLicenseIds)) {
+						idx++;
+						licenseIds.put(idx, andLicenseIds);
+					}
+					
+					if (!licenseIds.isEmpty()) {
+						for (int key : licenseIds.keySet()) {
+							List<String> licenseList = licenseIds.get(key);
+							Collections.sort(licenseList);
+							
+							if (licenseList.size() != licenseList.stream().distinct().count()) {
+								errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED_SHORT");
+								break;
+							}
+							
+							licenseIds.replace(key, licenseList);
+						}
+						
+						List<String> chkLicenseIdList = new ArrayList<>();
+						for (List<String> licenseId : licenseIds.values()) {
+							String strLicenseId = String.join(",", licenseId);
+							if (!chkLicenseIdList.contains(strLicenseId)) {
+								chkLicenseIdList.add(strLicenseId);
+							}
+						}
+						if (chkLicenseIdList.size() != licenseIds.size()) {
+							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED_SHORT");
+						}
+					}
 				}
 			}
 			

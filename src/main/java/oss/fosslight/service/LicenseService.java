@@ -31,8 +31,6 @@ public interface LicenseService extends HistoryConfig{
 	
 	void deleteDistributeLicense(LicenseMaster bean, boolean distributionFlag);
 	
-	void registNetworkServerLicense(String licenseId, String type);
-	
 	List<OssMaster> updateOssLicenseType(String licenseId);
 	
 	boolean distributeLicense(String licenseId, boolean distributionFlag);
@@ -50,4 +48,6 @@ public interface LicenseService extends HistoryConfig{
 	Map<String, Object> getLicenseDataMap(String gridId, boolean status, String msg);
 
     Map<String, Object> saveLicense(LicenseMaster licenseMaster);
+    
+    LicenseMaster getParamLicenseInfo(String licenseId, String domain);
 }

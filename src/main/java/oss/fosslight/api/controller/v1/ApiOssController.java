@@ -54,7 +54,7 @@ public class ApiOssController extends CoTopComponent {
 	private final RefineOssService refineOssService;
 
 	
-	@ApiOperation(value = "Search OSS List", notes = "OSS 조회")
+	@ApiOperation(value = "Search OSS List", notes = "Search OSS Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -86,7 +86,7 @@ public class ApiOssController extends CoTopComponent {
 		}
     }
 	
-	@ApiOperation(value = "Search OSS Info by downloadLocation", notes = "downloadLocation별 OSS Info 조회")
+	@ApiOperation(value = "Search OSS Info by downloadLocation", notes = "Search OSS Information by downloadLocation")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -114,7 +114,7 @@ public class ApiOssController extends CoTopComponent {
     }
 
 
-	@ApiOperation(value = "Search License Info", notes = "License Info 조회")
+	@ApiOperation(value = "Search License Info", notes = "Search License Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -142,7 +142,7 @@ public class ApiOssController extends CoTopComponent {
 		}
     }
 
-	@ApiOperation(value = "Register New OSS", notes = "신규 OSS 등록")
+	@ApiOperation(value = "Register New OSS", notes = "Register New OSS")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
 	})

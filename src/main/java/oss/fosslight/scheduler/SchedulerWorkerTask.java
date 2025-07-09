@@ -97,17 +97,19 @@ public class SchedulerWorkerTask extends CoTopComponent {
 		} catch (IOException ioe) {
 			log.error(ioe.getMessage() + " (resCd : " + resCd + ")", ioe);
 		}
+	}
+	
+	@Scheduled(cron="0 0 9 * * ?")
+	public void sendMailNvdDataIfJob() {
+		log.info("sendMailNvdDataIfJob start");
 		
-		log.info("nvdDataIfJob end");
+		try {
+			vulnerabilityService.sendMailNvdDataIfJob();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		
-//		List<String> prjIdList = projectMapper.selectProjectForSecurity();
-//		if (prjIdList != null && !prjIdList.isEmpty()) {
-//			log.info("security data update start");
-//			for (String prjId : prjIdList) {
-//				projectService.updateSecurityDataForProject(prjId);
-//			}
-//			log.info("security data update end");
-//		}
+		log.info("sendMailNvdDataIfJob end");
 	}
 	
 	// 0분 부터 5분 단위 스케줄 - 30분이 지난 메일은 삭제한다.

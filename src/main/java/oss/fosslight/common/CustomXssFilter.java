@@ -6,6 +6,7 @@
 package oss.fosslight.common;
 
 import java.util.List;
+import java.util.Map;
 
 import com.nhncorp.lucy.security.xss.XssPreventer;
 import com.nhncorp.lucy.security.xss.XssFilter;
@@ -94,6 +95,15 @@ public class CustomXssFilter {
         partner.setSoftwareName(escapedSoftwareName);
         partner.setDescription(escapedDescription);
         partner.setDivision(escapedDivision);
+    }
+    
+    public static void nameFilter(List<Map<String, String>> list) {
+        for (Map<String, String> name : list) {
+        	for (String key : name.keySet()) {
+        		String escapedName = XssPreventer.escape(name.get(key));
+        		name.replace(key, escapedName);
+        	}
+        }
     }
 }
 

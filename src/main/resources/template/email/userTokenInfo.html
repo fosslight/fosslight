@@ -27,26 +27,23 @@
                     <td style="background:#ddd" width="1"></td>
                     <td style="padding:40px;">
                         <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:utext="${contentsTitle}"></div>
-                        <pre>
-							<th:block th:if="${mailType == '800'}">
-									FOSSLight Hub-Access Token was issued as follows.
-								<div th:if="${token}">
-									<span th:text="${token}"></span>
-								</div>
-								<div th:if="${expireDate}">
-									Expired date : <span th:text="${expireDate}"></span>
-								</div>
-								<div th:text="${tokenInfo}"></div>
-							</th:block>
-
-							<th:block th:if="${mailType == '801'}">
-									The access token of FOSSLight Hub has been deleted.
-								<div th:text="${tokenInfo}"></div>
-							</th:block>
-						</pre>
+                        <th:block th:if="${mailType == '800'}">
+								FOSSLight Hub-Access Token was issued as follows.
+							<div th:if="${token}">
+								<br><span th:text="${token}"></span>
+							</div>
+							<div th:if="${expireDate}">
+								Expired date : <span th:text="${expireDate}"></span>
+							</div>
+								<br>You can also check the Token value in 'User Settings' menu.
+							<div th:utext="${tokenInfo}"></div>
+						</th:block>
+						<th:block th:if="${mailType == '801'}">
+								The access token of FOSSLight Hub has been deleted.
+							<div th:utext="${tokenInfo}"></div>
+						</th:block>
                         <div style="margin:20px 0;border:1px dashed #666;"></div>
-                        <div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
-                             style="font-size:12px;">
+                        <div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}" style="font-size:12px;">
                             * This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
                         </div>
                     </td>

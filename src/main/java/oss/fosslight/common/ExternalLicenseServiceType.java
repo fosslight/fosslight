@@ -32,11 +32,7 @@ public enum ExternalLicenseServiceType {
 					DependencyType.MAVEN_CENTRAL,
 					DependencyType.MAVEN_GOOGLE,
 					DependencyType.PYPI,
-					DependencyType.COCOAPODS,
-					DependencyType.GOOGLESOURCE,
-					DependencyType.NUGET,
-					DependencyType.STACKOVERFLOW,
-					DependencyType.CRATES
+					DependencyType.COCOAPODS
 			)
 	);
 

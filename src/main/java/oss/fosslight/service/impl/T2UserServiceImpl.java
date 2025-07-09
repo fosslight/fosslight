@@ -854,6 +854,36 @@ public class T2UserServiceImpl implements T2UserService {
 	}
 
 	@Override
+	public boolean checkBySSOUser(Map<String, String> userInfo, T2Users bean) {
+		boolean isAuthenticated = false;
+		String userId = userInfo.get("preferred_username");
+		String userEmail = userInfo.get("email");
+		String userName = userInfo.get("displayname");
+		
+		if (StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
+		} else {
+			isAuthenticated = true;
+			bean.setUserId(userId);
+			
+			if (!existUserIdOrEmail(userId)){
+				T2Users vo = new T2Users();
+				vo.setUserId(userId);
+				vo.setCreatedDateCurrentTime();
+				vo.setCreator(userId);
+				vo.setModifier(userId);
+				vo.setEmail(userEmail);
+				vo.setEmail(userEmail);
+				vo.setUserName(userName);
+				vo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+
+				addNewUsers(vo);
+			}
+		}
+		
+		return isAuthenticated;
+	}
+	
+	@Override
 	public boolean checkSystemUser(String userId, String rawPassword) {
 		T2Users param = new T2Users();
 		param.setUserId(userId);

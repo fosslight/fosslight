@@ -59,19 +59,18 @@
                                 <div class="card-body py-1">
                                     <form action="enhanced-results.html">
                                         <div class="row">
-                                            <!-- <div class="col-4">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <input class="form-control save-value" id="partnerId" name="partnerId" placeholder="Partner ID" th:value="${searchBean?.partnerId}" type="text">
-                                                </div>
-                                            </div> -->
-                                            <div class="col-4">
-                                                <div class="form-group">
-                                                    <input class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}" type="text"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-4">
-                                                <div class="form-group">
-                                                    <input class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
+                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
+                                                        <select class="form-control select2 save-value" id="parStatusSelect" multiple="multiple" name="status" style="width: 100%;">
+                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
+                                                            		th:if="${option.cdDtlNo != 'NA' and option.cdDtlNo != 'FREV'}"
+                                                                    th:text="${option.cdDtlNm}"
+                                                                    th:value="${option.cdDtlNo}"
+                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
+                                                            </option>
+                                                        </select>
+                                                    </th:block>
                                                 </div>
                                             </div>
                                             <div class="col-4">
@@ -88,9 +87,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            
                                             <div class="col-4">
                                                 <div class="form-group">
                                                     <select class="form-control select2 save-value" id="division" name="division" style="width: 100%;">
@@ -99,24 +95,6 @@
                                                             <option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}" th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"></option>
                                                         </th:block>
                                                     </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
-                                                        <select class="form-control select2 save-value" id="parStatusSelect" multiple="multiple" name="status" style="width: 100%;">
-                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
-                                                                    th:text="${option.cdDtlNm}"
-                                                                    th:value="${option.cdDtlNo}"
-                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
-                                                            </option>
-                                                        </select>
-                                                    </th:block>
-                                                </div>
-                                            </div>
-                                            <div class="col-4">
-                                                <div class="form-group">
-                                                    <input class="form-control save-value" name="watchers" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -133,12 +111,12 @@
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
+                                                    <input class="form-control save-value" name="watchers" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-4">
+                                        	<div class="col-4">
                                                 <div class="form-group">
                                                     <input type="text" name="ossName" class="form-control autoComOss" placeholder="OSS Name" th:value="${searchBean?.ossName}" />
                                                 </div>
@@ -148,13 +126,30 @@
                                                     <input type="text" name="ossVersion" class="form-control autoComOss" placeholder="OSS Version" th:value="${searchBean?.ossVersion}" />
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <textarea class="form-control" name="binaryName" placeholder="Binary Name" rows="3" th:utext="${searchBean?.binaryName}"></textarea>
+                                                    <input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="row">
+                                        	<div class="col-4">
+                                                <div class="form-group">
+                                                    <input class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}" type="text"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control save-value" name="binaryName" placeholder="Binary Name" th:value="${searchBean?.binaryName}"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
                                                     <textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
@@ -194,7 +189,7 @@
                             </button>
                             <div class="dropdown-menu" id="ChangeList" role="menu">
                                 <a class="dropdown-item" href="#" th:onclick="|fn.changeDivision()|" th:text="Division"></a>
-                                <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|" th:text="Watcher"></a>
+                                <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|" th:text="|Edit Pemission|"></a>
                             </div>
                         </div>
                     </div>

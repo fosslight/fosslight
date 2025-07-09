@@ -276,16 +276,12 @@ public class CoConstDef {
 	public static final Pattern GITHUB_PATTERN = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
 	public static final Pattern NPM_PATTERN = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+)/([^/]+))");
 	public static final Pattern NPM_PATTERN2 = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+))");
+	public static final Pattern NPM_PATTERN3 = Pattern.compile("((http|https)://npmjs.(org|com)/([^/]+))");
 	public static final Pattern PYPI_PATTERN = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
 	public static final Pattern MAVEN_CENTRAL_PATTERN = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+)(/([^/]+))?)");
-	public static final Pattern MAVEN_GOOGLE_PATTERN = Pattern.compile("((http|https)://maven.google.com/web/index.html#([^:]+):([^:]+)(:[^:]+)?)");
+	public static final Pattern MAVEN_GOOGLE_PATTERN = Pattern.compile("((http|https)://maven.google.com/web/index.html#([^:]+):([^:]+):([^:]+)?)");
 	public static final Pattern PUB_PATTERN = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
 	public static final Pattern COCOAPODS_PATTERN = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-	public static final Pattern GOOGLESOURCE_PATTERN = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
-	public static final Pattern NUGET_PATTERN = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
-	public static final Pattern STACKOVERFLOW_PATTERN = Pattern.compile("((http|https)://stackoverflow.com/revisions/([^/]+)/([^/]+))");
-	public static final Pattern CRATES_PATTERN = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
-	public static final Pattern CODELINARO_PATTERN = Pattern.compile("((http|https)://git.codelinaro.org/([^/]+)/([^/]+)/(.*))");
 	/* nothing match */
 	public static final Pattern UNSUPPORTED_PATTERN = Pattern.compile("(?!)");
 
@@ -433,13 +429,13 @@ public class CoConstDef {
 	public static final String CD_OBLIGATION_TYPE = "217";
 	public static final String CD_DTL_OBLIGATION_NOTICE = "10";
 	public static final String CD_DTL_OBLIGATION_DISCLOSURE = "11";
+	public static final String CD_DTL_OBLIGATION_DISCLOSURE_ONLY = "12";
 	public static final String CD_DTL_OBLIGATION_NEEDSCHECK = "90";
 	public static final String CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED = "99"; // NEED CHECK와 동일하나, 사용자가 적용하지 않음을 선택한 경우
 	public static final String CD_DTL_OBLIGATION_NONE = "NONE"; // 검색조건으로만 사용됨
 	/** Distribute Code - 218 */
 	public static final String CD_DISTRIBUTE_CODE = "218";
 	public static final String CD_DTL_DISTRIBUTE_LGE = "LGE";
-	public static final String CD_DTL_DISTRIBUTE_SKS = "SKS";
 	public static final String CD_DTL_DISTRIBUTE_NA = "NA";
 	public static final String DISTRIBUTE_CHECK_URL = "/pservice/osAvailCheck";
 	public static final String DISTRIBUTE_DEPLOY_URL = "/pservice/distribute";
@@ -491,8 +487,6 @@ public class CoConstDef {
 
 	/** Model 타입 코드 - 500 */
 	public static final String CD_MODEL_TYPE = "500";
-	/** Model 타입 코드 - 550 */
-	public static final String CD_MODEL_TYPE2 = "550";
 	/** External Link 코드 - 600 */
 	public static final String CD_EXTERNAL_LINK = "600";
 
@@ -567,6 +561,7 @@ public class CoConstDef {
 	/** Project Identification self reject */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT = "45";
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY = "46";
+	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_NETWORK_SERVICE_ONLY = "460";
 	public static final String CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF = "100";
 	/* Project Identification Binary DB Check*/
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT = "47";
@@ -659,6 +654,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED = "94";
 	/* nvd data 중 vendor-product 가 다른 경우 */
 	public static final String CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF = "95";
+	/* nvd oss sync is success*/
+	public static final String CD_MAIL_TYPE_VULNERABILITY_SYNC_RESULT = "96";
 	public static final String CD_MAIL_TYPE_SYSTEM_ERROR = "99";
 
 	/** Mail Type엥 따른 공통 Components 구성 */

@@ -81,4 +81,6 @@ public interface PartnerService extends HistoryConfig{
 	public List<OssComponents> getSecurityGridList(boolean isDemo, PartnerMaster partnerMaster);
 
 	public void registOssWhenRegistPartner(PartnerMaster partnerMaster);
+
+	public void deletePartnerRefFiles(PartnerMaster partnerMaster);
 }

@@ -163,6 +163,9 @@ public class OssMaster extends ComBean implements Serializable{
 	/** The license name. */
 	//LICENSE
 	private String licenseName;
+	
+	//DETECTED LICENSE
+	private String detectedLicenseName;
 
 	/** The license type. */
 	private String ossLicenseType;
@@ -274,6 +277,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private String ossTypeSearch;
 
 	private String licenseNameAllSearchFlag;
+	private String detectedLicenseNameAllSearchFlag;
 	private String homepageAllSearchFlag;
 	
 	private String startAnalysisFlag;
@@ -2407,5 +2411,21 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setExistPurls(String[] existPurls) {
 		this.existPurls = existPurls;
+	}
+
+	public String getDetectedLicenseName() {
+		return detectedLicenseName;
+	}
+
+	public void setDetectedLicenseName(String detectedLicenseName) {
+		this.detectedLicenseName = detectedLicenseName;
+	}
+
+	public String getDetectedLicenseNameAllSearchFlag() {
+		return detectedLicenseNameAllSearchFlag;
+	}
+
+	public void setDetectedLicenseNameAllSearchFlag(String detectedLicenseNameAllSearchFlag) {
+		this.detectedLicenseNameAllSearchFlag = detectedLicenseNameAllSearchFlag;
 	}
 }

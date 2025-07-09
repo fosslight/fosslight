@@ -144,8 +144,6 @@ public interface ProjectMapper {
 	void updateReadmeContent(Project project);
 
 	void updateVerifyContents(Project project);
-
-	void updateVulDocSkipYn(Project project);
 	
 	List<ProjectIdentification> identificationSubGrid(ProjectIdentification identification);
 
@@ -421,5 +419,9 @@ public interface ProjectMapper {
 	
 	List<ProjectIdentification> selectOssComponentsThirdCopy(OssComponents ossComponents);
 	
-	List<OssComponentsLicense> selectOssComponentsLicenseThirdCopy(OssComponents ossComponents);
+	List<OssComponentsLicense> selectOssComponentsIdLicenseList(OssComponents ossComponents);
+	
+	void copyProjectAddList(Project project);
+
+	List<String> getVersionsForCpeNames(@Param("matchCriteriaId") String matchCriteriaId);
 }

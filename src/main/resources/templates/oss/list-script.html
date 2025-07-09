@@ -276,6 +276,10 @@
                 $("#licenseNameAllSearchFlag").on("click", function (e) {
                     $("input[name='licenseNameAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
+                
+                $("#detectedLicenseNameAllSearchFlag").on("click", function (e) {
+                    $("input[name='detectedLicenseNameAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
+                });
 
                 $("#homepageAllSearchFlag").on("click", function (e) {
                     $("input[name='homepageAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
@@ -514,6 +518,7 @@
             	colNameArr.push("License Name");
             	colNameArr.push("License Type");
             	colNameArr.push("Restriction");
+            	colNameArr.push("OSS License Name");
             	colNameArr.push("Notice");
             	colNameArr.push("Source");
             	colNameArr.push("Download<br>Location");
@@ -569,11 +574,12 @@
                         index: 'restriction',
                         width: 30,
                         align: 'center',
-                        formatter: oss_lst_fn.displayLicenseRestriction,
+                        formatter: fn_grid_com.displayLicenseRestriction,
                         unformat: fn_grid_com.unformatter,
                         sortable: false,
                         search: false
                     }
+                    , {name: 'ossLicenseText', index: 'ossLicenseText', hidden: true}
                     , {name: 'obligationNotificationYn', index: 'obligationNotificationYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeNoticeFormat, unformat: fn_grid_com.unformatter, sortable : true}
                     , {name: 'obligationDisclosingSrcYn', index: 'obligationDisclosingSrcYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeSourceCodeFormat, unformat: fn_grid_com.unformatter, sortable : true}
                     , {
@@ -713,65 +719,6 @@
                         groupField: ['groupKey'],
                         groupColumnShow: [false]
                     }, // Enter the column name by group.
-                    gridComplete: function () {
-                        // add button in header
-                        if (!oss_lst_data.existTooltip) {
-                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
-                                .appendTo($("#jqgh_list_obligation"))
-                                .attr("title", oss_lst_data.obligationInformation)
-                                .tooltip({
-                                    content: function () {
-                                        return $(this).prop('title');
-                                    }
-                                }).on('inserted.bs.tooltip', function() {
-							        var tooltipId = 'gridHeaderTooltip';
-							        $('.tooltip').attr('id', tooltipId);
-							    });
-
-                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
-                                .attr("title", oss_lst_data.licenseTypeInformation)
-                                .tooltip({
-                                    content: function () {
-                                        return $(this).prop('title');
-                                    }
-                                }).on('inserted.bs.tooltip', function() {
-							        var tooltipId = 'gridHeaderTooltip';
-							        $('.tooltip').attr('id', tooltipId);
-							    });
-
-
-                            $('[data-toggle="tooltip"]').tooltip({html: true});
-                            oss_lst_data.existTooltip = true;
-                        }
-                        updateGridRowCount('list', 'pager');
-                        
-                        // grid complete 후 oss name auto complete 처리
-                        if (autoComplete.ossTags.length == 0) {
-                        	commonAjax.getOssTags().success(function (data, status, headers, config) {
-                                if (data != null) {
-                                    data.forEach(function (obj) {
-                                        if (obj != null) {
-                                            autoComplete.ossTags.push(obj.ossName);
-                                        }
-                                    })
-                                }
-                            });
-                            
-                            $('input[name="ossName"]').autocomplete({
-                            	source : autoComplete.ossTags,
-                            	select : function (event, ui) {
-                            		$(this).val(ui.item.value);
-                            	},
-                            	focus : function(event, ui) {return false;},
-                            	minLength : 1,
-                            	autoFocus : false,
-                            	disable : false,
-                            	close : function(event) {
-                            		$(".search-field").val("");
-                            	}
-                            });
-                        }
-                    },
                     loadComplete: function (result) {
                         totalRow = result.records;
                         var rows = result.rows;
@@ -885,11 +832,13 @@
                             $("#list_toppager_left").append(appendIcon);
                         }
 
-                        var setUpColumnButton = $('#setUpColumnButton');
+                        var setUpColumnButton = $('#setUpColumnButtonOss');
                         /* columns licalization */
                         if (setUpColumnButton.length === 0) {
                             var savedColNames = [];
                             var dropdownMenuOptions = {
+                            	_btnId : "Oss",
+                            	_targetId : "list",
                                 _listType: listType,
                                 _totalColInfos: totalColInfos,
                                 _defaultColNames: defaultColNames,
@@ -898,13 +847,13 @@
                             pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
 
                             // Check for click events occurring inside the menu area
-                            $("#setUpColumnMenu").on("click", function(event) {
+                            $("#setUpColumnMenuOss").on("click", function(event) {
                                 event.stopPropagation();
                             });
 
-                            $('#setUpColumnButton').on("click", function(event) {
+                            $('#setUpColumnButtonOss').on("click", function(event) {
                                 event.stopPropagation();
-                                $('#setUpColumnMenu').toggleClass("show");
+                                $('#setUpColumnMenuOss').toggleClass("show");
                                 $(this).toggleClass("show");
                             })
                         }
@@ -915,6 +864,69 @@
                         
                         adjustPageGridSize();
                     },
+                    gridComplete: function () {
+                        // add button in header
+                        if (!oss_lst_data.existTooltip) {
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
+                                .appendTo($("#jqgh_list_obligation"))
+                                .attr("title", oss_lst_data.obligationInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                }).on('inserted.bs.tooltip', function() {
+							        var tooltipId = 'gridHeaderTooltip';
+							        $('.tooltip').attr('id', tooltipId);
+							    });
+
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
+                                .attr("title", oss_lst_data.licenseTypeInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                }).on('inserted.bs.tooltip', function() {
+							        var tooltipId = 'gridHeaderTooltip';
+							        $('.tooltip').attr('id', tooltipId);
+							    });
+
+
+                            $('[data-toggle="tooltip"]').tooltip({html: true});
+                            oss_lst_data.existTooltip = true;
+                        }
+                        if (!document.getElementById("restrictionInfo")) {
+                        	$("#jqgh_list_restriction").append('<i class="fa fa-lg fa-info-circle icon-light-gray ml-1" data-toggle="tooltip" id="restrictionInfo" data-html="true" data-placement="right"></i>');
+                    		showHelpLink("License_List_Restriction_Info", "restrictionInfo");
+                        }
+                        updateGridRowCount('list', 'pager');
+                        
+                        // grid complete 후 oss name auto complete 처리
+                        if (autoComplete.ossTags.length == 0) {
+                        	commonAjax.getOssTags().success(function (data, status, headers, config) {
+                                if (data != null) {
+                                    data.forEach(function (obj) {
+                                        if (obj != null) {
+                                            autoComplete.ossTags.push(obj.ossName);
+                                        }
+                                    })
+                                }
+                            });
+                            
+                            $('input[name="ossName"]').autocomplete({
+                            	source : autoComplete.ossTags,
+                            	select : function (event, ui) {
+                            		$(this).val(ui.item.value);
+                            	},
+                            	focus : function(event, ui) {return false;},
+                            	minLength : 1,
+                            	autoFocus : false,
+                            	disable : false,
+                            	close : function(event) {
+                            		$(".search-field").val("");
+                            	}
+                            });
+                        }
+                    }
                 });
 
             }

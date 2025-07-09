@@ -412,7 +412,7 @@
 				nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+$("#input_ossNicknames").val()+'"/>';
 				nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 				nickHtml 		+=		'</div>';
-				nickHtml 		+=		'<span class="retxt"></span>';
+				nickHtml 		+=		'<span class="retxt" style="display:block;">NEW Nickname</span>';
 				nickHtml 		+= 	'</div>';
 				
 				$('.multiTxtSet').append(nickHtml);
@@ -495,30 +495,50 @@
 			
 			// add include CPE
 			$("#includeCpeAdd").on("click", function() {
-				let includeCpeHtml 	= 	'<div class="col-lg-12" style="margin-top: 5px;">';
-				includeCpeHtml 		+= 		'<div class="form-group mb-0">';
-				includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+$("#input_includeCpe").val()+'"/>';
-				includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-				includeCpeHtml 		+=		'</div>';
-				includeCpeHtml 		+=		'<span class="retxt"></span>';
-				includeCpeHtml 		+= 	'</div>';
+				$(this).parent().prev().removeClass("is-invalid");
+				$(this).parent().parent().parent().next().hide();
 				
-				$('.multiTxtIncludeCpe').append(includeCpeHtml);
-				$("#input_includeCpe").val('');
+				let includeCpe = $("#input_includeCpe").val();
+				let cpeData = includeCpe.split(":");
+				if (cpeData.length != 2 && (cpeData.length < 2 || cpeData.length < 13 || cpeData.length > 13)) {
+					$(this).parent().prev().addClass("is-invalid");
+					$(this).parent().parent().parent().next().show();
+				} else {
+					let includeCpeHtml 	= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+					includeCpeHtml 		+= 		'<div class="form-group mb-0">';
+					includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+ changeCpeDataFormat(includeCpe) +'"/>';
+					includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					includeCpeHtml 		+=		'</div>';
+					includeCpeHtml 		+=		'<span class="retxt"></span>';
+					includeCpeHtml 		+= 	'</div>';
+					
+					$('.multiTxtIncludeCpe').append(includeCpeHtml);
+					$("#input_includeCpe").val('');
+				}
 			});
 			
 			// add exclude CPE
 			$("#excludeCpeAdd").on("click", function() {
-				let excludeCpeHtml 	= 	'<div class="col-lg-12" style="margin-top: 5px;">';
-				excludeCpeHtml 		+= 		'<div class="form-group mb-0">';
-				excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+$("#input_excludeCpe").val()+'"/>';
-				excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-				excludeCpeHtml 		+=		'</div>';
-				excludeCpeHtml 		+=		'<span class="retxt"></span>';
-				excludeCpeHtml 		+= 	'</div>';
+				$(this).parent().prev().removeClass("is-invalid");
+				$(this).parent().parent().parent().next().hide();
 				
-				$('.multiTxtExcludeCpe').append(excludeCpeHtml);
-				$("#input_excludeCpe").val('');
+				let excludeCpe = $("#input_excludeCpe").val();
+				let cpeData = excludeCpe.split(":");
+				if (cpeData.length != 2 && (cpeData.length < 2 || cpeData.length < 13 || cpeData.length > 13)) {
+					$(this).parent().prev().addClass("is-invalid");
+					$(this).parent().parent().parent().next().show();
+				} else {
+					let excludeCpeHtml 	= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+					excludeCpeHtml 		+= 		'<div class="form-group mb-0">';
+					excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+ changeCpeDataFormat(excludeCpe) +'"/>';
+					excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					excludeCpeHtml 		+=		'</div>';
+					excludeCpeHtml 		+=		'<span class="retxt"></span>';
+					excludeCpeHtml 		+= 	'</div>';
+					
+					$('.multiTxtExcludeCpe').append(excludeCpeHtml);
+					$("#input_excludeCpe").val('');
+				}
 			});
 			
 			//oss 등록
@@ -929,6 +949,23 @@
 		return null;
 	}
 	
+	function changeCpeDataFormat(val) {
+		let cpeVal = val.split(":");
+		if (cpeVal.length > 2) {
+			let rtnCpeVal = "";
+			for (var i in cpeVal) {
+				if ((i > 4 && i < 10) || i > 11) {
+					rtnCpeVal += "*:";
+				} else {
+					rtnCpeVal += cpeVal[i] + ":";
+				}
+			}
+			rtnCpeVal = rtnCpeVal.substring(0,rtnCpeVal.length-1);console.log(rtnCpeVal);
+			return rtnCpeVal;
+		} else {
+			return val;
+		}
+	}
 	
 	$(document).ready(function () {
 		'use strict';
@@ -1848,7 +1885,7 @@
 		});
 
 		if(!nicknameFormatErrorFlag){
-			alertify.alert("Formatting error", function(){});
+			alertify.alert("Format error", function(){});
 			
 			return false;
 		}
@@ -2106,8 +2143,12 @@
 				});
 			} else if(json.validMsg == "deactivate"){
 				alertify.error([[#{msg.oss.deactivated}]], 0);
-			} else if(json.ossName == "Formatting error"){
+			} else if(json.ossName == "Format error"){
 				alertify.error([[#{msg.common.valid}]], 0);
+				// 커스텀 에러 메세지 
+				ossGridValidMsg(json, "_licenseChoice");
+			} else if (json.licenseName) {
+				alertify.error(json.licenseName, 0);
 				// 커스텀 에러 메세지 
 				ossGridValidMsg(json, "_licenseChoice");
 			} else {
@@ -2721,6 +2762,57 @@
 	}
 
 	var fn = {
+        shareUrl : function(){
+            var copyUrl = "";
+            var protocol = window.location.protocol;
+            var host =  window.location.host;
+            copyUrl = protocol + "//" + host + "/oss/shareUrl/" + [[${ossId}]];
+            copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
+            $("#copyUrl").val(copyUrl);
+
+            //launch it.
+            var btnHtml 	= 	'<div class="row form-group">';
+            btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+            btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+            btnHtml 		+= 	'	</div>';
+            btnHtml 		+= 	'</div>';
+            btnHtml 		+= 	'<div class="row float-right custom-layout">';
+            btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+            btnHtml 		+= 	'</div>';
+
+            if(!alertify.myAlert){
+                //define a new dialog
+                alertify.dialog('myAlert',function factory(){
+                    return{
+                        main:function(message){
+                            this.message = message;
+                        },
+                        setup:function(){
+                            return {
+                                focus: { element:0 }
+                            };
+                        },
+                        prepare:function(){
+                            this.setContent(this.message);
+                        }
+                    }});
+            }
+
+            alertify.myAlert(btnHtml);
+        },
+        copyUrl : function(target){
+            $('#copyUrl').attr('type', 'text');
+            $('#copyUrl').select();
+            var copyFlag = document.execCommand('copy');
+            $('#copyUrl').attr('type', 'hidden');
+
+            if (copyFlag) {
+                $('.ajs-close').trigger("click");
+                alertify.success([[#{msg.common.success}]]);
+            } else {
+                alertify.error([[#{msg.common.valid}]]);
+            }
+        },
 		urlDuplication : function(target){
 			var value = $(target).val().trim();
 			$(target).val(value);
@@ -2962,7 +3054,7 @@
 			var targetVal = $(target).val();
 
 			if(targetVal.indexOf(",") > -1){
-				$(target).parent().next("span.retxt").html("Formatting error").show();
+				$(target).parent().next("span.retxt").html("Format error").show();
 			} else {
 				$(target).parent().next("span.retxt").hide();
 			}
@@ -3478,7 +3570,7 @@
     vulnListMore : function() {
         var product = $("input[name=ossName]").val();
         var version = $("input[name=ossVersion]").val() == "" ? "-" : $("input[name=ossVersion]").val();
-        var url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=N&ossName=' + product + '&ossVersion=' + version;
+        var url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=Y&ossName=' + product + '&ossVersion=' + version;
 
         var _popup = null;
 

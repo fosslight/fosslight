@@ -39,6 +39,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -294,16 +295,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		HashMap<String, Object> subMap = new HashMap<String, Object>();
 			
 		list = selfCheckMapper.selectIdentificationGridList(identification);
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionOssComponentList = selfCheckMapper.selectIdentificationGridList(identification);;
-		if (notVersionOssComponentList != null) {
-			list.addAll(notVersionOssComponentList);
-		}
-		identification.setOssVersionEmptyFlag(null);
 		list.sort(Comparator.comparing(ProjectIdentification::getComponentIdx));
 		
 		if (list != null && !list.isEmpty()) {
-			List<String> cvssScoreMaxList = new ArrayList<>();
+			Map<String, Object> ossInfoCheckMap = new HashMap<>();
 			
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceDiv(identification.getReferenceDiv());
@@ -318,81 +313,29 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-				boolean setCveInfoFlag = false;
-				
-				// convert max score
-				if (bean.getCvssScoreMax() != null) {
-					String cveId = bean.getCvssScoreMax().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax());
-					}
-				}
-				if (bean.getCvssScoreMax1() != null) {
-					String cveId = bean.getCvssScoreMax1().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax1());
-					}
-				}
-				if (bean.getCvssScoreMax2() != null) {
-					String cveId = bean.getCvssScoreMax2().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax2());
-					}
-				}
-				if (bean.getCvssScoreMax3() != null) {
-					String cveId = bean.getCvssScoreMax3().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax3());
-					}
-				}
-				
-				if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-					if (cvssScoreMaxList.size() > 1) {
-						Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-							@Override
-							public int compare(String o1, String o2) {
-								if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-									return -1;
-								}else {
-									return 1;
-								}
-							}
-						});
-					}
-					
-					String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-					bean.setCvssScore(cveData[3]);
-					bean.setCveId(cveData[4]);
-					bean.setVulnYn(CoConstDef.FLAG_YES);
-				} else {
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, true);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						bean.setCvssScore(conversionCveData[3]);
-						bean.setCveId(conversionCveData[4]);
-						bean.setVulnYn(CoConstDef.FLAG_YES);
-					} else {
-						setCveInfoFlag = true;
-					}
-				}
-				
-				cvssScoreMaxList.clear();
-				
-				if (ossInfoMap.containsKey(key)) {
-					OssMaster om = ossInfoMap.get(key);
-					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
-						String cveId = om.getCveId();
-						String cvssScore = om.getCvssScore();
-						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-							bean.setCvssScore(cvssScore);
-							bean.setCveId(cveId);
-							bean.setVulnYn(CoConstDef.FLAG_YES);
-						}
-					}
+				String key = bean.getOssName() + "_" + avoidNull(bean.getOssVersion(), "-");
+				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
+					ossInfoCheckMap.put(key, "");
 				}
 			}
+			
+			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
+			if (!ossInfoCheckMap.isEmpty()) {
+				for (String key : ossInfoCheckMap.keySet()) {
+					String ossName = key.split("_")[0];
+					String ossVersion = key.split("_")[1];
+					if (ossVersion.equals("-")) {
+						ossVersion = "";
+					}
+					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossName, ossVersion);
+					if (om != null && !isEmpty(om.getCvssScore())) {
+						vulnerabilityInfoMap.put((ossName + "_" + ossVersion).toUpperCase(), om);
+					}
+				}
 				
+				ossInfoCheckMap.clear();
+			}
+			
 			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
 			Map<String, OssMaster> componentOssInfoMap = null;
 			
@@ -441,6 +384,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			// license 정보 등록
 			for (ProjectIdentification bean : list) {
+				String licenseIds = "";
+				String ossRestriction = "";
+				String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+				
+				if (!isEmpty(bean.getOssName())) {
+					if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
+						ossRestriction = CoCodeManager.OSS_INFO_UPPER.get(key).getRestriction();
+					}
+				}
+				
+				if (vulnerabilityInfoMap.containsKey(key)) {
+					OssMaster om = vulnerabilityInfoMap.get(key);
+					bean.setCveId(om.getCveId());
+					bean.setCvssScore(om.getCvssScore());
+					bean.setVulnYn(CoConstDef.FLAG_YES);
+				}
+				
 				if (bean.getComponentLicenseList()!=null){
 					String licenseCopy = "";
 						
@@ -488,12 +448,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					bean.setLicenseNameExistsYn(CommonFunction.existsLicenseName(bean.getComponentLicenseList()) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 					bean.setLicenseUserGuideStr(CommonFunction.checkLicenseUserGuide(bean.getComponentLicenseList()));
 					bean.setLicenseUserGuideYn(isEmpty(bean.getLicenseUserGuideStr()) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES);
-					bean.setRestriction(CommonFunction.setLicenseRestrictionList(bean.getComponentLicenseList()));
+					licenseIds = String.join(",", bean.getComponentLicenseList().stream().map(e -> e.getLicenseId()).distinct().collect(Collectors.toList()));
 					
 					// subGrid의 Item 추출을 위해 별도의 map으로 구성한다.
 					// 부몬의 component_id를 key로 관리한다.
 					subMap.put(bean.getGridId(), bean.getComponentLicenseList());
-				}	
+				}
+				bean.setRestriction(CommonFunction.setLicenseRestrictionListById(licenseIds, ossRestriction));
 			}
 			
 			// 다른 프로젝트에서 load한 경우 component id 초기화
@@ -668,7 +629,11 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void deleteProject(Project project) {
-		// project master
+		// delete self-check all components and license
+		selfCheckMapper.resetOssComponentsAndLicense(project.getPrjId(), null);
+		// self-check watcher master
+		selfCheckMapper.deleteProjectWatcher(project);
+		// self-check project master
 		selfCheckMapper.deleteProjectMaster(project);
 	}
 	
@@ -682,10 +647,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Transactional
 	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
 		// 컴포넌트 마스터 라이센스 지우기
-		ProjectIdentification prj = new ProjectIdentification();
-		prj.setReferenceId(project.getPrjId());
-		prj.setReferenceDiv(refDiv);
-		selfCheckMapper.resetOssComponentsAndLicense(prj);
+		selfCheckMapper.resetOssComponentsAndLicense(project.getPrjId(), refDiv);
 		
 //		deletePreparedStatement(componentId);
 //		for (int i = 0; i < componentId.size(); i++) {
@@ -707,7 +669,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		Map<String, List<ProjectIdentification>> reconstOssComponentLicenseList = new HashMap<>();
 		List<ProjectIdentification> reconstAddOssComponentLicenseList = null;
+		
+		ProjectIdentification prj = new ProjectIdentification();
+		prj.setReferenceId(project.getPrjId());
+		prj.setReferenceDiv(refDiv);
+		
 		String licenseComponentId = "";
+		
 		int componentIdx = Integer.parseInt(selfCheckMapper.selectComponentIdx(prj));
 		int licenseComponentIdx = componentIdx;
 		
@@ -746,7 +714,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if (downloadLocation != null && downloadLocation.endsWith("/")) {
 				ossComponent.get(i).setDownloadLocation(downloadLocation.substring(0, downloadLocation.length()-1));
 			}
-			
+			if (!isEmpty(ossComponent.get(i).getCopyrightText())) {
+				ossComponent.get(i).setCopyrightText(StringUtils.trimWhitespace(ossComponent.get(i).getCopyrightText()));
+			}
 			int componentLicenseId = 1;
 			//update
 			if (!StringUtil.contains(ossComponent.get(i).getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
@@ -889,7 +859,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		if (project.getCsvFile() != null && project.getCsvFile().size() > 0) {
 			for (int i = 0; i < project.getCsvFile().size(); i++) {
 				selfCheckMapper.deleteFileBySeq(project.getCsvFile().get(i));
-				fileService.deletePhysicalFile(project.getCsvFile().get(i), "SELF");
+				fileService.deletePhysicalFile(project.getCsvFile().get(i), CoConstDef.CD_CHECK_OSS_SELF);
 			}
 		}
 		
@@ -913,9 +883,18 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			if (_ossList != null) {
 				for (ProjectIdentification targetBean : _ossList) {
-					if (targetBean != null && !CoConstDef.FLAG_YES.equals(targetBean.getExcludeYn()) && !isEmpty(targetBean.getCvssScore())) {
-						double _currentSccore = Double.parseDouble(targetBean.getCvssScore());
-						
+					if (targetBean != null && !CoConstDef.FLAG_YES.equals(avoidNull(targetBean.getExcludeYn())) && !isEmpty(targetBean.getOssName()) && !targetBean.getOssName().equals("-")) {
+						double _currentSccore = 0;
+						OssMaster om = CommonFunction.getOssVulnerabilityInfo(targetBean.getOssName(), targetBean.getOssVersion());
+						if (om != null && !isEmpty(om.getCvssScore())) {
+							_currentSccore = Double.parseDouble(om.getCvssScore());
+							if (CoCodeManager.OSS_INFO_UPPER.containsKey((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase())) {
+								OssMaster bean = CoCodeManager.OSS_INFO_UPPER.get((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase());
+								if (!isEmpty(bean.getCvssScore())) {
+									max_cvss_score = Double.parseDouble(bean.getCvssScore());
+								}
+							}
+						}
 						if (Double.compare(_currentSccore, max_cvss_score) > 0) {
 							max_cvss_score = _currentSccore;
 							max_vuln_ossName = targetBean.getOssName();
@@ -2068,7 +2047,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		ossAttributionList.addAll(ossAttributionTreeMap.values());
 		
 		// 배포 사이트 구분에 따라 참조 코드가 달라짐
-		String noticeInfoCode = CoConstDef.CD_DTL_DISTRIBUTE_SKS.equals(avoidNull(distributeSite, CoConstDef.CD_DTL_DISTRIBUTE_LGE)) ? CoConstDef.CD_NOTICE_DEFAULT_SKS : CoConstDef.CD_NOTICE_DEFAULT;
+		String noticeInfoCode = CoConstDef.CD_NOTICE_DEFAULT;
 
 		noticeType = avoidNull(ossNotice.getNoticeType(), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL);
 		
@@ -2735,5 +2714,19 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		}
 		
 		return checkFlag;
+	}
+
+	@Override
+	public void deleteProjectRefFiles(Project project) {
+		deleteFiles(project.getCsvFile());
+	}
+	
+	private void deleteFiles(List<T2File> list) {
+		if (list != null) {
+			for (T2File fileInfo : list) {
+				selfCheckMapper.deleteFileBySeq(fileInfo);
+				fileService.deletePhysicalFile(fileInfo, CoConstDef.CD_CHECK_OSS_SELF);
+			}
+		}
 	}
 }

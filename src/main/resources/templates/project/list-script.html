@@ -616,6 +616,10 @@ var fn = {
 			if ("" != rowObject.packageFileId4) {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'4\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File4\"></i></span>';
 			}
+			
+			if ("" != rowObject.packageFileId5) {
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'5\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File5\"></i></span>';
+			}
 		}
 		
 		return display;
@@ -970,7 +974,7 @@ var fn = {
 			var prjId = $("#list").getGridParam("selrow");
 			var rowData = $("#list").getRowData(prjId);
 
-			if (parseInt(rowData["permission"]) > 0) {
+			if (parseInt(rowData["statusPermission"]) > 0) {
 				createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
 			} else {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
@@ -1456,7 +1460,7 @@ var fn = {
 						}, false, 'confirm');
                 	}
 					
-					alertify.changeWatcher(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '400');
+					alertify.changeWatcher(res).set('title', 'Change Edit Permission').set('resizable', true).resizeTo('1000', '400');
 				},
 				error: function(data){
 					alertify.error([[#{msg.common.valid2}]], 0);
@@ -1539,15 +1543,44 @@ var fn = {
 		});
 	},
 	changeWatcherDelete : function() {
+		if (changeWatcherArr.length == 0) {
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+			return false;
+		}
+		
+		var msg = "";
+		var notPermissionPrjIds = [];
+		var permissionPrjIds = [];
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		for (var i in prjIds) {
+			var gridData = $('#list').jqGrid('getRowData',prjIds[i]);
+			if ("1" == gridData.statusPermission) {
+				permissionPrjIds.push(prjIds[i]);
+			} else {
+				notPermissionPrjIds.push(prjIds[i]);
+			}
+		}
+		
+		if (notPermissionPrjIds.length > 0) {
+			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
+			msg += '<br/> - '
+			for (var i in notPermissionPrjIds) {
+				msg += 'PRJ-' + notPermissionPrjIds[i];
+				if(i < notPermissionPrjIds.length-1){
+					msg += ', ';
+				}
+			}
+		}
+		
+		if (permissionPrjIds.length == 0) {
+			alertify.alert(msg, function(){});
+			return false;
+		}
+		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
-				if (changeWatcherArr.length == 0) {
-					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
-					return false;
-				}
-				
-				var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
-				var data = {"prjIds" : prjIds, "changeWatcherList" : changeWatcherArr};
+				var data = {"prjIds" : permissionPrjIds, "changeWatcherList" : changeWatcherArr};
 				
 				$.ajax({
 					url : '/project/removeWatchers',
@@ -1557,8 +1590,12 @@ var fn = {
 					cache : false,
 					contentType : 'application/json',
 					success: function(resultData){
-						if(resultData.isValid == "true") {
-							alertify.success([[#{msg.common.success}]]);
+						if (resultData.isValid == "true") {
+							if ("" == msg) {
+								alertify.success([[#{msg.common.success}]]);
+							} else {
+								alertify.alert(msg, function(){});
+							}
 						} else {
 							alertify.error([[#{msg.common.valid2}]], 0);
 						}
@@ -2014,10 +2051,30 @@ var fn = {
 			success : function(data){
 				if ("10" == data.resCd) {
 					var message = "";
+					var noDelPrjIds = new Array();
+					if (typeof data.noDelPrjIds !== "undefined") {
+						noDelPrjIds = data.noDelPrjIds;
+					}
+					
+					if (noDelPrjIds.length > 0) {
+						if (notPermissions.length > 0) {
+							let filterNotPermissions = noDelPrjIds.filter(function(cur) {
+								return !notPermissions.includes(cur);
+							});
+							notPermissions = filterNotPermissions;
+						}
+						if (prjIds.length > 0) {
+							let filterPrjIds = noDelPrjIds.filter(function(cur) {
+								return !prjIds.includes(cur);
+							});
+							prjIds = filterPrjIds;
+						}
+					}
+					
 					var notPermissionsLength = notPermissions.length;
 					var permissionsLength = prjIds.length;
 					
-					if (notPermissionsLength > 0) {
+					if (notPermissionsLength > 0 && permissionsLength > 0) {
 						message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.success', 'projects')}]];
 						message += "<br>&emsp;- ";
 						prjIds.forEach (function (el, index) {
@@ -2037,11 +2094,36 @@ var fn = {
 							}
 						});
 					} else {
-						message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', 'projects')}]];
+						if (notPermissionsLength > 0) {
+							message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.fail', 'projects')}]];
+							message += "<br>&emsp;- ";
+							notPermissions.forEach (function (el, index) {
+								message += "PRJ-" + el;
+								if (index < notPermissionsLength-1) {
+									message += ", ";
+								}
+							});
+						} else if (permissionsLength > 0) {
+							message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', 'projects')}]];
+							message += "<br>&emsp;- ";
+							prjIds.forEach (function (el, index) {
+								message += "PRJ-" + el;
+								if (index < permissionsLength-1) {
+									message += ", ";
+								}
+							});
+						}
+					}
+					
+					if (noDelPrjIds.length > 0) {
+						if ("" != message) {
+							message += "<br><br>";
+						}
+						message += [[#{msg.project.cannot.deleted}]];
 						message += "<br>&emsp;- ";
-						prjIds.forEach (function (el, index) {
+						noDelPrjIds.forEach (function (el, index) {
 							message += "PRJ-" + el;
-							if (index < permissionsLength-1) {
+							if (index < noDelPrjIds.length-1) {
 								message += ", ";
 							}
 						});
@@ -2104,7 +2186,7 @@ var list = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true, title: false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false, cellattr: function(rowId, val, rawObject, cm, rdata) {
+		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : false, title:false, cellattr: function(rowId, val, rawObject, cm, rdata) {
                 return 'style="min-width: ' + (cm.width + 20) + 'px;"';
             }};
 		colModelArr.push(colModelObj);
@@ -2191,8 +2273,8 @@ var list = {
             {'Created Date': 'createdDate'},
             {'Modified Date': 'modifiedDate'},
             {'Reviewer': 'reviewer'}
-        ]
-        var defaultColNames = ['cb', 'prjId', 'prjName', 'status', 'progress', 'download']
+        ];
+        var defaultColNames = ['cb', 'prjId', 'prjName', 'status', 'progress', 'download'];
         
        	applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
 
@@ -2270,11 +2352,13 @@ var list = {
                     $("#list_toppager_left").append(appendIcon);
                 }
                 
-                var setUpColumnButton = $('#setUpColumnButton');
+                var setUpColumnButton = $('#setUpColumnButtonPrj');
                 /* columns licalization */
                 if (setUpColumnButton.length === 0) {
                     var savedColNames = [];
                     var dropdownMenuOptions = {
+                    	_btnId : "Prj",
+                    	_targetId : "list",
                         _listType: listType,
                         _totalColInfos: totalColInfos,
                         _defaultColNames: defaultColNames,
@@ -2283,13 +2367,13 @@ var list = {
                     pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
 
                     // Check for click events occurring inside the menu area
-                    $("#setUpColumnMenu").on("click", function(event) {
+                    $("#setUpColumnMenuPrj").on("click", function(event) {
                         event.stopPropagation();
                     });
 
-                    $('#setUpColumnButton').on("click", function(event) {
+                    $('#setUpColumnButtonPrj').on("click", function(event) {
                         event.stopPropagation();
-                        $('#setUpColumnMenu').toggleClass("show");
+                        $('#setUpColumnMenuPrj').toggleClass("show");
                         $(this).toggleClass("show");
                     })
                 }

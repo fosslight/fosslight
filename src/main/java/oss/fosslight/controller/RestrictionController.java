@@ -55,7 +55,7 @@ public class RestrictionController extends CoTopComponent {
 			, HttpServletResponse res
 			, Model model) throws Exception{
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		ArrayList<T2CodeDtl> codeDetailList = CodeService.getCodeDetailList(vo, true);
+		ArrayList<T2CodeDtl> codeDetailList = CodeService.getCodeDetailList(vo);
 		map.put("restrictionList", codeDetailList);
 		
 		return makeJsonResponseHeader(map);

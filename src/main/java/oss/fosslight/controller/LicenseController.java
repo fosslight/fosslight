@@ -5,11 +5,14 @@
 
 package oss.fosslight.controller;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -145,18 +148,23 @@ public class LicenseController extends CoTopComponent {
 		if ("ROLE_ADMIN".equals(loginUserRole())) {
 			return "license/edit";
 		} else {
-			if (!isEmpty(licenseMaster.getRestriction())) {
-				List<String> restrictionList = Arrays.asList(licenseMaster.getRestriction().split(","));
+			if (!CollectionUtils.isEmpty(licenseMaster.getRestrictionCdNoList())) {
 				String restrictionStr = "";
-				for (String restriction : restrictionList) {
-					if (isEmpty(restriction)) continue;
-
+				for (String restriction : licenseMaster.getRestrictionCdNoList()) {
+					if (isEmpty(restriction)) {
+						continue;
+					}
 					if (!isEmpty(restrictionStr)) {
 						restrictionStr += ", ";
 					}
 					restrictionStr += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restriction);
+					if (!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction))) {
+						restrictionStr += " (" + CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction) + ")";
+					}
 				}
-				if (!isEmpty(restrictionStr)) licenseMaster.setRestriction(restrictionStr);
+				if (!isEmpty(restrictionStr)) {
+					licenseMaster.setRestriction(restrictionStr);
+				}
 			}
 
 			return "license/view";
@@ -303,13 +311,8 @@ public class LicenseController extends CoTopComponent {
 		mailBean.setParamLicenseId(commentsHistory.getReferenceId());
 		mailBean.setComment(commentsHistory.getContents());
 
-		LicenseMaster licenseMaster = new LicenseMaster();
-		licenseMaster.setLicenseId(commentsHistory.getReferenceId());
-		licenseMaster = licenseService.getLicenseMasterOne(licenseMaster);
-		licenseMaster.setDomain(CommonFunction.getDomain(req));
-		String internalUrl = CommonFunction.makeLicenseInternalUrl(licenseMaster, CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
-		if (!isEmpty(internalUrl)) {
-			licenseMaster.setInternalUrl(internalUrl);
+		LicenseMaster licenseMaster = licenseService.getParamLicenseInfo(commentsHistory.getReferenceId(), CommonFunction.getDomain(req));
+		if (licenseMaster != null) {
 			mailBean.setParamLicenseInfo(licenseMaster);
 		}
 		
@@ -373,7 +376,7 @@ public class LicenseController extends CoTopComponent {
 	/**
 	 * LicenseBulkReg Save Post
 	 */
-	@PostMapping(value = Url.LICENSE.BULK_REG_AJAX)
+	@PostMapping(value = LICENSE.BULK_REG_AJAX)
 	public @ResponseBody
 	ResponseEntity<Object> saveAjaxJson(
 			@RequestBody List<LicenseMaster> licenseMasters
@@ -410,7 +413,65 @@ public class LicenseController extends CoTopComponent {
 			 * Set
 			 * HotYn, notice, source
 			 * */
-			license.setRestriction("");
+			boolean isNotExists = false;
+			String restrictionValue = license.getRestriction();
+			String restrictionCdNo = "";
+			List<CoCodeDtl> restrictionList = CoCodeManager.getCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION);
+			if (restrictionValue.contains(CoConstDef.CD_COMMA_CHAR)) {
+				for (String restriction : license.getRestriction().split(",")) {
+					if (!isEmpty(restriction)) {
+						List<CoCodeDtl> checkRestrictionList = restrictionList.stream().filter(e -> e.getCdDtlNm().equalsIgnoreCase(restriction)).collect(Collectors.toList());
+						if (!CollectionUtils.isEmpty(checkRestrictionList)) {
+							restrictionCdNo += checkRestrictionList.get(0).getCdDtlNo() + ",";
+						} else {
+							isNotExists = true;
+							break;
+						}
+					}
+				}
+			} else if (!isEmpty(restrictionValue)) {
+				List<CoCodeDtl> checkRestrictionList = restrictionList.stream().filter(e -> e.getCdDtlNm().equalsIgnoreCase(restrictionValue)).collect(Collectors.toList());
+				if (!CollectionUtils.isEmpty(checkRestrictionList)) {
+					restrictionCdNo = checkRestrictionList.get(0).getCdDtlNo();
+				} else {
+					isNotExists = true;
+				}
+			}
+			if (isNotExists) {
+				log.debug("Restriction not found.");
+				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (Restriction not found)");
+				licenseDataMapList.add(licenseDataMap);
+				continue;
+			} else {
+				if (!isEmpty(restrictionCdNo)) {
+					restrictionCdNo = restrictionCdNo.substring(0, restrictionCdNo.length()-1);
+					license.setRestriction(restrictionCdNo);
+				}
+			}
+			
+			isNotExists = false;
+			String disclosingSrcValue = license.getDisclosingSrc();
+			String disclosingSrcCdNo = "";
+			if (!isEmpty(disclosingSrcValue)) {
+				List<CoCodeDtl> disclosingSrcList = CoCodeManager.getCodeDtls(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE);
+				List<CoCodeDtl> checkDisclosingSrcList = disclosingSrcList.stream().filter(e -> e.getCdDtlNm().equalsIgnoreCase(disclosingSrcValue)).collect(Collectors.toList());
+				if (!CollectionUtils.isEmpty(checkDisclosingSrcList)) {
+					disclosingSrcCdNo = checkDisclosingSrcList.get(0).getCdDtlNo();
+				} else {
+					isNotExists = true;
+				}
+			}
+			if (isNotExists) {
+				log.debug("DisclosingSrc not found.");
+				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (DisclosingSrc not found)");
+				licenseDataMapList.add(licenseDataMap);
+				continue;
+			} else {
+				if (!isEmpty(disclosingSrcCdNo)) {
+					license.setDisclosingSrc(disclosingSrcCdNo);
+				}
+			}
+			
 			license.setHotYn(CoConstDef.FLAG_NO);
 			if (license.getObligationNotificationYn().equalsIgnoreCase("o")) {
 				license.setObligationNotificationYn(CoConstDef.FLAG_YES);
@@ -455,13 +516,13 @@ public class LicenseController extends CoTopComponent {
 			 * Check
 			 * LicenseText NPE
 			 * */
-			String licenseText = license.getLicenseText();
-			if (licenseText == null || licenseText.isEmpty()) {
-				log.debug("licenseText is null:" + license.getLicenseName());
-				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (Required missing)");
-				licenseDataMapList.add(licenseDataMap);
-				continue;
-			}
+//			String licenseText = license.getLicenseText();
+//			if (licenseText == null || licenseText.isEmpty()) {
+//				log.debug("licenseText is null:" + license.getLicenseName());
+//				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (Required missing)");
+//				licenseDataMapList.add(licenseDataMap);
+//				continue;
+//			}
 
 			/**
 			 * Check
@@ -554,6 +615,8 @@ public class LicenseController extends CoTopComponent {
 
 			Map<String, Object> result = licenseService.saveLicense(license);
 			if (result.get("resCd").equals("10")) {
+				license.setRestriction(restrictionValue);
+				license.setDisclosingSrc(disclosingSrcValue);
 				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), true, "O");
 				licenseDataMapList.add(licenseDataMap);
 			}
@@ -692,5 +755,10 @@ public class LicenseController extends CoTopComponent {
 		}
 
 		return makeJsonResponseHeader();
+	}
+
+	@GetMapping(value = LICENSE.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String licenseId) throws IOException {
+		res.sendRedirect(req.getContextPath() + "/license/edit/" + licenseId);
 	}
 }

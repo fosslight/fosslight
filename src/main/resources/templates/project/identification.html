@@ -295,11 +295,15 @@
     </div>
 </div>
 
-<th:block th:replace="project/view/sheetSelectView"></th:block>
+	<th:block th:replace="project/view/sheetSelectView"></th:block>
 
-<form id="bulkEditForm" method="post" th:action="@{/oss/ossBulkEditPopup}" th:target="bulkEditViewProjectPopup">
-    <input name="rowId" type="hidden" value=""/>
-    <input name="target" type="hidden" value=""/>
-</form>
+	<form id="bulkEditForm" method="post" th:action="@{/oss/ossBulkEditPopup}" th:target="bulkEditViewProjectPopup">
+	    <input name="rowId" type="hidden" value=""/>
+	    <input name="target" type="hidden" value=""/>
+	</form>
+
+	<form id="dependencyTreeForm" method="post" th:action="@{/project/dependencyTreePopup}" th:target="dependencyTreePopup">
+		<input type="hidden" name="rows" value=""/>
+	</form>
 </body>
 </html>

@@ -434,6 +434,7 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId2; // 오픈소스 파일ID
 	private String packageFileId3; // 오픈소스 파일ID
 	private String packageFileId4; // 오픈소스 파일ID
+	private String packageFileId5; // 오픈소스 파일ID
 	private String packageVulDocFileId;
 	private String noticeAppendFileId;
 
@@ -441,6 +442,7 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileType2; // 오픈소스 파일type
 	private String packageFileType3; // 오픈소스 파일type
 	private String packageFileType4; // 오픈소스 파일type
+	private String packageFileType5; // 오픈소스 파일type
 
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
@@ -453,6 +455,7 @@ public class Project extends ComBean implements Serializable {
 	private List<T2File> packageFile2; // 오픈소스 파일객체
 	private List<T2File> packageFile3; // 오픈소스 파일객체
 	private List<T2File> packageFile4; // 오픈소스 파일객체
+	private List<T2File> packageFile5; // 오픈소스 파일객체
 	
 	/** The dep csv file. */
 	private List<T2File> depCsvFile; // csv 파일 객체
@@ -489,6 +492,7 @@ public class Project extends ComBean implements Serializable {
 	private T2File packageFileInfo2; // 오픈소스 파일객체
 	private T2File packageFileInfo3; // 오픈소스 파일객체
 	private T2File packageFileInfo4; // 오픈소스 파일객체
+	private T2File packageFileInfo5; // 오픈소스 파일객체
 	private T2File packageVulDocFileInfo;
 	private T2File noticeAppendFileInfo;
 	
@@ -670,6 +674,9 @@ public class Project extends ComBean implements Serializable {
 	/** The osdd source file name. */
 	private String osddSourceFileName4;
 	
+	/** The osdd source file name. */
+	private String osddSourceFileName5;
+	
 	/** The osdd source file E-TAG. */
 	private String osddSourceFileEtag;
 	
@@ -681,6 +688,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The osdd source file E-TAG. */
 	private String osddSourceFileEtag4;
+	
+	/** The osdd source file E-TAG. */
+	private String osddSourceFileEtag5;
 
 	private String stage;
 	
@@ -692,6 +702,10 @@ public class Project extends ComBean implements Serializable {
 	private String secMailYn;
 
 	private String secMailDesc;
+
+	private String secPerson;
+
+	private String secPersonNm;
 	
 	/** The viewOnlyFlag. */
 	private String viewOnlyFlag;
@@ -733,6 +747,7 @@ public class Project extends ComBean implements Serializable {
 	private String reuseRefPrjId2;
 	private String reuseRefPrjId3;
 	private String reuseRefPrjId4;
+	private String reuseRefPrjId5;
 	
 	private String ossAnalysisStatus;
 	
@@ -3929,7 +3944,23 @@ public class Project extends ComBean implements Serializable {
 	public void setSecMailDesc(String secMailDesc) {
 		this.secMailDesc = secMailDesc;
 	}
+
+	public String getSecPerson() {
+		return secPerson;
+	}
+
+	public void setSecPerson(String secPerson) {
+		this.secPerson = secPerson;
+	}
 	
+	public String getSecPersonNm() {
+		return secPersonNm;
+	}
+
+	public void setSecPersonNm(String secPersonNm) {
+		this.secPersonNm = secPersonNm;
+	}
+
 	public String getViewOnlyFlag() {
 		return viewOnlyFlag;
 	}
@@ -4723,5 +4754,61 @@ public class Project extends ComBean implements Serializable {
 
 	public void setPrjRefIdx(int prjRefIdx) {
 		this.prjRefIdx = prjRefIdx;
+	}
+
+	public String getPackageFileId5() {
+		return packageFileId5;
+	}
+
+	public void setPackageFileId5(String packageFileId5) {
+		this.packageFileId5 = packageFileId5;
+	}
+
+	public String getPackageFileType5() {
+		return packageFileType5;
+	}
+
+	public void setPackageFileType5(String packageFileType5) {
+		this.packageFileType5 = packageFileType5;
+	}
+
+	public List<T2File> getPackageFile5() {
+		return packageFile5;
+	}
+
+	public void setPackageFile5(List<T2File> packageFile5) {
+		this.packageFile5 = packageFile5;
+	}
+
+	public String getReuseRefPrjId5() {
+		return reuseRefPrjId5;
+	}
+
+	public void setReuseRefPrjId5(String reuseRefPrjId5) {
+		this.reuseRefPrjId5 = reuseRefPrjId5;
+	}
+
+	public T2File getPackageFileInfo5() {
+		return packageFileInfo5;
+	}
+
+	public void setPackageFileInfo5(T2File packageFileInfo5) {
+		this.packageFileInfo5 = packageFileInfo5;
+	}
+
+	public String getOsddSourceFileName5() {
+		return osddSourceFileName5;
+	}
+
+	public void setOsddSourceFileName5(String osddSourceFileName5) {
+		this.osddSourceFileName5 = osddSourceFileName5;
+	}
+
+	public String getOsddSourceFileEtag5() {
+		return osddSourceFileEtag5;
+	}
+
+	public void setOsddSourceFileEtag5(String osddSourceFileEtag5) {
+		this.osddSourceFileEtag5 = osddSourceFileEtag5;
 	}
 }

@@ -105,7 +105,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
 				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
-//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
+				map.put("EDITORS", map.get("editors") == null ? "" : map.get("editors").toString());
 			}
 		}
 		
@@ -861,10 +861,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		for (Map<String, Object> map : list) {
 			Map<String, Object> modelMap = new HashMap<String, Object>();
 			String prjId = (String) map.get("prjId").toString();
+			String distributionName = (String) map.get("distributionName");
 			List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(prjId);
 			
 			modelMap.put("prjId", prjId);
 			modelMap.put("modelList", modelList);
+			modelMap.put("distributionName", distributionName);
 			contents.add(modelMap);
 		}
 		
@@ -3464,5 +3466,36 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		projectService.insertAddList(Collections.singletonList(addProjectParam));
 
 	    return responseMap;
+	}
+
+	public void processResetTab(String tabName, Project projectMaster, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense) {
+		Project project = new Project();
+		project.setPrjId(projectMaster.getPrjId());
+		switch(tabName) {
+			case "DEP":
+				project.setIdentificationSubStatusDep("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+				project.setCsvFile(projectMaster.getDepCsvFile());
+				project.setDepCsvFileId("");
+				projectService.registDepOss(ossComponents, ossComponentsLicense, project);
+
+				break;
+			case "SRC":
+				project.setIdentificationSubStatusSrc("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+				project.setCsvFile(projectMaster.getCsvFile());
+				project.setSrcCsvFileId("");
+				projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
+				break;
+			case "BIN":
+				project.setIdentificationSubStatusBin("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+				project.setCsvFile(projectMaster.getBinCsvFile());
+				project.setBinCsvFileId("");
+				projectService.registBinOss(ossComponents, ossComponentsLicense, project);
+				break;
+		}
+		projectService.existsAddList(project);
+		projectService.insertAddList(new ArrayList<Project>());
 	}
 }

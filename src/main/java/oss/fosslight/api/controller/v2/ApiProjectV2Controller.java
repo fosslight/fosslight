@@ -29,6 +29,8 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
+import oss.fosslight.domain.CoMail;
+import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.NoticeMapper;
 import oss.fosslight.service.*;
@@ -90,7 +92,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
 
-    @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @ApiOperation(value = "Search Project List", notes = "Search Project Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -99,6 +101,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
             @ApiParam(value = "Division (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String division,
             @ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
+            @ApiParam(value = "Model Name exact match (Y: true, N: false)", allowableValues = "Y,N", required = false) @RequestParam(required = false, defaultValue = "N") String modelNameExactYn,
             @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
@@ -123,6 +126,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("userRole", userRole(userInfo));
             paramMap.put("division", division);
             paramMap.put("modelName", modelName);
+            paramMap.put("modelNameExactYn", modelNameExactYn);
             paramMap.put("status", status);
             paramMap.put("prjIdList", prjIdList);
             paramMap.put("prjName", prjName);
@@ -142,7 +146,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Retrieve the model list of the project", notes = "Project의 모델 정보 조회")
+    @ApiOperation(value = "Retrieve the model list of the project", notes = "Retrieve Project Model Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -265,7 +269,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 //		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
     }
 
-    @ApiOperation(value = "Create Project", notes = "project 생성")
+    @ApiOperation(value = "Create Project", notes = "Create New Project")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -404,21 +408,19 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             try {
+            	String initMessage = "<p>Project Created via API</p>";
                 if (!isEmpty(userComment)) {
-                    String initMessage = "<p>Project Created</p>";
-
                     initMessage += userComment;
-
-                    CommentsHistory commentHisBean = new CommentsHistory();
-                    commentHisBean.setLoginUserName(userInfo.getUserId());
-
-                    commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
-                    commentHisBean.setReferenceId(resultPrjId);
-                    commentHisBean.setContents(initMessage);
-                    commentService.registComment(commentHisBean);
                 }
-
-
+                
+                CommentsHistory commentHisBean = new CommentsHistory();
+                commentHisBean.setLoginUserName(userInfo.getUserId());
+                commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+                commentHisBean.setReferenceId(resultPrjId);
+                commentHisBean.setContents(initMessage);
+                commentHisBean.setStatus("created");
+                commentService.registComment(commentHisBean);
+                
                 CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED);
                 mailBean.setParamPrjId(resultPrjId);
                 String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED));
@@ -582,8 +584,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> identificationReset(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
-            @ApiParam( value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
-            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name="tab_name") String tabName
+            @ApiParam( value = "Upload Target Tab Name (Valid Input: dep, src, bin, all)", required = true, allowableValues = "dep, src, bin, all")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin", "all"}) @PathVariable(name="tab_name") String tabName
     ){
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reset called by %s",prjId,tabName, userInfo.getUserId()));
@@ -611,36 +613,17 @@ public class ApiProjectV2Controller extends CoTopComponent {
         project.setCsvFileSeq(new ArrayList<T2File>());
 
         switch(tabName) {
+            case "ALL" :
+                apiProjectService.processResetTab("DEP", projectMaster, ossComponents, ossComponentsLicense);
+                apiProjectService.processResetTab("SRC", projectMaster, ossComponents, ossComponentsLicense);
+                apiProjectService.processResetTab("BIN", projectMaster, ossComponents, ossComponentsLicense);
+                break;
             case "DEP":
-                project.setIdentificationSubStatusDep("Y");
-                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-                project.setCsvFile(projectMaster.getDepCsvFile());
-                project.setDepCsvFileId("");
-                projectService.registDepOss(ossComponents, ossComponentsLicense, project);
-
-                break;
             case "SRC":
-                project.setIdentificationSubStatusSrc("Y");
-                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
-                project.setCsvFile(projectMaster.getCsvFile());
-                project.setSrcCsvFileId("");
-                projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
-                break;
             case "BIN":
-                project.setIdentificationSubStatusBin("Y");
-                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
-                project.setCsvFile(projectMaster.getBinCsvFile());
-                project.setBinCsvFileId("");
-                projectService.registBinOss(ossComponents, ossComponentsLicense, project);
+                apiProjectService.processResetTab(tabName, projectMaster, ossComponents, ossComponentsLicense);
                 break;
         }
-
-//        projectService.deleteUploadFile(project);
-
-        // reset load list
-        projectService.existsAddList(project);
-        projectService.insertAddList(new ArrayList<Project>());
-
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
@@ -655,7 +638,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
-            @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames) {
+            @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames,
+            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String bomSave) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
@@ -772,6 +757,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     }
                 }
             }
+
+            if(bomSave.equals(CoConstDef.FLAG_YES)) {
+                projectService.registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
+            }
+
             if (resultMap.isEmpty()) {
                 // 정상처리된 경우 세션 삭제
                 switch(tabName) {
@@ -1209,6 +1199,169 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
+    @ApiOperation(value = "Project Add Security Responsible Person", notes = "Project Add Security Responsible Person")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_SECURITY_PERSON})
+    public ResponseEntity<Map<String, Object>> addSecurityPerson(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "User ID", required = true) @RequestParam(required = true) String userId) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<>();
+
+        userService.changeSession(userInfo.getUserId());
+
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
+
+        try {
+            if (StringUtils.isEmpty(userId)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "User ID is required.");
+            }
+
+            // T2_Users 테이블에서 사용자 존재 여부 확인
+            T2Users targetUser = new T2Users();
+            targetUser.setUserId(userId);
+            T2Users existingUser = userService.getUser(targetUser);
+            
+            if (existingUser == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in T2_Users table. User ID: " + userId);
+            }
+
+            // 기존 프로젝트 정보 조회
+            Project project = projectService.getProjectBasicInfo(prjId);
+            Project beforeProject = projectService.getProjectBasicInfo(prjId);
+            Project afterProject = null;
+            if (project == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "Project not found. Project ID: " + prjId);
+            }
+
+            // Security responsible person 설정
+            project.setSecPerson(userId);
+            project.setSecPersonNm(existingUser.getUserName());
+            
+            // 프로젝트 업데이트
+            projectService.updateProjectMaster(project);
+
+            afterProject = projectService.getProjectBasicInfo(prjId);
+            String diffComment = CommonFunction.getDiffItemComment(beforeProject, afterProject, true);
+
+            try {
+                CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED);
+                mailBean.setParamPrjId(project.getPrjId());
+                mailBean.setCompareDataBefore(beforeProject);
+                mailBean.setCompareDataAfter(afterProject);
+
+                if (!isEmpty(diffComment)) {
+                    CommentsHistory commHisBean = new CommentsHistory();
+                    commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+                    commHisBean.setReferenceId(project.getPrjId());
+                    commHisBean.setContents(diffComment);
+                    commHisBean.setStatus("Changed");
+                    commentService.registComment(commHisBean);
+                }
+                CoMailManager.getInstance().sendMail(mailBean);
+
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+
+            resultMap.put("msg", "Security responsible person added successfully");
+            resultMap.put("userId", userId);
+            resultMap.put("userName", existingUser.getUserName());
+
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error adding security responsible person: " + e.getMessage(), e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to add security responsible person: " + e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "Project Set Security Mail", notes = "Project Set Security Mail")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SET_SECURITY_MAIL})
+    public ResponseEntity<Map<String, Object>> setSecurityMail(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Security Enable (Y: Enable, N: Disable)", required = true, allowableValues = "Y,N") @RequestParam(required = true) String secMailYn,
+            @ApiParam(value = "Security Description (Required when secMailYn is N)", required = false) @RequestParam(required = false) String secMailDesc) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<>();
+
+        userService.changeSession(userInfo.getUserId());
+
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
+
+        try {
+            if (StringUtils.isEmpty(secMailYn)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Security Enable (secMailYn) is required.");
+            }
+
+            if (!secMailYn.equals("Y") && !secMailYn.equals("N")) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Security Enable (secMailYn) must be Y or N.");
+            }
+
+            // Security Enable이 N인 경우 설명이 필수
+            if (secMailYn.equals("N") && StringUtils.isEmpty(secMailDesc)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Security Description (secMailDesc) is required when Security Enable is N.");
+            }
+
+            // 기존 프로젝트 정보 조회
+            Project project = projectService.getProjectBasicInfo(prjId);
+            Project beforeProject = projectService.getProjectBasicInfo(prjId);
+            Project afterProject = null;
+            if (project == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "Project not found. Project ID: " + prjId);
+            }
+
+            // Security enable 설정
+            project.setSecMailYn(secMailYn);
+            if (secMailYn.equals("N")) {
+                project.setSecMailDesc(secMailDesc);
+            } else {
+                project.setSecMailDesc("Enable");
+            }
+            
+            // 프로젝트 업데이트
+            projectService.updateProjectMaster(project);
+
+            afterProject = projectService.getProjectBasicInfo(prjId);
+            String diffComment = CommonFunction.getDiffItemComment(beforeProject, afterProject, true);
+
+            try {
+                CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED);
+                mailBean.setParamPrjId(project.getPrjId());
+                mailBean.setCompareDataBefore(beforeProject);
+                mailBean.setCompareDataAfter(afterProject);
+
+                if (!isEmpty(diffComment)) {
+                    CommentsHistory commHisBean = new CommentsHistory();
+                    commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+                    commHisBean.setReferenceId(project.getPrjId());
+                    commHisBean.setContents(diffComment);
+                    commHisBean.setStatus("Changed");
+                    commentService.registComment(commHisBean);
+                }
+                CoMailManager.getInstance().sendMail(mailBean);
+
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+
+            resultMap.put("msg", "Security enable setting updated successfully");
+            resultMap.put("secMailYn", secMailYn);
+            resultMap.put("secMailDesc", project.getSecMailDesc());
+
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error setting security enable: " + e.getMessage(), e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to set security enable: " + e.getMessage());
+        }
+    }
+
     @ApiOperation(value = "Project get Notice", notes = "Project Get")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
     public ResponseEntity getProjectNotice(
@@ -1223,7 +1376,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
 
         try {
-            var ossNotice = verificationService.selectOssNoticeOne(prjId);
+            OssNotice ossNotice = verificationService.selectOssNoticeOne(prjId);
 
             if (ossNotice == null) {
                 return responseService.errorResponse(HttpStatus.NOT_FOUND, "Notice has not been published for given project.");

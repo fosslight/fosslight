@@ -64,6 +64,8 @@ public interface VerificationService {
 	
 	OssNotice selectOssNoticeOne(String prjId);
 	
+	OssNotice selectOssNoticeOne2(String prjId);
+	
 	void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception;
 	
 	Map<String, Integer> setAddFileCount(Map<String, Integer> deCompResultMap, String url, int fileCnt) throws Exception;
@@ -95,4 +97,8 @@ public interface VerificationService {
 	void deleteFile(Map<Object, Object> map);
 
 	void updateFileWhenVerificationCopyConfirm(Project project, Project copyProject, List<String> packageFileSeqList) throws IOException;
+
+	Map<String, Object> checkNoticeHtmlInfo(OssNotice ossNotice);
+
+	String getNoticeAppendInfo(String prjId);
 }

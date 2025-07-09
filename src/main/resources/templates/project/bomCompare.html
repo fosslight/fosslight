@@ -15,18 +15,28 @@
                                     <div class="card-header" style="border-bottom: none;">
                                         <div class="row">
                                             <div class="col-md-2">
+                                            	<label for="inputName" th:text="'Before Project id'" style="margin-bottom:0;"></label>
                                                 <div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
-                                                	<input class="form-control" placeholder="Before Project id" type="text" id="beforePrjId" name="beforePrjId" th:onKeyup="this.value=this.value.replace(/[^0-9]/g,'')">
+                                                	<input class="form-control" type="text" id="beforePrjId" name="beforePrjId" th:onKeyup="this.value=this.value.replace(/[^0-9]/g,'')">
                                               	</div>
                                             </div>
+                                            <div class="col-md-1 text-center" style="max-width:3.5% !important;">
+                                            	<label for="inputName" th:text="''"></label>
+                                            	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                	<button type="button" class="btn" id="change" title="change"><i class="fas fa-arrows-alt-h"></i></button>
+                                                </div>
+                                            </div>
                                             <div class="col-md-2">
+                                            	<label for="inputName" th:text="'After Project id'" style="margin-bottom:0;"></label>
                                                 <div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
-                                                 	<input class="form-control" placeholder="After Project id" type="text" id="afterPrjId" name="afterPrjId" th:onKeyup="this.value=this.value.replace(/[^0-9]/g,'')">
+                                                 	<input class="form-control" type="text" id="afterPrjId" name="afterPrjId" th:onKeyup="this.value=this.value.replace(/[^0-9]/g,'')">
                                               	</div>
                                             </div>
                                             <div class="col-md-1">
+                                            	<label for="inputName" th:text="''"></label>
                                             	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
-                                                	<button type="button" class="btn btn-default" id="search"><i class="fa fa-search"></i></button></div>
+                                                	<button type="button" class="btn btn-default" id="search"><i class="fa fa-search"></i></button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

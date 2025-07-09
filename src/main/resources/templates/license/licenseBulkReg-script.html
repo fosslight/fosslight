@@ -128,7 +128,7 @@
           datatype: "local",
           data : jsonData,
           colNames:['gridId', 'License Name','License Type','Notice','Source Code','SPDX Short Identifier','Nickname',
-            'Website for the license','User Guide',  'License Text', 'Attribution','Comment', 'Status'],
+            'Website for the license','Disclosing SRC', 'Restriction','User Guide', 'License Text','Attribution','Comment', 'Status'],
           colModel: [
             { name: 'gridId', index: 'gridId', width: 75, key:true, hidden: true, editable:false},
             { name: 'licenseName', index: 'License Name', width: 200, align: 'left', editable:false},
@@ -138,6 +138,8 @@
             { name: 'shortIdentifier', index: 'SPDX Short Identifier', width: 300, align: 'left', editable:false},
             { name: 'licenseNicknames', index: 'Nickname', width: 300, align: 'left', editable:false},
             { name: 'webpages', index: 'Website for the license', width: 200, align: 'left', editable:false},
+            { name: 'disclosingSrc', index: 'Disclosing SRC', width: 200, align: 'left', editable:false},
+            { name: 'restriction', index: 'Restriction', width: 200, align: 'left', editable:false},
             { name: 'description', index:'User Guide', width: 250, align: 'left', editable:false, edittype:"textarea"},
             { name: 'licenseText', index:'License Text', width: 150, align: 'left', editable:false, edittype:"textarea"},
             { name: 'attribution', index:'Attribution', width: 150, align: 'left', editable:false, edittype:"textarea"},

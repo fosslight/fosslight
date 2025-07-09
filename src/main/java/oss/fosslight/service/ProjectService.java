@@ -39,7 +39,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponents, List<PartnerMaster> thirdPartyList);
 	
-	public List<Project> getProjectNameList(Project project);
+	public List<Map<String, String>> getProjectNameList(Project project);
 	
 	public List<Project> getProjectModelNameList();
 	
@@ -210,7 +210,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public boolean checkReqEntrySecurity(Project project, String tabMenu);
 
-	public void copySecurityDataForProject(Project project);
+	public void copySecurityDataForProject(Project project, Project bean);
 	
 	public Map<String, Object> checkSelectDownloadFile(Project project);
 
@@ -233,4 +233,8 @@ public interface ProjectService extends HistoryConfig{
 	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
 	
 	public Map<String, Object> changeProjectStatus(Project project);
+
+	public void copyOssComponentList(Project project, boolean isBom);
+
+	public Map<String, Object> getDependencyTreeList(List<ProjectIdentification> ossComponents);
 }

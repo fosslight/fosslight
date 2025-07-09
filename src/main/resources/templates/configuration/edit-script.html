@@ -104,6 +104,16 @@
     };
 
     let fn = {
+    	copy : function() {
+    		$('#token').select();
+            var copyFlag = document.execCommand('copy');
+            
+            if (copyFlag) {
+        		alertify.success([[#{msg.common.success}]]);
+            } else {
+            	alertify.error([[#{msg.common.valid}]]);
+            }
+    	},
         loadSearchCondition: function(){
             var searchAreaFlag = $("#defaultSearch option:selected").val();
             $("#searchConditionArea").fadeOut(300);

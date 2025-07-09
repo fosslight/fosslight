@@ -101,8 +101,9 @@ public class ApiProjectController extends CoTopComponent {
 	private final CodeMapper codeMapper;
 	
 	protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
-	
-	@ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+
+
+	@ApiOperation(value = "Search Project List", notes = "Search Project Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -149,7 +150,7 @@ public class ApiProjectController extends CoTopComponent {
 		}
     }
 	
-	@ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+	@ApiOperation(value = "Search Project List", notes = "Search Project Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -180,7 +181,7 @@ public class ApiProjectController extends CoTopComponent {
 		}
 	}
 
-	@ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
+	@ApiOperation(value = "Update model list of project", notes = "Update Model List in Basic Information")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
 	})
@@ -238,7 +239,7 @@ public class ApiProjectController extends CoTopComponent {
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
 	}
 
-	@ApiOperation(value = "Update model list of project with file", notes = "Basic Information > Model list with file")
+	@ApiOperation(value = "Update model list of project with file", notes = "Update Model List in Basic Information with File")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
 	})
@@ -297,7 +298,7 @@ public class ApiProjectController extends CoTopComponent {
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
 	}
 
-	@ApiOperation(value = "Create Project", notes = "project 생성")
+	@ApiOperation(value = "Create Project", notes = "Create New Project")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -487,7 +488,7 @@ public class ApiProjectController extends CoTopComponent {
 		}
     }
 
-	@ApiOperation(value = "Project Bom Tab Export", notes = "Project > Bom tab Export")
+	@ApiOperation(value = "Project Bom Tab Export", notes = "Export Project Bom Tab")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -530,7 +531,7 @@ public class ApiProjectController extends CoTopComponent {
 		}
 	}
 
-	@ApiOperation(value = "Project Bom Tab Export Json", notes = "Project > Bom tab Export Json")
+	@ApiOperation(value = "Project Bom Tab Export Json", notes = "Export Project Bom Tab as JSON")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
 	})
@@ -1653,7 +1654,7 @@ public class ApiProjectController extends CoTopComponent {
 		return responseService.getSingleResult(resultMap);
 	}
 	
-	@ApiOperation(value = "Project Add Watcher", notes = "Project Add Watcher")
+	@ApiOperation(value = "Project Add Editor", notes = "Project Add Editor")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })

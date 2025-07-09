@@ -80,7 +80,7 @@
                                 	<div class="col-md-6 required">
                                 		<label for="inputName" th:text="#{msg.common.field.project.name}"></label><span class="text-orange">*</span>
                                     	<input type="text" id="prjName" name="prjName" class="form-control" th:value="${project?.prjName}" th:disabled="${isReadOnly}">
-                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
+                                    	<span class="retxt text-danger text-sm" th:text="'Required.'"></span>
                                 	</div>
                                     <div class="col-md-4">
                                         <label for="inputName" th:text="#{msg.common.field.project.version}"></label>
@@ -110,7 +110,7 @@
                                     </div>
                                 </div>
                                 <div th:if="${project.viewOnlyFlag != 'Y'}" class="row">
-                                    <div class="col-md-6 mb-0">
+                                    <div class="col-md-3 mb-0">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.permission}"></label>
                                             <div class="form-group">
@@ -127,7 +127,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6 mb-0">
+                                    <div class="col-md-3 mb-0">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.security.mail}"></label>
                                             <div class="form-group">
@@ -148,6 +148,12 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-5">
+                                        <label for="secPersonNm" th:text="#{msg.common.field.security.person}"></label>
+                                        <i class="fas fa-info-circle fa-lg ml-1 icon-light-gray" id="helpLink_securityPerson" data-html="true" data-placement="right"></i>
+                                        <input type="text" id="secPersonNm" name="secPersonNm" th:value="${project?.secPersonNm}" class="form-control autoComSecPerson" th:disabled="${isReadOnly}">
+                                        <input type="hidden" name="secPerson" th:value="${project?.secPerson}" />
+                                    </div>
                                 </div>
                                 <input type="hidden" name="distributeTarget" value="NA"/>
                                 <input type="hidden" name="noticeType" value="10"/>
@@ -156,7 +162,7 @@
                                         <label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>
                                     	<select class="form-control select2" id="osType" name="osType" style="width: 100%;" th:disabled="${isReadOnly}">
                                    			<option value="" th:text="''"></option>
-                                   			<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
+                                   			<th:block th:each="option : ${@CoCodeManager.getCodeDtlsRegardlessUseYn(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
                                         		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.osType != null && option.cdDtlNo == project.osType}"></option>
                                        		</th:block>
                                     	</select>

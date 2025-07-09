@@ -2059,7 +2059,7 @@ public class ExcelUtil extends CoTopComponent {
 		List<Project> modelDeleteList = projectMapper.selectDeleteModelList(prjId);
 
 		Map<String, Project> osddModelInfo = new HashMap<>();
-		String modelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+		String modelCode = CoConstDef.CD_MODEL_TYPE;
 
 		if (modelList != null) {
 			for (Project bean : modelList) {
@@ -3056,7 +3056,7 @@ public class ExcelUtil extends CoTopComponent {
 			String fileName = multipart.getOriginalFilename();
 			String[] fileNameArray = StringUtil.split(fileName, File.separator);
 			fileName = fileNameArray[fileNameArray.length - 1];
-			File file = new File( "."+excelLocalPath +fileName);
+			File file = new File(excelLocalPath +fileName);
 			FileUtil.transferTo(multipart, file);
 			HSSFWorkbook wbHSSF = null;
 			XSSFWorkbook wbXSSF = null;
@@ -3137,7 +3137,7 @@ public class ExcelUtil extends CoTopComponent {
 	/**Excel 헤더 체크*/
 	public static boolean checkHeaderLicenseColumnValidate(Iterator<Cell> cellIterator, Map<Integer, String> columnCheckMap) {
 		List<String> definedColData = Arrays.asList(new String[] {"LICENSE NAME", "LICENSE TYPE", "NOTICE", "SOURCE CODE",
-				"SPDX SHORT IDENTIFIER", "NICKNAME", "WEBSITE FOR THE LICENSE",
+				"SPDX SHORT IDENTIFIER", "NICKNAME", "WEBSITE FOR THE LICENSE", "DISCLOSING SRC", "RESTRICTION",
 				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"});
 
 		List<String> firstRowColData = new ArrayList<>();
@@ -3338,6 +3338,18 @@ public class ExcelUtil extends CoTopComponent {
 						webpage.replaceAll("(\r\n|\r|\n|\n\r)", "");
 					});
 					licenseMaster.setWebpages(webpages);
+					break;
+				case "DISCLOSING SRC" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setDisclosingSrc(value);
+					break;
+				case "RESTRICTION" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setRestriction(value);
 					break;
 				case "USER GUIDE" :
 					if (value == null || value.trim().isEmpty()) {

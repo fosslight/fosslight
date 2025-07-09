@@ -18,7 +18,9 @@ $(document).ready(function () {
 	loadingIden.show();
 	
 	com_evt.init();
-	if (partnerFlag) party_evt.init();
+ 	if (partnerFlag) {
+ 		party_evt.init();
+ 	}
 	dep_evt.init();
 	src_evt.init();
 	bin_evt.init();
@@ -390,7 +392,15 @@ var fn = {
                 alertify.error([[#{msg.common.valid2}]], 0);
             }
         });
-    }
+    },
+    onUpdateSuccess : function(json, status){
+		loading.hide();
+	    if (json.resCd == '10'){
+	    	alertify.success([[#{msg.common.success}]]);
+	   	} else {
+	    	alertify.error([[#{msg.common.valid2}]], 0);
+	   	}
+	}
 }
 </script>
 </th:block>

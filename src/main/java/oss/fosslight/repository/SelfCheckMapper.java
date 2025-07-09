@@ -288,5 +288,5 @@ public interface SelfCheckMapper {
 
 	List<OssComponents> checkSelectDownloadFile(Project project);
 
-	void resetOssComponentsAndLicense(ProjectIdentification projectIdentification);
+	void resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
 }

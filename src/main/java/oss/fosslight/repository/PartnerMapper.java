@@ -164,4 +164,6 @@ public interface PartnerMapper {
 	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
 	
 	int updateOssFileId(PartnerMaster partnerMaster);
+	
+	void deleteFileBySeq(T2File file);
 }

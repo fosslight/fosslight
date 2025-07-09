@@ -66,10 +66,24 @@
 			AND (T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%') OR T3.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%'))
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(creator,'NONE')">
+					AND T1.CREATOR IN ('oscAdmin', 'sungwon.yun')
+				</when>
+				<otherwise>
+					AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(modifier,'NONE')">
+					AND T1.MODIFIER IN ('oscAdmin', 'sungwon.yun')
+				</when>
+				<otherwise>
+					AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
 			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate} 
@@ -99,6 +113,14 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
 			AND T1.DISCLOSING_SRC = #{disclosingSrc}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.LICENSE_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE REFERENCE_DIV = '30'
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
 		</if>
 		/* 2018-07-25 choye 추가 */ 
 		<if test="arrRestriction != null">
@@ -188,10 +210,24 @@
 			AND (T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%') OR T3.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%'))
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(creator,'NONE')">
+					AND T1.CREATOR = 'oscAdmin'
+				</when>
+				<otherwise>
+					AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(modifier,'NONE')">
+					AND T1.MODIFIER IN ('oscAdmin', 'sungwon.yun')
+				</when>
+				<otherwise>
+					AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
 			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate} 
@@ -221,6 +257,14 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
 			AND T1.DISCLOSING_SRC = #{disclosingSrc}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(comment)">
+			AND T1.LICENSE_ID IN (
+				SELECT REFERENCE_ID
+				FROM COMMENTS_HISTORY
+				WHERE REFERENCE_DIV = '30'
+				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
+			)
 		</if>
 		<if test="arrRestriction != null">
 			AND
@@ -548,44 +592,7 @@
 		DELETE FROM LICENSE_NICKNAME WHERE LICENSE_ID=#{licenseId}
 	</delete>
 	
-	 <select id="existNetworkServerLicense" parameterType="String" resultType="String">
-    	SELECT CD_DTL_NO
-    	  FROM T2_CODE_DTL 
-    	 WHERE CD_NO = '122'
-    	   AND CD_DTL_NM IN (SELECT LICENSE_NAME
-    	   					   FROM LICENSE_MASTER 
-    	   					  WHERE LICENSE_ID = #{licenseId})
-    </select>
-    
-    <insert id="insertNetworkServerLicense" parameterType="String">
-    	INSERT INTO T2_CODE_DTL
-	    	(CD_NO
-	    	, CD_DTL_NO
-	    	, CD_DTL_NM
-	    	, CD_SUB_NO
-	    	, CD_DTL_EXP
-	    	, CD_ORDER
-	    	, USE_YN)
-	    	SELECT '122' AS CD_NO
-				 , (SELECT MAX(CD_ORDER)+1 AS CNT FROM T2_CODE_DTL WHERE CD_NO = '122') AS CD_DTL_NO
-				 , LICENSE_NAME AS CD_DTL_NM
-				 , '' AS CD_SUB_NO
-				 , '' AS CD_DTL_EXP
-				 , (SELECT MAX(CD_ORDER)+1 AS CNT FROM T2_CODE_DTL WHERE CD_NO = '122') AS CD_ORDER
-				 , 'Y' AS USE_YN
-			  FROM LICENSE_MASTER
-			 WHERE LICENSE_ID = #{licenseId}
-    </insert>
-    
-    <delete id="deleteNetworkServerLicense" parameterType="String">
-    	DELETE FROM T2_CODE_DTL 
-    	 WHERE CD_NO = '122' 
-    	   AND CD_DTL_NM IN (SELECT LICENSE_NAME
-							   FROM LICENSE_MASTER
-							  WHERE LICENSE_ID = #{licenseId})
-    </delete>
-    
-    <select id="getOssListWithLicenseForTypeCheck" parameterType="String" resultType="String">
+	<select id="getOssListWithLicenseForTypeCheck" parameterType="String" resultType="String">
 		SELECT DISTINCT T1.OSS_ID FROM OSS_VERSION T1 INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		WHERE T1.USE_YN = 'Y'
 		AND T2.LICENSE_ID = #{licenseId}

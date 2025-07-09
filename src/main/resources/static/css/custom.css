@@ -986,7 +986,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 .mt10 {margin-top:10px;}
 .ui-autocomplete {z-index:1001; max-height:240px; overflow-y: auto; overflow-x: hidden;}
 
-.pop {position:fixed;top:35%;left:25%;z-index:1001;display:none;padding:0 30px;border-top:3px solid #c00c3f;background:#f4f4f4;}
+.pop {position:fixed;top:35%;left:25%;z-index:1001;display:none;padding:0 30px;background:#f4f4f4;}
 .changeStatusPop {width:400px;margin:-158px 0 0 -260px;}
 .pop .pbtn {clear:left;padding-bottom:30px;text-align:center;display:inline-block;width:100%;}
 
@@ -1202,3 +1202,6 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .note-editor.note-frame table th {border: 1px solid #ddd;}
 .note-editor.note-frame table td {border: 1px solid #ddd;}
 .checkBulkEdit {background-color: #fbf9ee;}
+.comment-inner-table-td {text-align:center; padding: 0.5rem;}
+.collaptable .b-right {border-right: 0px solid !important}
+.collaptable .b-left {border-left: 0px solid !important}

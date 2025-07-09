@@ -78,7 +78,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
     private final ProjectService projectService;
 
-    @ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
+    @ApiOperation(value = "Create SelfCheck", notes = "Create New SelfCheck")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_CREATE})
     public ResponseEntity<Map<String, Object>> createSelfCheck(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -230,7 +230,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                 }
             }
 
-            if (rtnMap.containsKey("validError")) {
+            if (rtnMap != null && rtnMap.containsKey("validError")) {
                 return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, getMessage("api.dataValidationError.msg")); // data validation error
             }
 
