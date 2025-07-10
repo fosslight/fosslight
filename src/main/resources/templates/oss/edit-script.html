@@ -441,41 +441,53 @@
 			
 			//Download Location Input 추가
 			$('#downloadLocationAdd').on('click', function(){
+				var isDuplicated = false;
 				var downloadLocation = $("#input_downloadLocations").val();
-				if (downloadLocation.endsWith("/")) {
-					downloadLocation = downloadLocation.slice(0, -1);
-				}
+				$("input[name='downloadLocations']").each(function (i) {
+					let dl = $("input[name='downloadLocations']").eq(i).val();
+					if ($.trim(dl) == $.trim(downloadLocation)) {
+						isDuplicated = true;
+					}
+				});
 				
-				let downloadLocationHtml 	= 	'<div class="col-md-12">';
-				downloadLocationHtml 		+=		'<div class="row">';
-				downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
-				downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
-                if (isReadOnly == 'true' || isReadOnly) {
-                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
-                } else {
-                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
-                }
-				downloadLocationHtml 		+=				'</div>';
-				downloadLocationHtml 		+= 			'</div>';
-				downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
-				downloadLocationHtml 		+= 				'<div class="row">';
-				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-				downloadLocationHtml 		+=						'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
-				downloadLocationHtml 		+=						'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
-				downloadLocationHtml 		+=					'</div>';
-				downloadLocationHtml 		+=					'<span class="urltxt"></span>';
-				downloadLocationHtml 		+=					'<span class="retxt"></span>';
-				downloadLocationHtml 		+=				'</div>';
-				downloadLocationHtml 		+= 			'</div>';
-				downloadLocationHtml 		+= 		'</div>';
-				downloadLocationHtml 		+= 	'</div>';
-				
-				$(".multiDownloadLocationSet").append(downloadLocationHtml);
-				$("#input_downloadLocations").val("");
-				
-				if ('' != downloadLocation){
-					$(".multiDownloadLocationSet > div:last").find("input").trigger("blur");
+				if (isDuplicated) {
+					alertify.alert("Please check the duplicate download location.", function(){});
+				} else {
+					if (downloadLocation.endsWith("/")) {
+						downloadLocation = downloadLocation.slice(0, -1);
+					}
+					
+					let downloadLocationHtml 	= 	'<div class="col-md-12">';
+					downloadLocationHtml 		+=		'<div class="row">';
+					downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
+					downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
+	                if (isReadOnly == 'true' || isReadOnly) {
+	                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
+	                } else {
+	                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+	                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
+	                }
+					downloadLocationHtml 		+=				'</div>';
+					downloadLocationHtml 		+= 			'</div>';
+					downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
+					downloadLocationHtml 		+= 				'<div class="row">';
+					downloadLocationHtml 		+= 					'<div class="col-lg-12">';
+					downloadLocationHtml 		+=						'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
+					downloadLocationHtml 		+=						'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
+					downloadLocationHtml 		+=					'</div>';
+					downloadLocationHtml 		+=					'<span class="urltxt"></span>';
+					downloadLocationHtml 		+=					'<span class="retxt"></span>';
+					downloadLocationHtml 		+=				'</div>';
+					downloadLocationHtml 		+= 			'</div>';
+					downloadLocationHtml 		+= 		'</div>';
+					downloadLocationHtml 		+= 	'</div>';
+					
+					$(".multiDownloadLocationSet").append(downloadLocationHtml);
+					$("#input_downloadLocations").val("");
+					
+					if ('' != downloadLocation){
+						$(".multiDownloadLocationSet > div:last").find("input").trigger("blur");
+					}
 				}
 			});
 			
