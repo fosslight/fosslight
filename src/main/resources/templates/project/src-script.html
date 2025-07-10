@@ -305,6 +305,12 @@ var src_fn = {
 		var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
 		var mainData = target.jqGrid('getGridParam','data');
 		var srcAddListData = $("#_srcAddList").jqGrid("getRowData");
+		mainData.forEach (function (el, index) {
+			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
+				el.packageUrl = "";
+			}
+		});
+		
 		// 최종 데이터
 		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
 				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData), "srcAddListData" : JSON.stringify(srcAddListData)};

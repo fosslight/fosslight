@@ -151,6 +151,11 @@ var bin_fn = {
 		
 		// 메인 그리드
 		var mainData = target.jqGrid('getGridParam','data');
+		mainData.forEach (function (el, index) {
+			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
+				el.packageUrl = "";
+			}
+		});
 		// 서브 그리드
 		var subData = [];
 		var binAddListData = $("#_binAddList").jqGrid("getRowData");

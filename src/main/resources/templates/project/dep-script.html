@@ -200,14 +200,31 @@ var dep_fn = {
 		var identificationSubStatusDep = $("input[name='identificationSubStatusDep']").val();
 		var mainData = target.jqGrid('getGridParam','data');
 		var depAddListData = $("#_depAddList").jqGrid("getRowData");
-		// 최종 데이터
-		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
-				   , "identificationSubStatusDep" : identificationSubStatusDep, "mainData" : JSON.stringify(mainData), "depAddListData" : JSON.stringify(depAddListData)};
 		
-		if (resetFlag) {
-			dep_fn.resetExeSave(finalData);
+		var chkMainData = [];
+		mainData.forEach (function (el, index) {
+			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl && el.packageUrl.length > 2000) {
+				let ossVersion = "" != el.ossVersion ? el.ossVersion : "N/A";
+				chkMainData.push(el.ossName + " (" + ossVersion + ")");
+			}
+		});
+		
+		if (chkMainData.length > 0) {
+			let message = [[#{msg.common.check.maxlength.over.data}]];
+    		chkMainData.forEach (function (el, index) {
+				message += "<br>&emsp;- " + el;
+			});
+    		alertify.alert(message, function(){});
 		} else {
-			dep_fn.nickNameValid(mainData, finalData);
+			// 최종 데이터
+			var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
+					   , "identificationSubStatusDep" : identificationSubStatusDep, "mainData" : JSON.stringify(mainData), "depAddListData" : JSON.stringify(depAddListData)};
+			
+			if (resetFlag) {
+				dep_fn.resetExeSave(finalData);
+			} else {
+				dep_fn.nickNameValid(mainData, finalData);
+			}
 		}
 	},
 	// 닉네임 체크
