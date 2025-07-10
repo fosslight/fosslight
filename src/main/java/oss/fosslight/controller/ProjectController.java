@@ -434,6 +434,59 @@ public class ProjectController extends CoTopComponent {
 		}
 	}
 	
+	@RequestMapping(value = { PROJECT.EDIT_DIV_ID }, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	public String editDiv(@PathVariable String prjId, @PathVariable String initDiv, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
+		project = projectService.getProjectDetail(project);
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
+		comHisBean.setReferenceId(project.getPrjId());
+		
+		project.setUserComment(commentService.getUserComment(comHisBean));
+
+		model.addAttribute("project", project);
+		model.addAttribute("detail", project);
+		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("initDiv", initDiv);
+		
+		List<String> permissionCheckList = null;
+		boolean permissionFlag = false;
+		
+		if (!CommonFunction.isAdmin()) {
+			project.setPrjIds(new String[] {prjId});
+			permissionCheckList = CommonFunction.checkUserPermissions("", project.getPrjIds(), "project");
+			if (permissionCheckList.contains(loginUserName())) {
+				permissionFlag = true;
+			}
+
+		}
+		
+		if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
+				&& !CommonFunction.isAdmin()
+				&& !permissionFlag) {
+			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
+			
+			return "project/view";
+		} else {
+			if (!CommonFunction.isAdmin() && !permissionFlag) {
+				List<T2Users> userList = userService.selectAllUsers();
+				
+				if (userList != null) {
+					model.addAttribute("userWithDivisionList", userList);
+				}
+				
+				return "project/view";
+			} else {
+				return "project/edit";
+			}
+		}
+	}
+	
 	@RequestMapping(value = { PROJECT.VIEW_ID }, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
 	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) throws IOException {
 		Project project = new Project();

@@ -1240,6 +1240,11 @@
 			},
 			// 성공 콜백
 			onRegistSuccess : function(json, status){
+				var callbackUrl = '/project/edit/';
+				if (!$(".basicInfoCommentArea").is(":visible")) {
+					callbackUrl += "1/"
+				}
+				
 				if ('Y' == completeYn){
 					fn.disabledCompleteRow(true);
 				}
@@ -1281,7 +1286,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
-								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1290,7 +1295,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
-								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1303,7 +1308,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
-								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1313,7 +1318,7 @@
 								
 								if (prjId == '') {
 									deleteTabInFrame('/project/edit');
-									createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+									createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								} else {
 									var status = data.detail.distributionStatus;
 									var flag = "false";
@@ -1333,7 +1338,7 @@
 										);
 									} else {
 										deleteTabInFrame('/project/edit/' +prjId);
-										createTabInFrame(prjId + '_Project', '/project/edit/' + prjId);
+										createTabInFrame(prjId + '_Project', callbackUrl + prjId);
 									}
 								}
 							});	
@@ -2650,6 +2655,10 @@
 			
 			commentsParam.height = $(window).height() - 120;
 			fn_comment.getCommentList(commentsParam);
+			
+			if ([[${initDiv}]] != null) {
+				fn_comment.activateCommentArea();
+			}
 		},
 		getModelGridData : function(param){
 			$.ajax({

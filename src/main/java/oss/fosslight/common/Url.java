@@ -277,6 +277,7 @@ public final class Url {
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		public static final String EDIT_ID =  PATH + "/edit/{prjId}";
+		public static final String EDIT_DIV_ID =  PATH + "/edit/{initDiv}/{prjId}";
 		
 		public static final String VIEW_ID =  PATH + "/view/{prjId}";
 		public static final String VIEW_JSP = TILES_ROOT + PATH + "/view";
