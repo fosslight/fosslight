@@ -339,6 +339,9 @@ var Ctrl_fn = {
 	downloadLocationAdd : function(seq) {
 		var isDuplicated = false;
 		var downloadLocation = $("#input_downloadLocations" + seq).val();
+		if (downloadLocation.endsWith("/")) {
+			downloadLocation = downloadLocation.slice(0, -1);
+		}
 		$("input[name='downloadLocations"+seq+"']").each(function (i) {
 			let dl = $("input[name='downloadLocations"+seq+"']").eq(i).val();
 			if ($.trim(dl) == $.trim(downloadLocation)) {
@@ -349,10 +352,6 @@ var Ctrl_fn = {
 		if (isDuplicated) {
 			alertify.alert("Please check the duplicate download location.", function(){});
 		} else {
-			if (downloadLocation.endsWith("/")) {
-				downloadLocation = downloadLocation.slice(0, -1);
-			}
-			
 			let downloadLocationHtml 	= 	'<div class="col-md-12 mt-1 pl-0">';
 			downloadLocationHtml 		+=		'<div class="row">';
 			downloadLocationHtml 		+= 			'<div class="col-lg-12" style="margin-top: 5px;">';
