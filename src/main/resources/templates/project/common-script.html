@@ -240,12 +240,37 @@ var com_evt = {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}
 		});
-		
-		// bomRequest 버튼 
-		$('#bomRequest').click(function(e){
-			if (com_fn.checkStatus()){
-				e.preventDefault();
-				
+        // bomRequest 버튼
+        $('#bomRequest').click(function(e){
+            if (com_fn.checkStatus()){
+                e.preventDefault();
+
+                // distributionType이 101(SelfCheck)인 경우 에러 팝업
+                var distributionType = [[${project.distributionType}]];
+                if (distributionType == [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_SELFCHECK')}]]) {
+                    alertify.alert([[#{msg.project.cannot.request}]], function(){});
+                    return false;
+                } else {
+                    // CD_DTL_NOTICE_TYPE_INHOUSEONLY인 경우 먼저 확인 팝업
+                    if (distributionType == [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_INHOUSEONLY')}]]) {
+                        alertify.confirm([[#{msg.project.ask.request}]], function(e){
+                            if (e) {
+                                // 확인을 눌렀을 때만 다음 단계 진행
+                                proceedWithBomChecks();
+                            }
+                        });
+                        return false;
+                    } else {
+                        // CD_DTL_NOTICE_TYPE_INHOUSEONLY가 아닌 경우 바로 진행
+                        proceedWithBomChecks();
+                    }
+                }
+            } else {
+                alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+            }
+        });
+
+        function proceedWithBomChecks() {
 				// in case of bin-android and Yocto
 				if (isAndroidModel) {
 					if ("" == $('#srcAndroidNoticeFileId').val()) {
@@ -322,10 +347,7 @@ var com_evt = {
 				} else {
 					com_fn.bomReqeustStart();
 				}
-			} else {
-				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}
-		});
 		
 		// bomReviewStart 버튼 
 		$('#bomReviewStart').click(function(e) {

@@ -44,7 +44,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 * License, OSS
   - Added Share URL button
   - Change color of Restriction icon based on the level
-가* DataBase
+* DataBase
   -  Added column
     - PROJECT_MASTER: PACKAGE_FILE_ID5
   - Deleted columns
