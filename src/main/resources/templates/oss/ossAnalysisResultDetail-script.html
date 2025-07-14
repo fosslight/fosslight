@@ -998,16 +998,18 @@ var Ctrl_fn = {
 					
 					$("div.retxt").show();
 				} else {
-					if(key == 'ossNicknames'){
+					if (key == 'ossNicknames') {
 						$(ossForm + ' input[name=ossNicknames]').parent().next("span.retxt").html(value).show();
-					}
-					
-					if($(ossForm + ' input[name='+key+']').length > 0) {
-						$(ossForm + ' input[name='+key+']').next("span.retxt").html(value).show();
-					} else if($(ossForm + ' textarea[name='+key+']').length > 0) {
-						$(ossForm + ' textarea[name='+key+']').next("span.retxt").html(value).show();
-					} else if($(ossForm  + ' select[name='+k+']').length > 0) {
-						$(ossForm + ' select[name='+key+']').parent().siblings("span.retxt").html(value).show();
+					} else if (key.indexOf("licenseName") > -1) {
+						$('.mark' + seq).next("span.retxt").html(value).show();
+					} else {
+						if ($(ossForm + ' input[name='+key+']').length > 0) {
+							$(ossForm + ' input[name='+key+']').next("span.retxt").html(value).show();
+						} else if($(ossForm + ' textarea[name='+key+']').length > 0) {
+							$(ossForm + ' textarea[name='+key+']').next("span.retxt").html(value).show();
+						} else if($(ossForm  + ' select[name='+k+']').length > 0) {
+							$(ossForm + ' select[name='+key+']').parent().siblings("span.retxt").html(value).show();
+						}
 					}
 				}
 				
@@ -1443,7 +1445,7 @@ var grid_fn = {
 		}
 		
 		if(markTxt.indexOf('undefined') == -1){
-			$('.licenseMulti .mark'+seq).html(markTxt);
+			$('.mark'+seq).html(markTxt);
 		}
 	},
 	makeBackGroundColor : function(_target){
