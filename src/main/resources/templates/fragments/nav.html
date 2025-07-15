@@ -63,6 +63,11 @@
 		<!-- Right navbar links -->
 		<ul class="navbar-nav ml-auto">
 			<!-- Navbar Search -->
+			<li class="nav-item" th:if="${@environment.getProperty('chatbotFlag') != null}">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="fas fa-user-astronaut" data-toggle="tooltip"  title="Hub ChatBot" th:onclick="|openHelpGuideLink('ChatBot_Link')|"></i>
+				</a>
+			</li>
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="dropdown" href="#">
 					<i class="fas fa-book" data-toggle="tooltip"  title="Hub Homepage" th:onclick="|openHelpGuideLink('Hompage_Link')|"></i>
