@@ -3382,6 +3382,7 @@ public class ProjectController extends CoTopComponent {
 		String partyGrid = (String) map.get("partyGrid");
 		String srcMainGrid = (String) map.get("srcMainGrid");
 		String binMainGrid = (String) map.get("binMainGrid");
+		String depMainGrid = (String) map.get("depMainGrid");
 		String status = (String) map.get("status");
 
 		// party
@@ -3404,7 +3405,26 @@ public class ProjectController extends CoTopComponent {
 					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
 					srcSubData,
 					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-		}		// bin
+		}
+		// dep
+		Type depType = new TypeToken<List<ProjectIdentification>>() {
+		}.getType();
+		List<ProjectIdentification> depData = new ArrayList<ProjectIdentification>();
+		depData = (List<ProjectIdentification>) fromJson(depMainGrid, depType);
+		if (!CollectionUtils.isEmpty(depData)) {
+			depData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+		}
+
+		List<List<ProjectIdentification>> depSubData = CommonFunction.setOssComponentLicense(depData);
+
+		if(depSubData != null && !depSubData.isEmpty()) {
+			depSubData = CommonFunction.mergeGridAndSession(
+					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData,
+					depSubData,
+					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+		}
+
+		// bin
 		Type binType = new TypeToken<List<ProjectIdentification>>() {
 		}.getType();
 		List<ProjectIdentification> binData = new ArrayList<ProjectIdentification>();
@@ -3423,8 +3443,8 @@ public class ProjectController extends CoTopComponent {
 		}
 		// 체크 서비스 호출
 		String errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData,
-				binSubData, (String) map.get("applicableParty"), (String) map.get("applicableSrc"),
-				(String) map.get("applicableBin"));
+				binSubData, depData, depSubData, (String) map.get("applicableParty"), (String) map.get("applicableSrc"),
+				(String) map.get("applicableBin"), (String) map.get("applicableDep"));
 		
 		if (!isEmpty(errMsg)) {
 			return makeJsonResponseHeader(false, errMsg);

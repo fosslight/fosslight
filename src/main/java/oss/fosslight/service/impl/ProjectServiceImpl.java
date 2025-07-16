@@ -5296,7 +5296,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData,
 			List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
 			List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
-			String applicableParty, String applicableSrc, String applicableBin) {
+			List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData,
+			String applicableParty, String applicableSrc, String applicableBin, String applicableDep) {
 		
 		// 현재 DB에 등록되어 있는 정보와 CLIENT에서 넘어온 정보를 SORT 한 후 문자열로 비교한다.
 		// TRIM, 대소문자를 무시하고, 주요 칼럼만 비교한다.
@@ -5307,29 +5308,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> dbPartnerList = new ArrayList<>();
 		List<String> dbSrcList = new ArrayList<>();
 		List<String> dbBinList = new ArrayList<>();
+		List<String> dbDepList = new ArrayList<>();
 
 		List<String> partnerList = null;
 		List<String> srcList = null;
 		List<String> binList = null;
+		List<String> depList = null;
 
 		// LICENSE NAME으로 비교시 SHORT IDENTIFIER로 설정된 경우 에러로 판단하는 오류 대응을 위해 두가지 패턴으로 체크
 		List<String> partnerList2 = null;
 		List<String> srcList2 = null;
 		List<String> binList2 = null;
+		List<String> depList2 = null;
 
 		boolean partnerUseFlag = CoConstDef.FLAG_NO.equals(applicableParty);
 		boolean srcUseFlag = CoConstDef.FLAG_NO.equals(applicableSrc);
 		boolean binUseFlag = CoConstDef.FLAG_NO.equals(applicableBin);
+		boolean depUseFlag = CoConstDef.FLAG_NO.equals(applicableDep);
 		boolean dbPartnerUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusPartner());
 		boolean dbSrcUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusSrc());
 		boolean dbBinUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusBin());
-		
+		boolean dbDepUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusDep());
+
 		if (partnerUseFlag != dbPartnerUseFlag) {
 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
 		} else if (srcUseFlag != dbSrcUseFlag) {
 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
 		} else if (binUseFlag != dbBinUseFlag) {
 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
+		} else if (depUseFlag != dbDepUseFlag) {
+			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP)});
 		}
 		
  		if (dbInfoList != null && !dbInfoList.isEmpty()) {
@@ -5344,7 +5352,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
  					dbSrcList.add(key);
  				} else if (!dbBinUseFlag && key.startsWith(CoConstDef.CD_DTL_COMPONENT_ID_BIN)) {
  					dbBinList.add(key);
- 				}
+ 				} else if (!dbDepUseFlag && key.startsWith(CoConstDef.CD_DTL_COMPONENT_ID_DEP)) {
+					dbDepList.add(key);
+				}
  			}
 		}
  		
@@ -5364,6 +5374,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
  			binList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_BIN, binData, binSubData);
  			binList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_BIN, binData, binSubData, true);
  		}
+
+		if (!depUseFlag && depData != null && depSubData != null) {
+			depList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_DEP, depData, depSubData);
+			depList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_DEP, depData, depSubData, true);
+		}
  		
  		if (partnerList == null) {
  			partnerList = new ArrayList<>();
@@ -5379,6 +5394,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
  			binList = new ArrayList<>();
  			binList2 = new ArrayList<>();
  		}
+
+		if (depList == null) {
+			depList = new ArrayList<>();
+			depList2 = new ArrayList<>();
+		}
  		
  		// 1) 건수 비교 
  		// 2) 건수가 동일하기 때문에 sort후 text 비교
@@ -5388,7 +5408,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
  			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
  		} else if (binList.size() != dbBinList.size() || !compareList(binList, binList2, dbBinList)) {
  			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
- 		}
+ 		} else if (depList.size() != dbDepList.size() || !compareList(depList, depList2, dbDepList)) {
+			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP)});
+		}
  		
  		return null;
 	}

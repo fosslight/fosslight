@@ -108,7 +108,8 @@ public interface ProjectService extends HistoryConfig{
 
 	String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData,
 			List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
-			List<ProjectIdentification> batData, List<List<ProjectIdentification>> batSubData, String applicableParty, String applicableSrc, String applicableBat);
+			List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
+			List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData, String applicableParty, String applicableSrc, String applicableBin, String applicableDep);
 
 	Map<String, Object> applySrcAndroidModel(List<ProjectIdentification> list, List<String> noticeBinaryList) throws IOException;
 
