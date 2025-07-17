@@ -4820,14 +4820,14 @@ public class ProjectController extends CoTopComponent {
 			
 			ProjectIdentification beforeIdentification = new ProjectIdentification();
 			beforeIdentification.setReferenceId(beforePrjId);
+			beforeIdentification.setMerge(CoConstDef.FLAG_NO);
 			
-			if(!beforePrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			if (!beforePrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				beforeIdentification.setMerge("N");
 			} else {
-				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
-				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 			}
 			
 			Project afterPrjInfo = projectService.getProjectBasicInfo(afterPrjId);
@@ -4835,14 +4835,14 @@ public class ProjectController extends CoTopComponent {
 			
 			ProjectIdentification AfterIdentification = new ProjectIdentification();
 			AfterIdentification.setReferenceId(afterPrjId);
+			AfterIdentification.setMerge(CoConstDef.FLAG_NO);
 			
-			if(!afterPrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			if (!afterPrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				AfterIdentification.setMerge("N");
 			} else {
-				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
-				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 			}
 			
 			Map<String, Object> beforeBom = new HashMap<String, Object>();
@@ -4853,36 +4853,20 @@ public class ProjectController extends CoTopComponent {
 			boolean afterDataFlag = false;
 			
 			beforeBom = getOssComponentDataInfo(beforeIdentification, beforeReferenceDiv);
-			if (beforeReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
-				if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
-					beforeDataFlag = true;
-				} else {
-					beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
-				}
+			if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+				beforeDataFlag = true;
 			} else {
-				if (!beforeBom.containsKey("mainData") || (List<ProjectIdentification>) beforeBom.get("mainData") == null) {
-					beforeDataFlag = true;
-				} else {
-					beforeBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) beforeBom.get("mainData"));
-				}
+				beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
 			}
 			if (beforeDataFlag || beforeBomList == null) {
 				return makeJsonResponseHeader(false, "1");
 			}
 			
 			afterBom = getOssComponentDataInfo(AfterIdentification, afterReferenceDiv);
-			if (afterReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
-				if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
-					afterDataFlag = true;
-				} else {
-					afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
-				}
+			if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+				afterDataFlag = true;
 			} else {
-				if (!afterBom.containsKey("mainData") || (List<ProjectIdentification>) afterBom.get("mainData") == null) {
-					afterDataFlag = true;
-				} else {
-					afterBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) afterBom.get("mainData"));
-				}
+				afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
 			}
 			if (afterDataFlag || afterBomList == null) {
 				return makeJsonResponseHeader(false, "1");
