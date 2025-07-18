@@ -5399,20 +5399,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			depList = new ArrayList<>();
 			depList2 = new ArrayList<>();
 		}
+
+		List<String> diffList = new ArrayList<>();
  		
  		// 1) 건수 비교 
  		// 2) 건수가 동일하기 때문에 sort후 text 비교
- 		if (partnerList.size() != dbPartnerList.size() || !compareList(partnerList, partnerList2, dbPartnerList)) {
- 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
- 		} else if (srcList.size() != dbSrcList.size() || !compareList(srcList, srcList2, dbSrcList)) {
- 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
- 		} else if (binList.size() != dbBinList.size() || !compareList(binList, binList2, dbBinList)) {
- 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
- 		} else if (depList.size() != dbDepList.size() || !compareList(depList, depList2, dbDepList)) {
-			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP)});
+		if (partnerList.size() != dbPartnerList.size() || !compareList(partnerList, partnerList2, dbPartnerList)) {
+			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER));
 		}
- 		
- 		return null;
+		if (srcList.size() != dbSrcList.size() || !compareList(srcList, srcList2, dbSrcList)) {
+			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC));
+		}
+		if (binList.size() != dbBinList.size() || !compareList(binList, binList2, dbBinList)) {
+			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN));
+		}
+		if (depList.size() != dbDepList.size() || !compareList(depList, depList2, dbDepList)) {
+			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP));
+		}
+		if(!diffList.isEmpty()) {
+			return getMessage("msg.project.check.changed", new String[]{StringUtil.join(diffList, ", ")});
+		}
+		return null;
 	}
 	
 	private boolean compareList(List<String> list, List<String> list2, List<String> dbList) {
