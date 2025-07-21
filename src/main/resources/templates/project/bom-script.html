@@ -101,19 +101,33 @@ var bom_fn = {
             }
  			
  			// obligationType 설정
- 			if ("Y" == row["notify"]) {
- 				if ("Y" == row["source"]) {
- 					row["obligationType"] = "11";
- 				} else {
- 					row["obligationType"] = "10";
- 				}
- 			} else {
- 				if ("Y" == row["source"]) {
- 					row["obligationType"] = "12";
- 				} else {
- 					row["obligationType"] = "";
- 				}
+ 			let notify = row["notify"];
+ 			let source = row["source"];
+ 			if ($(notify).attr("title") !== "undefined") {
+ 				row["obligationType"] = $(notify).attr("title");
  			}
+ 			if ($(source).attr("title") !== "undefined") {
+ 				row["obligationType"] = $(source).attr("title";
+ 			} else {
+ 				if ("Y" == row["notify"]) {
+ 	 				if ("Y" == row["source"]) {
+ 	 					row["obligationType"] = "11";
+ 	 				} else {
+ 	 					row["obligationType"] = "10";
+ 	 				}
+ 	 			} else {
+ 	 				if ("Y" == row["source"]) {
+ 	 					row["obligationType"] = "12";
+ 	 				} else {
+ 	 					row["obligationType"] = "";
+ 	 				}
+ 	 			}
+ 			}
+ 			
+			let cvssScore = row["cvssScore"];
+			if ($(cvssScore ).attr("title") !== "undefined") {
+				row["cvssScore"] = $(cvssScore).attr("title");
+			}
  			
  			if ("Y" == row["adminCheck"]) {
  				row["adminCheckYn"] = "Y";
@@ -233,11 +247,11 @@ var bom_fn = {
 		if ("Y" != notAdminCheck) {
 			if (adminCheck == false) {
 				if (preObligationType == 10 || preObligationType == 11){
-					display="<i class=\"fas fa-check fa-2xs\"></i>";
+					display="<i class=\"fas fa-check fa-2xs\" title=\"" + preObligationType + "\"></i>";
 				}
 
 				if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
-					display="<i class=\"fas fa-check fa-2xs\"></i>";
+					display="<i class=\"fas fa-check fa-2xs\" title=\"" + obligationType + "\"></i>";
 				}
 			} else if (adminCheck == true && obligationType == 12) {
 				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
@@ -250,7 +264,7 @@ var bom_fn = {
 					+ '<option value="N" '+((obligationType!='10' && obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
 					+ '</select>';
 			} else if(obligationLicense == 10 || obligationLicense == 11) {
-				display = "<i class=\"fas fa-check fa-2xs\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\" title=\"" + obligationLicense + "\"></i>";
 			}
 		}
 		
@@ -270,11 +284,11 @@ var bom_fn = {
 		
 		if(adminCheck == false) {
 			if (preObligationType == 11) {
-				display = "<i class=\"fas fa-check fa-2xs\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\" title=\"" + preObligationType + "\"></i>";
 			}
 
 			if (preObligationType == undefined && obligationType == 11){
-				display = "<i class=\"fas fa-check fa-2xs\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\" title=\"" + obligationType + "\"></i>";
 			}
 		} else if (adminCheck == true && obligationType == 12) {
 			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
@@ -287,7 +301,7 @@ var bom_fn = {
 				+ '<option value="N" '+((obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
 				+ '</select>';
 		} else if(obligationLicense == 11) {
-			display = "<i class=\"fas fa-check fa-2xs\"></i>";
+			display = "<i class=\"fas fa-check fa-2xs\" title=\"" + obligationLicense + "\"></i>";
 		}
 		
 		return display;
@@ -1122,7 +1136,7 @@ var bom_fn = {
 		} else if(parseInt(cellvalue) > 0) {
 			display = "<span class=\"badge badge-warning\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
-			display = "<span style=\"font-size:0;\"></span>";
+			display = "<span style=\"font-size:0;\" title=\"0\"></span>";
 		} else {
 			display = cellvalue;
 		}
