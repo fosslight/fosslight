@@ -129,7 +129,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public List<OssComponents> getVerifyOssList(Project projectMaster) {
 		List<OssComponents> componentList = verificationMapper.selectVerifyOssList(projectMaster);
-		if (!CollectionUtils.isEmpty(componentList) && CoConstDef.FLAG_YES.equals(avoidNull(projectMaster.getNetworkServerFlag()))) {
+		if (!CollectionUtils.isEmpty(componentList) && CoConstDef.FLAG_YES.equals(avoidNull(projectMaster.getNetworkServerType()))) {
 			List<OssComponents> collateOssComponentList = null;
 			for (OssComponents ossComponent : componentList) {
 				String restrictionStr = ossComponent.getRestriction();
