@@ -8422,4 +8422,15 @@
 			)
 			</foreach>
 	</insert>
+
+	<update id="updateSecurityPerson" parameterType="oss.fosslight.domain.Project">
+		UPDATE
+		PROJECT_MASTER
+		SET
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(secPerson)">
+			SECPERSON = #{secPerson}
+		</if>
+		WHERE
+		PRJ_ID = #{prjId}
+	</update>
 </mapper>

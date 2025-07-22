@@ -238,4 +238,6 @@ public interface ProjectService extends HistoryConfig{
 	public void copyOssComponentList(Project project, boolean isBom);
 
 	public Map<String, Object> getDependencyTreeList(List<ProjectIdentification> ossComponents);
+
+	public void updateSecurityPerson(Project project);
 }

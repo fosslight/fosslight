@@ -1242,7 +1242,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             project.setSecPersonNm(existingUser.getUserName());
             
             // 프로젝트 업데이트
-            projectService.updateProjectMaster(project);
+            projectService.updateSecurityPerson(project);
 
             afterProject = projectService.getProjectBasicInfo(prjId);
             String diffComment = CommonFunction.getDiffItemComment(beforeProject, afterProject, true);

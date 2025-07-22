@@ -8439,4 +8439,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		return rtnTreeMap;
 	}
+
+	public void updateSecurityPerson(Project project) {
+		projectMapper.updateSecurityPerson(project);
+	}
 }
