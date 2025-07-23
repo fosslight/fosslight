@@ -53,19 +53,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.common.CustomXssFilter;
-import oss.fosslight.domain.CoMail;
-import oss.fosslight.domain.CoMailManager;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.PartnerMaster;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.T2File;
-import oss.fosslight.domain.T2Users;
-import oss.fosslight.domain.UploadFile;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
@@ -3383,77 +3371,103 @@ public class ProjectController extends CoTopComponent {
 		String srcMainGrid = (String) map.get("srcMainGrid");
 		String binMainGrid = (String) map.get("binMainGrid");
 		String depMainGrid = (String) map.get("depMainGrid");
+		String androidMainGrid = (String) map.get("androidMainGrid");
 		String status = (String) map.get("status");
+		String errMsg = "";
+		String bom = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 
-		// party
-		Type partyType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> partyData = new ArrayList<ProjectIdentification>();
-		partyData = (List<ProjectIdentification>) fromJson(partyGrid, partyType);
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = projectService.getProjectDetail(project);
+		if(project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)){
+			bom = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+			Type androidType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+			List<ProjectIdentification> androidData = new ArrayList<ProjectIdentification>();
+			androidData = (List<ProjectIdentification>) fromJson(androidMainGrid, androidType);
+			if (!CollectionUtils.isEmpty(androidData)) {
+				androidData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			}
 
-		// src
-		Type srcType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> srcData = new ArrayList<ProjectIdentification>();
-		srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
-		if (!CollectionUtils.isEmpty(srcData)) {
-			srcData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
-		}
-		
-		List<List<ProjectIdentification>> srcSubData = CommonFunction.setOssComponentLicense(srcData);
-		
-		if(srcSubData != null && !srcSubData.isEmpty()) {
-			srcSubData = CommonFunction.mergeGridAndSession(
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
-					srcSubData,
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-		}
-		// dep
-		Type depType = new TypeToken<List<ProjectIdentification>>() {
-		}.getType();
-		List<ProjectIdentification> depData = new ArrayList<ProjectIdentification>();
-		depData = (List<ProjectIdentification>) fromJson(depMainGrid, depType);
-		if (!CollectionUtils.isEmpty(depData)) {
-			depData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
-		}
+			List<List<ProjectIdentification>> androidSubData = CommonFunction.setOssComponentLicense(androidData);
 
-		List<List<ProjectIdentification>> depSubData = CommonFunction.setOssComponentLicense(depData);
+			if(androidSubData != null && !androidSubData.isEmpty()) {
+				androidSubData = CommonFunction.mergeGridAndSession(
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, prjId), androidData,
+						androidSubData,
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID, prjId));
+			}
+			errMsg = projectService.checkChangedIdentification(prjId, androidData, androidSubData,(String) map.get("applicableAndroid"));
+		} else {
+			// party
+			Type partyType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+			List<ProjectIdentification> partyData = new ArrayList<ProjectIdentification>();
+			partyData = (List<ProjectIdentification>) fromJson(partyGrid, partyType);
 
-		if(depSubData != null && !depSubData.isEmpty()) {
-			depSubData = CommonFunction.mergeGridAndSession(
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData,
-					depSubData,
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
-		}
+			// src
+			Type srcType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+			List<ProjectIdentification> srcData = new ArrayList<ProjectIdentification>();
+			srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
+			if (!CollectionUtils.isEmpty(srcData)) {
+				srcData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			}
 
-		// bin
-		Type binType = new TypeToken<List<ProjectIdentification>>() {
-		}.getType();
-		List<ProjectIdentification> binData = new ArrayList<ProjectIdentification>();
-		binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
-		if (!CollectionUtils.isEmpty(binData)) {
-			binData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			List<List<ProjectIdentification>> srcSubData = CommonFunction.setOssComponentLicense(srcData);
+
+			if(srcSubData != null && !srcSubData.isEmpty()) {
+				srcSubData = CommonFunction.mergeGridAndSession(
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
+						srcSubData,
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+			}
+			// dep
+			Type depType = new TypeToken<List<ProjectIdentification>>() {
+			}.getType();
+			List<ProjectIdentification> depData = new ArrayList<ProjectIdentification>();
+			depData = (List<ProjectIdentification>) fromJson(depMainGrid, depType);
+			if (!CollectionUtils.isEmpty(depData)) {
+				depData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			}
+
+			List<List<ProjectIdentification>> depSubData = CommonFunction.setOssComponentLicense(depData);
+
+			if(depSubData != null && !depSubData.isEmpty()) {
+				depSubData = CommonFunction.mergeGridAndSession(
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData,
+						depSubData,
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+			}
+
+			// bin
+			Type binType = new TypeToken<List<ProjectIdentification>>() {
+			}.getType();
+			List<ProjectIdentification> binData = new ArrayList<ProjectIdentification>();
+			binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
+			if (!CollectionUtils.isEmpty(binData)) {
+				binData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			}
+
+			List<List<ProjectIdentification>> binSubData = CommonFunction.setOssComponentLicense(binData);
+
+			if(binSubData != null && !binSubData.isEmpty()) {
+				binSubData = CommonFunction.mergeGridAndSession(
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
+						binSubData,
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+			}
+			// 체크 서비스 호출
+			errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData,
+					binSubData, depData, depSubData, (String) map.get("applicableParty"), (String) map.get("applicableSrc"),
+					(String) map.get("applicableBin"), (String) map.get("applicableDep"));
 		}
-		
-		List<List<ProjectIdentification>> binSubData = CommonFunction.setOssComponentLicense(binData);
-		
-		if(binSubData != null && !binSubData.isEmpty()) {
-			binSubData = CommonFunction.mergeGridAndSession(
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
-					binSubData,
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
-		}
-		// 체크 서비스 호출
-		String errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData,
-				binSubData, depData, depSubData, (String) map.get("applicableParty"), (String) map.get("applicableSrc"),
-				(String) map.get("applicableBin"), (String) map.get("applicableDep"));
 		
 		if (!isEmpty(errMsg)) {
 			return makeJsonResponseHeader(false, errMsg);
 		}
 
-		if (!isEmpty(status) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(status.toUpperCase())){
+		if (!isEmpty(avoidNull(status)) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(status.toUpperCase())){
 			ProjectIdentification identification = new ProjectIdentification();
 			identification.setReferenceId(prjId);
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			identification.setReferenceDiv(bom);
 			identification.setMerge(CoConstDef.FLAG_YES);
 			errMsg = projectService.checkOssNicknameList(identification);
 			if (!isEmpty(errMsg)) {

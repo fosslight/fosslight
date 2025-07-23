@@ -5293,6 +5293,56 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	@Override
+	public String checkChangedIdentification(String prjId, List<ProjectIdentification> androidData, List<List<ProjectIdentification>> androidSubData, String applicableAndroid){
+		List<String> dbInfoList = projectMapper.checkChangedIdentification(prjId);
+
+		Project prjDetail = new Project();
+		prjDetail.setPrjId(prjId);
+		prjDetail = getProjectDetail(prjDetail);
+		String noticeTypeEtc = prjDetail.getNoticeTypeEtc();
+		String noticeTypeEtcStr = "Bin(" + CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc) + ")";
+
+		Project projectInfo = projectMapper.selectProjectMaster2(prjId);
+		List<String> dbAndroidList = new ArrayList<>();
+		List<String> androidList = null;
+		List<String> androidList2 = null;
+
+		boolean androidUseFlag = CoConstDef.FLAG_NO.equals(applicableAndroid);
+		boolean dbAndroidUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusAndroid());
+
+		if (androidUseFlag != dbAndroidUseFlag) {
+			return getMessage("msg.project.check.changed", new String[]{noticeTypeEtcStr});
+		}
+
+		if (dbInfoList != null && !dbInfoList.isEmpty()) {
+			for (String key : dbInfoList) {
+				key = key.toUpperCase();
+				if (!dbAndroidUseFlag && key.startsWith(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
+					dbAndroidList.add(key);
+				}
+			}
+		}
+		if (!androidUseFlag && androidData != null && androidSubData != null) {
+			androidList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, androidData, androidSubData);
+			androidList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, androidData, androidSubData, true);
+		}
+
+		if (androidList == null) {
+			androidList = new ArrayList<>();
+			androidList2 = new ArrayList<>();
+		}
+
+		List<String> diffList = new ArrayList<>();
+		if (androidList.size() != dbAndroidList.size() || !compareList(androidList, androidList2, dbAndroidList)) {
+			diffList.add(noticeTypeEtcStr);
+		}
+		if(!diffList.isEmpty()) {
+			return getMessage("msg.project.check.changed", new String[]{StringUtil.join(diffList, ", ")});
+		}
+		return null;
+	}
+
+	@Override
 	public String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData,
 			List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
 			List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
