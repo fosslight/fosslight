@@ -4079,7 +4079,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					} else if (CollectionUtils.isNotEmpty(orLicenseIdList)) {
 						ossDeclaredLicenseIdList.addAll(orLicenseIdList);
 						if (!isEmpty(licenseId)) {
-							ossDeclaredLicenseIdList.add(licenseId);
+							ossDeclaredLicenseIdList.addAll(Arrays.asList(licenseId.split(",")));
 						}
 					}
 				}
