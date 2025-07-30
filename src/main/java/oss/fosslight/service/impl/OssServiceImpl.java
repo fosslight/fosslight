@@ -4053,19 +4053,60 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
 
 			if (detectedLicenses != null) {
+				OssMaster param = new OssMaster();
+				param.setOssIdList(Arrays.asList(new String[] {ossMaster.getOssId()}));
+				List<OssLicense> ossDeclaredLicenseList = ossMapper.selectOssLicenseList(param);
+				List<String> ossDeclaredLicenseIdList = new ArrayList<>();
+				List<String> orLicenseIdList = new ArrayList<>();
+				if (CollectionUtils.isNotEmpty(ossDeclaredLicenseList)) {
+					String licenseId = "";
+					for (OssLicense license : ossDeclaredLicenseList) {
+						if (!isEmpty(license.getOssLicenseComb()) && license.getOssLicenseComb().equalsIgnoreCase("or")) {
+							if (!isEmpty(licenseId) && licenseId.endsWith(",")) {
+								licenseId = licenseId.substring(0, licenseId.length()-1);
+							}
+							orLicenseIdList.add(licenseId);
+							licenseId = "";
+						} else {
+							licenseId += license.getLicenseId() + ",";
+						}
+					}
+					if (!isEmpty(licenseId) && licenseId.endsWith(",")) {
+						licenseId = licenseId.substring(0, licenseId.length()-1);
+					}
+					if (CollectionUtils.isEmpty(orLicenseIdList) && !isEmpty(licenseId)) {
+						ossDeclaredLicenseIdList = Arrays.asList(licenseId.split(","));
+					} else if (CollectionUtils.isNotEmpty(orLicenseIdList)) {
+						ossDeclaredLicenseIdList.addAll(orLicenseIdList);
+						if (!isEmpty(licenseId)) {
+							ossDeclaredLicenseIdList.add(licenseId);
+						}
+					}
+				}
+				
 				int ossLicenseDetectedIdx = 0;
 
 				for (String detectedLicense : detectedLicenses) {
 					if (!isEmpty(detectedLicense)) {
 						LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase());
-
-						OssMaster om = new OssMaster(
-							  ossMaster.getOssId() // ossId
-							, detectedLicenseInfo.getLicenseId() // licenseId
-							, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
-						);
-
-						ossMapper.insertOssLicenseDetected(om);
+						boolean isExists = false;
+						if (detectedLicenseInfo != null) {
+							if (CollectionUtils.isNotEmpty(ossDeclaredLicenseIdList)) {
+								for (String ossDeclaredLicense : ossDeclaredLicenseIdList) {
+									if (ossDeclaredLicense.equalsIgnoreCase(detectedLicenseInfo.getLicenseId())) {
+										isExists = true;
+										break;
+									}
+								}
+							}
+						} else {
+							isExists = true;
+						}
+						
+						if (!isExists) {
+							OssMaster om = new OssMaster(ossMaster.getOssId(), detectedLicenseInfo.getLicenseId(), Integer.toString(++ossLicenseDetectedIdx));
+							ossMapper.insertOssLicenseDetected(om);
+						}
 					}
 				}
 			}
