@@ -1059,11 +1059,7 @@ loadingIden.show();
     			return comments.indexOf("direct") > -1;
     		});
     		
-    		var depTreeDependsOnData = depMainData.filter(function(cur){
-    			return "" != cur.dependencies;
-    		});
-    		
-    		if (depTreeDirectData.length == 0 || depTreeDependsOnData.length == 0) {
+    		if (depTreeDirectData.length == 0) {
     			alertify.alert([[#{msg.project.cannot.print.identification.dependency}]], function(){});
     		} else {
     			if (_popup == null || _popup.closed) {
