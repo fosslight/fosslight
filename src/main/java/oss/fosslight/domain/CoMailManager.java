@@ -4010,13 +4010,24 @@ public class CoMailManager extends CoTopComponent {
 				String type = "";
 				String id = "";
 				ProjectIdentification prjBean = new ProjectIdentification();
+				Project prjDetail = new Project();
+				prjDetail.setPrjId(coMail.getParamPrjId());
+				prjDetail = projectService.getProjectDetail(prjDetail);
 				Boolean isAttached = true;
+				String refDiv = "";
 
 				if (CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType())) {
-					type = "bom";
+					if (prjDetail.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+						refDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+						type = "binAndroidBom";
+					} else {
+						refDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+						type = "bom";
+					}
+
 					id = coMail.getParamPrjId();
 					prjBean.setReferenceId(id);
-					prjBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					prjBean.setReferenceDiv(refDiv);
 					List<ProjectIdentification> list = projectService.getBomListExcel(prjBean);
 					if(list.size() == 0) {
 						isAttached = false;
