@@ -4023,6 +4023,7 @@ public class CoMailManager extends CoTopComponent {
 					} else {
 						refDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 						type = "bom";
+						projectService.registBom(coMail.getParamPrjId(), "Y", new ArrayList<>(), new ArrayList<>());
 					}
 
 					id = coMail.getParamPrjId();
