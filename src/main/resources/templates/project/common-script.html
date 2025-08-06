@@ -1073,85 +1073,114 @@ var com_fn = {
 			// PARTY Data
 			cleanErrMsg("list3");
 			
-			var partyGrid = [];
-			var partnerCheck = [[${project.identificationSubStatusPartner}]];
-			var depCheck = [[${project.identificationSubStatusDep}]];
-			var srcCheck = [[${project.identificationSubStatusSrc}]];
-			var binCheck = [[${project.identificationSubStatusBin}]];
+			var checkFlag = false;
+			var tabs = ["party", "dep", "src", "bin"];
+        	for (var i in tabs) {
+        		var finalData = { 
+                	referenceId : [[${project.prjId}]],
+                	status : status
+                }
+        		
+        		if ("party" == tabs[i] && [[${partnerFlag}]]) {
+        			var partyGrid = [];
+					var partnerCheck = [[${project.identificationSubStatusPartner}]];
+        			partyGrid = $('#list3').jqGrid('getGridParam', 'data');
+    				var applicablePartyValue = $("input[name='identificationSubStatusPartner']").val();
+    				partnerCheck = applicablePartyValue;
+    				if ("N" != applicablePartyValue) {
+    					partnerCheck = 'Y';
+    				}
+    				
+    				finalData["applicableParty"] = partnerCheck;
+    				finalData["partyGrid"] = JSON.stringify(partyGrid);
+        		} else if ("dep" == tabs[i]) {
+        			var depCheck = [[${project.identificationSubStatusDep}]];
+        			var applicableDepValue = $("input[name='identificationSubStatusDep']").val();
+        			depCheck = applicableDepValue;
+        			if ("N" != applicableDepValue) {
+        				depCheck = 'Y';
+        			}
+        			var depMainGrid = $('#depList').jqGrid('getGridParam','data');
+        			
+        			finalData["applicableDep"] = depCheck;
+    				finalData["depMainGrid"] = JSON.stringify(depMainGrid);
+    				finalData["depSubGrid"] = "";
+        		} else if ("src" == tabs[i]) {
+        			var srcCheck = [[${project.identificationSubStatusSrc}]];
+        			var applicableSrcValue = $("input[name='identificationSubStatusSrc']").val();
+        			srcCheck = applicableSrcValue;
+        			if ("N" != applicableSrcValue) {
+        				srcCheck = 'Y';
+        			}
+        			var srcMainGrid = $('#srcList').jqGrid('getGridParam','data');
+        			
+        			finalData["applicableSrc"] = srcCheck;
+    				finalData["srcMainGrid"] = JSON.stringify(srcMainGrid);
+    				finalData["srcSubGrid"] = "";
+        		} else {
+        			var binCheck = [[${project.identificationSubStatusBin}]];
+        			var applicableBinValue = $("input[name='identificationSubStatusBin']").val();
+        			binCheck = applicableBinValue;
+        			if ("N" != applicableBinValue) {
+        				binCheck = 'Y';
+        			}
+        			var binMainGrid = $('#binList').jqGrid('getGridParam','data');
+        			
+        			finalData["applicableBin"] = binCheck;
+    				finalData["binMainGrid"] = JSON.stringify(binMainGrid);
+    				finalData["binSubGrid"] = "";
+        		}
+        		
+        		checkFlag = com_fn.getCheckChangeData(finalData);
+        		if (checkFlag) {
+        			break;
+        		}
+        	}
 			
-			if ([[${partnerFlag}]]) {
-				partyGrid = $('#list3').jqGrid('getRowData');
-				var applicablePartyValue = $("input[name='identificationSubStatusPartner']").val();
-				partnerCheck = applicablePartyValue;
-				if ("N" != applicablePartyValue) partnerCheck = 'Y';
-			}
-			
-			var applicableDepValue = $("input[name='identificationSubStatusDep']").val();
-			depCheck = applicableDepValue;
-			if ("N" != applicableDepValue) depCheck = 'Y';
-			var applicableSrcValue = $("input[name='identificationSubStatusSrc']").val();
-			srcCheck = applicableSrcValue;
-			if ("N" != applicableSrcValue) srcCheck = 'Y';
-			var applicableBinValue = $("input[name='identificationSubStatusBin']").val();
-			binCheck = applicableBinValue;
-			if ("N" != applicableBinValue) binCheck = 'Y';
-			
-			var depMainGrid = $('#depList').jqGrid('getGridParam','data'); 
-			var srcMainGrid = $('#srcList').jqGrid('getGridParam','data');
-			var binMainGrid = $('#binList').jqGrid('getGridParam','data'); 
-	 		
-			// finalData
-			var finalData = { 
-				referenceId : [[${project.prjId}]],
-				partyGrid : JSON.stringify(partyGrid),
-				depMainGrid : JSON.stringify(depMainGrid),
-				depSubGrid : "",
-				srcMainGrid : JSON.stringify(srcMainGrid),
-				srcSubGrid : "",
-				binMainGrid : JSON.stringify(binMainGrid),
-				binSubGrid : "",
-				applicableParty : partnerCheck,
-				applicableDep : depCheck,
-				applicableSrc : srcCheck,
-				applicableBin : binCheck,
-				status : status
-			}
-			
-			$.ajax({
-				url : "/project/getCheckChangeData",
-				type : 'POST',
-				data : JSON.stringify(finalData),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function(json){
-					loading.hide();
-					
-					if("false" == json.isValid) {
-						alertify.alert(json.validMsg == "" ? [[#{msg.project.required.bomSave2}]] : json.validMsg, function(){});
-
-						if (depValidMsgData) {
-							gridValidMsgNew(depValidMsgData, "depList");
-						}
-						
-						if(srcValidMsgData) {
-							gridValidMsgNew(srcValidMsgData, "srcList");
-						}
-						
-						if(binValidMsgData) {
-							gridValidMsgNew(binValidMsgData, "binList");
-						}
-					} else {
-						com_fn.exeProjectStatus(data, status);
-					}
-				},
-				error: function(json){
-					loading.hide();
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-			
+        	if (!checkFlag) {
+        		com_fn.exeProjectStatus(data, status);
+        	}
 		}
+	},
+	getCheckChangeData : function(finalData) {
+		var checkFlag = false;
+		
+		$.ajax({
+			url : "/project/getCheckChangeData",
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function(json){
+				loading.hide();
+				if ("false" == json.isValid) {
+					checkFlag = true;
+					alertify.alert(json.validMsg == "" ? [[#{msg.project.required.bomSave2}]] : json.validMsg, function(){});
+
+					if (typeof depValidMsgData !== "undefined") {
+						gridValidMsgNew(depValidMsgData, "depList");
+					}
+					
+					if (typeof srcValidMsgData !== "undefined") {
+						gridValidMsgNew(srcValidMsgData, "srcList");
+					}
+					
+					if (typeof binValidMsgData !== "undefined") {
+						gridValidMsgNew(binValidMsgData, "binList");
+					}
+				} else {
+					checkFlag = false;
+				}
+			},
+			error: function(json){
+				loading.hide();
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		return checkFlag;
 	},
 	// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
 	validBomChangeStatus : function(_androidBinFlag) {

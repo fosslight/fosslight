@@ -106,10 +106,8 @@ public interface ProjectService extends HistoryConfig{
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 
-	String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData,
-			List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
-			List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
-			List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData, String applicableParty, String applicableSrc, String applicableBin, String applicableDep);
+	String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData, List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData, List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
+			List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData, Map<String, Object> param);
 
 	String checkChangedIdentification(String prjId, List<ProjectIdentification> androidData, List<List<ProjectIdentification>> androidSubData, String applicableAndroid);
 

@@ -5343,11 +5343,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	@Override
-	public String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData,
-			List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
-			List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
-			List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData,
-			String applicableParty, String applicableSrc, String applicableBin, String applicableDep) {
+	public String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData, List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
+			List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData, List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData, Map<String, Object> param) {
 		
 		// 현재 DB에 등록되어 있는 정보와 CLIENT에서 넘어온 정보를 SORT 한 후 문자열로 비교한다.
 		// TRIM, 대소문자를 무시하고, 주요 칼럼만 비교한다.
@@ -5371,26 +5368,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> binList2 = null;
 		List<String> depList2 = null;
 
+		String applicableParty = (String) param.getOrDefault("applicableParty", CoConstDef.FLAG_YES);
+		String applicableSrc = (String) param.getOrDefault("applicableSrc", CoConstDef.FLAG_YES);
+		String applicableBin = (String) param.getOrDefault("applicableBin", CoConstDef.FLAG_YES);
+		String applicableDep = (String) param.getOrDefault("applicableDep", CoConstDef.FLAG_YES);
+		
 		boolean partnerUseFlag = CoConstDef.FLAG_NO.equals(applicableParty);
 		boolean srcUseFlag = CoConstDef.FLAG_NO.equals(applicableSrc);
 		boolean binUseFlag = CoConstDef.FLAG_NO.equals(applicableBin);
 		boolean depUseFlag = CoConstDef.FLAG_NO.equals(applicableDep);
+		
 		boolean dbPartnerUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusPartner());
 		boolean dbSrcUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusSrc());
 		boolean dbBinUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusBin());
 		boolean dbDepUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusDep());
 
-		if (partnerUseFlag != dbPartnerUseFlag) {
-			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
-		} else if (srcUseFlag != dbSrcUseFlag) {
-			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
-		} else if (binUseFlag != dbBinUseFlag) {
-			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
-		} else if (depUseFlag != dbDepUseFlag) {
-			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP)});
-		}
-		
- 		if (dbInfoList != null && !dbInfoList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(dbInfoList)) {
  			for (String key : dbInfoList) {
  				key = key.toUpperCase();
  				if (!dbPartnerUseFlag && key.startsWith(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) {
@@ -5407,66 +5400,73 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
  			}
 		}
- 		
-		// 화면정보 비교 key로 convert
-		// 3rd party의 경우는 편집이 불가능하기 때문에 라이선스 정보를 제외하고 비교한다.
- 		if (!partnerUseFlag && partyData != null) {
- 			partnerList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, partyData, null);
- 			partnerList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, partyData, null, true);
- 		}
- 		
- 		if (!srcUseFlag && srcData != null && srcSubData != null) {
- 			srcList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_SRC, srcData, srcSubData);
- 			srcList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_SRC, srcData, srcSubData, true);
- 		}
- 		
- 		if (!binUseFlag && binData != null && binSubData != null) {
- 			binList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_BIN, binData, binSubData);
- 			binList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_BIN, binData, binSubData, true);
- 		}
-
-		if (!depUseFlag && depData != null && depSubData != null) {
-			depList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_DEP, depData, depSubData);
-			depList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_DEP, depData, depSubData, true);
-		}
- 		
- 		if (partnerList == null) {
- 			partnerList = new ArrayList<>();
- 			partnerList2 = new ArrayList<>();
- 		}
- 		
- 		if (srcList == null) {
- 			srcList = new ArrayList<>();
- 			srcList2 = new ArrayList<>();
- 		}
- 		
- 		if (binList == null) {
- 			binList = new ArrayList<>();
- 			binList2 = new ArrayList<>();
- 		}
-
-		if (depList == null) {
-			depList = new ArrayList<>();
-			depList2 = new ArrayList<>();
-		}
-
+		
 		List<String> diffList = new ArrayList<>();
- 		
+		if (CollectionUtils.isNotEmpty(partyData)) {
+			if (partnerUseFlag != dbPartnerUseFlag) {
+				return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
+			}
+			if (!partnerUseFlag) {
+	 			partnerList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, partyData, null);
+	 			partnerList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, partyData, null, true);
+	 		}
+			if (CollectionUtils.isEmpty(partnerList)) {
+	 			partnerList = new ArrayList<>();
+	 			partnerList2 = new ArrayList<>();
+	 		}
+			if (partnerList.size() != dbPartnerList.size() || !compareList(partnerList, partnerList2, dbPartnerList)) {
+				diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER));
+			}
+		} else if (CollectionUtils.isNotEmpty(srcData)) {
+			if (srcUseFlag != dbSrcUseFlag) {
+				return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
+			}
+			if (!srcUseFlag) {
+	 			srcList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_SRC, srcData, srcSubData);
+	 			srcList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_SRC, srcData, srcSubData, true);
+	 		}
+			if (CollectionUtils.isEmpty(srcList)) {
+	 			srcList = new ArrayList<>();
+	 			srcList2 = new ArrayList<>();
+	 		}
+			if (srcList.size() != dbSrcList.size() || !compareList(srcList, srcList2, dbSrcList)) {
+				diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC));
+			}
+		} else if (CollectionUtils.isNotEmpty(binData)) {
+			if (binUseFlag != dbBinUseFlag) {
+				return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
+			}
+			if (!binUseFlag) {
+	 			binList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_BIN, binData, binSubData);
+	 			binList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_BIN, binData, binSubData, true);
+	 		}
+			if (CollectionUtils.isEmpty(binList)) {
+	 			binList = new ArrayList<>();
+	 			binList2 = new ArrayList<>();
+	 		}
+			if (binList.size() != dbBinList.size() || !compareList(binList, binList2, dbBinList)) {
+				diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN));
+			}
+		} else if (CollectionUtils.isNotEmpty(depData)) { 
+			if (depUseFlag != dbDepUseFlag) {
+				return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP)});
+			}
+			if (!depUseFlag) {
+				depList = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_DEP, depData, depSubData);
+				depList2 = makeCompareKey(CoConstDef.CD_DTL_COMPONENT_ID_DEP, depData, depSubData, true);
+			}
+			if (CollectionUtils.isEmpty(depList)) {
+				depList = new ArrayList<>();
+				depList2 = new ArrayList<>();
+			}
+			if (depList.size() != dbDepList.size() || !compareList(depList, depList2, dbDepList)) {
+				diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP));
+			}
+		}
+
  		// 1) 건수 비교 
  		// 2) 건수가 동일하기 때문에 sort후 text 비교
-		if (partnerList.size() != dbPartnerList.size() || !compareList(partnerList, partnerList2, dbPartnerList)) {
-			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER));
-		}
-		if (srcList.size() != dbSrcList.size() || !compareList(srcList, srcList2, dbSrcList)) {
-			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC));
-		}
-		if (binList.size() != dbBinList.size() || !compareList(binList, binList2, dbBinList)) {
-			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN));
-		}
-		if (depList.size() != dbDepList.size() || !compareList(depList, depList2, dbDepList)) {
-			diffList.add(CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_DEP));
-		}
-		if(!diffList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(diffList)) {
 			return getMessage("msg.project.check.changed", new String[]{StringUtil.join(diffList, ", ")});
 		}
 		return null;

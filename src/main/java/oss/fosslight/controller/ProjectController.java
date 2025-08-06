@@ -3365,12 +3365,12 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.CHECK_CHANGE_DATA)
-	public @ResponseBody ResponseEntity<Object> getCheckChangeData(@RequestBody HashMap<String, Object> map) {
+	public @ResponseBody ResponseEntity<Object> getCheckChangeData(@RequestBody Map<String, Object> map) {
 		String prjId = (String) map.get("referenceId");
-		String partyGrid = (String) map.get("partyGrid");
-		String srcMainGrid = (String) map.get("srcMainGrid");
-		String binMainGrid = (String) map.get("binMainGrid");
-		String depMainGrid = (String) map.get("depMainGrid");
+		String partyGrid = map.containsKey("partyGrid") ? (String) map.get("partyGrid") : "";
+		String srcMainGrid = map.containsKey("srcMainGrid") ? (String) map.get("srcMainGrid") : "";
+		String binMainGrid = map.containsKey("binMainGrid") ? (String) map.get("binMainGrid") : "";
+		String depMainGrid = map.containsKey("depMainGrid") ? (String) map.get("depMainGrid") : "";
 		String androidMainGrid = (String) map.get("androidMainGrid");
 		String status = (String) map.get("status");
 		String errMsg = "";
@@ -3379,7 +3379,7 @@ public class ProjectController extends CoTopComponent {
 		Project project = new Project();
 		project.setPrjId(prjId);
 		project = projectService.getProjectDetail(project);
-		if(project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)){
+		if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(project.getNoticeType())) {
 			bom = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
 			Type androidType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 			List<ProjectIdentification> androidData = new ArrayList<ProjectIdentification>();
@@ -3396,68 +3396,78 @@ public class ProjectController extends CoTopComponent {
 						androidSubData,
 						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID, prjId));
 			}
-			errMsg = projectService.checkChangedIdentification(prjId, androidData, androidSubData,(String) map.get("applicableAndroid"));
+			errMsg = projectService.checkChangedIdentification(prjId, androidData, androidSubData, (String) map.get("applicableAndroid"));
 		} else {
+			List<ProjectIdentification> partyData = null;
+			List<ProjectIdentification> srcData = null;
+			List<List<ProjectIdentification>> srcSubData = null;
+			List<ProjectIdentification> depData = null;
+			List<List<ProjectIdentification>> depSubData = null;
+			List<ProjectIdentification> binData = null;
+			List<List<ProjectIdentification>> binSubData = null;
+			
 			// party
-			Type partyType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-			List<ProjectIdentification> partyData = new ArrayList<ProjectIdentification>();
-			partyData = (List<ProjectIdentification>) fromJson(partyGrid, partyType);
+			if (!isEmpty(partyGrid)) {
+				Type partyType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				partyData = new ArrayList<ProjectIdentification>();
+				partyData = (List<ProjectIdentification>) fromJson(partyGrid, partyType);
+			}
 
 			// src
-			Type srcType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-			List<ProjectIdentification> srcData = new ArrayList<ProjectIdentification>();
-			srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
-			if (!CollectionUtils.isEmpty(srcData)) {
-				srcData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			if (!isEmpty(srcMainGrid)) {
+				Type srcType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				srcData = new ArrayList<ProjectIdentification>();
+				srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
+				if (CollectionUtils.isNotEmpty(srcData)) {
+					srcData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+				}
+				srcSubData = CommonFunction.setOssComponentLicense(srcData);
+				if (CollectionUtils.isNotEmpty(srcSubData)) {
+					srcSubData = CommonFunction.mergeGridAndSession(
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
+							srcSubData,
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+				}
 			}
-
-			List<List<ProjectIdentification>> srcSubData = CommonFunction.setOssComponentLicense(srcData);
-
-			if(srcSubData != null && !srcSubData.isEmpty()) {
-				srcSubData = CommonFunction.mergeGridAndSession(
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
-						srcSubData,
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-			}
+			
 			// dep
-			Type depType = new TypeToken<List<ProjectIdentification>>() {
-			}.getType();
-			List<ProjectIdentification> depData = new ArrayList<ProjectIdentification>();
-			depData = (List<ProjectIdentification>) fromJson(depMainGrid, depType);
-			if (!CollectionUtils.isEmpty(depData)) {
-				depData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
-			}
+			if (!isEmpty(depMainGrid)) {
+				Type depType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				depData = new ArrayList<ProjectIdentification>();
+				depData = (List<ProjectIdentification>) fromJson(depMainGrid, depType);
+				if (CollectionUtils.isNotEmpty(depData)) {
+					depData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+				}
 
-			List<List<ProjectIdentification>> depSubData = CommonFunction.setOssComponentLicense(depData);
-
-			if(depSubData != null && !depSubData.isEmpty()) {
-				depSubData = CommonFunction.mergeGridAndSession(
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData,
-						depSubData,
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+				depSubData = CommonFunction.setOssComponentLicense(depData);
+				if (CollectionUtils.isNotEmpty(depSubData)) {
+					depSubData = CommonFunction.mergeGridAndSession(
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData,
+							depSubData,
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+				}
 			}
 
 			// bin
-			Type binType = new TypeToken<List<ProjectIdentification>>() {
-			}.getType();
-			List<ProjectIdentification> binData = new ArrayList<ProjectIdentification>();
-			binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
-			if (!CollectionUtils.isEmpty(binData)) {
-				binData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			if (!isEmpty(binMainGrid)) {
+				Type binType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				binData = new ArrayList<ProjectIdentification>();
+				binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
+				if (CollectionUtils.isNotEmpty(binData)) {
+					binData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+				}
+				
+				binSubData = CommonFunction.setOssComponentLicense(binData);
+				if (CollectionUtils.isNotEmpty(binSubData)) {
+					binSubData = CommonFunction.mergeGridAndSession(
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
+							binSubData,
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+				}
 			}
 
-			List<List<ProjectIdentification>> binSubData = CommonFunction.setOssComponentLicense(binData);
-
-			if(binSubData != null && !binSubData.isEmpty()) {
-				binSubData = CommonFunction.mergeGridAndSession(
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
-						binSubData,
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
-			}
 			// 체크 서비스 호출
-			errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData,
-					binSubData, depData, depSubData, (String) map.get("applicableParty"), (String) map.get("applicableSrc"),
-					(String) map.get("applicableBin"), (String) map.get("applicableDep"));
+			errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData, binSubData, depData, depSubData, map);
 		}
 		
 		if (!isEmpty(errMsg)) {
