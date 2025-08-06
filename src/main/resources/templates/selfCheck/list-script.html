@@ -580,8 +580,8 @@ var list = {
 				if (pageButtonArea.find('button').length == 0) {
                		var appendIcon = "";
                		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Self-Check\" onclick=\"createTabInFrame('New_SelfCheck', '/selfCheck/edit')\"><i class=\"fas fa-plus\"></i></button>";
-                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete Self-Check\" onclick=\"fn.deleteSelfCheck()\"><i class=\"far fa-trash-alt\"></i></button>";
-                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete Self-Check\" onclick=\"fn.deleteSelfCheck()\"><i class=\"far fa-trash-alt\"></i></button>";
+                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export Self-Check List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
                       
                   	pageButtonArea.append(appendIcon);
             	}

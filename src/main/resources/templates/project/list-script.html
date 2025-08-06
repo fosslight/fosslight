@@ -2345,9 +2345,9 @@ var list = {
                 var pageButtonArea = $('#list_toppager_left');
                 if ($("#list_toppager_left").find('button').length == 0) {
                 	var appendIcon = "";
-                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"add project\" onclick=\"createTabInFrame('New_Project', '/project/edit')\"><i class=\"fas fa-plus\"></i></button>";
-                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete project\" onclick=\"fn.deleteProject()\"><i class=\"far fa-trash-alt\"></i></button>";
-                    appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Project\" onclick=\"createTabInFrame('New_Project', '/project/edit')\"><i class=\"fas fa-plus\"></i></button>";
+                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete Project\" onclick=\"fn.deleteProject()\"><i class=\"far fa-trash-alt\"></i></button>";
+                    appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export Project List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
                     
                     $("#list_toppager_left").append(appendIcon);
                 }

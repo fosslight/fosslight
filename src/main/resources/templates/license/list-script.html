@@ -621,11 +621,11 @@
                             if ([[${@CommonFunction.isAdmin()}]]) {
                             	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
                             	appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
-                            	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_License', '/license/edit')\">Add License</span>";
-                            	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_License', '/license/licenseBulkReg')\">Bulk Registration</span></div>";
-                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deleteLicense()\"><i class=\"far fa-trash-alt\"></i></button>";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" title=\"Add License\" onclick=\"createTabInFrame('New_License', '/license/edit')\">Add License</span>";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" title=\"Bulk Registration\" onclick=\"createTabInFrame('BulkReg_License', '/license/licenseBulkReg')\">Bulk Registration</span></div>";
+                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete License\" onclick=\"fn.deleteLicense()\"><i class=\"far fa-trash-alt\"></i></button>";
                             }
-                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export License List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 
                             pageButtonArea.append(appendIcon);
                         }

@@ -823,11 +823,11 @@
                             if (isAdmin) {
                                 appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
                                 appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
-                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
-                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
-                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
+                                appendIcon += "<span class=\"dropdown-item pointer\" title=\"Add OSS\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
+                                appendIcon += "<span class=\"dropdown-item pointer\" title=\"Bulk Registration\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete OSS\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
                             }
-                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export OSS List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 
                             $("#list_toppager_left").append(appendIcon);
                         }
