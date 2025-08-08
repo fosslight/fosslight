@@ -7909,7 +7909,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 							overMaxLengthOssList.add(key);
 						}
 					}
-					if (!bean.getLicenseTypeIdx().equals("1")) {
+					if (!bean.getLicenseTypeIdx().equals("1") || (isEmpty(bean.getOssName()) && !isEmpty(bean.getLicenseName()) && CommonFunction.isIgnoreLicense(bean.getLicenseName()))) {
 						continue;
 					}
 					if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
@@ -7926,6 +7926,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						if (!overMaxLengthOssList.contains(key)) {
 							overMaxLengthOssList.add(key);
 						}
+					}
+					if (isEmpty(oss.getOssName()) && !isEmpty(oss.getLicenseName()) && CommonFunction.isIgnoreLicense(oss.getLicenseName())) {
+						continue;
 					}
 					if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
 						emptyCheckFlag = true;
