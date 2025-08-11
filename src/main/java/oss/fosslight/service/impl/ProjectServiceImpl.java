@@ -7912,7 +7912,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					if (!bean.getLicenseTypeIdx().equals("1") || (isEmpty(bean.getOssName()) && !isEmpty(bean.getLicenseName()) && CommonFunction.isIgnoreLicense(bean.getLicenseName()))) {
 						continue;
 					}
-					if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
+					if (isEmpty(bean.getOssName()) || (isEmpty(bean.getLicenseId()) && isEmpty(bean.getLicenseName()))) {
 						emptyCheckFlag = true;
 					}
 				}
@@ -7930,7 +7930,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					if (isEmpty(oss.getOssName()) && !isEmpty(oss.getLicenseName()) && CommonFunction.isIgnoreLicense(oss.getLicenseName())) {
 						continue;
 					}
-					if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+					if (isEmpty(oss.getOssName()) || (isEmpty(oss.getLicenseId()) && isEmpty(oss.getLicenseName()))) {
 						emptyCheckFlag = true;
 					}
 				}
