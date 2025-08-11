@@ -4358,7 +4358,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			boolean ossNicknameFlag = false;
 			
 			String comment  = bean.getComment();
-			if (!isEmpty(comment)) userData.setComment(comment);
+			if (!isEmpty(comment)) {
+				userData.setComment(comment);
+			}
 			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
 				List<OssAnalysis> latestRegistrationInfoList = new ArrayList<OssAnalysis>();
@@ -4427,6 +4429,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					List<String> downloadLocationSplitList = new ArrayList<>();
 					String[] downloadLocationSplit = bean.getDownloadLocation().split("[,]");
 					for (String download : downloadLocationSplit) {
+						download = download.trim();
 						boolean equalsFlag = false;
 						for (String customData : downloadLocationSplitList) {
 							if (download.equalsIgnoreCase(customData)) {
@@ -4798,10 +4801,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			
-			if (analysisResults != null) {
+			if (analysisResults != null && !CollectionUtils.isEmpty(analyzedDownloadLocationList)) {
+				analyzedDownloadLocationList = analyzedDownloadLocationList.stream().map(String::toLowerCase).distinct().collect(Collectors.toList());
 				analysisResults.setDownloadLocation(String.join(",", analyzedDownloadLocationList));
 			} else {
-				latestOssAnalysis.setDownloadLocation(String.join(",", latestDownloadLocationList));
+				if (!CollectionUtils.isEmpty(latestDownloadLocationList)) {
+					latestDownloadLocationList = latestDownloadLocationList.stream().map(String::toLowerCase).distinct().collect(Collectors.toList());
+					latestOssAnalysis.setDownloadLocation(String.join(",", latestDownloadLocationList));
+				}
 			}
 		}
 	}
@@ -5987,10 +5994,18 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				case "REV": btnShowMap.put("confirmBtn", CoConstDef.FLAG_YES); break;
 				case "CONF": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
 			}
-			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("confirmBtn")) btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("requestBtn")) {
+				btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("reviewBtn")) {
+				btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("confirmBtn")) {
+				btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("rejectBtn")) {
+				btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			}
 		} else if (viewOnlyFlag.equals("Y")) {
 			btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
 			btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
@@ -6003,10 +6018,18 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				case "REQ": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
 				case "CONF": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
 			}
-			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("confirmBtn")) btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("requestBtn")) {
+				btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("reviewBtn")) {
+				btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("confirmBtn")) {
+				btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("rejectBtn")) {
+				btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			}
 		}
 	}
 
