@@ -330,8 +330,7 @@ public class VerificationController extends CoTopComponent {
 	
 	@ResponseBody
 	@PostMapping(value=VERIFICATION.REGIST_FILE)
-	public String registFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
-			HttpServletResponse res, Model model) throws Exception {
+	public String registFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/registFile");
 		
 		String permission = StringUtil.isEmpty(req.getParameter("permission")) ? null : req.getParameter("permission");
@@ -347,7 +346,7 @@ public class VerificationController extends CoTopComponent {
 			String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 
 			Map<String, MultipartFile> fileMap = req.getFileMap();
-			String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
+			String fileNm = fileMap.get("myfile").getOriginalFilename();
 			String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
 			
 			//파일 등록
@@ -369,12 +368,12 @@ public class VerificationController extends CoTopComponent {
 				String[] exts = codeExp.split(",");
 				boolean fileExtCheck = false;
 				for (String s : exts) {
-					if (s.equals(fileExtension)) {
+					if (!isEmpty(fileNm) && fileNm.endsWith(s.trim())) {
 						fileExtCheck = true;
 					}
 				}
 
-				if(!fileExtCheck) {
+				if (!fileExtCheck) {
 					resultList.add("UNSUPPORTED_FILE");
 					String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{codeExp});
 					resultList.add(msg);
@@ -623,13 +622,11 @@ public class VerificationController extends CoTopComponent {
 							) {
 						project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 						ignoreMailSend = true;
-					} else if (!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget())
-							&& CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA.equals(prjInfo.getDistributionStatus())) {
+					} else if (!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget()) && CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA.equals(prjInfo.getDistributionStatus())) {
 						project.setResetDistributionStatus(CoConstDef.FLAG_YES);
 					}
 					
-					if (!isEmpty(prjInfo.getDistributionStatus()) 
-							&& CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(confirm.toUpperCase())) {
+					if (!isEmpty(prjInfo.getDistributionStatus()) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(confirm.toUpperCase())) {
 						project.setChangedNoticeYn(CoConstDef.FLAG_YES);
 					}
 				}
