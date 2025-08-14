@@ -320,7 +320,7 @@ public class NvdDataService {
 									configurationInsertParam.put("cveId", cveId);
 									configurationInsertParam.put("matchCriteriaId", matchCriteriaId);
 									configurationInsertParam.put("criteria", criteria);
-									final String[] criteriaArr = criteria.split(":");
+									final String[] criteriaArr = unescapedColon(criteria);
 									configurationInsertParam.put("vendor", criteriaArr[3]);
 									configurationInsertParam.put("product", criteriaArr[4]);
 									configurationInsertParam.put("version", criteriaArr[5]);
@@ -435,6 +435,19 @@ public class NvdDataService {
 
 		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
 		return responseMap;
+	}
+
+	private String[] unescapedColon(String criteria) {
+		String placeholder = "__ESCAPED_COLON__";
+        String temp = criteria.replaceAll("\\\\:", placeholder);
+
+        String[] parts = temp.split(":");
+
+        List<String> result = new ArrayList<>();
+        for (String part : parts) {
+            result.add(part.replace(placeholder, ":"));
+        }
+		return result.toArray(new String[result.size()]);
 	}
 
 	@SuppressWarnings("unchecked")
