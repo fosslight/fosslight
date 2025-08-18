@@ -592,15 +592,32 @@ public class NvdDataService {
 		Map<String, Object> cvssData = null;
 		Map<String, Object> cvssObj = null;
 		if (cvssMetricList.size() > 1) {
+			Map<String, Object> firstObj = null;
+			Map<String, Object> firstData = null;
+			Map<String, Object> secondObj = null;
+			Map<String, Object> secondData = null;
+			
 			for (Map<String, Object> cvssMetric : cvssMetricList) {
 				String source = String.valueOf(cvssMetric.get("source"));
 				String type = String.valueOf(cvssMetric.get("type"));
-				if (source.equalsIgnoreCase("nvd@nist.gov") && type.equalsIgnoreCase("Primary")) {
-					cvssObj = cvssMetric;
-					cvssData = (Map<String, Object>) cvssObj.get("cvssData");
-					break;
+				if (source.equalsIgnoreCase("nvd@nist.gov")) {
+					firstObj = cvssMetric;
+					firstData = (Map<String, Object>) firstObj.get("cvssData");
+				}
+				if (type.equalsIgnoreCase("Primary")) {
+					secondObj = cvssMetric;
+					secondData = (Map<String, Object>) secondObj.get("cvssData");
 				}
 			}
+			
+			if (firstObj != null) {
+				cvssObj = firstObj;
+				cvssData = firstData;
+			} else if (secondObj != null) {
+				cvssObj = secondObj;
+				cvssData = secondData;
+			}
+			
 			if (cvssObj == null) {
 				cvssObj = (Map<String, Object>) cvssMetricList.get(0);
 				cvssData = (Map<String, Object>) cvssObj.get("cvssData");
