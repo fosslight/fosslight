@@ -25,7 +25,7 @@
                                	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                         	</th:block>
                         	<button th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV') and project.statusRequestYn == 'N'}"
-                        			type="button" class="btn btn-default disabled btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
+                        			type="button" class="btn btn-default disabled btn-sm width-6rem px-1" id="btnRejectNotice" th:text="Reject" th:title="|If you need modify, please leave a comment on FOSSLight team.|"></button>
                             <button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
                        	</div>
                         <span th:if="${@CommonFunction.isAdmin() and project.binBinaryFileId != null}" class="icheck-danger center-atom mr-1 ignoreBinaryDbCheckbox projdecBtn" style="font-size: .85rem">
