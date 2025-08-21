@@ -1767,7 +1767,7 @@
 			 // row로 들어오는 데이터가 텍스트인지 element인지 확인.
 			var olc = row.ossLicenseComb, lnm = row.licenseNameEx;
 			var ossLicenseComb, licenseName;
-			var url = '/license/edit/'+row.licenseId;
+			var url = '/license/shareUrl/'+row.licenseId;
 
 			ossLicenseComb = /<[a-z][\s\S]*>/i.test(olc) ? $("#" + $(olc).attr("id")).val() : olc;
 			licenseName = /<[a-z][\s\S]*>/i.test(lnm) ? $("#" + $(lnm).attr("id")).val() : lnm;
@@ -1776,8 +1776,8 @@
 			if(index!=0){
 				markTxt += ' <span> '+ossLicenseComb+' </span> ';
 			}
-			
-			markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","'+url+'")>'+licenseName+'</a>';
+
+			markTxt+='<a href="' + url + '" target="_blank">'+licenseName+'</a>';
 		});
 		
 		var andTxts = markTxt.split('<span> OR </span>');
