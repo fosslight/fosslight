@@ -726,30 +726,25 @@ var src_fn = {
 			});
     		alertify.alert(message, function(){});
     	} else {
-    		if (obj.isValid) {
-    			// download file
-                if (target === "report_sub") {
-                	src_fn.downloadExcel();
-                } else {
-                	loadingIden.hide();
-                	
-                	var identificationStatus = [[${project.identificationStatus}]];
-                	if ("CONF" != identificationStatus) {
-                		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-            				if (e) {
-            					com_fn.downloadYaml('SRC');
-            				} else {
-            					return false;
-            				}
-            			});
-                	} else {
-                		com_fn.downloadYaml('SRC');
-                	}
-                }
-    		} else {
-    			loadingIden.hide();
-    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    		}
+    		// download file
+            if (target === "report_sub") {
+            	src_fn.downloadExcel();
+            } else {
+            	loadingIden.hide();
+            	
+            	var identificationStatus = [[${project.identificationStatus}]];
+            	if ("CONF" != identificationStatus) {
+            		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+        				if (e) {
+        					com_fn.downloadYaml('SRC');
+        				} else {
+        					return false;
+        				}
+        			});
+            	} else {
+            		com_fn.downloadYaml('SRC');
+            	}
+            }
     	}
     },
 	// 다운로드 엑셀

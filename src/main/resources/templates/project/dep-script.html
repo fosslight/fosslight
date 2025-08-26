@@ -603,7 +603,7 @@ var dep_fn = {
 		$("#_depAddListContainer").show();
 	},
 	selectDownloadFile : function(target) {
-loadingIden.show();
+		loadingIden.show();
     	
     	let obj = com_fn.checkSelectDownloadFile('DEP');
     	if (typeof obj.overMaxLengthOssList !== "undefined") {
@@ -616,30 +616,25 @@ loadingIden.show();
 			});
     		alertify.alert(message, function(){});
     	} else {
-    		if (obj.isValid) {
-    			// download file
-    	        if (target === "report_sub") {
-    	        	dep_fn.downloadExcel();
-    	        } else {
-    	        	loadingIden.hide();
-    	        	
-    	        	var identificationStatus = [[${project.identificationStatus}]];
-    	        	if ("CONF" != identificationStatus) {
-    	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-    	    				if (e) {
-    	    					com_fn.downloadYaml('DEP');
-    	    				} else {
-    	    					return false;
-    	    				}
-    	    			});
-    	        	} else {
-    	        		com_fn.downloadYaml('DEP');
-    	        	}
-    	        }
-    		} else {
-    			loadingIden.hide();
-    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    		}
+    		// download file
+	        if (target === "report_sub") {
+	        	dep_fn.downloadExcel();
+	        } else {
+	        	loadingIden.hide();
+	        	
+	        	var identificationStatus = [[${project.identificationStatus}]];
+	        	if ("CONF" != identificationStatus) {
+	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+	    				if (e) {
+	    					com_fn.downloadYaml('DEP');
+	    				} else {
+	    					return false;
+	    				}
+	    			});
+	        	} else {
+	        		com_fn.downloadYaml('DEP');
+	        	}
+	        }
     	}
     },
 	// 다운로드 엑셀
