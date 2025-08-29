@@ -2310,7 +2310,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	private String appendCheckOssName(List<OssMaster> ossNameList, Map<String, String> ossInfoNames, String checkOssName) {
 		List<String> checkName = new ArrayList<>();
 
-		if(ossNameList != null) {
+		if (ossInfoNames.containsKey(checkOssName.toUpperCase())) {
+			String ossNameTemp = ossInfoNames.get(checkOssName.toUpperCase());
+			checkName.add(ossNameTemp);
+		}
+
+		if(ossNameList != null && checkName.size()==0) {
 			for (OssMaster ossBean : ossNameList) {
 				if(ossBean != null) {
 					for(String name : ossBean.getOssName().split(",")){
@@ -2320,10 +2325,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 		}
 		
-		if (ossInfoNames.containsKey(checkOssName.toUpperCase())) {
-			String ossNameTemp = ossInfoNames.get(checkOssName.toUpperCase());
-			checkName.add(ossNameTemp);
-		}
+
 		
 		return checkName.stream().distinct().map(v->v.toString()).collect(Collectors.joining("|"));
 	}
