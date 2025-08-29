@@ -11,6 +11,7 @@
 					<div class="card-body">
 						<div class="form-group" style="margin-bottom: 0;">
 							<label class="pl-1" for="checkLicense" style="margin-bottom: .2rem; font-size: .85rem;" th:text="#{msg.project.check.license}"></label>
+							<label class="pl-1" id="targetName" style="margin-bottom: .2rem; font-size: .85rem;"></label>
 							<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_EXTERNAL_SERVICE_USED_FLAG')) == 'N'}">
 								<br/>
 								<label class="pl-1" for="disable" style="margin-bottom: .2rem; font-size: .85rem; color: blue;" th:text="#{external.service.disable}"></label>
@@ -27,7 +28,8 @@
        						</div>
        						<div class="row pl-2 mt-2 float-left">
             					<button type="button" id="btnChangeOss" class="btn btn-outline-dark  btn-sm width-9rem px-2" th:text="'Change License'"></button>
-            				</div>
+								<button type="button" id="btnNextChangeOss" class="btn btn-outline-dark btn-sm width-9rem px-2" style='display: none;' th:text="'Next'"></button>
+							</div>
 						</div>
 					</div>
 				</div>

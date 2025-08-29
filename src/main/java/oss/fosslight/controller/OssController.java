@@ -1461,6 +1461,8 @@ public class OssController extends CoTopComponent{
 	@GetMapping(value = OSS.CHECK_OSS_LICENSE)
 	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		model.addAttribute("projectInfo", bean);
+		model.addAttribute("isNext", req.getParameter("isNext"));
+
 
 		return "oss/checkOssLicensePopup";
 	}
@@ -1547,6 +1549,7 @@ public class OssController extends CoTopComponent{
 	public String checkOssName(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
+		model.addAttribute("isNext", req.getParameter("isNext"));
 		
 		return "oss/checkOssNamePopup";
 	}
