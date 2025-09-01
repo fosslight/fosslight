@@ -80,12 +80,14 @@
 						<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
 							<span th:text="${distributionSiteUrl}"></span>
 						</a>
+						<span th:text="."></span>
 					</th:block>
 					<th:block th:if="${editCompanyYn == 'N' && editDistributionSiteUrlYn == 'Y'}">
 						The source code for the above may be obtained free of charge from
 						<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
 							<span th:text="${distributionSiteUrl}"></span>
 						</a>
+						<span th:text="."></span>
 					</th:block>
 					<th:block th:if="${editDistributionSiteUrlYn == 'N'}"></th:block>
 					<th:block th:if="${editDistributionSiteUrlYn == 'Y' && editEmailYn == 'Y'}">
