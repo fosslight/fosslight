@@ -3435,7 +3435,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				String msg = removeLineSeparator(validMessageMap.get(key));
 				if (key.indexOf(".") > -1) {
 					if (isCheckOssName) {
-						if (msg.contains("Formatting") && key.substring(0, key.indexOf(".")).equals("ossName")) {
+						if (msg.contains("Format") && key.substring(0, key.indexOf(".")).equals("ossName")) {
 							validFlag = true;
 							break;
 						}
