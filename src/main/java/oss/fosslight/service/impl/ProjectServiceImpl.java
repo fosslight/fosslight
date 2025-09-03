@@ -5336,7 +5336,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (androidList.size() != dbAndroidList.size() || !compareList(androidList, androidList2, dbAndroidList)) {
 			diffList.add(noticeTypeEtcStr);
 		}
-		if(!diffList.isEmpty()) {
+		if (!diffList.isEmpty()) {
 			return getMessage("msg.project.check.changed", new String[]{StringUtil.join(diffList, ", ")});
 		}
 		return null;
@@ -5496,6 +5496,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	private List<String> makeCompareKey(String type, List<ProjectIdentification> data, List<List<ProjectIdentification>> subData, boolean convertShortLicenseName) {
 		List<String> list = new ArrayList<>();
+		List<String> chkList = new ArrayList<>();
 		
 		if (data != null) {
 			for (ProjectIdentification bean : data) {
@@ -5527,10 +5528,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 					if (bean.getComponentLicenseList() != null) {
 						for (ProjectIdentification license : bean.getComponentLicenseList()) {
+							String licenseName = avoidNull(convertLicenseShortName(license.getLicenseName(), convertShortLicenseName)).trim();
+							String _key = (bean.getComponentId() + "|" + licenseName).toUpperCase();
+							if (chkList.contains(_key)) {
+								continue;
+							} else {
+								chkList.add(_key);
+							}
+							
 							String key = type;
 							key += "|" + avoidNull(bean.getOssName()).trim();
 							key += "|" + avoidNull(bean.getOssVersion()).trim();
-							key += "|" + avoidNull(convertLicenseShortName(license.getLicenseName(), convertShortLicenseName)).trim();
+							key += "|" + licenseName;
 							key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
 							key += "|" + avoidNull(license.getExcludeYn(), CoConstDef.FLAG_NO);
 							key = key.toUpperCase();
@@ -5551,6 +5560,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 		}
+		chkList.clear();
 		
 		return list;
 	}
