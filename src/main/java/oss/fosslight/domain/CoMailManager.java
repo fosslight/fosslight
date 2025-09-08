@@ -1086,7 +1086,7 @@ public class CoMailManager extends CoTopComponent {
 							project.setPrjId(bean.getParamPrjId());
 							Project projectDetail = projectService.getProjectDetail(project);
 							if (!isEmpty(avoidNull(projectDetail.getSecPerson()))) {
-								ccList.add(projectDetail.getSecPerson());
+								ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{projectDetail.getSecPerson()})));
 							}
         				}
     				}
