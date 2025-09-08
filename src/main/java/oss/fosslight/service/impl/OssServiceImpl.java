@@ -5028,12 +5028,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				seq++;
 			}
-			
 			if (downloadLocation.indexOf("://") > -1) {
 				downloadLocation = downloadLocation.substring(downloadLocation.indexOf("://")+3, downloadLocation.length());
 			}
 			if (downloadLocation.startsWith("www.")) {
 				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
+			}
+			if (urlSearchSeq == 0 && downloadLocation.startsWith("gist.")) {
+				urlSearchSeq = -1;
 			}
 			if (downloadLocation.contains(";")) {
 				downloadLocation = downloadLocation.split("[;]")[0];
