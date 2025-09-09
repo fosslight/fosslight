@@ -602,7 +602,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String fileSeq =	(String)map.get("fileSeq");
 		int packagingFileIdx = (int)map.get("packagingFileIdx");
 		List<String> fileSeqs =	(List<String>)map.get("fileSeqs");
-		String filePath =	"";
+		List<String> fileNames = (List<String>)map.get("fileNames");
+		String filePath = "";
 		List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
 		List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 		boolean isChangedPackageFile = (boolean)map.get("isChangedPackageFile");
@@ -732,11 +733,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				boolean isFirst = true;
 				
 				for (String s : result) {
-					if (s.contains("?")) s = s.replaceAll("[?]", "0x3F");
+					if (s.contains("?")) {
+						s = s.replaceAll("[?]", "0x3F");
+					}
 					
-					if (!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
+					if (!isEmpty(s)) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
-
+						for (String fileName : fileNames) {
+							if (s.contains(fileName.trim())) {
+								continue;
+							}
+						}
+						
 						boolean isFile = s.endsWith("*");
 						s = s.replace(VERIFY_PATH_DECOMP +"/" + prjId + "/", "");
 						s = s.replaceAll("//", "/");
@@ -3452,5 +3460,19 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public String getNoticeAppendInfo(String prjId) {
 		return verificationMapper.selectNoticeAppendInfo(prjId);
+	}
+
+	@Override
+	public List<String> getPackageFileNameList(List<String> packageFileSeqList) {
+		List<String> packageFileNames = new ArrayList<>();
+		for (String fileSeq : packageFileSeqList) {
+			if (!isEmpty(fileSeq)) {
+				T2File file = fileService.selectFileInfo(fileSeq);
+				if (file != null && !isEmpty(file.getOrigNm())) {
+					packageFileNames.add(file.getOrigNm());
+				}
+			}
+		}
+		return packageFileNames;
 	}
 }

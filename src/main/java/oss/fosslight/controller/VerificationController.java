@@ -431,8 +431,7 @@ public class VerificationController extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@ResponseBody
 	@PostMapping(value=VERIFICATION.VERIFY)
-	public String procVerify(@RequestBody Map<Object, Object> map, T2File file, Project project,
-			HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+	public String procVerify(@RequestBody Map<Object, Object> map, T2File file, Project project, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/verify");
 		
 		Map<String, Object> resMap = null;
@@ -451,10 +450,12 @@ public class VerificationController extends CoTopComponent {
 			boolean isChangedPackageFile = verificationService.getChangedPackageFile(prjId, fileSeqs);
 			int seq = 1;
 			
+			List<String> fileNames = verificationService.getPackageFileNameList(fileSeqs);
 			for (String fileSeq : fileSeqs){
 				map.put("fileSeq", fileSeq);
 				map.put("packagingFileIdx", seq++);
 				map.put("isChangedPackageFile", isChangedPackageFile);
+				map.put("fileNames", fileNames);
 				result.add(verificationService.processVerification(map, file, project));
 			}
 			

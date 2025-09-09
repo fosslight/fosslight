@@ -101,4 +101,6 @@ public interface VerificationService {
 	Map<String, Object> checkNoticeHtmlInfo(OssNotice ossNotice);
 
 	String getNoticeAppendInfo(String prjId);
+
+	List<String> getPackageFileNameList(List<String> packageFileSeqList);
 }
