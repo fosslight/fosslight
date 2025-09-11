@@ -398,13 +398,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					if (prjInfo != null) {
 						if (!isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
-							noticeBinaryList = CommonFunction.getNoticeBinaryList(
-									fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
+							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
 						}
 
 						if (!isEmpty(prjInfo.getSrcAndroidResultFileId())) {
-							existsBinaryName = CommonFunction.getExistsBinaryNames(
-									fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
+							existsBinaryName = CommonFunction.getExistsBinaryNames(fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
 						}
 					}
 
@@ -2730,6 +2728,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				int rowIdx = 1;
 
 				for (OssComponents bean : noticeList) {
+					boolean isPackageUrl = false;
 					Row row = sheetPackage.getRow(rowIdx);
 
 					if (row == null) {
@@ -2748,7 +2747,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
 					String ossName = bean.getOssName().replace("&#39;", "\'"); // ossName에 '가 들어갈 경우 정상적으로 oss Info를 찾지 못하는 증상이 발생하여 현재 값으로 치환.
 
-					String relationshipsKey = bean.getPackageUrl(); // (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+					String relationshipsKey = "";
+					if (!isEmpty(bean.getPackageUrl())) {
+						isPackageUrl = true;
+						relationshipsKey = bean.getPackageUrl();
+					} else {
+						relationshipsKey = (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+					}
 					String spdxRefId = "";
 					
 					if (ossName.equals("-")) {
@@ -2761,7 +2766,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						packageInfoidentifierList.add("SPDXRef-Package-" + bean.getOssId());
 					}
 
-					if (!isEmpty(relationshipsKey)) {
+					if (isPackageUrl) {
 						relationshipsMap.put(relationshipsKey, spdxRefId);
 						externalRefsMap.put(spdxRefId, relationshipsKey);
 					}
@@ -3376,6 +3381,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				int rowIdx = 1;
 
 				for (OssComponents bean : noticeList) {
+					boolean isPackageUrl = false;
 					Row row = sheetPackage.getRow(rowIdx);
 
 					if (row == null) {
@@ -3395,7 +3401,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					String ossName = bean.getOssName().replace("&#39;", "\'");
 
 //					String relationshipsKey = (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
-					String relationshipsKey = bean.getPackageUrl();
+					String relationshipsKey = "";
+					if (!isEmpty(bean.getPackageUrl())) {
+						isPackageUrl = true;
+						relationshipsKey = bean.getPackageUrl();
+					} else {
+						relationshipsKey = (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+					}
 					String spdxRefId = "";
 					
 					if (ossName.equals("-") || (bean.getOssId() == null || bean.getOssId().isEmpty())) {
@@ -3407,7 +3419,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					cellSPDXIdentifier.setCellValue(spdxRefId);
 					packageInfoidentifierList.add(spdxRefId);
-					if (!isEmpty(relationshipsKey)) {
+					if (isPackageUrl) {
 						relationshipsMap.put(relationshipsKey, spdxRefId);
 						externalRefsMap.put(spdxRefId, relationshipsKey);
 					}
@@ -5672,8 +5684,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		List<String> checkCveIdList = new ArrayList<>();
 		List<Dependency> dependencyList = new ArrayList<>();
 		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-		OssMaster ossMaster = new OssMaster();
+//		OssMaster ossMaster = new OssMaster();
 		
+		boolean isPackageUrl = false;
 		for (OssComponents bean : noticeList) {
 			String ossName = bean.getOssName();
 			String ossVersion = bean.getOssVersion();
@@ -5682,7 +5695,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			ExternalReference external = new ExternalReference();
 			List<ExternalReference> externalList = new ArrayList<>();
 			
-			String relationshipsKey = bean.getPackageUrl(); // (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+			String relationshipsKey = "";
+			if (!isEmpty(bean.getPackageUrl())) {
+				isPackageUrl = true;
+				relationshipsKey = bean.getPackageUrl();
+			} else {
+				relationshipsKey = (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+			}
 			String bomRef = bean.getComponentId();
 			
 			component.setType(org.cyclonedx.model.Component.Type.LIBRARY);
@@ -5690,24 +5709,29 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			component.setName(ossName);
 			component.setVersion(bean.getOssVersion());
 			
-			if (!isEmpty(relationshipsKey)) {
+			if (isPackageUrl) {
 				relationshipsMap.put(relationshipsKey, bomRef);
 				component.setPurl(relationshipsKey);
-			} else {
-				if (!isEmpty(bean.getDownloadLocation())) {
-					for (String downloadLocation : bean.getDownloadLocation().split(",")) {
-						if (!isEmpty(downloadLocation)) {
-							ossMaster.setDownloadLocation(downloadLocation);
-							String purl = ossService.getPurlByDownloadLocation(ossMaster);
-							if (!isEmpty(purl)) {
-								relationshipsKey = purl;
-								component.setPurl(purl);
-							}
-							break;
-						}
-					}
-				}
 			}
+			
+//			if (!isEmpty(relationshipsKey)) {
+//				relationshipsMap.put(relationshipsKey, bomRef);
+//				component.setPurl(relationshipsKey);
+//			} else {
+//				if (!isEmpty(bean.getDownloadLocation())) {
+//					for (String downloadLocation : bean.getDownloadLocation().split(",")) {
+//						if (!isEmpty(downloadLocation)) {
+//							ossMaster.setDownloadLocation(downloadLocation);
+//							String purl = ossService.getPurlByDownloadLocation(ossMaster);
+//							if (!isEmpty(purl)) {
+//								relationshipsKey = purl;
+//								component.setPurl(purl);
+//							}
+//							break;
+//						}
+//					}
+//				}
+//			}
 //			if (!isEmpty(bean.getDownloadLocation())) {
 //				for (String downloadLocation : bean.getDownloadLocation().split(",")) {
 //					if (!isEmpty(downloadLocation)) {

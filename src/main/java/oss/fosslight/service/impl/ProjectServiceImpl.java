@@ -7546,7 +7546,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(ossNotice.getPrjId());
-		identification.setReferenceDiv(!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(ossNotice.getRefDiv()) ? CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM : CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+		identification.setReferenceDiv(!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(ossNotice.getRefDiv()) ? CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM : CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 		
 		List<OssComponents> ossComponentList = projectMapper.selectOssComponentsSbomList(identification);
 		
@@ -7555,44 +7555,39 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		Map<String, OssComponents> srcInfo = new HashMap<>();
 		Map<String, OssComponents> notObligationInfo = new HashMap<>();
 		
-		OssMaster om = new OssMaster();
 		OssComponents ossComponent;
 		
 		for (OssComponents bean : ossComponentList) {
 			String componentKey = "";
-			if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(identification.getReferenceDiv())) {
-				if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
-					continue;
-				}
-				componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
-				if ("-".equals(bean.getOssName())) {
-					componentKey += dashSeq++;
-				}
-			} else {
-				if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName()) || isEmpty(bean.getPackageUrl())) {
-					continue;
-				}
+			if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
+				continue;
+			}
+			componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+			if ("-".equals(bean.getOssName())) {
+				componentKey += dashSeq++;
+			}
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv()) && !isEmpty(bean.getPackageUrl())) {
 				componentKey = bean.getPackageUrl().toUpperCase();
 			}
 			
-			om.setOssNames(new String[] {bean.getOssName()});
-			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
-			if (ossList != null && !ossList.isEmpty()) {
-				om = ossList.get(0);
-				OssMaster ossInfo = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId());
-				if (ossInfo != null) {
-					String copyright = ossInfo.getCopyright();
-					String homepage = ossInfo.getHomepage();
-					
-					if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
-						bean.setCopyrightText(copyright);
-					}
-					
-					if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
-						bean.setHomepage(homepage);
-					}
-				}
-			}
+//			om.setOssNames(new String[] {bean.getOssName()});
+//			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
+//			if (ossList != null && !ossList.isEmpty()) {
+//				om = ossList.get(0);
+//				OssMaster ossInfo = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId());
+//				if (ossInfo != null) {
+//					String copyright = ossInfo.getCopyright();
+//					String homepage = ossInfo.getHomepage();
+//					
+//					if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+//						bean.setCopyrightText(copyright);
+//					}
+//					
+//					if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+//						bean.setHomepage(homepage);
+//					}
+//				}
+//			}
 			
 			// type
 			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(bean.getObligationType());
@@ -7671,18 +7666,14 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		if (addOssComponentList != null) {
 			for (OssComponents bean : addOssComponentList) {
 				String componentKey = "";
-				if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(identification.getReferenceDiv())) {
-					if (isEmpty(bean.getLicenseName())) {
-						continue;
-					}
-					componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
-					if ("-".equals(bean.getOssName())) {
-						componentKey += dashSeq++;
-					}
-				} else {
-					if (isEmpty(bean.getLicenseName()) || isEmpty(bean.getPackageUrl())) {
-						continue;
-					}
+				if (isEmpty(bean.getLicenseName())) {
+					continue;
+				}
+				componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				if ("-".equals(bean.getOssName())) {
+					componentKey += dashSeq++;
+				}
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv()) && !isEmpty(bean.getPackageUrl())) {
 					componentKey = bean.getPackageUrl().toUpperCase();
 				}
 				
