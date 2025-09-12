@@ -2630,7 +2630,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		if (!isEmpty(CoCodeManager.CD_ROLE_OUT_LICENSE)) {
 			for (String license : avoidNull(licenseName).split(",")) {
 				for (String s : CoCodeManager.CD_ROLE_OUT_LICENSE.split("\\|")) {
-					if (s.trim().equalsIgnoreCase(license)) {
+					if ((s.trim().equalsIgnoreCase("LGE Proprietary License") || s.trim().equalsIgnoreCase("Other Proprietary License")) && (s.trim().equalsIgnoreCase(license))) {
 						result = true;
 						break;
 					}
