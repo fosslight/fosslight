@@ -1520,8 +1520,14 @@
 	</select>
 	
 	<insert id="insertWatcher" parameterType="hashMap">
-		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{prjEmail})
-	</insert>
+		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID)
+		SELECT #{prjId}, #{division}, #{userId}
+		FROM DUAL
+		WHERE NOT EXISTS (
+				SELECT 1
+				FROM PROJECT_WATCHER
+				WHERE PRJ_ID = #{prjId} AND DIVISION = #{division} AND USER_ID = #{userId}
+			)</insert>
 	
 	<update id="updateProjectSubStatus" parameterType="hashMap">
 		UPDATE 

@@ -1157,41 +1157,33 @@ public class ApiProjectV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @ApiParam(value = "Editor Id", required = true) @RequestParam(required = true) String[] idList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
-            throw new CProjectNotAvailableException(prjId);
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
         try {
-            if (emailList == null) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Email list is required.");
+            if (idList == null) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Editor ID list is required.");
             }
-            for (String email : emailList) {
-                boolean ldapCheck = true;
-                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
-                    apiProjectService.existLdapUserToEmail(email);
-                }
-                if (!ldapCheck) {
-                    return responseService.errorResponse(HttpStatus.NOT_FOUND,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
-                }
-                boolean watcherFlag = apiProjectService.existsWatcherByEmail(prjId, email);
-                if (!watcherFlag) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+
+            for(String id : idList) {
+                T2Users targetUser = new T2Users();
+                targetUser.setUserId(id);
+                T2Users existingUser = userService.getUser(targetUser);
+                if (existingUser == null) {
+                    return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in FOSSLight Hub. User ID: " + id);
                 }
                 Map<String, Object> param = new HashMap<>();
                 param.put("prjId", prjId);
-                param.put("division", "");
-                param.put("userId", "");
-                param.put("prjEmail", email);
+                param.put("division", existingUser.getDivision());
+                param.put("userId", existingUser.getUserId());
                 apiProjectService.insertWatcher(param);
             }
-
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST,
@@ -1209,8 +1201,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
-        userService.changeSession(userInfo.getUserId());
-
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
@@ -1226,7 +1216,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             T2Users existingUser = userService.getUser(targetUser);
             
             if (existingUser == null) {
-                return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in T2_Users table. User ID: " + userId);
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in FOSSLight Hub. User ID: " + userId);
             }
 
             // 기존 프로젝트 정보 조회
