@@ -24,6 +24,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
@@ -100,7 +101,7 @@ public class ProjectController extends CoTopComponent {
 	@Autowired SearchService searchService;
 	
 	@Autowired private BinaryDataService binaryDataService;
-	
+	@Autowired T2UserService t2UserService;
 	/** The env. */
 	@Resource
 	private Environment env;
@@ -605,7 +606,7 @@ public class ProjectController extends CoTopComponent {
 		boolean isBatResult = !isEmpty(identification.getRefBatId());
 		boolean isSortOnBom = false;
 		
-		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(code)) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(code) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(code) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(code)) {
 			if (!isEmpty(identification.getSidxOrg())) {
 				String[] _sortIdxs = identification.getSidxOrg().split(",");
 				
@@ -3046,8 +3047,7 @@ public class ProjectController extends CoTopComponent {
 	 * @throws Exception the exception
 	 */
 	@GetMapping(value = PROJECT.IDENTIFICATION_ID_DIV, produces = "text/html; charset=utf-8")
-	public String identification(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId,
-			@PathVariable String initDiv) throws Exception {
+	public String identification(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId, @PathVariable String initDiv) throws Exception {
 		Project project = new Project();
 		project.setPrjId(prjId);
 		project.setActType(CoConstDef.FLAG_NO);
@@ -5616,4 +5616,8 @@ public class ProjectController extends CoTopComponent {
 		return "project/fragments/dependencyTreePopup";
 	}
 
+	@PostMapping(value = PROJECT.INIT_AUTO_REVIEW)
+    public @ResponseBody ResponseEntity<Object> initAutoReview(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) throws SchedulerException {
+        return makeJsonResponseHeader(projectService.initAutoReview(project.getPrjId()), null);
+    }
 }

@@ -843,11 +843,15 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param copyrights the new copyrights
 	 */
 	public void setCopyrights(String copyrights) {
-		String[] copys = copyrights.split("\r\n");
-		if (copys[0].equals("") && copys.length == 1){
-			this.copyrights = null; 
-		}else{
-			this.copyrights = copys;
+		if (!isEmpty(copyrights)) {
+			String[] copys = copyrights.split("\r\n");
+			if (copys[0].equals("") && copys.length == 1){
+				this.copyrights = null; 
+			} else {
+				this.copyrights = copys;
+			}
+		} else {
+			this.copyrights = null;
 		}
 	}
 	
@@ -1920,21 +1924,21 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 	
 	public void setDetectedLicense(String detectedLicense) {
-		List<String> list = Arrays.asList(detectedLicense.split(","));
-		
 		this.detectedLicenses = null; // clear
 		
-		for (String s : list) {
-			if (!isEmpty(s)) {
-				this.addDetectedLicense(s.trim());
+		if (!isEmpty(detectedLicense)) {
+			List<String> list = Arrays.asList(detectedLicense.split(","));
+			
+			for (String s : list) {
+				if (!isEmpty(s)) {
+					this.addDetectedLicense(s.trim());
+				}
 			}
 		}
 	}
 	
 	public List<String> getDetectedLicenses() {
-		return detectedLicenses == null 
-						? new ArrayList<>() 
-						: detectedLicenses;
+		return detectedLicenses == null ? new ArrayList<>() : detectedLicenses;
 	}
 	
 	public String getDetectedLicense() {

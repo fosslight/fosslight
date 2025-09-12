@@ -3980,14 +3980,16 @@ public class CoMailManager extends CoTopComponent {
 						analysisResultListPath += "/" + prjId;
 
 						File file = FileUtil.getAutoAnalysisFile("LOG", analysisResultListPath);
-						DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
-						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
-
+						if (file != null) {
+							DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
+							helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+						}
 						analysisResultListPath += "/result";
-						file = FileUtil.getAutoAnalysisFile("XLSX", analysisResultListPath);
-						dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
-						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
-
+						File fileResult = FileUtil.getAutoAnalysisFile("XLSX", analysisResultListPath);
+						if (fileResult != null) {
+							DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + fileResult.getName());
+							helper.addAttachment(MimeUtility.encodeText(fileResult.getName(), "UTF-8", "B"), dataSource);
+						}
 					}
 				}
 				log.info("[CoReviewer][PRJ-" + prjId + "] Send Mail");
@@ -4002,8 +4004,6 @@ public class CoMailManager extends CoTopComponent {
 					helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
 				}
 			}
-
-
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType()) ||
 					CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {

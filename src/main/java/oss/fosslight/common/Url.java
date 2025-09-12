@@ -419,6 +419,8 @@ public final class Url {
 		public static final String CHANGE_PROJECT_STATUS = PATH + "/changeProjectStatus";
 		public static final String DEPENDENCY_TREE_POPUP = PATH + "/dependencyTreePopup";
 		public static final String CHECK_COMPONENTS_LOADED = PATH + "/checkComponentLoaded";
+		
+		public static final String INIT_AUTO_REVIEW = PATH + "/initAutoReview";
 	}
 	
 	public static final class VERIFICATION {
@@ -1094,7 +1096,6 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
-
 	}
 
 	public static final class API_LITE {

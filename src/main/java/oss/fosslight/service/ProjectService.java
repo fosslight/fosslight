@@ -240,4 +240,8 @@ public interface ProjectService extends HistoryConfig{
 	public Map<String, Object> getDependencyTreeList(List<ProjectIdentification> ossComponents);
 
 	public void updateSecurityPerson(Project project);
+
+	public boolean initAutoReview(String prjId);
+
+	public void updateProjectNotification(Project project, Map<String, Object> param);
 }

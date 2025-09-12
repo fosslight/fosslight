@@ -76,8 +76,11 @@ import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.CacheService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
+import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VerificationService;
 import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.util.DateUtil;
@@ -96,6 +99,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private FileService fileService;
 	@Autowired private VulnerabilityService vulnerabilityService;
 	@Autowired private CommentService commentService;
+	@Autowired private T2UserService t2UserService;
+	@Autowired private PartnerService partnerService;
+	@Autowired private HistoryService historyService;
 	
 	// Mapper
 	@Autowired private ProjectMapper projectMapper;
@@ -4116,8 +4122,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) throws Exception {
 		Map<String, Object> resultMap = new HashMap<>();
 		
-		String commentDiv = isEmpty(project.getReferenceDiv()) ? CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS
-				: project.getReferenceDiv();
+		String commentDiv = isEmpty(project.getReferenceDiv()) ? CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS : project.getReferenceDiv();
 		
 		String userComment = project.getUserComment();
 		String statusCode = project.getIdentificationStatus();
@@ -8496,5 +8501,229 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 
 	public void updateSecurityPerson(Project project) {
 		projectMapper.updateSecurityPerson(project);
+	}
+
+	@Override
+	public boolean initAutoReview(String prjId) {
+        String userName = loginUserName();
+        String targetName = CoConstDef.CD_CHECK_OSS_IDENTIFICATION;
+        if(prjId.contains("3rd_")){
+            prjId = prjId.substring(4);
+            targetName = CoConstDef.CD_CHECK_OSS_PARTNER;
+        }
+        log.info("[CoReviewer][PRJ-" + prjId + "] Click CoReviewer");
+        
+        String status = checkStatus(prjId, targetName);
+
+        ossService.setOssAnalysisStatus(prjId);
+
+        if(status.equals("REQ")) {
+        	t2UserService.changeSession(userName);
+            switch(targetName.toUpperCase()){
+                case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+                    Project prj = new Project();
+                    prj.setPrjId(prjId);
+                    prj.setIdentificationStatus("REV");
+                    Map<String, Object> resultMap = new HashMap<>();
+                    try {
+                        resultMap = updateProjectStatus(prj, false, false);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    updateProjectNotification(prj, resultMap);
+                    break;
+                case CoConstDef.CD_CHECK_OSS_PARTNER:
+                    PartnerMaster partnerMaster = new PartnerMaster();
+                    partnerMaster.setPartnerId(prjId);
+                    partnerMaster.setStatus("REV");
+                    partnerService.changeStatus(partnerMaster, true);
+                    break;
+            }
+        }
+        t2UserService.changeSession("OSPO");
+        
+        return initAutoReviewCheckOssName(prjId, targetName);
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean initAutoReviewCheckOssName(String prjId, String targetName) {
+        String status = checkStatus(prjId, targetName);
+        if (status.equals("REV")) {
+            log.info("[CoReviewer][PRJ-" + prjId + "] Start Check Oss Name");
+            Map<String, Object> resMap = new HashMap<>();
+            ProjectIdentification paramBean = new ProjectIdentification();
+            Map<String, String> diffMap = new HashMap<>();
+            List<String> diffComponentIdList = new ArrayList<>();
+            paramBean.setReferenceId(prjId);
+            String refId = "";
+            switch(targetName.toUpperCase()){
+                case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+                    String[] referenceDiv = new String[] {CoConstDef.CD_DTL_COMPONENT_ID_SRC, CoConstDef.CD_DTL_COMPONENT_ID_BIN, CoConstDef.CD_DTL_COMPONENT_ID_DEP, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID};
+                    for (int i=0; i<referenceDiv.length; i++) {
+                        diffComponentIdList.clear();
+                        paramBean.setReferenceDiv(referenceDiv[i]);
+                        resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
+                        diffMap = (Map<String, String>) resMap.get("diffMap");
+                        if (diffMap != null) {
+                            for (String key : diffMap.keySet()) {
+                                if (key.indexOf("downloadLocation") == 0) {
+                                    diffComponentIdList.add(key.split("[.]")[1]);
+                                }
+                            }
+                            diffComponentIdList = diffComponentIdList.stream().distinct().collect(Collectors.toList());
+                        }
+                        if (resMap.containsKey("list")) {
+                        	List<ProjectIdentification> prjList = (List<ProjectIdentification>) resMap.get("list");
+                            List<ProjectIdentification> changeList = new ArrayList<>();
+                        	if (!CollectionUtils.isEmpty(prjList)) {
+                        		for (ProjectIdentification prj : prjList) {
+                                    if (prj.getCheckName().indexOf("|") > -1 || diffComponentIdList.contains(prj.getComponentId())
+                                            || prj.getLicenseName().toUpperCase().equals("LGE PROPRIETARY LICENSE") || prj.getLicenseName().toUpperCase().equals("OTHER PROPRIETARY LICENSE")) {
+                                        continue;
+                                    }
+                                    prj.setRefPrjId(prjId);
+                                    prj.setReferenceId(refId);
+                                    changeList.add(prj);
+                                }
+                        		
+                        		Map<String, Object> save = ossService.saveOssCheckName(changeList, targetName);
+                                if (!(boolean) save.get("isValid")) {
+                                    return false;
+                                }
+                                if (save.containsKey("commentId") && save.get("commentId") != null) {
+                                    refId = (String) save.get("commentId");
+                                }
+                            }
+                            Project project = new Project();
+                            project.setPrjId(prjId);
+                            Project projectDetail = getProjectDetail(project);
+                            if (projectDetail.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                                registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>(), null, false, true );
+                            } else{
+                                registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
+                            }
+                        }
+                    }
+                    break;
+                case CoConstDef.CD_CHECK_OSS_PARTNER:
+                    paramBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+                    resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
+                    diffMap = (Map<String, String>) resMap.get("diffMap");
+                    if(diffMap != null) {
+                        for (String key : diffMap.keySet()) {
+                            if (key.indexOf("downloadLocation") == 0) {
+                                diffComponentIdList.add(key.split("[.]")[1]);
+                            }
+                        }
+                        diffComponentIdList = diffComponentIdList.stream().distinct().collect(Collectors.toList());
+                    }
+                    if (resMap.containsKey("list")) {
+                    	List<ProjectIdentification> prjList = (List<ProjectIdentification>) resMap.get("list");
+                    	if (!CollectionUtils.isEmpty(prjList)) {
+                    		for (ProjectIdentification prj : prjList) {
+                                if (prj.getCheckName().indexOf("|") > -1 || diffComponentIdList.contains(prj.getComponentId())) {
+                                    continue;
+                                }
+                                prj.setRefPrjId(refId);
+                                prj.setReferenceId(prjId);
+                            }
+                    		
+                    		Map<String, Object> save = ossService.saveOssCheckName(prjList, targetName);
+                            if (!(boolean) save.get("isValid")) {
+                                return false;
+                            }
+                            if (save.get("commentId") != null){
+                                refId = (String) save.get("commentId");
+                            }
+                        }
+                    }
+                    registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>(), null, false, false, true);
+                    break;
+            }
+       }
+        return true;
+    }
+
+	@Override
+	public void updateProjectNotification(Project project, Map<String, Object> param) {
+		if (param != null) {
+			String mailType = (String) param.get("mailType");
+			String userComment = (String) param.get("userComment");
+			String commentDiv = (String) param.get("commentDiv");
+			String status = (String) param.get("status");
+			
+			try {
+				History h = new History();
+				h = work(project);
+				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+				project = (Project) h.gethData();
+				h.sethEtc(project.etcStr());
+				historyService.storeData(h);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			if(!isEmpty(mailType)) {
+				try {
+					
+					CoMail mailBean = new CoMail(mailType);
+					mailBean.setParamPrjId(project.getPrjId());
+					mailBean.setComment(userComment);
+					
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+			
+			if (!isEmpty(avoidNull(userComment).trim())) {
+				try {
+					CommentsHistory commHisBean = new CommentsHistory();
+					commHisBean.setReferenceDiv(commentDiv);
+					commHisBean.setReferenceId(project.getPrjId());
+					commHisBean.setContents(userComment);
+					commHisBean.setStatus(status);
+					log.info(status + " 상태 comment 저장!!");
+					commentService.registComment(commHisBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			} else if (!isEmpty(status)) {
+				try {
+					CommentsHistory commHisBean = new CommentsHistory();
+					commHisBean.setReferenceDiv(commentDiv);
+					commHisBean.setReferenceId(project.getPrjId());
+					commHisBean.setContents(userComment);
+					commHisBean.setStatus(status);
+					log.info("comment empty, " + status + " 상태 comment 저장!!");
+					commentService.registComment(commHisBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private String checkStatus(String prjId, String targetName) {
+		String status = "";
+        switch(targetName.toUpperCase()) {
+            case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+                Project prj = new Project();
+                prj.setPrjId(prjId);
+                prj.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+                status = getProjectDetail(prj).getIdentificationStatus();
+                break;
+
+            case CoConstDef.CD_CHECK_OSS_PARTNER:
+                PartnerMaster p = new PartnerMaster();
+                p.setPartnerName(prjId);
+                Map<String, Object> a = partnerService.getPartnerMasterList(p);
+                List<PartnerMaster> list = (List<PartnerMaster>) a.get("rows");
+                PartnerMaster partnerMaster = list.get(0);
+                status = partnerMaster.getStatus();
+                break;
+        }
+        return status;
 	}
 }
