@@ -8514,11 +8514,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
         log.info("[CoReviewer][PRJ-" + prjId + "] Click CoReviewer");
         
         String status = checkStatus(prjId, targetName);
-
+        t2UserService.changeSession(userName);
+        
         ossService.setOssAnalysisStatus(prjId);
 
         if(status.equals("REQ")) {
-        	t2UserService.changeSession(userName);
             switch(targetName.toUpperCase()){
                 case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
                     Project prj = new Project();
