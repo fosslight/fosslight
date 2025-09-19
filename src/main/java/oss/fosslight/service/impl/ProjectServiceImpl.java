@@ -8505,20 +8505,21 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 
 	@Override
 	public boolean initAutoReview(String prjId) {
+		log.info("[CoReviewer][PRJ-" + prjId + "] Click CoReviewer");
+		ossService.setOssAnalysisStatus(prjId);
+		
         String userName = loginUserName();
         String targetName = CoConstDef.CD_CHECK_OSS_IDENTIFICATION;
-        if(prjId.contains("3rd_")){
-            prjId = prjId.substring(4);
+        
+        if (prjId.contains("3rd_")){
+        	prjId = prjId.substring(4);
             targetName = CoConstDef.CD_CHECK_OSS_PARTNER;
         }
-        log.info("[CoReviewer][PRJ-" + prjId + "] Click CoReviewer");
         
         String status = checkStatus(prjId, targetName);
         t2UserService.changeSession(userName);
         
-        ossService.setOssAnalysisStatus(prjId);
-
-        if(status.equals("REQ")) {
+        if (status.equals("REQ")) {
             switch(targetName.toUpperCase()){
                 case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
                     Project prj = new Project();
