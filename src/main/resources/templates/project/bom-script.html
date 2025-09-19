@@ -367,13 +367,15 @@ var bom_fn = {
 		var selectedVal = $("#"+id+"_notify").prop("selected", true).val();
 		
 		if (selectedVal) {
-// 			if (selectedVal == "N") {
-// 				$("#"+id+"_source").val("N");
-// 			}
+			if ("Y" == selectedVal) {
+ 				$("#bomList").jqGrid('setCell', id, 'obligationType', '10');
+ 			} else {
+ 				$("#bomList").jqGrid('setCell', id, 'obligationType', '99');
+ 			}
 			
 			$("#"+id+"_notify").parent().css("background", "");
 			
-			if($("#"+id+"_source").val()) {
+			if ($("#"+id+"_source").val()) {
 				$("#"+id+"_source").parent().css("background", "");
 			}
 		} else {
@@ -384,16 +386,25 @@ var bom_fn = {
 	},
 	onSourceCboxClick : function(rowId){
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var notifyVal = $("#"+id+"_notify").prop("selected", true).val();
 		var selectedVal = $("#"+id+"_source").prop("selected", true).val();
 		
 		if (selectedVal) {
-// 			if (selectedVal == "Y") {
-// 				$("#"+id+"_notify").val("Y");
-// 			}
+ 			if ("Y" == selectedVal) {
+				if ("N" == notifyVal) {
+					$("#bomList").jqGrid('setCell', id, 'obligationType', '12');
+				} else {
+					$("#bomList").jqGrid('setCell', id, 'obligationType', '11');
+				}
+			} else {
+				if ("N" == notifyVal) {
+					$("#bomList").jqGrid('setCell', id, 'obligationType', '99');
+				}
+			}
 			
 			$("#"+id+"_source").parent().css("background", "");
 			
-			if($("#"+id+"_notify").val()) {
+			if ($("#"+id+"_notify").val()) {
 				$("#"+id+"_notify").parent().css("background", "");
 			}
 		} else {
