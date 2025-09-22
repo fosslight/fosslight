@@ -809,12 +809,18 @@ var overview = {
 			
 			let ossName = key.split("_")[0];
 			let ossVersion = key.split("_")[1];
+			if ("N/A" == ossVersion) {
+				ossVersion = "";
+			}
 			
 			let vulnCount = data[key];
 			let vulnHtml = "";
 			for (let vulnKey in vulnCount) {
 				let vulnStr = vulnKey[0];
 				let cnt = vulnCount[vulnKey];
+				if ("" == ossVersion && cnt > 0) {
+					cnt = 0;
+				}
 				vulnHtml += "<span style=\"cursor: pointer;\" onclick=\"overview.vulnDetailPopup('" + ossName + "', '" + ossVersion + "', '" + vulnStr + "', '" + cnt + "');\">";
 				if ("C" == vulnStr) {
 					vulnHtml += '<span class="badge badge-dark p-2">C</span>';

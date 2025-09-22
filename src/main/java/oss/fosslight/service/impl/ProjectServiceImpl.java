@@ -7345,10 +7345,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						oc.setSecurityComments(bean.getSecurityComments());
 					}
 					
-					if (!activateFlag) {
-						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
-					}
-					
+					generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
 					fullDiscoveredList.add(oc);
 					
 					bean = null;
