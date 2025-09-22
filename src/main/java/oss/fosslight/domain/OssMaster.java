@@ -370,6 +370,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private List<String> restrictionCdNoList;
 	
 	private String inCpeMatchFlag;
+	
+	private String range;
 		
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -2431,5 +2433,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDetectedLicenseNameAllSearchFlag(String detectedLicenseNameAllSearchFlag) {
 		this.detectedLicenseNameAllSearchFlag = detectedLicenseNameAllSearchFlag;
+	}
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
 	}
 }
