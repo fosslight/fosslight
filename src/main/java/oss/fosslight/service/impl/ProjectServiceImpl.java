@@ -7254,6 +7254,18 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		List<ProjectIdentification> list = null;
 		List<ProjectIdentification> fullList = null;
 		
+		List<String> checkVulnScore = new ArrayList<>();
+		Map<String, Object> vulnScore = new LinkedHashMap<>();
+		vulnScore.put("Critical", 0);
+		vulnScore.put("High", 0);
+		vulnScore.put("Medium", 0);
+		vulnScore.put("Low", 0);
+		
+		Map<String, Object> vulnScoreResolution = new LinkedHashMap<>();
+		vulnScoreResolution.put("Unresolved", 0);
+		vulnScoreResolution.put("Fixed", 0);
+		Map<String, Map<String, Object>> vulnScoreByOssVersion = new HashMap<>();
+		
 		OssComponents oc = null;
 		OssComponents bean = null;
 		boolean activateFlag;
@@ -7332,13 +7344,18 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
 						oc.setSecurityComments(bean.getSecurityComments());
 					}
-							
+					
+					if (!activateFlag) {
+						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
+					}
+					
 					fullDiscoveredList.add(oc);
 					
 					bean = null;
 					gridIdx++;
 				}
 			}
+			checkVulnScore.clear();
 			
 			if (list != null && !list.isEmpty()) {
 				gridIdx = 1;
@@ -7424,10 +7441,82 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			rtnMap.put("msg", warningMsg);
 		}
 		
+		Map<String, Object> overViewData = new HashMap<>();
+		overViewData.put("vulnScore", vulnScore);
+		overViewData.put("vulnScoreResolution", vulnScoreResolution);
+		overViewData.put("vulnScoreByOssVersion", vulnScoreByOssVersion);
+		
 		rtnMap.put("totalList", totalList);
 		rtnMap.put("fullDiscoveredList", fullDiscoveredList);
+		rtnMap.put("overviewData", overViewData);
 		
 		return rtnMap;
+	}
+
+	private void generateDataToDisplayOverView(OssComponents oc, List<String> checkVulnScore, Map<String, Object> vulnScore, Map<String, Object> vulnScoreResolution, Map<String, Map<String, Object>> vulnScoreByOssVersion) {
+		// Count graph by vulnerability score range for all CVE IDs
+		String cveId = oc.getCveId();
+		String cvssScore = oc.getCvssScore();
+		String scoreStr = "";
+		
+		if (!isEmpty(cvssScore)) {
+			BigDecimal score = new BigDecimal(cvssScore);
+			if (score.compareTo(new BigDecimal("9.0")) >= 0) {
+				scoreStr = "Critical";
+			} else if (score.compareTo(new BigDecimal("7.0")) >= 0) {
+				scoreStr = "High";
+			} else if (score.compareTo(new BigDecimal("4.0")) >= 0) {
+				scoreStr = "Medium";
+			} else if (score.compareTo(new BigDecimal("0.0")) >= 0) {
+				scoreStr = "Low";
+			}
+			if (!isEmpty(scoreStr) && !checkVulnScore.contains(cveId)) {
+				if (vulnScore.containsKey(scoreStr)) {
+					int cnt = (int) vulnScore.get(scoreStr);
+					cnt++;
+					vulnScore.replace(scoreStr, cnt); 
+				} else {
+					vulnScore.put(scoreStr, 1);
+				}
+				checkVulnScore.add(cveId);
+			}
+		}
+		
+		// Vulnerability resolution graph
+		if (!isEmpty(oc.getVulnerabilityResolution())) {
+			String vulnerabilityResolution = oc.getVulnerabilityResolution();
+			if (vulnScoreResolution.containsKey(vulnerabilityResolution)) {
+				int count = (int) vulnScoreResolution.get(vulnerabilityResolution);
+				count++;
+				vulnScoreResolution.replace(vulnerabilityResolution, count); 
+			}
+		}
+		
+		// Displays counts for vulnerability scores by OSS version
+		String ossName = oc.getOssName();
+		String ossVersion = oc.getOssVersion();
+		String key = ossName + "_" + avoidNull(ossVersion, "N/A");
+		if (!isEmpty(scoreStr)) {
+			Map<String, Object> vulnScoreByOssVersionMap = null;
+			if (!vulnScoreByOssVersion.containsKey(key)) {
+				vulnScoreByOssVersionMap = new LinkedHashMap<>();
+				vulnScoreByOssVersionMap.put("Critical", 0);
+				vulnScoreByOssVersionMap.put("High", 0);
+				vulnScoreByOssVersionMap.put("Medium", 0);
+				vulnScoreByOssVersionMap.put("Low", 0);
+				if (vulnScoreByOssVersionMap.containsKey(scoreStr)) {
+					vulnScoreByOssVersionMap.replace(scoreStr, 1);
+				}
+			} else {
+				vulnScoreByOssVersionMap = vulnScoreByOssVersion.get(key);
+				if (vulnScoreByOssVersionMap.containsKey(scoreStr)) {
+					int cnt = (int) vulnScoreByOssVersionMap.get(scoreStr);
+					cnt++;
+					vulnScoreByOssVersionMap.replace(scoreStr, cnt);
+				}
+			}
+			vulnScoreByOssVersion.put(key, vulnScoreByOssVersionMap);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

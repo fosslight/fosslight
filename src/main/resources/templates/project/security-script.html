@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script th:inline="javascript">
 var lastsel;
 var totalMainData = [];
 var fullDiscoveredMainData = [];
+var vulnScore;
+var vulnScoreResolution;
+var vulnScoreByOssVersion;
 var saveFlag = false;
 var prevEditSel;
 var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'security'};
@@ -52,12 +56,23 @@ var sec_data = {
 			success : function(data){
 				loading.hide();
 				
+				sec_data.loadOverviewData(data);
 				sec_data.loadJqGridData(data);
 			},
 			complete : function() {
 				fn.displayProjectInfo();
+				$("#tabMenuOverview").trigger("click");
 			}
 		});
+	},
+	loadOverviewData : function(data) {
+		vulnScore = data.overviewData.vulnScore;
+		vulnScoreResolution = data.overviewData.vulnScoreResolution;
+		vulnScoreByOssVersion = data.overviewData.vulnScoreByOssVersion;
+		
+		overview.vulnScoreChartOpen(vulnScore);
+		overview.vulnResolutionChartOpen(vulnScoreResolution);
+		overview.vulnScoreByOssVersionTable(vulnScoreByOssVersion);
 	},
 	loadJqGridData : function(data) {
 		totalMainData = data.totalGridData;
@@ -77,7 +92,8 @@ var sec_data = {
 		fullDiscovered.loadSecurityGrid();
 		
 		if (!saveFlag && data.hasOwnProperty('msg')){
-			alertify.alert(data.msg, function(){});
+//			alertify.alert(data.msg, function(){});
+			$("#overviewMsgDiv").html([[#{msg.project.security.check.version}]]);
 		}
 		
 		saveFlag = false;
@@ -88,7 +104,7 @@ var sec_com_evt = {
 	dataInit : function(){
 		commentsParam.height = $(window).height() - 120;
 		fn_comment.getCommentList(commentsParam);
-		$("#tabMenuTotal").trigger("click");
+		$("#tabMenuOverview").trigger("click");
 		sec_data.getJqGrid();
 	}
 }
@@ -722,6 +738,118 @@ var com_fn = {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
+	}
+}
+
+var vulnScoreChartObject;
+var vulnResolutionChartObject;
+var dataTable;
+
+var overview = {
+	vulnScoreChartOpen : function(data) {
+		var obj = new Object();
+		var chartData = new Object();
+		var labels = new Array();
+		var datasets = new Array();
+		var dataArr = new Array();
+		
+		let sortedKeys = Object.keys(data).sort();
+		[sortedKeys[2], sortedKeys[3]] = [sortedKeys[3], sortedKeys[2]];
+		
+		let sortedObj = {};
+		sortedKeys.forEach(function(obj){
+			sortedObj[obj] = data[obj];
+		});
+		
+		for (let key in sortedObj) {
+			labels.push(key);
+			dataArr.push(data[key]);
+		};
+		
+		let color = ["#343a40", "#dc3545", "#ffa500", "#ffff00"];		
+		datasets.push({label:'Count', data:dataArr, backgroundColor:color});
+		obj["labels"] = labels;
+		obj["datasets"] = datasets;
+		
+		if (vulnScoreChartObject) {
+			vulnScoreChartObject.data.labels = obj["labels"];
+			vulnScoreChartObject.data.datasets = obj["datasets"];
+			vulnScoreChartObject.update();
+		} else {
+			vulnScoreChartObject = getPieChart($('#vulnScoreChart').get(0).getContext('2d'), obj);
+		}
+	},
+	vulnResolutionChartOpen : function(data) {
+		var obj = new Object();
+		var chartData = new Object();
+		var labels = new Array();
+		var datasets = new Array();
+		var dataArr = new Array();
+		
+		for (let key in data) {
+			labels.push(key);
+			dataArr.push(data[key]);
+		};
+		
+		datasets.push({label:'Count', data:dataArr, backgroundColor:Object.values(CHART_COLORS)});
+		obj["labels"] = labels;
+		obj["datasets"] = datasets;
+		
+		if (vulnResolutionChartObject) {
+			vulnResolutionChartObject.data.labels = obj["labels"];
+			vulnResolutionChartObject.data.datasets = obj["datasets"];
+			vulnResolutionChartObject.update();
+		} else {
+			vulnResolutionChartObject = getPieChart($('#vulnResolutionChart').get(0).getContext('2d'), obj);
+		}
+	},
+	vulnScoreByOssVersionTable : function(data) {
+		for (let key in data) {
+			let tr = document.createElement("tr");
+			
+			let ossName = key.split("_")[0];
+			let ossVersion = key.split("_")[1];
+			
+			let vulnCount = data[key];
+			let vulnHtml = "";
+			for (let vulnKey in vulnCount) {
+				let vulnStr = vulnKey[0];
+				let cnt = vulnCount[vulnKey];
+				vulnHtml += "<span style=\"cursor: pointer;\" onclick=\"overview.vulnDetailPopup('" + ossName + "', '" + ossVersion + "', '" + vulnStr + "', '" + cnt + "');\">";
+				if ("C" == vulnStr) {
+					vulnHtml += '<span class="badge badge-dark p-2">C</span>';
+				} else if ("H" == vulnStr) {
+					vulnHtml += '<span class="badge badge-danger p-2 ml-4">H</span>';
+				} else if ("M" == vulnStr) {
+					vulnHtml += '<span class="badge badge-orange p-2 ml-4">M</span>';
+				} else {
+					vulnHtml += '<span class="badge badge-yellow2 p-2 ml-4">L</span>';
+				}
+				vulnHtml += "<span class=\"ml-2\">" + cnt + "</span></span>";
+			}
+			
+			let ossNameTd = document.createElement("td");
+			ossNameTd.innerHTML = ossName;
+			let ossVersionTd = document.createElement("td");
+			ossVersionTd.innerHTML = ossVersion;
+			let vulnCountTd = document.createElement("td");
+			vulnCountTd.classList.add("text-center");
+			vulnCountTd.innerHTML = vulnHtml;
+			
+			tr.appendChild(ossNameTd);
+			tr.appendChild(ossVersionTd);
+			tr.appendChild(vulnCountTd);
+			
+			$("#vulnScoreTableBody").append(tr);
+		}
+	},
+	vulnDetailPopup : function (ossName, ossVersion, flag, cnt) {
+		if (cnt > 0) {
+			var _url = '/vulnerability/vulnpopup?ossName=' + ossName + '&ossVersion=' + ossVersion + '&vulnType=' + '&range=' + flag;
+			openNVD2(ossName, _url);
+		} else {
+			alertify.alert("There are no vulnerabilities at this level.", function(){});
+		}
 	}
 }
 

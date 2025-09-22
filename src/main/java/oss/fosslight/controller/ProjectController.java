@@ -5296,6 +5296,7 @@ public class ProjectController extends CoTopComponent {
 			result = projectService.getSecurityGridList(project);
 			rtnMap.put("totalGridData", (List<OssComponents>) result.get("totalList"));
 			rtnMap.put("fullDiscoveredGridData", (List<OssComponents>) result.get("fullDiscoveredList"));
+			rtnMap.put("overviewData", (Map<String, Object>) result.get("overviewData"));
 			
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 			pv.setProcType(pv.PROC_TYPE_SECURITY);
