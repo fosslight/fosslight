@@ -111,53 +111,57 @@
 					<div class="bottom-component">
 						<div class="row pl-2" name="gridArea" id="gridAreaOverview" style="width: 100%; display: none;">
 							<div class="container-fluid">
-                				<div class="card card-dark">
-									<div class="row">
-										<div class="col-12">
-	                						<h6 style="margin: 1rem;" th:text="|Vulnerabilty Score|"></h6>
-	                					</div>
-			                		</div>
-			                		<div class="row">
-	                					<div class="col-12">
-	                						<canvas id="vulnScoreChart" style="min-height: 350px; height: 350px; max-height: 350px; max-width: 100%;"></canvas>
-	                					</div>
-	                				</div>
+								<div class="row">
+									<div class="card card-dark col-lg-6">
+										<div class="row">
+											<div class="col-12">
+		                						<h6 style="margin: 1rem;" th:text="|Vulnerabilty Score|"></h6>
+		                					</div>
+				                		</div>
+				                		<div class="row">
+		                					<div class="col-12">
+		                						<canvas id="vulnScoreChart" style="min-height: 350px; height: 350px; max-height: 350px; max-width: 100%;"></canvas>
+		                					</div>
+		                				</div>
+									</div>
+									<div class="card card-dark col-lg-6">
+										<div class="row">
+											<div class="col-12">
+		                						<h6 style="margin: 1rem;" th:text="|Vulnerability Resolution|"></h6>
+		                					</div>
+				                		</div>
+				                		<div class="row">
+		                					<div class="col-12">
+		                						<canvas id="vulnResolutionChart" style="min-height: 350px; height: 350px; max-height: 350px; max-width: 100%;"></canvas>
+		                					</div>
+		                				</div>
+									</div>
 								</div>
-								<div class="card card-dark">
-									<div class="row">
-										<div class="col-12">
-	                						<h6 style="margin: 1rem;" th:text="|Vulnerability Resolution|"></h6>
-	                					</div>
-			                		</div>
-			                		<div class="row">
-	                					<div class="col-12">
-	                						<canvas id="vulnResolutionChart" style="min-height: 350px; height: 350px; max-height: 350px; max-width: 100%;"></canvas>
-	                					</div>
-	                				</div>
-								</div>
-								<div class="card card-dark">
-									<div class="row">
-			                			<div class="col-12">
-			                				<h6 style="margin: 1rem;" th:text="|Vulnerability score by OSS version|"></h6>
-			                			</div>
-			                		</div>
-			                		<div class="row">
-			                			<div class="col-12">
-			                				<div class="card-body table-responsive pt-0" style="max-height: 450px;">
-												<table class="table table-head-fixed text-nowrap" id="vulnScoreTable">
-													<thead>
-														<tr>
-															<th class="text-center" th:text="|OSS Name|"></th>
-															<th class="text-center" th:text="|OSS Version|"></th>
-															<th class="text-center" th:text="|Vulnerability Score|"></th>
-														</tr>
-													</thead>
-													<tbody id="vulnScoreTableBody">
-													</tbody>
-												</table>
-											</div>
-			                			</div>
-			                		</div>
+								<div class="row">
+									<div class="card card-dark col-lg-12">
+										<div class="row">
+				                			<div class="col-12">
+				                				<h6 style="margin: 1rem;" th:text="|Vulnerability score by OSS version|"></h6>
+				                			</div>
+				                		</div>
+				                		<div class="row">
+				                			<div class="col-12">
+				                				<div class="card-body table-responsive pt-0" style="max-height: 450px;">
+													<table class="table table-head-fixed text-nowrap" id="vulnScoreTable">
+														<thead>
+															<tr>
+																<th class="text-center" th:text="|OSS Name|"></th>
+																<th class="text-center" th:text="|OSS Version|"></th>
+																<th class="text-center" th:text="|Vulnerability Score|"></th>
+															</tr>
+														</thead>
+														<tbody id="vulnScoreTableBody">
+														</tbody>
+													</table>
+												</div>
+				                			</div>
+				                		</div>
+									</div>
 								</div>
                 			</div>
 						</div>
