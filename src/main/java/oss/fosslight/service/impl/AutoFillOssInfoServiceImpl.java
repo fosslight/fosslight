@@ -582,138 +582,163 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return returnMap;
 	}
 
-	@Transactional
 	@Override
 	public Map<String, Object> saveOssCheckLicense(List<ProjectIdentification> paramBeanList, String targetName) {
+		return saveOssCheckLicense(paramBeanList, targetName, null, null, null, null, true);
+	}
+	
+	@Transactional
+	@Override
+	public Map<String, Object> saveOssCheckLicense(List<ProjectIdentification> paramBeanList, String targetName, String prjId, List<String> comments, List<String> successIdList, List<String> failIdList, boolean isSaveComments) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
 			int updateCnt = 0;
 
 			List<String> changeOssLicenseInfoList = new ArrayList<>();
-			List<String> successIdList = new ArrayList<>();
-			List<String> failIdList = new ArrayList<>();
 			String referenceId = "";
 			String referenceDiv = "";
 			String commentId = "";
 			
-			for (ProjectIdentification paramBean : paramBeanList) {
-				String rowId = paramBean.getGridId();
-				List<String> componentIds = paramBean.getComponentIdList();
+			if (paramBeanList != null) {
+				for (ProjectIdentification paramBean : paramBeanList) {
+					String rowId = paramBean.getGridId();
+					List<String> componentIds = paramBean.getComponentIdList();
 
-				for (String componentId : componentIds) {
-					OssComponents oc = new OssComponents();
-					oc.setComponentId(componentId);
-					switch(targetName.toUpperCase()) {
-						case CoConstDef.CD_CHECK_OSS_SELF:
-							selfCheckMapper.deleteOssComponentsLicense(oc);
-							break;
-						case CoConstDef.CD_CHECK_OSS_PARTNER:
-							partnerMapper.deleteOssComponentsLicense(oc);
-							break;
-						case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
-							projectMapper.deleteOssComponentsLicense(oc);
-							break;
-					}
-									
-					String[] checkLicense = paramBean.getCheckLicense().split(",");
-					String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
-					List<OssComponentsLicense> ossComponentsLicenseList = new ArrayList<>();
-					
-					for (String licenseName : checkLicense) {
-						ProjectIdentification comLicense = new ProjectIdentification();
-						comLicense.setComponentId(componentId);
-						comLicense.setLicenseName(licenseName);
-						OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, licenseDev);
-						ossComponentsLicenseList.add(license);
+					for (String componentId : componentIds) {
+						OssComponents oc = new OssComponents();
+						oc.setComponentId(componentId);
 						switch(targetName.toUpperCase()) {
 							case CoConstDef.CD_CHECK_OSS_SELF:
-								selfCheckMapper.registComponentLicense(license);
+								selfCheckMapper.deleteOssComponentsLicense(oc);
 								break;
 							case CoConstDef.CD_CHECK_OSS_PARTNER:
-								partnerMapper.insertOssComponentsLicense(license);
+								partnerMapper.deleteOssComponentsLicense(oc);
 								break;
 							case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
-								projectMapper.registComponentLicense(license);
+								projectMapper.deleteOssComponentsLicense(oc);
 								break;
 						}
+										
+						String[] checkLicense = paramBean.getCheckLicense().split(",");
+						String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
+						List<OssComponentsLicense> ossComponentsLicenseList = new ArrayList<>();
 						
-						updateCnt++;
+						for (String licenseName : checkLicense) {
+							ProjectIdentification comLicense = new ProjectIdentification();
+							comLicense.setComponentId(componentId);
+							comLicense.setLicenseName(licenseName);
+							OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, licenseDev);
+							ossComponentsLicenseList.add(license);
+							switch(targetName.toUpperCase()) {
+								case CoConstDef.CD_CHECK_OSS_SELF:
+									selfCheckMapper.registComponentLicense(license);
+									break;
+								case CoConstDef.CD_CHECK_OSS_PARTNER:
+									partnerMapper.insertOssComponentsLicense(license);
+									break;
+								case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+									projectMapper.registComponentLicense(license);
+									break;
+							}
+							
+							updateCnt++;
+						}
+						
+						oc.setObligationType(CommonFunction.checkObligationSelectedLicense(ossComponentsLicenseList));
+						projectMapper.updateBom(oc);
 					}
 					
-					oc.setObligationType(CommonFunction.checkObligationSelectedLicense(ossComponentsLicenseList));
-					projectMapper.updateBom(oc);
-				}
-				
-				if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())
-						|| CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
-					if (updateCnt >= 1) {
-						commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
-						String changeOssLicenseInfo = !isEmpty(paramBean.getOssName()) ? paramBean.getOssName() : "N/A";
-						if (!isEmpty(paramBean.getOssVersion())) {
-							changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ")";
-						}
-						if (!isEmpty(paramBean.getDownloadLocation())) {
-							changeOssLicenseInfo = "<a href='" + paramBean.getDownloadLocation() + "' class='urlLink2' target='_blank'>" + changeOssLicenseInfo + "</a>";
-						}
-						changeOssLicenseInfo += "|" + avoidNull(paramBean.getLicenseName(), "N/A") + "|" + paramBean.getCheckLicense();
-						changeOssLicenseInfoList.add(changeOssLicenseInfo);
+					if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())
+							|| CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
+						if (updateCnt >= 1) {
+							commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
+							String changeOssLicenseInfo = !isEmpty(paramBean.getOssName()) ? paramBean.getOssName() : "N/A";
+							if (!isEmpty(paramBean.getOssVersion())) {
+								changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ")";
+							}
+							if (!isEmpty(paramBean.getDownloadLocation())) {
+								changeOssLicenseInfo = "<a href='" + paramBean.getDownloadLocation() + "' class='urlLink2' target='_blank'>" + changeOssLicenseInfo + "</a>";
+							}
+							changeOssLicenseInfo += "|" + avoidNull(paramBean.getLicenseName(), "N/A") + "|" + paramBean.getCheckLicense();
+							changeOssLicenseInfoList.add(changeOssLicenseInfo);
 
-						if (isEmpty(commentId)) {
-							if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
-								referenceDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
-								referenceId = paramBean.getReferenceId();
-							} else {
-								referenceDiv = CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS;
-								referenceId = paramBean.getRefPrjId();
+							if (isEmpty(commentId)) {
+								if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
+									referenceDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
+									referenceId = paramBean.getReferenceId();
+								} else {
+									referenceDiv = CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS;
+									referenceId = paramBean.getRefPrjId();
+								}
 							}
 						}
 					}
+					
+					if (updateCnt >= 1) {
+						successIdList.add(rowId);
+					} else {
+						failIdList.add(rowId);
+					}
 				}
-				
-				if (updateCnt >= 1) {
-					successIdList.add(rowId);
+			} else {
+				referenceId = prjId;
+				if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
+					referenceDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
 				} else {
-					failIdList.add(rowId);
+					referenceDiv = CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS;
 				}
 			}
 			
-			if (!CollectionUtils.isEmpty(changeOssLicenseInfoList)) {
-				map.put("isValid", true);
-				map.put("returnType", "Success");
-				
-				String comment = CommonFunction.changeDataToTableFormat("license", CommonFunction.getCustomMessage("msg.common.change.name", "License Name"), changeOssLicenseInfoList);
-				CommentsHistory commentInfo = null;
-				
-				if (isEmpty(commentId)) {
-					CommentsHistory commHisBean = new CommentsHistory();
-					commHisBean.setReferenceDiv(referenceDiv);
-					commHisBean.setReferenceId(referenceId);
-					commHisBean.setContents(comment);
-					commHisBean.setStatus("pre-review > license");
-					commentInfo = commentService.registComment(commHisBean, false);
-				} else {
-					commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+			if (!isSaveComments) {
+				if (CollectionUtils.isNotEmpty(changeOssLicenseInfoList)) {
+					comments.addAll(changeOssLicenseInfoList);
+				}
+			} else {
+				List<String> ossLicenseInfoList = new ArrayList<>();
+				if (CollectionUtils.isNotEmpty(comments)) {
+					ossLicenseInfoList.addAll(comments);
+				}
+				if (CollectionUtils.isNotEmpty(changeOssLicenseInfoList)) {
+					ossLicenseInfoList.addAll(changeOssLicenseInfoList);
+				}
+				if (CollectionUtils.isNotEmpty(ossLicenseInfoList)) {
+					map.put("isValid", true);
+					map.put("returnType", "Success");
+					
+					String comment = CommonFunction.changeDataToTableFormat("license", CommonFunction.getCustomMessage("msg.common.change.name", "License Name"), ossLicenseInfoList);
+					CommentsHistory commentInfo = null;
+					
+					if (isEmpty(commentId)) {
+						CommentsHistory commHisBean = new CommentsHistory();
+						commHisBean.setReferenceDiv(referenceDiv);
+						commHisBean.setReferenceId(referenceId);
+						commHisBean.setContents(comment);
+						commHisBean.setStatus("pre-review > license");
+						commentInfo = commentService.registComment(commHisBean, false);
+					} else {
+						commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
 
-					if (commentInfo != null) {
-						if (!isEmpty(commentInfo.getContents())) {
-							String contents = commentInfo.getContents();
-							contents += comment;
-							commentInfo.setContents(contents);
-							commentInfo.setStatus("pre-review > license");
+						if (commentInfo != null) {
+							if (!isEmpty(commentInfo.getContents())) {
+								String contents = commentInfo.getContents();
+								contents += comment;
+								commentInfo.setContents(contents);
+								commentInfo.setStatus("pre-review > license");
 
-							commentService.updateComment(commentInfo, false);
+								commentService.updateComment(commentInfo, false);
+							}
 						}
 					}
-				}
-				
-				if (commentInfo != null) {
-					map.put("commentId", commentInfo.getCommId());
-				}
-				if (!successIdList.isEmpty()) {
-					map.put("successIds", successIdList);
-				}
-				if (!failIdList.isEmpty()) {
-					map.put("failIds", failIdList);
+					
+					if (commentInfo != null) {
+						map.put("commentId", commentInfo.getCommId());
+					}
+					if (!successIdList.isEmpty()) {
+						map.put("successIds", successIdList);
+					}
+					if (!failIdList.isEmpty()) {
+						map.put("failIds", failIdList);
+					}
 				}
 			}
 		} catch (Exception e) {
