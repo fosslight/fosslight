@@ -7345,7 +7345,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						oc.setSecurityComments(bean.getSecurityComments());
 					}
 					
-					generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
+					if (!activateFlag) {
+						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
+					}
 					fullDiscoveredList.add(oc);
 					
 					bean = null;
@@ -7419,22 +7421,20 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 		}
 		
-		checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
-		String warningMsg = getMessage("msg.project.security.check.version");
-		boolean checkDataFlag = false;
-		
-		if (!checkOssNameList.isEmpty()) {
-			checkDataFlag = true;
+		if (CollectionUtils.isNotEmpty(checkOssNameList)) {
+			checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
+			String warningMsg = getMessage("msg.project.security.check.version");
+			int size = checkOssNameList.size();
+			int idx = 0;
 			warningMsg += "<br/><br/>";
-			for (int i=0; i < checkOssNameList.size(); i++) {
-				warningMsg += "- " + checkOssNameList.get(i);
-				if (i < checkOssNameList.size()-1) {
-					warningMsg += "<br/>";
+			for (String key : checkOssNameList) {
+				String vulnLink = "<span style=\"cursor: pointer; color: blue;\" onclick=\"overview.vulnDetailPopup('" + key + "', '', '', 1);\">" + key + "</span>";
+				warningMsg += vulnLink;
+				if (idx < size-1) {
+					warningMsg += ", ";
 				}
+				idx++;
 			}
-		}
-		
-		if (checkDataFlag) {
 			rtnMap.put("msg", warningMsg);
 		}
 		
