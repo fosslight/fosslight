@@ -2456,6 +2456,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName) {
+		return getCheckOssNameAjax(paramBean, targetName, true);
+	}
+	
+	@Override
+	public Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName, boolean checkRedirect) {
 		Map<String, Object> resMap = new HashMap<>();
 		Map<String, Object> map = null;
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
@@ -2499,7 +2504,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 
 		if(result.size() > 0) {
-			result = checkOssName(result);
+			result = checkOssName(result, checkRedirect);
 			List<ProjectIdentification> valid = new ArrayList<ProjectIdentification>();
 			List<ProjectIdentification> invalid = new ArrayList<ProjectIdentification>();
 			for(ProjectIdentification prj : result){
@@ -2569,7 +2574,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
-	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list){
+	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list, boolean checkRedirect) {
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		List<String> packageManagerUrl = new ArrayList<>();
@@ -2668,38 +2673,43 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							} else if (urlSearchSeq == 3 || urlSearchSeq == 5){
 								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 							} else {
-								String redirectlocationUrl = "";
-								try {
-									URL checkUrl = new URL("https://" + downloadlocationUrl);
-									HttpURLConnection oc = (HttpURLConnection) checkUrl.openConnection();
-									oc.setUseCaches(false);
-									oc.setConnectTimeout(1500);
-									if (200 == oc.getResponseCode()) {
-										ProjectIdentification url = new ProjectIdentification();
-										url.setDownloadLocation(oc.getURL().toString());
-										url = downloadlocationFormatter(url, urlSearchSeq);
-										if (url.getDownloadLocation().equals(downloadlocationUrl) || url.getDownloadLocation().equals(downloadlocationUrl + "/")) {
-											checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
-										} else {
-											if (oc.getURL().toString().indexOf("//") > -1) {
-												redirectlocationUrl = oc.getURL().toString().split("//")[1];
-											}
-											bean.setDownloadLocation(redirectlocationUrl);
-											bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
-											checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
-											if (!isEmpty(checkName)) {
-												bean.setCheckOssList("Y");
-												bean.setRecommendedNickname(bean.getOssNickName() + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
+								if (checkRedirect) {
+									String redirectlocationUrl = "";
+									try {
+										URL checkUrl = new URL("https://" + downloadlocationUrl);
+										HttpURLConnection oc = (HttpURLConnection) checkUrl.openConnection();
+										oc.setUseCaches(false);
+										oc.setConnectTimeout(1500);
+										if (200 == oc.getResponseCode()) {
+											ProjectIdentification url = new ProjectIdentification();
+											url.setDownloadLocation(oc.getURL().toString());
+											url = downloadlocationFormatter(url, urlSearchSeq);
+											if (url.getDownloadLocation().equals(downloadlocationUrl) || url.getDownloadLocation().equals(downloadlocationUrl + "/")) {
+												checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 											} else {
-												checkName = generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p);
+												if (oc.getURL().toString().indexOf("//") > -1) {
+													redirectlocationUrl = oc.getURL().toString().split("//")[1];
+												}
+												bean.setDownloadLocation(redirectlocationUrl);
+												bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
+												checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
+												if (!isEmpty(checkName)) {
+													bean.setCheckOssList("Y");
+													bean.setRecommendedNickname(bean.getOssNickName() + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
+												} else {
+													checkName = generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p);
+												}
+												bean.setRedirectLocation(redirectlocationUrl);
 											}
-											bean.setRedirectLocation(redirectlocationUrl);
+										} else {
+											checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
+											bean.setCheckOssList("I");
 										}
-									} else {
+									} catch (IOException e) {
 										checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 										bean.setCheckOssList("I");
 									}
-								} catch (IOException e) {
+								} else {
 									checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 									bean.setCheckOssList("I");
 								}
