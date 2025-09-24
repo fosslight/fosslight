@@ -8649,7 +8649,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
                     for (int i=0; i<referenceDiv.length; i++) {
                         diffComponentIdList.clear();
                         paramBean.setReferenceDiv(referenceDiv[i]);
-                        resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
+                        resMap = ossService.getCheckOssNameAjax(paramBean, targetName, false);
                         diffMap = (Map<String, String>) resMap.get("diffMap");
                         if (diffMap != null) {
                             for (String key : diffMap.keySet()) {
@@ -8681,20 +8681,21 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
                                     refId = (String) save.get("commentId");
                                 }
                             }
-                            Project project = new Project();
-                            project.setPrjId(prjId);
-                            Project projectDetail = getProjectDetail(project);
-                            if (projectDetail.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-                                registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>(), null, false, true );
-                            } else{
-                                registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
-                            }
                         }
+                    }
+                    
+                    Project project = new Project();
+                    project.setPrjId(prjId);
+                    Project projectDetail = getProjectDetail(project);
+                    if (projectDetail.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                        registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>(), null, false, true );
+                    } else{
+                        registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
                     }
                     break;
                 case CoConstDef.CD_CHECK_OSS_PARTNER:
                     paramBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
-                    resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
+                    resMap = ossService.getCheckOssNameAjax(paramBean, targetName, false);
                     diffMap = (Map<String, String>) resMap.get("diffMap");
                     if(diffMap != null) {
                         for (String key : diffMap.keySet()) {
