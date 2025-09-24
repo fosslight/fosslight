@@ -1606,9 +1606,12 @@
            	            async : false,
            	            contentType : 'application/json',
            	            success : function(data){
-           	                console.log("stop review");
+           	            	loadingIden.hide();
+           	            	$("#autoReview").show();
+           	            	$("#autoReviewStop").hide();
            	            },
            	            error : function(){
+           	            	loadingIden.hide();
            	                console.log("Fail stop review");
            	            }
            	        });
@@ -1625,11 +1628,14 @@
             	     	async : false,
             	      	contentType : 'application/json',
             	      	success : function(data){
-            	      		var btn_review = $("i.fa-clock");
+            	      		var btn_review = $("#autoReview");
+            	      		var btn_review_stop = $("#autoReviewStop");
             	           	if (!data.isValid && "running" == data.validMsg) {
-                                btn_review.show();
+            	           		btn_review.hide();
+            	           		btn_review_stop.show();
             	           	} else {
-                                btn_review.hide();
+            	           		btn_review_stop.hide();
+                                btn_review.show();
             	         	}
             	      	},
             	    	error : function(){

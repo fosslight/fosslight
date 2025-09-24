@@ -2946,7 +2946,7 @@ public class ExcelUtil extends CoTopComponent {
 					bean.setDownloadLocation(downloadLocationCol < 0 ? "" : avoidNull(row[downloadLocationCol]).trim().replaceAll("\t", ""));
 					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(row[homepageCol]).trim().replaceAll("\t", ""));
 					bean.setOssCopyright(copyrightTextCol < 0 ? "" : avoidNull(row[copyrightTextCol]).trim().replaceAll("\t", ""));
-					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\t", ""));
+					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\t", "").replaceAll("<b>", "").replaceAll("</b>", ""));
 					
 					analysisResultList.add(bean);
 				}
