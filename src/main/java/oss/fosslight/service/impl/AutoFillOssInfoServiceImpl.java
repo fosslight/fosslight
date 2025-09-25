@@ -591,6 +591,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@Override
 	public Map<String, Object> saveOssCheckLicense(List<ProjectIdentification> paramBeanList, String targetName, String prjId, List<String> comments, List<String> successIdList, List<String> failIdList, boolean isSaveComments) {
 		Map<String, Object> map = new HashMap<String, Object>();
+		if (successIdList == null) {
+			successIdList = new ArrayList<>();
+		}
+		if (failIdList == null) {
+			failIdList = new ArrayList<>();
+		}
 		try {
 			int updateCnt = 0;
 
