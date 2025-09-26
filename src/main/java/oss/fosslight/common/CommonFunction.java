@@ -4382,7 +4382,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				String askalonoLicense = bean.getAskalonoLicense().replaceAll("\\(\\d+\\)", "");
 				String scancodeLicense = bean.getScancodeLicense().replaceAll("\\(\\d+\\)", "");
 				
+				List<String> ossNicknameList = new ArrayList<>();
 				String duplicateNickname = bean.getOssNickname();
+				for (String nickname : duplicateNickname.split(",")) {
+					if (!ossNicknameList.contains(nickname)) {
+						ossNicknameList.add(nickname);
+					}
+				}
 				
 				String customOssName = "";
 				if (bean.getOssName().contains(";")) {
@@ -4472,7 +4478,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				int idx = 1;
 				OssMaster param = new OssMaster();
 				
-				for (String nick : duplicateNickname.split(",")) {
+				String _ossName = bean.getOssName();
+				if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(_ossName.toUpperCase())) {
+					String _ossNickname = CoCodeManager.OSS_INFO_UPPER_NAMES.get(_ossName.toUpperCase());
+					if (!_ossName.equalsIgnoreCase(_ossNickname) && !ossNicknameList.contains(_ossName)) {
+						ossNicknameList.add(_ossName);
+					}
+				}
+				
+				for (String nick : ossNicknameList) {
 					if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(nick.toUpperCase())) {
 						String ossNameByNick = CoCodeManager.OSS_INFO_UPPER_NAMES.get(nick.toUpperCase());
 						param.setOssName(ossNameByNick);
