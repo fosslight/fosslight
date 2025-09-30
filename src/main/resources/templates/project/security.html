@@ -114,8 +114,14 @@
 								<div class="row">
 									<div class="card card-dark col-lg-6">
 										<div class="row">
-											<div class="col-12">
+											<div class="col-6">
 		                						<h6 style="margin: 1rem;" th:text="|Vulnerabilty Score|"></h6>
+		                					</div>
+		                					<div class="col-3"></div>
+		                					<div class="col-3 float-right">
+		                						<select class="form-control select2 mt-2" id="vulnScoreChartDivision" name="vulnScoreChartDivision" style="width: 100%;">
+                                    				<option th:value="''" th:text="전체"></option>
+                                    			</select>
 		                					</div>
 				                		</div>
 				                		<div class="row">
@@ -126,8 +132,14 @@
 									</div>
 									<div class="card card-dark col-lg-6">
 										<div class="row">
-											<div class="col-12">
+											<div class="col-6">
 		                						<h6 style="margin: 1rem;" th:text="|Vulnerability Resolution|"></h6>
+		                					</div>
+		                					<div class="col-3"></div>
+		                					<div class="col-3 float-right">
+		                						<select class="form-control select2 mt-2" id="vulnResolutionChartDivision" name="vulnResolutionChartDivision" style="width: 100%;">
+                                    				<option th:value="''" th:text="전체"></option>
+                                    			</select>
 		                					</div>
 				                		</div>
 				                		<div class="row">

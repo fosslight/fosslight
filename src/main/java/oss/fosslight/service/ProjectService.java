@@ -202,6 +202,8 @@ public interface ProjectService extends HistoryConfig{
 	public void deleteUploadFile(Project project);
 	
 	public Map<String, Object> getSecurityGridList(Project project);
+	
+	public Map<String, Object> getSecurityGridList(Project project, boolean isVulnPopup);
 
 	public void registSecurity(Project project, String tabName, List<OssComponents> ossComponents);
 

@@ -7254,6 +7254,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	
 	@Override
 	public Map<String, Object> getSecurityGridList(Project project) {
+		return getSecurityGridList(project, false);
+	}
+	
+	@Override
+	public Map<String, Object> getSecurityGridList(Project project, boolean isVulnPopup) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		List<OssComponents> totalList = new ArrayList<>();
 		List<OssComponents> fullDiscoveredList = new ArrayList<>();
@@ -7291,8 +7296,9 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		} else {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 		}
-		
-		list = projectMapper.selectSecurityListForProject(identification);
+		if (!isVulnPopup) {
+			list = projectMapper.selectSecurityListForProject(identification);
+		}
 		identification.setStandardScore(Float.valueOf("0.1"));
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
@@ -7355,7 +7361,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						oc.setSecurityComments(bean.getSecurityComments());
 					}
 					
-					if (!activateFlag) {
+					if (!activateFlag && !isVulnPopup) {
 						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
 					}
 					fullDiscoveredList.add(oc);
@@ -7366,7 +7372,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			checkVulnScore.clear();
 			
-			if (list != null && !list.isEmpty()) {
+			if (!isVulnPopup && CollectionUtils.isNotEmpty(list)) {
 				gridIdx = 1;
 				caseWithoutVersionKey.clear();
 				deduplicatedkey.clear();
@@ -7431,32 +7437,34 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 		}
 		
-		if (CollectionUtils.isNotEmpty(checkOssNameList)) {
-			checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
-			String warningMsg = getMessage("msg.project.security.check.version");
-			int size = checkOssNameList.size();
-			int idx = 0;
-			warningMsg += "<br/><br/>";
-			for (String key : checkOssNameList) {
-				String vulnLink = "<span style=\"cursor: pointer; color: blue;\" onclick=\"overview.vulnDetailPopup('" + key + "', '', '', 1);\">" + key + "</span>";
-				warningMsg += vulnLink;
-				if (idx < size-1) {
-					warningMsg += ", ";
+		if (!isVulnPopup) {
+			if (CollectionUtils.isNotEmpty(checkOssNameList)) {
+				checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
+				String warningMsg = getMessage("msg.project.security.check.version");
+				int size = checkOssNameList.size();
+				int idx = 0;
+				warningMsg += "<br/><br/>";
+				for (String key : checkOssNameList) {
+					String vulnLink = "<span style=\"cursor: pointer; color: blue;\" onclick=\"overview.vulnDetailPopup('" + key + "', '', '', 1);\">" + key + "</span>";
+					warningMsg += vulnLink;
+					if (idx < size-1) {
+						warningMsg += ", ";
+					}
+					idx++;
 				}
-				idx++;
+				rtnMap.put("msg", warningMsg);
 			}
-			rtnMap.put("msg", warningMsg);
+			
+			Map<String, Object> overViewData = new HashMap<>();
+			overViewData.put("vulnScore", vulnScore);
+			overViewData.put("vulnScoreResolution", vulnScoreResolution);
+			overViewData.put("vulnScoreByOssVersion", vulnScoreByOssVersion);
+			
+			rtnMap.put("totalList", totalList);
+			rtnMap.put("overviewData", overViewData);
 		}
 		
-		Map<String, Object> overViewData = new HashMap<>();
-		overViewData.put("vulnScore", vulnScore);
-		overViewData.put("vulnScoreResolution", vulnScoreResolution);
-		overViewData.put("vulnScoreByOssVersion", vulnScoreByOssVersion);
-		
-		rtnMap.put("totalList", totalList);
 		rtnMap.put("fullDiscoveredList", fullDiscoveredList);
-		rtnMap.put("overviewData", overViewData);
-		
 		return rtnMap;
 	}
 

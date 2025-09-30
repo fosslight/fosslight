@@ -35,6 +35,41 @@ $(function () {
 		}
 	});
 	
+	$(document).on('change', "select[name=vulnScoreChartDivision]", function() {
+		var selectVal = $(this).val();
+		var vulnScoreData = vulnScore;
+		if (typeof vulnScoreData !== "undefined" && "" != selectVal) {
+			var selected = {};
+			Object.keys(vulnScoreData).forEach(function(key) {
+				if (key.startsWith(selectVal)) {
+					selected[key] = vulnScoreData[key];
+				}
+			});
+			vulnScoreData = selected;
+		}
+		overview.vulnScoreChartOpen(vulnScoreData, selectVal, true);
+	});
+	
+	$(document).on('change', "select[name=vulnResolutionChartDivision]", function(event) {
+		var selectVal = $(this).val();
+		var target = event.target;
+		var selectedIndex = 0;
+		if (target && target.tagName === 'SELECT') {
+		    selectedIndex = target.selectedIndex;
+		}
+		var vulnScoreResolutionData = vulnScoreResolution;
+		if (typeof vulnScoreResolutionData !== "undefined" && "" != selectVal) {
+			var selected = {};
+			Object.keys(vulnScoreResolutionData).forEach(function(key) {
+				if (key == selectVal) {
+					selected[key] = vulnScoreResolutionData[key];
+				}
+			});
+			vulnScoreResolutionData = selected;
+		}
+		overview.vulnResolutionChartOpen(vulnScoreResolutionData, selectedIndex, true);
+	});
+	
 	$(document).on('change', ".bulkEditCheck", function() {
 		if (this.checked) {
 			$("input[name='onlyEditCommentFlag']").val("Y");
@@ -70,8 +105,8 @@ var sec_data = {
 		vulnScoreResolution = data.overviewData.vulnScoreResolution;
 		vulnScoreByOssVersion = data.overviewData.vulnScoreByOssVersion;
 		
-		overview.vulnScoreChartOpen(vulnScore);
-		overview.vulnResolutionChartOpen(vulnScoreResolution);
+		overview.vulnScoreChartOpen(vulnScore, "", false);
+		overview.vulnResolutionChartOpen(vulnScoreResolution, 0, false);
 		overview.vulnScoreByOssVersionTable(vulnScoreByOssVersion);
 	},
 	loadJqGridData : function(data) {
@@ -746,7 +781,7 @@ var vulnResolutionChartObject;
 var dataTable;
 
 var overview = {
-	vulnScoreChartOpen : function(data) {
+	vulnScoreChartOpen : function(data, flag, init) {
 		var obj = new Object();
 		var chartData = new Object();
 		var labels = new Array();
@@ -754,19 +789,40 @@ var overview = {
 		var dataArr = new Array();
 		
 		let sortedKeys = Object.keys(data).sort();
-		[sortedKeys[2], sortedKeys[3]] = [sortedKeys[3], sortedKeys[2]];
+		if ("" == flag) {
+			[sortedKeys[2], sortedKeys[3]] = [sortedKeys[3], sortedKeys[2]];
+		}
 		
 		let sortedObj = {};
 		sortedKeys.forEach(function(obj){
 			sortedObj[obj] = data[obj];
 		});
 		
-		for (let key in sortedObj) {
-			labels.push(key);
-			dataArr.push(data[key]);
-		};
+		if (!init) {
+			for (let key in sortedObj) {
+				labels.push(key);
+				dataArr.push(data[key]);
+			};
+		}
 		
-		let color = ["#343a40", "#dc3545", "#ffa500", "#ffff00"];		
+		let color = new Array();
+		if ("" != flag) {
+			if ("C" == flag) {
+				color.push("#343a40");
+			} else if ("H" == flag) {
+				color.push("#dc3545");
+			} else if ("M" == flag) {
+				color.push("#ffa500");
+			} else {
+				color.push("#ffff00");
+			}
+		} else {
+			color.push("#343a40");
+			color.push("#dc3545");
+			color.push("#ffa500");
+			color.push("#ffff00");
+		}
+		
 		datasets.push({label:'Count', data:dataArr, backgroundColor:color});
 		obj["labels"] = labels;
 		obj["datasets"] = datasets;
@@ -776,10 +832,57 @@ var overview = {
 			vulnScoreChartObject.data.datasets = obj["datasets"];
 			vulnScoreChartObject.update();
 		} else {
-			vulnScoreChartObject = getPieChart($('#vulnScoreChart').get(0).getContext('2d'), obj);
+			vulnScoreChartObject = overview.getPieChartVulnScore($('#vulnScoreChart').get(0).getContext('2d'), obj);
 		}
 	},
-	vulnResolutionChartOpen : function(data) {
+	getPieChartVulnScore : function (target, obj) {
+		return new Chart(target, {
+			type: 'doughnut',
+			data: {labels:obj.labels, datasets:obj.datasets},
+			options: {
+				responsive: true,
+				maintainAspectRatio : false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+					},
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								let dataLabel = context.dataset.label || '';
+								let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+								        return previousValue + currentValue;
+								      });
+								let currentValue = context.raw;
+								let percentage = 0;
+								if (total > 0) {
+									percentage = Math.floor(((currentValue/total) * 100)+0.5);
+								}
+								let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+								return dataLabel += value;
+							}
+						}
+					}
+				},
+				onClick: function (e, elements, chart) {
+					if (elements.length > 0) {
+						let prjId = [[${project.prjId}]];
+				    	let element = elements[0];
+
+				    	let datasetIndex = element.datasetIndex;
+				    	let dataIndex = element.index;
+
+				    	let label = chart.data.labels[dataIndex];
+				    	let value = chart.data.datasets[datasetIndex].data[dataIndex];
+				    	
+				    	let range = label.charAt(0);
+				    	overview.vulnDetailPopupByRange(prjId, range, "score");
+					}
+				}
+			}
+		});
+	},
+	vulnResolutionChartOpen : function(data, index, init) {
 		var obj = new Object();
 		var chartData = new Object();
 		var labels = new Array();
@@ -791,7 +894,19 @@ var overview = {
 			dataArr.push(data[key]);
 		};
 		
-		datasets.push({label:'Count', data:dataArr, backgroundColor:Object.values(CHART_COLORS)});
+		if (!init) {
+			for (let key in labels) {
+	 			var newOption = new Option(labels[key], labels[key], false, false);
+	 			$('#vulnResolutionChartDivision').append(newOption);
+	 		}
+		}
+		
+		let color = Object.values(CHART_COLORS);
+		if (index > 0) {
+			color = color[index-1];
+		}
+		
+		datasets.push({label:'Count', data:dataArr, backgroundColor:color});
 		obj["labels"] = labels;
 		obj["datasets"] = datasets;
 		
@@ -800,8 +915,51 @@ var overview = {
 			vulnResolutionChartObject.data.datasets = obj["datasets"];
 			vulnResolutionChartObject.update();
 		} else {
-			vulnResolutionChartObject = getPieChart($('#vulnResolutionChart').get(0).getContext('2d'), obj);
+			vulnResolutionChartObject = overview.getPieChartVulnResolution($('#vulnResolutionChart').get(0).getContext('2d'), obj);
 		}
+	},
+	getPieChartVulnResolution : function (target, obj) {
+		return new Chart(target, {
+			type: 'doughnut',
+			data: {labels:obj.labels, datasets:obj.datasets},
+			options: {
+				responsive: true,
+				maintainAspectRatio : false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+					},
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								let dataLabel = context.dataset.label || '';
+								let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+								        return previousValue + currentValue;
+								      });
+								let currentValue = context.raw;
+								let percentage = 0;
+								if (total > 0) {
+									percentage = Math.floor(((currentValue/total) * 100)+0.5);
+								}
+								let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+								return dataLabel += value;
+							}
+						}
+					}
+				},
+				onClick: function (e, elements, chart) {
+					if (elements.length > 0) {
+						let prjId = [[${project.prjId}]];
+				    	let element = elements[0];
+
+				    	let datasetIndex = element.datasetIndex;
+				    	let dataIndex = element.index;
+
+				    	overview.vulnDetailPopupByRange(prjId, dataIndex, "resolution");
+					}
+				}
+			}
+		});
 	},
 	vulnScoreByOssVersionTable : function(data) {
 		for (let key in data) {
@@ -851,6 +1009,9 @@ var overview = {
 		} else {
 			alertify.alert("There are no vulnerabilities at this level.", function(){});
 		}
+	},
+	vulnDetailPopupByRange : function (prjId, range, flag) {
+		openNVD2(flag, '/vulnerability/vulnpopup?prjId=' + prjId + '&range=' + range);
 	}
 }
 
