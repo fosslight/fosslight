@@ -2778,7 +2778,6 @@
             var protocol = window.location.protocol;
             var host =  window.location.host;
             copyUrl = protocol + "//" + host + "/oss/shareUrl/" + [[${ossId}]];
-            copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
             $("#copyUrl").val(copyUrl);
 
             //launch it.

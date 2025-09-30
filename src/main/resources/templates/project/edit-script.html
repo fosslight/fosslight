@@ -2053,7 +2053,6 @@
 				var protocol = window.location.protocol;
 				var host =  window.location.host;
 				copyUrl = protocol + "//" + host + "/project/shareUrl/" + [[${project.prjId}]];
-				copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
 				$("#copyUrl").val(copyUrl);
 				
 				//launch it.

@@ -241,7 +241,6 @@
                 var protocol = window.location.protocol;
                 var host =  window.location.host;
                 copyUrl = protocol + "//" + host + "/license/shareUrl/" + $('input[name=licenseId]').val();
-                copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
                 $("#copyUrl").val(copyUrl);
 
                 //launch it.
