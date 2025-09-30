@@ -240,10 +240,17 @@ public class SelfCheckController extends CoTopComponent {
 		@SuppressWarnings("unchecked")
 		List<Project> list = (List<Project>) map.get("rows");
 		
+		boolean isPermission = false;
 		for (Project prj : list) {
 			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {prj.getPrjId()}, "selfCheck");
-			if (permissionCheckList != null) {
-				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+				for (String userId : permissionCheckList) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						isPermission = true;
+						break;
+					}
+				}
+				if (!CommonFunction.isAdmin() && !isPermission) {
 					prj.setStatusPermission(0);
 				} else {
 					prj.setStatusPermission(1);

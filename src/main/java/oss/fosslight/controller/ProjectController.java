@@ -396,15 +396,17 @@ public class ProjectController extends CoTopComponent {
 		if (!CommonFunction.isAdmin()) {
 			project.setPrjIds(new String[] {prjId});
 			permissionCheckList = CommonFunction.checkUserPermissions("", project.getPrjIds(), "project");
-			if (permissionCheckList.contains(loginUserName())) {
-				permissionFlag = true;
+			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+				for (String userId : permissionCheckList) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						permissionFlag = true;
+						break;
+					}
+				}
 			}
-
 		}
 		
-		if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
-				&& !CommonFunction.isAdmin()
-				&& !permissionFlag) {
+		if (project.getPublicYn().equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !permissionFlag) {
 			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
 			
 			return "project/view";
@@ -449,15 +451,17 @@ public class ProjectController extends CoTopComponent {
 		if (!CommonFunction.isAdmin()) {
 			project.setPrjIds(new String[] {prjId});
 			permissionCheckList = CommonFunction.checkUserPermissions("", project.getPrjIds(), "project");
-			if (permissionCheckList.contains(loginUserName())) {
-				permissionFlag = true;
+			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+				for (String userId : permissionCheckList) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						permissionFlag = true;
+						break;
+					}
+				}
 			}
-
 		}
 		
-		if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
-				&& !CommonFunction.isAdmin()
-				&& !permissionFlag) {
+		if (project.getPublicYn().equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !permissionFlag) {
 			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
 			
 			return "project/view";
@@ -5003,7 +5007,7 @@ public class ProjectController extends CoTopComponent {
 			permissionCheckList = CommonFunction.checkUserPermissions(loginUserName(), project.getPrjIds(), "project");
 		}
 		
-		if (permissionCheckList == null || permissionCheckList.isEmpty()){
+		if (CollectionUtils.isEmpty(permissionCheckList)) {
 			Map<String, List<Project>> updatePrjDivision = projectService.updateProjectDivision(project);
 			
 			if (updatePrjDivision.containsKey("before") && updatePrjDivision.containsKey("after")) {

@@ -259,14 +259,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
 						List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {bean.getPrjId()}, "project");
-						if (permissionCheckList != null) {
-							if (bean.getPublicYn().equals(CoConstDef.FLAG_NO)
-									&& !CommonFunction.isAdmin() 
-									&& !permissionCheckList.contains(loginUserName())) {
+						if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+							boolean isPermission = false;
+							for (String userId : permissionCheckList) {
+								if (userId.equalsIgnoreCase(loginUserName())) {
+									isPermission = true;
+									break;
+								}
+							}
+							if (bean.getPublicYn().equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
 								bean.setPermission(0);
 								bean.setStatusPermission(0);
 							} else {
-								if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+								if (!CommonFunction.isAdmin() && !isPermission) {
 									bean.setStatusPermission(0);
 								} else {
 									bean.setStatusPermission(1);
@@ -439,14 +444,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {project.getPrjId()}, "project");
-		if (permissionCheckList != null) {
-			if (avoidNull(project.getPublicYn()).equals(CoConstDef.FLAG_NO)
-					&& !CommonFunction.isAdmin() 
-					&& !permissionCheckList.contains(loginUserName())) {
+		if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+			boolean isPermission = false;
+			for (String userId : permissionCheckList) {
+				if (userId.equalsIgnoreCase(loginUserName())) {
+					isPermission = true;
+					break;
+				}
+			}
+			if (avoidNull(project.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
 				project.setPermission(0);
 				project.setStatusPermission(0);
 			} else {
-				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+				if (!CommonFunction.isAdmin() && !isPermission) {
 					project.setStatusPermission(0);
 				} else {
 					project.setStatusPermission(1);
@@ -7452,7 +7462,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 
 	private void generateDataToDisplayOverView(OssComponents oc, List<String> checkVulnScore, Map<String, Object> vulnScore, Map<String, Object> vulnScoreResolution, Map<String, Map<String, Object>> vulnScoreByOssVersion) {
 		// Count graph by vulnerability score range for all CVE IDs
-		String cveId = oc.getCveId();
+		String cveId = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
 		String cvssScore = oc.getCvssScore();
 		String scoreStr = "";
 		
