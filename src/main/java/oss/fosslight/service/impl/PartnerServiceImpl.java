@@ -5,6 +5,7 @@
 
 package oss.fosslight.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -176,16 +177,6 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 					list = sortedList;
 				}
 			}
-			
-			list.forEach(bean -> {
-				String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
-				if (conversionCveInfo != null) {
-					String[] conversionCveData = conversionCveInfo.split("\\@");
-					bean.setCvssScore(conversionCveData[3]);
-					bean.setCveId(conversionCveData[4]);
-					bean.setVulnYn(CoConstDef.FLAG_YES);
-				}
-			});
 		}
 		
 		map.put("page", partnerMaster.getCurPage());
@@ -1683,5 +1674,30 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				fileService.deletePhysicalFile(fileInfo, CoConstDef.CD_CHECK_OSS_PARTNER);
 			}
 		}
+	}
+
+	@Override
+	public void updateSecurityDataForPartner(String partnerId) {
+		OssComponents bean = new OssComponents();
+		List<OssComponents> ossComponents = partnerMapper.selectVulnerabilityDataForPartner(partnerId, CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+		if (CollectionUtils.isNotEmpty(ossComponents)) {
+			Collections.sort(ossComponents, new Comparator<OssComponents>() {
+				@Override
+				public int compare(OssComponents o1, OssComponents o2) {
+					if (new BigDecimal(o1.getCvssScore()).compareTo(new BigDecimal(o2.getCvssScore())) > 0) {
+						return -1;
+					} else if (new BigDecimal(o1.getCvssScore()).compareTo(new BigDecimal(o2.getCvssScore())) == 0) {
+						return 0;
+					} else {
+						return 1;
+					}
+				}
+			});
+			bean = ossComponents.get(0);
+			bean.setReferenceId(partnerId);
+		} else {
+			bean.setReferenceId(partnerId);
+		}
+		partnerMapper.updateVulnerabilityDataForPartner(bean);
 	}
 }

@@ -166,4 +166,8 @@ public interface PartnerMapper {
 	int updateOssFileId(PartnerMaster partnerMaster);
 	
 	void deleteFileBySeq(T2File file);
+
+	public List<OssComponents> selectVulnerabilityDataForPartner(@Param("prjId") String partnerId, @Param("referenceDiv") String referenceDiv);
+
+	public void updateVulnerabilityDataForPartner(OssComponents ossComponents);
 }

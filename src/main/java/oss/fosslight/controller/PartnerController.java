@@ -451,11 +451,7 @@ public class PartnerController extends CoTopComponent{
 	
 	@SuppressWarnings("unchecked")
 	@GetMapping(value=PARTNER.LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> listAjax(
-			PartnerMaster partnerMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> listAjax(PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -947,7 +943,7 @@ public class PartnerController extends CoTopComponent{
 		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
 		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
 		projectService.registBom(partnerId, merge, projectIdentification, checkGridBomList, null, false, false, true);
-//		projectService.updateSecurityDataForProject(prjId);
+		partnerService.updateSecurityDataForPartner(partnerId);
 		Map<String, String> resMap = new HashMap<>();
 		
 		try {
