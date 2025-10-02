@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -1124,6 +1126,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			int ossLicenseDeclaredIdx = 0;
 			String licenseId = ""; 
 			
+			// sort licenses alphabetically
+			if (CollectionUtils.isNotEmpty(list)) {
+				list = sortByNameOfOssLicenses(list);
+			}
+			
 			for (OssLicense license : list) {
 				ossLicenseDeclaredIdx++;
 				licenseId = CommonFunction.getLicenseIdByName(license.getLicenseName());
@@ -1310,6 +1317,60 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		} 
 		
 		return ossMaster.getOssId();
+	}
+
+	private List<OssLicense> sortByNameOfOssLicenses(List<OssLicense> list) {
+		List<OssLicense> newList = new ArrayList<>();
+		Map<Integer, List<OssLicense>> ossLicenseMap = new HashMap<>();
+		List<OssLicense> andLicenseList = new ArrayList<>();
+		int idx = 0;
+		for (OssLicense ol : list) {
+			if (!isEmpty(ol.getOssLicenseComb()) && ol.getOssLicenseComb().equalsIgnoreCase("or")) {
+				idx++;
+				ossLicenseMap.put(idx, andLicenseList);
+				andLicenseList = new ArrayList<>();
+				andLicenseList.add(ol);
+			} else {
+				andLicenseList.add(ol);
+			}
+		}
+		if (CollectionUtils.isNotEmpty(andLicenseList)) {
+			idx++;
+			ossLicenseMap.put(idx, andLicenseList);
+		}
+		if (MapUtils.isNotEmpty(ossLicenseMap)) {
+			Map<String, List<OssLicense>> newMap = new HashMap<>();
+			idx = 0;
+			for (int key : ossLicenseMap.keySet()) {
+				List<OssLicense> licenseList = new ArrayList<>(ossLicenseMap.get(key));
+				licenseList.sort(Comparator.comparing(OssLicense::getLicenseName));
+				for (OssLicense license : licenseList) {
+					if (idx > 0) {
+						license.setOssLicenseComb("AND");
+					} else {
+						license.setOssLicenseComb("");
+					}
+					idx++;
+				}
+				newMap.put(licenseList.get(0).getLicenseName(), licenseList);
+			}
+			Map<String, List<OssLicense>> sortedMap = newMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+			idx = 0;
+			for (List<OssLicense> olList : sortedMap.values()) {
+				if (idx > 0) {
+					olList.get(0).setOssLicenseComb("OR");
+				} else {
+					olList.get(0).setOssLicenseComb("");
+				}
+				newList.addAll(olList);
+				idx++;
+			}
+		}
+		if (CollectionUtils.isNotEmpty(newList)) {
+			return newList;
+		} else {
+			return list;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
