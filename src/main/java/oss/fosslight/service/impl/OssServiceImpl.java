@@ -4837,11 +4837,27 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<Map<String, Object>> resultData  = new ArrayList<>();
 		boolean vDiffFlag = ossMapper.checkOssVersionDiff(ossName) > 0 ? true : false;
 
-		if(vDiffFlag) {
+		if (vDiffFlag) {
 			OssMaster param = new OssMaster();
 			param.setOssNames(new String[] {ossName});
 			Map<String, OssMaster> ossMap = getBasicOssInfoList(param);
-
+			if (MapUtils.isNotEmpty(ossMap)) {
+				LinkedHashMap<String, OssMaster> sortedMap = ossMap.entrySet().stream().sorted((e1, e2) -> {
+			            	String s1 = avoidNull(e1.getValue().getOssVersion());
+			                String s2 = avoidNull(e2.getValue().getOssVersion());
+			                if (isEmpty(s1) && isEmpty(s2)) {
+			                	return 0;
+			                }
+			                if (isEmpty(s1)) {
+			                	return 1;
+			                }
+			                if (isEmpty(s2)) {
+			                	return -1;
+			                }
+			                return s2.trim().compareTo(s1.trim());
+			            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+				ossMap = sortedMap;
+			}
 			for (String key : ossMap.keySet()) {
 				OssMaster om = ossMap.get(key);
 				Map<String, Object> contentMap = new HashMap<>();
