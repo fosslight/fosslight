@@ -150,7 +150,10 @@
                 	} else {
                 		colorClass = "badge-gray";
                 	}
-                	display = '<span class="badge ' + colorClass + ' text-xm" data-toggle="tooltip" data-placement="bottom" title="' + cellvalue + '" style="cursor: pointer">R</span>';
+                	if (cellvalue.includes('"')) {
+                		cellvalue = cellvalue.replaceAll('"', '&quot;');
+                	}
+                	display = "<span class=\"badge " + colorClass + " text-xm\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"" + cellvalue + "\" style=\"cursor: pointer\">R</span>";
                 }
                 return display;
             }
@@ -248,7 +251,11 @@
                                 }
 
                                 if (rowLicenseRestriction) {
-                                    $("#licenseRestrictionInfo").html($(rowLicenseRestriction).attr("title").replace(/\n/g, '<br>'));
+                                	var restrictionInfo = "";
+                                	if (rowLicenseRestriction.indexOf("title=") > -1 && rowLicenseRestriction.indexOf("style=") > -1) {
+                                		restrictionInfo = rowLicenseRestriction.substring(rowLicenseRestriction.indexOf("title")+7, rowLicenseRestriction.indexOf("style")-2);
+                                	}
+                                    $("#licenseRestrictionInfo").html(restrictionInfo);
                                     $("#informationArea").show();
                                     $("#restrictionsGroup").show();
                                 } else {
