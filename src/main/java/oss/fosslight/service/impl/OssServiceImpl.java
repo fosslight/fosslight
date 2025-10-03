@@ -5099,7 +5099,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
 			}
 			for (String url : checkPurl) {
-				if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
+				if (urlSearchSeq == -1 && downloadLocation.startsWith(url)) {
 					urlSearchSeq = seq;
 					break;
 				}
