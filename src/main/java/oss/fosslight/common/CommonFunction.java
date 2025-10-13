@@ -4558,7 +4558,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						if (newestOssInfo != null) {
 							newestOssInfo.setGridId(""+gridSeq++);
-							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
+							newestOssInfo.setOssVersion(bean.getOssVersion());
 							newestOssInfo.setComment(comment);
 						}
 						
@@ -4674,7 +4674,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					
 					if (totalNewestOssInfo != null) {
 						totalNewestOssInfo.setGridId(""+gridSeq++);
-						totalNewestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
+						totalNewestOssInfo.setOssVersion(bean.getOssVersion());
 						totalNewestOssInfo.setComment(comment);
 						
 						String totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
