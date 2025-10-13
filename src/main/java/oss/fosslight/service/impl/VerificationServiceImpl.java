@@ -23,6 +23,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -3404,6 +3405,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> checkNoticeHtmlInfo(OssNotice ossNotice) {
 		Map<String, Object> rtnMap = new HashMap<>();
@@ -3419,7 +3421,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(referenceDiv)) {
 			map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
 		}
-		
+		if (MapUtils.isNotEmpty(map) && map.containsKey("rows")) {
+			List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
+			if (CollectionUtils.isNotEmpty(list)) {
+				list.removeIf(e -> e.getObligationType() == null || e.getObligationType().trim().isEmpty());
+				map.put("rows", list);
+			}
+		}
 		List<ProjectIdentification> bomList = (List<ProjectIdentification>) map.get("rows");
 		T2CoProjectValidator pv = new T2CoProjectValidator();
 		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
