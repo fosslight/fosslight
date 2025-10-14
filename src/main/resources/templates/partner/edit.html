@@ -223,7 +223,7 @@
 								</div>
 								<div class="row form-group" th:if="${detail.partnerId != null}">
 									<label for="inputName" th:text="#{msg.common.field.reviewer}"></label>
-									<input type="text" name="reviewerName" class="form-control" th:value="${detail?.reviewerName}" th:disabled="disabled">
+									<input type="text" name="reviewerName" class="form-control autoComReviewer" th:value="${detail?.reviewerName}" th:disabled="${@CommonFunction.isAdmin() == false} ? 'disabled'">
 								</div>
 								</form>
                             </div>
