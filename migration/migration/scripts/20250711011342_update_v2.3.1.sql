@@ -29,3 +29,8 @@ ALTER TABLE `OSS_ANALYSIS_MAP` ADD `COMMENTS_FLAG` char(1) DEFAULT NULL, ADD `CO
 ALTER TABLE `OSS_ANALYSIS_STATUS` ADD `COMMENTS` mediumtext DEFAULT NULL;
 
 ALTER TABLE `PARTNER_MASTER` ADD `CVE_ID` varchar(20) DEFAULT NULL, ADD `CVSS_SCORE_MAX` varchar(20) DEFAULT NULL;
+
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+	('301', '013', 'includeCpes', NULL, 'Array|Include CPE', 13, 'Y'),
+	('301', '014', 'excludeCpes', NULL, 'Array|Exclude CPE', 14, 'Y'),
+	('301', '015', 'ossVersionAliases', NULL, 'Array|OSS Version Alias', 15, 'Y');
