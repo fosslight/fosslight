@@ -445,6 +445,8 @@
 		DELETE FROM PRE_PROJECT_MASTER WHERE PRJ_ID = #{prjId}
 	</delete>
 	
+	<delete id="deleteOssNotice">DELETE FROM PRE_OSS_NOTICE WHERE PRJ_ID = #{prjId}</delete>
+	
 	<delete id="deleteProjectModel" parameterType="oss.fosslight.domain.Project">
 		DELETE FROM PROJECT_MODEL
 		 WHERE PRJ_ID = #{prjId} 	

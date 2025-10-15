@@ -633,6 +633,8 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		selfCheckMapper.resetOssComponentsAndLicense(project.getPrjId(), null);
 		// self-check watcher master
 		selfCheckMapper.deleteProjectWatcher(project);
+		// self-check notice
+		selfCheckMapper.deleteOssNotice(project);
 		// self-check project master
 		selfCheckMapper.deleteProjectMaster(project);
 	}
