@@ -35,3 +35,5 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('301', '014', 'excludeCpes', NULL, 'Array|Exclude CPE', 14, 'Y'),
 	('301', '015', 'ossVersionAliases', NULL, 'Array|OSS Version Alias', 15, 'Y'),
 	('913', '020', 'nuget.org/packages/', '', 'nuget', 20, 'Y');
+	
+ALTER TABLE `OSS_ANALYSIS_MAP` ADD `COREVIEWER_YN` CHAR(1) DEFAULT 'N';
