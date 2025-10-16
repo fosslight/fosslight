@@ -223,6 +223,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							}
 							param.setVerifyFileCount("");
 							verificationMapper.updateVerifyFileCount(param);
+						} else if (!verifyGridMap.containsKey(s)) {
+							if (!isVerify) {
+								isVerify = true;
+							}
 						}
 						
 						verificationMapper.updateVerifyFilePath(param);
