@@ -5225,6 +5225,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						case 18:
 							purl = new PackageURL(StandardTypes.CARGO, null, splitDownloadLocation[2], null, null, null);
 							break;
+						case 19:
+							purl = new PackageURL(StandardTypes.NUGET, null, splitDownloadLocation[2], null, null, null);
+							break;
 						default:
 							break;
 					}
@@ -5318,6 +5321,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				break;
 			case 18:
 				p = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
+				break;
+			case 19:
+				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");

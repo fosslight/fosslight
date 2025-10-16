@@ -5293,6 +5293,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('913', '017', 'android.googlesource.com', '', 'android', 17, 'Y'),
 	('913', '018', 'pub.dev/packages/', '', 'pub', 18, 'Y'),
 	('913', '019', 'crates.io/crates/', '', 'cargo', 19, 'Y'),
+	('913', '020', 'nuget.org/packages/', '', 'nuget', 20, 'Y'),
 	('914', '100', 'notice', '', '', 1, 'Y'),
 	('918', '101', 'Notice Flag', '927', 'Y', 1, 'Y'),
 	('918', '100', 'Distribution Flag', '', 'N', 2, 'Y'),
