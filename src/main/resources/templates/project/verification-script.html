@@ -1942,16 +1942,24 @@
                                 if (json.isValid == 'false') {
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 } else {
-                                    alertify.alert([[#{msg.common.success}]], function () {
-                                    	activeDeleteTabInFrame();
-                                    	
-                                    	let callBackUrl = '/project/verification/';
-                                    	if (!$(".comment-area").is(":visible")) {
-                                    		callBackUrl += "2/";
-                                    	}
-                                    	callBackUrl += [[${project.prjId}]];
-                                        createTabInFrame([[${project.prjId}]] + '_Packaging', callBackUrl);
-                                    });
+                                	var msg = [[#{msg.common.success}]];
+                                	if (typeof json.resultData.isVerify !== "undefined" && json.resultData.isVerify) {
+                                		msg = [[#{msg.package.verify.retry}]];
+                                		alertify.alert(msg, function () {
+                                			fn.verify();
+                                		});
+                                	} else {
+                                		alertify.alert([[#{msg.common.success}]], function () {
+                                        	activeDeleteTabInFrame();
+                                        	
+                                        	let callBackUrl = '/project/verification/';
+                                        	if (!$(".comment-area").is(":visible")) {
+                                        		callBackUrl += "2/";
+                                        	}
+                                        	callBackUrl += [[${project.prjId}]];
+                                            createTabInFrame([[${project.prjId}]] + '_Packaging', callBackUrl);
+                                        });
+                                	}
                                 }
                             },
                             error: function (data) {

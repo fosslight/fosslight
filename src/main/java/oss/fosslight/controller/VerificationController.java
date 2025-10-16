@@ -521,14 +521,15 @@ public class VerificationController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> savePath(@RequestBody Map<Object, Object> map, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception{
 		log.info("URI: "+ "/project/verification/savePath");
 		
+		Map<String, Object> result = null;
 		try {
-			verificationService.savePath(map);
+			result = verificationService.savePath(map);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(true, null, result);
 	}
 	
 	@SuppressWarnings("unchecked")

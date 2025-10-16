@@ -46,7 +46,7 @@ public interface VerificationService {
 	
 	Map<String, Object> processVerification(Map<Object, Object> map, T2File file, Project project);
 	
-	void savePath(Map<Object, Object> map);
+	Map<String, Object> savePath(Map<Object, Object> map);
 	
 	String getNoticeHtmlFileForPreview(OssNotice ossNotice) throws IOException;
 	

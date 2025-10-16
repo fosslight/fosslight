@@ -47,9 +47,9 @@
                             	</ul>
                       		</div>
                       		<div class="d-flex-align" style="margin-left: auto;">
-                      			<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" class="badge px-2" id="verify" name="verify" type="button" title="Verify">
-                      				<i class="fas fa-check-circle customIcon2"></i>
-                      			</span>
+<!--                       		<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" class="badge px-2" id="verify" name="verify" type="button" title="Verify"> -->
+<!--                       			<i class="fas fa-check-circle customIcon2"></i> -->
+<!--                       		</span> -->
                         		<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" class="badge mr-2 px-2" type="button" title="Save" id="btnSavePath" name="btnSavePath" th:onclick="|fn.savePath()|">
                         			<i class="fas fa-save customIcon2"></i>
                         		</span>

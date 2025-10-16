@@ -177,7 +177,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
-	public void savePath(Map<Object, Object> map) {
+	public Map<String, Object> savePath(Map<Object, Object> map) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		
 		try {
 			List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 			List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
@@ -190,22 +192,41 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String deleteComment = "";
 			String uploadComment = "";
 			
-			// verify 버튼 클릭시 file path를 저장한다.
+			boolean isVerify = false;
+			Map<String, String> verifyGridMap = new HashMap<>();
+			
 			if (gridComponentIds != null && !gridComponentIds.isEmpty()) {
+				try {
+					Project param = new Project();
+					param.setPrjId(prjId);
+					List<OssComponents> list = getVerifyOssList(param);
+					if (CollectionUtils.isNotEmpty(list)) {
+						list = setMergeGridData(list);
+						verifyGridMap = list.stream().collect(Collectors.toMap(OssComponents::getComponentId, OssComponents::getFilePath));
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
 				int idx = 0;
+				OssComponents param = new OssComponents();
 				
 				for (String s : gridComponentIds){
-					OssComponents param = new OssComponents();
-					param.setComponentId(s);
-					param.setFilePath(gridFilePaths.get(idx++));
-					
-					if (verifyFlag.equals(CoConstDef.FLAG_YES)){
-						param.setVerifyFileCount("");
+					String filePath = gridFilePaths.get(idx++);
+					if (!isEmpty(filePath)) {
+						param.setComponentId(s);
+						param.setFilePath(filePath);
 						
-						verificationMapper.updateVerifyFileCount(param);
+						if (verifyGridMap.containsKey(s) && !avoidNull(filePath).equals(verifyGridMap.get(s))) {
+							if (!isVerify) {
+								isVerify = true;
+							}
+							param.setVerifyFileCount("");
+							verificationMapper.updateVerifyFileCount(param);
+						}
+						
+						verificationMapper.updateVerifyFilePath(param);
 					}
-					
-					verificationMapper.updateVerifyFilePath(param);
 				}
 			}
 			
@@ -258,6 +279,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						T2File fileInfo = new T2File();
 						
 						if (!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
+							if (!isVerify) {
+								isVerify = true;
+							}
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
@@ -274,6 +298,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
+							if (!isVerify) {
+								isVerify = true;
+							}
 							fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							oss.fosslight.domain.File result = verificationMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
@@ -314,10 +341,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					projectMapper.updateReadmeContent(prjParam); // README Clear
 					projectMapper.updateVerifyContents(prjParam); // File List, Banned List Clear
 				}
+				
+				rtnMap.put("isVerify", isVerify);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+		
+		return rtnMap;
 	}
 	
 	@Override
