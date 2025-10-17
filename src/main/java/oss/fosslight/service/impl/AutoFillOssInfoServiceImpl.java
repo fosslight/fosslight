@@ -700,50 +700,63 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					comments.addAll(changeOssLicenseInfoList);
 				}
 			} else {
-				List<String> ossLicenseInfoList = new ArrayList<>();
-				if (CollectionUtils.isNotEmpty(comments)) {
-					ossLicenseInfoList.addAll(comments);
-				}
-				if (CollectionUtils.isNotEmpty(changeOssLicenseInfoList)) {
-					ossLicenseInfoList.addAll(changeOssLicenseInfoList);
-				}
-				if (CollectionUtils.isNotEmpty(ossLicenseInfoList)) {
-					map.put("isValid", true);
-					map.put("returnType", "Success");
-					
-					String comment = CommonFunction.changeDataToTableFormat("license", CommonFunction.getCustomMessage("msg.common.change.name", "License Name"), ossLicenseInfoList);
-					CommentsHistory commentInfo = null;
-					
-					if (isEmpty(commentId)) {
-						CommentsHistory commHisBean = new CommentsHistory();
-						commHisBean.setReferenceDiv(referenceDiv);
-						commHisBean.setReferenceId(referenceId);
-						commHisBean.setContents(comment);
-						commHisBean.setStatus("pre-review > license");
-						commentInfo = commentService.registComment(commHisBean, false);
-					} else {
-						commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+				if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) || CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
+					List<String> ossLicenseInfoList = new ArrayList<>();
+					if (CollectionUtils.isNotEmpty(comments)) {
+						ossLicenseInfoList.addAll(comments);
+					}
+					if (CollectionUtils.isNotEmpty(changeOssLicenseInfoList)) {
+						ossLicenseInfoList.addAll(changeOssLicenseInfoList);
+					}
+					if (CollectionUtils.isNotEmpty(ossLicenseInfoList)) {
+						map.put("isValid", true);
+						map.put("returnType", "Success");
+						
+						String comment = CommonFunction.changeDataToTableFormat("license", CommonFunction.getCustomMessage("msg.common.change.name", "License Name"), ossLicenseInfoList);
+						CommentsHistory commentInfo = null;
+						
+						if (isEmpty(commentId)) {
+							CommentsHistory commHisBean = new CommentsHistory();
+							commHisBean.setReferenceDiv(referenceDiv);
+							commHisBean.setReferenceId(referenceId);
+							commHisBean.setContents(comment);
+							commHisBean.setStatus("pre-review > license");
+							commentInfo = commentService.registComment(commHisBean, false);
+						} else {
+							commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
 
-						if (commentInfo != null) {
-							if (!isEmpty(commentInfo.getContents())) {
-								String contents = commentInfo.getContents();
-								contents += comment;
-								commentInfo.setContents(contents);
-								commentInfo.setStatus("pre-review > license");
+							if (commentInfo != null) {
+								if (!isEmpty(commentInfo.getContents())) {
+									String contents = commentInfo.getContents();
+									contents += comment;
+									commentInfo.setContents(contents);
+									commentInfo.setStatus("pre-review > license");
 
-								commentService.updateComment(commentInfo, false);
+									commentService.updateComment(commentInfo, false);
+								}
 							}
 						}
+						
+						if (commentInfo != null) {
+							map.put("commentId", commentInfo.getCommId());
+						}
+						if (!successIdList.isEmpty()) {
+							map.put("successIds", successIdList);
+						}
+						if (!failIdList.isEmpty()) {
+							map.put("failIds", failIdList);
+						}
 					}
-					
-					if (commentInfo != null) {
-						map.put("commentId", commentInfo.getCommId());
-					}
-					if (!successIdList.isEmpty()) {
-						map.put("successIds", successIdList);
-					}
-					if (!failIdList.isEmpty()) {
-						map.put("failIds", failIdList);
+				} else {
+					if (!successIdList.isEmpty() || !failIdList.isEmpty()) {
+						map.put("isValid", true);
+						map.put("returnType", "Success");
+						if (!successIdList.isEmpty()) {
+							map.put("successIds", successIdList);
+						}
+						if (!failIdList.isEmpty()) {
+							map.put("failIds", failIdList);
+						}
 					}
 				}
 			}
