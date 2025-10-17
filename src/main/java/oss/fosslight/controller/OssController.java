@@ -44,6 +44,7 @@ import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoOssValidator;
@@ -2455,6 +2456,10 @@ public class OssController extends CoTopComponent{
 
 	@GetMapping(value = OSS.SHARE_URL)
 	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String ossId) throws IOException {
-		res.sendRedirect(req.getContextPath() + "/oss/edit/" + ossId);
+		if (CoCodeManager.OSS_INFO_BY_ID.containsKey(ossId)) {
+			res.sendRedirect(req.getContextPath() + "/oss/edit/" + ossId);
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+		}
 	}
 }

@@ -412,40 +412,46 @@ public class PartnerController extends CoTopComponent{
 		
 		try {
 			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
-			partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
-			
-			CommonFunction.setPartnerService(partnerService);
-			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
-			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
-				boolean isPermission = false;
-				for (String userId : permissionCheckList) {
-					if (userId.equalsIgnoreCase(loginUserName())) {
-						isPermission = true;
-						break;
+			if (partnerMaster != null) {
+				partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
+				
+				CommonFunction.setPartnerService(partnerService);
+				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+				if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+					boolean isPermission = false;
+					for (String userId : permissionCheckList) {
+						if (userId.equalsIgnoreCase(loginUserName())) {
+							isPermission = true;
+							break;
+						}
 					}
-				}
-				if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
-					partnerMaster.setPermission(0);
-					partnerMaster.setStatusPermission(0);
-				} else {
-					if (!CommonFunction.isAdmin() && !isPermission) {
+					if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
+						partnerMaster.setPermission(0);
 						partnerMaster.setStatusPermission(0);
 					} else {
-						partnerMaster.setStatusPermission(1);
+						if (!CommonFunction.isAdmin() && !isPermission) {
+							partnerMaster.setStatusPermission(0);
+						} else {
+							partnerMaster.setStatusPermission(1);
+						}
+						partnerMaster.setPermission(1);
 					}
-					partnerMaster.setPermission(1);
 				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 		
-		if (!CoConstDef.FLAG_NO.equals(avoidNull(partnerMaster.getUseYn()))) {
-			if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
-				res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
-			} else {
-				res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
+		if (partnerMaster != null) {
+			if (!CoConstDef.FLAG_NO.equals(avoidNull(partnerMaster.getUseYn()))) {
+				if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
+					res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
+				} else {
+					res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
+				}
 			}
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
 		}
 	}
 	

@@ -58,6 +58,7 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.util.YamlUtil;
 import oss.fosslight.validation.T2CoValidationResult;
@@ -887,6 +888,13 @@ public class SelfCheckController extends CoTopComponent {
 	
 	@GetMapping(value = SELF_CHECK.SHARE_URL)
 	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId) throws IOException {
-		res.sendRedirect(req.getContextPath() + "/index?id=" + prjId + "&menu=self&view=true");
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = selfCheckService.getProjectDetail(project);
+		if (project != null) {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + prjId + "&menu=self&view=true");
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+		}
 	}
 }

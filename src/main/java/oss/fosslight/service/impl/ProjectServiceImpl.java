@@ -358,6 +358,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
 		// master
 		project = projectMapper.selectProjectMaster(project.getPrjId());
+		if (project == null) {
+			return null;
+		}
 		
 		// 이전에 생성된 프로젝트를 위해 Default를 설정한다.
 		Map<String, Object> NoticeInfo = projectMapper.getNoticeType(project.getPrjId());

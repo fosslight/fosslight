@@ -216,6 +216,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	public Project getProjectDetail(Project project) {
 		// master
 		project = selfCheckMapper.selectProjectMaster(project);
+		if (project == null) {
+			return null;
+		}
 		
 		project.setDestributionName(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType()));
 		//OS_TYPE

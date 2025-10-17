@@ -31,6 +31,7 @@ import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.util.ExcelUtil;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoLicenseValidator;
@@ -759,6 +760,10 @@ public class LicenseController extends CoTopComponent {
 
 	@GetMapping(value = LICENSE.SHARE_URL)
 	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String licenseId) throws IOException {
-		res.sendRedirect(req.getContextPath() + "/license/edit/" + licenseId);
+		if (CoCodeManager.LICENSE_INFO_BY_ID.containsKey(licenseId)) {
+			res.sendRedirect(req.getContextPath() + "/license/edit/" + licenseId);
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+		}
 	}
 }
