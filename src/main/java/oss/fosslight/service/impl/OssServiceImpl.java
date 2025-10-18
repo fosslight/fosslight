@@ -313,6 +313,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public OssMaster getOssMasterOne(OssMaster ossMaster) {
 		ossMaster = ossMapper.selectOssOne(ossMaster);
+		if (ossMaster == null) {
+			return null;
+		}
 		List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
 		List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(ossMaster);
 		List<OssLicense> ossLicenses = ossMapper.selectOssLicenseList(ossMaster); // declared License

@@ -293,6 +293,7 @@ public class OssController extends CoTopComponent{
 		ossMaster = ossService.getOssMasterOne(ossMaster);
 		if (ossMaster == null) {
 			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			return null;
 		}
 		if (ossMaster.getOssVersion() == null) {
 			ossMaster.setOssVersion("");

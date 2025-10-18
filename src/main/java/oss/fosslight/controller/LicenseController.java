@@ -133,6 +133,7 @@ public class LicenseController extends CoTopComponent {
 		licenseMaster = licenseService.getLicenseMasterOne(licenseMaster);
 		if (licenseMaster == null) {
 			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			return null;
 		}
 		
 		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
