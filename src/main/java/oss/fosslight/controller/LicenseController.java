@@ -131,19 +131,20 @@ public class LicenseController extends CoTopComponent {
 	public String edit(@PathVariable String licenseId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
 		LicenseMaster licenseMaster = new LicenseMaster(licenseId);
 		licenseMaster = licenseService.getLicenseMasterOne(licenseMaster);
-		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-
-		if (licenseMaster != null) {
-			licenseMaster.setDomain(CommonFunction.getDomain(req));
-			licenseMaster.setInternalUrl(CommonFunction.makeLicenseInternalUrl(licenseMaster, distributionFlag));
-
-			if (!"ROLE_ADMIN".equals(loginUserRole())) {
-				// html link 형식으로 변환
-				licenseMaster.setDescription(CommonFunction.makeHtmlLinkTagWithText(licenseMaster.getDescription()));
-			}
-			model.addAttribute("licenseInfo", licenseMaster);
+		if (licenseMaster == null) {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
 		}
+		
+		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+		licenseMaster.setDomain(CommonFunction.getDomain(req));
+		licenseMaster.setInternalUrl(CommonFunction.makeLicenseInternalUrl(licenseMaster, distributionFlag));
 
+		if (!"ROLE_ADMIN".equals(loginUserRole())) {
+			// html link 형식으로 변환
+			licenseMaster.setDescription(CommonFunction.makeHtmlLinkTagWithText(licenseMaster.getDescription()));
+		}
+		
+		model.addAttribute("licenseInfo", licenseMaster);
 		model.addAttribute("detail", licenseMaster);
 
 		if ("ROLE_ADMIN".equals(loginUserRole())) {
@@ -352,8 +353,7 @@ public class LicenseController extends CoTopComponent {
 	}
 
 	@PostMapping(value = LICENSE.LICENSE_ID)
-	public @ResponseBody ResponseEntity<Object> getLicenseId(HttpServletRequest req, HttpServletResponse res,
-															 @RequestParam(value = "licenseName", required = true) String licenseName) {
+	public @ResponseBody ResponseEntity<Object> getLicenseId(HttpServletRequest req, HttpServletResponse res, @RequestParam(value = "licenseName", required = true) String licenseName) throws Exception {
 		Map<String, String> map = new HashMap<String, String>();
 
 		LicenseMaster lm = new LicenseMaster();

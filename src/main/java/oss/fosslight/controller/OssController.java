@@ -291,7 +291,9 @@ public class OssController extends CoTopComponent{
 		OssMaster ossMaster = new OssMaster(ossId);
 		Map<String, Object> map = ossService.getOssLicenseList(ossMaster);
 		ossMaster = ossService.getOssMasterOne(ossMaster);
-
+		if (ossMaster == null) {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+		}
 		if (ossMaster.getOssVersion() == null) {
 			ossMaster.setOssVersion("");
 		}
