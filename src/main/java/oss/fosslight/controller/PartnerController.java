@@ -346,7 +346,10 @@ public class PartnerController extends CoTopComponent{
 		
 		try {
 			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
-			
+			if (partnerMaster == null) {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+				return null;
+			}
 			if (CoConstDef.FLAG_YES.equals(partnerMaster.getUseYn())) {
 				T2File confirmationFile = new T2File();
 				confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());

@@ -495,7 +495,10 @@ public class ProjectController extends CoTopComponent {
 		
 		try {
 			project = projectService.getProjectDetail(project);
-			
+			if (project == null) {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+				return null;
+			}
 			if (CoConstDef.FLAG_YES.equals(project.getUseYn())) {
 				CommentsHistory comHisBean = new CommentsHistory();
 				comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
