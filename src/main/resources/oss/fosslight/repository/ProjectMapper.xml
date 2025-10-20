@@ -4520,7 +4520,12 @@
 	</update>
 	
 	<select id="existsWatcherByEmail" resultType="int" parameterType="oss.fosslight.domain.Project">
-		SELECT COUNT(1) FROM PROJECT_WATCHER WHERE EMAIL = #{prjEmail} AND PRJ_ID = #{prjId}
+		SELECT COUNT(1) 
+		FROM PROJECT_WATCHER PW
+		LEFT JOIN T2_USERS USR
+		ON PW.USER_ID = USR.USER_ID
+		WHERE (PW.EMAIL = #{prjEmail} AND PW.PRJ_ID = #{prjId})
+		OR (IFNULL(USR.EMAIL, '') = #{prjEmail} AND PW.PRJ_ID = #{prjId})
 	</select>
 	
 	<select id="existsWatcherByUser" resultType="int" parameterType="oss.fosslight.domain.Project">
