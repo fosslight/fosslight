@@ -377,6 +377,14 @@ public class ProjectController extends CoTopComponent {
 		project.setPrjId(prjId);
 		project.setActType(CoConstDef.FLAG_NO);
 		project = projectService.getProjectDetail(project);
+		if (project == null) {
+			try {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			return null;
+		}
 		
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);

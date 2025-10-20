@@ -136,14 +136,23 @@ public class SelfCheckController extends CoTopComponent {
 	/**
 	 * [API] 프로젝트 상세 조회 Edit Page
 	 */
-	@RequestMapping(value = SELF_CHECK.EDIT_ID, method = { RequestMethod.GET,
-			RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	@RequestMapping(value = SELF_CHECK.EDIT_ID, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
 	public String edit(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
 		project = selfCheckService.getProjectDetail(project);
+		if (project == null) {
+			try {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			return null;
+		}
 		T2Users user = userService.getLoginUserInfo();
-		if (user != null) project.setPrjEmail(user.getEmail());
+		if (user != null) {
+			project.setPrjEmail(user.getEmail());
+		}
 
 		model.addAttribute("project", project);
 		model.addAttribute("detail", project);
