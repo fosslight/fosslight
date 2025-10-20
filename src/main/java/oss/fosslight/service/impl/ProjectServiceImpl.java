@@ -6007,7 +6007,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					continue;
 				}
 				
-				if ("-".equals(temp.getOssName())) {
+				boolean mergeCheckFlag = isEmpty(temp.getOssName()) || "-".equals(temp.getOssName()) ? true : false;
+				if (mergeCheckFlag) {
 					boolean licenseSameFlag = false;
 					List<String> tempLicenses = Arrays.asList(temp.getLicenseName().split(","));
 					List<String> rtnBeanLicenses = Arrays.asList(rtnBean.getLicenseName().split(","));
@@ -6017,11 +6018,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						licenseSameFlag = true;
 					}
 					
-					if (licenseSameFlag && temp.getDownloadLocation().equalsIgnoreCase(rtnBean.getDownloadLocation()) && temp.getHomepage().equalsIgnoreCase(rtnBean.getHomepage())) {
+					if (isEmpty(temp.getOssName())) {
+						if (!licenseSameFlag) {
+							resultGridData.add(rtnBean);
+							rtnBean = temp;
+							continue;
+						}
 					} else {
-						resultGridData.add(rtnBean);
-						rtnBean = temp;
-						continue;
+						if (licenseSameFlag && temp.getDownloadLocation().equalsIgnoreCase(rtnBean.getDownloadLocation()) && temp.getHomepage().equalsIgnoreCase(rtnBean.getHomepage())) {
+						} else {
+							resultGridData.add(rtnBean);
+							rtnBean = temp;
+							continue;
+						}
 					}
 				}
 				
