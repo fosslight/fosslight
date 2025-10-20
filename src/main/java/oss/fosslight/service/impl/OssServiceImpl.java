@@ -24,9 +24,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -1190,14 +1192,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			 * 1. 라이센스 닉네임 삭제 
 			 * 2. 라이센스 닉네임 재등록
 			 */
-			if (CoConstDef.FLAG_YES.equals(ossMaster.getAddNicknameYn())) { //nickname을 clear&insert 하지 않고, 중복제거를 한 나머지 nickname에 대해서는 add함.
-				if (ossNicknames != null){
+			if (ossNicknames != null) {
+				Set<String> uniqueLower = new LinkedHashSet<>();
+				for (String s : ossNicknames) {
+				    uniqueLower.add(s.toLowerCase());
+				}
+				if (CoConstDef.FLAG_YES.equals(ossMaster.getAddNicknameYn())) {
 					List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
 					
-					for (String nickName : ossNicknames){
+					for (String nickName : uniqueLower){
 						if (!isEmpty(nickName)) {
 							int duplicateCnt = ossNicknameList.stream().filter(o -> nickName.toUpperCase().equals(o.getOssNickname().toUpperCase())).collect(Collectors.toList()).size();
-							
 							if (duplicateCnt == 0) {
 								OssMaster ossBean = new OssMaster();
 //								ossBean.setOssName(ossMaster.getOssName());
@@ -1208,20 +1213,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							}
 						}
 					}
-				}
-			} else { // nickname => clear&insert
-				if (ossNicknames != null) {
+				} else {
 					ossMapper.deleteOssNickname(ossMaster);
 					
-					for (String nickName : ossNicknames){
+					for (String nickName : uniqueLower){
 						if (!isEmpty(nickName)) {
 							ossMaster.setOssNickname(nickName.trim());
 							ossMapper.insertOssNickname(ossMaster);
 						}
 					}
-				} else {
-					ossMapper.deleteOssNickname(ossMaster);
 				}
+			} else {
+				ossMapper.deleteOssNickname(ossMaster);
 			}
 			
 			//코멘트 등록
