@@ -60,8 +60,8 @@
 								</div>
 								<br />
 								<div th:style="'margin:20px 0;border:1px dashed #666;'"></div>
-								<div th:if="${domain != null && domain != ''}">
-									<div th:assign="shortDomain=${domain.replaceAll('(http|https)://', '')}" th:style="'font-size:12px;'" th:text="'* This mail was sent by ' + ${shortDomain}"></div>
+								<div th:if="${domain != null && domain != ''}" th:with="shortDomain=${domain.replaceAll('(http|https)://', '')}" style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
 								</div>
 							</td>
 							<td width="1" th:style="'background:#ddd'"></td>
