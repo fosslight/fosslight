@@ -3984,8 +3984,8 @@ public class CoMailManager extends CoTopComponent {
 						url += "/api/project/" + prjId + "/logs";
 						ResponseEntity<byte[]> response = new RestTemplate().exchange(url, HttpMethod.GET, null, byte[].class);
 						if (response.getStatusCode() == HttpStatus.OK) {
-							DataSource dataSource = new ByteArrayDataSource(response.getBody(), "text/plain");
-							helper.addAttachment("auto_analysis_result_" + prjId + ".log", dataSource);
+							DataSource dataSource = new ByteArrayDataSource(response.getBody(), "application/json");
+							helper.addAttachment("auto_analysis_result_" + prjId + ".json", dataSource);
 						}
 					}
 					
