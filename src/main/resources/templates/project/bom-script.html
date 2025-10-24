@@ -447,12 +447,15 @@ var bom_fn = {
 						
 						if (data.includes("http://") || data.includes("https://")) {
 							data = data.replace(/http/g, ",http");
+							data = data.substring(1);
 						}
 						if (data.includes("ftp://")) {
 							data = data.replace(/ftp/g, ",ftp");
+							data = data.substring(1);
 						}
 						if (data.includes("git://")) {
 							data = data.replace(/git/g, ",git");
+							data = data.substring(1);
 						}
 					} else if ("homepage" == value) {
 						if(data.indexOf("Different from DB") > -1){
