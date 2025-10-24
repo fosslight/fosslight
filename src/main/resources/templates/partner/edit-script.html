@@ -1345,7 +1345,7 @@ var fn = {
         }
 	},
 	makeFileTag : function(obj, flag) {
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + "_" + obj.loginUserName;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = "";
 		
