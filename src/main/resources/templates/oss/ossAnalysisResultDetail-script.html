@@ -146,33 +146,11 @@ var Ctrl_fn = {
 		});
 
 		if (typeof selectData.includeCpes !== "undefined") {
-			selectData.includeCpes.forEach(function(includeCpe){
-				if ('' != includeCpe) {
-					let includeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
-					includeCpeHtml 			+= 		'<div class="form-group mb-0">';
-					includeCpeHtml 			+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'">';
-					includeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
-					includeCpeHtml 			+=		'</div>';
-					includeCpeHtml 			+= 	'</div>';
-					
-					$(".multiTxtIncludeCpe" + seq).append(includeCpeHtml);
-				}
-			});
+			Ctrl_fn.addIncludeCpe(selectData.includeCpes, seq);
 		}
 		
 		if (typeof selectData.excludeCpes !== "undefined") {
-			selectData.excludeCpes.forEach(function(excludeCpe){
-				if ('' != excludeCpe) {
-					let excludeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
-					excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
-					excludeCpeHtml 			+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'">';
-					excludeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
-					excludeCpeHtml 			+=		'</div>';
-					excludeCpeHtml 			+= 	'</div>';
-					
-					$(".multiTxtExcludeCpe" + seq).append(excludeCpeHtml);
-				}
-			});
+			Ctrl_fn.addExcludeCpe(selectData.excludeCpes, seq);
 		}
 		
 		if (typeof selectData.ossVersionAliases !== "undefined") {
@@ -300,6 +278,34 @@ var Ctrl_fn = {
 	        }).trigger("reloadGrid");
 		
 		Ctrl_fn.setMessage(gridId, seq);
+	},
+	addIncludeCpe : function (list, seq) {
+		list.forEach(function(includeCpe){
+			if ('' != includeCpe) {
+				let includeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
+				includeCpeHtml 			+= 		'<div class="form-group mb-0">';
+				includeCpeHtml 			+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'">';
+				includeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+				includeCpeHtml 			+=		'</div>';
+				includeCpeHtml 			+= 	'</div>';
+				
+				$(".multiTxtIncludeCpe" + seq).append(includeCpeHtml);
+			}
+		});
+	},
+	addExcludeCpe : function (list, seq) {
+		list.forEach(function(excludeCpe){
+			if ('' != excludeCpe) {
+				let excludeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
+				excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
+				excludeCpeHtml 			+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'">';
+				excludeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+				excludeCpeHtml 			+=		'</div>';
+				excludeCpeHtml 			+= 	'</div>';
+				
+				$(".multiTxtExcludeCpe" + seq).append(excludeCpeHtml);
+			}
+		});
 	},
 	nicknameAdd : function(seq) {
 		let nickHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
@@ -635,6 +641,32 @@ var Ctrl_fn = {
 	    				}
 	    				
 	    				alertify.alert(_alertMsg, function(){});
+	    			} else if ("hasExists" == json.validMsg) {
+	    				var existItems = "";
+	    				if (typeof json.resultData.addSummaryDescription !== "undefined") {
+	    					existItems += "Summary Description,";
+	    					$("#detailSummaryDescription" + seq).val(json.resultData.addSummaryDescription);
+	    				}
+						if (typeof json.resultData.addImportantNotes !== "undefined") {
+							existItems += "Important Notes,";
+							$("#detailImportantNotes" + seq).val(json.resultData.addImportantNotes);
+	    				}
+						if (typeof json.resultData.addIncludeCpe !== "undefined") {
+							existItems += "Include CPE,";
+							let arr = json.resultData.addIncludeCpe.split(",");
+							Ctrl_fn.addIncludeCpe(arr, seq);
+	    				}
+						if (typeof json.resultData.addExcludeCpe !== "undefined") {
+							existItems += "Exclude CPE,";
+							let arr = json.resultData.addExcludeCpe.split(",");
+							Ctrl_fn.addExcludeCpe(arr, seq);
+	    				}
+						if ("" != existItems) {
+							existItems = existItems.substring(0, existItems.length-1);
+							var msg = [[#{msg.oss.information.exists}]];
+							msg = msg.replaceAll("items", existItems);
+							alertify.alert(msg, function(){});
+						}
 	    			} else if(json.resultData) {
 	    				alertify.alert([[#{msg.oss.nickname.exists}]], function(){});
 

@@ -283,6 +283,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private String startAnalysisFlag;
 	
 	private String analysisYn;
+	private String analysisDetailYn;
 	private String completeYn;
 	private String addNicknameYn = "N";
 	
@@ -2441,5 +2442,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setRange(String range) {
 		this.range = range;
+	}
+
+	public String getAnalysisDetailYn() {
+		return analysisDetailYn;
+	}
+
+	public void setAnalysisDetailYn(String analysisDetailYn) {
+		this.analysisDetailYn = analysisDetailYn;
 	}
 }

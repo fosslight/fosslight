@@ -638,7 +638,26 @@ public class OssController extends CoTopComponent{
 					// 삭제는 불가능하기 때문에, 건수가 다르면 기존에 등록된 닉네임이 있다는 의미
 					// null을 반환하지는 않는다.
 					if (_mergeNicknames.length > 0) {
-						return makeJsonResponseHeader(false, null, _mergeNicknames);
+						Map<String, List<String>> diffMap = new HashMap<>();
+						diffMap.put("addNickArr", Arrays.asList(_mergeNicknames));
+						return makeJsonResponseHeader(false, null, diffMap);
+					}
+					
+					if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getAnalysisDetailYn()))) {
+						Map<String, Object> diffMap = new HashMap<>();
+						if (!isEmpty(checkOssInfo.getSummaryDescription())) {
+							diffMap.put("addSummaryDescription", checkOssInfo.getSummaryDescription());
+						}
+						if (!isEmpty(checkOssInfo.getImportantNotes())) {
+							diffMap.put("addImportantNotes", checkOssInfo.getImportantNotes());
+						}
+						if (!isEmpty(checkOssInfo.getIncludeCpe())) {
+							diffMap.put("addIncludeCpe", checkOssInfo.getIncludeCpe());
+						}
+						if (!isEmpty(checkOssInfo.getExcludeCpe())) {
+							diffMap.put("addExcludeCpe", checkOssInfo.getExcludeCpe());
+						}
+						return makeJsonResponseHeader(false, "hasExists", diffMap);
 					}
 				}
 			} else {
