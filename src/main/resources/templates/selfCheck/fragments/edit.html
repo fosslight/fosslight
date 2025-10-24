@@ -48,7 +48,7 @@
 												<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 												<input type="hidden" name="uploadCsvFile" th:value="${csvFile.fileSeq}" />
 												<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|src_fn.deleteCsv(this, '1')|" th:text="X"></span>
-												<br>[[${csvFile.createdDate}]]
+												<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
 											</li>
 										</th:block>
 									</th:block>
@@ -107,7 +107,8 @@
 											<li th:if="${csvFile.delYn == 'N'}">
 												<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 												<input type="hidden" name="uploadCsvFile" th:value="${csvFile.fileSeq}" />
-												<br>[[${csvFile.createdDate}]]</li>
+												<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
+											</li>
 										</th:block>
 									</ul>
 								</div>

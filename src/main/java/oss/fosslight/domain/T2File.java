@@ -28,6 +28,7 @@ public class T2File extends ComBean implements Serializable {
 	private String tabNm;
 	private String reuseCnt;
 	private String actualFileNm;
+	private String regId;
 
 	public T2File(String fileSeq) {
 		super();
@@ -152,5 +153,13 @@ public class T2File extends ComBean implements Serializable {
 
 	public void setActualFileNm(String actualFileNm) {
 		this.actualFileNm = actualFileNm;
+	}
+
+	public String getRegId() {
+		return regId;
+	}
+
+	public void setRegId(String regId) {
+		this.regId = regId;
 	}
 }

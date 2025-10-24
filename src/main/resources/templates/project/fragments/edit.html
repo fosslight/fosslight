@@ -236,7 +236,8 @@
 															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 															<input type="hidden" class="depCsvFileSeq" th:value="${csvFile.fileSeq}">
 															<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-															<br>[[${csvFile.createdDate}]]</li>
+															<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
+														</li>
 													</th:block>
 												</th:block>
 											</ul>
@@ -391,7 +392,8 @@
 															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 															<input type="hidden" class="srcCsvFileSeq" th:value="${csvFile.fileSeq}" />
 															<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-															<br>[[${csvFile.createdDate}]]</li>
+															<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
+														</li>
 													</th:block>
 												</th:block>
 											</ul>
@@ -546,7 +548,8 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="binCsvFileSeq" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]</li>
+																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
+															</li>
 														</th:block>
 													</th:block>
 												</ul>
@@ -574,7 +577,7 @@
 														<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 														<input type="hidden" class="binBinaryFileSeq" th:value="${csvFile.fileSeq}" />
 														<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '2')|" th:text="X"></span>
-														<br>[[${csvFile.createdDate}]]
+														<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
 													</li>
 												</th:block>
 											</ul>
@@ -732,7 +735,7 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="androidCsvFileSeq" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '2')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]
+																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
 															</li>
 														</th:block>
 													</th:block>
@@ -756,7 +759,7 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="androidNoticeFileSeq" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '3')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]
+																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
 															</li>
 														</th:block>
 													</th:block>
@@ -780,7 +783,7 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="androidResultFile" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '4')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]
+																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="'_' + ${csvFile.regId}"></span>
 															</li>
 														</th:block>
 													</th:block>
