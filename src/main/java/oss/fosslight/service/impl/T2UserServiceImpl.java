@@ -437,10 +437,16 @@ public class T2UserServiceImpl implements T2UserService {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			List<String[]> result = ldapTemplate.search(query().where("mail").is(filter), new AttributesMapper() {
 				public Object mapFromAttributes(Attributes attrs) throws NamingException {
-					return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+					String mail = (String) attrs.get("mail").get();
+					String displayName = (String) attrs.get("displayname").get();
+					
+					mail = mail.replace("mail:", "").trim();
+					displayName = displayName.replace("displayName:", "").trim();
+					
+					return new String[] {mail, displayName};
 				}
 			});
-			if(result != null && result.size() > 0) {
+			if (CollectionUtils.isNotEmpty(result)) {
 				isAuthenticated = true;
 				for(int i=0;i<result.size();i++) {
 					String email = result.get(i)[0];
@@ -664,10 +670,16 @@ public class T2UserServiceImpl implements T2UserService {
 			if(ldapTemplate.authenticate("", String.format("(cn=%s)", ldapSearchID), contextSource.getPassword())) {
 				List<String[]> searchResult = ldapTemplate.search(query().where("cn").is(userId), new AttributesMapper() {
 					public Object mapFromAttributes(Attributes attrs) throws NamingException {
-						return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+						String mail = (String) attrs.get("mail").get();
+						String displayName = (String) attrs.get("displayname").get();
+						
+						mail = mail.replace("mail:", "").trim();
+						displayName = displayName.replace("displayName:", "").trim();
+						
+						return new String[] {mail, displayName};
 					}
 				});
-				if(searchResult != null && searchResult.size() > 0) {
+				if (CollectionUtils.isNotEmpty(searchResult)) {
 					int cnt = 1;
 					for(int i=0;i<searchResult.size();i++) {
 						String email = searchResult.get(i)[0];
@@ -745,7 +757,7 @@ public class T2UserServiceImpl implements T2UserService {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap) {
 		String rtnEmail = "";
@@ -761,7 +773,7 @@ public class T2UserServiceImpl implements T2UserService {
 			try {
 				LdapContextSource contextSource = new LdapContextSource();
 				contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-				contextSource.setBase("OU=LGE Users, DC=LGE, DC=NET");
+				contextSource.setBase("OU=LGE Users,DC=LGE,DC=NET");
 				contextSource.setUserDn(user_id+ldapDomain);
 				contextSource.setPassword(user_pw);
 				CommonFunction.setSslWithCert();
@@ -773,7 +785,13 @@ public class T2UserServiceImpl implements T2UserService {
 				if (ldapTemplate.authenticate("", String.format("(cn=%s)", user_id), user_pw)) {
 					searchResult = ldapTemplate.search(query().where("cn").is(user_id), new AttributesMapper() {
 						public Object mapFromAttributes(Attributes attrs) throws NamingException {
-							return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+							String mail = (String) attrs.get("mail").get();
+							String displayName = (String) attrs.get("displayname").get();
+							
+							mail = mail.replace("mail:", "").trim();
+							displayName = displayName.replace("displayName:", "").trim();
+							
+							return new String[] {mail, displayName};
 						}
 					});
 						

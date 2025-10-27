@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -2867,11 +2869,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			List<String[]> result = ldapTemplate.search(query().where("mail").is(email), new AttributesMapper() {
 				public Object mapFromAttributes(Attributes attrs) throws NamingException {
-					return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+					String mail = (String) attrs.get("mail").get();
+					String displayName = (String) attrs.get("displayname").get();
+					
+					mail = mail.replace("mail:", "").trim();
+					displayName = displayName.replace("displayName:", "").trim();
+					
+					return new String[] {mail, displayName};
 				}
 			});
 			
-			if (result != null && !result.isEmpty()) ldapCheckFlag = true;
+			if (CollectionUtils.isNotEmpty(result)) {
+				ldapCheckFlag = true;
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -2887,7 +2897,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		LdapContextSource contextSource = new LdapContextSource();
 		try {
 			contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-			contextSource.setBase("OU=LGE Users, DC=LGE, DC=NET");
+			contextSource.setBase("OU=LGE Users,DC=LGE,DC=NET");
 			contextSource.setUserDn(LDAP_SEARCH_ID+LDAP_SEARCH_DOMAIN);
 			contextSource.setPassword(LDAP_SEARCH_PW);
 			CommonFunction.setSslWithCert();
