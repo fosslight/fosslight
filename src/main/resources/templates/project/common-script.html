@@ -2456,6 +2456,12 @@ var com_fn = {
 				}
 			};
 		}, false, 'alert');
+	},
+	downloadSampleReport : function () {
+		var logiPath = "/sample/FOSSLight-Identification-Sample.xlsx";
+		var fileName = "FOSSLight-Identification-Sample.xlsx";
+
+		location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
 	}
 }
 
