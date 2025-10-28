@@ -3067,10 +3067,10 @@
 						, ZIP_FILE_ID = NULL
 					</if>
 				</when>
-				<otherwise>
-					,VERIFICATION_STATUS = NULL
-					,DISTRIBUTION_STATUS = NULL
-				</otherwise>
+				<when test="@oss.fosslight.util.StringUtil@isEmpty(completeYn)">
+					, VERIFICATION_STATUS = NULL
+					, DISTRIBUTION_STATUS = NULL
+				</when>
 			</choose>
 		WHERE 
 			PRJ_ID = #{prjId}
