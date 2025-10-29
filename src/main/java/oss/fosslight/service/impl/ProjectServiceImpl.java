@@ -2798,17 +2798,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	@Transactional
-	public void registOss(List<ProjectIdentification> ossComponent,
-			List<List<ProjectIdentification>> ossComponentLicense, String refId, String refDiv) {
+	public void registOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String refId, String refDiv) {
 		updateOssComponentList(new Project(), refDiv, refId, ossComponent, ossComponentLicense);
 	}
 
 	@Override
 	@Transactional
-	public void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent,
-			List<List<ProjectIdentification>> ossComponentLicense) {
+	public void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense) {
 		
-		if(StringUtil.isEmpty(refId)) {
+		if (!isEmpty(refId)) {
 			refId = project.getPrjId();
 		}
 		
@@ -3250,6 +3248,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String _componentId;
 		String _licenseId;
 		for (List<ProjectIdentification> compLicenseList : ossComponentLicense) {
+			String licenseDiv = compLicenseList.size() > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
 			for (ProjectIdentification compLicense : compLicenseList) {
 				_componentId = isEmpty(compLicense.getComponentId()) ? compLicense.getGridId() : compLicense.getComponentId();
 				_licenseId = compLicense.getLicenseId();
@@ -3278,7 +3277,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					continue;
 				}
 
-				licenseList.add(CommonFunction.reMakeLicenseBean(compLicense, CoConstDef.LICENSE_DIV_MULTI));
+				licenseList.add(CommonFunction.reMakeLicenseBean(compLicense, licenseDiv));
 				componentMultiLicenseMap.put(_componentId, licenseList);
 			}
 		}
