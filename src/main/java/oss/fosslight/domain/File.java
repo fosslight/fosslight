@@ -41,6 +41,7 @@ public class File extends ComBean implements Serializable{
 	private String[] fileSeqs;
 	private String reuseFlag;
 	private String refPrjId;
+	private String regId;
 
 	public File() {
 		super();
@@ -180,5 +181,11 @@ public class File extends ComBean implements Serializable{
 	}
 	public void setCreatedDate(String createdDate) {
 		this.createdDate = createdDate;
+	}
+	public String getRegId() {
+		return regId;
+	}
+	public void setRegId(String regId) {
+		this.regId = regId;
 	}
 }	

@@ -192,7 +192,7 @@
                                                         						<li th:if="${file != null and file.delYn == 'N'}">
                                                                         			<a class="ajax-file-upload-filename" th:text="${file.origNm}" th:href="@{'/download/' + ${file.fileSeq} + '/' + ${file.logiNm}}"></a>
                                                                         			<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" th:class="'badge bg-danger uploadFile'+${i}" style="cursor:pointer;" th:onclick="fn.deleteFile(this, [[${file.fileSeq}]], [[${i}]])">X</span>
-                                                                        			<br>[[${file.createdDate}]]
+                                                                        			<br>[[${file.createdDate}]]<span th:if="${file.regId != null}" th:text="' (' + ${file.regId} + ')'"></span>
                                                                    				</li>
                                                         					</th:block>
                                                         				</th:block>
@@ -357,7 +357,7 @@
 	                                                				<ll th:if="${appendFile.delYn eq 'N'}">
 			                                                			<a class="ajax-file-upload-filename" th:text="${appendFile.origNm}" th:href="@{'/download/' + ${appendFile.fileSeq} + '/' + ${appendFile.logiNm}}"></a>
 																		<span th:if="${project.verificationStatus != 'CONF'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="fn.deleteAppendFile(this, [[${appendFile.fileSeq}]])" th:text="X"></span>
-																		[[${appendFile.createdDate}]]
+																		[[${appendFile.createdDate}]]<span th:if="${appendFile.regId != null}" th:text="' (' + ${appendFile.regId} + ')'"></span>
 			                                                		</ll><br>
 	                                                			</th:block>
 	                                                		</th:block>

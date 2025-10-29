@@ -88,7 +88,7 @@
 										<a class="ajax-file-upload-filename" th:text="${confirmationFile.origNm}" th:href="@{'/download/' + ${confirmationFile.fileSeq} + '/' + ${confirmationFile.logiNm}}"></a>
 										<span th:if="${detail.viewOnlyFlag != 'N'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="|fn.deleteConfirmationFile(this)|" th:text="X"></span>
 										<input type="hidden" id="confirmationFileId" name="confirmationFileId" th:value="${confirmationFile.fileSeq}" />
-										<br>[[${confirmationFile.createdDate}]]<span th:if="${confirmationFile.regId != null}" th:text="'_' + ${confirmationFile.regId}"></span>
+										<br>[[${confirmationFile.createdDate}]]<span th:if="${confirmationFile.regId != null}" th:text="' (' + ${confirmationFile.regId} + ')'"></span>
 									</li>
 								</ul>
 							</div>
@@ -108,7 +108,7 @@
 										<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
 										<span th:if="${detail.viewOnlyFlag != 'Y'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="|fn.deleteOssFile(this)|" th:text="X"></span>
 										<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}" />
-										<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="'_' + ${ossFile.regId}"></span>
+										<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="' (' + ${ossFile.regId} + ')'"></span>
 									</li>
 								</ul>
 							</div>
@@ -128,7 +128,7 @@
 										<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}" th:href="@{'/download/' + ${binaryFile.fileSeq} + '/' + ${binaryFile.logiNm}}"></a>
 										<span class="badge bg-danger" th:style="${isCommited} ? 'cursor:pointer; display:none;' : 'cursor:pointer;'" th:onclick="|fn.deleteBinaryFile(this)|" th:text="X"></span>
 										<input type="hidden" id="binaryFileId" name="binaryFileId" th:value="${binaryFile.fileSeq}" />
-										<br>[[${binaryFile.createdDate}]]<span th:if="${binaryFile.regId != null}" th:text="'_' + ${binaryFile.regId}"></span>
+										<br>[[${binaryFile.createdDate}]]<span th:if="${binaryFile.regId != null}" th:text="' (' + ${binaryFile.regId} + ')'"></span>
 									</li>
 								</ul>
 							</div>
@@ -153,7 +153,7 @@
 											<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}" th:href="@{'/download/' + ${documentsFile.fileSeq} + '/' + ${documentsFile.logiNm}}"></a>
 											<span class="badge bg-danger" th:style="${isCommited} ? 'cursor:pointer; display:none;' : 'cursor:pointer;'" th:onclick="|fn.deleteDocumentsFile(this)|" th:text="X"></span>
 											<input type="hidden" th:value="${documentsFile.fileSeq}" />
-											<br>[[${documentsFile.createdDate}]]<span th:if="${documentsFile.regId != null}" th:text="'_' + ${documentsFile.regId}"></span>
+											<br>[[${documentsFile.createdDate}]]<span th:if="${documentsFile.regId != null}" th:text="' (' + ${documentsFile.regId} + ')'"></span>
 										</li>
 									</th:block>
 								</th:block>
@@ -402,7 +402,7 @@
 													<span th:text="${confirmationFile.origNm}"></span>
 											</th:block>
 											<input type="hidden" id="confirmationFileId" name="confirmationFileId" th:value="${confirmationFile.fileSeq}" />
-											<br>[[${confirmationFile.createdDate}]]<span th:if="${confirmationFile.regId != null}" th:text="'_' + ${confirmationFile.regId}"></span>
+											<br>[[${confirmationFile.createdDate}]]<span th:if="${confirmationFile.regId != null}" th:text="' (' + ${confirmationFile.regId} + ')'"></span>
 										</th:block>
 										<th:block th:unless="${confirmationFile != null}">
 											<span th:text="'No File'"></span>
@@ -423,7 +423,7 @@
 													<span th:text="${ossFile.origNm}"></span>
 												</th:block>
 												<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}" />
-												<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="'_' + ${ossFile.regId}"></span>
+												<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="' (' + ${ossFile.regId} + ')'"></span>
 											</li>
 											<li th:unless="${ossFile != null}">
 												<span th:text="'No File'"></span>
@@ -445,7 +445,7 @@
 													<span th:text="${binaryFile.origNm}"></span>
 												</th:block>
 												<input type="hidden" id="binaryFileId" name="binaryFileId" th:value="${binaryFile.fileSeq}" />
-												<br>[[${binaryFile.createdDate}]]<span th:if="${binaryFile.regId != null}" th:text="'_' + ${binaryFile.regId}"></span>
+												<br>[[${binaryFile.createdDate}]]<span th:if="${binaryFile.regId != null}" th:text="' (' + ${binaryFile.regId} + ')'"></span>
 											</li>
 										</ul>
 									</td>
@@ -466,7 +466,7 @@
 														<span th:text="${documentsFile.origNm}"></span>
 													</th:block>
 													<input type="hidden" th:value="${documentsFile.fileSeq}" />
-													<br>[[${documentsFile.createdDate}]]<span th:if="${documentsFile.regId != null}" th:text="'_' + ${documentsFile.regId}"></span>
+													<br>[[${documentsFile.createdDate}]]<span th:if="${documentsFile.regId != null}" th:text="' (' + ${documentsFile.regId} + ')'"></span>
 													<th:block th:if="${status.count != status.size}"><br></th:block>
 												</th:block>
 											</th:block>
@@ -583,7 +583,7 @@
 											<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
 											<span th:if="${detail.viewOnlyFlag != 'Y' and detail.status != 'REQ'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="|fn.deleteOssFile(this)|" th:text="X"></span>
 											<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}"/>
-											<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="'_' + ${ossFile.regId}"></span>
+											<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="' (' + ${ossFile.regId} + ')'"></span>
 										</li>
 									</ul>
 								</div>
@@ -621,7 +621,7 @@
 									<li th:if="${ossFile != null}">
 										<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
 										<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}"/>
-										<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="'_' + ${ossFile.regId}"></span>
+										<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="' (' + ${ossFile.regId} + ')'"></span>
 									</li>
 									<li th:unless="${ossFile != null}" class="mt-1" th:text="'No File'"></li>
 								</ul>

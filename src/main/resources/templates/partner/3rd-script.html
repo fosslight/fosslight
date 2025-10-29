@@ -1252,7 +1252,7 @@ var fn = {
     	return checkEmptyFlag;
 	},
 	makeFileTag : function(obj, flag) {
-		var appendHtml = '<br>'+obj.createdDate + "_" + obj.loginUserName;
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
 		

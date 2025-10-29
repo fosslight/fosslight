@@ -272,7 +272,7 @@
 
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile1" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'1\')">X</span>' + appendHtml + '</li>';
@@ -314,7 +314,7 @@
 
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile2" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'2\')">X</span>' + appendHtml + '</li>';
@@ -357,7 +357,7 @@
                         
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile3" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'3\')">X</span>' + appendHtml + '</li>';
@@ -399,7 +399,7 @@
                         
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile4" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'4\')">X</span>' + appendHtml + '</li>';
@@ -441,7 +441,7 @@
                         
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile5" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
@@ -484,7 +484,7 @@
                         	result.forEach(function (item) {
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
-                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteAppendFile(this,\'' + item[0].registSeq + '\')">X</span>' + item[0].createdDate + '</li>';
+                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteAppendFile(this,\'' + item[0].registSeq + '\')">X</span>' + item[0].createdDate + ' (' + item[0].loginUserName + ')</li>';
 
                                 $('.appendFileUpload').append(uploadFileTag);
                                 $('input[name=noticeAppendFileId]').val(item[0].registFileId);

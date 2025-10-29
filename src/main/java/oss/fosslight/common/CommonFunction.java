@@ -436,11 +436,12 @@ public class CommonFunction extends CoTopComponent {
 		
 		if (isEmpty(delimiter)) {
 			return makeLicenseExpression(licenseList);
-		}else {
+		} else {
 			return makeLicenseString(licenseList, delimiter);
 		}
 	}
-public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectIdentification bean) {
+	
+	public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectIdentification bean) {
 		List<ProjectIdentification> list = new ArrayList<>();
 		boolean dual = false;
 		for (OssLicense license : ossmaster.getOssLicenses()) {
@@ -1362,15 +1363,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 
 
-	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents,
-			List<List<ProjectIdentification>> ossComponentsLicense, List<OssComponents> reportData, String fileSeq) {
+	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, List<OssComponents> reportData, String fileSeq) {
 		return makeGridDataFromReport(ossComponents, ossComponentsLicense, null, reportData, fileSeq, "");
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents,
-			List<List<ProjectIdentification>> ossComponentsLicense,  List<ProjectIdentification> addOssComponents,
-			List<OssComponents> reportData, String fileSeq, String readType) {
+	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense,  List<ProjectIdentification> addOssComponents, List<OssComponents> reportData, String fileSeq, String readType) {
 		Map<String, Object> resultMap = new HashMap<>();
 		Map<String, Object> subMap = new HashMap<>();
 
