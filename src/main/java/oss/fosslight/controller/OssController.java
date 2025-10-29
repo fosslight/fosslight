@@ -644,18 +644,46 @@ public class OssController extends CoTopComponent{
 					}
 					
 					if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getAnalysisDetailYn()))) {
+						boolean isSame = false;
 						Map<String, Object> diffMap = new HashMap<>();
+						
 						if (!isEmpty(checkOssInfo.getSummaryDescription())) {
-							diffMap.put("addSummaryDescription", checkOssInfo.getSummaryDescription());
+							isSame = false;
+							if (!isEmpty(ossMaster.getSummaryDescription()) && ossMaster.getSummaryDescription().equalsIgnoreCase(checkOssInfo.getSummaryDescription())) {
+								isSame = true;
+							}
+							if (!isSame) {
+								diffMap.put("addSummaryDescription", checkOssInfo.getSummaryDescription());
+							}
 						}
 						if (!isEmpty(checkOssInfo.getImportantNotes())) {
-							diffMap.put("addImportantNotes", checkOssInfo.getImportantNotes());
+							isSame = false;
+							if (!isEmpty(ossMaster.getImportantNotes()) && ossMaster.getImportantNotes().equalsIgnoreCase(checkOssInfo.getImportantNotes())) {
+								isSame = true;
+							}
+							if (!isSame) {
+								diffMap.put("addImportantNotes", checkOssInfo.getImportantNotes());
+							}
 						}
 						if (!isEmpty(checkOssInfo.getIncludeCpe())) {
-							diffMap.put("addIncludeCpe", checkOssInfo.getIncludeCpe());
+							isSame = false;
+							if (ossMaster.getIncludeCpes() != null) {
+								String[] includeCpeArr = checkOssInfo.getIncludeCpe().split(",");
+								isSame = Arrays.equals(includeCpeArr, ossMaster.getIncludeCpes());
+							}
+							if (!isSame) {
+								diffMap.put("addIncludeCpe", checkOssInfo.getIncludeCpe());
+							}
 						}
 						if (!isEmpty(checkOssInfo.getExcludeCpe())) {
-							diffMap.put("addExcludeCpe", checkOssInfo.getExcludeCpe());
+							isSame = false;
+							if (ossMaster.getExcludeCpes() != null) {
+								String[] excludeCpeArr = checkOssInfo.getExcludeCpe().split(",");
+								isSame = Arrays.equals(excludeCpeArr, ossMaster.getExcludeCpes());
+							}
+							if (!isSame) {
+								diffMap.put("addExcludeCpe", checkOssInfo.getExcludeCpe());
+							}
 						}
 						return makeJsonResponseHeader(false, "hasExists", diffMap);
 					}
@@ -1911,7 +1939,9 @@ public class OssController extends CoTopComponent{
 		if (detailData != null) {
 			OssMaster bean = new OssMaster();
 			for (OssAnalysis oa : detailData) {
-				if (ossService.checkOssTypeForAnalysisResult(oa)) oa.setOssType("V");
+				if (ossService.checkOssTypeForAnalysisResult(oa)) {
+					oa.setOssType("V");
+				}
 				if (!isEmpty(oa.getDownloadLocation())) {
 					StringBuilder sb = new StringBuilder();
 					if (oa.getDownloadLocation().contains(",")) {
@@ -1944,10 +1974,12 @@ public class OssController extends CoTopComponent{
 					param.setOssCommonId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssCommonId());
 					param.setOssName(oa.getOssName());
 					param.setOssVersion(oa.getOssVersion());
-					param.setOssVersionAliases(CoCodeManager.OSS_INFO_UPPER.get(key).getOssVersionAliases());
+					if (oa.getTitle().contains("최신 등록 정보")) {
+						param.setOssVersionAliases(CoCodeManager.OSS_INFO_UPPER.get(key).getOssVersionAliases());
+					}
 				}
 				OssMaster ossBean = ossService.getOssInfo(null, oa.getOssName(), true);
-				if (ossBean != null) {
+				if (ossBean != null && oa.getTitle().contains("최신 등록 정보")) {
 					oa.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
 					oa.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
 				}

@@ -644,19 +644,23 @@ var Ctrl_fn = {
 	    			} else if ("hasExists" == json.validMsg) {
 	    				var existItems = "";
 	    				if (typeof json.resultData.addSummaryDescription !== "undefined") {
+	    					$("#detailSummaryDescription" + seq).val("");
 	    					existItems += "Summary Description,";
 	    					$("#detailSummaryDescription" + seq).val(json.resultData.addSummaryDescription);
 	    				}
 						if (typeof json.resultData.addImportantNotes !== "undefined") {
+							$("#detailImportantNotes" + seq).val("");
 							existItems += "Important Notes,";
 							$("#detailImportantNotes" + seq).val(json.resultData.addImportantNotes);
 	    				}
 						if (typeof json.resultData.addIncludeCpe !== "undefined") {
+							$(".multiTxtIncludeCpe" + seq).empty();
 							existItems += "Include CPE,";
 							let arr = json.resultData.addIncludeCpe.split(",");
 							Ctrl_fn.addIncludeCpe(arr, seq);
 	    				}
 						if (typeof json.resultData.addExcludeCpe !== "undefined") {
+							$(".multiTxtExcludeCpe" + seq).empty();
 							existItems += "Exclude CPE,";
 							let arr = json.resultData.addExcludeCpe.split(",");
 							Ctrl_fn.addExcludeCpe(arr, seq);
