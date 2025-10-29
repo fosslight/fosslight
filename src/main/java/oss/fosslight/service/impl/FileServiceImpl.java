@@ -102,7 +102,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			if (fileId == null){
 				fileId = "1";
 			}
-		}else{
+		} else{
 			fileId = oldFileId;
 		}
 		

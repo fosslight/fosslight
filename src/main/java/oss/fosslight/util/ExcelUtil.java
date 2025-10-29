@@ -519,8 +519,7 @@ public class ExcelUtil extends CoTopComponent {
 	 * @param errMsg
 	 * @return
 	 */
-	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, 
-	        List<OssComponents> list,List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
+	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list,List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
 
 		T2File fileInfo = fileService.selectFileInfo(fileSeq);
 		if (fileInfo == null) {
@@ -771,8 +770,7 @@ public class ExcelUtil extends CoTopComponent {
 		return true;
 	}
 
-	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol,
-	        String readType, List<String> errMsgList) {
+	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList) {
 		int DefaultHeaderRowIndex = 2; // header index
 		
 		int ossNameCol = -1;

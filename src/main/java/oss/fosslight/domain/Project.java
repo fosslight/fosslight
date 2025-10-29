@@ -423,6 +423,9 @@ public class Project extends ComBean implements Serializable {
 	/** The security csv file id. */
 	private String scrtCsvFileId;
 	
+	/** The src scan file id. */
+	private String srcScanFileId;
+	
 	/** The notice file id. */
 	private String noticeFileId; // 라이센스 파일ID
 
@@ -483,6 +486,12 @@ public class Project extends ComBean implements Serializable {
 
 	/** The security csv file. */
 	private List<T2File> scrtCsvFile; // csv 파일 객체
+	
+	/** The scan file. */
+	private List<T2File> scanFile; // scan 파일 객체
+	
+	/** The scan file. */
+	private List<T2File> delScanFile; // scan 파일 객체
 	
 	/** The notice file info. */
 	private T2File noticeFileInfo; // 라이센스 파일객체
@@ -4810,5 +4819,29 @@ public class Project extends ComBean implements Serializable {
 
 	public void setOsddSourceFileEtag5(String osddSourceFileEtag5) {
 		this.osddSourceFileEtag5 = osddSourceFileEtag5;
+	}
+
+	public String getSrcScanFileId() {
+		return srcScanFileId;
+	}
+
+	public void setSrcScanFileId(String srcScanFileId) {
+		this.srcScanFileId = srcScanFileId;
+	}
+
+	public List<T2File> getScanFile() {
+		return scanFile;
+	}
+
+	public void setScanFile(List<T2File> scanFile) {
+		this.scanFile = scanFile;
+	}
+
+	public List<T2File> getDelScanFile() {
+		return delScanFile;
+	}
+
+	public void setDelScanFile(List<T2File> delScanFile) {
+		this.delScanFile = delScanFile;
 	}
 }

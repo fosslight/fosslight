@@ -96,8 +96,6 @@ public interface SelfCheckMapper {
 
 	String selectLicenseComb(ProjectIdentification projectIdentification);
 
-	void updateComment(CommentsHistory result);
-
 	void deleteComment(CommentsHistory commentsHistory);
 	
 	List<OssComponents> selectOssRefPrjList(OssMaster ossMaster);
@@ -291,4 +289,8 @@ public interface SelfCheckMapper {
 	void resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
 
 	void deleteOssNotice(Project project);
+
+	List<T2File> selectScanFile(Project project);
+	
+	void updateComment(Project project);
 }

@@ -764,6 +764,7 @@ public class CoConstDef {
 	public static final String CD_EXTERNAL_ANALYSIS_SETTING						= "706";
 	public static final String CD_DTL_FL_SCANNER_URL 							= "101";
 	public static final String CD_DTL_ADMIN_TOKEN								= "102";
+	public static final String CD_DTL_FL_SCANNER_API_KEY						= "103";
 
 	/** Watcher Domain Setting */
 	public static final String CD_WATCHER_DOMAIN								= "710";

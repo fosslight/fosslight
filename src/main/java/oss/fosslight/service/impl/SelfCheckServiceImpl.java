@@ -252,6 +252,11 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		// file
 		project.setCsvFile(selfCheckMapper.selectCsvFile(project));
 		
+		// scan file
+		if (!isEmpty(project.getSrcScanFileId())) {
+			project.setScanFile(selfCheckMapper.selectScanFile(project));
+		}
+		
 		List<String> userIdList = new ArrayList<>();
 		userIdList.add(project.getCreator());
 		
@@ -875,6 +880,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if (project.getCsvFileSeq() != null) {
 				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
 					selfCheckMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
+				}				
+			}
+		}
+		
+		if (CollectionUtils.isNotEmpty(project.getDelScanFile())) {
+			for (int i = 0; i < project.getDelScanFile().size(); i++) {
+				selfCheckMapper.deleteFileBySeq(project.getDelScanFile().get(i));
+				fileService.deletePhysicalFile(project.getDelScanFile().get(i), CoConstDef.CD_CHECK_OSS_SELF);
+			}
+		}
+		
+		if (!isEmpty(project.getSrcScanFileId())) {
+			selfCheckMapper.updateFileId(project);
+			
+			if (CollectionUtils.isNotEmpty(project.getScanFile())) {
+				for (int i = 0; i < project.getScanFile().size(); i++) {
+					selfCheckMapper.updateFileBySeq(project.getScanFile().get(i));
 				}				
 			}
 		}
@@ -2733,5 +2755,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				fileService.deletePhysicalFile(fileInfo, CoConstDef.CD_CHECK_OSS_SELF);
 			}
 		}
+	}
+
+	@Override
+	public void updateComment(Project project) {
+		selfCheckMapper.updateComment(project);
 	}
 }
