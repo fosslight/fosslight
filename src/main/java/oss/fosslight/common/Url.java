@@ -687,6 +687,8 @@ public final class Url {
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/external";
 		
 		public static final String REQUEST_FL_SCAN = PATH + "/request-fl-scan";
+		public static final String REQUEST_FL_SCAN_FILE = PATH + "/request-fl-scan-file";
+		public static final String REQUEST_FL_SCAN_SEARCH = PATH + "/request-fl-scan-search";
 	}
 	
 	public static final class CODE {
