@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -648,41 +649,61 @@ public class OssController extends CoTopComponent{
 						Map<String, Object> diffMap = new HashMap<>();
 						
 						if (!isEmpty(checkOssInfo.getSummaryDescription())) {
+							String summaryDescription = checkOssInfo.getSummaryDescription();
 							isSame = false;
-							if (!isEmpty(ossMaster.getSummaryDescription()) && ossMaster.getSummaryDescription().equalsIgnoreCase(checkOssInfo.getSummaryDescription())) {
-								isSame = true;
+							if (!isEmpty(ossMaster.getSummaryDescription())) {
+								if (ossMaster.getSummaryDescription().equalsIgnoreCase(checkOssInfo.getSummaryDescription())) {
+									isSame = true;
+								} else {
+									summaryDescription += ossMaster.getSummaryDescription();
+								}
 							}
 							if (!isSame) {
-								diffMap.put("addSummaryDescription", checkOssInfo.getSummaryDescription());
+								diffMap.put("addSummaryDescription", summaryDescription);
 							}
 						}
 						if (!isEmpty(checkOssInfo.getImportantNotes())) {
+							String importantNotes = checkOssInfo.getImportantNotes();
 							isSame = false;
-							if (!isEmpty(ossMaster.getImportantNotes()) && ossMaster.getImportantNotes().equalsIgnoreCase(checkOssInfo.getImportantNotes())) {
-								isSame = true;
+							if (!isEmpty(ossMaster.getImportantNotes())) {
+								if (ossMaster.getImportantNotes().equalsIgnoreCase(checkOssInfo.getImportantNotes())) {
+									isSame = true;
+								} else {
+									importantNotes += ossMaster.getImportantNotes();
+								}
 							}
 							if (!isSame) {
-								diffMap.put("addImportantNotes", checkOssInfo.getImportantNotes());
+								diffMap.put("addImportantNotes", importantNotes);
 							}
 						}
 						if (!isEmpty(checkOssInfo.getIncludeCpe())) {
 							isSame = false;
+							String includeCpe = checkOssInfo.getIncludeCpe();
 							if (ossMaster.getIncludeCpes() != null) {
 								String[] includeCpeArr = checkOssInfo.getIncludeCpe().split(",");
 								isSame = Arrays.equals(includeCpeArr, ossMaster.getIncludeCpes());
+								if (!isSame) {
+									String[] mergeArr = Stream.concat(Arrays.stream(includeCpeArr), Arrays.stream(ossMaster.getIncludeCpes())).distinct().toArray(String[]::new);
+									includeCpe = String.join(",", mergeArr);
+								}
 							}
 							if (!isSame) {
-								diffMap.put("addIncludeCpe", checkOssInfo.getIncludeCpe());
+								diffMap.put("addIncludeCpe", includeCpe);
 							}
 						}
 						if (!isEmpty(checkOssInfo.getExcludeCpe())) {
 							isSame = false;
+							String excludeCpe = checkOssInfo.getExcludeCpe();
 							if (ossMaster.getExcludeCpes() != null) {
 								String[] excludeCpeArr = checkOssInfo.getExcludeCpe().split(",");
 								isSame = Arrays.equals(excludeCpeArr, ossMaster.getExcludeCpes());
+								if (!isSame) {
+									String[] mergeArr = Stream.concat(Arrays.stream(excludeCpeArr), Arrays.stream(ossMaster.getExcludeCpes())).distinct().toArray(String[]::new);
+									excludeCpe = String.join(",", mergeArr);
+								}
 							}
 							if (!isSame) {
-								diffMap.put("addExcludeCpe", checkOssInfo.getExcludeCpe());
+								diffMap.put("addExcludeCpe", excludeCpe);
 							}
 						}
 						return makeJsonResponseHeader(false, "hasExists", diffMap);
