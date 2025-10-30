@@ -1753,6 +1753,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 		//String prjDate = map.get("OSS_NOTICE_DUE_DATE");
 		String secMailYn = map.get("SEC_MAIL_YN");
 		String secMailDec = map.get("SEC_MAIL_DESC");
+		String transferDivision = map.get("TRANSFER_DIVISION");
 		
 		// -- 프로젝트 기본정보 유효성 체크 start --------------------------------
 		// 1. 신규인경우 프로젝트명 유니크 체크 -> 수정인 경우에도 체크
@@ -1834,6 +1835,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 		targetName = "SECMAIL_DESC";
 		if(!errMap.containsKey(targetName)) {
 			if(isEmpty(secMailDec) && secMailYn.equals("N")) errMap.put(targetName, targetName + ".REQUIRED");
+		}
+
+		targetName = "TRANSFER_DIVISION";
+		if(!errMap.containsKey(targetName)) {
+			if(isEmpty(transferDivision)) errMap.put(targetName, targetName + ".REQUIRED");
 		}
 		
 		if (isAdmin) {

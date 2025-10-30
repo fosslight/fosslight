@@ -1425,7 +1425,12 @@ public class CoMailManager extends CoTopComponent {
 		// opertating system
 		convBean.setOsType(CoConstDef.COMMON_SELECTED_ETC.equals(convBean.getOsType()) ? convBean.getOsTypeEtc() : CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, convBean.getOsType()));
 		// distribution type
-		convBean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, convBean.getDistributionType()));
+		if(!isEmpty(avoidNull(convBean.getTransferDivision()))) {
+			convBean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, convBean.getDistributionType()) + " (" + convBean.getTransferDivision() + ")");
+		} else {
+			convBean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, convBean.getDistributionType()));
+		}
+
 		// distribution site
 		convBean.setDistributeTarget(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, convBean.getDistributeTarget()));
 		// due date

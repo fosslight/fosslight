@@ -82,6 +82,15 @@
 			$("[name='noticeType']").attr("disabled", true);
 			$("#noticeTypeEtc").attr("disabled", true);
 		}
+
+        $("[name='distributionType']").on('change', function() {
+            var selectedValue = $(this).val();
+            if(selectedValue === [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_MERGE')}]]) {
+                $('#transfer').show();
+            } else {
+                $('#transfer').hide();
+            }
+        });
 	});
 	
 	// 이벤트
@@ -1139,6 +1148,10 @@
                         $('input[name=secPersonNm]').focus();
                         return false;
                     }
+                }
+
+                if($('#distributionType').val() !== [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_MERGE')}]]){
+                    $('#transferDivision').val('');
                 }
 				
 				cleanErrMsg("_modelList");
@@ -2471,6 +2484,11 @@
                     $("#secMailDesc").hide();
                 } else {
                     $("#secMailDesc").show();
+                }
+
+                var distributionTypeValue = $('#distributionType').val();
+                if(distributionTypeValue === [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_MERGE')}]]) {
+                    $('#transfer').show();
                 }
 				
 				// Complete 버튼 처리 

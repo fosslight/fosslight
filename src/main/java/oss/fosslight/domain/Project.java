@@ -715,6 +715,8 @@ public class Project extends ComBean implements Serializable {
 	private String secPerson;
 
 	private String secPersonNm;
+
+	private String transferDivision;
 	
 	/** The viewOnlyFlag. */
 	private String viewOnlyFlag;
@@ -3968,6 +3970,14 @@ public class Project extends ComBean implements Serializable {
 
 	public void setSecPersonNm(String secPersonNm) {
 		this.secPersonNm = secPersonNm;
+	}
+
+	public String getTransferDivision(){
+		return transferDivision;
+	}
+
+	public void setTransferDivision(String transferDivision){
+		this.transferDivision = transferDivision;
 	}
 
 	public String getViewOnlyFlag() {

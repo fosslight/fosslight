@@ -686,6 +686,7 @@
 		    , A.SECMAIL_YN
 		    , A.SECMAIL_DESC
 		    , A.SECPERSON
+			, A.TRANSFER_DIVISION
 			, A.COPY_PRJ_ID
 			, A.WITHOUT_VERIFY_YN
 			, T3.USER_NAME AS secPersonNm
@@ -868,6 +869,7 @@
 			, SECMAIL_YN
 			, SECMAIL_DESC
 			, SECPERSON
+			, TRANSFER_DIVISION
 			, PRIORITY
 			, DIVISION
 		)
@@ -899,6 +901,7 @@
 			, #{secMailYn}
 			, #{secMailDesc}
 			, #{secPerson}
+		    , #{transferDivision}
 			, #{priority}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
 		) ON DUPLICATE KEY UPDATE
@@ -921,6 +924,7 @@
 		    , SECMAIL_YN                  = #{secMailYn}
 		    , SECMAIL_DESC                = #{secMailDesc}
 			, SECPERSON                   = #{secPerson}
+			, TRANSFER_DIVISION                    = #{transferDivision}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR                    = #{creator}
 			</if>
@@ -2891,6 +2895,7 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secPerson)">
 			, SECPERSON = #{secPerson}
 			</if>
+			, TRANSFER_DIVISION = #{transferDivision}
 			/* 2018-07-20 choye 추가 */
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
 			, COMM_ID = #{commId}

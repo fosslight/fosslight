@@ -5170,12 +5170,20 @@ public class CommonFunction extends CoTopComponent {
 				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, beforeBean.getOsType()) + "<br />";
 				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, afterBean.getOsType()) + "</span></p>";
 			}
-			
+
 			// Distribution Type
-			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType()))) {
+			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType())) || !avoidNull(beforeBean.getTransferDivision()).equals(avoidNull(afterBean.getTransferDivision()))) {
 				comment += "<p><strong>Distribution Type</strong><br />";
-				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType()) + "<br />";
-				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "</span></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType());
+				if (!isEmpty(avoidNull(beforeBean.getTransferDivision()))){
+					comment += " (" + beforeBean.getTransferDivision() + ")";
+				}
+				comment	+= "<br />";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType());
+				if (!isEmpty(avoidNull(afterBean.getTransferDivision()))){
+					comment += " (" + afterBean.getTransferDivision() + ")";
+				}
+				comment += "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getNetworkServerType()).equals(avoidNull(afterBean.getNetworkServerType()))) {
