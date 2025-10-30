@@ -1136,7 +1136,62 @@ var fn = {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
-    }
+    },
+    bomCompare : function(){ /* BOM Compare ADD */
+		// 체크박스 선택 체크
+		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+	
+		if (chk < 3){
+			var bomCompareArr = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			var notPermissionIds = "";
+			for (var i in bomCompareArr) {
+				var permission = $("#list").jqGrid("getRowData", bomCompareArr[i]).permission;
+				if ("1" != permission) {
+					if ("" != notPermissionIds) {
+						notPermissionIds += ", ";
+					}
+					notPermissionIds += bomCompareArr[i];
+				}
+			}
+			
+			if ("" != notPermissionIds) {
+				var message = [[#{msg.partner.bom.compare.permission}]];
+				message = message.replace("partnerId", notPermissionIds);
+				alertify.alert(message, function(){});
+				return false;
+			}
+			
+			var beforePrjId = "";
+			var afterPrjId = "";
+
+			switch (chk) {
+				case 0:
+					beforePrjId = "0000";
+					afterPrjId = "0000";
+					break;
+				case 1:
+					beforePrjId = bomCompareArr[0];
+					afterPrjId = "0000";
+					break;
+				case 2:
+					bomCompareArr.sort();
+					
+					beforePrjId = bomCompareArr[0];
+					afterPrjId = bomCompareArr[1];
+					
+					break;
+			}
+			
+			var tabNm = "3rdParty_SBOM_Compare";
+			var tabLk = '/partner/bomCompare/'+beforePrjId+'/'+afterPrjId+'';
+	
+			createTabInFrame(tabNm, tabLk);
+		} else {
+			alertify.alert([[#{msg.project.choose}]], function(){});
+			return false;
+		}
+	}
 }
 
 //http
