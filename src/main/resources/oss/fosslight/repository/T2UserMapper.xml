@@ -121,7 +121,7 @@
     </select>
     
     <select id="getPassword" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users">
-        SELECT PASSWORD FROM T2_USERS WHERE USER_ID = #{userId}
+        SELECT PASSWORD FROM T2_USERS WHERE USER_ID = #{userId} AND USE_YN = 'Y'
     </select>
     <!-- ID중복여부 체크 -->
     <select id="selectDuplicateId" parameterType="String" resultType="int">
