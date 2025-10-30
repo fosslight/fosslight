@@ -2806,7 +2806,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Transactional
 	public void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense) {
 		
-		if (!isEmpty(refId)) {
+		if (isEmpty(refId)) {
 			refId = project.getPrjId();
 		}
 		
