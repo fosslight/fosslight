@@ -114,7 +114,7 @@
 											<ul class="mb-0 d-flex-align ossUpload">
 												<li th:if="${ossFile != null}">
 													<a class="ajax-file-upload-filename" style="cursor: pointer;" th:text="${ossFile.origNm}" th:onclick="|fn.mvIdentification()|"></a>
-													<br>[[${ossFile.createdDate}]]
+													<br>[[${ossFile.createdDate}]]<span th:if="${ossFile.regId != null}" th:text="' (' + ${ossFile.regId} + ')'"></span>
 												</li>
 											</ul>
 										</div>
@@ -134,7 +134,8 @@
 														<li>
 															<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}" th:href="@{'/download/' + ${documentsFile.fileSeq} + '/' + ${documentsFile.logiNm}}"></a>
 															<span th:if="${detail.viewOnlyFlag != 'Y'}" class="badge bg-danger" th:onclick="|fn.deleteDocumentsFile(this)|" th:text="X"></span>
-															<input type="hidden" th:value="${documentsFile.fileSeq}" /> <br>[[${documentsFile.createdDate}]]
+															<input type="hidden" th:value="${documentsFile.fileSeq}" />
+															<br>[[${documentsFile.createdDate}]]<span th:if="${documentsFile.regId != null}" th:text="' (' + ${documentsFile.regId} + ')'"></span>
 														</li>
 													</th:block>
 												</th:block>
