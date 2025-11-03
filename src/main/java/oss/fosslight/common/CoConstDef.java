@@ -345,6 +345,7 @@ public class CoConstDef {
 	public static final String CD_DTL_NOTICE_TYPE_FULLOPTION = "60";
 	public static final String CD_DTL_NOTICE_TYPE_INHOUSEONLY = "100";
 	public static final String CD_DTL_NOTICE_TYPE_SELFCHECK = "101";
+	public static final String CD_DTL_NOTICE_TYPE_CONTRIBUTION = "110";
 
 
 	/** 3RD 파티 delivery form - 209 */

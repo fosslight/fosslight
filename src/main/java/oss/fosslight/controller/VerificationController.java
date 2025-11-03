@@ -107,8 +107,10 @@ public class VerificationController extends CoTopComponent {
 		
 		List<OssComponents> list = null;
 		try {
-			list = verificationService.getVerifyOssList(projectMaster);
-			if (list != null) list = verificationService.setMergeGridData(list);
+			if(!projectMaster.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION)) {
+				list = verificationService.getVerifyOssList(projectMaster);
+				if (list != null) list = verificationService.setMergeGridData(list);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
