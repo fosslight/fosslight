@@ -5348,7 +5348,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			List<Map<String, String>> bomCompareListExcel = prjService.getBomCompare(beforeBomList, afterBomList, "excel");
 			
 			try {
-				inFile= new FileInputStream(new File(downloadpath + "/BOM_Compare.xlsx")); 
+				inFile= new FileInputStream(new File(downloadpath + "/SBOM_Compare.xlsx"));
 				wb = new XSSFWorkbook(inFile);
 				CreationHelper creationHelper = wb.getCreationHelper();
 				CellStyle hyperLinkStyle = wb.createCellStyle();
@@ -5359,7 +5359,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
 				hyperLinkStyle.setFont(hyperLinkFont);
 				sheet = wb.getSheetAt(0); 
-				wb.setSheetName(0, "BOM_Compare_"+beforeId+"_"+afterId);
+				wb.setSheetName(0, "SBOM_Compare_"+beforeId+"_"+afterId);
 			  
 				List<String[]> rows = new ArrayList<String[]>();
 			  
@@ -5374,7 +5374,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					rows.add(rowParam);
 				}
 				
-				//시트 만들기 
+				//시트 만들기
 				makeBomCompareSheet(sheet, rows, beforeCompareInfo, afterCompareInfo, beforeCompareUrl, afterCompareUrl, creationHelper, hyperLinkStyle); 
 			} catch (FileNotFoundException e) {
 				log.error(e.getMessage(), e); 
@@ -5385,7 +5385,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			return makeBomCompareExcelFileId(beforeId, afterId, wb, "BOM_Compare", "xlsx");
+			return makeBomCompareExcelFileId(beforeId, afterId, wb, "SBOM_Compare", "xlsx");
 		} catch (IOException e){
 			log.error(e.getMessage());
 		}
