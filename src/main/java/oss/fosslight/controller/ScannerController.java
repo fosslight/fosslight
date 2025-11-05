@@ -83,7 +83,6 @@ public class ScannerController extends CoTopComponent {
 			log.info("fl scanner start pid : " + prjId + ", url:" + wgetUrl);
 			String scanServiceUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_URL);
 			String adminToken = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_ADMIN_TOKEN);
-			String scanApiKey = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_API_KEY);
 			
 			if (StringUtil.isEmpty(scanServiceUrl) || StringUtil.isEmpty(adminToken)) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "FL Scanner Url or Admin token is not configured");
@@ -124,7 +123,7 @@ public class ScannerController extends CoTopComponent {
 		        	HttpHeaders headers = new HttpHeaders();
 			        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			        headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
-			        headers.set("Authorization", scanApiKey);
+			        headers.set("Authorization", adminToken);
 		        	
 					MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 					body.add("project_uuid", projectUUID);
@@ -168,7 +167,7 @@ public class ScannerController extends CoTopComponent {
 		try {
 			
 			String scanServiceUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_URL);
-			String scanApiKey = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_API_KEY);
+			String scanApiKey = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_ADMIN_TOKEN);
 			if (StringUtil.isEmpty(scanServiceUrl) || StringUtil.isEmpty(scanApiKey)) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "FL Scanner Url or Api Key is not configured");
 			}
@@ -256,7 +255,6 @@ public class ScannerController extends CoTopComponent {
 			
 			String scanServiceUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_URL);
 			String adminToken = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_ADMIN_TOKEN);
-			String scanApiKey = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_API_KEY);
 			
 			if (StringUtil.isEmpty(scanServiceUrl) || StringUtil.isEmpty(adminToken)) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "FL Scanner Url or Admin token is not configured");
@@ -278,7 +276,7 @@ public class ScannerController extends CoTopComponent {
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 	        headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
-	        headers.set("Authorization", scanApiKey);
+	        headers.set("Authorization", adminToken);
 
 	        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 	        ResponseEntity<Map> response = restTemplate.exchange(scanServiceUrl + infoUrl, HttpMethod.POST, requestEntity, Map.class);
