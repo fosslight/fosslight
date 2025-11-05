@@ -461,12 +461,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
         try {
             String downloadId = "";
             T2File fileInfo = new T2File();
+            String type = "";
 
             if ("Y".equals(saveFlag)) {
 //                    apiProjectService.registBom(prjId, mergeSaveFlag);
                 projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
             }
-            downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+
+            Project project = new Project();
+            project.setPrjId(prjId);
+            Project projectMaster = projectService.getProjectDetail(project);
+
+            if(projectMaster.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                type = "binAndroidBom";
+            } else {
+                type = "bom";
+            }
+            downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
             fileInfo = fileService.selectFileInfo(downloadId);
 
             return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
