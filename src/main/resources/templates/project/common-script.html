@@ -248,7 +248,8 @@ var com_evt = {
                 // distributionType이 101(SelfCheck)인 경우 에러 팝업
                 var distributionType = [[${project.distributionType}]];
                 if (distributionType == [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_SELFCHECK')}]]) {
-                    alertify.alert([[#{msg.project.cannot.request}]], function(){});
+                    var shareUrl = [[${@environment.getProperty('server.domain')}]] + '/project/shareUrl/' + [[${project.prjId}]];
+                    alertify.alert([[#{msg.project.cannot.request}]] + "<a href='" + shareUrl+ "' target='_blank\'> (PRJ-"+ [[${project.prjId}]] +")</a>", function(){});
                     return false;
                 } else {
                     // CD_DTL_NOTICE_TYPE_INHOUSEONLY인 경우 먼저 확인 팝업
