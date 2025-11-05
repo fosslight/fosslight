@@ -421,6 +421,7 @@ public final class Url {
 		public static final String CHECK_COMPONENTS_LOADED = PATH + "/checkComponentLoaded";
 		
 		public static final String INIT_AUTO_REVIEW = PATH + "/initAutoReview";
+		public static final String AI_VIEW = PATH + "/ai";
 	}
 	
 	public static final class VERIFICATION {
