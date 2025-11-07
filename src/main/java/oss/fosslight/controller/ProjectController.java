@@ -5640,4 +5640,12 @@ public class ProjectController extends CoTopComponent {
     public @ResponseBody ResponseEntity<Object> initAutoReview(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) throws SchedulerException {
         return makeJsonResponseHeader(projectService.initAutoReview(project.getPrjId()), null);
     }
+
+	@PostMapping(value = PROJECT.REVIEW_REPORT)
+	public @ResponseBody ResponseEntity<Object> reviewReport(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) throws SchedulerException, IOException {
+		Map<String, String> resMap = new HashMap<>();
+		verificationService.getReviewReportPdfFile(project.getPrjId());
+		resMap.put("isValid", "true");
+		return makeJsonResponseHeader(resMap);
+	}
 }

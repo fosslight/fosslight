@@ -207,6 +207,24 @@ var bom_fn = {
 			}
 		});
 	},
+    downloadReviewReport : function() {
+        loadingIden.show();
+        $.ajax({
+            type: "POST",
+            url: '/project/reviewReport',
+            data: JSON.stringify({"prjId":[[${project.prjId}]]}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                loadingIden.hide();
+                location.href = '/project/verification/downloadReviewReport?prjId='+[[${project.prjId}]];
+            },
+            error: function(data){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
 	downloadExcel : function(){
 		loadingIden.show();
 		
@@ -971,7 +989,9 @@ var bom_fn = {
     		// download file
 	    	if (target === "report_sub") {
 	        	bom_fn.downloadExcel();
-	        } else {
+	        } else if(target === "reviewReport"){
+                bom_fn.downloadReviewReport();
+            } else {
 	        	var identificationStatus = [[${project.identificationStatus}]];
 	        	if ("CONF" != identificationStatus) {
 	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
@@ -1443,7 +1463,8 @@ var bom_data = {
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxJSON')\">CycloneDX (JSON)</span>";
-	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX ((XML)</span></div>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX ((XML)</span>";
+                        appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('reviewReport')\">ReviewReport</span></div>";
 	                                        
 	                    $("#bomList_toppager_left").append(appendBtn);
 	                }

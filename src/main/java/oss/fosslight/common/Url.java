@@ -422,6 +422,7 @@ public final class Url {
 		
 		public static final String INIT_AUTO_REVIEW = PATH + "/initAutoReview";
 		public static final String AI_VIEW = PATH + "/ai";
+		public static final String REVIEW_REPORT = PATH + "/reviewReport";
 	}
 	
 	public static final class VERIFICATION {
