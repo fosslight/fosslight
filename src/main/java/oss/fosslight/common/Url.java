@@ -988,9 +988,9 @@ public final class Url {
 			/** API 3rd Party Add Editor */
 			public static final String FOSSLIGHT_API_PARTNER_ADD_EDITOR			= "/partners/{id}/editors";
 
-			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/bom/file";
+			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/sbom/file";
 
-		public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/bom/json-data";
+		public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/sbom/json-data";
 
 
 		/** OSS */
@@ -1031,13 +1031,13 @@ public final class Url {
 			public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/projects/{id}/models/upload";
 
 			/** API Project BOM Tab Export */
-			public static final String FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD = "/projects/{id}/bom/file";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD = "/projects/{id}/sbom/file";
 
 			/** API Project BOM Tab Export JSON*/
-			public static final String FOSSLIGHT_API_PROJECT_BOM_JSON	    = "/projects/{id}/bom/json-data";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_JSON	    = "/projects/{id}/sbom/json-data";
 
 			/** API BOM COMPARE */
-			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/bom/compare-with/{compareId}";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/sbom/compare-with/{compareId}";
 
 			/** API Project Add Editor */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_EDITOR		= "/projects/{id}/editors";

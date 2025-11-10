@@ -449,6 +449,26 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
+    }
+
+    @ApiOperation(value = "Project Bom Download as File (Deprecated)", notes = "Project > Bom tab download as file", hidden = true)
+    @GetMapping(value = {"/projects/{id}/bom/file"})
+    public ResponseEntity<FileSystemResource> getPrjBomDownloadDeprecated(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet")
+            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
+    }
+
+    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(
+            String authorization,
+            String prjId,
+            String saveFlag,
+            String format){
 
         log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
@@ -494,6 +514,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
+        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
+    }
+
+    @ApiOperation(value = "Get Project Bom Tab As Json (Deprecated)", notes = "Project > Get Bom tab data as json", hidden = true)
+    @GetMapping(value = {"/projects/{id}/bom/json-data"})
+    public ResponseEntity<Map<String, Object>> getPrjBomAsJsonDeprecated(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
+        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
+    }
+
+    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(
+            String authorization,
+            String prjId,
+            String saveFlag){
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -528,6 +565,22 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
+        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+    }
+
+    @ApiOperation(value = "Project Bom Compare (Deprecated)", notes = "Project > Bom tab Compare", hidden = true)
+    @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
+    public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
+            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
+        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+    }
+
+    private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(
+            String authorization,
+            String beforePrjId,
+            String afterPrjId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();

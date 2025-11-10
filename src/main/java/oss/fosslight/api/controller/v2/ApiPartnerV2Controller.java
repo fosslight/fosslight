@@ -152,6 +152,22 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
+        return get3rdDownloadInternal(authorization, partnerId, format);
+    }
+
+    @ApiOperation(value = "3rd Party Export report (Deprecated)", notes = "3rd Party > Export report", hidden = true)
+    @GetMapping(value = {"/partners/{id}/bom/file"})
+    public ResponseEntity<FileSystemResource> get3rdDownloadDeprecated(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
+        return get3rdDownloadInternal(authorization, partnerId, format);
+    }
+
+    private ResponseEntity<FileSystemResource> get3rdDownloadInternal(
+            String authorization,
+            String partnerId,
+            String format) throws Exception {
 
         String downloadId = "";
         T2File fileInfo = new T2File();
@@ -177,6 +193,20 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> get3rdAsJson(
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+        return get3rdAsJsonInternal(authorization, partnerId);
+    }
+
+    @ApiOperation(value = "3rd Party Export Json (Deprecated)", notes = "3rd Party > Export Json", hidden = true)
+    @GetMapping(value = {"/partners/{id}/bom/json-data"})
+    public ResponseEntity<Map<String, Object>> get3rdAsJsonDeprecated(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+        return get3rdAsJsonInternal(authorization, partnerId);
+    }
+
+    private ResponseEntity<Map<String, Object>> get3rdAsJsonInternal(
+            String authorization,
+            String partnerId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
