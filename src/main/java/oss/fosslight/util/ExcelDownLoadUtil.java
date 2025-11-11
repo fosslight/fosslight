@@ -151,6 +151,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static final int MAX_RECORD_CNT = 99999;
 	private static final int MAX_RECORD_CNT_LIST = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_EXCEL_DOWNLOAD, CoConstDef.CD_MAX_ROW_COUNT))+1;	
 
+	@SuppressWarnings("unchecked")
 	private static String getReportExcelPost (String prjId, String type) throws IOException, InvalidFormatException {
 		Workbook wb = null;
 		Sheet sheet1 = null;
@@ -225,16 +226,25 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, wb.getSheetAt(6), projectService.getIdentificationGridList(ossListParam), projectInfo);
 			}
 			
-			//bom
-			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
-				ossListParam.setReferenceDiv(isEmpty(type) ? CoConstDef.CD_DTL_COMPONENT_ID_BOM : type);
+			//BIN(ANDROID) BOM
+			if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
+				ossListParam.setReferenceDiv(type);
 				ossListParam.setMerge(CoConstDef.FLAG_NO);
 				
 				Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
-				if (!CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
-					map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM, wb.getSheetAt(7), map, projectInfo);
+			}
+			
+			//bom
+			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+				if (isEmpty(type)) {
+					type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 				}
+				ossListParam.setReferenceDiv(type);
+				ossListParam.setMerge(CoConstDef.FLAG_NO);
 				
+				Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
+				map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(7), map, projectInfo);
 			}
 			
@@ -465,346 +475,29 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			String currentGroupKey = null;
 			int idx = 1;
-			for (ProjectIdentification bean : list) {
-				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
-					if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
-						for (String[] editRow : rows) {
-							if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-")
-									&& editRow[1].equals(bean.getOssName()) && editRow[2].equals(bean.getOssVersion())) {
-								String referenceDiv = editRow[8];
-								String referenceDivChk = bean.getRefDiv();
-								
-								if (!isEmpty(referenceDivChk)) {
-									switch (avoidNull(referenceDivChk)) {
-									case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
-										referenceDivChk = "3rd";
-										break;
-									case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
-										referenceDivChk = "DEP";
-										break;
-									case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
-										referenceDivChk = "SRC";
-										break;
-									case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
-										referenceDivChk = "BIN";
-										
-										break;
-									case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
-										if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
-											referenceDivChk = "BIN(ANDROID)";
-										} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
-											referenceDivChk = "BIN(YOCTO)";
-										}
-									case CoConstDef.CD_DTL_COMPONENT_PARTNER:
-										referenceDivChk = "3rd Party";
-										break;
-									default:
-										break;
-									}
-									
-									if (!referenceDiv.contains(referenceDivChk)) {
-										referenceDiv = referenceDiv + "," + referenceDivChk;
-										editRow[8] = referenceDiv;
-										break;
-									}
-								}
-							}
-						}
-						
-						continue;
-					} else {
-						currentGroupKey = bean.getGroupingColumn();
-					}
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
+				for (ProjectIdentification bean : list) {
+					makeSheetDataForBomOssComponents(idx, type, vr, currentGroupKey, rows, projectInfo, bean);
+					idx++;
 				}
-				
-				// bom의 경우
-				if (bean.getOssComponentsLicenseList() != null && !bean.getOssComponentsLicenseList().isEmpty()) {
-					boolean isMainRow = true;
-					
-					List<String> params = new ArrayList<>();
-					// main 정보
-					params.add(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : "");
-					params.add(bean.getOssName()); // OSS Name
-					params.add(bean.getOssVersion()); // OSS Version
-					params.add(bean.getLicenseName()); // LICENSE
-					params.add(isMainRow ? bean.getDownloadLocation() : ""); // download url
-					params.add(isMainRow ? bean.getHomepage() : ""); // home page url
-					params.add(isMainRow ? bean.getCopyrightText() : "");
-					
-					String licenseTextUrl = "";
-					
-					for (String licenseName : bean.getLicenseName().split(",")) {
-						String licenseUrl = CommonFunction.getLicenseUrlByName(licenseName.trim());
-						
-						if (isEmpty(licenseUrl)) {
-							boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-							
-							licenseUrl = CommonFunction.makeLicenseInternalUrl(CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase()), distributionFlag);
-						}
-						
-						if (!isEmpty(licenseUrl)) {
-							if (!isEmpty(licenseTextUrl)) {
-								licenseTextUrl += ", ";
-							}
-							
-							licenseTextUrl += licenseUrl;
-						}
-					}
-					
-					params.add(licenseTextUrl); //license text => license homepage
-					
-					String refSrcTab = "";
-					String thirdKey = "3rd";
-					
-					String[] refDivs = bean.getRefDiv().split("[,]");
-					for (String refDiv : refDivs) {
-						switch (avoidNull(refDiv)) {
-							case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
-								if (!isEmpty(refSrcTab)) refSrcTab += ",";
-									refSrcTab += thirdKey;
-								break;
-							case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
-								if (!isEmpty(refSrcTab)) refSrcTab += ",";
-								refSrcTab += "DEP";
-								break;
-							case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
-								if (!isEmpty(refSrcTab)) refSrcTab += ",";
-								refSrcTab += "SRC";
-								break;
-							case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
-								if (!isEmpty(refSrcTab)) refSrcTab += ",";
-								refSrcTab += "BIN";
-								break;
-							case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
-								if (!isEmpty(refSrcTab)) refSrcTab += ",";
-								if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
-									refSrcTab += "BIN(ANDROID)";
-								} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
-									refSrcTab += "BIN(YOCTO)";
-								}
-								break;
-							case CoConstDef.CD_DTL_COMPONENT_PARTNER:
-								if (!isEmpty(refSrcTab)) refSrcTab += ",";
-								refSrcTab += "3rd Party";
-								break;
-							default:
-								break;
-						}
-					}
-					if (refSrcTab.contains(thirdKey)) {
-						String[] thirdIds = avoidNull(bean.getRefPartnerId(), "").split(",");
-						List<String> thirdNames = new ArrayList<String>();
-						for (String thirdId : thirdIds) {
-							String thirdPartyName = projectService.getPartnerFormatName(thirdId, true);
-							if (!isEmpty(thirdPartyName) && !thirdNames.contains(thirdKey + "-" + thirdPartyName)) {
-								thirdNames.add(thirdKey + "-" + thirdPartyName);
-							}
-						}
-						if (thirdNames.size() > 0) {
-							String thirdName = String.join(",", thirdNames);
-							refSrcTab = refSrcTab.replace(thirdKey, thirdName);
-						}
-					}
-					// from
-					params.add(isMainRow ? refSrcTab : "");
-					// main 정보 (license 정보 후처리)
-//					params.add(isMainRow ? bean.getFilePath() : ""); // path
-					// vulnerability
-					params.add(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()) : "");
-					// dependencies
-//					params.add(isMainRow ? (isEmpty(bean.getDependencies()) ? "" : bean.getDependencies()) : "");
-					// notice
-					params.add(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : "")  : "");
-					// source code
-					params.add(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : "") : "");
-					// Restriction
-					params.add(isMainRow ? (isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()) : "");
-					
-					addColumnWarningMessage(type, bean, vr, params);
-					
-					rows.add(params.toArray(new String[params.size()]));
-				} else {
+			} else {
+				boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+				for (ProjectIdentification bean : list) {
 					// exclude 제외
 					if ((CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn()))) {
 						continue;
 					}
 					
-					List<String> params = new ArrayList<>();
+					makeSheetDataForOssComponents(idx, type, isSelfCheck, vr, bean, rowsMap, distributionFlag);
 					
-					// main 정보
-					//params.add(isSelfCheck ? bean.getComponentIdx() : bean.getComponentId()); //ID
-					params.add(isSelfCheck ? bean.getComponentIdx() : bean.getComponentIdx());
-
-					// TODO 3rd party 이름 가져올 수 있나?
-					if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)) {
-
-						params.add(projectService.getPartnerFormatName(bean.getRefPartnerId(), false)); //3rd Party
-					}
-
-					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-						params.add(bean.getBinaryName()); // Binary Name
-					}
+//					addColumnWarningMessage(type, bean, vr, params);
 					
-					if (!CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) && !CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
-						if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
-							params.add(bean.getPackageUrl());
-						} else {
-							params.add(bean.getFilePath()); // path
-						}
-					}
-					
-					if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-						params.add(bean.getBinaryNotice()); // notice
-					}
-					
-					params.add(bean.getOssName()); // OSS Name
-					params.add(bean.getOssVersion()); // OSS Version
-					String licenseNameList = "";
-					
-					if (bean.getComponentLicenseList() != null) {
-						for ( ProjectIdentification project : bean.getComponentLicenseList()) {
-							if (!isEmpty(licenseNameList)) {
-								licenseNameList += ",";
-							}
-							
-							LicenseMaster lm = CoCodeManager.LICENSE_INFO_UPPER.get(project.getLicenseName().toUpperCase());
-							
-							if (lm != null) {
-								licenseNameList += (!isEmpty(lm.getShortIdentifier()) ? lm.getShortIdentifier() : lm.getLicenseName());
-							}else {
-								licenseNameList += project.getLicenseName();
-							}
-						}
-					}
-					
-					params.add(licenseNameList); // license
-					params.add(bean.getDownloadLocation()); // download url
-					params.add(bean.getHomepage()); // home page url
-					params.add(bean.getCopyrightText());
-					
-					if (!(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)
-							|| CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)
-							|| CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type)
-							|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type))
-						|| isSelfCheck) {
-						String licenseTextUrl = "";
-						
-						for (String licenseName : licenseNameList.split(",")) {
-							String licenseUrl = CommonFunction.getLicenseUrlByName(licenseName.trim());						
-							
-							if (isEmpty(licenseUrl)) {
-								boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-								
-								licenseUrl = CommonFunction.makeLicenseInternalUrl(CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase()), distributionFlag);
-							}
-							
-							if (!isEmpty(licenseUrl)) {
-								if (!isEmpty(licenseTextUrl)) {
-									licenseTextUrl += ", ";
-								}
-								
-								licenseTextUrl += licenseUrl;
-							}
-						}
-						
-						params.add(licenseTextUrl);
-					}
-					
-					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
-//						params.add(""); // check list > Modified or not
-						params.add((new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore())); // Vuln
-					}
-					
-					if (!CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && !isSelfCheck) { // selfcheck에서는 출력하지 않음.
-						if ( CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-							params.add("Exclude");
-						} else {
-							params.add("");
-						}
-					}
-					
-					// Comment
-					String _comm = "";
-					
-					if (!isSelfCheck 
-						&& (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) 
-							|| CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) 
-							|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) 
-							|| CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type))) {
-						_comm = avoidNull(bean.getComments().trim());
-						
-						params.add(_comm); 
-					}
-					
-					
-					// Vulnerability
-					if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-						params.add(new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()); // Vuln
-						params.add(isEmpty(bean.getRestriction()) ? "" : bean.getRestriction());
-					}
-					
-					if (isSelfCheck){
-						params.add((new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore())); // Vuln
-						
-						boolean errRowFlag = false;
-						
-						for (String errCd : vr.getErrorCodeMap().keySet()) {
-							if (errCd.contains(bean.getComponentId())) {
-								errRowFlag = true;
-								
-								break;
-							} 
-						}
-						
-						if (errRowFlag) {
-							// notice
-							params.add("");
-							// source code
-							params.add("");
-						}else {
-							// notice
-							params.add(( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
-							// source code
-							params.add(( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
-						}
-						
-						// Restriction
-						params.add((isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()));
-					}
-					
-					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)){
-						params.add(isEmpty(bean.getComments()) ? "" : bean.getComments());
-						// notice
-						params.add(( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
-						// source code
-						params.add(( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
-						// Restriction
-						params.add((isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()));
-					}
-					
-					if (isSelfCheck){
-						if (bean.getExcludeYn().equals(CoConstDef.FLAG_YES)) {
-							params.add("Exclude");
-						} else {
-							params.add("");
-						}
-					}
-					
-					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)){
-						if (!isEmpty(bean.getDependencies())) {
-							params.add(bean.getDependencies());
-						} else {
-							params.add("");
-						}
-					}
-					
-					addColumnWarningMessage(type, bean, vr, params);
-					rowsMap.put(String.valueOf(idx), params);
 //					rows.add(params.toArray(new String[params.size()]));
+					
+					idx++;
 				}
-				idx++;
 			}
-
+			
 			if (!MapUtils.isEmpty(rowsMap)) {
 				for (String key : rowsMap.keySet()) {
 					List<String> params = rowsMap.get(key);
@@ -840,6 +533,324 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 	
+	private static void makeSheetDataForBomOssComponents(int idx, String type, T2CoValidationResult vr, String currentGroupKey, List<String[]> rows, Project projectInfo, ProjectIdentification bean) {
+		boolean continueFlag = false;
+		if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
+			for (String[] editRow : rows) {
+				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && editRow[1].equals(bean.getOssName()) && editRow[2].equals(bean.getOssVersion())) {
+					String referenceDiv = editRow[8];
+					String referenceDivChk = bean.getRefDiv();
+					
+					if (!isEmpty(referenceDivChk)) {
+						switch (avoidNull(referenceDivChk)) {
+							case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
+								referenceDivChk = "3rd";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
+								referenceDivChk = "DEP";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
+								referenceDivChk = "SRC";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
+								referenceDivChk = "BIN";
+								
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
+								if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
+									referenceDivChk = "BIN(ANDROID)";
+								} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
+									referenceDivChk = "BIN(YOCTO)";
+								}
+							case CoConstDef.CD_DTL_COMPONENT_PARTNER:
+								referenceDivChk = "3rd Party";
+								break;
+							default:
+								break;
+						}
+						
+						if (!referenceDiv.contains(referenceDivChk)) {
+							referenceDiv = referenceDiv + "," + referenceDivChk;
+							editRow[8] = referenceDiv;
+							break;
+						}
+					}
+				}
+			}
+			continueFlag = true;
+		} else {
+			currentGroupKey = bean.getGroupingColumn();
+		}
+		
+		// bom의 경우
+		if (!continueFlag && bean.getOssComponentsLicenseList() != null && !bean.getOssComponentsLicenseList().isEmpty()) {
+			boolean isMainRow = true;
+			
+			List<String> params = new ArrayList<>();
+			// main 정보
+			params.add(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : "");
+			params.add(bean.getOssName()); // OSS Name
+			params.add(bean.getOssVersion()); // OSS Version
+			params.add(bean.getLicenseName()); // LICENSE
+			params.add(isMainRow ? bean.getDownloadLocation() : ""); // download url
+			params.add(isMainRow ? bean.getHomepage() : ""); // home page url
+			params.add(isMainRow ? bean.getCopyrightText() : "");
+			
+			String licenseTextUrl = "";
+			
+			for (String licenseName : bean.getLicenseName().split(",")) {
+				String licenseUrl = CommonFunction.getLicenseUrlByName(licenseName.trim());
+				
+				if (isEmpty(licenseUrl)) {
+					boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+					
+					licenseUrl = CommonFunction.makeLicenseInternalUrl(CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase()), distributionFlag);
+				}
+				
+				if (!isEmpty(licenseUrl)) {
+					if (!isEmpty(licenseTextUrl)) {
+						licenseTextUrl += ", ";
+					}
+					
+					licenseTextUrl += licenseUrl;
+				}
+			}
+			
+			params.add(licenseTextUrl); //license text => license homepage
+			
+			String refSrcTab = "";
+			String thirdKey = "3rd";
+			
+			String[] refDivs = bean.getRefDiv().split("[,]");
+			for (String refDiv : refDivs) {
+				switch (avoidNull(refDiv)) {
+					case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
+						if (!isEmpty(refSrcTab)) refSrcTab += ",";
+							refSrcTab += thirdKey;
+						break;
+					case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
+						if (!isEmpty(refSrcTab)) refSrcTab += ",";
+						refSrcTab += "DEP";
+						break;
+					case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
+						if (!isEmpty(refSrcTab)) refSrcTab += ",";
+						refSrcTab += "SRC";
+						break;
+					case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
+						if (!isEmpty(refSrcTab)) refSrcTab += ",";
+						refSrcTab += "BIN";
+						break;
+					case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
+						if (!isEmpty(refSrcTab)) refSrcTab += ",";
+						if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
+							refSrcTab += "BIN(ANDROID)";
+						} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
+							refSrcTab += "BIN(YOCTO)";
+						}
+						break;
+					case CoConstDef.CD_DTL_COMPONENT_PARTNER:
+						if (!isEmpty(refSrcTab)) refSrcTab += ",";
+						refSrcTab += "3rd Party";
+						break;
+					default:
+						break;
+				}
+			}
+			if (refSrcTab.contains(thirdKey)) {
+				String[] thirdIds = avoidNull(bean.getRefPartnerId(), "").split(",");
+				List<String> thirdNames = new ArrayList<String>();
+				for (String thirdId : thirdIds) {
+					String thirdPartyName = projectService.getPartnerFormatName(thirdId, true);
+					if (!isEmpty(thirdPartyName) && !thirdNames.contains(thirdKey + "-" + thirdPartyName)) {
+						thirdNames.add(thirdKey + "-" + thirdPartyName);
+					}
+				}
+				if (thirdNames.size() > 0) {
+					String thirdName = String.join(",", thirdNames);
+					refSrcTab = refSrcTab.replace(thirdKey, thirdName);
+				}
+			}
+			// from
+			params.add(isMainRow ? refSrcTab : "");
+			// main 정보 (license 정보 후처리)
+//			params.add(isMainRow ? bean.getFilePath() : ""); // path
+			// vulnerability
+			params.add(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()) : "");
+			// dependencies
+//			params.add(isMainRow ? (isEmpty(bean.getDependencies()) ? "" : bean.getDependencies()) : "");
+			// notice
+			params.add(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : "")  : "");
+			// source code
+			params.add(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : "") : "");
+			// Restriction
+			params.add(isMainRow ? (isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()) : "");
+			
+			addColumnWarningMessage(type, bean, vr, params);
+			
+			rows.add(params.toArray(new String[params.size()]));
+		}
+	}
+	private static void makeSheetDataForOssComponents(int idx, String type, boolean isSelfCheck, T2CoValidationResult vr, ProjectIdentification bean, Map<String, List<String>> rowsMap, boolean distributionFlag) {
+		List<String> params = new ArrayList<>();
+		// main 정보
+		//params.add(isSelfCheck ? bean.getComponentIdx() : bean.getComponentId()); //ID
+		params.add(isSelfCheck ? bean.getComponentIdx() : bean.getComponentIdx());
+
+		// TODO 3rd party 이름 가져올 수 있나?
+		if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)) {
+
+			params.add(projectService.getPartnerFormatName(bean.getRefPartnerId(), false)); //3rd Party
+		}
+
+		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+			params.add(bean.getBinaryName()); // Binary Name
+		}
+		
+		if (!CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) && !CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
+				params.add(bean.getPackageUrl());
+			} else {
+				params.add(bean.getFilePath()); // path
+			}
+		}
+		
+		if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+			params.add(bean.getBinaryNotice()); // notice
+		}
+		
+		params.add(bean.getOssName()); // OSS Name
+		params.add(bean.getOssVersion()); // OSS Version
+		String licenseNameList = "";
+		
+		if (bean.getComponentLicenseList() != null) {
+			for ( ProjectIdentification project : bean.getComponentLicenseList()) {
+				if (!isEmpty(licenseNameList)) {
+					licenseNameList += ",";
+				}
+				
+				LicenseMaster lm = CoCodeManager.LICENSE_INFO_UPPER.get(project.getLicenseName().toUpperCase());
+				
+				if (lm != null) {
+					licenseNameList += (!isEmpty(lm.getShortIdentifier()) ? lm.getShortIdentifier() : lm.getLicenseName());
+				} else {
+					licenseNameList += project.getLicenseName();
+				}
+			}
+		}
+		
+		params.add(licenseNameList); // license
+		params.add(bean.getDownloadLocation()); // download url
+		params.add(bean.getHomepage()); // home page url
+		params.add(bean.getCopyrightText());
+		
+		if (!(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type))
+			|| isSelfCheck) {
+			String licenseTextUrl = "";
+			
+			for (String licenseName : licenseNameList.split(",")) {
+				String licenseUrl = CommonFunction.getLicenseUrlByName(licenseName.trim());						
+				
+				if (isEmpty(licenseUrl)) {
+					licenseUrl = CommonFunction.makeLicenseInternalUrl(CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase()), distributionFlag);
+				}
+				
+				if (!isEmpty(licenseUrl)) {
+					if (!isEmpty(licenseTextUrl)) {
+						licenseTextUrl += ", ";
+					}
+					
+					licenseTextUrl += licenseUrl;
+				}
+			}
+			
+			params.add(licenseTextUrl);
+		}
+		
+		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
+//			params.add(""); // check list > Modified or not
+			params.add((new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore())); // Vuln
+		}
+		
+		if (!CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && !isSelfCheck) { // selfcheck에서는 출력하지 않음.
+			if ( CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+				params.add("Exclude");
+			} else {
+				params.add("");
+			}
+		}
+		
+		// Comment
+		String _comm = "";
+		
+		if (!isSelfCheck && (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type))) {
+			_comm = avoidNull(bean.getComments().trim());
+			params.add(_comm); 
+		}
+		
+		// Vulnerability
+		if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+			params.add(new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()); // Vuln
+			params.add(isEmpty(bean.getRestriction()) ? "" : bean.getRestriction());
+		}
+		
+		if (isSelfCheck){
+			params.add((new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore())); // Vuln
+			
+			boolean errRowFlag = false;
+			
+			for (String errCd : vr.getErrorCodeMap().keySet()) {
+				if (errCd.contains(bean.getComponentId())) {
+					errRowFlag = true;
+					
+					break;
+				} 
+			}
+			
+			if (errRowFlag) {
+				// notice
+				params.add("");
+				// source code
+				params.add("");
+			} else {
+				// notice
+				params.add(( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+				// source code
+				params.add(( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+			}
+			
+			// Restriction
+			params.add((isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()));
+		}
+		
+		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)){
+			params.add(isEmpty(bean.getComments()) ? "" : bean.getComments());
+			// notice
+			params.add(( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+			// source code
+			params.add(( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+			// Restriction
+			params.add((isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()));
+		}
+		
+		if (isSelfCheck){
+			if (bean.getExcludeYn().equals(CoConstDef.FLAG_YES)) {
+				params.add("Exclude");
+			} else {
+				params.add("");
+			}
+		}
+		
+		if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)){
+			if (!isEmpty(bean.getDependencies())) {
+				params.add(bean.getDependencies());
+			} else {
+				params.add("");
+			}
+		}
+		
+		addColumnWarningMessage(type, bean, vr, params);
+		rowsMap.put(String.valueOf(idx), params);
+	}
 	private static void addColumnWarningMessage(String type, ProjectIdentification bean, T2CoValidationResult vr, List<String> params) {
 		String message = "";
 		
@@ -2031,7 +2042,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return getExcelDownloadId(type, dataStr, filepath, null);
 	}
 
-	@SuppressWarnings({ "unchecked", "serial" })
+	@SuppressWarnings({ "unchecked" })
 	public static String getExcelDownloadId(String type, String dataStr, String filepath, String extParam) throws Exception {
 		downloadpath = filepath;
 		String downloadId = null;

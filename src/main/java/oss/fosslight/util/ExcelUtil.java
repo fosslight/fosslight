@@ -519,7 +519,7 @@ public class ExcelUtil extends CoTopComponent {
 	 * @param errMsg
 	 * @return
 	 */
-	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list,List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
+	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list, List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
 
 		T2File fileInfo = fileService.selectFileInfo(fileSeq);
 		if (fileInfo == null) {
