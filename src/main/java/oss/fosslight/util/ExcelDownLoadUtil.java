@@ -322,6 +322,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 								isRemoveSheet = true;
 							}
 							break;
+						case CoConstDef.CD_DTL_COMPONENT_ID_BOM :
+							if (sheetName.equalsIgnoreCase("BIN (Android)") || sheetName.equalsIgnoreCase("BIN (Yocto)")) {
+								wb.removeSheetAt(i);
+								isRemoveSheet = true;
+							}
+							break;
 						case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID :
 							if (!sheetName.equalsIgnoreCase("BIN (Android)") && !sheetName.equalsIgnoreCase("BIN (Yocto)")) {
 								wb.removeSheetAt(i);
