@@ -4259,7 +4259,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			if (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
-				if (!hasSourceOss) {
+				if (prjInfo.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION) || !hasSourceOss) {
 					project.setSkipPackageFlag(CoConstDef.FLAG_YES);
 					project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
 					project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
