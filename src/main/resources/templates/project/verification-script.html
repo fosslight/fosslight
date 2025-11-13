@@ -1844,12 +1844,18 @@
                         var filePaths = [];
                         var componentIds = [];
                         var pathValidMsg = {};
+                        var runVerify = false;
 
                         // empty check
                         for (var i in arr) {
                             var _path = target.jqGrid('getCell', arr[i], 'filePath');
                             var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
+                            var _verifyFileCount = target.jqGrid('getCell', arr[i], 'verifyFileCount');
+                        	_verifyFileCount = $.trim(_verifyFileCount);
                             
+                        	if (!runVerify && "" == _verifyFileCount) {
+                        		runVerify = true;
+                        	}
                             if ("undefined/" == _path) {
                             	_path = "";
                             } else if ("/" == _path) {
@@ -1943,7 +1949,7 @@
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 } else {
                                 	var msg = [[#{msg.common.success}]];
-                                	if (typeof json.resultData.isVerify !== "undefined" && json.resultData.isVerify) {
+                                	if (runVerify || (typeof json.resultData.isVerify !== "undefined" && json.resultData.isVerify)) {
                                 		msg = [[#{msg.package.verify.retry}]];
                                 		alertify.alert(msg, function () {
                                 			fn.verify();
