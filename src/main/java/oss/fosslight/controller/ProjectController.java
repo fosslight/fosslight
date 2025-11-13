@@ -1775,7 +1775,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@PostMapping(value = PROJECT.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+			HttpServletResponse res, Model model) throws InterruptedException {
 
 		Project projectInfo = projectService.getProjectDetail(project);
 		
@@ -1803,6 +1803,8 @@ public class ProjectController extends CoTopComponent {
 		
 		String rtnFlag = "11"; // default error
 		HashMap<String, Object> resMap = new HashMap<>();
+
+		Thread.sleep(3000);
 		
 		try {
 			projectService.deleteProject(project);
