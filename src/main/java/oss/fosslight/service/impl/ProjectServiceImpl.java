@@ -581,11 +581,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					bomLicenseMap.put(key, bomLicenses);
 				});
 				
-				Map<String, Object> ossInfoCheckMap = new HashMap<>();
+				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
  				list.forEach(ll -> {
- 					String key = ll.getOssName() + "_" + avoidNull(ll.getOssVersion(), "-");
- 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
- 						ossInfoCheckMap.put(key, "");
+ 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
+ 						String key = ll.getOssName() + "_" + ll.getOssVersion();
+						if (!vulnerabilityInfoMap.containsKey(key.toUpperCase()) && ossInfoMap.containsKey(key.toUpperCase())) {
+							OssMaster ossMaster = ossInfoMap.get(key.toUpperCase());
+							if (isEmpty(ossMaster.getOssVersion())) {
+								ossMaster.setOssVersion("-");
+							}
+							OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+							if (om != null && !isEmpty(om.getCvssScore())) {
+								vulnerabilityInfoMap.put(key.toUpperCase(), om);
+							}
+						}
  					}
  					
 					ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
@@ -639,104 +648,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 					}
 					
-//					String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
-//					boolean setCveInfoFlag = false;
-//					
-//					if (ll.getCvssScoreMax() != null) {
-//						String cveId = ll.getCvssScoreMax().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
-//					}
-//					if (ll.getCvssScoreMax1() != null) {
-//						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
-//					}
-//					if (ll.getCvssScoreMax2() != null) {
-//						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
-//					}
-//					if (ll.getCvssScoreMax3() != null) {
-//						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
-//					}
-//					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-//						if (cvssScoreMaxList.size() > 1) {
-//							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-//								@Override
-//								public int compare(String o1, String o2) {
-//									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-//										return -1;
-//									}else {
-//										return 1;
-//									}
-//								}
-//							});
-//						}
-//						
-//						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-//						ll.setCvssScore(cveData[3]);
-//						ll.setCveId(cveData[4]);
-//						ll.setVulnYn(CoConstDef.FLAG_YES);
-//					} else {
-//						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
-//						if (conversionCveInfo != null) {
-//							String[] conversionCveData = conversionCveInfo.split("\\@");
-//							ll.setCvssScore(conversionCveData[3]);
-//							ll.setCveId(conversionCveData[4]);
-//							ll.setVulnYn(CoConstDef.FLAG_YES);
-//						} else {
-//							setCveInfoFlag = true;
-//						}
-//					}
-//					
-//					cvssScoreMaxList.clear();
-//					
-//					if (!isEmpty(ll.getOssName()) && ossInfoMap.containsKey(key)) {
-//						OssMaster om = ossInfoMap.get(key);
-//						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
-//							String cveId = om.getCveId();
-//							String cvssScore = om.getCvssScore();
-//							String _cvssScore = ll.getCvssScore();
-//							
-//							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-//								if (!isEmpty(_cvssScore)) {
-//									if (new BigDecimal(cvssScore).compareTo(new BigDecimal(_cvssScore)) > 0) {
-//										ll.setCvssScore(cvssScore);
-//										ll.setCveId(cveId);
-//										ll.setVulnYn(CoConstDef.FLAG_YES);
-//									}
-//								} else {
-//									ll.setCvssScore(cvssScore);
-//									ll.setCveId(cveId);
-//									ll.setVulnYn(CoConstDef.FLAG_YES);
-//								}
-//							}
-//						}
-//					}
-					
 					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(ll.getRefDiv())) {
 						String _key = ll.getOssName() + "-" + avoidNull(ll.getOssVersion());
 						mergeDepMap.put(_key, ll);
 					}
 				});
 				
- 				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
- 				if (!ossInfoCheckMap.isEmpty()) {
- 					for (String key : ossInfoCheckMap.keySet()) {
- 						String ossName = key.split("_")[0];
- 						String ossVersion = key.split("_")[1];
- 						if (ossVersion.equals("-")) {
- 							ossVersion = "";
- 						}
- 						OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossName, ossVersion);
- 						if (om != null && !isEmpty(om.getCvssScore())) {
- 							vulnerabilityInfoMap.put((ossName + "_" + ossVersion).toUpperCase(), om);
- 						}
- 					}
- 					
- 					ossInfoCheckMap.clear();
- 				}
- 				
-				// bat merget
+ 				// bat merget
 				// bat 분석 결과 중에서 oss version이 명시되지 않고, src 또는 3rd party에 동일한 oss 가 존재하는 경우
 				// bat 분석 결과를 src 또는 3rd party에 merge 한다.
 				List<ProjectIdentification> _list = new ArrayList<>();
@@ -930,35 +848,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder());
 				list.sort(compare);
 				
-				Map<String, Object> ossInfoCheckMap = new HashMap<>();
+				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 				list.forEach(ll -> {
- 					String key = ll.getOssName() + "_" + avoidNull(ll.getOssVersion(), "-");
- 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
- 						ossInfoCheckMap.put(key, "");
- 					}
+					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
+						String key = ll.getOssName() + "_" + ll.getOssVersion();
+	 					if (!vulnerabilityInfoMap.containsKey(key.toUpperCase()) && ossInfoMap.containsKey(key.toUpperCase())) {
+	 						OssMaster ossMaster = ossInfoMap.get(key.toUpperCase());
+	 						if (isEmpty(ossMaster.getOssVersion())) {
+	 							ossMaster.setOssVersion("-");
+	 						}
+	 						OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+	 						if (om != null && !isEmpty(om.getCvssScore())) {
+	 							vulnerabilityInfoMap.put(key.toUpperCase(), om);
+	 						}
+	 					}
+					}
 				});
 				
-				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
- 				if (!ossInfoCheckMap.isEmpty()) {
- 					for (String key : ossInfoCheckMap.keySet()) {
- 						String ossName = key.split("_")[0];
- 						String ossVersion = key.split("_")[1];
- 						if (ossVersion.equals("-")) {
- 							ossVersion = "";
- 						}
- 						OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossName, ossVersion);
- 						if (om != null && !isEmpty(om.getCvssScore())) {
- 							vulnerabilityInfoMap.put((ossName + "_" + ossVersion).toUpperCase(), om);
- 						}
- 					}
- 					
- 					ossInfoCheckMap.clear();
- 				}
-				
 				// convert max score
-				List<String> cvssScoreMaxList = new ArrayList<>();
 				List<String> adminCheckList = new ArrayList<>();
-				
 				Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
 				List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
 				
@@ -1135,6 +1043,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			list = projectMapper.selectIdentificationGridList(identification);
 			list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 			
+			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 			if (list != null && !list.isEmpty()) {
 				Map<String, Object> ossInfoCheckMap = new HashMap<>();
 				
@@ -1142,6 +1051,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					String _test = project.getOssName().trim() + "_" + project.getOssVersion().trim();
 					String _test2 = project.getOssName().trim() + "_" + project.getOssVersion().trim() + ".0";
 					String licenseDiv = "";
+					
+					if (!isEmpty(project.getOssName()) && !project.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(project.getExcludeYn()))) {
+						if (!vulnerabilityInfoMap.containsKey(_test.toUpperCase()) && ossInfoMap.containsKey(_test.toUpperCase())) {
+							OssMaster ossMaster = ossInfoMap.get(_test.toUpperCase());
+							if (isEmpty(ossMaster.getOssVersion())) {
+								ossMaster.setOssVersion("-");
+							}
+							OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+							if (om != null && !isEmpty(om.getCvssScore())) {
+								vulnerabilityInfoMap.put(_test.toUpperCase(), om);
+							}
+						}
+					}
 					
 					if (CoCodeManager.OSS_INFO_UPPER.containsKey(_test.toUpperCase())){
 						licenseDiv = CoCodeManager.OSS_INFO_UPPER.get(_test.toUpperCase()).getLicenseDiv(); 
@@ -1174,23 +1096,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						project.setDependencies(avoidNull(project.getDependencies()));
 					}
 				}
-				
-				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
- 				if (!ossInfoCheckMap.isEmpty()) {
- 					for (String key : ossInfoCheckMap.keySet()) {
- 						String ossName = key.split("_")[0];
- 						String ossVersion = key.split("_")[1];
- 						if (ossVersion.equals("-")) {
- 							ossVersion = "";
- 						}
- 						OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossName, ossVersion);
- 						if (om != null && !isEmpty(om.getCvssScore())) {
- 							vulnerabilityInfoMap.put((ossName + "_" + ossVersion).toUpperCase(), om);
- 						}
- 					}
- 					
- 					ossInfoCheckMap.clear();
- 				}
 				
 				ProjectIdentification param = new ProjectIdentification();
 				OssMaster ossParam = new OssMaster();
