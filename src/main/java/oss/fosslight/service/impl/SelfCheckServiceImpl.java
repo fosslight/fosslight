@@ -314,6 +314,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			OssMaster ossParam = new OssMaster();
 			
 			// components license 정보를 한번에 가져온다
+			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 			for (ProjectIdentification bean : list) {
 				param.addComponentIdList(bean.getComponentId());
 				
@@ -321,27 +322,17 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				String key = bean.getOssName() + "_" + avoidNull(bean.getOssVersion(), "-");
-				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
-					ossInfoCheckMap.put(key, "");
-				}
-			}
-			
-			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-			if (!ossInfoCheckMap.isEmpty()) {
-				for (String key : ossInfoCheckMap.keySet()) {
-					String ossName = key.split("_")[0];
-					String ossVersion = key.split("_")[1];
-					if (ossVersion.equals("-")) {
-						ossVersion = "";
+				String key = bean.getOssName() + "_" + bean.getOssVersion();
+				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !vulnerabilityInfoMap.containsKey(key)) {
+					OssMaster ossMaster = ossInfoMap.get(key.toUpperCase());
+					if (isEmpty(ossMaster.getOssVersion())) {
+						ossMaster.setOssVersion("-");
 					}
-					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossName, ossVersion);
+					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
 					if (om != null && !isEmpty(om.getCvssScore())) {
-						vulnerabilityInfoMap.put((ossName + "_" + ossVersion).toUpperCase(), om);
+						vulnerabilityInfoMap.put(key.toUpperCase(), om);
 					}
 				}
-				
-				ossInfoCheckMap.clear();
 			}
 			
 			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
@@ -909,17 +900,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			List<ProjectIdentification> _ossList = selfCheckMapper.selectIdentificationGridList(prj);
 			
 			if (_ossList != null) {
+				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 				for (ProjectIdentification targetBean : _ossList) {
 					if (targetBean != null && !CoConstDef.FLAG_YES.equals(avoidNull(targetBean.getExcludeYn())) && !isEmpty(targetBean.getOssName()) && !targetBean.getOssName().equals("-")) {
+						String key = targetBean.getOssName() + "_" + targetBean.getOssVersion();
 						double _currentSccore = 0;
-						OssMaster om = CommonFunction.getOssVulnerabilityInfo(targetBean.getOssName(), targetBean.getOssVersion());
-						if (om != null && !isEmpty(om.getCvssScore())) {
-							_currentSccore = Double.parseDouble(om.getCvssScore());
-							if (CoCodeManager.OSS_INFO_UPPER.containsKey((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase())) {
-								OssMaster bean = CoCodeManager.OSS_INFO_UPPER.get((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase());
-								if (!isEmpty(bean.getCvssScore())) {
-									max_cvss_score = Double.parseDouble(bean.getCvssScore());
+						if (!vulnerabilityInfoMap.containsKey(key.toUpperCase()) && CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
+							OssMaster ossMaster = CoCodeManager.OSS_INFO_UPPER.get(key.toUpperCase());
+							if (isEmpty(ossMaster.getOssVersion())) {
+								ossMaster.setOssVersion("-");
+							}
+							OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+							if (om != null && !isEmpty(om.getCvssScore())) {
+								_currentSccore = Double.parseDouble(om.getCvssScore());
+								if (!isEmpty(ossMaster.getCvssScore())) {
+									max_cvss_score = Double.parseDouble(ossMaster.getCvssScore());
 								}
+								vulnerabilityInfoMap.put(key.toUpperCase(), om);
 							}
 						}
 						if (Double.compare(_currentSccore, max_cvss_score) > 0) {
@@ -929,6 +926,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 						}
 					}
 				}
+				vulnerabilityInfoMap.clear();
 			}
 			
 			Project vnlnUpdBean = new Project();
