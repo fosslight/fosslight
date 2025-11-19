@@ -538,6 +538,25 @@ var sec_com_fn = {
 		
 		return url;
 	},
+	displayLineBreakData : function(cellvalue, options, rowObject){
+		var data = "";
+		if(cellvalue != null && cellvalue !== undefined && "" != cellvalue){
+			var dataInfo = cellvalue;
+			if (dataInfo.indexOf("|") > -1){
+				dataInfo = dataInfo.split("|");
+				for (var i=0; i < dataInfo.length; i++){
+					data += dataInfo[i];
+					if (i < dataInfo.length-1){
+						data += "<br/>";
+					}
+				}
+			} else {
+				data = cellvalue;
+			}
+		}
+		
+		return data;
+	},
 	showVulnViewPage : function(_ossName, _ossVersion){
 		var prjId = [[${project.prjId}]];
 		var _url = '/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+_ossName+'&ossVersion='+_ossVersion;
@@ -1084,6 +1103,14 @@ var total = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
 		colModelArr.push(colModelObj);
+		colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakData, template: searchStringOptions, editable:false,
+						cellattr: function (rowId, tv, rawObject, cm, rdata) {
+							if (typeof rawObject.verStartEndRange !== "undefined") {
+								return ' title="' + rawObject.verStartEndRange.replaceAll('|', '&#10;') + '"';
+							}
+						}
+		};
+		colModelArr.push(colModelObj);
 		colModelObj = {name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true};
 		colModelArr.push(colModelObj);
 		
@@ -1091,16 +1118,16 @@ var total = {
 		var listType = 'SECURITY_NEED';
 		var totalColInfos = [
 				{'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'CVE ID' : 'cveId'}, {'CVSS SCORE' : 'cvssScore'}, {'Published Date' : 'publDate'}, {'Vulnerability Resolution' : 'vulnerabilityResolution'},
-				{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Security Comments' : 'securityComments'}
+				{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Affected SW Version Range' : 'verStartEndRange'}, {'Security Comments' : 'securityComments'}
 	  	];
-		var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'securityComments'];
+		var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'verStartEndRange', 'securityComments'];
 		var defaultColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'vulnerabilityResolution'];
 		applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
 		
 		totalList.jqGrid({
 			datatype: 'local',
 			data: totalMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Affected SW<br/>Version Range','Security<br/>Comments'],
 			colModel: colModelArr,
 		   	editurl:'clientArray',
  			autowidth: true,
@@ -1375,6 +1402,14 @@ var fullDiscovered = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
 			colModelArr.push(colModelObj);
+			colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakData, template: searchStringOptions, editable:false,
+							cellattr: function (rowId, tv, rawObject, cm, rdata) {
+								if (typeof rawObject.verStartEndRange !== "undefined") {
+									return ' title="' + rawObject.verStartEndRange.replaceAll('|', '&#10;') + '"';
+								}
+							}		
+			};
+			colModelArr.push(colModelObj);
 			colModelObj = {name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true};
 			colModelArr.push(colModelObj);
 			
@@ -1382,16 +1417,16 @@ var fullDiscovered = {
 			var listType = 'SECURITY_FULL';
 			var totalColInfos = [
 					{'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'CVE ID' : 'cveId'}, {'CVSS SCORE' : 'cvssScore'}, {'Published Date' : 'publDate'}, {'Vulnerability Resolution' : 'vulnerabilityResolution'},
-					{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Security Comments' : 'securityComments'}
+					{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Affected SW Version Range' : 'verStartEndRange'}, {'Security Comments' : 'securityComments'}
 		  	];
-			var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'securityComments'];
+			var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'verStartEndRange', 'securityComments'];
 			var defaultColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'vulnerabilityResolution'];
 			applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
 			
 			fullDiscoveredList.jqGrid({ 
 				datatype: 'local',  
 				data: fullDiscoveredMainData,
-				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
+				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Affected SW<br/>Version Range','Security<br/>Comments'],
 				colModel: colModelArr,
 				editurl:'clientArray',
 	 			autowidth: true,
