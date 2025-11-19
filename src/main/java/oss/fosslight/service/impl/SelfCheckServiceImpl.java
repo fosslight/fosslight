@@ -306,8 +306,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		list.sort(Comparator.comparing(ProjectIdentification::getComponentIdx));
 		
 		if (list != null && !list.isEmpty()) {
-			Map<String, Object> ossInfoCheckMap = new HashMap<>();
-			
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceDiv(identification.getReferenceDiv());
 			param.setReferenceId(identification.getReferenceId());
@@ -322,15 +320,17 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				String key = bean.getOssName() + "_" + bean.getOssVersion();
+				String key = (bean.getOssName() + "_" + bean.getOssVersion()).toUpperCase();
 				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !vulnerabilityInfoMap.containsKey(key)) {
-					OssMaster ossMaster = ossInfoMap.get(key.toUpperCase());
-					if (isEmpty(ossMaster.getOssVersion())) {
-						ossMaster.setOssVersion("-");
-					}
-					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-					if (om != null && !isEmpty(om.getCvssScore())) {
-						vulnerabilityInfoMap.put(key.toUpperCase(), om);
+					OssMaster ossMaster = ossInfoMap.get(key);
+					if (ossMaster != null) {
+						if (isEmpty(ossMaster.getOssVersion())) {
+							ossMaster.setOssVersion("-");
+						}
+						OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+						if (om != null && !isEmpty(om.getCvssScore())) {
+							vulnerabilityInfoMap.put(key, om);
+						}
 					}
 				}
 			}
@@ -368,8 +368,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							bean.addComponentLicenseList(reLi);
 							
 							if (!unconfirmedLicenseList.contains(avoidNull(reLi.getLicenseName()))) {
-								if (CoConstDef.FLAG_NO.equals(bean.getExcludeYn()) 
-										&& isEmpty(reLi.getLicenseId())) {
+								if (CoConstDef.FLAG_NO.equals(bean.getExcludeYn()) && isEmpty(reLi.getLicenseId())) {
 									unconfirmedLicenseList.add(reLi.getLicenseName());
 								}
 							}
