@@ -826,8 +826,8 @@
                                 appendIcon += "<span class=\"dropdown-item pointer\" title=\"Add Open Source\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
                                 appendIcon += "<span class=\"dropdown-item pointer\" title=\"Bulk Registration\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
                                 appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete Open Source\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export Open Source List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
                             }
-                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export Open Source List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 
                             $("#list_toppager_left").append(appendIcon);
                         }
