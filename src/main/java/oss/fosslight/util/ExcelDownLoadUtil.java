@@ -23,8 +23,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -151,6 +153,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static final int MAX_RECORD_CNT = 99999;
 	private static final int MAX_RECORD_CNT_LIST = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_EXCEL_DOWNLOAD, CoConstDef.CD_MAX_ROW_COUNT))+1;	
 
+	private static String msgGridId;
+	
 	@SuppressWarnings("unchecked")
 	private static String getReportExcelPost (String prjId, String type) throws IOException, InvalidFormatException {
 		Workbook wb = null;
@@ -386,7 +390,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		if (listMap != null && (listMap.containsKey("mainData") || listMap.containsKey("rows") )) {
 			list = (List<ProjectIdentification>) listMap.get(listMap.containsKey("mainData") ? "mainData" : "rows");
 			List<String[]> rows = new ArrayList<>();
-			Map<String, List<String>> rowsMap = new HashMap<>();
+			Map<String, String> rowsMap = new LinkedHashMap<>();
 			//Excell export sort
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 
@@ -483,31 +487,26 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			int idx = 1;
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				for (ProjectIdentification bean : list) {
-					makeSheetDataForBomOssComponents(idx, type, vr, currentGroupKey, rows, projectInfo, bean);
+					setExcelDataForBomOssComponents(idx, type, vr, currentGroupKey, rows, projectInfo, bean);
+					rowsMap.put(String.valueOf(idx), bean.getExportRowStr());
 					idx++;
 				}
 			} else {
 				boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 				for (ProjectIdentification bean : list) {
-					// exclude 제외
-					if ((CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn()))) {
+					if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 						continue;
 					}
-					
-					makeSheetDataForOssComponents(idx, type, isSelfCheck, vr, bean, rowsMap, distributionFlag);
-					
-//					addColumnWarningMessage(type, bean, vr, params);
-					
-//					rows.add(params.toArray(new String[params.size()]));
-					
+					setExcelDataForOssComponents(idx, type, isSelfCheck, vr, bean, distributionFlag);
+					rowsMap.put(String.valueOf(idx), bean.getExportRowStr());
 					idx++;
 				}
 			}
 			
 			if (!MapUtils.isEmpty(rowsMap)) {
 				for (String key : rowsMap.keySet()) {
-					List<String> params = rowsMap.get(key);
-					rows.add(params.toArray(new String[params.size()]));
+					String params = rowsMap.get(key);
+					rows.add(params.split("[|]"));
 				}
 				rowsMap.clear();
 			}
@@ -539,7 +538,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 	
-	private static void makeSheetDataForBomOssComponents(int idx, String type, T2CoValidationResult vr, String currentGroupKey, List<String[]> rows, Project projectInfo, ProjectIdentification bean) {
+	private static void setExcelDataForBomOssComponents(int idx, String type, T2CoValidationResult vr, String currentGroupKey, List<String[]> rows, Project projectInfo, ProjectIdentification bean) {
+		StringBuffer sb = new StringBuffer();
 		boolean continueFlag = false;
 		if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
 			for (String[] editRow : rows) {
@@ -585,22 +585,21 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			continueFlag = true;
 		} else {
-			currentGroupKey = bean.getGroupingColumn();
+			sb.append(bean.getGroupingColumn());
 		}
 		
 		// bom의 경우
 		if (!continueFlag && bean.getOssComponentsLicenseList() != null && !bean.getOssComponentsLicenseList().isEmpty()) {
 			boolean isMainRow = true;
 			
-			List<String> params = new ArrayList<>();
 			// main 정보
-			params.add(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : "");
-			params.add(bean.getOssName()); // OSS Name
-			params.add(bean.getOssVersion()); // OSS Version
-			params.add(bean.getLicenseName()); // LICENSE
-			params.add(isMainRow ? bean.getDownloadLocation() : ""); // download url
-			params.add(isMainRow ? bean.getHomepage() : ""); // home page url
-			params.add(isMainRow ? bean.getCopyrightText() : "");
+			sb.append("|").append(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : " ");
+			sb.append("|").append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
+			sb.append("|").append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
+			sb.append("|").append(!isEmpty(bean.getLicenseName()) ? bean.getLicenseName() : " "); // LICENSE
+			sb.append("|").append(isMainRow ? (!isEmpty(bean.getDownloadLocation()) ? bean.getDownloadLocation() : " ") : " "); // download url
+			sb.append("|").append(isMainRow ? (!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " ") : " "); // home page url
+			sb.append("|").append(isMainRow ? (!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ") : " ");
 			
 			String licenseTextUrl = "";
 			
@@ -622,7 +621,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			params.add(licenseTextUrl); //license text => license homepage
+			sb.append("|").append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " "); //license text => license homepage
 			
 			String refSrcTab = "";
 			String thirdKey = "3rd";
@@ -677,59 +676,89 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			// from
-			params.add(isMainRow ? refSrcTab : "");
+			sb.append("|").append(isMainRow && !isEmpty(refSrcTab) ? refSrcTab : " ");
 			// main 정보 (license 정보 후처리)
 //			params.add(isMainRow ? bean.getFilePath() : ""); // path
 			// vulnerability
-			params.add(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()) : "");
+			sb.append("|").append(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? " " : bean.getCvssScore()) : " ");
 			// dependencies
 //			params.add(isMainRow ? (isEmpty(bean.getDependencies()) ? "" : bean.getDependencies()) : "");
 			// notice
-			params.add(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : "")  : "");
+			sb.append("|").append(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ")  : " ");
 			// source code
-			params.add(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : "") : "");
+			sb.append("|").append(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ") : " ");
 			// Restriction
-			params.add(isMainRow ? (isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()) : "");
+			sb.append("|").append(isMainRow ? (isEmpty(bean.getRestriction()) ? " " : bean.getRestriction()) : " ");
 			
-			addColumnWarningMessage(type, bean, vr, params);
+			String message = "";
+			if (!vr.getValidMessageMap().isEmpty()) {
+				msgGridId = bean.getGridId();
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
+					msgGridId = bean.getComponentId();
+				}
+				List<Map.Entry<String, String>> validMsgList = vr.getValidMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+				if (CollectionUtils.isNotEmpty(validMsgList)) {
+					for (Entry<String, String> map : validMsgList) {
+						if (!isEmpty(message)) {
+							message += "/";
+						}
+						message += warningMsgCode((map.getKey().split("[.]")[0]).toUpperCase()) + map.getValue() + "(FONT_RED)";
+					}
+				}
+			}
 			
-			rows.add(params.toArray(new String[params.size()]));
+			if (!vr.getDiffMessageMap().isEmpty()) {
+				msgGridId = bean.getGridId();
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
+					msgGridId = bean.getComponentId();
+				}
+				List<Map.Entry<String, String>> diffMsgList = vr.getDiffMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+				if (CollectionUtils.isNotEmpty(diffMsgList)) {
+					for (Entry<String, String> map : diffMsgList) {
+						if (!isEmpty(message)) {
+							message += "/";
+						}
+						message += warningMsgCode((map.getKey().split("[.]")[0]).toUpperCase()) + map.getValue() + "(FONT_RED)";
+					}
+				}
+			}
+			sb.append("|").append(!isEmpty(message) ? message : " ");
+			bean.setExportRowStr(sb.toString());
 		}
 	}
-	private static void makeSheetDataForOssComponents(int idx, String type, boolean isSelfCheck, T2CoValidationResult vr, ProjectIdentification bean, Map<String, List<String>> rowsMap, boolean distributionFlag) {
-		List<String> params = new ArrayList<>();
-		// main 정보
-		//params.add(isSelfCheck ? bean.getComponentIdx() : bean.getComponentId()); //ID
-		params.add(isSelfCheck ? bean.getComponentIdx() : bean.getComponentIdx());
+	
+	private static void setExcelDataForOssComponents(int idx, String type, boolean isSelfCheck, T2CoValidationResult vr, ProjectIdentification bean, boolean distributionFlag) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(isSelfCheck ? bean.getComponentIdx() : bean.getComponentIdx());
 
 		// TODO 3rd party 이름 가져올 수 있나?
 		if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)) {
-
-			params.add(projectService.getPartnerFormatName(bean.getRefPartnerId(), false)); //3rd Party
+			String partnerFormatName = projectService.getPartnerFormatName(bean.getRefPartnerId(), false);
+			sb.append("|").append(!isEmpty(partnerFormatName) ? partnerFormatName : " ");
 		}
 
 		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-			params.add(bean.getBinaryName()); // Binary Name
+			sb.append("|").append(!isEmpty(bean.getBinaryName()) ? bean.getBinaryName() : " ");
 		}
 		
 		if (!CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) && !CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
 			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
-				params.add(bean.getPackageUrl());
+				sb.append("|").append(!isEmpty(bean.getPackageUrl()) ? bean.getPackageUrl() : " ");
 			} else {
-				params.add(bean.getFilePath()); // path
+				sb.append("|").append(!isEmpty(bean.getFilePath()) ? bean.getFilePath() : " ");
 			}
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-			params.add(bean.getBinaryNotice()); // notice
+			sb.append("|").append(!isEmpty(bean.getBinaryNotice()) ? bean.getBinaryNotice() : " ");
 		}
 		
-		params.add(bean.getOssName()); // OSS Name
-		params.add(bean.getOssVersion()); // OSS Version
+		sb.append("|").append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
+		sb.append("|").append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
 		String licenseNameList = "";
 		
 		if (bean.getComponentLicenseList() != null) {
-			for ( ProjectIdentification project : bean.getComponentLicenseList()) {
+			for (ProjectIdentification project : bean.getComponentLicenseList()) {
 				if (!isEmpty(licenseNameList)) {
 					licenseNameList += ",";
 				}
@@ -744,10 +773,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 		
-		params.add(licenseNameList); // license
-		params.add(bean.getDownloadLocation()); // download url
-		params.add(bean.getHomepage()); // home page url
-		params.add(bean.getCopyrightText());
+		sb.append("|").append(!isEmpty(licenseNameList) ? licenseNameList : " "); // license
+		sb.append("|").append(!isEmpty(bean.getDownloadLocation()) ? bean.getDownloadLocation() : " "); // download url
+		sb.append("|").append(!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " "); // home page url
+		sb.append("|").append(!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ");
 		
 		if (!(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type))
 			|| isSelfCheck) {
@@ -769,19 +798,18 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			params.add(licenseTextUrl);
+			sb.append("|").append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " ");
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
-//			params.add(""); // check list > Modified or not
-			params.add((new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore())); // Vuln
+			sb.append("|").append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
 		}
 		
 		if (!CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && !isSelfCheck) { // selfcheck에서는 출력하지 않음.
 			if ( CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-				params.add("Exclude");
+				sb.append("|").append("Exclude");
 			} else {
-				params.add("");
+				sb.append("|").append(" ");
 			}
 		}
 		
@@ -790,17 +818,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		if (!isSelfCheck && (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type))) {
 			_comm = avoidNull(bean.getComments().trim());
-			params.add(_comm); 
+			sb.append("|").append(!isEmpty(_comm) ? _comm : " "); 
 		}
 		
 		// Vulnerability
 		if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-			params.add(new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()); // Vuln
-			params.add(isEmpty(bean.getRestriction()) ? "" : bean.getRestriction());
+			sb.append("|").append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
+			sb.append("|").append(isEmpty(bean.getRestriction()) ? " " : bean.getRestriction());
 		}
 		
 		if (isSelfCheck){
-			params.add((new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore())); // Vuln
+			sb.append("|").append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
 			
 			boolean errRowFlag = false;
 			
@@ -814,90 +842,80 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			if (errRowFlag) {
 				// notice
-				params.add("");
+				sb.append("|").append(" ");
 				// source code
-				params.add("");
+				sb.append("|").append(" ");
 			} else {
 				// notice
-				params.add(( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+				sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 				// source code
-				params.add(( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+				sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 			}
 			
 			// Restriction
-			params.add((isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()));
+			sb.append("|").append(isEmpty(bean.getRestriction()) ? " " : avoidNull(bean.getRestriction()));
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)){
-			params.add(isEmpty(bean.getComments()) ? "" : bean.getComments());
+			sb.append("|").append(isEmpty(bean.getComments()) ? " " : bean.getComments());
 			// notice
-			params.add(( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+			sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 			// source code
-			params.add(( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+			sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 			// Restriction
-			params.add((isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()));
+			sb.append("|").append(isEmpty(bean.getRestriction()) ? " " : bean.getRestriction());
 		}
 		
 		if (isSelfCheck){
 			if (bean.getExcludeYn().equals(CoConstDef.FLAG_YES)) {
-				params.add("Exclude");
+				sb.append("|").append("Exclude");
 			} else {
-				params.add("");
+				sb.append("|").append(" ");
 			}
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)){
 			if (!isEmpty(bean.getDependencies())) {
-				params.add(bean.getDependencies());
+				sb.append("|").append(bean.getDependencies());
 			} else {
-				params.add("");
+				sb.append("|").append(" ");
 			}
 		}
 		
-		addColumnWarningMessage(type, bean, vr, params);
-		rowsMap.put(String.valueOf(idx), params);
-	}
-	private static void addColumnWarningMessage(String type, ProjectIdentification bean, T2CoValidationResult vr, List<String> params) {
 		String message = "";
-		
 		if (!vr.getValidMessageMap().isEmpty()) {
-			String gridId = "";
+			msgGridId = bean.getGridId();
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
-				gridId = bean.getComponentId();
-			} else {
-				gridId = bean.getGridId();
+				msgGridId = bean.getComponentId();
 			}
-			
-			for (String key : vr.getValidMessageMap().keySet()) {
-				if (key.contains(".") && gridId.equals(key.split("[.]")[1])) {
+			List<Map.Entry<String, String>> validMsgList = vr.getValidMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+			if (CollectionUtils.isNotEmpty(validMsgList)) {
+				for (Entry<String, String> map : validMsgList) {
 					if (!isEmpty(message)) {
 						message += "/";
 					}
-					
-					message += warningMsgCode((key.split("[.]")[0]).toUpperCase()) + vr.getValidMessageMap().get(key) + "(FONT_RED)";
+					message += warningMsgCode((map.getKey().split("[.]")[0]).toUpperCase()) + map.getValue() + "(FONT_RED)";
 				}
 			}
 		}
 		
 		if (!vr.getDiffMessageMap().isEmpty()) {
-			String gridId = "";
+			msgGridId = bean.getGridId();
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
-				gridId = bean.getComponentId();
-			} else {
-				gridId = bean.getGridId();
+				msgGridId = bean.getComponentId();
 			}
-			for (String key : vr.getDiffMessageMap().keySet()) {
-				if (key.contains(".") && gridId.equals(key.split("[.]")[1])) {
+			List<Map.Entry<String, String>> diffMsgList = vr.getDiffMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+			if (CollectionUtils.isNotEmpty(diffMsgList)) {
+				for (Entry<String, String> map : diffMsgList) {
 					if (!isEmpty(message)) {
 						message += "/";
 					}
-					
-					message += warningMsgCode((key.split("[.]")[0]).toUpperCase()) + vr.getDiffMessageMap(true).get(key) + "(FONT_BLUE)";
+					message += warningMsgCode((map.getKey().split("[.]")[0]).toUpperCase()) + map.getValue() + "(FONT_RED)";
 				}
 			}
 		}
-		
-		params.add(isEmpty(message) ? "" : message);
+		sb.append("|").append(!isEmpty(message) ? message : " ");
+		bean.setExportRowStr(sb.toString());
 	}
 	
 	private static String warningMsgCode(String key) {
