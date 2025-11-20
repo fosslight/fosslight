@@ -359,6 +359,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private Float standardScore;
 	private String linkToPopup;
 	
+	private String exportRowStr;
+	
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
@@ -2195,5 +2197,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setLinkToPopup(String linkToPopup) {
 		this.linkToPopup = linkToPopup;
+	}
+
+	public String getExportRowStr() {
+		return exportRowStr;
+	}
+
+	public void setExportRowStr(String exportRowStr) {
+		this.exportRowStr = exportRowStr;
 	}
 }
