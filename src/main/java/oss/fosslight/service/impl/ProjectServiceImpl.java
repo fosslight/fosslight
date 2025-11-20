@@ -4084,8 +4084,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				map = getIdentificationGridList(param);
 
-				if (map != null && map.containsKey("mainData")
-						&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
+				if (map != null && map.containsKey("mainData") && !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
 					isAndroidModel = true;
 					T2CoProjectValidator pv = new T2CoProjectValidator();
 					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
@@ -4116,7 +4115,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					T2CoValidationResult vr = pv.validate(new HashMap<>());
 					
 					// return validator result
-					if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
+					if (!vr.isValid() && (map.containsKey("adminCheckList") && !vr.isAdminCheck((List<String>) map.get("adminCheckList")))) {
 //						return makeJsonResponseHeader(vr.getValidMessageMap());
 						resultMap.put("validMap", vr.getValidMessageMap());
 						return resultMap;
