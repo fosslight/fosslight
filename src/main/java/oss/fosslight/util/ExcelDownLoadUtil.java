@@ -585,7 +585,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			continueFlag = true;
 		} else {
-			sb.append(bean.getGroupingColumn());
+			currentGroupKey = bean.getGroupingColumn();
 		}
 		
 		// bom의 경우
