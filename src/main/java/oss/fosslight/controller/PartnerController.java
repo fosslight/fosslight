@@ -1008,7 +1008,7 @@ public class PartnerController extends CoTopComponent{
 			@ModelAttribute PartnerMaster partnerMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
+			, Model model) throws InterruptedException {
 		HashMap<String, Object> resMap = new HashMap<>();
 		String resCd = "00";
 		
@@ -1026,6 +1026,8 @@ public class PartnerController extends CoTopComponent{
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+
+		Thread.sleep(3000);
 		
 		try {
 			History h = partnerService.work(partnerMaster);
