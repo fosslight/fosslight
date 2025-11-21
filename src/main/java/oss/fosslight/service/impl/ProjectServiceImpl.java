@@ -4114,8 +4114,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 					T2CoValidationResult vr = pv.validate(new HashMap<>());
 					
+					boolean isAdminCheck = false;
+					if (map.containsKey("adminCheckList")) {
+						isAdminCheck = vr.isAdminCheck((List<String>) map.get("adminCheckList"));
+					}
 					// return validator result
-					if (!vr.isValid() && (map.containsKey("adminCheckList") && !vr.isAdminCheck((List<String>) map.get("adminCheckList")))) {
+					if (!vr.isValid() && !isAdminCheck) {
 //						return makeJsonResponseHeader(vr.getValidMessageMap());
 						resultMap.put("validMap", vr.getValidMessageMap());
 						return resultMap;
