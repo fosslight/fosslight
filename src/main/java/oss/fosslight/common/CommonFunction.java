@@ -25,6 +25,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6372,6 +6373,16 @@ public class CommonFunction extends CoTopComponent {
 		}
 		bean = ossService.getOssVulnerabilityInfo(ossMaster);
 		return bean;
+	}
+
+	public static String normalizeText(String text) {
+	    text = Jsoup.parse(text).text();
+	    text = text.replace("\r\n", "\n").replace("\r", "\n");
+	    text = text.replaceAll("\\u00A0", "");
+	    text = text.replaceAll("\\s+", " ");
+	    text = text.trim();
+	    text = Normalizer.normalize(text, Normalizer.Form.NFC);
+	    return text;
 	}
 }
 
