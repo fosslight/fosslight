@@ -688,7 +688,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			// source code
 			sb.append("|").append(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ") : " ");
 			// Restriction
-			sb.append("|").append(isMainRow ? (isEmpty(bean.getRestriction()) ? " " : bean.getRestriction()) : " ");
+			sb.append("|").append(isMainRow ? (isEmpty(bean.getRestriction()) ? " " : bean.getRestriction().contains("|") ? bean.getRestriction().split("[|]")[0] : bean.getRestriction()) : " ");
 			
 			String message = "";
 			if (!vr.getValidMessageMap().isEmpty()) {
