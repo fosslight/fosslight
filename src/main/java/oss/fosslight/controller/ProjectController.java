@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -186,8 +187,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.AUTOCOMPLETE_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
 		List<Map<String, String>> list = projectService.getProjectNameList(project);
 		CustomXssFilter.nameFilter(list);
@@ -195,8 +195,7 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	@GetMapping(value = PROJECT.AUTOCOMPLETE_ID_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteIdAjax(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> autoCompleteIdAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
 		List<Project> list = projectService.getProjectIdList(project);
 		return makeJsonResponseHeader(list);
@@ -1950,10 +1949,9 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_3RD)
-	public @ResponseBody ResponseEntity<Object> save3rd(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> save3rd(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String prjId = (String) map.get("referenceId");
-		String identificationSubStatusPartner = (String) map.get("identificationSubStatusPartner");
+		String identificationSubStatusPartner = (String) map.getOrDefault("identificationSubStatusPartner", "");
 		String mainGrid = (String) map.get("mainData");
 		String thirdPartyGrid = (String) map.get("thirdPartyData");
 		String resetFlag = (String) map.get("resetFlag");
@@ -1972,7 +1970,7 @@ public class ProjectController extends CoTopComponent {
 		// 서브그리드
 		projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
 		
-		if (CoConstDef.FLAG_NO.equals(identificationSubStatusPartner)) {
+		if (CoConstDef.FLAG_NO.equals(avoidNull(identificationSubStatusPartner))) {
 			project.setPrjId(prjId);
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			project.setIdentificationSubStatusPartner(identificationSubStatusPartner);
@@ -1983,8 +1981,7 @@ public class ProjectController extends CoTopComponent {
 		
 		try {
 			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
-				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-				CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
+				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
 							
 				if (!isEmpty(changedLicenseName)) {
 					CommentsHistory commentHisBean = new CommentsHistory();
@@ -2499,8 +2496,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_SRC)
-	public @ResponseBody ResponseEntity<Object> saveSrc(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveSrc(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		// default validation
 		boolean isValid = true;
 		// last response map
@@ -2697,8 +2693,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.NICKNAME_CD)
-	public @ResponseBody ResponseEntity<Object> nickNameValid(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
+	public @ResponseBody ResponseEntity<Object> nickNameValid(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
 		Map<String, List<String>> result = null;
 
 		String mainDataString = (String) map.get("mainData");
@@ -2758,8 +2753,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@PostMapping(value = PROJECT.SAVE_BINANDROID)
-	public @ResponseBody ResponseEntity<Object> saveBinAndroid(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveBinAndroid(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		// default validation
 		boolean isValid = true;
 		// last response map
@@ -2861,10 +2855,8 @@ public class ProjectController extends CoTopComponent {
 			
 			// 분석결과서 업로드시 라이선스명(닉네임)이 변경된 사항이 있으면 이력으로 등록한다.
 			try {
-				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-						CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId)) != null) {
-					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-							CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId), true);
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId), true);
 					
 					if (!isEmpty(changedLicenseName)) {
 						CommentsHistory commentHisBean = new CommentsHistory();
@@ -2881,11 +2873,8 @@ public class ProjectController extends CoTopComponent {
 
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
 			try {
-				if (getSessionObject(
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId,
-								CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) != null) {
-					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID), true);
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID), true);
 					
 					if (!isEmpty(changedLicenseName)) {
 						CommentsHistory commentHisBean = new CommentsHistory();
@@ -3067,7 +3056,6 @@ public class ProjectController extends CoTopComponent {
 	public String identification(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId, @PathVariable String initDiv) throws Exception {
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project.setActType(CoConstDef.FLAG_NO);
 		Project projectMaster = projectService.getProjectDetail(project);
 		
 		boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
@@ -3281,8 +3269,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@RequestMapping(value = PROJECT.TRD_OSS)
-	public @ResponseBody ResponseEntity<Object> listAjax(OssComponents ossComponents, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> listAjax(OssComponents ossComponents, HttpServletRequest req, HttpServletResponse res, Model model) {
 		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 		Map<String, Object> map = projectService.getPartnerOssList(ossComponents);
 		projectService.setLoadToList(map, ossComponents.getReferenceId());
@@ -3300,8 +3287,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SEARCH_CD)
-	public @ResponseBody ResponseEntity<Object> thirdProject(ProjectIdentification projectIdentification,
-			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
+	public @ResponseBody ResponseEntity<Object> thirdProject(ProjectIdentification projectIdentification, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -3327,8 +3313,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.IDENTIFICATION_THIRD)
-	public @ResponseBody ResponseEntity<Object> identificationThird(OssComponents ossComponents, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> identificationThird(OssComponents ossComponents, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> map = projectService.getIdentificationThird(ossComponents);
 
 		return makeJsonResponseHeader(map);
@@ -3575,8 +3560,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the 3 rd map
 	 */
 	@GetMapping(value = PROJECT.TRD_MAP)
-	public @ResponseBody ResponseEntity<Object> get3rdMap(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> get3rdMap(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> map = null;
 		
 		try {
@@ -3853,8 +3837,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the 3 rd map
 	 */
 	@GetMapping(value = PROJECT.ADD_LIST)
-	public @ResponseBody ResponseEntity<Object> getSrcAddList(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> getSrcAddList(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> map = null;
 		
 		try {
@@ -3911,8 +3894,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@ResponseBody
 	@PostMapping(value = PROJECT.CSV_FILE)	
-	public String csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
-			HttpServletResponse res, Model model) throws Exception {
+	public String csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		ArrayList<Object> resultList = new ArrayList<Object>();
 		// 파일등록
 		List<UploadFile> list = new ArrayList<UploadFile>();
@@ -3925,8 +3907,7 @@ public class ProjectController extends CoTopComponent {
 		
 		// 파일 등록
 		try {
-			if (req.getContentType() != null
-					&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
+			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
 				if (fileId == null) {
 					list = fileService.uploadFile(req, file);
@@ -4091,8 +4072,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SHEET_DATA)
-	public @ResponseBody ResponseEntity<Object> getSheetData(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> getSheetData(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		log.info("Report Read Start");
 
 		try {
@@ -4110,13 +4090,11 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 			// 편집중인 Data 격납
-			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {
-			}.getType();
+			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
 			List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
 			ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
 
-			Type collectionType3 = new TypeToken<List<List<ProjectIdentification>>>() {
-			}.getType();
+			Type collectionType3 = new TypeToken<List<List<ProjectIdentification>>>() {}.getType();
 			List<List<ProjectIdentification>> ossComponentsLicense = new ArrayList<>();
 			ossComponentsLicense = (List<List<ProjectIdentification>>) fromJson(subDataString, collectionType3);
 
@@ -4125,8 +4103,7 @@ public class ProjectController extends CoTopComponent {
 			List<String> errMsgList = new ArrayList<>();
 			Map<String, String> emptyErrMsg = new HashMap<>();
 			try {
-				if (!ExcelUtil.readReport(readType, true, sheetList.toArray(new String[sheetList.size()]), fileSeq,
-						reportData, errMsgList, emptyErrMsg)) {
+				if (!ExcelUtil.readReport(readType, true, sheetList.toArray(new String[sheetList.size()]), fileSeq, reportData, errMsgList, emptyErrMsg)) {
 					// error 처리
 					for (String s : errMsgList) {
 						if (isEmpty(s)) {
@@ -4173,10 +4150,8 @@ public class ProjectController extends CoTopComponent {
 			
 			// license name이 변경된 내용이 있을 경우 사용자 표시
 			String systemChangeHisStr = "";
-			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-					CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq)) != null) {
-				systemChangeHisStr = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-						CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq));
+			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq)) != null) {
+				systemChangeHisStr = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq));
 			}
 
 			if (resultMap.containsKey("versionChangedList")) {
@@ -4210,8 +4185,7 @@ public class ProjectController extends CoTopComponent {
 
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				resultMap.replace("mainData", CommonFunction.identificationSortByValidInfo(
-						(List<ProjectIdentification>) resultMap.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
+				resultMap.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) resultMap.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
 				return makeJsonResponseHeader(true, errMsg, resultMap, vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap());
 			}
 			
@@ -4378,16 +4352,29 @@ public class ProjectController extends CoTopComponent {
 			if ("csv".equals(fileType)) {
 				type = "13";
 			} else if ("notice".equals(fileType)) {
-				type = "14";
+				type = "14,20";
 			} else {
 				type = "19";
 			}
 			
-			String codeExt[] = StringUtil.split(codeMapper.selectExtType(type), ",");
-			
-			for (int i = 0; i < codeExt.length; i++) {
-				if (codeExt[i].equals(extType)) {
-					count++;
+			if (type.contains(",")) {
+				for (String t : type.split(",")) {
+					String codeExt[] = StringUtil.split(codeMapper.selectExtType(t), ",");
+					for (int i = 0; i < codeExt.length; i++) {
+						if (codeExt[i].equalsIgnoreCase(extType)) {
+							count++;
+						}
+					}
+					if (count > 0) {
+						break;
+					}
+				}
+			} else {
+				String codeExt[] = StringUtil.split(codeMapper.selectExtType(type), ",");
+				for (int i = 0; i < codeExt.length; i++) {
+					if (codeExt[i].equals(extType)) {
+						count++;
+					}
 				}
 			}
 		}
