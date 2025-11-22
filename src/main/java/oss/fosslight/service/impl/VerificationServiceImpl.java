@@ -337,8 +337,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				// delete physical file
 				for (T2File delFile : deletePhysicalFileList){
 					fileService.deletePhysicalFile(delFile, "VERIFY");
-					log.info("[Prj " + prjId + "] "+ "Remove physical file for " + delFile.getOrigNm() + " : "
-							+ delFile.getLogiPath() + "/" + delFile.getLogiNm());
+					log.info("[Prj " + prjId + "] "+ "Remove physical file for " + delFile.getOrigNm() + " : " + delFile.getLogiPath() + "/" + delFile.getLogiNm());
 				}
 				
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
@@ -1401,25 +1400,28 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				log.info("VERIFY Copy Readme file START -----------------");
 				log.info("VERIFY README MV PATH : " + VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath);
 				
-				if (isChangedPackageFile){
+				File readmeFile = new File(VERIFY_PATH_OUTPUT +"/" + prjId +"/" + readmeFileName);
+				if (isChangedPackageFile || !readmeFile.exists()){
 					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
+				resMap.put("readmeFileName", readmeFileName);
 				log.info("VERIFY Copy Readme file END -----------------");
 			}
 			
 			//STEP 7 : README 파일 내용 DB 에 저장
-			if (doUpdate && packagingFileIdx == 1) {
-				log.debug("VERIFY readme 등록");
-				
-				project.setPrjId(prjId);
-				project.setReadmeFileName(readmeFileName);
-				project.setReadmeYn(StringUtil.isEmpty(readmeFileName) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES);
 			
-				projectService.registReadmeContent(project);
-				
-				log.debug("VERIFY readme 등록 완료");
-			}
+//			if (doUpdate && packagingFileIdx == 1) {
+//				log.debug("VERIFY readme 등록");
+//				
+//				project.setPrjId(prjId);
+//				project.setReadmeFileName(readmeFileName);
+//				project.setReadmeYn(StringUtil.isEmpty(readmeFileName) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES);
+//			
+//				projectService.registReadmeContent(project);
+//				
+//				log.debug("VERIFY readme 등록 완료");
+//			}
 			
 			//STEP 8 : Verify 동작 후 Except File Result DB 저장
 			log.info("VERIFY Read exceptFileContent file START -----------------");
@@ -1482,8 +1484,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 				if (isExistFile) {
 					String verify_binary_list = CommonFunction.getStringFromFile(VERIFY_PATH_OUTPUT +"/"+prjId+"/verify_binary_list").replaceAll(VERIFY_PATH_DECOMP +"/"+ prjId + "/", "");
-					FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_BINARY_LIST, verify_binary_list);
-					project.setBinaryFileYn(CoConstDef.FLAG_YES);
+					if (!isEmpty(verify_binary_list)) {
+						FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_BINARY_LIST, verify_binary_list);
+						project.setBinaryFileYn(CoConstDef.FLAG_YES);
+					} else {
+						project.setBinaryFileYn("");
+					}
 				} else {
 					project.setBinaryFileYn("");
 				}

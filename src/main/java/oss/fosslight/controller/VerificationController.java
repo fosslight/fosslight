@@ -463,6 +463,28 @@ public class VerificationController extends CoTopComponent {
 				result.add(verificationService.processVerification(map, file, project));
 			}
 			
+			// README 파일 내용 DB 에 저장
+			if (CollectionUtils.isNotEmpty(result)) {
+				String readmeFileName = "";
+				for (Map<String, Object> resultMap : result) {
+					if (resultMap.containsKey("readmeFileName")) {
+						readmeFileName = String.valueOf(resultMap.get("readmeFileName"));
+						break;
+					}
+				}
+				
+				Project param = new Project();
+				param.setPrjId(prjId);
+				if (!isEmpty(readmeFileName)) {
+					param.setReadmeFileName(readmeFileName);
+					param.setReadmeYn(CoConstDef.FLAG_YES);
+				} else {
+					param.setReadmeFileName(null);
+					param.setReadmeYn(CoConstDef.FLAG_NO);
+				}
+				projectService.registReadmeContent(param);
+			}
+			
 			resMap = result.get(0);
 			
 			Map<String, Object> fileCountsMap = new HashMap<>();
