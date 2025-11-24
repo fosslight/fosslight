@@ -561,7 +561,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			    				})
 			    				.block()
 			    				.bodyToMono(String.class)
-			    				.retry(1)
+			    				.retry(5)
 			    				.block();
 		
 		Map<String, Object> returnMap = null;
