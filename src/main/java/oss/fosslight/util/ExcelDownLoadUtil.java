@@ -491,9 +491,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				diffMsgMap = vr.getDiffMessageMap(true);
 			}
 			
+			String SEP = "\u001F";
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				for (ProjectIdentification bean : list) {
-					setExcelDataForBomOssComponents(idx, type, validMsgMap, diffMsgMap, currentGroupKey, rows, projectInfo, bean);
+					setExcelDataForBomOssComponents(idx, type, validMsgMap, diffMsgMap, currentGroupKey, rows, projectInfo, bean, SEP);
 					rowsMap.put(String.valueOf(idx), bean.getExportRowStr());
 					idx++;
 				}
@@ -504,7 +505,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 						continue;
 					}
-					setExcelDataForOssComponents(idx, type, isSelfCheck, validMsgMap, diffMsgMap, errCodeMap, bean, distributionFlag);
+					setExcelDataForOssComponents(idx, type, isSelfCheck, validMsgMap, diffMsgMap, errCodeMap, bean, distributionFlag, SEP);
 					rowsMap.put(String.valueOf(idx), bean.getExportRowStr());
 					idx++;
 				}
@@ -513,7 +514,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (!MapUtils.isEmpty(rowsMap)) {
 				for (String key : rowsMap.keySet()) {
 					String params = rowsMap.get(key);
-					rows.add(params.split("[|]"));
+					rows.add(params.split(SEP));
 				}
 				rowsMap.clear();
 			}
@@ -545,7 +546,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 	
-	private static void setExcelDataForBomOssComponents(int idx, String type, Map<String, String> validMsgMap, Map<String, String> diffMsgMap, String currentGroupKey, List<String[]> rows, Project projectInfo, ProjectIdentification bean) {
+	private static void setExcelDataForBomOssComponents(int idx, String type, Map<String, String> validMsgMap, Map<String, String> diffMsgMap, String currentGroupKey, List<String[]> rows, Project projectInfo, ProjectIdentification bean, String SEP) {
 		StringBuffer sb = new StringBuffer();
 		boolean continueFlag = false;
 		if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
@@ -601,12 +602,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			// main 정보
 			sb.append(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : " ");
-			sb.append("|").append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
-			sb.append("|").append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
-			sb.append("|").append(!isEmpty(bean.getLicenseName()) ? bean.getLicenseName() : " "); // LICENSE
-			sb.append("|").append(isMainRow ? (!isEmpty(bean.getDownloadLocation()) ? bean.getDownloadLocation() : " ") : " "); // download url
-			sb.append("|").append(isMainRow ? (!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " ") : " "); // home page url
-			sb.append("|").append(isMainRow ? (!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ") : " ");
+			sb.append(SEP).append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
+			sb.append(SEP).append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
+			sb.append(SEP).append(!isEmpty(bean.getLicenseName()) ? bean.getLicenseName() : " "); // LICENSE
+			sb.append(SEP).append(isMainRow ? (!isEmpty(bean.getDownloadLocation()) ? bean.getDownloadLocation() : " ") : " "); // download url
+			sb.append(SEP).append(isMainRow ? (!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " ") : " "); // home page url
+			sb.append(SEP).append(isMainRow ? (!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ") : " ");
 			
 			String licenseTextUrl = "";
 			
@@ -628,7 +629,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			sb.append("|").append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " "); //license text => license homepage
+			sb.append(SEP).append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " "); //license text => license homepage
 			
 			String refSrcTab = "";
 			String thirdKey = "3rd";
@@ -683,19 +684,19 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			// from
-			sb.append("|").append(isMainRow && !isEmpty(refSrcTab) ? refSrcTab : " ");
+			sb.append(SEP).append(isMainRow && !isEmpty(refSrcTab) ? refSrcTab : " ");
 			// main 정보 (license 정보 후처리)
 //			params.add(isMainRow ? bean.getFilePath() : ""); // path
 			// vulnerability
-			sb.append("|").append(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? " " : bean.getCvssScore()) : " ");
+			sb.append(SEP).append(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? " " : bean.getCvssScore()) : " ");
 			// dependencies
 //			params.add(isMainRow ? (isEmpty(bean.getDependencies()) ? "" : bean.getDependencies()) : "");
 			// notice
-			sb.append("|").append(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ")  : " ");
+			sb.append(SEP).append(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ")  : " ");
 			// source code
-			sb.append("|").append(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ") : " ");
+			sb.append(SEP).append(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ") : " ");
 			// Restriction
-			sb.append("|").append(isMainRow ? (isEmpty(bean.getRestriction()) ? " " : bean.getRestriction().contains("|") ? bean.getRestriction().split("[|]")[0] : bean.getRestriction()) : " ");
+			sb.append(SEP).append(isMainRow ? (isEmpty(bean.getRestriction()) ? " " : bean.getRestriction().contains("|") ? bean.getRestriction().split("[|]")[0] : bean.getRestriction()) : " ");
 			
 			String message = "";
 			if (MapUtils.isNotEmpty(validMsgMap)) {
@@ -703,7 +704,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 					msgGridId = bean.getComponentId();
 				}
-				List<Map.Entry<String, String>> validMsgList = validMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+				List<Map.Entry<String, String>> validMsgList = validMsgMap.entrySet().stream().filter(e -> e.getKey().indexOf(msgGridId) > -1).collect(Collectors.toList());
 				if (CollectionUtils.isNotEmpty(validMsgList)) {
 					for (Entry<String, String> map : validMsgList) {
 						if (!isEmpty(message)) {
@@ -719,7 +720,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 					msgGridId = bean.getComponentId();
 				}
-				List<Map.Entry<String, String>> diffMsgList = diffMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+				List<Map.Entry<String, String>> diffMsgList = diffMsgMap.entrySet().stream().filter(e -> e.getKey().indexOf(msgGridId) > -1).collect(Collectors.toList());
 				if (CollectionUtils.isNotEmpty(diffMsgList)) {
 					for (Entry<String, String> map : diffMsgList) {
 						if (!isEmpty(message)) {
@@ -729,39 +730,39 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 				}
 			}
-			sb.append("|").append(!isEmpty(message) ? message : " ");
+			sb.append(SEP).append(!isEmpty(message) ? message : " ");
 			bean.setExportRowStr(sb.toString());
 		}
 	}
 	
-	private static void setExcelDataForOssComponents(int idx, String type, boolean isSelfCheck, Map<String, String> validMsgMap, Map<String, String> diffMsgMap, Map<String, String> errCodeMap, ProjectIdentification bean, boolean distributionFlag) {
+	private static void setExcelDataForOssComponents(int idx, String type, boolean isSelfCheck, Map<String, String> validMsgMap, Map<String, String> diffMsgMap, Map<String, String> errCodeMap, ProjectIdentification bean, boolean distributionFlag, String SEP) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(isSelfCheck ? bean.getComponentIdx() : bean.getComponentIdx());
 
 		// TODO 3rd party 이름 가져올 수 있나?
 		if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)) {
 			String partnerFormatName = projectService.getPartnerFormatName(bean.getRefPartnerId(), false);
-			sb.append("|").append(!isEmpty(partnerFormatName) ? partnerFormatName : " ");
+			sb.append(SEP).append(!isEmpty(partnerFormatName) ? partnerFormatName : " ");
 		}
 
 		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-			sb.append("|").append(!isEmpty(bean.getBinaryName()) ? bean.getBinaryName() : " ");
+			sb.append(SEP).append(!isEmpty(bean.getBinaryName()) ? bean.getBinaryName() : " ");
 		}
 		
 		if (!CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type) && !CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
 			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
-				sb.append("|").append(!isEmpty(bean.getPackageUrl()) ? bean.getPackageUrl() : " ");
+				sb.append(SEP).append(!isEmpty(bean.getPackageUrl()) ? bean.getPackageUrl() : " ");
 			} else {
-				sb.append("|").append(!isEmpty(bean.getFilePath()) ? bean.getFilePath() : " ");
+				sb.append(SEP).append(!isEmpty(bean.getFilePath()) ? bean.getFilePath() : " ");
 			}
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-			sb.append("|").append(!isEmpty(bean.getBinaryNotice()) ? bean.getBinaryNotice() : " ");
+			sb.append(SEP).append(!isEmpty(bean.getBinaryNotice()) ? bean.getBinaryNotice() : " ");
 		}
 		
-		sb.append("|").append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
-		sb.append("|").append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
+		sb.append(SEP).append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
+		sb.append(SEP).append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
 		String licenseNameList = "";
 		
 		if (bean.getComponentLicenseList() != null) {
@@ -780,10 +781,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 		
-		sb.append("|").append(!isEmpty(licenseNameList) ? licenseNameList : " "); // license
-		sb.append("|").append(!isEmpty(bean.getDownloadLocation()) ? bean.getDownloadLocation() : " "); // download url
-		sb.append("|").append(!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " "); // home page url
-		sb.append("|").append(!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ");
+		sb.append(SEP).append(!isEmpty(licenseNameList) ? licenseNameList : " "); // license
+		sb.append(SEP).append(!isEmpty(bean.getDownloadLocation()) ? bean.getDownloadLocation() : " "); // download url
+		sb.append(SEP).append(!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " "); // home page url
+		sb.append(SEP).append(!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ");
 		
 		if (!(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type))
 			|| isSelfCheck) {
@@ -805,18 +806,18 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			sb.append("|").append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " ");
+			sb.append(SEP).append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " ");
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
-			sb.append("|").append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
+			sb.append(SEP).append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
 		}
 		
 		if (!CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && !isSelfCheck) { // selfcheck에서는 출력하지 않음.
-			if ( CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-				sb.append("|").append("Exclude");
+			if (CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+				sb.append(SEP).append("Exclude");
 			} else {
-				sb.append("|").append(" ");
+				sb.append(SEP).append(" ");
 			}
 		}
 		
@@ -825,17 +826,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		if (!isSelfCheck && (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type))) {
 			_comm = avoidNull(bean.getComments().trim());
-			sb.append("|").append(!isEmpty(_comm) ? _comm : " "); 
+			sb.append(SEP).append(!isEmpty(_comm) ? _comm : " "); 
 		}
 		
 		// Vulnerability
 		if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-			sb.append("|").append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
-			sb.append("|").append(isEmpty(bean.getRestriction()) ? " " : bean.getRestriction());
+			sb.append(SEP).append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
+			sb.append(SEP).append(isEmpty(bean.getRestriction()) ? " " : bean.getRestriction());
 		}
 		
 		if (isSelfCheck){
-			sb.append("|").append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
+			sb.append(SEP).append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
 			
 			boolean errRowFlag = false;
 			
@@ -851,43 +852,43 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			if (errRowFlag) {
 				// notice
-				sb.append("|").append(" ");
+				sb.append(SEP).append(" ");
 				// source code
-				sb.append("|").append(" ");
+				sb.append(SEP).append(" ");
 			} else {
 				// notice
-				sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
+				sb.append(SEP).append((CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 				// source code
-				sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
+				sb.append(SEP).append((CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 			}
 			
 			// Restriction
-			sb.append("|").append(isEmpty(bean.getRestriction()) ? " " : avoidNull(bean.getRestriction()));
+			sb.append(SEP).append(isEmpty(bean.getRestriction()) ? " " : avoidNull(bean.getRestriction()));
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)){
-			sb.append("|").append(isEmpty(bean.getComments()) ? " " : bean.getComments());
+			sb.append(SEP).append(isEmpty(bean.getComments()) ? " " : bean.getComments());
 			// notice
-			sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
+			sb.append(SEP).append((CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 			// source code
-			sb.append("|").append((CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
+			sb.append(SEP).append((CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : " ");
 			// Restriction
-			sb.append("|").append(isEmpty(bean.getRestriction()) ? " " : bean.getRestriction());
+			sb.append(SEP).append(isEmpty(bean.getRestriction()) ? " " : bean.getRestriction());
 		}
 		
 		if (isSelfCheck){
 			if (bean.getExcludeYn().equals(CoConstDef.FLAG_YES)) {
-				sb.append("|").append("Exclude");
+				sb.append(SEP).append("Exclude");
 			} else {
-				sb.append("|").append(" ");
+				sb.append(SEP).append(" ");
 			}
 		}
 		
 		if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)){
 			if (!isEmpty(bean.getDependencies())) {
-				sb.append("|").append(bean.getDependencies());
+				sb.append(SEP).append(bean.getDependencies());
 			} else {
-				sb.append("|").append(" ");
+				sb.append(SEP).append(" ");
 			}
 		}
 		
@@ -897,7 +898,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				msgGridId = bean.getComponentId();
 			}
-			List<Map.Entry<String, String>> validMsgList = validMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+			List<Map.Entry<String, String>> validMsgList = validMsgMap.entrySet().stream().filter(e -> e.getKey().indexOf(msgGridId) > -1).collect(Collectors.toList());
 			if (CollectionUtils.isNotEmpty(validMsgList)) {
 				for (Entry<String, String> map : validMsgList) {
 					if (!isEmpty(message)) {
@@ -913,7 +914,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				msgGridId = bean.getComponentId();
 			}
-			List<Map.Entry<String, String>> diffMsgList = diffMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+			List<Map.Entry<String, String>> diffMsgList = diffMsgMap.entrySet().stream().filter(e -> e.getKey().indexOf(msgGridId) > -1).collect(Collectors.toList());
 			if (CollectionUtils.isNotEmpty(diffMsgList)) {
 				for (Entry<String, String> map : diffMsgList) {
 					if (!isEmpty(message)) {
@@ -923,7 +924,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 		}
-		sb.append("|").append(!isEmpty(message) ? message : " ");
+		sb.append(SEP).append(!isEmpty(message) ? message : " ");
 		bean.setExportRowStr(sb.toString());
 	}
 	
