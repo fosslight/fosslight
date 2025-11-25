@@ -16,7 +16,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +43,6 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Min;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -703,14 +701,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
             @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames,
-            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String bomSave) {
+            @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
+            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N", hidden=true)
+            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false) String bomSave)
+            {
 
-        T2Users userInfo = userService.checkApiUserAuth(authorization);
+
+            T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         tabName = tabName.toUpperCase();
+        
+        // bomSave 파라미터가 있으면 sbomSave로 사용
+        if (!isEmpty(bomSave)) {
+            sbomSave = bomSave;
+        }
 
         if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
@@ -822,7 +829,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
             }
 
-            if(bomSave.equals(CoConstDef.FLAG_YES)) {
+            if(sbomSave.equals(CoConstDef.FLAG_YES)) {
                 projectService.registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
             }
 
