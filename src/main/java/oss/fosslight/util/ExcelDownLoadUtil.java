@@ -485,19 +485,26 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			String currentGroupKey = null;
 			int idx = 1;
+			Map<String, String> validMsgMap = vr.getValidMessageMap();
+			Map<String, String> diffMsgMap = null;
+			if (!vr.isDiff()) {
+				diffMsgMap = vr.getDiffMessageMap(true);
+			}
+			
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				for (ProjectIdentification bean : list) {
-					setExcelDataForBomOssComponents(idx, type, vr, currentGroupKey, rows, projectInfo, bean);
+					setExcelDataForBomOssComponents(idx, type, validMsgMap, diffMsgMap, currentGroupKey, rows, projectInfo, bean);
 					rowsMap.put(String.valueOf(idx), bean.getExportRowStr());
 					idx++;
 				}
 			} else {
+				Map<String, String> errCodeMap = vr.getErrorCodeMap();
 				boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 				for (ProjectIdentification bean : list) {
 					if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 						continue;
 					}
-					setExcelDataForOssComponents(idx, type, isSelfCheck, vr, bean, distributionFlag);
+					setExcelDataForOssComponents(idx, type, isSelfCheck, validMsgMap, diffMsgMap, errCodeMap, bean, distributionFlag);
 					rowsMap.put(String.valueOf(idx), bean.getExportRowStr());
 					idx++;
 				}
@@ -538,7 +545,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 	
-	private static void setExcelDataForBomOssComponents(int idx, String type, T2CoValidationResult vr, String currentGroupKey, List<String[]> rows, Project projectInfo, ProjectIdentification bean) {
+	private static void setExcelDataForBomOssComponents(int idx, String type, Map<String, String> validMsgMap, Map<String, String> diffMsgMap, String currentGroupKey, List<String[]> rows, Project projectInfo, ProjectIdentification bean) {
 		StringBuffer sb = new StringBuffer();
 		boolean continueFlag = false;
 		if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
@@ -691,12 +698,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			sb.append("|").append(isMainRow ? (isEmpty(bean.getRestriction()) ? " " : bean.getRestriction().contains("|") ? bean.getRestriction().split("[|]")[0] : bean.getRestriction()) : " ");
 			
 			String message = "";
-			if (!vr.getValidMessageMap().isEmpty()) {
+			if (MapUtils.isNotEmpty(validMsgMap)) {
 				msgGridId = bean.getGridId();
 				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 					msgGridId = bean.getComponentId();
 				}
-				List<Map.Entry<String, String>> validMsgList = vr.getValidMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+				List<Map.Entry<String, String>> validMsgList = validMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
 				if (CollectionUtils.isNotEmpty(validMsgList)) {
 					for (Entry<String, String> map : validMsgList) {
 						if (!isEmpty(message)) {
@@ -707,12 +714,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			if (!vr.getDiffMessageMap().isEmpty()) {
+			if (MapUtils.isNotEmpty(diffMsgMap)) {
 				msgGridId = bean.getGridId();
 				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 					msgGridId = bean.getComponentId();
 				}
-				List<Map.Entry<String, String>> diffMsgList = vr.getDiffMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+				List<Map.Entry<String, String>> diffMsgList = diffMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
 				if (CollectionUtils.isNotEmpty(diffMsgList)) {
 					for (Entry<String, String> map : diffMsgList) {
 						if (!isEmpty(message)) {
@@ -727,7 +734,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 	
-	private static void setExcelDataForOssComponents(int idx, String type, boolean isSelfCheck, T2CoValidationResult vr, ProjectIdentification bean, boolean distributionFlag) {
+	private static void setExcelDataForOssComponents(int idx, String type, boolean isSelfCheck, Map<String, String> validMsgMap, Map<String, String> diffMsgMap, Map<String, String> errCodeMap, ProjectIdentification bean, boolean distributionFlag) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(isSelfCheck ? bean.getComponentIdx() : bean.getComponentIdx());
 
@@ -832,12 +839,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			boolean errRowFlag = false;
 			
-			for (String errCd : vr.getErrorCodeMap().keySet()) {
-				if (errCd.contains(bean.getComponentId())) {
-					errRowFlag = true;
-					
-					break;
-				} 
+			if (MapUtils.isNotEmpty(errCodeMap)) {
+				for (String errCd : errCodeMap.keySet()) {
+					if (errCd.contains(bean.getComponentId())) {
+						errRowFlag = true;
+						
+						break;
+					} 
+				}
 			}
 			
 			if (errRowFlag) {
@@ -883,12 +892,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		String message = "";
-		if (!vr.getValidMessageMap().isEmpty()) {
+		if (MapUtils.isNotEmpty(validMsgMap)) {
 			msgGridId = bean.getGridId();
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				msgGridId = bean.getComponentId();
 			}
-			List<Map.Entry<String, String>> validMsgList = vr.getValidMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+			List<Map.Entry<String, String>> validMsgList = validMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
 			if (CollectionUtils.isNotEmpty(validMsgList)) {
 				for (Entry<String, String> map : validMsgList) {
 					if (!isEmpty(message)) {
@@ -899,12 +908,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 		
-		if (!vr.getDiffMessageMap().isEmpty()) {
+		if (MapUtils.isNotEmpty(diffMsgMap)) {
 			msgGridId = bean.getGridId();
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				msgGridId = bean.getComponentId();
 			}
-			List<Map.Entry<String, String>> diffMsgList = vr.getDiffMessageMap().entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
+			List<Map.Entry<String, String>> diffMsgList = diffMsgMap.entrySet().stream().filter(e -> e.getKey().endsWith(msgGridId)).collect(Collectors.toList());
 			if (CollectionUtils.isNotEmpty(diffMsgList)) {
 				for (Entry<String, String> map : diffMsgList) {
 					if (!isEmpty(message)) {
