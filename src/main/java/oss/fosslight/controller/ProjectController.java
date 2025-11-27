@@ -4326,8 +4326,7 @@ public class ProjectController extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@ResponseBody
 	@PostMapping(value = PROJECT.ANDROID_FILE)
-	public String androidFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
-			HttpServletResponse res, Model model) throws Exception {
+	public String androidFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		String fileType = req.getParameter("fileType");
 		ArrayList<Object> resultList = new ArrayList<Object>();
 		// 파일등록거
@@ -4352,29 +4351,15 @@ public class ProjectController extends CoTopComponent {
 			if ("csv".equals(fileType)) {
 				type = "13";
 			} else if ("notice".equals(fileType)) {
-				type = "14,20";
+				type = "14";
 			} else {
 				type = "19";
 			}
 			
-			if (type.contains(",")) {
-				for (String t : type.split(",")) {
-					String codeExt[] = StringUtil.split(codeMapper.selectExtType(t), ",");
-					for (int i = 0; i < codeExt.length; i++) {
-						if (codeExt[i].equalsIgnoreCase(extType)) {
-							count++;
-						}
-					}
-					if (count > 0) {
-						break;
-					}
-				}
-			} else {
-				String codeExt[] = StringUtil.split(codeMapper.selectExtType(type), ",");
-				for (int i = 0; i < codeExt.length; i++) {
-					if (codeExt[i].equals(extType)) {
-						count++;
-					}
+			String codeExt[] = StringUtil.split(codeMapper.selectExtType(type), ",");
+			for (int i = 0; i < codeExt.length; i++) {
+				if (codeExt[i].equalsIgnoreCase(extType)) {
+					count++;
 				}
 			}
 		}
@@ -4383,7 +4368,7 @@ public class ProjectController extends CoTopComponent {
 			String codeExt[] = StringUtil.split(codeMapper.selectExtType(CoConstDef.CD_ANDROID_NOTICE_XML), ",");
 			
 			for (int i = 0; i < codeExt.length; i++) {
-				if (codeExt[i].equals(extType)) {
+				if (codeExt[i].equalsIgnoreCase(extType)) {
 					count++;
 				}
 			}
@@ -4392,8 +4377,7 @@ public class ProjectController extends CoTopComponent {
 				resultList = null;
 			} else {
 				// 파일 등록
-				if (req.getContentType() != null
-						&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
+				if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 					file.setCreator(loginUserName());
 					Map<String, Object> rtnMap = fileService.uploadNoticeXMLFile(req, file, fileId, prjId);
 					if (rtnMap.containsKey("msg")) {
@@ -4413,8 +4397,7 @@ public class ProjectController extends CoTopComponent {
 			}
 		} else {
 			// 파일 등록
-			if (req.getContentType() != null
-					&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
+			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
 				
 				if (isEmpty(fileId)) {
