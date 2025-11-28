@@ -95,37 +95,39 @@ public class ScannerController extends CoTopComponent {
 			
 			String resBody = "";
 			String url = scanServiceUrl + "/api/projects/process_data/";
+			
+			RestTemplate template = new RestTemplate();
+			HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+	        headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
+	        headers.set("Authorization", adminToken);
+			
+	        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
  			if (scanServiceUrl.startsWith("https://")) {
- 				Map<String, String> parts = new HashMap<>();
- 				parts.put("pid", prjId);
- 				parts.put("link", wgetUrl);
- 				parts.put("email", user.getEmail());
- 				parts.put("admin", adminToken);
- 				resBody = HttpsRequestUtil.makePostRequest(url, parts);
- 			} else {
- 				MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
  				parts.add("pid", prjId);
  				parts.add("link", wgetUrl);
  				parts.add("email", user.getEmail());
  				parts.add("admin", adminToken);
- 				resBody = RequestUtil.post(url, parts);
+ 			} else {
+ 				parts.add("pid", prjId);
+ 				parts.add("link", wgetUrl);
+ 				parts.add("email", user.getEmail());
+ 				parts.add("admin", adminToken);
  			}
-
+ 			
+ 			HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(parts, headers);
+ 			ResponseEntity<Map> res = template.exchange(url, HttpMethod.POST, entity, Map.class);
+ 			resBody = res.getBody().toString();
+ 			
 			log.info("fl scanner response : " + resBody);
 			
 			if (StringUtils.isNotEmpty(resBody)) {
-				ObjectMapper objectMapper = new ObjectMapper();
-		        Map<String, Object> map = objectMapper.readValue(resBody, Map.class);
+		        Map<String, Object> map = res.getBody();
 		        if (map.containsKey("project_uuid")) {
 		        	String projectUUID = (String) map.get("project_uuid");
 		        	
 		        	RestTemplate restTemplate = new RestTemplate();
-		        	HttpHeaders headers = new HttpHeaders();
-			        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-			        headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
-			        headers.set("Authorization", adminToken);
-		        	
-					MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+		        	MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 					body.add("project_uuid", projectUUID);
 					
 					HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
