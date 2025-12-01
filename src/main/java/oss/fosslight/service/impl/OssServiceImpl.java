@@ -326,13 +326,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<String> excludeCpeList = ossMapper.selectOssExcludeCpeList(ossMaster);
 		List<String> ossVersionAliasList = ossMapper.selectOssVersionAliases(ossMaster);
 		
-		if (includeCpeList != null && !includeCpeList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(includeCpeList)) {
 			ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
 		}
-		if (excludeCpeList != null && !excludeCpeList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(excludeCpeList)) {
 			ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
 		}
-		if (ossVersionAliasList != null && !ossVersionAliasList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(ossVersionAliasList)) {
 			ossMaster.setOssVersionAliases(ossVersionAliasList.toArray(new String[ossVersionAliasList.size()]));
 		}
 		
@@ -2681,6 +2681,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				continue;
 			}
 
+			String downloadLocationStr = bean.getDownloadLocation().trim();
 			try {
 				boolean semicolonFlag = false;
 				String semicolonStr = "";
@@ -2707,6 +2708,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					seq++;
 				}
 
+				boolean isCheckName = false;
 				if ( urlSearchSeq > -1 ) {
 					if(urlSearchSeq == 10) { //pythonhosted
 						String name[] =  bean.getDownloadLocation().split("/");
@@ -2787,6 +2789,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							bean.setCheckName(checkName);
 							bean.setDownloadLocation(downloadLocation);
 							if (!bean.getOssName().equals(bean.getCheckName())) {
+								isCheckName = true;
 								result.add(bean);
 							}
 						}
@@ -2854,9 +2857,21 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							bean.setCheckOssList("Y");
 							bean.setCheckName(checkName);
 							if (!bean.getOssName().equals(bean.getCheckName())) {
+								isCheckName = true;
 								bean.setDownloadLocation(downloadLocation);
 								result.add(bean);
 							}
+						}
+					}
+				}
+				if (!isCheckName) {
+					String checkName = ossMapper.checkOssName(bean.getOssName(), downloadLocationStr);
+					if (!isEmpty(checkName)) {
+						bean.setCheckOssList(CoConstDef.FLAG_YES);
+						bean.setCheckName(checkName);
+						if (!bean.getOssName().equals(bean.getCheckName())) {
+							bean.setDownloadLocation(downloadLocationStr);
+							result.add(bean);
 						}
 					}
 				}
@@ -3055,8 +3070,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		/*Json String -> Json Object*/
 		String jsonString = ossMaster.getOssLicensesJson();
 		if (!isEmpty(jsonString)) {
-			Type collectionType = new TypeToken<List<OssLicense>>() {
-			}.getType();
+			Type collectionType = new TypeToken<List<OssLicense>>() {}.getType();
 			List<OssLicense> list = checkLicenseId((List<OssLicense>) fromJson(jsonString, collectionType));
 			ossMaster.setOssLicenses(list);
 		}
