@@ -1845,6 +1845,7 @@
                         var componentIds = [];
                         var pathValidMsg = {};
                         var runVerify = false;
+                        var noFile = false;
 
                         // empty check
                         for (var i in arr) {
@@ -1923,6 +1924,10 @@
                         	fileTypeSeqs.push($('input[name="packageFileType5"]').val());
                         }
                         
+                        if (fileSeqs.length == 0) {
+                        	noFile = true;
+                        }
+                        
                         var obj = {
                             prjId: [[${project.prjId}]],
                             gridFilePaths: filePaths,
@@ -1949,7 +1954,7 @@
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 } else {
                                 	var msg = [[#{msg.common.success}]];
-                                	if (runVerify || (typeof json.resultData.isVerify !== "undefined" && json.resultData.isVerify)) {
+                                	if (!noFile && (runVerify || (typeof json.resultData.isVerify !== "undefined" && json.resultData.isVerify))) {
                                 		msg = [[#{msg.package.verify.retry}]];
                                 		alertify.alert(msg, function () {
                                 			fn.verify();
