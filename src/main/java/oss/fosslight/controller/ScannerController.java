@@ -127,12 +127,17 @@ public class ScannerController extends CoTopComponent {
 		        	String projectUUID = (String) map.get("project_uuid");
 		        	
 		        	RestTemplate restTemplate = new RestTemplate();
-		        	MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+		        	HttpHeaders header = new HttpHeaders();
+			        header.setContentType(MediaType.MULTIPART_FORM_DATA);
+			        header.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
+			        header.set("Authorization", adminToken);
+		        	
+			        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 					body.add("project_uuid", projectUUID);
 					
-					HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+					HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, header);
 					ResponseEntity<Map> response = restTemplate.exchange(scanServiceUrl + "/scanner_api/project_info/", HttpMethod.POST, requestEntity, Map.class);
-
+					log.info("[project uuid response] {}", response.getStatusCode());
 			        if (response.getStatusCode() == HttpStatus.OK) {
 			        	Map<String, Object> responseBody = response.getBody();
 			        	String prjLink = (String) responseBody.get("project_link");
