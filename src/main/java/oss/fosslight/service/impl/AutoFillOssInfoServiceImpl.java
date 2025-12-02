@@ -6,6 +6,7 @@
 package oss.fosslight.service.impl;
 
 import java.net.URLDecoder;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.netty.channel.ChannelOption;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -51,6 +54,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
+import reactor.util.retry.Retry;
 
 @Service
 @Slf4j
@@ -549,20 +554,35 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> requestClearlyDefinedLicense(String location) {
-		String responseString = webClient.get().uri(location).exchange()
-			    				.flatMap(response -> {
-			    					HttpStatus statusCode = response.statusCode();
-			    					if (statusCode.is4xxClientError()) {
-			    						return Mono.error(new HttpServerErrorException(statusCode));
-			    					} else if (statusCode.is5xxServerError()) {
-			    						return Mono.error(new HttpServerErrorException(statusCode));
-			    					}
-			    					return Mono.just(response);
-			    				})
-			    				.block()
-			    				.bodyToMono(String.class)
-			    				.retry(5)
-			    				.block();
+		WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(
+        		HttpClient.create()
+                	.responseTimeout(Duration.ofSeconds(10))   // read timeout
+                	.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // connect timeout
+				)).build();
+
+		String responseString = webClient.get()
+    				.uri(location)
+    				.retrieve()
+    				.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new HttpServerErrorException(response.statusCode())))
+    				.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new HttpServerErrorException(response.statusCode())))
+    				.bodyToMono(String.class)
+    				.retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
+    				.block();
+		
+//		String responseString = webClient.get().uri(location).exchange()
+//			    				.flatMap(response -> {
+//			    					HttpStatus statusCode = response.statusCode();
+//			    					if (statusCode.is4xxClientError()) {
+//			    						return Mono.error(new HttpServerErrorException(statusCode));
+//			    					} else if (statusCode.is5xxServerError()) {
+//			    						return Mono.error(new HttpServerErrorException(statusCode));
+//			    					}
+//			    					return Mono.just(response);
+//			    				})
+//			    				.block()
+//			    				.bodyToMono(String.class)
+//			    				.retry(5)
+//			    				.block();
 		
 		Map<String, Object> returnMap = null;
 		ObjectMapper mapper = new ObjectMapper();
