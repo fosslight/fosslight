@@ -717,7 +717,7 @@ var fn = {
 	       		.set('onok', function(e) {
 	       			if (e) {
 	       				var comment = $("#parSaveEditor").summernote('code');
-	       					if ("" != $(comment).text().trim() && !isStatusChangeFlag) {
+	       				if (("" != $(comment).text().trim() || $(comment).find('img').length > 0) && !isStatusChangeFlag) {
 	       					$("#userComment").val(comment);
 	       				} else {
 	       					$('#userComment').val("");
@@ -761,7 +761,7 @@ var fn = {
 		$(".permissionRadio").find(".active").find("input").prop("checked", true);
 		
 		var editorVal = $("#descriptionTextarea").summernote('code');
-		if ("" != $(editorVal).text().trim()){
+		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
 			$('#description').val(replaceWithLink(editorVal));
 		} else {
 			$('#description').val("");
@@ -932,16 +932,14 @@ var fn = {
            	.set('onok', function(e){
            		if (e) {
            			var comment = $("#parDelEditor").summernote('code');
-               		if ("" == $(comment).text().trim()){
-               			alertify.alert([[#{msg.project.required.comments}]], function(){});
-               		} else {
-    					var partnerId = $('input[name=partnerId]').val();
+               		if ("" != $(comment).text().trim() || $(editorVal).find('img').length > 0) {
+               			var partnerId = $('input[name=partnerId]').val();
     					$.ajax({
     						url : '/partner/delAjax',
     						type : 'POST',
     						dataType : 'json',
     						cache : false,
-    						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code'))},
+    						data : {'partnerId' : partnerId, userComment : replaceWithLink(comment)},
     						success: function(data){
     							if (partnerId) {
     								deleteTabInFrame('/partner/edit/'+partnerId);			
@@ -955,6 +953,8 @@ var fn = {
     							alertify.error([[#{msg.common.valid2}]], 0);
     						}
     					});
+               		} else {
+               			alertify.alert([[#{msg.project.required.comments}]], function(){});
     				}
            		} else {
            			return false;

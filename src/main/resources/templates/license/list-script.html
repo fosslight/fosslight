@@ -384,12 +384,12 @@
                         .set('onok', function(e){
                             if (e) {
                                 var editorVal = $("#deleteLicenseEditor").summernote('code');
-                                if ("" == $(editorVal).text().trim()){
+                                if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+                                	fn.deleteSubmit(ids);
+                                } else {
                                     alertify.alert([[#{msg.project.required.comments}]], function(){});
 
                                     return false;
-                                } else {
-                                    fn.deleteSubmit(ids);
                                 }
                             } else {
                                 return false;

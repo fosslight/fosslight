@@ -315,12 +315,12 @@ var fn = {
 	           	alertify.delSelfDialog(innerHtml, function () {
 					var editorVal = $("#delSelfEditor").summernote('code');
 
-					if ("" == $(editorVal).text().trim()) {
+					if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+						fn.deleteSubmit(permissions, notPermissions);
+					} else {
 						alertify.alert([[#{msg.project.required.comments}]], function () { });
 
 						return false;
-					} else {
-						fn.deleteSubmit(permissions, notPermissions);
 					}
 				});
 				

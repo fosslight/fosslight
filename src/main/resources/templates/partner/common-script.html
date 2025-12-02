@@ -61,12 +61,8 @@
 		       		if (e) {
 		       			var editorVal = $("#partnerRejectEditor").summernote('code');
 		       			
-		       			if ("" == $(editorVal).text().trim()){
-		       				alertify.alert([[#{msg.project.required.comments}]], function(){});
-		       				
-		       				return false;
-		    			} else {
-		    				var param = {status : 'PROG', partnerId : [[${detail.partnerId}]], userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
+		       			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		       				var param = {status : 'PROG', partnerId : [[${detail.partnerId}]], userComment : replaceWithLink(editorVal)};
 
 		    				$.ajax({
 		    					url : '/partner/changeStatus',
@@ -88,6 +84,10 @@
 		    						alertify.error([[#{msg.common.valid2}]], 0);
 		    					}
 		    				});
+		    			} else {
+							alertify.alert([[#{msg.project.required.comments}]], function(){});
+		       				
+		       				return false;
 		    			}
 		       		} else {
 		       			return false;
@@ -186,7 +186,8 @@
 		               	}
 		               	
 		               	var editorVal = $("#partnerConfirmEditor").summernote('code');
-		       			if ("" == $(editorVal).text().trim()) {
+		       			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		       			} else {
 		       				editorVal = "";
 		       			}
 		       			

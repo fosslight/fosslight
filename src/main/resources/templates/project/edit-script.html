@@ -200,7 +200,8 @@
            		.set('onok', function(e) {
            			if (e) {
 						var editorVal = $("#completeEditor").summernote('code');
-						if ("" == $(editorVal).text().trim()) {
+						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+	       				} else {
 	       					editorVal = "";
 	       				}
 						
@@ -266,10 +267,8 @@
                 	.set('onok', function(e) {
                 		if (e) {
 							var editorVal = $("#dropEditor").summernote('code');
-							if ("" == $(editorVal).text().trim()){
-		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
-		    				} else {
-		    					if (distributionStatus == "PROC") {
+							if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+								if (distributionStatus == "PROC") {
 		    						var comment = [[#{msg.project.distribution.loading}]];
 		    						
 		    						alertify.error(comment, 0);
@@ -298,6 +297,8 @@
 		    					} else {
 		    						fn.exeProjectDrop(true);
 		    					}
+		    				} else {
+		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
 		    				}
 						} else {
 							return false;
@@ -361,12 +362,12 @@
 					.set('onok', function(event){
 						var editorVal = $("#prjDelEditor").summernote('code');
 
-						if ("" == $(editorVal).text().trim()) {
+						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+							fn.deleteSubmit();
+						} else {
 							alertify.alert([[#{msg.project.required.comments}]], function () { });
 
 							return false;
-						} else {
-							fn.deleteSubmit();
 						}
 					})
 					.set('onshow', function(event){
@@ -1103,7 +1104,7 @@
 	       		.set('onok', function(e) {
 	       			if (e) {
 	       				var editorVal = $("#prjSaveEditor").summernote('code');
-	       				if ("" != $(editorVal).text().trim()) {
+	       				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
 							$("input[name='userComment']").val(editorVal);
 						}
 	       				
@@ -1509,7 +1510,8 @@
 				//코멘트 저장
 				var editorVal = $("#modifiedCommentInPjtEditor").summernote('code');
 				
-				if ("" != $(editorVal).text().trim()) {
+				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+				} else {
 					alertify.alert([[#{msg.project.enter.comment}]], function(){});
 					
 					return false;
@@ -1900,7 +1902,7 @@
 							var userComment = "";
 							var summernoteVal = $("#editor3").summernote('code');
 							
-							if ("" != $(summernoteVal).text().trim()) {
+							if ("" != $(summernoteVal).text().trim() || $(summernoteVal).find('img').length > 0) {
 								userComment = summernoteVal;
 							}
 							
@@ -1998,7 +2000,8 @@
 			},
 			commentsIgnore : function(){
 				var editorVal = $("#reqToOpenTextareaAdmin").summernote('code');
-				if ("" == $(editorVal).text().trim()) {
+				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+    			} else {
 					editorVal = "";
     			}
 				
@@ -2217,7 +2220,8 @@
 						editorVal = $("#reqToOpenTextarea").summernote('code');
 					}
 					
-					if ("" == $(editorVal).text().trim()){
+					if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+					} else {
 						alertify.alert([[#{msg.project.required.comments.reject}]], function(){});
 						return false;
 					}

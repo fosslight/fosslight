@@ -390,13 +390,12 @@
 							.set('onok', function(e){
 								var comment = $("#promptPopupEditor").summernote('code');
 	                            if (e) {
-	                            	if ("" == $(comment).text().trim()){
-	                                    alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
-	                                    });
+	                            	if ("" != $(comment).text().trim() || $(comment).find('img').length > 0) {
+	                            		oss_lst_fn.multiDelAjax(deleteIds, comment);
+	                                } else {
+	                                	alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {});
 
 	                                    return false;
-	                                } else {
-	                                	oss_lst_fn.multiDelAjax(deleteIds, comment);
 	                                }
 	                            } else {
 	                                return false;

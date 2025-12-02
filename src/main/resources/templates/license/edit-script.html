@@ -80,7 +80,7 @@
                		.set('onok', function(e) {
                			if (e) {
                				var editorVal = $("#licenseSaveEditor").summernote('code');
-               				if ("" != $(editorVal).text().trim()) {
+               				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
     							$("input[name='comment']").val(editorVal);
     						}
                				
@@ -108,8 +108,9 @@
                     alertify.delLicenseDialog()
                         .set('onok', function(e){
                             var editorVal = $("#delLicenseEditor").summernote('code');
-                            if ("" == $(editorVal).text().trim()){
-                                alertify.alert([[#{msg.oss.required.deletion}]], function(){});
+                            if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+                            } else {
+                            	alertify.alert([[#{msg.oss.required.deletion}]], function(){});
                                 return false;
                             }
 

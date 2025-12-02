@@ -579,14 +579,15 @@
                 alertify.delOssDialog()
                     .set('onok', function(event){
                         var editorVal = $("#deleteOssEditor").summernote('code');
-                        if ("" == $(editorVal).text().trim()){
-                            alertify.alert([[#{msg.oss.required.deletion}]], function(){});
+                        if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+                        } else {
+                        	alertify.alert([[#{msg.oss.required.deletion}]], function(){});
                             return false;
                         }
 
                         loading.show();
 
-                        $('input[name=comment]').val($("#deleteOssEditor").summernote('code'));
+                        $('input[name=comment]').val(editorVal);
                         if (isDisabled) {
     						$("input[name='ossName']").prop("disabled", false);
     					}
@@ -3158,7 +3159,7 @@
            		.set('onok', function(e) {
            			if (e) {
            				var editorVal = $("#ossSaveEditor").summernote('code');
-           				if ("" != $(editorVal).text().trim()) {
+           				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
 							$("input[name='comment']").val(editorVal);
 						} else {
 							var localDeactivateFlag = $("[name='deactivateFlag']").val();

@@ -660,7 +660,8 @@
                         alertify.verConfirmDialog()
                         .set('onok', function(e) {
                         	var editorVal = $("#verConfirmEditor").summernote('code');
-            				if ("" == $(editorVal).text().trim()) {
+            				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+               				} else {
                					editorVal = "";
                				}
             				$("input[name='userComment']").val(editorVal);
@@ -766,21 +767,21 @@
                         .set('onok', function(e) {
                         	var editorVal = $("#editor3").summernote('code');
                         	
-     						if ("" == $(editorVal).text().trim()){
+     						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+     							var data = {
+                               		"prjId": [[${project.prjId}]]
+                                    , "verificationStatus": "PROG"
+                                    , "useCustomNoticeYn": "N"
+                                    , "userComment": editorVal
+                                    , "referenceDiv": "12"
+                                    , "noticeFileFormat": datas.noticeFileFormat
+                           		};
+
+     							fn.exeProjectStatus(data, "PROG");
+     						} else {
      							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
     							return false;
-     						} else {
-     							var data = {
-                                   	"prjId": [[${project.prjId}]]
-                                   	, "verificationStatus": "PROG"
-                                   	, "useCustomNoticeYn": "N"
-                                   	, "userComment": $("#editor3").summernote('code')
-                                   	, "referenceDiv": "12"
-                                   	, "noticeFileFormat": datas.noticeFileFormat
-                                };
-     							
-                               	fn.exeProjectStatus(data, "PROG");
     						}
                         })
                         .set('onshow', function(e){

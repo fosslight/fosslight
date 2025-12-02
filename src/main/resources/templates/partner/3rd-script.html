@@ -357,7 +357,7 @@ var fn = {
 	       			
 	       			if (e) {
 	       				var comment = $("#parSaveEditor").summernote('code');
-	       					if ("" != $(comment).text().trim() && !isStatusChangeFlag) {
+	       				if (("" != $(comment).text().trim() || $(comment).find('img').length > 0) && !isStatusChangeFlag) {
 	       					$("#userComment").val(comment);
 	       				} else {
 	       					$('#userComment').val("");

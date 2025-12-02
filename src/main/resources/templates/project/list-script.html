@@ -1948,13 +1948,13 @@ var fn = {
 	           			if (e) {
 		           			var editorVal = $("#delPrjListEditor").summernote('code');
 		           			
-		           			if ("" == $(editorVal).text().trim()){
+		           			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		           				chkPrjIds = fn.checkStatus(permissions);
+		 						fn.beforeDeleteSubmit(permissions, notPermissions, chkPrjIds);
+							} else {
 								alertify.alert([[#{msg.project.required.comments}]], function(){});
 
 								return false;
-							} else {
-								chkPrjIds = fn.checkStatus(permissions);
-		 						fn.beforeDeleteSubmit(permissions, notPermissions, chkPrjIds);
 							}
 		           		} else {
 		           			return false;
