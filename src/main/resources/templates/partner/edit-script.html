@@ -77,6 +77,9 @@ var evt = {
 			if ("" != description && description != null) {
 				$("#descriptionTextarea").summernote('code', description);
 			}
+			if ([[${detail.ossFileId}]] == null) {
+				fn.ossUploadFile();
+			}
 		} else {
 			fn.ossUploadFile();
 		}
@@ -1376,6 +1379,12 @@ var fn = {
 		$("#ossFileId").val("");
 		
 		evt.init();
+	},
+	downloadSampleReport : function() {
+		var logiPath = "/sample/FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx";
+		var fileName = "FOSSLight-OSS-Checklist-for-3rdParty.xlsx";
+
+		location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
 	}
 }
 
