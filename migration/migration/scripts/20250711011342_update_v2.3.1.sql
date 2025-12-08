@@ -47,3 +47,11 @@ UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p>Identification 탭에 Open Source 목�
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p>Identification 탭에 Open Source 목록을 작성 후 SBOM 탭에서 Request를 클릭하여 리뷰 요청하십시오.<br />Fill out the Open Source list in the Identification  and request a review by clicking Request in the SBOM tab.<br /><br />- Guide : https://fosslight.org/fosslight-guide-en/tutorial/1_project.html#2-identification</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '37';
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p>SBOM 탭의 Download Location, Homepage, Copyright text 정보가 DB 기반으로 업데이트 되었습니다.<br />Packaging 수행 후 Request 클릭하여 리뷰 요청해주시기 바랍니다.<br /> OSS Notice에 대하여 수정이 필요한 경우 (ex- text형식으로 발행), Packaging내 Notice탭에서 설정바랍니다.<br /><br />Download Location, Homepage and Copyright text in SBOM tab have been updated based on DB.<br />After performing Packaging, click Request to request a review.<br />If it is necessary to modify the OSS Notice (ex- should be issued in text format), please set it in the Notice tab in Packaging.</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '41';
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p>SBOM 탭의 Download Location, Homepage, Copyright text 정보가 DB 기반으로 업데이트 되었습니다.<br />Download Location, Homepage and Copyright text in SBOM tab have been updated based on DB.</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '46';
+
+CREATE TABLE IF NOT EXISTS `SEARCH_TEMPORARY` (
+	`PRODUCT` VARCHAR(200) NOT NULL,
+	`VERSION` VARCHAR(200) NOT NULL,
+	INDEX `PRODUCT_VERSION` (`PRODUCT`, `VERSION`) USING BTREE
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB;
