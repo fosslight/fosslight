@@ -101,33 +101,19 @@ var bom_fn = {
             }
  			
  			// obligationType 설정
- 			let notify = row["notify"];
- 			let source = row["source"];
- 			if ($(notify).attr("title") !== "undefined") {
- 				row["obligationType"] = $(notify).attr("title");
- 			}
- 			if ($(source).attr("title") !== "undefined") {
- 				row["obligationType"] = $(source).attr("title");
+ 			if ("Y" == row["notify"]) {
+ 				if ("Y" == row["source"]) {
+ 					row["obligationType"] = "11";
+ 				} else {
+ 					row["obligationType"] = "10";
+ 				}
  			} else {
- 				if ("Y" == row["notify"]) {
- 	 				if ("Y" == row["source"]) {
- 	 					row["obligationType"] = "11";
- 	 				} else {
- 	 					row["obligationType"] = "10";
- 	 				}
- 	 			} else {
- 	 				if ("Y" == row["source"]) {
- 	 					row["obligationType"] = "12";
- 	 				} else {
- 	 					row["obligationType"] = "";
- 	 				}
- 	 			}
+ 				if ("Y" == row["source"]) {
+ 					row["obligationType"] = "12";
+ 				} else {
+ 					row["obligationType"] = "";
+ 				}
  			}
- 			
-			let cvssScore = row["cvssScore"];
-			if ($(cvssScore ).attr("title") !== "undefined") {
-				row["cvssScore"] = $(cvssScore).attr("title");
-			}
  			
  			if ("Y" == row["adminCheck"]) {
  				row["adminCheckYn"] = "Y";
@@ -207,24 +193,6 @@ var bom_fn = {
 			}
 		});
 	},
-    downloadReviewReport : function() {
-        loadingIden.show();
-        $.ajax({
-            type: "POST",
-            url: '/project/reviewReport',
-            data: JSON.stringify({"prjId":[[${project.prjId}]]}),
-            dataType : 'json',
-            cache : false,
-            contentType : 'application/json',
-            success: function (data) {
-                loadingIden.hide();
-                location.href = '/project/verification/downloadReviewReport?prjId='+[[${project.prjId}]];
-            },
-            error: function(data){
-                alertify.error([[#{msg.common.valid2}]], 0);
-            }
-        });
-    },
 	downloadExcel : function(){
 		loadingIden.show();
 		
@@ -265,26 +233,24 @@ var bom_fn = {
 		if ("Y" != notAdminCheck) {
 			if (adminCheck == false) {
 				if (preObligationType == 10 || preObligationType == 11){
-					display="<i class=\"fas fa-check fa-2xs\" title=\"" + preObligationType + "\"></i>";
+					display="<i class=\"fas fa-check fa-2xs\"></i>";
 				}
 
 				if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
-					display="<i class=\"fas fa-check fa-2xs\" title=\"" + obligationType + "\"></i>";
+					display="<i class=\"fas fa-check fa-2xs\"></i>";
 				}
-			} else if (adminCheck == true && typeof obligationType !== "undefined" && obligationType == 12) {
+			} else if (adminCheck == true && obligationType == 12) {
 				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
 				+ '<option value="Y">O</option>'
 				+ '<option value="N" selected="selected">X</option>'
 				+ '</select>';
-			} else if (obligationLicense == 90 || adminCheck == true) {
-				if (typeof obligationType !== "undefined" && (("10" == obligationType || "11" == obligationType) || (obligationType!='10' && obligationType!='11'))) {
-					display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
+			} else if(obligationLicense == 90 || adminCheck == true) {
+				display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
 					+ '<option value="Y" '+((obligationType=='10' || obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
 					+ '<option value="N" '+((obligationType!='10' && obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
 					+ '</select>';
-				}
 			} else if(obligationLicense == 10 || obligationLicense == 11) {
-				display = "<i class=\"fas fa-check fa-2xs\" title=\"" + obligationLicense + "\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
 		}
 		
@@ -304,26 +270,24 @@ var bom_fn = {
 		
 		if(adminCheck == false) {
 			if (preObligationType == 11) {
-				display = "<i class=\"fas fa-check fa-2xs\" title=\"" + preObligationType + "\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
 
 			if (preObligationType == undefined && obligationType == 11){
-				display = "<i class=\"fas fa-check fa-2xs\" title=\"" + obligationType + "\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
-		} else if (adminCheck == true && typeof obligationType !== "undefined" && obligationType == 12) {
+		} else if (adminCheck == true && obligationType == 12) {
 			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
 				+ '<option value="Y" selected="selected">O</option>'
 				+ '<option value="N">X</option>'
 				+ '</select>';
 		} else if(obligationLicense == 90 || adminCheck == true) {
-			if (typeof obligationType !== "undefined" && ("11" == obligationType || "11" != obligationType)) {
-				display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
+			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
 				+ '<option value="Y" '+((obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
 				+ '<option value="N" '+((obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
 				+ '</select>';
-			}
 		} else if(obligationLicense == 11) {
-			display = "<i class=\"fas fa-check fa-2xs\" title=\"" + obligationLicense + "\"></i>";
+			display = "<i class=\"fas fa-check fa-2xs\"></i>";
 		}
 		
 		return display;
@@ -389,15 +353,13 @@ var bom_fn = {
 		var selectedVal = $("#"+id+"_notify").prop("selected", true).val();
 		
 		if (selectedVal) {
-			if ("Y" == selectedVal) {
- 				$("#bomList").jqGrid('setCell', id, 'obligationType', '10');
- 			} else {
- 				$("#bomList").jqGrid('setCell', id, 'obligationType', '99');
- 			}
+// 			if (selectedVal == "N") {
+// 				$("#"+id+"_source").val("N");
+// 			}
 			
 			$("#"+id+"_notify").parent().css("background", "");
 			
-			if ($("#"+id+"_source").val()) {
+			if($("#"+id+"_source").val()) {
 				$("#"+id+"_source").parent().css("background", "");
 			}
 		} else {
@@ -408,25 +370,16 @@ var bom_fn = {
 	},
 	onSourceCboxClick : function(rowId){
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
-		var notifyVal = $("#"+id+"_notify").prop("selected", true).val();
 		var selectedVal = $("#"+id+"_source").prop("selected", true).val();
 		
 		if (selectedVal) {
- 			if ("Y" == selectedVal) {
-				if ("N" == notifyVal) {
-					$("#bomList").jqGrid('setCell', id, 'obligationType', '12');
-				} else {
-					$("#bomList").jqGrid('setCell', id, 'obligationType', '11');
-				}
-			} else {
-				if ("N" == notifyVal) {
-					$("#bomList").jqGrid('setCell', id, 'obligationType', '99');
-				}
-			}
+// 			if (selectedVal == "Y") {
+// 				$("#"+id+"_notify").val("Y");
+// 			}
 			
 			$("#"+id+"_source").parent().css("background", "");
 			
-			if ($("#"+id+"_notify").val()) {
+			if($("#"+id+"_notify").val()) {
 				$("#"+id+"_notify").parent().css("background", "");
 			}
 		} else {
@@ -469,15 +422,12 @@ var bom_fn = {
 						
 						if (data.includes("http://") || data.includes("https://")) {
 							data = data.replace(/http/g, ",http");
-							data = data.substring(1);
 						}
 						if (data.includes("ftp://")) {
 							data = data.replace(/ftp/g, ",ftp");
-							data = data.substring(1);
 						}
 						if (data.includes("git://")) {
 							data = data.replace(/git/g, ",git");
-							data = data.substring(1);
 						}
 					} else if ("homepage" == value) {
 						if(data.indexOf("Different from DB") > -1){
@@ -990,25 +940,27 @@ var bom_fn = {
 			});
     		alertify.alert(message, function(){});
     	} else {
-    		// download file
-	    	if (target === "report_sub") {
-	        	bom_fn.downloadExcel();
-	        } else if(target === "reviewReport"){
-                bom_fn.downloadReviewReport();
-            } else {
-	        	var identificationStatus = [[${project.identificationStatus}]];
-	        	if ("CONF" != identificationStatus) {
-	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-	    				if (e) {
-	    					bom_fn.selectDownloadFileValidation(target);
-	    				} else {
-	    					return false;
-	    				}
-	    			});
-	        	} else {
-	        		bom_fn.selectDownloadFileValidation(target);
-	        	}
-	        }
+    		if (obj.isValid) {
+    			// download file
+    	    	if (target === "report_sub") {
+    	        	bom_fn.downloadExcel();
+    	        } else {
+    	        	var identificationStatus = [[${project.identificationStatus}]];
+    	        	if ("CONF" != identificationStatus) {
+    	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+    	    				if (e) {
+    	    					bom_fn.selectDownloadFileValidation(target);
+    	    				} else {
+    	    					return false;
+    	    				}
+    	    			});
+    	        	} else {
+    	        		bom_fn.selectDownloadFileValidation(target);
+    	        	}
+    	        }
+    		} else {
+    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    		}
     	}
     },
     selectDownloadFileValidation : function(target) {
@@ -1170,7 +1122,7 @@ var bom_fn = {
 		} else if(parseInt(cellvalue) > 0) {
 			display = "<span class=\"badge badge-warning\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
-			display = "<span style=\"font-size:0;\" title=\"0\"></span>";
+			display = "<span style=\"font-size:0;\"></span>";
 		} else {
 			display = cellvalue;
 		}
@@ -1457,7 +1409,7 @@ var bom_data = {
 	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('bom', 'bomList', true)\"><i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('bom', 'bomList', '_bomAddList', 'main', true)\"><i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
 	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('bom')\"><i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
-	                	appendBtn += "<button id=\"bomDropTop\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download customGridIcon\"></i></button>";
+	                	appendBtn += "<button id=\"bomDropTop\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-download customGridIcon\"></i></button>";
 	                	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"bomDropTop\">";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
@@ -1467,8 +1419,7 @@ var bom_data = {
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxJSON')\">CycloneDX (JSON)</span>";
-	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX ((XML)</span>";
-                        appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('reviewReport')\">ReviewReport</span></div>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX (XML)</span></div>";
 	                                        
 	                    $("#bomList_toppager_left").append(appendBtn);
 	                }
@@ -1504,7 +1455,7 @@ var bom_data = {
 					return true;
 				}
 				, onCellSelect: function(rowid,iCol,cellcontent,e) {
-					if(iCol == "0"){
+					if(iCol == "1"){
 						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					}
 				}
@@ -1563,18 +1514,17 @@ var bom_data = {
 					com_fn.checkGridComplete(false);
 					adjustMultiPageGridSize();
 					updateGridRowCount('bomList', 'bomPager');
+					// $("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false});
+					$("#bomList").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+						beforeSearch : function () {
+							if(!this.p.postData.referenceId) {
+								this.p.postData.referenceId = [[${project.prjId}]];
+							}
+						}, afterSearch : function () { 
+							updateGridRowCount('bomList', 'bomPager') 
+						}	
+					});
 				}
-			});
-
-			// $("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false});
-			$("#bomList").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
-				beforeSearch : function () {
-					if(!this.p.postData.referenceId) {
-						this.p.postData.referenceId = [[${project.prjId}]];
-					}
-				}, afterSearch : function () { 
-					updateGridRowCount('bomList', 'bomPager') 
-				}	
 			});
 		}
 	}

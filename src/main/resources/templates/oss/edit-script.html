@@ -441,52 +441,41 @@
 			
 			//Download Location Input 추가
 			$('#downloadLocationAdd').on('click', function(){
-				var isDuplicated = false;
 				var downloadLocation = $("#input_downloadLocations").val();
 				if (downloadLocation.endsWith("/")) {
 					downloadLocation = downloadLocation.slice(0, -1);
 				}
-				$("input[name='downloadLocations']").each(function (i) {
-					let dl = $("input[name='downloadLocations']").eq(i).val();
-					if ($.trim(dl) == $.trim(downloadLocation)) {
-						isDuplicated = true;
-					}
-				});
 				
-				if (isDuplicated) {
-					alertify.alert("Please check the duplicate download location.", function(){});
-				} else {
-					let downloadLocationHtml 	= 	'<div class="col-md-12">';
-					downloadLocationHtml 		+=		'<div class="row">';
-					downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
-					downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
-	                if (isReadOnly == 'true' || isReadOnly) {
-	                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
-	                } else {
-	                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-	                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
-	                }
-					downloadLocationHtml 		+=				'</div>';
-					downloadLocationHtml 		+= 			'</div>';
-					downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
-					downloadLocationHtml 		+= 				'<div class="row">';
-					downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-					downloadLocationHtml 		+=						'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
-					downloadLocationHtml 		+=						'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
-					downloadLocationHtml 		+=					'</div>';
-					downloadLocationHtml 		+=					'<span class="urltxt"></span>';
-					downloadLocationHtml 		+=					'<span class="retxt"></span>';
-					downloadLocationHtml 		+=				'</div>';
-					downloadLocationHtml 		+= 			'</div>';
-					downloadLocationHtml 		+= 		'</div>';
-					downloadLocationHtml 		+= 	'</div>';
-					
-					$(".multiDownloadLocationSet").append(downloadLocationHtml);
-					$("#input_downloadLocations").val("");
-					
-					if ('' != downloadLocation){
-						$(".multiDownloadLocationSet > div:last").find("input").trigger("blur");
-					}
+				let downloadLocationHtml 	= 	'<div class="col-md-12">';
+				downloadLocationHtml 		+=		'<div class="row">';
+				downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
+				downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
+                if (isReadOnly == 'true' || isReadOnly) {
+                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
+                } else {
+                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
+                }
+				downloadLocationHtml 		+=				'</div>';
+				downloadLocationHtml 		+= 			'</div>';
+				downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
+				downloadLocationHtml 		+= 				'<div class="row">';
+				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
+				downloadLocationHtml 		+=						'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
+				downloadLocationHtml 		+=						'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
+				downloadLocationHtml 		+=					'</div>';
+				downloadLocationHtml 		+=					'<span class="urltxt"></span>';
+				downloadLocationHtml 		+=					'<span class="retxt"></span>';
+				downloadLocationHtml 		+=				'</div>';
+				downloadLocationHtml 		+= 			'</div>';
+				downloadLocationHtml 		+= 		'</div>';
+				downloadLocationHtml 		+= 	'</div>';
+				
+				$(".multiDownloadLocationSet").append(downloadLocationHtml);
+				$("#input_downloadLocations").val("");
+				
+				if ('' != downloadLocation){
+					$(".multiDownloadLocationSet > div:last").find("input").trigger("blur");
 				}
 			});
 			
@@ -579,15 +568,14 @@
                 alertify.delOssDialog()
                     .set('onok', function(event){
                         var editorVal = $("#deleteOssEditor").summernote('code');
-                        if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
-                        } else {
-                        	alertify.alert([[#{msg.oss.required.deletion}]], function(){});
+                        if ("" == $(editorVal).text().trim()){
+                            alertify.alert([[#{msg.oss.required.deletion}]], function(){});
                             return false;
                         }
 
                         loading.show();
 
-                        $('input[name=comment]').val(editorVal);
+                        $('input[name=comment]').val($("#deleteOssEditor").summernote('code'));
                         if (isDisabled) {
     						$("input[name='ossName']").prop("disabled", false);
     					}
@@ -1768,7 +1756,7 @@
 			 // row로 들어오는 데이터가 텍스트인지 element인지 확인.
 			var olc = row.ossLicenseComb, lnm = row.licenseNameEx;
 			var ossLicenseComb, licenseName;
-			var url = '/license/shareUrl/'+row.licenseId;
+			var url = '/license/edit/'+row.licenseId;
 
 			ossLicenseComb = /<[a-z][\s\S]*>/i.test(olc) ? $("#" + $(olc).attr("id")).val() : olc;
 			licenseName = /<[a-z][\s\S]*>/i.test(lnm) ? $("#" + $(lnm).attr("id")).val() : lnm;
@@ -1777,8 +1765,8 @@
 			if(index!=0){
 				markTxt += ' <span> '+ossLicenseComb+' </span> ';
 			}
-
-			markTxt+='<a href="' + url + '" target="_blank">'+licenseName+'</a>';
+			
+			markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","'+url+'")>'+licenseName+'</a>';
 		});
 		
 		var andTxts = markTxt.split('<span> OR </span>');
@@ -2779,6 +2767,7 @@
             var protocol = window.location.protocol;
             var host =  window.location.host;
             copyUrl = protocol + "//" + host + "/oss/shareUrl/" + [[${ossId}]];
+            copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
             $("#copyUrl").val(copyUrl);
 
             //launch it.
@@ -3159,7 +3148,7 @@
            		.set('onok', function(e) {
            			if (e) {
            				var editorVal = $("#ossSaveEditor").summernote('code');
-           				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+           				if ("" != $(editorVal).text().trim()) {
 							$("input[name='comment']").val(editorVal);
 						} else {
 							var localDeactivateFlag = $("[name='deactivateFlag']").val();
@@ -3344,7 +3333,7 @@
 					const renameFormData = new FormData(form);
 					
 					$.ajax({
-						url : suffix + '/oss/validation',
+						url : '/oss/validation',
 						type : 'POST',
 						data : renameFormData,
 						cache : false,

@@ -218,11 +218,6 @@
 								<div class="row">
 									<div class="col-lg-2 pl-3 mt-1">
 										<strong th:text="'FOSSLight Report'"></strong>
-										<div class="col-lg-12 pl-0">
-											<a href="javascript:void(0);" th:onclick="|com_fn.downloadSampleReport()|">
-												<i class="far fa-file-excel hover-icon mr-1 text-primary" style="font-size: .9rem;" title="FOSSLight Report" th:text=" Sample"></i>
-											</a>
-										</div>
 									</div>
 									<div class="col-lg-3 fileUploader">
 										<div class="row">
@@ -241,8 +236,7 @@
 															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 															<input type="hidden" class="depCsvFileSeq" th:value="${csvFile.fileSeq}">
 															<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-															<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
-														</li>
+															<br>[[${csvFile.createdDate}]]</li>
 													</th:block>
 												</th:block>
 											</ul>
@@ -378,11 +372,6 @@
 								<div class="row">
 									<div class="col-lg-2 pl-3 mt-1">
 										<strong th:text="'FOSSLight Report'"></strong>
-										<div class="col-lg-12 pl-0">
-											<a href="javascript:void(0);" th:onclick="|com_fn.downloadSampleReport()|">
-												<i class="far fa-file-excel hover-icon mr-1 text-primary" style="font-size: .9rem;" title="FOSSLight Report" th:text=" Sample"></i>
-											</a>
-										</div>
 									</div>
 									<div class="col-lg-3 fileUploader">
 										<div class="row">
@@ -402,8 +391,7 @@
 															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 															<input type="hidden" class="srcCsvFileSeq" th:value="${csvFile.fileSeq}" />
 															<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-															<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
-														</li>
+															<br>[[${csvFile.createdDate}]]</li>
 													</th:block>
 												</th:block>
 											</ul>
@@ -539,11 +527,6 @@
 								<div class="row">
 									<div class="col-lg-2 pl-3 mt-1">
 										<strong th:text="'FOSSLight Report'"></strong>
-										<div class="col-lg-12 pl-0">
-											<a href="javascript:void(0);" th:onclick="|com_fn.downloadSampleReport()|">
-												<i class="far fa-file-excel hover-icon mr-1 text-primary" style="font-size: .9rem;" title="FOSSLight Report" th:text=" Sample"></i>
-											</a>
-										</div>
 									</div>
 									<div class="col-lg-9">
 										<div class="col-lg-4 fileUploader">
@@ -563,8 +546,7 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="binCsvFileSeq" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
-															</li>
+																<br>[[${csvFile.createdDate}]]</li>
 														</th:block>
 													</th:block>
 												</ul>
@@ -592,7 +574,7 @@
 														<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 														<input type="hidden" class="binBinaryFileSeq" th:value="${csvFile.fileSeq}" />
 														<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '2')|" th:text="X"></span>
-														<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
+														<br>[[${csvFile.createdDate}]]
 													</li>
 												</th:block>
 											</ul>
@@ -737,11 +719,6 @@
 									<div class="row">
 										<div class="col-lg-2">
 											<p style="text-align: center;" th:text="'FOSSLight Report'"></p>
-											<div class="col-lg-12 pl-0">
-												<a href="javascript:void(0);" th:onclick="|com_fn.downloadSampleReport()|">
-													<i class="far fa-file-excel hover-icon mr-1 text-primary" style="font-size: .9rem;" title="FOSSLight Report" th:text=" Sample"></i>
-												</a>
-											</div>
 										</div>
 										<div class="col-lg-4">
 											<div class="multi-fileuploader" id="androidCsvFile" th:text="Upload"></div>
@@ -755,7 +732,7 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="androidCsvFileSeq" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '2')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
+																<br>[[${csvFile.createdDate}]]
 															</li>
 														</th:block>
 													</th:block>
@@ -779,7 +756,7 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="androidNoticeFileSeq" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '3')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
+																<br>[[${csvFile.createdDate}]]
 															</li>
 														</th:block>
 													</th:block>
@@ -803,7 +780,7 @@
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
 																<input type="hidden" class="androidResultFile" th:value="${csvFile.fileSeq}" />
 																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '4')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
+																<br>[[${csvFile.createdDate}]]
 															</li>
 														</th:block>
 													</th:block>
