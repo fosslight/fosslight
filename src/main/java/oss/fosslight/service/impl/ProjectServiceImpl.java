@@ -7212,6 +7212,12 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		String vulnerabilityLink = "";
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(project.getPrjId());
+		if (!isEmpty(project.getOssName())) {
+			identification.setOssName(project.getOssName());
+		}
+		if (!isEmpty(project.getOssVersion())) {
+			identification.setOssVersion(project.getOssVersion());
+		}
 		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
 		
 		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
@@ -7226,52 +7232,66 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		identification.setStandardScore(Float.valueOf("0.1"));
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
-		Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
-		Map<String, String> patchLinkMap = new HashMap<>();
-		Map<String, String> runningOnWithMap = new HashMap<>();
-		List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
-		for (Map<String, Object> cpeInfo : cpeInfoList) {
-			String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
-			String key2 = (String) cpeInfo.get("cveId");
-			String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
-			String runningOnWith = (String) cpeInfo.getOrDefault("runningOnWith", "");
-			
-			List<Map<String, Object>> cpeInfoMapList = null;
-			if (cpeInfoMap.containsKey(key)) {
-				cpeInfoMapList = cpeInfoMap.get(key);
-			} else {
-				cpeInfoMapList = new ArrayList<>();
-			}
-			cpeInfoMapList.add(cpeInfo);
-			cpeInfoMap.put(key, cpeInfoMapList);
-			
-			if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
-				patchLinkMap.put(key2, patchLink);
-			}
-			
-			if (!isEmpty(runningOnWith)) {
-				if (runningOnWithMap.containsKey(key)) {
-					String chkRunningOnWith = runningOnWithMap.get(key);
-					runningOnWith = runningOnWith + "@" + chkRunningOnWith;
-				}
-				runningOnWithMap.put(key, runningOnWith);
-			}
-		}
-		
-		if (!MapUtils.isEmpty(runningOnWithMap)) {
-			for (String key : runningOnWithMap.keySet()) {
-				String[] value = runningOnWithMap.get(key).split("@");
-				String[] distinctValue = Arrays.stream(value).distinct().toArray(String[]::new);
-				runningOnWithMap.replace(key, String.join(",", distinctValue));
-			}
-		}
-		
 		if (fullList != null && !fullList.isEmpty()) {
 			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
 			if (securityDatalist != null && !securityDatalist.isEmpty()) {
 				for (OssComponents oss : securityDatalist) {
 					String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
 					securityGridMap.put(key, oss);
+				}
+			}
+			
+			Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
+			Map<String, String> patchLinkMap = new HashMap<>();
+			Map<String, String> runningOnWithMap = new HashMap<>();
+			Map<String, List<String>> versionsForCpeNames = new HashMap<>();
+			
+			List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
+			if (CollectionUtils.isNotEmpty(cpeInfoList)) {
+				List<String> matchCriteriaIds = cpeInfoList.stream().map(m -> m.get("matchCriteriaId")).filter(Objects::nonNull).map(Object::toString).distinct().collect(Collectors.toList());
+				List<Map<String, Object>> versionsForMatchCriteriaIds = projectMapper.selectVersionsForCpeNames(matchCriteriaIds);
+				for (Map<String, Object> versionsMap : versionsForMatchCriteriaIds) {
+				    String matchCriteriaId = String.valueOf(versionsMap.get("matchCriteriaId"));
+				    String versionStr = String.valueOf(versionsMap.get("version"));
+				    versionsForCpeNames.put(matchCriteriaId, Arrays.asList(versionStr.split(",")));
+				}
+			}
+			
+			for (Map<String, Object> cpeInfo : cpeInfoList) {
+				String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
+				String key2 = (String) cpeInfo.get("cveId");
+				String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
+				String runningOnWith = (String) cpeInfo.getOrDefault("runningOnWith", "");
+				int cpeInfoCnt = Integer.parseInt(cpeInfo.get("cpeInfoCnt").toString()); 
+				if (cpeInfoCnt > 0) {
+					List<Map<String, Object>> cpeInfoMapList = null;
+					if (cpeInfoMap.containsKey(key)) {
+						cpeInfoMapList = cpeInfoMap.get(key);
+					} else {
+						cpeInfoMapList = new ArrayList<>();
+					}
+					cpeInfoMapList.add(cpeInfo);
+					cpeInfoMap.put(key, cpeInfoMapList);
+					
+					if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
+						patchLinkMap.put(key2, patchLink);
+					}
+					
+					if (!isEmpty(runningOnWith)) {
+						if (runningOnWithMap.containsKey(key)) {
+							String chkRunningOnWith = runningOnWithMap.get(key);
+							runningOnWith = runningOnWith + "@" + chkRunningOnWith;
+						}
+						runningOnWithMap.put(key, runningOnWith);
+					}
+				}
+			}
+			
+			if (!MapUtils.isEmpty(runningOnWithMap)) {
+				for (String key : runningOnWithMap.keySet()) {
+					String[] value = runningOnWithMap.get(key).split("@");
+					String[] distinctValue = Arrays.stream(value).distinct().toArray(String[]::new);
+					runningOnWithMap.replace(key, String.join(",", distinctValue));
 				}
 			}
 			
@@ -7335,23 +7355,23 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 							
 							boolean emptyFlag = false;
 							for (Map<String, Object> cpeInfo : matchCpeInfoList) {
-								Map<String, Object> paramMap = new HashMap<>();
-								paramMap = cpeInfo;
-								if (!paramMap.containsKey("verStartInc")) {
-									paramMap.put("verStartInc", "");
-								}
-								if (!paramMap.containsKey("verEndInc")) {
-									paramMap.put("verEndInc", "");
-								}
-								if (!paramMap.containsKey("verStartExc")) {
-									paramMap.put("verStartExc", "");
-								}
-								if (!paramMap.containsKey("verEndExc")) {
-									paramMap.put("verEndExc", "");
-								}
-								if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
-									continue;
-								}
+//								Map<String, Object> paramMap = new HashMap<>();
+//								paramMap = cpeInfo;
+//								if (!paramMap.containsKey("verStartInc")) {
+//									paramMap.put("verStartInc", "");
+//								}
+//								if (!paramMap.containsKey("verEndInc")) {
+//									paramMap.put("verEndInc", "");
+//								}
+//								if (!paramMap.containsKey("verStartExc")) {
+//									paramMap.put("verStartExc", "");
+//								}
+//								if (!paramMap.containsKey("verEndExc")) {
+//									paramMap.put("verEndExc", "");
+//								}
+//								if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
+//									continue;
+//								}
 								
 								if (cpeInfo.containsKey("criteria")) {
 									String cpeInfoCriteria = (String) cpeInfo.get("criteria");
@@ -7412,10 +7432,14 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 										String rowStr = rowArr[0];
 										String matchCriteriaId = rowArr[1];
 										
-										List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-										if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-											deduplicateKey.add(rowStr);
-											runningOnWith += rowStr + ",";
+//										List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
+//										if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+										if (versionsForCpeNames.containsKey(matchCriteriaId)) {
+											List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
+											if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+												deduplicateKey.add(rowStr);
+												runningOnWith += rowStr + ",";
+											}
 										}
 									}
 									
@@ -7426,8 +7450,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 								}
 								oc.setVerStartEndRange(verStartEndRange);
 							} else {
-								verStartEndRange = "N/A";
 								if (!MapUtils.isEmpty(runningOnWithMap) && runningOnWithMap.containsKey(key2)) {
+									verStartEndRange = "N/A";
 									String runningOnWith = "";
 									String[] rows = runningOnWithMap.get(key2).split(",");
 									List<String> deduplicateKey = new ArrayList<>();
@@ -7437,10 +7461,14 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 										String rowStr = rowArr[0];
 										String matchCriteriaId = rowArr[1];
 										
-										List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-										if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-											deduplicateKey.add(rowStr);
-											runningOnWith += rowStr + ",";
+//										List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
+//										if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+										if (versionsForCpeNames.containsKey(matchCriteriaId)) {
+											List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
+											if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+												deduplicateKey.add(rowStr);
+												runningOnWith += rowStr + ",";
+											}
 										}
 									}
 									
@@ -7531,23 +7559,23 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 								
 								boolean emptyFlag = false;
 								for (Map<String, Object> cpeInfo : matchCpeInfoList) {
-									Map<String, Object> paramMap = new HashMap<>();
-									paramMap = cpeInfo;
-									if (!paramMap.containsKey("verStartInc")) {
-										paramMap.put("verStartInc", "");
-									}
-									if (!paramMap.containsKey("verEndInc")) {
-										paramMap.put("verEndInc", "");
-									}
-									if (!paramMap.containsKey("verStartExc")) {
-										paramMap.put("verStartExc", "");
-									}
-									if (!paramMap.containsKey("verEndExc")) {
-										paramMap.put("verEndExc", "");
-									}
-									if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
-										continue;
-									}
+//									Map<String, Object> paramMap = new HashMap<>();
+//									paramMap = cpeInfo;
+//									if (!paramMap.containsKey("verStartInc")) {
+//										paramMap.put("verStartInc", "");
+//									}
+//									if (!paramMap.containsKey("verEndInc")) {
+//										paramMap.put("verEndInc", "");
+//									}
+//									if (!paramMap.containsKey("verStartExc")) {
+//										paramMap.put("verStartExc", "");
+//									}
+//									if (!paramMap.containsKey("verEndExc")) {
+//										paramMap.put("verEndExc", "");
+//									}
+//									if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
+//										continue;
+//									}
 									
 									if (cpeInfo.containsKey("criteria")) {
 										String cpeInfoCriteria = (String) cpeInfo.get("criteria");
@@ -7608,10 +7636,14 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 											String rowStr = rowArr[0];
 											String matchCriteriaId = rowArr[1];
 											
-											List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-											if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-												deduplicateKey.add(rowStr);
-												runningOnWith += rowStr + ",";
+//											List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
+//											if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+											if (versionsForCpeNames.containsKey(matchCriteriaId)) {
+												List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
+												if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+													deduplicateKey.add(rowStr);
+													runningOnWith += rowStr + ",";
+												}
 											}
 										}
 										
@@ -7633,10 +7665,14 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 											String rowStr = rowArr[0];
 											String matchCriteriaId = rowArr[1];
 											
-											List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-											if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-												deduplicateKey.add(rowStr);
-												runningOnWith += rowStr + ",";
+//											List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
+//											if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+											if (versionsForCpeNames.containsKey(matchCriteriaId)) {
+												List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
+												if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
+													deduplicateKey.add(rowStr);
+													runningOnWith += rowStr + ",";
+												}
 											}
 										}
 										
@@ -7657,6 +7693,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					}
 				}
 			}
+			
+			versionsForCpeNames.clear();
 		}
 		
 		if (!isVulnPopup) {

@@ -424,6 +424,8 @@ public interface ProjectMapper {
 	void copyProjectAddList(Project project);
 
 	List<String> getVersionsForCpeNames(@Param("matchCriteriaId") String matchCriteriaId);
+	
+	List<Map<String, Object>> selectVersionsForCpeNames(@Param("matchCriteriaIds") List<String> matchCriteriaIds);
 
 	void updateSecurityPerson(Project Project);
 

@@ -7166,8 +7166,14 @@
 					FROM OSS_COMPONENTS
 					WHERE REFERENCE_ID = #{referenceId}
 					AND REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OSS_NAME, '') != '' 
-					AND IFNULL(OSS_VERSION, '') != ''
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OSS_NAME, '') != '' 
+						AND IFNULL(OSS_VERSION, '') != ''
+					</if>
 					AND OSS_NAME != '-'
 					AND EXCLUDE_YN != 'Y'
 					GROUP BY OSS_NAME, OSS_VERSION
@@ -7219,8 +7225,14 @@
 						FROM OSS_COMPONENTS
 						WHERE REFERENCE_ID = #{referenceId}
 						AND REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OSS_NAME, '') != '' 
-						AND IFNULL(OSS_VERSION, '') != ''
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OSS_NAME, '') != '' 
+							AND IFNULL(OSS_VERSION, '') != ''
+						</if>
 						AND OSS_NAME != '-'
 						AND EXCLUDE_YN != 'Y'
 						GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
@@ -7273,9 +7285,15 @@
 					FROM OSS_COMPONENTS
 					WHERE REFERENCE_ID = #{referenceId}
 					AND REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OSS_NAME, '') != '' 
-					AND IFNULL(OSS_VERSION, '') = ''
-					AND OSS_NAME != '-'
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OSS_NAME, '') != '' 
+						AND IFNULL(OSS_VERSION, '') != ''
+						AND OSS_NAME != '-'
+					</if>
 					AND EXCLUDE_YN != 'Y'
 					GROUP BY OSS_NAME, OSS_VERSION
 				) OC
@@ -7326,9 +7344,15 @@
 						FROM OSS_COMPONENTS
 						WHERE REFERENCE_ID = #{referenceId}
 						AND REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OSS_NAME, '') != '' 
-						AND IFNULL(OSS_VERSION, '') = ''
-						AND OSS_NAME != '-'
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OSS_NAME, '') != '' 
+							AND OSS_NAME != '-'
+							AND IFNULL(OSS_VERSION, '') != ''
+						</if>
 						AND EXCLUDE_YN != 'Y'
 						GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
 					) OC
@@ -7388,9 +7412,15 @@
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND IFNULL(OC.OSS_VERSION, '') != ''
-					AND OC.OSS_NAME != '-'
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-'
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 				) OC
@@ -7446,9 +7476,15 @@
 					ON OC.OSS_NAME = NICK.OSS_NICKNAME
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND IFNULL(OC.OSS_VERSION, '') != ''
-					AND OC.OSS_NAME != '-'
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-'
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 				) OC
@@ -7507,9 +7543,15 @@
 					ON OC.OSS_ID = ALIAS.OSS_ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND IFNULL(OC.OSS_VERSION, '') != ''
-					AND OC.OSS_NAME != '-'
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-'
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS
 				) OC
@@ -7568,9 +7610,15 @@
 					ON OC.OSS_ID = ALIAS.OSS_ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND IFNULL(OC.OSS_VERSION, '') != ''
-					AND OC.OSS_NAME != '-'
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-'
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS
 				) OC
@@ -7625,9 +7673,15 @@
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND IFNULL(OC.OSS_VERSION, '') = ''
-					AND OC.OSS_NAME != '-'
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-'
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 				) OC
@@ -7682,9 +7736,15 @@
 					ON OC.OSS_NAME = NICK.OSS_NICKNAME
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND IFNULL(OC.OSS_VERSION, '') = ''
-					AND OC.OSS_NAME != '-'
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-'
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 				) OC
@@ -7760,8 +7820,13 @@
 				ON OC.OSS_NAME = OM.OSS_NAME
 				WHERE OC.REFERENCE_ID = #{referenceId}
 				AND OC.REFERENCE_DIV = #{referenceDiv}
-				AND IFNULL(OC.OSS_NAME, '') != '' 
-				AND OC.OSS_NAME != '-' 
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+					AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+					AND IFNULL(OC.OSS_NAME, '') != '' 
+					AND OC.OSS_NAME != '-' 
+				</if>
 				AND OC.EXCLUDE_YN != 'Y'
 				GROUP BY OC.OSS_NAME, OC.OSS_VERSION, OM.CRITERIA
 			) OC
@@ -7781,8 +7846,13 @@
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND OC.OSS_NAME != '-' 
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-' 
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY OC.OSS_NAME
 				) OC
@@ -7832,8 +7902,13 @@
 						FROM OSS_COMPONENTS OC
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND OC.OSS_NAME != '-' 
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-' 
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						GROUP BY OC.OSS_NAME
 					) OC
@@ -7883,8 +7958,13 @@
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND IFNULL(OC.OSS_NAME, '') != '' 
-					AND OC.OSS_NAME != '-' 
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND OC.OSS_NAME != '-' 
+					</if>
 					AND OC.EXCLUDE_YN != 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION
 				) OC
@@ -7942,8 +8022,13 @@
 						FROM OSS_COMPONENTS OC
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND OC.OSS_NAME != '-' 
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-' 
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						GROUP BY OC.OSS_ID, OC.OSS_NAME, OC.OSS_VERSION
 					) OC
@@ -7999,6 +8084,14 @@
 		SELECT CONF.MATCH_CRITERIA_ID, CONF.CVE_ID, CONF.PRODUCT, CONF.VERSION, CONF.CRITERIA, CONF.VER_START_INC, CONF.VER_END_INC, CONF.VER_START_EXC, CONF.VER_END_EXC
 				, (SELECT GROUP_CONCAT(DISTINCT PATCH_LINK) FROM NVD_DATA_PATCH_LINK WHERE CVE_ID = CONF.CVE_ID) AS PATCH_LINK
 				, (SELECT GROUP_CONCAT(CONCAT(VENDOR, ':', PRODUCT, '|', MATCH_CRITERIA_ID)) FROM NVD_DATA_RUNNING_ON_WITH WHERE MATCH_CRITERIA_ID = CONF.MATCH_CRITERIA_ID AND CVE_ID = CONF.CVE_ID) AS RUNNING_ON_WITH
+				, (SELECT COUNT(1) FROM NVD_CPE_MATCH 
+					WHERE MATCH_CRITERIA_ID = CONF.MATCH_CRITERIA_ID 
+					AND CPE23URI = CONF.CRITERIA 
+					AND IFNULL(VER_START_INC, '') = IFNULL(CONF.VER_START_INC, '')
+					AND IFNULL(VER_END_INC, '') = IFNULL(CONF.VER_END_INC, '')
+					AND IFNULL(VER_START_EXC, '') = IFNULL(CONF.VER_START_EXC, '')
+					AND IFNULL(VER_END_EXC, '') = IFNULL(CONF.VER_END_EXC, '')
+				) AS CPE_INFO_CNT
 		FROM NVD_DATA_CONFIGURATIONS CONF
 		WHERE EXISTS (
 			SELECT 1
@@ -8015,9 +8108,15 @@
 						FROM OSS_COMPONENTS
 						WHERE REFERENCE_ID = #{referenceId}
 						AND REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OSS_NAME, '') != '' 
-						AND IFNULL(OSS_VERSION, '') != ''
-						AND OSS_NAME != '-'
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OSS_NAME, '') != '' 
+							AND OSS_NAME != '-'
+							AND IFNULL(OSS_VERSION, '') != ''
+						</if>
 						AND EXCLUDE_YN != 'Y'
 						GROUP BY OSS_NAME, OSS_VERSION
 					) OC
@@ -8038,9 +8137,15 @@
 							FROM OSS_COMPONENTS
 							WHERE REFERENCE_ID = #{referenceId}
 							AND REFERENCE_DIV = #{referenceDiv}
-							AND IFNULL(OSS_NAME, '') != '' 
-							AND IFNULL(OSS_VERSION, '') != ''
-							AND OSS_NAME != '-'
+							<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+								AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+							</if>
+							<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND IFNULL(OSS_NAME, '') != '' 
+								AND OSS_NAME != '-'
+								AND IFNULL(OSS_VERSION, '') != ''
+							</if>
 							AND EXCLUDE_YN != 'Y'
 							GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
 						) OC
@@ -8062,9 +8167,15 @@
 						FROM OSS_COMPONENTS
 						WHERE REFERENCE_ID = #{referenceId}
 						AND REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OSS_NAME, '') != '' 
-						AND IFNULL(OSS_VERSION, '') = ''
-						AND OSS_NAME != '-'
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OSS_NAME, '') != '' 
+							AND OSS_NAME != '-'
+							AND IFNULL(OSS_VERSION, '') = ''
+						</if>
 						AND EXCLUDE_YN != 'Y'
 						GROUP BY OSS_NAME, OSS_VERSION
 					) OC
@@ -8085,9 +8196,15 @@
 							FROM OSS_COMPONENTS
 							WHERE REFERENCE_ID = #{referenceId}
 							AND REFERENCE_DIV = #{referenceDiv}
-							AND IFNULL(OSS_NAME, '') != '' 
-							AND IFNULL(OSS_VERSION, '') = ''
-							AND OSS_NAME != '-'
+							<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND (IFNULL(OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+								AND IFNULL(OSS_VERSION, '') = #{ossVersion}
+							</if>
+							<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND IFNULL(OSS_NAME, '') != '' 
+								AND OSS_NAME != '-'
+								AND IFNULL(OSS_VERSION, '') = ''
+							</if>
 							AND EXCLUDE_YN != 'Y'
 							GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
 						) OC
@@ -8117,9 +8234,15 @@
 						ON OC.OSS_NAME = NICK.OSS_NAME
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND IFNULL(OC.OSS_VERSION, '') != ''
-						AND OC.OSS_NAME != '-'
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-'
+							AND IFNULL(OC.OSS_VERSION, '') != ''
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 					) OC
@@ -8148,9 +8271,15 @@
 						ON OC.OSS_ID = ALIAS.OSS_ID
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND IFNULL(OC.OSS_VERSION, '') != ''
-						AND OC.OSS_NAME != '-'
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-'
+							AND IFNULL(OC.OSS_VERSION, '') != ''
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS
 					) OC
@@ -8175,9 +8304,15 @@
 						ON OC.OSS_NAME = NICK.OSS_NAME
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND IFNULL(OC.OSS_VERSION, '') = ''
-						AND OC.OSS_NAME != '-'
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-'
+							AND IFNULL(OC.OSS_VERSION, '') = ''
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 					) OC
@@ -8202,9 +8337,15 @@
 						ON OC.OSS_NAME = NICK.OSS_NAME
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND IFNULL(OC.OSS_VERSION, '') != '' 
-						AND OC.OSS_NAME != '-' 
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-' 
+							AND IFNULL(OC.OSS_VERSION, '') != '' 
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						AND NICK.OSS_NICKNAME REGEXP '[-]'
 						GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
@@ -8230,9 +8371,15 @@
 						ON OC.OSS_NAME = NICK.OSS_NAME
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND IFNULL(OC.OSS_VERSION, '') = ''
-						AND OC.OSS_NAME != '-' 
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-' 
+							AND IFNULL(OC.OSS_VERSION, '') = ''
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						AND NICK.OSS_NICKNAME REGEXP '[-]'
 						GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
@@ -8262,8 +8409,13 @@
 						ON OC.OSS_NAME = OM.OSS_NAME
 						WHERE OC.REFERENCE_ID = #{referenceId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
-						AND IFNULL(OC.OSS_NAME, '') != '' 
-						AND OC.OSS_NAME != '-' 
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+						</if>
+						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-' 
+						</if>
 						AND OC.EXCLUDE_YN != 'Y'
 						GROUP BY OC.OSS_NAME, OC.OSS_VERSION, OM.CRITERIA
 					) OC
@@ -8284,8 +8436,13 @@
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_ID = #{referenceId}
 							AND OC.REFERENCE_DIV = #{referenceDiv}
-							AND IFNULL(OC.OSS_NAME, '') != '' 
-							AND OC.OSS_NAME != '-' 
+							<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							</if>
+							<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND IFNULL(OC.OSS_NAME, '') != '' 
+								AND OC.OSS_NAME != '-' 
+							</if>
 							AND OC.EXCLUDE_YN != 'Y'
 							GROUP BY OC.OSS_NAME
 						) OC
@@ -8317,8 +8474,13 @@
 							ON OC.OSS_NAME = NICK.OSS_NAME
 							WHERE OC.REFERENCE_ID = #{referenceId}
 							AND OC.REFERENCE_DIV = #{referenceDiv}
-							AND IFNULL(OC.OSS_NAME, '') != '' 
-							AND OC.OSS_NAME != '-' 
+							<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR REPLACE(IFNULL(OC.OSS_NAME, ''), '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+							</if>
+							<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+								AND IFNULL(OC.OSS_NAME, '') != '' 
+								AND OC.OSS_NAME != '-' 
+							</if>
 							AND OC.EXCLUDE_YN != 'Y'
 							GROUP BY OC.OSS_ID, OC.OSS_NAME, OC.OSS_VERSION
 						) OC
@@ -8343,6 +8505,16 @@
 		SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 6), ':', -1) AS VERSION
 		FROM NVD_CPE_MATCH_NAMES
 		WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
+	</select>
+	
+	<select id="selectVersionsForCpeNames" parameterType="string" resultType="oss.fosslight.domain.CamelMap">
+		SELECT MATCH_CRITERIA_ID, GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 6), ':', -1)) AS VERSION
+		FROM NVD_CPE_MATCH_NAMES
+		WHERE MATCH_CRITERIA_ID IN
+		<foreach collection="matchCriteriaIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY MATCH_CRITERIA_ID
 	</select>
 	
 	<update id="updateProjectForSecurity" parameterType="oss.fosslight.domain.Project">
