@@ -1355,7 +1355,6 @@ public class CoMailManager extends CoTopComponent {
     					_ccList = new ArrayList<>();
     				}
     				
-    				
     				// 일단 자기자신에 중복된게 있으면 삭제
     				List<String> _toListFinal = new ArrayList<String>(new HashSet<String>(_toList));
     				List<String> _ccListFinal = new ArrayList<>();
@@ -1375,9 +1374,8 @@ public class CoMailManager extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-
-
-				if (!isTest &&
+    			
+    			if (!isTest &&
 						(
 								CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())
 										|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()))
@@ -3164,8 +3162,9 @@ public class CoMailManager extends CoTopComponent {
 				param.add(bean.getParamPrjId());
 				return makeVulnerabilityInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS:
-			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
 				return makeVulnerabilityInfo(getMailComponentDataWithArray(bean.getParamOssKey(), component));
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
+				return makeVulnerabilityInfo(getMailComponentDataWithArray(null, component));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED:
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED:
 				param.add(bean.getParamPrjId());
@@ -3793,13 +3792,14 @@ public class CoMailManager extends CoTopComponent {
 		return dataList;
 	}
 	
-
 	private List<Map<String, Object>> getMailComponentDataWithArray(List<String> params, String key) {
 		// sql 문 생성
 		String sql = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_NAME, key);
 		List<Map<String, Object>> dataList = new ArrayList<>();
 		// sql param 생성
-		sql = sql.replace("?", createInQuery(params));
+		if (!CollectionUtils.isEmpty(params)) {
+			sql = sql.replace("?", createInQuery(params));
+		}
 		try (
 			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
 			PreparedStatement pstmt = conn.prepareStatement(sql);
