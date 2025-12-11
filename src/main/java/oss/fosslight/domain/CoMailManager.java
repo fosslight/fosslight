@@ -3162,9 +3162,8 @@ public class CoMailManager extends CoTopComponent {
 				param.add(bean.getParamPrjId());
 				return makeVulnerabilityInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS:
-				return makeVulnerabilityInfo(getMailComponentDataWithArray(bean.getParamOssKey(), component));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
-				return makeVulnerabilityInfo(getMailComponentDataWithArray(null, component));
+				return makeVulnerabilityInfo(getMailComponentDataWithArray(bean.getParamOssKey(), component));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED:
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED:
 				param.add(bean.getParamPrjId());
@@ -3797,13 +3796,11 @@ public class CoMailManager extends CoTopComponent {
 		String sql = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_NAME, key);
 		List<Map<String, Object>> dataList = new ArrayList<>();
 		// sql param 생성
-		if (!CollectionUtils.isEmpty(params)) {
-			sql = sql.replace("?", createInQuery(params));
-		}
+		sql = sql.replace("?", createInQuery(params));
 		try (
 			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			ResultSet rs = pstmt.executeQuery()
+			ResultSet rs = pstmt.executeQuery();
 		) {
 			
 			if (rs != null) {
