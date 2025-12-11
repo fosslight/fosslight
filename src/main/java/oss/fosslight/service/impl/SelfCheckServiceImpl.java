@@ -322,15 +322,30 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				
 				String key = (bean.getOssName() + "_" + bean.getOssVersion()).toUpperCase();
 				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !vulnerabilityInfoMap.containsKey(key)) {
-					OssMaster ossMaster = ossInfoMap.get(key);
-					if (ossMaster != null) {
-						if (isEmpty(ossMaster.getOssVersion())) {
-							ossMaster.setOssVersion("-");
+					OssMaster ossMaster = null;
+					if (ossInfoMap.containsKey(key)) {
+						ossMaster = ossInfoMap.get(key);
+					} else {
+						for (String ossInfoKey : ossInfoMap.keySet()) {
+							if (ossInfoKey.startsWith((bean.getOssName() + "_").toUpperCase())) {
+								ossMaster = ossInfoMap.get(ossInfoKey);
+								break;
+							}
 						}
-						OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-						if (om != null && !isEmpty(om.getCvssScore())) {
-							vulnerabilityInfoMap.put(key, om);
+						if (ossMaster != null) {
+							ossMaster.setOssVersionAliases(null);
+						} else {
+							ossMaster = new OssMaster();
+							ossMaster.setOssName(bean.getOssName());
 						}
+						ossMaster.setOssVersion(bean.getOssVersion());
+					}
+					if (isEmpty(ossMaster.getOssVersion())) {
+						ossMaster.setOssVersion("-");
+					}
+					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+					if (om != null && !isEmpty(om.getCvssScore())) {
+						vulnerabilityInfoMap.put(key, om);
 					}
 				}
 			}

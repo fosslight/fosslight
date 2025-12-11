@@ -590,8 +590,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
  				list.forEach(ll -> {
  					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
  						String key = ll.getOssName() + "_" + ll.getOssVersion();
-						if (!vulnerabilityInfoMap.containsKey(key.toUpperCase()) && ossInfoMap.containsKey(key.toUpperCase())) {
-							OssMaster ossMaster = ossInfoMap.get(key.toUpperCase());
+						if (!vulnerabilityInfoMap.containsKey(key.toUpperCase())) {
+							OssMaster ossMaster = null;
+							if (ossInfoMap.containsKey(key.toUpperCase())) {
+								ossMaster = ossInfoMap.get(key.toUpperCase());
+							} else {
+								for (String ossInfoKey : ossInfoMap.keySet()) {
+									if (ossInfoKey.startsWith((ll.getOssName() + "_").toUpperCase())) {
+										ossMaster = ossInfoMap.get(ossInfoKey);
+										break;
+									}
+								}
+								if (ossMaster != null) {
+									ossMaster.setOssVersionAliases(null);
+								} else {
+									ossMaster = new OssMaster();
+									ossMaster.setOssName(ll.getOssName());
+								}
+								ossMaster.setOssVersion(ll.getOssVersion());
+							}
 							if (isEmpty(ossMaster.getOssVersion())) {
 								ossMaster.setOssVersion("-");
 							}
@@ -857,8 +874,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				list.forEach(ll -> {
 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
 						String key = ll.getOssName() + "_" + ll.getOssVersion();
-	 					if (!vulnerabilityInfoMap.containsKey(key.toUpperCase()) && ossInfoMap.containsKey(key.toUpperCase())) {
-	 						OssMaster ossMaster = ossInfoMap.get(key.toUpperCase());
+	 					if (!vulnerabilityInfoMap.containsKey(key.toUpperCase())) {
+	 						OssMaster ossMaster = null;
+	 						if (ossInfoMap.containsKey(key.toUpperCase())) {
+	 							ossMaster = ossInfoMap.get(key.toUpperCase());
+	 						} else {
+	 							for (String ossInfoKey : ossInfoMap.keySet()) {
+									if (ossInfoKey.startsWith((ll.getOssName() + "_").toUpperCase())) {
+										ossMaster = ossInfoMap.get(ossInfoKey);
+										break;
+									}
+								}
+								if (ossMaster != null) {
+									ossMaster.setOssVersionAliases(null);
+								} else {
+									ossMaster = new OssMaster();
+									ossMaster.setOssName(ll.getOssName());
+								}
+								ossMaster.setOssVersion(ll.getOssVersion());
+	 						}
 	 						if (isEmpty(ossMaster.getOssVersion())) {
 	 							ossMaster.setOssVersion("-");
 	 						}
@@ -1058,8 +1092,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					String licenseDiv = "";
 					
 					if (!isEmpty(project.getOssName()) && !project.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(project.getExcludeYn()))) {
-						if (!vulnerabilityInfoMap.containsKey(_test.toUpperCase()) && ossInfoMap.containsKey(_test.toUpperCase())) {
-							OssMaster ossMaster = ossInfoMap.get(_test.toUpperCase());
+						if (!vulnerabilityInfoMap.containsKey(_test.toUpperCase())) {
+							OssMaster ossMaster = null;
+							if (ossInfoMap.containsKey(_test.toUpperCase())) {
+								ossMaster = ossInfoMap.get(_test.toUpperCase());
+							} else {
+								for (String ossInfoKey : ossInfoMap.keySet()) {
+									if (ossInfoKey.startsWith((project.getOssName() + "_").toUpperCase())) {
+										ossMaster = ossInfoMap.get(ossInfoKey);
+										break;
+									}
+								}
+								if (ossMaster != null) {
+									ossMaster.setOssVersionAliases(null);
+								} else {
+									ossMaster = new OssMaster();
+									ossMaster.setOssName(project.getOssName());
+								}
+								ossMaster.setOssVersion(project.getOssVersion());
+							}
 							if (isEmpty(ossMaster.getOssVersion())) {
 								ossMaster.setOssVersion("-");
 							}
