@@ -1457,7 +1457,7 @@ var bom_data = {
 	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('bom', 'bomList', true)\"><i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('bom', 'bomList', '_bomAddList', 'main', true)\"><i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
 	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('bom')\"><i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
-	                	appendBtn += "<button id=\"bomDropTop\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download customGridIcon\"></i></button>";
+	                	appendBtn += "<button id=\"bomDropTop\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-download customGridIcon\"></i></button>";
 	                	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"bomDropTop\">";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
@@ -1467,7 +1467,7 @@ var bom_data = {
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span>";
 	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxJSON')\">CycloneDX (JSON)</span>";
-	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX ((XML)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX (XML)</span>";
                         appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('reviewReport')\">ReviewReport</span></div>";
 	                                        
 	                    $("#bomList_toppager_left").append(appendBtn);
@@ -1563,18 +1563,17 @@ var bom_data = {
 					com_fn.checkGridComplete(false);
 					adjustMultiPageGridSize();
 					updateGridRowCount('bomList', 'bomPager');
+					// $("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false});
+					$("#bomList").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+						beforeSearch : function () {
+							if(!this.p.postData.referenceId) {
+								this.p.postData.referenceId = [[${project.prjId}]];
+							}
+						}, afterSearch : function () { 
+							updateGridRowCount('bomList', 'bomPager') 
+						}	
+					});
 				}
-			});
-
-			// $("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false});
-			$("#bomList").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
-				beforeSearch : function () {
-					if(!this.p.postData.referenceId) {
-						this.p.postData.referenceId = [[${project.prjId}]];
-					}
-				}, afterSearch : function () { 
-					updateGridRowCount('bomList', 'bomPager') 
-				}	
 			});
 		}
 	}
