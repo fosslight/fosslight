@@ -1,5 +1,5 @@
 
-INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
+INSERT IGNORE INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
     ('207', 'Distribution Type', 'Depending on the type of project, Detail Description should be set. T for Transfer in-hous or Preceeding Software, N for Network Server, and A for Android or Yocto Model.', 'N');
 
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
