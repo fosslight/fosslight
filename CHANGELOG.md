@@ -1,5 +1,63 @@
 # Changelog
 
+## v2.4.0 (15/12/2025)
+## What's Changed
+* Fix bug in migration scripts by @syleeeee in https://github.com/fosslight/fosslight/pull/1107
+* Fix OSS Rename performance issues and Project Search UI bugs by @dongs0 in https://github.com/fosslight/fosslight/pull/1114
+* Fix migration script that deletes table data  by @syleeeee in https://github.com/fosslight/fosslight/pull/1110
+* fix: improve OSS nickname search and autocomplete by @dongs0 in https://github.com/fosslight/fosslight/pull/1113
+
+## New Contributors
+* @dongs0 made their first contribution in https://github.com/fosslight/fosslight/pull/1114
+
+## 🚀 Features
+- Security
+  - Added an Overview tab to view project vulnerability statistics and chart information.
+- Project
+  - Added new Distribution Types:
+    - Contribution for open-source disclosure and contribution purposes.
+    - Self-Check for internal review and pre-assessment purposes.
+  - Added a new input field for the transfer division when the Distribution Type is Transfer In-House.
+- Self-Check
+  - Added integration with the FOSSLight Scanner Service.
+- Common
+  - When deleting a Project or 3rd Party, the SBOM-exported FOSSLight Report file is now automatically sent via email.
+
+
+## 🐛 Hotfixes
+- Security > Need to Resolve: Fixed an issue where the max score was displayed incorrectly.
+- OSS Save: Fixed an issue where identical licenses were duplicated in declared or both declared and detected fields.
+- Identification
+  - Fixed an issue where the admin check* status was unintentionally cleared.
+  -Fixed an issue where 3rd party copyright was not displayed in the SBOM tab.
+  -Fixed an issue where exports failed when required warning messages existed.
+  -Fixed an issue where license information disappeared after exclude and save.
+  -Fixed an issue where Proprietary license types did not display warning messages.
+  -Fixed an issue where Pre-review > License change targets were not listed.
+- Packaging: Fixed an issue where network service OSS was incorrectly categorized as source disclosure required.
+
+
+## 🔧 Maintenance
+- Project
+  - Packaging
+    - Added support for uploading files in the tar.bz2 format.
+    - Verify and Save buttons have been merged into a single action.
+    - During Confirm, OSS items without notice or source are now excluded from warning message checks.
+  - Distribution
+    - The action performer’s information is now displayed in the completion email.
+- Security
+  -  Added the Affected SW Version Range column to the Need to Resolve and Full Discovered tabs.
+- History List
+  - OSS: Added information for include CPE, exclude CPE, and version alias.
+- OSS
+  - When saving Dual or Multi licenses, licenses are now sorted in alphabetical order.
+  - For OSS with Version Diff, the version information table in the registration email is now sorted by version order.
+- Vulnerability
+  - Modified NVD sync behavior to skip entries where download location, homepage is null.
+
+**Full Changelog**: https://github.com/fosslight/fosslight/compare/v2.3.0...v2.4.0
+---
+
 ## v2.3.0 (09/07/2025)
 ## What Changes
 - Release version 2.3.0  by @Min-Kyungsun, @FOSSLight-dev(#1096)
@@ -915,12 +973,3 @@
 - Change Status Message for Row Registration Failed in OSS Bulk @soimkim (#503)
 - When copying OSS and Project, try setting the name and version. @soimkim (#492)
 - Fix the bug where the warning message is not displayed for the deactivated OSS @FOSSLight-dev (#490)
-
----
-
-## v1.3.5 (29/04/2022)
-## Changes
-## 🐛 Hotfixes
-
-- Fix a bug on clicking the Rename button @FOSSLight-dev (#489)
-- Update OSS Table > Validation Downloadlocation @FOSSLight-dev (#488)
