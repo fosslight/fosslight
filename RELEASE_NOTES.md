@@ -6,6 +6,68 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.4.0](https://github.com/fosslight/fosslight/releases/tag/v2.4.0) (2025-12-16)
+
+### New
+
+* Security
+  - Added an Overview tab to view project vulnerability statistics and chart information.  
+
+* Project  
+  - Added new Distribution Types:  
+    - Contribution for open-source disclosure and contribution purposes.  
+    - Self-Check for internal review and pre-assessment purposes.  
+  - Added a new input field for the transfer division when the Distribution Type is Transfer In-House.  
+
+* Self-Check 
+  - Added integration with the FOSSLight Scanner Service.  
+
+* Common 
+  - When deleting a Project or 3rd Party, the SBOM-exported FOSSLight Report file is now automatically sent via email.  
+
+### Changed
+
+* Project
+  - Packaging
+    - Added support for uploading files in the tar.bz2 format.  
+    - Verify and Save buttons have been merged into a single action.  
+    - During Confirm, OSS items without notice or source are now excluded from warning message checks.  
+  - Distribution
+    - The action performer’s information is now displayed in the completion email.  
+
+* Security 
+  - Added the Affected SW Version Range column to the Need to Resolve and Full Discovered tabs.  
+
+* History List 
+  - OSS: Added information for include CPE, exclude CPE, and *version alias*.  
+
+* OSS  
+  - When saving Dual or Multi licenses, licenses are now sorted in alphabetical order.  
+  - For OSS with Version Diff, the version information table in the registration email is now sorted by version order.  
+
+* Vulnerability 
+  - Modified NVD sync behavior to skip entries where download location, homepage is null.  
+
+* Bug Fixes  
+  - Security > Need to Resolve: Fixed an issue where the max score was displayed incorrectly.  
+  - OSS Save: Fixed an issue where identical licenses were duplicated in declared or both declared and detected fields.  
+  - Identification
+    - Fixed an issue where the admin check* status was unintentionally cleared.  
+    - Fixed an issue where 3rd party copyright was not displayed in the SBOM tab.  
+    - Fixed an issue where exports failed when required warning messages existed.  
+    - Fixed an issue where license information disappeared after exclude and save.  
+    - Fixed an issue where Proprietary license types did not display warning messages.  
+    - Fixed an issue where Pre-review > License change targets were not listed.  
+  - Packaging: Fixed an issue where network service OSS was incorrectly categorized as source disclosure required.  
+
+
+### DataBase
+
+* Columns Added  
+  - `PRE_PROJECT_MASTER`: `SRC_SCAN_FILE_ID`  
+  - `PROJECT_MASTER`: `TRANSFER_DIVISION`  
+  - `PARTNER_MASTER`: `CVE_ID`, `CVSS_SCORE_MAX`
+ 
 ## [2.3.0](https://github.com/fosslight/fosslight/releases/tag/v2.3.0) (2025-07-09)
 
 ### New
