@@ -290,15 +290,15 @@ public class T2CoOssValidator extends T2CoValidator {
 								idx++;
 								licenseIds.put(idx, andLicenseIds);
 								andLicenseIds = new ArrayList<>();
-								andLicenseIds.add(ol.getLicenseId());
+								andLicenseIds.add(ol.getLicenseNameEx());
 							} else {
-								andLicenseIds.add(ol.getLicenseId());
+								andLicenseIds.add(ol.getLicenseNameEx());
 							}
 						} else {
 							if (andLicenseIds == null) {
 								andLicenseIds = new ArrayList<>();
 							}
-							andLicenseIds.add(ol.getLicenseId());
+							andLicenseIds.add(ol.getLicenseNameEx());
 						}
 					}
 					

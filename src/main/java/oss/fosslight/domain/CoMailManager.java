@@ -36,10 +36,14 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.jsoup.Jsoup;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -1086,7 +1090,7 @@ public class CoMailManager extends CoTopComponent {
 							project.setPrjId(bean.getParamPrjId());
 							Project projectDetail = projectService.getProjectDetail(project);
 							if (!isEmpty(avoidNull(projectDetail.getSecPerson()))) {
-								ccList.add(projectDetail.getSecPerson());
+								ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{projectDetail.getSecPerson()})));
 							}
         				}
     				}
@@ -1351,7 +1355,6 @@ public class CoMailManager extends CoTopComponent {
     					_ccList = new ArrayList<>();
     				}
     				
-    				
     				// 일단 자기자신에 중복된게 있으면 삭제
     				List<String> _toListFinal = new ArrayList<String>(new HashSet<String>(_toList));
     				List<String> _ccListFinal = new ArrayList<>();
@@ -1371,9 +1374,8 @@ public class CoMailManager extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-
-
-				if (!isTest &&
+    			
+    			if (!isTest &&
 						(
 								CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())
 										|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()))
@@ -1421,7 +1423,12 @@ public class CoMailManager extends CoTopComponent {
 		// opertating system
 		convBean.setOsType(CoConstDef.COMMON_SELECTED_ETC.equals(convBean.getOsType()) ? convBean.getOsTypeEtc() : CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, convBean.getOsType()));
 		// distribution type
-		convBean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, convBean.getDistributionType()));
+		if(!isEmpty(avoidNull(convBean.getTransferDivision()))) {
+			convBean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, convBean.getDistributionType()) + " (" + convBean.getTransferDivision() + ")");
+		} else {
+			convBean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, convBean.getDistributionType()));
+		}
+
 		// distribution site
 		convBean.setDistributeTarget(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, convBean.getDistributeTarget()));
 		// due date
@@ -3784,7 +3791,6 @@ public class CoMailManager extends CoTopComponent {
 		return dataList;
 	}
 	
-
 	private List<Map<String, Object>> getMailComponentDataWithArray(List<String> params, String key) {
 		// sql 문 생성
 		String sql = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_NAME, key);
@@ -3794,7 +3800,7 @@ public class CoMailManager extends CoTopComponent {
 		try (
 			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			ResultSet rs = pstmt.executeQuery()
+			ResultSet rs = pstmt.executeQuery();
 		) {
 			
 			if (rs != null) {
@@ -3965,8 +3971,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED.equals(coMail.getMsgType()) || CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
 				String prjId = "";
 				if((ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS"))
 				    || (ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()).equals("SUCCESS"))){
@@ -3975,20 +3980,33 @@ public class CoMailManager extends CoTopComponent {
 					} else {
 						prjId = "3rd_"+coMail.getParamPartnerId();
 					}
-					String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "");
-					if(!isEmpty(analysisResultListPath)){
-						analysisResultListPath += "/" + prjId;
-
-						File file = FileUtil.getAutoAnalysisFile("LOG", analysisResultListPath);
-						DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
-						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
-
-						analysisResultListPath += "/result";
-						file = FileUtil.getAutoAnalysisFile("XLSX", analysisResultListPath);
-						dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
-						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
-
+					
+					String url = CommonFunction.emptyCheckProperty("fl.scan.service.url", "");
+					if (!isEmpty(url)) {
+						url += "/api/project/" + prjId + "/logs";
+						ResponseEntity<byte[]> response = new RestTemplate().exchange(url, HttpMethod.GET, null, byte[].class);
+						if (response.getStatusCode() == HttpStatus.OK) {
+							DataSource dataSource = new ByteArrayDataSource(response.getBody(), "application/json");
+							helper.addAttachment("auto_analysis_result_" + prjId + ".json", dataSource);
+						}
 					}
+					
+//					String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "");
+//					if(!isEmpty(analysisResultListPath)){
+//						analysisResultListPath += "/" + prjId;
+//
+//						File file = FileUtil.getAutoAnalysisFile("LOG", analysisResultListPath);
+//						if (file != null) {
+//							DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
+//							helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+//						}
+//						analysisResultListPath += "/result";
+//						File fileResult = FileUtil.getAutoAnalysisFile("XLSX", analysisResultListPath);
+//						if (fileResult != null) {
+//							DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + fileResult.getName());
+//							helper.addAttachment(MimeUtility.encodeText(fileResult.getName(), "UTF-8", "B"), dataSource);
+//						}
+//					}
 				}
 				log.info("[CoReviewer][PRJ-" + prjId + "] Send Mail");
 			}
@@ -4003,20 +4021,29 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-
-
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType()) ||
 					CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {
 				String type = "";
 				String id = "";
 				ProjectIdentification prjBean = new ProjectIdentification();
+				Project prjDetail = new Project();
+				prjDetail.setPrjId(coMail.getParamPrjId());
+				prjDetail = projectService.getProjectDetail(prjDetail);
 				Boolean isAttached = true;
+				String refDiv = "";
 
 				if (CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType())) {
-					type = "bom";
+					if (prjDetail.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+						refDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+						type = "binAndroidBom";
+					} else {
+						refDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+						type = "bom";
+					}
+
 					id = coMail.getParamPrjId();
 					prjBean.setReferenceId(id);
-					prjBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					prjBean.setReferenceDiv(refDiv);
 					List<ProjectIdentification> list = projectService.getBomListExcel(prjBean);
 					if(list.size() == 0) {
 						isAttached = false;

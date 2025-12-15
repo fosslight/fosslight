@@ -130,6 +130,7 @@
 		, A.PUBLIC_YN
 		, A.SECPERSON
 		, A.SECMAIL_YN
+		, A.TRANSFER_DIVISION
 		, W.WATCHER AS EDITORS
 		FROM (
 		SELECT T1.PRJ_ID
@@ -139,6 +140,7 @@
 		, T1.MODIFIED_DATE
 		, T1.SECPERSON
 		, T1.SECMAIL_YN
+		, T1.TRANSFER_DIVISION
 		, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
 		, CASE
 		WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
@@ -1120,6 +1122,7 @@
 			, A.SECMAIL_YN
 		    , A.SECMAIL_DESC
 		    , A.SECPERSON
+			, A.TRANASFER_DIVISION
 		    , E.USER_NAME AS secPersonNm
 			, A.REVIEWER 
 			, A.USE_YN 
@@ -1520,8 +1523,14 @@
 	</select>
 	
 	<insert id="insertWatcher" parameterType="hashMap">
-		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{prjEmail})
-	</insert>
+		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID)
+		SELECT #{prjId}, #{division}, #{userId}
+		FROM DUAL
+		WHERE NOT EXISTS (
+				SELECT 1
+				FROM PROJECT_WATCHER
+				WHERE PRJ_ID = #{prjId} AND DIVISION = #{division} AND USER_ID = #{userId}
+			)</insert>
 	
 	<update id="updateProjectSubStatus" parameterType="hashMap">
 		UPDATE 

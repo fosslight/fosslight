@@ -1020,12 +1020,12 @@ var fn = {
            		.set('onok', function(e) {
 				   	if (e) {
 				   		var editorVal = $("#delParEditor").summernote('code');
-				   		if ("" == $(editorVal).text().trim()) {
+				   		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+				   			fn.deleteSubmit(permissions, notPermissions);
+						} else {
 							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
 							return false;
-						} else {
-							fn.deleteSubmit(permissions, notPermissions);
 						}
 				   	} else {
 				   		return false;
@@ -1136,7 +1136,62 @@ var fn = {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
-    }
+    },
+    bomCompare : function(){ /* BOM Compare ADD */
+		// 체크박스 선택 체크
+		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+	
+		if (chk < 3){
+			var bomCompareArr = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			var notPermissionIds = "";
+			for (var i in bomCompareArr) {
+				var permission = $("#list").jqGrid("getRowData", bomCompareArr[i]).permission;
+				if ("1" != permission) {
+					if ("" != notPermissionIds) {
+						notPermissionIds += ", ";
+					}
+					notPermissionIds += bomCompareArr[i];
+				}
+			}
+			
+			if ("" != notPermissionIds) {
+				var message = [[#{msg.partner.bom.compare.permission}]];
+				message = message.replace("partnerId", notPermissionIds);
+				alertify.alert(message, function(){});
+				return false;
+			}
+			
+			var beforePrjId = "";
+			var afterPrjId = "";
+
+			switch (chk) {
+				case 0:
+					beforePrjId = "0000";
+					afterPrjId = "0000";
+					break;
+				case 1:
+					beforePrjId = bomCompareArr[0];
+					afterPrjId = "0000";
+					break;
+				case 2:
+					bomCompareArr.sort();
+					
+					beforePrjId = bomCompareArr[0];
+					afterPrjId = bomCompareArr[1];
+					
+					break;
+			}
+			
+			var tabNm = "3rdParty_SBOM_Compare";
+			var tabLk = '/partner/bomCompare/'+beforePrjId+'/'+afterPrjId+'';
+	
+			createTabInFrame(tabNm, tabLk);
+		} else {
+			alertify.alert([[#{msg.project.choose}]], function(){});
+			return false;
+		}
+	}
 }
 
 //http
@@ -1371,9 +1426,9 @@ var partnerList = {
                     var pageButtonArea = $('#list_toppager_left');
                     if (pageButtonArea.find('button').length == 0) {
 	               		var appendIcon = "";
-	               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Partner\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
-	                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
-	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+	               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add 3rd Party\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
+	                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete 3rd Party\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
+	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export 3rd Party List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 	                            
 	                  	pageButtonArea.append(appendIcon);
 	            	}

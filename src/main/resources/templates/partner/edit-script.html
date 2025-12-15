@@ -77,6 +77,9 @@ var evt = {
 			if ("" != description && description != null) {
 				$("#descriptionTextarea").summernote('code', description);
 			}
+			if ([[${detail.ossFileId}]] == null) {
+				fn.ossUploadFile();
+			}
 		} else {
 			fn.ossUploadFile();
 		}
@@ -717,7 +720,7 @@ var fn = {
 	       		.set('onok', function(e) {
 	       			if (e) {
 	       				var comment = $("#parSaveEditor").summernote('code');
-	       					if ("" != $(comment).text().trim() && !isStatusChangeFlag) {
+	       				if (("" != $(comment).text().trim() || $(comment).find('img').length > 0) && !isStatusChangeFlag) {
 	       					$("#userComment").val(comment);
 	       				} else {
 	       					$('#userComment').val("");
@@ -756,12 +759,12 @@ var fn = {
 	},
 	saveSubmit : function () {
 		cleanErrMsg("list");
-		$("div.retxt").hide();
+		$("span.retxt").hide();
 		$("input, textarea").removeClass("is-invalid");
 		$(".permissionRadio").find(".active").find("input").prop("checked", true);
 		
 		var editorVal = $("#descriptionTextarea").summernote('code');
-		if ("" != $(editorVal).text().trim()){
+		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
 			$('#description').val(replaceWithLink(editorVal));
 		} else {
 			$('#description').val("");
@@ -800,12 +803,14 @@ var fn = {
 		_mainLastsel = -1;
 		if ("false" == data.isValid) {
 			// 폼 메세지
-			if(data.partnerName){
-				$('input[name=partnerName]').next().text(data.partnerName).show();
+			if (typeof data.dupData.partnerName !== "undefined") {
+				$('input[name=partnerName]').addClass("is-invalid");
+				$('input[name=partnerName]').next().text(data.dupData.partnerName).show();
 			}
 			
-			if(data.softwareName){
-				$('input[name=softwareName]').next().text(data.softwareName).show();
+			if (typeof data.dupData.softwareName !== "undefined") {
+				$('input[name=softwareName]').addClass("is-invalid");
+				$('input[name=softwareName]').next().text(data.dupData.softwareName).show();
 			}
 			
 			if(data.confirmationFileId){
@@ -932,16 +937,14 @@ var fn = {
            	.set('onok', function(e){
            		if (e) {
            			var comment = $("#parDelEditor").summernote('code');
-               		if ("" == $(comment).text().trim()){
-               			alertify.alert([[#{msg.project.required.comments}]], function(){});
-               		} else {
-    					var partnerId = $('input[name=partnerId]').val();
+               		if ("" != $(comment).text().trim() || $(editorVal).find('img').length > 0) {
+               			var partnerId = $('input[name=partnerId]').val();
     					$.ajax({
     						url : '/partner/delAjax',
     						type : 'POST',
     						dataType : 'json',
     						cache : false,
-    						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code'))},
+    						data : {'partnerId' : partnerId, userComment : replaceWithLink(comment)},
     						success: function(data){
     							if (partnerId) {
     								deleteTabInFrame('/partner/edit/'+partnerId);			
@@ -955,6 +958,8 @@ var fn = {
     							alertify.error([[#{msg.common.valid2}]], 0);
     						}
     					});
+               		} else {
+               			alertify.alert([[#{msg.project.required.comments}]], function(){});
     				}
            		} else {
            			return false;
@@ -1293,7 +1298,6 @@ var fn = {
 		var protocol = window.location.protocol;
 		var host =  window.location.host;
 		copyUrl = protocol + "//" + host + "/partner/shareUrl/" + [[${detail.partnerId}]];
-		copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
 		
 		$("#copyUrl").val(copyUrl);
 		
@@ -1346,7 +1350,7 @@ var fn = {
         }
 	},
 	makeFileTag : function(obj, flag) {
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = "";
 		
@@ -1377,6 +1381,12 @@ var fn = {
 		$("#ossFileId").val("");
 		
 		evt.init();
+	},
+	downloadSampleReport : function() {
+		var logiPath = "/sample/FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx";
+		var fileName = "FOSSLight-OSS-Checklist-for-3rdParty.xlsx";
+
+		location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
 	}
 }
 

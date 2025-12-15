@@ -16,7 +16,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +43,6 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Min;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -449,6 +447,26 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
+    }
+
+    @ApiOperation(value = "Project Bom Download as File (Deprecated)", notes = "Project > Bom tab download as file", hidden = true)
+    @GetMapping(value = {"/projects/{id}/bom/file"})
+    public ResponseEntity<FileSystemResource> getPrjBomDownloadDeprecated(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet")
+            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
+    }
+
+    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(
+            String authorization,
+            String prjId,
+            String saveFlag,
+            String format){
 
         log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
@@ -461,12 +479,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
         try {
             String downloadId = "";
             T2File fileInfo = new T2File();
+            String type = "";
 
             if ("Y".equals(saveFlag)) {
 //                    apiProjectService.registBom(prjId, mergeSaveFlag);
                 projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
             }
-            downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+
+            Project project = new Project();
+            project.setPrjId(prjId);
+            Project projectMaster = projectService.getProjectDetail(project);
+
+            if(projectMaster.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                type = "binAndroidBom";
+            } else {
+                type = "bom";
+            }
+            downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
             fileInfo = fileService.selectFileInfo(downloadId);
 
             return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
@@ -483,6 +512,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
+        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
+    }
+
+    @ApiOperation(value = "Get Project Bom Tab As Json (Deprecated)", notes = "Project > Get Bom tab data as json", hidden = true)
+    @GetMapping(value = {"/projects/{id}/bom/json-data"})
+    public ResponseEntity<Map<String, Object>> getPrjBomAsJsonDeprecated(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
+        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
+    }
+
+    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(
+            String authorization,
+            String prjId,
+            String saveFlag){
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -517,6 +563,22 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
+        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+    }
+
+    @ApiOperation(value = "Project Bom Compare (Deprecated)", notes = "Project > Bom tab Compare", hidden = true)
+    @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
+    public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
+            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
+        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+    }
+
+    private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(
+            String authorization,
+            String beforePrjId,
+            String afterPrjId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
@@ -639,14 +701,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
             @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames,
-            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String bomSave) {
+            @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
+            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N", hidden=true)
+            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false) String bomSave)
+            {
 
-        T2Users userInfo = userService.checkApiUserAuth(authorization);
+
+            T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         tabName = tabName.toUpperCase();
+        
+        // bomSave 파라미터가 있으면 sbomSave로 사용
+        if (!isEmpty(bomSave)) {
+            sbomSave = bomSave;
+        }
 
         if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
@@ -758,7 +829,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
             }
 
-            if(bomSave.equals(CoConstDef.FLAG_YES)) {
+            if(sbomSave.equals(CoConstDef.FLAG_YES)) {
                 projectService.registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
             }
 
@@ -1157,41 +1228,33 @@ public class ApiProjectV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @ApiParam(value = "Editor Id", required = true) @RequestParam(required = true) String[] idList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
-            throw new CProjectNotAvailableException(prjId);
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
         try {
-            if (emailList == null) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Email list is required.");
+            if (idList == null) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Editor ID list is required.");
             }
-            for (String email : emailList) {
-                boolean ldapCheck = true;
-                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
-                    apiProjectService.existLdapUserToEmail(email);
-                }
-                if (!ldapCheck) {
-                    return responseService.errorResponse(HttpStatus.NOT_FOUND,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
-                }
-                boolean watcherFlag = apiProjectService.existsWatcherByEmail(prjId, email);
-                if (!watcherFlag) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+
+            for(String id : idList) {
+                T2Users targetUser = new T2Users();
+                targetUser.setUserId(id);
+                T2Users existingUser = userService.getUser(targetUser);
+                if (existingUser == null) {
+                    return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in FOSSLight Hub. User ID: " + id);
                 }
                 Map<String, Object> param = new HashMap<>();
                 param.put("prjId", prjId);
-                param.put("division", "");
-                param.put("userId", "");
-                param.put("prjEmail", email);
+                param.put("division", existingUser.getDivision());
+                param.put("userId", existingUser.getUserId());
                 apiProjectService.insertWatcher(param);
             }
-
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST,
@@ -1209,8 +1272,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
-        userService.changeSession(userInfo.getUserId());
-
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
@@ -1226,7 +1287,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             T2Users existingUser = userService.getUser(targetUser);
             
             if (existingUser == null) {
-                return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in T2_Users table. User ID: " + userId);
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in FOSSLight Hub. User ID: " + userId);
             }
 
             // 기존 프로젝트 정보 조회
@@ -1242,7 +1303,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             project.setSecPersonNm(existingUser.getUserName());
             
             // 프로젝트 업데이트
-            projectService.updateProjectMaster(project);
+            projectService.updateSecurityPerson(project);
 
             afterProject = projectService.getProjectBasicInfo(prjId);
             String diffComment = CommonFunction.getDiffItemComment(beforeProject, afterProject, true);

@@ -283,6 +283,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private String startAnalysisFlag;
 	
 	private String analysisYn;
+	private String analysisDetailYn;
 	private String completeYn;
 	private String addNicknameYn = "N";
 	
@@ -370,6 +371,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private List<String> restrictionCdNoList;
 	
 	private String inCpeMatchFlag;
+	
+	private String range;
 		
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -843,11 +846,15 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param copyrights the new copyrights
 	 */
 	public void setCopyrights(String copyrights) {
-		String[] copys = copyrights.split("\r\n");
-		if (copys[0].equals("") && copys.length == 1){
-			this.copyrights = null; 
-		}else{
-			this.copyrights = copys;
+		if (!isEmpty(copyrights)) {
+			String[] copys = copyrights.split("\r\n");
+			if (copys[0].equals("") && copys.length == 1){
+				this.copyrights = null; 
+			} else {
+				this.copyrights = copys;
+			}
+		} else {
+			this.copyrights = null;
 		}
 	}
 	
@@ -1920,21 +1927,21 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 	
 	public void setDetectedLicense(String detectedLicense) {
-		List<String> list = Arrays.asList(detectedLicense.split(","));
-		
 		this.detectedLicenses = null; // clear
 		
-		for (String s : list) {
-			if (!isEmpty(s)) {
-				this.addDetectedLicense(s.trim());
+		if (!isEmpty(detectedLicense)) {
+			List<String> list = Arrays.asList(detectedLicense.split(","));
+			
+			for (String s : list) {
+				if (!isEmpty(s)) {
+					this.addDetectedLicense(s.trim());
+				}
 			}
 		}
 	}
 	
 	public List<String> getDetectedLicenses() {
-		return detectedLicenses == null 
-						? new ArrayList<>() 
-						: detectedLicenses;
+		return detectedLicenses == null ? new ArrayList<>() : detectedLicenses;
 	}
 	
 	public String getDetectedLicense() {
@@ -2427,5 +2434,21 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDetectedLicenseNameAllSearchFlag(String detectedLicenseNameAllSearchFlag) {
 		this.detectedLicenseNameAllSearchFlag = detectedLicenseNameAllSearchFlag;
+	}
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
+	}
+
+	public String getAnalysisDetailYn() {
+		return analysisDetailYn;
+	}
+
+	public void setAnalysisDetailYn(String analysisDetailYn) {
+		this.analysisDetailYn = analysisDetailYn;
 	}
 }

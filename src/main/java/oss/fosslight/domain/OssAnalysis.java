@@ -59,6 +59,7 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String summaryDescription;
 	private String importantNotes;
 	private String comment;
+	private String commentsFlag;
 	private String analysisYn;
 	private String completeYn;
 	private String referenceOssId;
@@ -89,5 +90,9 @@ public class OssAnalysis extends ComBean implements Serializable {
 
 	public String getReferenceDiv() {
 		return referenceDiv;
+	}
+	
+	public String getComment() {
+		return avoidNull(comment);
 	}
 }

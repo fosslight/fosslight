@@ -82,6 +82,15 @@
 			$("[name='noticeType']").attr("disabled", true);
 			$("#noticeTypeEtc").attr("disabled", true);
 		}
+
+        $("[name='distributionType']").on('change', function() {
+            var selectedValue = $(this).val();
+            if(selectedValue === [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_MERGE')}]]) {
+                $('#transfer').show();
+            } else {
+                $('#transfer').hide();
+            }
+        });
 	});
 	
 	// 이벤트
@@ -191,7 +200,8 @@
            		.set('onok', function(e) {
            			if (e) {
 						var editorVal = $("#completeEditor").summernote('code');
-						if ("" == $(editorVal).text().trim()) {
+						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+	       				} else {
 	       					editorVal = "";
 	       				}
 						
@@ -257,10 +267,8 @@
                 	.set('onok', function(e) {
                 		if (e) {
 							var editorVal = $("#dropEditor").summernote('code');
-							if ("" == $(editorVal).text().trim()){
-		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
-		    				} else {
-		    					if (distributionStatus == "PROC") {
+							if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+								if (distributionStatus == "PROC") {
 		    						var comment = [[#{msg.project.distribution.loading}]];
 		    						
 		    						alertify.error(comment, 0);
@@ -289,6 +297,8 @@
 		    					} else {
 		    						fn.exeProjectDrop(true);
 		    					}
+		    				} else {
+		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
 		    				}
 						} else {
 							return false;
@@ -352,12 +362,12 @@
 					.set('onok', function(event){
 						var editorVal = $("#prjDelEditor").summernote('code');
 
-						if ("" == $(editorVal).text().trim()) {
+						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+							fn.deleteSubmit();
+						} else {
 							alertify.alert([[#{msg.project.required.comments}]], function () { });
 
 							return false;
-						} else {
-							fn.deleteSubmit();
 						}
 					})
 					.set('onshow', function(event){
@@ -1094,7 +1104,7 @@
 	       		.set('onok', function(e) {
 	       			if (e) {
 	       				var editorVal = $("#prjSaveEditor").summernote('code');
-	       				if ("" != $(editorVal).text().trim()) {
+	       				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
 							$("input[name='userComment']").val(editorVal);
 						}
 	       				
@@ -1139,6 +1149,10 @@
                         $('input[name=secPersonNm]').focus();
                         return false;
                     }
+                }
+
+                if($('#distributionType').val() !== [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_MERGE')}]]){
+                    $('#transferDivision').val('');
                 }
 				
 				cleanErrMsg("_modelList");
@@ -1240,6 +1254,11 @@
 			},
 			// 성공 콜백
 			onRegistSuccess : function(json, status){
+				var callbackUrl = '/project/edit/';
+				if (!$(".basicInfoCommentArea").is(":visible")) {
+					callbackUrl += "1/"
+				}
+				
 				if ('Y' == completeYn){
 					fn.disabledCompleteRow(true);
 				}
@@ -1281,7 +1300,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
-								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1290,7 +1309,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
-								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1303,7 +1322,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
-								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1313,7 +1332,7 @@
 								
 								if (prjId == '') {
 									deleteTabInFrame('/project/edit');
-									createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+									createTabInFrame(json.resultData.prjId + '_Project', callbackUrl + json.resultData.prjId);
 								} else {
 									var status = data.detail.distributionStatus;
 									var flag = "false";
@@ -1333,7 +1352,7 @@
 										);
 									} else {
 										deleteTabInFrame('/project/edit/' +prjId);
-										createTabInFrame(prjId + '_Project', '/project/edit/' + prjId);
+										createTabInFrame(prjId + '_Project', callbackUrl + prjId);
 									}
 								}
 							});	
@@ -1491,7 +1510,8 @@
 				//코멘트 저장
 				var editorVal = $("#modifiedCommentInPjtEditor").summernote('code');
 				
-				if ("" != $(editorVal).text().trim()) {
+				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+				} else {
 					alertify.alert([[#{msg.project.enter.comment}]], function(){});
 					
 					return false;
@@ -1882,7 +1902,7 @@
 							var userComment = "";
 							var summernoteVal = $("#editor3").summernote('code');
 							
-							if ("" != $(summernoteVal).text().trim()) {
+							if ("" != $(summernoteVal).text().trim() || $(summernoteVal).find('img').length > 0) {
 								userComment = summernoteVal;
 							}
 							
@@ -1980,7 +2000,8 @@
 			},
 			commentsIgnore : function(){
 				var editorVal = $("#reqToOpenTextareaAdmin").summernote('code');
-				if ("" == $(editorVal).text().trim()) {
+				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+    			} else {
 					editorVal = "";
     			}
 				
@@ -2048,7 +2069,6 @@
 				var protocol = window.location.protocol;
 				var host =  window.location.host;
 				copyUrl = protocol + "//" + host + "/project/shareUrl/" + [[${project.prjId}]];
-				copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
 				$("#copyUrl").val(copyUrl);
 				
 				//launch it.
@@ -2200,7 +2220,8 @@
 						editorVal = $("#reqToOpenTextarea").summernote('code');
 					}
 					
-					if ("" == $(editorVal).text().trim()){
+					if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+					} else {
 						alertify.alert([[#{msg.project.required.comments.reject}]], function(){});
 						return false;
 					}
@@ -2468,6 +2489,11 @@
                 } else {
                     $("#secMailDesc").show();
                 }
+
+                var distributionTypeValue = $('#distributionType').val();
+                if(distributionTypeValue === [[${@CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TYPE_MERGE')}]]) {
+                    $('#transfer').show();
+                }
 				
 				// Complete 버튼 처리 
 				var status = ["PROG","REQ","REV"];
@@ -2650,6 +2676,10 @@
 			
 			commentsParam.height = $(window).height() - 120;
 			fn_comment.getCommentList(commentsParam);
+			
+			if ([[${initDiv}]] != null) {
+				fn_comment.activateCommentArea();
+			}
 		},
 		getModelGridData : function(param){
 			$.ajax({

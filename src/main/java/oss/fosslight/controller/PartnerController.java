@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -170,6 +171,14 @@ public class PartnerController extends CoTopComponent{
 		PartnerMaster partnerMaster = new PartnerMaster();
 		partnerMaster.setPartnerId(partnerId);
 		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+		if (partnerMaster == null) {
+			try {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			return null;
+		}
 		
 		T2File confirmationFile = new T2File();
 		confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
@@ -191,20 +200,22 @@ public class PartnerController extends CoTopComponent{
 		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
 		
-		boolean notPermission = false;
+		boolean isPermission = false;
 		CommonFunction.setPartnerService(partnerService);
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
-		if (permissionCheckList != null) {
-			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
-					&& !CommonFunction.isAdmin() 
-					&& !permissionCheckList.contains(loginUserName())) {
+		if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+			for (String userId : permissionCheckList) {
+				if (userId.equalsIgnoreCase(loginUserName())) {
+					isPermission = true;
+					break;
+				}
+			}
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
 				partnerMaster.setPermission(0);
 				partnerMaster.setStatusPermission(0);
-				notPermission = true;
 			} else {
-				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+				if (!CommonFunction.isAdmin() && !isPermission) {
 					partnerMaster.setStatusPermission(0);
-					notPermission = true;
 				} else {
 					partnerMaster.setStatusPermission(1);
 				}
@@ -229,7 +240,7 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
-		return !notPermission ? "partner/edit" : "partner/view";
+		return partnerMaster.getStatusPermission() == 1 ? "partner/edit" : "partner/view";
 	}
 	
 	@GetMapping(value = PARTNER.IDENTIFICATION_ID, produces = "text/html; charset=utf-8")
@@ -240,14 +251,19 @@ public class PartnerController extends CoTopComponent{
 		
 		CommonFunction.setPartnerService(partnerService);
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
-		if (permissionCheckList != null) {
-			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
-					&& !CommonFunction.isAdmin() 
-					&& !permissionCheckList.contains(loginUserName())) {
+		if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+			boolean isPermission = false;
+			for (String userId : permissionCheckList) {
+				if (userId.equalsIgnoreCase(loginUserName())) {
+					isPermission = true;
+					break;
+				}
+			}
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
 				partnerMaster.setPermission(0);
 				partnerMaster.setStatusPermission(0);
 			} else {
-				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+				if (!CommonFunction.isAdmin() && !isPermission) {
 					partnerMaster.setStatusPermission(0);
 				} else {
 					partnerMaster.setStatusPermission(1);
@@ -288,14 +304,19 @@ public class PartnerController extends CoTopComponent{
 		
 		CommonFunction.setPartnerService(partnerService);
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
-		if (permissionCheckList != null) {
-			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
-					&& !CommonFunction.isAdmin() 
-					&& !permissionCheckList.contains(loginUserName())) {
+		if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+			boolean isPermission = false;
+			for (String userId : permissionCheckList) {
+				if (userId.equalsIgnoreCase(loginUserName())) {
+					isPermission = true;
+					break;
+				}
+			}
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
 				partnerMaster.setPermission(0);
 				partnerMaster.setStatusPermission(0);
 			} else {
-				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+				if (!CommonFunction.isAdmin() && !isPermission) {
 					partnerMaster.setStatusPermission(0);
 				} else {
 					partnerMaster.setStatusPermission(1);
@@ -326,7 +347,10 @@ public class PartnerController extends CoTopComponent{
 		
 		try {
 			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
-			
+			if (partnerMaster == null) {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+				return null;
+			}
 			if (CoConstDef.FLAG_YES.equals(partnerMaster.getUseYn())) {
 				T2File confirmationFile = new T2File();
 				confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
@@ -347,14 +371,19 @@ public class PartnerController extends CoTopComponent{
 				
 				CommonFunction.setPartnerService(partnerService);
 				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
-				if (permissionCheckList != null) {
-					if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
-							&& !CommonFunction.isAdmin() 
-							&& !permissionCheckList.contains(loginUserName())) {
+				if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+					boolean isPermission = false;
+					for (String userId : permissionCheckList) {
+						if (userId.equalsIgnoreCase(loginUserName())) {
+							isPermission = true;
+							break;
+						}
+					}
+					if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
 						partnerMaster.setPermission(0);
 						partnerMaster.setStatusPermission(0);
 					} else {
-						if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+						if (!CommonFunction.isAdmin() && !isPermission) {
 							partnerMaster.setStatusPermission(0);
 						} else {
 							partnerMaster.setStatusPermission(1);
@@ -395,45 +424,52 @@ public class PartnerController extends CoTopComponent{
 		
 		try {
 			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
-			partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
-			
-			CommonFunction.setPartnerService(partnerService);
-			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
-			if (permissionCheckList != null) {
-				if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
-						&& !CommonFunction.isAdmin() 
-						&& !permissionCheckList.contains(loginUserName())) {
-					partnerMaster.setPermission(0);
-					partnerMaster.setStatusPermission(0);
-				} else {
-					if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+			if (partnerMaster != null) {
+				partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
+				
+				CommonFunction.setPartnerService(partnerService);
+				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+				if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+					boolean isPermission = false;
+					for (String userId : permissionCheckList) {
+						if (userId.equalsIgnoreCase(loginUserName())) {
+							isPermission = true;
+							break;
+						}
+					}
+					if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
+						partnerMaster.setPermission(0);
 						partnerMaster.setStatusPermission(0);
 					} else {
-						partnerMaster.setStatusPermission(1);
+						if (!CommonFunction.isAdmin() && !isPermission) {
+							partnerMaster.setStatusPermission(0);
+						} else {
+							partnerMaster.setStatusPermission(1);
+						}
+						partnerMaster.setPermission(1);
 					}
-					partnerMaster.setPermission(1);
 				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 		
-		if (!CoConstDef.FLAG_NO.equals(avoidNull(partnerMaster.getUseYn()))) {
-			if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
-				res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
-			} else {
-				res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
+		if (partnerMaster != null) {
+			if (!CoConstDef.FLAG_NO.equals(avoidNull(partnerMaster.getUseYn()))) {
+				if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
+					res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
+				} else {
+					res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
+				}
 			}
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	@GetMapping(value=PARTNER.LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> listAjax(
-			PartnerMaster partnerMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> listAjax(PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -469,13 +505,18 @@ public class PartnerController extends CoTopComponent{
 			for (PartnerMaster bean : list) {
 				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {bean.getPartnerId()}, "partner");
 				if (permissionCheckList != null) {
-					if (avoidNull(bean.getPublicYn()).equals(CoConstDef.FLAG_NO)
-							&& !CommonFunction.isAdmin() 
-							&& !permissionCheckList.contains(loginUserName())) {
+					boolean isPermission = false;
+					for (String userId : permissionCheckList) {
+						if (userId.equalsIgnoreCase(loginUserName())) {
+							isPermission = true;
+							break;
+						}
+					}
+					if (avoidNull(bean.getPublicYn()).equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !isPermission) {
 						bean.setPermission(0);
 						bean.setStatusPermission(0);
 					} else {
-						if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+						if (!CommonFunction.isAdmin() && !isPermission) {
 							bean.setStatusPermission(0);
 						} else {
 							bean.setStatusPermission(1);
@@ -611,11 +652,7 @@ public class PartnerController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=PARTNER.SAVE_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjax(
-			@RequestBody PartnerMaster partnerMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveAjax(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
 		// default validation
 		boolean isValid = true;
 		// last response map
@@ -630,9 +667,20 @@ public class PartnerController extends CoTopComponent{
 		Map<String, Object> retMap = new HashMap<String, Object>();
 		Map<String, Object> ruleMap = T2CoValidationConfig.getInstance().getRuleAllMap();
 		String msg = "";
-	        
+	    
+		if (isEmpty(partnerMaster.getPartnerName())) {
+			dupMap.put("partnerName", (String) ruleMap.get("PARTNER_NAME.REQUIRED.MSG"));
+		}
+		if (isEmpty(partnerMaster.getSoftwareName())) {
+			dupMap.put("softwareName", (String) ruleMap.get("SOFTWARE_NAME.REQUIRED.MSG"));
+		}
+		if (MapUtils.isNotEmpty(dupMap)) {
+			retMap.put("isValid", "false");
+			retMap.put("dupData", dupMap);
+			return makeJsonResponseHeader(retMap);
+		}
+		
 		if (result.size() > 0){
-
 			if (!isEmpty(partnerMaster.getPartnerName()) && partnerMaster.getPartnerName().equals(result.get(0).getPartnerName())){
 				msg = (String) ruleMap.get("PARTNER_NAME.DUPLICATED.MSG");
 				dupMap.put("partnerName", msg);
@@ -920,7 +968,7 @@ public class PartnerController extends CoTopComponent{
 		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
 		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
 		projectService.registBom(partnerId, merge, projectIdentification, checkGridBomList, null, false, false, true);
-//		projectService.updateSecurityDataForProject(prjId);
+		partnerService.updateSecurityDataForPartner(partnerId);
 		Map<String, String> resMap = new HashMap<>();
 		
 		try {
@@ -968,7 +1016,7 @@ public class PartnerController extends CoTopComponent{
 			@ModelAttribute PartnerMaster partnerMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
+			, Model model) throws InterruptedException {
 		HashMap<String, Object> resMap = new HashMap<>();
 		String resCd = "00";
 		
@@ -986,6 +1034,8 @@ public class PartnerController extends CoTopComponent{
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+
+		Thread.sleep(3000);
 		
 		try {
 			History h = partnerService.work(partnerMaster);
@@ -1771,7 +1821,7 @@ public class PartnerController extends CoTopComponent{
 			permissionCheckList = CommonFunction.checkUserPermissions(loginUserName(), partnerMaster.getPartnerIds(), "partner");
 		}
 		
-		if (permissionCheckList == null || permissionCheckList.isEmpty()){
+		if (CollectionUtils.isEmpty(permissionCheckList)) {
 			Map<String, List<PartnerMaster>> updatePartnerDivision = partnerService.updatePartnerDivision(partnerMaster);	
 			
 			if (updatePartnerDivision.containsKey("before") && updatePartnerDivision.containsKey("after")) {
@@ -1980,8 +2030,7 @@ public class PartnerController extends CoTopComponent{
 	
 	@SuppressWarnings("unchecked")
 	@GetMapping(value=PARTNER.BOM_COMPARE_LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> bomCompareList(
-			@RequestParam("beforePartnerId") String beforePartnerId, @RequestParam("afterPartnerId") String afterPartnerId) throws Exception{
+	public @ResponseBody ResponseEntity<Object> bomCompareList(@RequestParam("beforePartnerId") String beforePartnerId, @RequestParam("afterPartnerId") String afterPartnerId) throws Exception{
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		try {

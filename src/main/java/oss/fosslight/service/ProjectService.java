@@ -106,9 +106,10 @@ public interface ProjectService extends HistoryConfig{
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 
-	String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData,
-			List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
-			List<ProjectIdentification> batData, List<List<ProjectIdentification>> batSubData, String applicableParty, String applicableSrc, String applicableBat);
+	String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData, List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData, List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
+			List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData, Map<String, Object> param);
+
+	String checkChangedIdentification(String prjId, List<ProjectIdentification> androidData, List<List<ProjectIdentification>> androidSubData, String applicableAndroid);
 
 	Map<String, Object> applySrcAndroidModel(List<ProjectIdentification> list, List<String> noticeBinaryList) throws IOException;
 
@@ -201,6 +202,8 @@ public interface ProjectService extends HistoryConfig{
 	public void deleteUploadFile(Project project);
 	
 	public Map<String, Object> getSecurityGridList(Project project);
+	
+	public Map<String, Object> getSecurityGridList(Project project, boolean isVulnPopup);
 
 	public void registSecurity(Project project, String tabName, List<OssComponents> ossComponents);
 
@@ -237,4 +240,10 @@ public interface ProjectService extends HistoryConfig{
 	public void copyOssComponentList(Project project, boolean isBom);
 
 	public Map<String, Object> getDependencyTreeList(List<ProjectIdentification> ossComponents);
+
+	public void updateSecurityPerson(Project project);
+
+	public boolean initAutoReview(String prjId);
+
+	public void updateProjectNotification(Project project, Map<String, Object> param);
 }

@@ -175,7 +175,7 @@ public interface OssMapper {
 	
 	void insertOssDownloadLocation(OssMaster ossMaster);
 	
-	String checkOssName(ProjectIdentification bean);
+	String checkOssName(@Param("ossName") String ossName, @Param("downloadLocation") String downloadLocation);
 	
 	List<OssMaster> checkOssNameUrl(ProjectIdentification bean);
 	

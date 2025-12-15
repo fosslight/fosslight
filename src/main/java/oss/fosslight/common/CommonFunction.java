@@ -25,6 +25,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -436,11 +437,12 @@ public class CommonFunction extends CoTopComponent {
 		
 		if (isEmpty(delimiter)) {
 			return makeLicenseExpression(licenseList);
-		}else {
+		} else {
 			return makeLicenseString(licenseList, delimiter);
 		}
 	}
-public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectIdentification bean) {
+	
+	public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectIdentification bean) {
 		List<ProjectIdentification> list = new ArrayList<>();
 		boolean dual = false;
 		for (OssLicense license : ossmaster.getOssLicenses()) {
@@ -1362,15 +1364,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 
 
-	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents,
-			List<List<ProjectIdentification>> ossComponentsLicense, List<OssComponents> reportData, String fileSeq) {
+	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, List<OssComponents> reportData, String fileSeq) {
 		return makeGridDataFromReport(ossComponents, ossComponentsLicense, null, reportData, fileSeq, "");
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents,
-			List<List<ProjectIdentification>> ossComponentsLicense,  List<ProjectIdentification> addOssComponents,
-			List<OssComponents> reportData, String fileSeq, String readType) {
+	public static Map<String, Object> makeGridDataFromReport(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense,  List<ProjectIdentification> addOssComponents, List<OssComponents> reportData, String fileSeq, String readType) {
 		Map<String, Object> resultMap = new HashMap<>();
 		Map<String, Object> subMap = new HashMap<>();
 
@@ -1558,7 +1557,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			if (convertObj.containsKey("versionChangeList")) {
 				resultMap.put("versionChangedList",convertObj.get("versionChangeList"));
 			}
-						
 		}
 		resultMap.put("subData", subMap);
 		resultMap.put("mainData", mainGridList);
@@ -2630,7 +2628,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		if (!isEmpty(CoCodeManager.CD_ROLE_OUT_LICENSE)) {
 			for (String license : avoidNull(licenseName).split(",")) {
 				for (String s : CoCodeManager.CD_ROLE_OUT_LICENSE.split("\\|")) {
-					if (s.trim().equalsIgnoreCase(license)) {
+					if ((s.trim().equalsIgnoreCase("LGE Proprietary License") || s.trim().equalsIgnoreCase("Other Proprietary License")) && (s.trim().equalsIgnoreCase(license))) {
 						result = true;
 						break;
 					}
@@ -3435,7 +3433,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				String msg = removeLineSeparator(validMessageMap.get(key));
 				if (key.indexOf(".") > -1) {
 					if (isCheckOssName) {
-						if (msg.contains("Formatting") && key.substring(0, key.indexOf(".")).equals("ossName")) {
+						if (msg.contains("Format") && key.substring(0, key.indexOf(".")).equals("ossName")) {
 							validFlag = true;
 							break;
 						}
@@ -4358,7 +4356,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			boolean ossNicknameFlag = false;
 			
 			String comment  = bean.getComment();
-			if (!isEmpty(comment)) userData.setComment(comment);
+			if (!isEmpty(comment)) {
+				userData.setComment(comment);
+			}
 			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
 				List<OssAnalysis> latestRegistrationInfoList = new ArrayList<OssAnalysis>();
@@ -4380,7 +4380,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				String askalonoLicense = bean.getAskalonoLicense().replaceAll("\\(\\d+\\)", "");
 				String scancodeLicense = bean.getScancodeLicense().replaceAll("\\(\\d+\\)", "");
 				
+				List<String> ossNicknameList = new ArrayList<>();
 				String duplicateNickname = bean.getOssNickname();
+				for (String nickname : duplicateNickname.split(",")) {
+					if (!ossNicknameList.contains(nickname)) {
+						ossNicknameList.add(nickname);
+					}
+				}
 				
 				String customOssName = "";
 				if (bean.getOssName().contains(";")) {
@@ -4427,6 +4433,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					List<String> downloadLocationSplitList = new ArrayList<>();
 					String[] downloadLocationSplit = bean.getDownloadLocation().split("[,]");
 					for (String download : downloadLocationSplit) {
+						download = download.trim();
 						boolean equalsFlag = false;
 						for (String customData : downloadLocationSplitList) {
 							if (download.equalsIgnoreCase(customData)) {
@@ -4469,7 +4476,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				int idx = 1;
 				OssMaster param = new OssMaster();
 				
-				for (String nick : duplicateNickname.split(",")) {
+				String _ossName = bean.getOssName();
+				if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(_ossName.toUpperCase())) {
+					String _ossNickname = CoCodeManager.OSS_INFO_UPPER_NAMES.get(_ossName.toUpperCase());
+					if (!_ossName.equalsIgnoreCase(_ossNickname) && !ossNicknameList.contains(_ossName)) {
+						ossNicknameList.add(_ossName);
+					}
+				}
+				
+				for (String nick : ossNicknameList) {
 					if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(nick.toUpperCase())) {
 						String ossNameByNick = CoCodeManager.OSS_INFO_UPPER_NAMES.get(nick.toUpperCase());
 						param.setOssName(ossNameByNick);
@@ -4541,7 +4556,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						if (newestOssInfo != null) {
 							newestOssInfo.setGridId(""+gridSeq++);
-							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
+							newestOssInfo.setOssVersion(bean.getOssVersion());
 							newestOssInfo.setComment(comment);
 						}
 						
@@ -4657,7 +4672,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					
 					if (totalNewestOssInfo != null) {
 						totalNewestOssInfo.setGridId(""+gridSeq++);
-						totalNewestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
+						totalNewestOssInfo.setOssVersion(bean.getOssVersion());
 						totalNewestOssInfo.setComment(comment);
 						
 						String totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
@@ -4798,10 +4813,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			
-			if (analysisResults != null) {
+			if (analysisResults != null && !CollectionUtils.isEmpty(analyzedDownloadLocationList)) {
+				analyzedDownloadLocationList = analyzedDownloadLocationList.stream().map(String::toLowerCase).distinct().collect(Collectors.toList());
 				analysisResults.setDownloadLocation(String.join(",", analyzedDownloadLocationList));
 			} else {
-				latestOssAnalysis.setDownloadLocation(String.join(",", latestDownloadLocationList));
+				if (!CollectionUtils.isEmpty(latestDownloadLocationList)) {
+					latestDownloadLocationList = latestDownloadLocationList.stream().map(String::toLowerCase).distinct().collect(Collectors.toList());
+					latestOssAnalysis.setDownloadLocation(String.join(",", latestDownloadLocationList));
+				}
 			}
 		}
 	}
@@ -5151,12 +5170,20 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, beforeBean.getOsType()) + "<br />";
 				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, afterBean.getOsType()) + "</span></p>";
 			}
-			
+
 			// Distribution Type
-			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType()))) {
+			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType())) || !avoidNull(beforeBean.getTransferDivision()).equals(avoidNull(afterBean.getTransferDivision()))) {
 				comment += "<p><strong>Distribution Type</strong><br />";
-				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType()) + "<br />";
-				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "</span></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType());
+				if (!isEmpty(avoidNull(beforeBean.getTransferDivision()))){
+					comment += " (" + beforeBean.getTransferDivision() + ")";
+				}
+				comment	+= "<br />";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType());
+				if (!isEmpty(avoidNull(afterBean.getTransferDivision()))){
+					comment += " (" + afterBean.getTransferDivision() + ")";
+				}
+				comment += "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getNetworkServerType()).equals(avoidNull(afterBean.getNetworkServerType()))) {
@@ -5987,10 +6014,18 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				case "REV": btnShowMap.put("confirmBtn", CoConstDef.FLAG_YES); break;
 				case "CONF": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
 			}
-			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("confirmBtn")) btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("requestBtn")) {
+				btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("reviewBtn")) {
+				btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("confirmBtn")) {
+				btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("rejectBtn")) {
+				btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			}
 		} else if (viewOnlyFlag.equals("Y")) {
 			btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
 			btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
@@ -6003,10 +6038,18 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				case "REQ": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
 				case "CONF": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
 			}
-			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("confirmBtn")) btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("requestBtn")) {
+				btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("reviewBtn")) {
+				btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("confirmBtn")) {
+				btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
+			}
+			if (!btnShowMap.containsKey("rejectBtn")) {
+				btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+			}
 		}
 	}
 
@@ -6294,52 +6337,52 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 	}
 
-	public static OssMaster getOssVulnerabilityInfo(String ossName, String ossVersion) {
-		OssMaster ossMaster = new OssMaster();
-		if (CoCodeManager.OSS_INFO_UPPER.containsKey((ossName + "_" + ossVersion).toUpperCase())) {
-			ossMaster = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + ossVersion).toUpperCase());
-			String[] ossNicknameList = ossService.getOssNickNameListByOssName(ossName);
-			if (ossNicknameList != null && ossNicknameList.length > 0) {
-				ossMaster.setOssNicknames(ossNicknameList);
-			}
-			if (!isEmpty(ossMaster.getIncludeCpe()) && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag()))) {
-				List<String> includeCpeList = new ArrayList<>();
-				for (String includeCpe : ossMaster.getIncludeCpe().split(",")) {
-					String[] splitIncludeCpe = includeCpe.split(":");
-					if (splitIncludeCpe.length > 2 && splitIncludeCpe.length == 13) {
-						includeCpeList.add(splitIncludeCpe[3] + ":" + splitIncludeCpe[4]);
-					} else {
-						includeCpeList.add(includeCpe);
-					}
-				}
-				if (!includeCpeList.isEmpty()) {
-					ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
+	public static OssMaster getOssVulnerabilityInfo(OssMaster ossMaster) {
+		OssMaster bean = null;
+		if (!isEmpty(ossMaster.getIncludeCpe()) && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag()))) {
+			List<String> includeCpeList = new ArrayList<>();
+			for (String includeCpe : ossMaster.getIncludeCpe().split(",")) {
+				String[] splitIncludeCpe = includeCpe.split(":");
+				if (splitIncludeCpe.length > 2 && splitIncludeCpe.length == 13) {
+					includeCpeList.add(splitIncludeCpe[3] + ":" + splitIncludeCpe[4]);
+				} else {
+					includeCpeList.add(includeCpe);
 				}
 			}
-			if (!isEmpty(ossMaster.getExcludeCpe())) {
-				List<String> excludeCpeList = new ArrayList<>();
-				for (String excludeCpe : ossMaster.getExcludeCpe().split(",")) {
-					String[] splitExcludeCpe = excludeCpe.split(":");
-					if (splitExcludeCpe.length > 2 && splitExcludeCpe.length == 13) {
-						excludeCpeList.add(splitExcludeCpe[3] + ":" + splitExcludeCpe[4]);
-					} else {
-						excludeCpeList.add(excludeCpe);
-					}
-				}
-				if (!excludeCpeList.isEmpty()) {
-					ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
-				}
+			if (!includeCpeList.isEmpty()) {
+				ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
 			}
-			if (!isEmpty(ossMaster.getOssVersionAlias())) {
-				String[] ossVersionAliases = Arrays.stream(ossMaster.getOssVersionAlias().split(",")).map(String::trim).toArray(String[]::new);
-				ossMaster.setOssVersionAliases(ossVersionAliases);
-			}
-		} else {
-			ossMaster.setOssName(ossName);
-			ossMaster.setOssVersion(ossVersion);
 		}
-		ossMaster = ossService.getOssVulnerabilityInfo(ossMaster);
-		return ossMaster;
+		if (!isEmpty(ossMaster.getExcludeCpe())) {
+			List<String> excludeCpeList = new ArrayList<>();
+			for (String excludeCpe : ossMaster.getExcludeCpe().split(",")) {
+				String[] splitExcludeCpe = excludeCpe.split(":");
+				if (splitExcludeCpe.length > 2 && splitExcludeCpe.length == 13) {
+					excludeCpeList.add(splitExcludeCpe[3] + ":" + splitExcludeCpe[4]);
+				} else {
+					excludeCpeList.add(excludeCpe);
+				}
+			}
+			if (!excludeCpeList.isEmpty()) {
+				ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
+			}
+		}
+		if (!isEmpty(ossMaster.getOssVersionAlias())) {
+			String[] ossVersionAliases = Arrays.stream(ossMaster.getOssVersionAlias().split(",")).map(String::trim).toArray(String[]::new);
+			ossMaster.setOssVersionAliases(ossVersionAliases);
+		}
+		bean = ossService.getOssVulnerabilityInfo(ossMaster);
+		return bean;
+	}
+
+	public static String normalizeText(String text) {
+	    text = Jsoup.parse(text).text();
+	    text = text.replace("\r\n", "\n").replace("\r", "\n");
+	    text = text.replaceAll("\\u00A0", "");
+	    text = text.replaceAll("\\s+", " ");
+	    text = text.trim();
+	    text = Normalizer.normalize(text, Normalizer.Form.NFC);
+	    return text;
 	}
 }
 

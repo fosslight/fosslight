@@ -38,6 +38,9 @@
                        		<div class="card-header d-flex p-0 pt-1">
                         		<div class="d-flex align-items-center">
                             		<ul class="nav nav-tabs" id="menu-tab" role="tablist">
+                            			<li class="nav-item">
+	                                    	<a class="nav-link" id="tabMenuOverview" data-toggle="pill" href="#menu-overview" role="tab" aria-controls="menu-overview" aria-selected="true" th:text="|Overview|"></a>
+	                                	</li>
                                 		<li class="nav-item">
                                     		<a class="nav-link" id="tabMenuTotal" data-toggle="pill" href="#menu-total" role="tab" aria-controls="menu-total" aria-selected="true" th:text="|Need to resolve|"></a>
                                 		</li>
@@ -54,6 +57,9 @@
                         	</div>
                         	<div class="card-body">
 	                        	<div class="tab-content" id="security-tabContent">
+	                        		<div class="tab-pane fade" id="menu-overview" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+	                        			<div class="ml-2 mb-1" id="overviewMsgDiv"></div>
+	                        		</div>
 	                        		<div class="tab-pane fade" id="menu-total" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
 	                        			<div class="ml-2 mb-1" th:text="${@CommonFunction.getCustomMessage('msg.project.security.tab.resolve', @CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE')))}"></div>
 	                        			<div class="card-body bg-ivory">
@@ -103,6 +109,75 @@
                     	</div>
                     </div>
 					<div class="bottom-component">
+						<div class="row pl-2" name="gridArea" id="gridAreaOverview" style="width: 100%; display: none;">
+							<div class="container-fluid">
+								<div class="row">
+									<div class="card card-dark col-lg-6">
+										<div class="row">
+											<div class="col-6">
+		                						<h6 style="margin: 1rem;" th:text="|Vulnerabilty Score|"></h6>
+		                					</div>
+		                					<div class="col-3"></div>
+		                					<div class="col-3 float-right">
+		                						<select class="form-control select2 mt-2" id="vulnScoreChartDivision" name="vulnScoreChartDivision" style="width: 100%;">
+                                    				<option th:value="''" th:text="전체"></option>
+                                    			</select>
+		                					</div>
+				                		</div>
+				                		<div class="row">
+		                					<div class="col-12">
+		                						<canvas id="vulnScoreChart" style="min-height: 350px; height: 350px; max-height: 350px; max-width: 100%;"></canvas>
+		                					</div>
+		                				</div>
+									</div>
+									<div class="card card-dark col-lg-6">
+										<div class="row">
+											<div class="col-6">
+		                						<h6 style="margin: 1rem;" th:text="|Vulnerability Resolution|"></h6>
+		                					</div>
+		                					<div class="col-3"></div>
+		                					<div class="col-3 float-right">
+		                						<select class="form-control select2 mt-2" id="vulnResolutionChartDivision" name="vulnResolutionChartDivision" style="width: 100%;">
+                                    				<option th:value="''" th:text="전체"></option>
+                                    			</select>
+		                					</div>
+				                		</div>
+				                		<div class="row">
+		                					<div class="col-12">
+		                						<canvas id="vulnResolutionChart" style="min-height: 350px; height: 350px; max-height: 350px; max-width: 100%;"></canvas>
+		                					</div>
+		                				</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="card card-dark col-lg-12">
+										<div class="row">
+				                			<div class="col-12">
+				                				<h6 style="margin: 1rem;" th:text="|Vulnerability score by OSS version|"></h6>
+				                			</div>
+				                		</div>
+				                		<div class="row">
+				                			<div class="col-12">
+				                				<div class="card-body table-responsive pt-0" style="max-height: 450px;">
+													<table class="table table-head-fixed text-nowrap" id="vulnScoreTable">
+														<thead>
+															<tr>
+																<th class="text-center" th:text="|OSS Name|"></th>
+																<th class="text-center" th:text="|OSS Version|"></th>
+																<th class="text-center" th:text="|Vulnerability Score|"></th>
+															</tr>
+														</thead>
+														<tbody id="vulnScoreTableBody">
+														</tbody>
+													</table>
+												</div>
+				                			</div>
+				                		</div>
+									</div>
+								</div>
+                			</div>
+						</div>
+						
 						<div class="row pl-2 grid-area" name="gridArea" id="gridAreaTotal" style="width: 100%; display: none;">
                         	<div class="col-md-12 jqGridSet">
                             	<table id="totalList"><tr><td></td></tr></table>

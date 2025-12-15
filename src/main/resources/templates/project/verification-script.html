@@ -272,7 +272,7 @@
 
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile1" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'1\')">X</span>' + appendHtml + '</li>';
@@ -314,7 +314,7 @@
 
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile2" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'2\')">X</span>' + appendHtml + '</li>';
@@ -357,7 +357,7 @@
                         
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile3" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'3\')">X</span>' + appendHtml + '</li>';
@@ -399,7 +399,7 @@
                         
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile4" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'4\')">X</span>' + appendHtml + '</li>';
@@ -441,7 +441,7 @@
                         
                         if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
+                                var appendHtml = '<br>' + item[0].createdDate + " (" + item[0].loginUserName + ")";
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
                                 uploadFileTag += '<span class="badge bg-danger uploadFile5" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'5\')">X</span>' + appendHtml + '</li>';
@@ -484,7 +484,7 @@
                         	result.forEach(function (item) {
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
-                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteAppendFile(this,\'' + item[0].registSeq + '\')">X</span>' + item[0].createdDate + '</li>';
+                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteAppendFile(this,\'' + item[0].registSeq + '\')">X</span>' + item[0].createdDate + ' (' + item[0].loginUserName + ')</li>';
 
                                 $('.appendFileUpload').append(uploadFileTag);
                                 $('input[name=noticeAppendFileId]').val(item[0].registFileId);
@@ -660,7 +660,8 @@
                         alertify.verConfirmDialog()
                         .set('onok', function(e) {
                         	var editorVal = $("#verConfirmEditor").summernote('code');
-            				if ("" == $(editorVal).text().trim()) {
+            				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+               				} else {
                					editorVal = "";
                				}
             				$("input[name='userComment']").val(editorVal);
@@ -766,21 +767,21 @@
                         .set('onok', function(e) {
                         	var editorVal = $("#editor3").summernote('code');
                         	
-     						if ("" == $(editorVal).text().trim()){
+     						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+     							var data = {
+                               		"prjId": [[${project.prjId}]]
+                                    , "verificationStatus": "PROG"
+                                    , "useCustomNoticeYn": "N"
+                                    , "userComment": editorVal
+                                    , "referenceDiv": "12"
+                                    , "noticeFileFormat": datas.noticeFileFormat
+                           		};
+
+     							fn.exeProjectStatus(data, "PROG");
+     						} else {
      							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
     							return false;
-     						} else {
-     							var data = {
-                                   	"prjId": [[${project.prjId}]]
-                                   	, "verificationStatus": "PROG"
-                                   	, "useCustomNoticeYn": "N"
-                                   	, "userComment": $("#editor3").summernote('code')
-                                   	, "referenceDiv": "12"
-                                   	, "noticeFileFormat": datas.noticeFileFormat
-                                };
-     							
-                               	fn.exeProjectStatus(data, "PROG");
     						}
                         })
                         .set('onshow', function(e){
@@ -1844,12 +1845,19 @@
                         var filePaths = [];
                         var componentIds = [];
                         var pathValidMsg = {};
+                        var runVerify = false;
+                        var noFile = false;
 
                         // empty check
                         for (var i in arr) {
                             var _path = target.jqGrid('getCell', arr[i], 'filePath');
                             var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
+                            var _verifyFileCount = target.jqGrid('getCell', arr[i], 'verifyFileCount');
+                        	_verifyFileCount = $.trim(_verifyFileCount);
                             
+                        	if (!runVerify && "" == _verifyFileCount) {
+                        		runVerify = true;
+                        	}
                             if ("undefined/" == _path) {
                             	_path = "";
                             } else if ("/" == _path) {
@@ -1917,6 +1925,10 @@
                         	fileTypeSeqs.push($('input[name="packageFileType5"]').val());
                         }
                         
+                        if (fileSeqs.length == 0) {
+                        	noFile = true;
+                        }
+                        
                         var obj = {
                             prjId: [[${project.prjId}]],
                             gridFilePaths: filePaths,
@@ -1938,20 +1950,31 @@
                             timeout: 1000 * 60 * 10,
                             success: function (json) {
                                 loading.hide();
+                                if ("Y" == $("#deleteFlag").val()) {
+                                	$("#deleteFlag").val("N");
+                    			}
 
                                 if (json.isValid == 'false') {
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 } else {
-                                    alertify.alert([[#{msg.common.success}]], function () {
-                                    	activeDeleteTabInFrame();
-                                    	
-                                    	let callBackUrl = '/project/verification/';
-                                    	if (!$(".comment-area").is(":visible")) {
-                                    		callBackUrl += "2/";
-                                    	}
-                                    	callBackUrl += [[${project.prjId}]];
-                                        createTabInFrame([[${project.prjId}]] + '_Packaging', callBackUrl);
-                                    });
+                                	var msg = [[#{msg.common.success}]];
+                                	if (!noFile && (runVerify || (typeof json.resultData.isVerify !== "undefined" && json.resultData.isVerify))) {
+                                		msg = [[#{msg.package.verify.retry}]];
+                                		alertify.alert(msg, function () {
+                                			fn.verify();
+                                		});
+                                	} else {
+                                		alertify.alert([[#{msg.common.success}]], function () {
+                                        	activeDeleteTabInFrame();
+                                        	
+                                        	let callBackUrl = '/project/verification/';
+                                        	if (!$(".comment-area").is(":visible")) {
+                                        		callBackUrl += "2/";
+                                        	}
+                                        	callBackUrl += [[${project.prjId}]];
+                                            createTabInFrame([[${project.prjId}]] + '_Packaging', callBackUrl);
+                                        });
+                                	}
                                 }
                             },
                             error: function (data) {

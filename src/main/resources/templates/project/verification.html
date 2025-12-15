@@ -47,15 +47,25 @@
                             	</ul>
                       		</div>
                       		<div class="d-flex-align" style="margin-left: auto;">
-                      			<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" class="badge px-2" id="verify" name="verify" type="button" title="Verify">
-                      				<i class="fas fa-check-circle customIcon2"></i>
-                      			</span>
-                        		<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" class="badge mr-2 px-2" type="button" title="Save" id="btnSavePath" name="btnSavePath" th:onclick="|fn.savePath()|">
-                        			<i class="fas fa-save customIcon2"></i>
-                        		</span>
-                        		<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" class="badge mr-2 px-2" type="button" title="Save" id="save" th:onclick="|fn.save()|" style="display: none;">
-                       				<i class="fas fa-save customIcon2"></i>
-                       			</span>
+<!--                       		<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" class="badge px-2" id="verify" name="verify" type="button" title="Verify"> -->
+<!--                       			<i class="fas fa-check-circle customIcon2"></i> -->
+<!--                       		</span> -->
+								<th:block th:if="${@CommonFunction.isAdmin() and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}">
+									<span class="badge mr-2 px-2" type="button" title="Save" id="btnSavePath" name="btnSavePath" th:onclick="|fn.savePath()|">
+	                        			<i class="fas fa-save customIcon2"></i>
+	                        		</span>
+	                        		<span class="badge mr-2 px-2" type="button" title="Save" id="save" th:onclick="|fn.save()|" style="display: none;">
+	                       				<i class="fas fa-save customIcon2"></i>
+	                       			</span>
+								</th:block>
+                        		<th:block th:if="${!@CommonFunction.isAdmin() and project.verificationStatus != 'CONF' and project.verificationStatus != 'REV' and project.verificationStatus != 'REQ'}">
+                        			<span class="badge mr-2 px-2" type="button" title="Save" id="btnSavePath" name="btnSavePath" th:onclick="|fn.savePath()|">
+	                        			<i class="fas fa-save customIcon2"></i>
+	                        		</span>
+	                        		<span class="badge mr-2 px-2" type="button" title="Save" id="save" th:onclick="|fn.save()|" style="display: none;">
+	                       				<i class="fas fa-save customIcon2"></i>
+	                       			</span>
+                        		</th:block>
                       		</div>
                         </div>
                         <div class="card-body">
@@ -191,8 +201,13 @@
                                                         					<th:block th:if="${stat.count == i}">
                                                         						<li th:if="${file != null and file.delYn == 'N'}">
                                                                         			<a class="ajax-file-upload-filename" th:text="${file.origNm}" th:href="@{'/download/' + ${file.fileSeq} + '/' + ${file.logiNm}}"></a>
-                                                                        			<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}" th:class="'badge bg-danger uploadFile'+${i}" style="cursor:pointer;" th:onclick="fn.deleteFile(this, [[${file.fileSeq}]], [[${i}]])">X</span>
-                                                                        			<br>[[${file.createdDate}]]
+                                                                        			<th:block th:if="${@CommonFunction.isAdmin() and project.verificationStatus != 'CONF' and project.verificationStatus != 'REQ'}">
+                                                                        				<span th:class="'badge bg-danger uploadFile'+${i}" style="cursor:pointer;" th:onclick="fn.deleteFile(this, [[${file.fileSeq}]], [[${i}]])">X</span>
+                                                                        			</th:block>
+                                                                        			<th:block th:if="${!@CommonFunction.isAdmin() and project.verificationStatus != 'CONF' and project.verificationStatus != 'REV' and project.verificationStatus != 'REQ'}">
+                                                                        				<span th:class="'badge bg-danger uploadFile'+${i}" style="cursor:pointer;" th:onclick="fn.deleteFile(this, [[${file.fileSeq}]], [[${i}]])">X</span>
+                                                                        			</th:block>
+                                                                        			<br>[[${file.createdDate}]]<span th:if="${file.regId != null}" th:text="' (' + ${file.regId} + ')'"></span>
                                                                    				</li>
                                                         					</th:block>
                                                         				</th:block>
@@ -203,10 +218,18 @@
                                                         	</div>
                                                         </div>
                                                     </div>
-                                                    <div th:if="${project.verificationStatus != 'CONF'}" class="col-md-1" th:id="BtnSetDynamicCreate_+${i}">
-                                                        <button th:if="${i < 5}" type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
-                                                        <button type="button" class="btn btn-outline-secondary btn-sm float-right" th:id="uploadRemove_+${i}" th:text="Remove" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
-                                                    </div>
+                                                    <th:block th:if="${@CommonFunction.isAdmin() and project.verificationStatus != 'CONF'}">
+                                                    	<div class="col-md-1" th:id="BtnSetDynamicCreate_+${i}">
+                                                        	<button th:if="${i < 5}" type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                        	<button type="button" class="btn btn-outline-secondary btn-sm float-right" th:id="uploadRemove_+${i}" th:text="Remove" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                    	</div>
+                                                    </th:block>
+                                                    <th:block th:if="${!@CommonFunction.isAdmin() and project.verificationStatus != 'CONF' and project.verificationStatus != 'REV' and project.verificationStatus != 'REQ'}">
+                                                    	<div class="col-md-1" th:id="BtnSetDynamicCreate_+${i}">
+                                                        	<button th:if="${i < 5}" type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                        	<button type="button" class="btn btn-outline-secondary btn-sm float-right" th:id="uploadRemove_+${i}" th:text="Remove" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                    	</div>
+                                                    </th:block>
                                                 </div>
                                         	</div>
                                         	</th:block>
@@ -356,8 +379,13 @@
 	                                                			<th:block th:each="appendFile : ${noticeAppendFile}">
 	                                                				<ll th:if="${appendFile.delYn eq 'N'}">
 			                                                			<a class="ajax-file-upload-filename" th:text="${appendFile.origNm}" th:href="@{'/download/' + ${appendFile.fileSeq} + '/' + ${appendFile.logiNm}}"></a>
-																		<span th:if="${project.verificationStatus != 'CONF'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="fn.deleteAppendFile(this, [[${appendFile.fileSeq}]])" th:text="X"></span>
-																		[[${appendFile.createdDate}]]
+			                                                			<th:block th:if="${@CommonFunction.isAdmin() and project.verificationStatus != 'CONF'}">
+			                                                				<span class="badge bg-danger" style="cursor: pointer;" th:onclick="fn.deleteAppendFile(this, [[${appendFile.fileSeq}]])" th:text="X"></span>
+			                                                			</th:block>
+			                                                			<th:block th:if="${!@CommonFunction.isAdmin() and project.verificationStatus != 'CONF' and project.verificationStatus != 'REV' and project.verificationStatus != 'REQ'}">
+			                                                				<span class="badge bg-danger" style="cursor: pointer;" th:onclick="fn.deleteAppendFile(this, [[${appendFile.fileSeq}]])" th:text="X"></span>
+			                                                			</th:block>
+																		[[${appendFile.createdDate}]]<span th:if="${appendFile.regId != null}" th:text="' (' + ${appendFile.regId} + ')'"></span>
 			                                                		</ll><br>
 	                                                			</th:block>
 	                                                		</th:block>

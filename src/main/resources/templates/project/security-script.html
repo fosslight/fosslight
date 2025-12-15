@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script th:inline="javascript">
 var lastsel;
 var totalMainData = [];
 var fullDiscoveredMainData = [];
+var vulnScore;
+var vulnScoreResolution;
+var vulnScoreByOssVersion;
 var saveFlag = false;
 var prevEditSel;
 var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'security'};
@@ -31,6 +35,41 @@ $(function () {
 		}
 	});
 	
+	$(document).on('change', "select[name=vulnScoreChartDivision]", function() {
+		var selectVal = $(this).val();
+		var vulnScoreData = vulnScore;
+		if (typeof vulnScoreData !== "undefined" && "" != selectVal) {
+			var selected = {};
+			Object.keys(vulnScoreData).forEach(function(key) {
+				if (key.startsWith(selectVal)) {
+					selected[key] = vulnScoreData[key];
+				}
+			});
+			vulnScoreData = selected;
+		}
+		overview.vulnScoreChartOpen(vulnScoreData, selectVal, true);
+	});
+	
+	$(document).on('change', "select[name=vulnResolutionChartDivision]", function(event) {
+		var selectVal = $(this).val();
+		var target = event.target;
+		var selectedIndex = 0;
+		if (target && target.tagName === 'SELECT') {
+		    selectedIndex = target.selectedIndex;
+		}
+		var vulnScoreResolutionData = vulnScoreResolution;
+		if (typeof vulnScoreResolutionData !== "undefined" && "" != selectVal) {
+			var selected = {};
+			Object.keys(vulnScoreResolutionData).forEach(function(key) {
+				if (key == selectVal) {
+					selected[key] = vulnScoreResolutionData[key];
+				}
+			});
+			vulnScoreResolutionData = selected;
+		}
+		overview.vulnResolutionChartOpen(vulnScoreResolutionData, selectedIndex, true);
+	});
+	
 	$(document).on('change', ".bulkEditCheck", function() {
 		if (this.checked) {
 			$("input[name='onlyEditCommentFlag']").val("Y");
@@ -52,12 +91,23 @@ var sec_data = {
 			success : function(data){
 				loading.hide();
 				
+				sec_data.loadOverviewData(data);
 				sec_data.loadJqGridData(data);
 			},
 			complete : function() {
 				fn.displayProjectInfo();
+				$("#tabMenuOverview").trigger("click");
 			}
 		});
+	},
+	loadOverviewData : function(data) {
+		vulnScore = data.overviewData.vulnScore;
+		vulnScoreResolution = data.overviewData.vulnScoreResolution;
+		vulnScoreByOssVersion = data.overviewData.vulnScoreByOssVersion;
+		
+		overview.vulnScoreChartOpen(vulnScore, "", false);
+		overview.vulnResolutionChartOpen(vulnScoreResolution, 0, false);
+		overview.vulnScoreByOssVersionTable(vulnScoreByOssVersion);
 	},
 	loadJqGridData : function(data) {
 		totalMainData = data.totalGridData;
@@ -77,7 +127,8 @@ var sec_data = {
 		fullDiscovered.loadSecurityGrid();
 		
 		if (!saveFlag && data.hasOwnProperty('msg')){
-			alertify.alert(data.msg, function(){});
+//			alertify.alert(data.msg, function(){});
+			$("#overviewMsgDiv").html(data.msg);
 		}
 		
 		saveFlag = false;
@@ -88,7 +139,7 @@ var sec_com_evt = {
 	dataInit : function(){
 		commentsParam.height = $(window).height() - 120;
 		fn_comment.getCommentList(commentsParam);
-		$("#tabMenuTotal").trigger("click");
+		$("#tabMenuOverview").trigger("click");
 		sec_data.getJqGrid();
 	}
 }
@@ -487,6 +538,25 @@ var sec_com_fn = {
 		
 		return url;
 	},
+	displayLineBreakData : function(cellvalue, options, rowObject){
+		var data = "";
+		if(cellvalue != null && cellvalue !== undefined && "" != cellvalue){
+			var dataInfo = cellvalue;
+			if (dataInfo.indexOf("|") > -1){
+				dataInfo = dataInfo.split("|");
+				for (var i=0; i < dataInfo.length; i++){
+					data += dataInfo[i];
+					if (i < dataInfo.length-1){
+						data += "<br/>";
+					}
+				}
+			} else {
+				data = cellvalue;
+			}
+		}
+		
+		return data;
+	},
 	showVulnViewPage : function(_ossName, _ossVersion){
 		var prjId = [[${project.prjId}]];
 		var _url = '/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+_ossName+'&ossVersion='+_ossVersion;
@@ -691,7 +761,7 @@ var com_fn = {
 	makeFileTag : function (obj) {
 		$('#scrtCsvFileId').val(obj.registFileId);
 		
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'1\')">X</span>'+appendHtml+'</li>';
@@ -722,6 +792,245 @@ var com_fn = {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
+	}
+}
+
+var vulnScoreChartObject;
+var vulnResolutionChartObject;
+var dataTable;
+
+var overview = {
+	vulnScoreChartOpen : function(data, flag, init) {
+		var obj = new Object();
+		var chartData = new Object();
+		var labels = new Array();
+		var datasets = new Array();
+		var dataArr = new Array();
+		
+		let sortedKeys = Object.keys(data).sort();
+		if ("" == flag) {
+			[sortedKeys[2], sortedKeys[3]] = [sortedKeys[3], sortedKeys[2]];
+		}
+		
+		let sortedObj = {};
+		sortedKeys.forEach(function(obj){
+			sortedObj[obj] = data[obj];
+		});
+		
+		if (!init) {
+			for (let key in sortedObj) {
+				labels.push(key);
+				dataArr.push(data[key]);
+			};
+		}
+		
+		let color = new Array();
+		if ("" != flag) {
+			if ("C" == flag) {
+				color.push("#343a40");
+			} else if ("H" == flag) {
+				color.push("#dc3545");
+			} else if ("M" == flag) {
+				color.push("#ffa500");
+			} else {
+				color.push("#ffff00");
+			}
+		} else {
+			color.push("#343a40");
+			color.push("#dc3545");
+			color.push("#ffa500");
+			color.push("#ffff00");
+		}
+		
+		datasets.push({label:'Count', data:dataArr, backgroundColor:color});
+		obj["labels"] = labels;
+		obj["datasets"] = datasets;
+		
+		if (vulnScoreChartObject) {
+			vulnScoreChartObject.data.labels = obj["labels"];
+			vulnScoreChartObject.data.datasets = obj["datasets"];
+			vulnScoreChartObject.update();
+		} else {
+			vulnScoreChartObject = overview.getPieChartVulnScore($('#vulnScoreChart').get(0).getContext('2d'), obj);
+		}
+	},
+	getPieChartVulnScore : function (target, obj) {
+		return new Chart(target, {
+			type: 'doughnut',
+			data: {labels:obj.labels, datasets:obj.datasets},
+			options: {
+				responsive: true,
+				maintainAspectRatio : false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+					},
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								let dataLabel = context.dataset.label || '';
+								let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+								        return previousValue + currentValue;
+								      });
+								let currentValue = context.raw;
+								let percentage = 0;
+								if (total > 0) {
+									percentage = Math.floor(((currentValue/total) * 100)+0.5);
+								}
+								let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+								return dataLabel += value;
+							}
+						}
+					}
+				},
+				onClick: function (e, elements, chart) {
+					if (elements.length > 0) {
+						let prjId = [[${project.prjId}]];
+				    	let element = elements[0];
+
+				    	let datasetIndex = element.datasetIndex;
+				    	let dataIndex = element.index;
+
+				    	let label = chart.data.labels[dataIndex];
+				    	let value = chart.data.datasets[datasetIndex].data[dataIndex];
+				    	
+				    	let range = label.charAt(0);
+				    	overview.vulnDetailPopupByRange(prjId, range, "score");
+					}
+				}
+			}
+		});
+	},
+	vulnResolutionChartOpen : function(data, index, init) {
+		var obj = new Object();
+		var chartData = new Object();
+		var labels = new Array();
+		var datasets = new Array();
+		var dataArr = new Array();
+		
+		for (let key in data) {
+			labels.push(key);
+			dataArr.push(data[key]);
+		};
+		
+		if (!init) {
+			for (let key in labels) {
+	 			var newOption = new Option(labels[key], labels[key], false, false);
+	 			$('#vulnResolutionChartDivision').append(newOption);
+	 		}
+		}
+		
+		let color = Object.values(CHART_COLORS);
+		if (index > 0) {
+			color = color[index-1];
+		}
+		
+		datasets.push({label:'Count', data:dataArr, backgroundColor:color});
+		obj["labels"] = labels;
+		obj["datasets"] = datasets;
+		
+		if (vulnResolutionChartObject) {
+			vulnResolutionChartObject.data.labels = obj["labels"];
+			vulnResolutionChartObject.data.datasets = obj["datasets"];
+			vulnResolutionChartObject.update();
+		} else {
+			vulnResolutionChartObject = overview.getPieChartVulnResolution($('#vulnResolutionChart').get(0).getContext('2d'), obj);
+		}
+	},
+	getPieChartVulnResolution : function (target, obj) {
+		return new Chart(target, {
+			type: 'doughnut',
+			data: {labels:obj.labels, datasets:obj.datasets},
+			options: {
+				responsive: true,
+				maintainAspectRatio : false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+					},
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								let dataLabel = context.dataset.label || '';
+								let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+								        return previousValue + currentValue;
+								      });
+								let currentValue = context.raw;
+								let percentage = 0;
+								if (total > 0) {
+									percentage = Math.floor(((currentValue/total) * 100)+0.5);
+								}
+								let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+								return dataLabel += value;
+							}
+						}
+					}
+				},
+				onClick: function (e, elements, chart) {
+					if (elements.length > 0) {
+						let prjId = [[${project.prjId}]];
+				    	let element = elements[0];
+
+				    	let datasetIndex = element.datasetIndex;
+				    	let dataIndex = element.index;
+
+				    	overview.vulnDetailPopupByRange(prjId, dataIndex, "resolution");
+					}
+				}
+			}
+		});
+	},
+	vulnScoreByOssVersionTable : function(data) {
+		for (let key in data) {
+			let tr = document.createElement("tr");
+			
+			let ossName = key.split("_")[0];
+			let ossVersion = key.split("_")[1];
+			
+			let vulnCount = data[key];
+			let vulnHtml = "";
+			for (let vulnKey in vulnCount) {
+				let vulnStr = vulnKey[0];
+				let cnt = vulnCount[vulnKey];
+				
+				vulnHtml += "<span style=\"cursor: pointer;\" onclick=\"overview.vulnDetailPopup('" + ossName + "', '" + ossVersion + "', '" + vulnStr + "', '" + cnt + "');\">";
+				if ("C" == vulnStr) {
+					vulnHtml += '<span class="badge badge-dark p-2">C</span>';
+				} else if ("H" == vulnStr) {
+					vulnHtml += '<span class="badge badge-danger p-2 ml-4">H</span>';
+				} else if ("M" == vulnStr) {
+					vulnHtml += '<span class="badge badge-orange p-2 ml-4">M</span>';
+				} else {
+					vulnHtml += '<span class="badge badge-yellow2 p-2 ml-4">L</span>';
+				}
+				vulnHtml += "<span class=\"ml-2\">" + cnt + "</span></span>";
+			}
+			
+			let ossNameTd = document.createElement("td");
+			ossNameTd.innerHTML = ossName;
+			let ossVersionTd = document.createElement("td");
+			ossVersionTd.innerHTML = ossVersion;
+			let vulnCountTd = document.createElement("td");
+			vulnCountTd.classList.add("text-center");
+			vulnCountTd.innerHTML = vulnHtml;
+			
+			tr.appendChild(ossNameTd);
+			tr.appendChild(ossVersionTd);
+			tr.appendChild(vulnCountTd);
+			
+			$("#vulnScoreTableBody").append(tr);
+		}
+	},
+	vulnDetailPopup : function (ossName, ossVersion, flag, cnt) {
+		if (cnt > 0) {
+			var _url = '/vulnerability/vulnpopup?ossName=' + ossName + '&ossVersion=' + ossVersion + '&vulnType=' + '&range=' + flag;
+			openNVD2(ossName, _url);
+		} else {
+			alertify.alert("There are no vulnerabilities at this level.", function(){});
+		}
+	},
+	vulnDetailPopupByRange : function (prjId, range, flag) {
+		openNVD2(flag, '/vulnerability/vulnpopup?prjId=' + prjId + '&range=' + range);
 	}
 }
 
@@ -794,6 +1103,14 @@ var total = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
 		colModelArr.push(colModelObj);
+		colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakData, template: searchStringOptions, editable:false,
+						cellattr: function (rowId, tv, rawObject, cm, rdata) {
+							if (typeof rawObject.verStartEndRange !== "undefined") {
+								return ' title="' + rawObject.verStartEndRange.replaceAll('|', '&#10;') + '"';
+							}
+						}
+		};
+		colModelArr.push(colModelObj);
 		colModelObj = {name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true};
 		colModelArr.push(colModelObj);
 		
@@ -801,16 +1118,16 @@ var total = {
 		var listType = 'SECURITY_NEED';
 		var totalColInfos = [
 				{'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'CVE ID' : 'cveId'}, {'CVSS SCORE' : 'cvssScore'}, {'Published Date' : 'publDate'}, {'Vulnerability Resolution' : 'vulnerabilityResolution'},
-				{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Security Comments' : 'securityComments'}
+				{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Affected SW Version Range' : 'verStartEndRange'}, {'Security Comments' : 'securityComments'}
 	  	];
-		var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'securityComments'];
+		var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'verStartEndRange', 'securityComments'];
 		var defaultColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'vulnerabilityResolution'];
 		applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
 		
 		totalList.jqGrid({
 			datatype: 'local',
 			data: totalMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Affected SW<br/>Version Range','Security<br/>Comments'],
 			colModel: colModelArr,
 		   	editurl:'clientArray',
  			autowidth: true,
@@ -1085,6 +1402,14 @@ var fullDiscovered = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
 			colModelArr.push(colModelObj);
+			colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakData, template: searchStringOptions, editable:false,
+							cellattr: function (rowId, tv, rawObject, cm, rdata) {
+								if (typeof rawObject.verStartEndRange !== "undefined") {
+									return ' title="' + rawObject.verStartEndRange.replaceAll('|', '&#10;') + '"';
+								}
+							}		
+			};
+			colModelArr.push(colModelObj);
 			colModelObj = {name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true};
 			colModelArr.push(colModelObj);
 			
@@ -1092,16 +1417,16 @@ var fullDiscovered = {
 			var listType = 'SECURITY_FULL';
 			var totalColInfos = [
 					{'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'CVE ID' : 'cveId'}, {'CVSS SCORE' : 'cvssScore'}, {'Published Date' : 'publDate'}, {'Vulnerability Resolution' : 'vulnerabilityResolution'},
-					{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Security Comments' : 'securityComments'}
+					{'Vulnerabilty Link' : 'vulnerabilityLink'}, {'Affected SW Version Range' : 'verStartEndRange'}, {'Security Comments' : 'securityComments'}
 		  	];
-			var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'securityComments'];
+			var defaultTotalColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'publDate', 'vulnerabilityResolution', 'vulnerabilityLink', 'verStartEndRange', 'securityComments'];
 			var defaultColNames = ['ossName', 'ossVersion', 'cveId', 'cvssScore', 'vulnerabilityResolution'];
 			applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultTotalColNames, listType);
 			
 			fullDiscoveredList.jqGrid({ 
 				datatype: 'local',  
 				data: fullDiscoveredMainData,
-				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
+				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Affected SW<br/>Version Range','Security<br/>Comments'],
 				colModel: colModelArr,
 				editurl:'clientArray',
 	 			autowidth: true,

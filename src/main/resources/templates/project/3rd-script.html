@@ -515,7 +515,9 @@ var party_evt = {
 			mtype: 'GET',
 			loadComplete: function(data){
 				$('.commentDiv').find('p').css('margin','0px 0px');
-				tableRefreshNew("_list-1");
+				if (typeof tableRefreshContentsAreaEdit === 'function') {
+                    tableRefreshContentsAreaEdit("_list-1");
+                }
 			},
 			gridComplete : function() {
 				$('#_list-1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
@@ -817,8 +819,6 @@ var part_grid = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true};
 			colModelArr.push(colModelObj);
-			colModelObj = {name: 'refPartnerId', index: 'refPartnerId', width: 29, align: 'center', hidden:true};
-			colModelArr.push(colModelObj);
 			colModelObj = {name: 'refPrjId', index: 'refPrjId', width: 29, align: 'center', hidden:true};
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true};
@@ -861,7 +861,7 @@ var part_grid = {
 			partList.jqGrid({
 				datatype: 'local',
 				data : partMainData,
-				colNames: ['gridId','ID_KEY','ID','3rd Party', 'Binary Name or Source Path','ReferenceId','RefPartnerId','RefPrjId','ReferenceDiv', 'OssId','OSS Name','OSS Version','License','Download Location'
+				colNames: ['gridId','ID_KEY','ID','3rd Party', 'Binary Name or Source Path','ReferenceId','RefPrjId','ReferenceDiv', 'OssId','OSS Name','OSS Version','License','Download Location'
 							, 'Homepage','LicenseId','Copyright Text', 'Vulnera<br/>bility', 'CVE ID'	
 							, '<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list3\');">Exclude', 'refComponentId'],
 				colModel: colModelArr,

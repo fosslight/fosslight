@@ -468,19 +468,26 @@ public class FileUtil {
 			log.error("파일정보를 찾을 수 없습니다. file path : " + path);
 			return null;
 		}
-
+		
+		boolean isFile = false;
 		for (File f : file.listFiles()) {
 			if (f.isFile()) {
 				String[] fileName = f.getName().split("\\.");
 				String fileExt = (fileName[fileName.length - 1]).toUpperCase();
 
-				if(fileExt.equals(fileformat.toUpperCase())) {
+				if (fileExt.equals(fileformat.toUpperCase())) {
+					isFile = true;
 					file = f;
 					break;
 				}
 			}
 		}
-		return file;
+		
+		if (isFile) {
+			return file;
+		} else {
+			return null;
+		}
 	}
 	
 	public static void addFileContents(String targetPath, String path) {

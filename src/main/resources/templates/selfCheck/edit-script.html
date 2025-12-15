@@ -453,7 +453,7 @@ var fn = {
 	// 저장
 	saveSubmit : function(){
 		var editorVal = $("#editor").summernote('code');
-		if ("" != $(editorVal).text().trim()) {
+		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
 			$('input[name=comment]').val(replaceWithLink(editorVal));
 		} else {
 			$('input[name=comment]').val("");
@@ -785,7 +785,42 @@ var fn = {
             error : customError
 		}).submit();
 	},
-	
+	getNoticePreview : function() {
+		fn.checkStatus();
+		
+		$("#editCompanyName").attr("disabled", false);
+		$("#editOssDistributionSite").attr("disabled", false);
+		$("#editEmail").attr("disabled", false);
+		
+		if ($("#append").prop("checked")) {
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+		}
+		
+		$('#noticeForm').ajaxForm({
+			url : '/selfCheck/noticeAjax',
+            type : 'POST',
+            dataType: 'text',
+            cache : false,
+            success: fn.openPreviewPop,
+            error : function(data) {
+				if (!$("#companyName").prop("checked")) {
+					$("#editCompanyName").attr("disabled", true);
+				}
+				
+				if (!$("#ossDistributionSite").prop("checked")) {
+					$("#editOssDistributionSite").attr("disabled", true);
+				}
+				
+				if (!$("#email").prop("checked")) {
+					$("#editEmail").attr("disabled", true);
+				}
+				
+				$("#loading_grid").hide();
+            	alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		}).submit();
+	},
 	downloadNotice : function(){
 		if($("#append").prop("checked")){
 			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
@@ -1851,7 +1886,7 @@ var src_fn = {
 		});
 	},
 	makeFileTag : function(obj){
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + "_" + obj.loginUserName;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" name="uploadCsvFile" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="src_fn.deleteCsv(this, \'1\')">X</span>'+appendHtml+'</li>';
@@ -2345,7 +2380,7 @@ var src_fn = {
 				// 메인, 서브 그리드 세이브 모드
 				fn_grid_com.totalGridSaveMode('srcList');
 				// 닉네임 체크
-				src_fn.saveMakeData();
+				src_fn.saveMakeData(false);
 			} else {
 				return false;
 			}
@@ -3382,7 +3417,7 @@ var notice_evt = {
 			if (unconfirmedLicenseList.length > 0) {
 				fn.showUnconfirmedLicense();
 			} else {
-				fn.saveOrGetNotice('preview');
+				fn.getNoticePreview();
 			}
 		});
 

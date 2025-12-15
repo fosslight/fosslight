@@ -54,7 +54,7 @@
                                 		<div class="input-group">
                                             <input class="form-control" type="text" id="token" th:value="${userInfo?.token}" readonly/>
                                             <div class="input-group-append">
-                                            	<button class="btn btn-block btn-secondary btn-sm" type="button" th:onclick="|fn.copy()|"><i class="far fa-copy customIcon2 m-1"></i></button>
+                                            	<button class="btn btn-block btn-secondary btn-sm" type="button" th:onclick="|fn.copy()|" th:disabled="${userInfo?.token == null}"><i class="far fa-copy customIcon2 m-1"></i></button>
                                             </div>
                                         </div>
                                 	</div>

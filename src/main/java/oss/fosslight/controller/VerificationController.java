@@ -107,8 +107,10 @@ public class VerificationController extends CoTopComponent {
 		
 		List<OssComponents> list = null;
 		try {
-			list = verificationService.getVerifyOssList(projectMaster);
-			if (list != null) list = verificationService.setMergeGridData(list);
+			if(!projectMaster.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION)) {
+				list = verificationService.getVerifyOssList(projectMaster);
+				if (list != null) list = verificationService.setMergeGridData(list);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -222,11 +224,13 @@ public class VerificationController extends CoTopComponent {
 			// Notice Type: Accompanied with source code인 경우 Default Company Name, Email 세팅
 			model.addAttribute("ossNotice", _noticeInfo);
 		}
-		
+
 		List<OssComponents> list = null;
 		try {
-			list = verificationService.getVerifyOssList(projectMaster);
-			if (list != null) list = verificationService.setMergeGridData(list);
+			if(!projectMaster.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION)) {
+				list = verificationService.getVerifyOssList(projectMaster);
+				if (list != null) list = verificationService.setMergeGridData(list);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -330,8 +334,7 @@ public class VerificationController extends CoTopComponent {
 	
 	@ResponseBody
 	@PostMapping(value=VERIFICATION.REGIST_FILE)
-	public String registFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
-			HttpServletResponse res, Model model) throws Exception {
+	public String registFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/registFile");
 		
 		String permission = StringUtil.isEmpty(req.getParameter("permission")) ? null : req.getParameter("permission");
@@ -347,7 +350,7 @@ public class VerificationController extends CoTopComponent {
 			String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 
 			Map<String, MultipartFile> fileMap = req.getFileMap();
-			String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
+			String fileNm = fileMap.get("myfile").getOriginalFilename();
 			String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
 			
 			//파일 등록
@@ -369,12 +372,12 @@ public class VerificationController extends CoTopComponent {
 				String[] exts = codeExp.split(",");
 				boolean fileExtCheck = false;
 				for (String s : exts) {
-					if (s.equals(fileExtension)) {
+					if (!isEmpty(fileNm) && fileNm.endsWith(s.trim())) {
 						fileExtCheck = true;
 					}
 				}
 
-				if(!fileExtCheck) {
+				if (!fileExtCheck) {
 					resultList.add("UNSUPPORTED_FILE");
 					String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{codeExp});
 					resultList.add(msg);
@@ -432,8 +435,7 @@ public class VerificationController extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@ResponseBody
 	@PostMapping(value=VERIFICATION.VERIFY)
-	public String procVerify(@RequestBody Map<Object, Object> map, T2File file, Project project,
-			HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+	public String procVerify(@RequestBody Map<Object, Object> map, T2File file, Project project, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/verify");
 		
 		Map<String, Object> resMap = null;
@@ -452,11 +454,35 @@ public class VerificationController extends CoTopComponent {
 			boolean isChangedPackageFile = verificationService.getChangedPackageFile(prjId, fileSeqs);
 			int seq = 1;
 			
+			List<String> fileNames = verificationService.getPackageFileNameList(fileSeqs);
 			for (String fileSeq : fileSeqs){
 				map.put("fileSeq", fileSeq);
 				map.put("packagingFileIdx", seq++);
 				map.put("isChangedPackageFile", isChangedPackageFile);
+				map.put("fileNames", fileNames);
 				result.add(verificationService.processVerification(map, file, project));
+			}
+			
+			// README 파일 내용 DB 에 저장
+			if (CollectionUtils.isNotEmpty(result)) {
+				String readmeFileName = "";
+				for (Map<String, Object> resultMap : result) {
+					if (resultMap.containsKey("readmeFileName")) {
+						readmeFileName = String.valueOf(resultMap.get("readmeFileName"));
+						break;
+					}
+				}
+				
+				Project param = new Project();
+				param.setPrjId(prjId);
+				if (!isEmpty(readmeFileName)) {
+					param.setReadmeFileName(readmeFileName);
+					param.setReadmeYn(CoConstDef.FLAG_YES);
+				} else {
+					param.setReadmeFileName(null);
+					param.setReadmeYn(CoConstDef.FLAG_NO);
+				}
+				projectService.registReadmeContent(param);
 			}
 			
 			resMap = result.get(0);
@@ -521,14 +547,15 @@ public class VerificationController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> savePath(@RequestBody Map<Object, Object> map, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception{
 		log.info("URI: "+ "/project/verification/savePath");
 		
+		Map<String, Object> result = null;
 		try {
-			verificationService.savePath(map);
+			result = verificationService.savePath(map);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(true, null, result);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -623,13 +650,11 @@ public class VerificationController extends CoTopComponent {
 							) {
 						project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 						ignoreMailSend = true;
-					} else if (!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget())
-							&& CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA.equals(prjInfo.getDistributionStatus())) {
+					} else if (!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget()) && CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA.equals(prjInfo.getDistributionStatus())) {
 						project.setResetDistributionStatus(CoConstDef.FLAG_YES);
 					}
 					
-					if (!isEmpty(prjInfo.getDistributionStatus()) 
-							&& CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(confirm.toUpperCase())) {
+					if (!isEmpty(prjInfo.getDistributionStatus()) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(confirm.toUpperCase())) {
 						project.setChangedNoticeYn(CoConstDef.FLAG_YES);
 					}
 				}

@@ -519,8 +519,7 @@ public class ExcelUtil extends CoTopComponent {
 	 * @param errMsg
 	 * @return
 	 */
-	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, 
-	        List<OssComponents> list,List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
+	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list, List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
 
 		T2File fileInfo = fileService.selectFileInfo(fileSeq);
 		if (fileInfo == null) {
@@ -771,8 +770,7 @@ public class ExcelUtil extends CoTopComponent {
 		return true;
 	}
 
-	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol,
-	        String readType, List<String> errMsgList) {
+	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList) {
 		int DefaultHeaderRowIndex = 2; // header index
 		
 		int ossNameCol = -1;
@@ -2946,7 +2944,7 @@ public class ExcelUtil extends CoTopComponent {
 					bean.setDownloadLocation(downloadLocationCol < 0 ? "" : avoidNull(row[downloadLocationCol]).trim().replaceAll("\t", ""));
 					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(row[homepageCol]).trim().replaceAll("\t", ""));
 					bean.setOssCopyright(copyrightTextCol < 0 ? "" : avoidNull(row[copyrightTextCol]).trim().replaceAll("\t", ""));
-					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\t", ""));
+					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\t", "").replaceAll("<b>", "").replaceAll("</b>", ""));
 					
 					analysisResultList.add(bean);
 				}

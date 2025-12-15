@@ -390,13 +390,12 @@
 							.set('onok', function(e){
 								var comment = $("#promptPopupEditor").summernote('code');
 	                            if (e) {
-	                            	if ("" == $(comment).text().trim()){
-	                                    alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
-	                                    });
+	                            	if ("" != $(comment).text().trim() || $(comment).find('img').length > 0) {
+	                            		oss_lst_fn.multiDelAjax(deleteIds, comment);
+	                                } else {
+	                                	alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {});
 
 	                                    return false;
-	                                } else {
-	                                	oss_lst_fn.multiDelAjax(deleteIds, comment);
 	                                }
 	                            } else {
 	                                return false;
@@ -823,11 +822,11 @@
                             if (isAdmin) {
                                 appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
                                 appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
-                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
-                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
-                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
+                                appendIcon += "<span class=\"dropdown-item pointer\" title=\"Add Open Source\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
+                                appendIcon += "<span class=\"dropdown-item pointer\" title=\"Bulk Registration\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete Open Source\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export Open Source List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
                             }
-                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 
                             $("#list_toppager_left").append(appendIcon);
                         }

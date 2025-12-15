@@ -540,7 +540,7 @@ var dep_fn = {
 		}
 	},	
 	makeFileTag : function(obj){
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'1\')">X</span>'+appendHtml+'</li>';
@@ -603,7 +603,7 @@ var dep_fn = {
 		$("#_depAddListContainer").show();
 	},
 	selectDownloadFile : function(target) {
-loadingIden.show();
+		loadingIden.show();
     	
     	let obj = com_fn.checkSelectDownloadFile('DEP');
     	if (typeof obj.overMaxLengthOssList !== "undefined") {
@@ -616,30 +616,25 @@ loadingIden.show();
 			});
     		alertify.alert(message, function(){});
     	} else {
-    		if (obj.isValid) {
-    			// download file
-    	        if (target === "report_sub") {
-    	        	dep_fn.downloadExcel();
-    	        } else {
-    	        	loadingIden.hide();
-    	        	
-    	        	var identificationStatus = [[${project.identificationStatus}]];
-    	        	if ("CONF" != identificationStatus) {
-    	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-    	    				if (e) {
-    	    					com_fn.downloadYaml('DEP');
-    	    				} else {
-    	    					return false;
-    	    				}
-    	    			});
-    	        	} else {
-    	        		com_fn.downloadYaml('DEP');
-    	        	}
-    	        }
-    		} else {
-    			loadingIden.hide();
-    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    		}
+    		// download file
+	        if (target === "report_sub") {
+	        	dep_fn.downloadExcel();
+	        } else {
+	        	loadingIden.hide();
+	        	
+	        	var identificationStatus = [[${project.identificationStatus}]];
+	        	if ("CONF" != identificationStatus) {
+	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+	    				if (e) {
+	    					com_fn.downloadYaml('DEP');
+	    				} else {
+	    					return false;
+	    				}
+	    			});
+	        	} else {
+	        		com_fn.downloadYaml('DEP');
+	        	}
+	        }
     	}
     },
 	// 다운로드 엑셀
@@ -782,6 +777,23 @@ loadingIden.show();
 	makeOssList : function(data){
 
 		depMainData = data.mainData;
+		
+		var chkMainData = [];
+		depMainData.forEach (function (el, index) {
+			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl && el.packageUrl.length > 2000) {
+				let ossVersion = "" != el.ossVersion ? el.ossVersion : "N/A";
+				chkMainData.push(el.ossName + " (" + ossVersion + ")");
+				el.packageUrl = "";
+			}
+		});
+		
+		if (chkMainData.length > 0) {
+			let message = [[#{msg.common.check.maxlength.over.data}]];
+    		chkMainData.forEach (function (el, index) {
+				message += "<br>&emsp;- " + el;
+			});
+    		alertify.alert(message, function(){});
+		}
 		
 		// 리로드 대신 그리드 삭제 후 다시 그리기
 		$("#depList").jqGrid('GridUnload');
@@ -1042,11 +1054,7 @@ loadingIden.show();
     			return comments.indexOf("direct") > -1;
     		});
     		
-    		var depTreeDependsOnData = depMainData.filter(function(cur){
-    			return "" != cur.dependencies;
-    		});
-    		
-    		if (depTreeDirectData.length == 0 || depTreeDependsOnData.length == 0) {
+    		if (depTreeDirectData.length == 0) {
     			alertify.alert([[#{msg.project.cannot.print.identification.dependency}]], function(){});
     		} else {
     			if (_popup == null || _popup.closed) {

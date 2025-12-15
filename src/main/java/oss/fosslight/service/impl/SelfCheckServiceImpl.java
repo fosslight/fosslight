@@ -216,6 +216,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	public Project getProjectDetail(Project project) {
 		// master
 		project = selfCheckMapper.selectProjectMaster(project);
+		if (project == null) {
+			return null;
+		}
 		
 		project.setDestributionName(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType()));
 		//OS_TYPE
@@ -248,6 +251,11 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 
 		// file
 		project.setCsvFile(selfCheckMapper.selectCsvFile(project));
+		
+		// scan file
+		if (!isEmpty(project.getSrcScanFileId())) {
+			project.setScanFile(selfCheckMapper.selectScanFile(project));
+		}
 		
 		List<String> userIdList = new ArrayList<>();
 		userIdList.add(project.getCreator());
@@ -298,14 +306,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		list.sort(Comparator.comparing(ProjectIdentification::getComponentIdx));
 		
 		if (list != null && !list.isEmpty()) {
-			Map<String, Object> ossInfoCheckMap = new HashMap<>();
-			
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceDiv(identification.getReferenceDiv());
 			param.setReferenceId(identification.getReferenceId());
 			OssMaster ossParam = new OssMaster();
 			
 			// components license 정보를 한번에 가져온다
+			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 			for (ProjectIdentification bean : list) {
 				param.addComponentIdList(bean.getComponentId());
 				
@@ -313,27 +320,34 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				String key = bean.getOssName() + "_" + avoidNull(bean.getOssVersion(), "-");
-				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !ossInfoCheckMap.containsKey(key)) {
-					ossInfoCheckMap.put(key, "");
-				}
-			}
-			
-			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-			if (!ossInfoCheckMap.isEmpty()) {
-				for (String key : ossInfoCheckMap.keySet()) {
-					String ossName = key.split("_")[0];
-					String ossVersion = key.split("_")[1];
-					if (ossVersion.equals("-")) {
-						ossVersion = "";
+				String key = (bean.getOssName() + "_" + bean.getOssVersion()).toUpperCase();
+				if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn())) && !vulnerabilityInfoMap.containsKey(key)) {
+					OssMaster ossMaster = null;
+					if (ossInfoMap.containsKey(key)) {
+						ossMaster = ossInfoMap.get(key);
+					} else {
+						for (String ossInfoKey : ossInfoMap.keySet()) {
+							if (ossInfoKey.startsWith((bean.getOssName() + "_").toUpperCase())) {
+								ossMaster = ossInfoMap.get(ossInfoKey);
+								break;
+							}
+						}
+						if (ossMaster != null) {
+							ossMaster.setOssVersionAliases(null);
+						} else {
+							ossMaster = new OssMaster();
+							ossMaster.setOssName(bean.getOssName());
+						}
+						ossMaster.setOssVersion(bean.getOssVersion());
 					}
-					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossName, ossVersion);
+					if (isEmpty(ossMaster.getOssVersion())) {
+						ossMaster.setOssVersion("-");
+					}
+					OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
 					if (om != null && !isEmpty(om.getCvssScore())) {
-						vulnerabilityInfoMap.put((ossName + "_" + ossVersion).toUpperCase(), om);
+						vulnerabilityInfoMap.put(key, om);
 					}
 				}
-				
-				ossInfoCheckMap.clear();
 			}
 			
 			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
@@ -369,8 +383,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							bean.addComponentLicenseList(reLi);
 							
 							if (!unconfirmedLicenseList.contains(avoidNull(reLi.getLicenseName()))) {
-								if (CoConstDef.FLAG_NO.equals(bean.getExcludeYn()) 
-										&& isEmpty(reLi.getLicenseId())) {
+								if (CoConstDef.FLAG_NO.equals(bean.getExcludeYn()) && isEmpty(reLi.getLicenseId())) {
 									unconfirmedLicenseList.add(reLi.getLicenseName());
 								}
 							}
@@ -633,6 +646,8 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		selfCheckMapper.resetOssComponentsAndLicense(project.getPrjId(), null);
 		// self-check watcher master
 		selfCheckMapper.deleteProjectWatcher(project);
+		// self-check notice
+		selfCheckMapper.deleteOssNotice(project);
 		// self-check project master
 		selfCheckMapper.deleteProjectMaster(project);
 	}
@@ -874,6 +889,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		}
 		
+		if (CollectionUtils.isNotEmpty(project.getDelScanFile())) {
+			for (int i = 0; i < project.getDelScanFile().size(); i++) {
+				selfCheckMapper.deleteFileBySeq(project.getDelScanFile().get(i));
+				fileService.deletePhysicalFile(project.getDelScanFile().get(i), CoConstDef.CD_CHECK_OSS_SELF);
+			}
+		}
+		
+		if (!isEmpty(project.getSrcScanFileId())) {
+			selfCheckMapper.updateFileId(project);
+			
+			if (CollectionUtils.isNotEmpty(project.getScanFile())) {
+				for (int i = 0; i < project.getScanFile().size(); i++) {
+					selfCheckMapper.updateFileBySeq(project.getScanFile().get(i));
+				}				
+			}
+		}
+		
 		{
 			// vulnerability max score를 저장
 			double max_cvss_score = 0;
@@ -882,17 +914,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			List<ProjectIdentification> _ossList = selfCheckMapper.selectIdentificationGridList(prj);
 			
 			if (_ossList != null) {
+				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 				for (ProjectIdentification targetBean : _ossList) {
 					if (targetBean != null && !CoConstDef.FLAG_YES.equals(avoidNull(targetBean.getExcludeYn())) && !isEmpty(targetBean.getOssName()) && !targetBean.getOssName().equals("-")) {
+						String key = targetBean.getOssName() + "_" + targetBean.getOssVersion();
 						double _currentSccore = 0;
-						OssMaster om = CommonFunction.getOssVulnerabilityInfo(targetBean.getOssName(), targetBean.getOssVersion());
-						if (om != null && !isEmpty(om.getCvssScore())) {
-							_currentSccore = Double.parseDouble(om.getCvssScore());
-							if (CoCodeManager.OSS_INFO_UPPER.containsKey((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase())) {
-								OssMaster bean = CoCodeManager.OSS_INFO_UPPER.get((targetBean.getOssName() + "_" + targetBean.getOssVersion()).toUpperCase());
-								if (!isEmpty(bean.getCvssScore())) {
-									max_cvss_score = Double.parseDouble(bean.getCvssScore());
+						if (!vulnerabilityInfoMap.containsKey(key.toUpperCase()) && CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
+							OssMaster ossMaster = CoCodeManager.OSS_INFO_UPPER.get(key.toUpperCase());
+							if (isEmpty(ossMaster.getOssVersion())) {
+								ossMaster.setOssVersion("-");
+							}
+							OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+							if (om != null && !isEmpty(om.getCvssScore())) {
+								_currentSccore = Double.parseDouble(om.getCvssScore());
+								if (!isEmpty(ossMaster.getCvssScore())) {
+									max_cvss_score = Double.parseDouble(ossMaster.getCvssScore());
 								}
+								vulnerabilityInfoMap.put(key.toUpperCase(), om);
 							}
 						}
 						if (Double.compare(_currentSccore, max_cvss_score) > 0) {
@@ -902,6 +940,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 						}
 					}
 				}
+				vulnerabilityInfoMap.clear();
 			}
 			
 			Project vnlnUpdBean = new Project();
@@ -2728,5 +2767,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				fileService.deletePhysicalFile(fileInfo, CoConstDef.CD_CHECK_OSS_SELF);
 			}
 		}
+	}
+
+	@Override
+	public void updateComment(Project project) {
+		selfCheckMapper.updateComment(project);
 	}
 }

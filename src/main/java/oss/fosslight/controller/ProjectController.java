@@ -21,9 +21,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
@@ -53,19 +55,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.common.CustomXssFilter;
-import oss.fosslight.domain.CoMail;
-import oss.fosslight.domain.CoMailManager;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.PartnerMaster;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.T2File;
-import oss.fosslight.domain.T2Users;
-import oss.fosslight.domain.UploadFile;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
@@ -78,6 +68,7 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.OssComponentUtil;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.util.YamlUtil;
 import oss.fosslight.validation.T2CoValidationResult;
@@ -112,7 +103,7 @@ public class ProjectController extends CoTopComponent {
 	@Autowired SearchService searchService;
 	
 	@Autowired private BinaryDataService binaryDataService;
-	
+	@Autowired T2UserService t2UserService;
 	/** The env. */
 	@Resource
 	private Environment env;
@@ -196,8 +187,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.AUTOCOMPLETE_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
 		List<Map<String, String>> list = projectService.getProjectNameList(project);
 		CustomXssFilter.nameFilter(list);
@@ -205,8 +195,7 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	@GetMapping(value = PROJECT.AUTOCOMPLETE_ID_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteIdAjax(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> autoCompleteIdAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
 		List<Project> list = projectService.getProjectIdList(project);
 		return makeJsonResponseHeader(list);
@@ -292,8 +281,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> listAjax(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> listAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -388,6 +376,14 @@ public class ProjectController extends CoTopComponent {
 		project.setPrjId(prjId);
 		project.setActType(CoConstDef.FLAG_NO);
 		project = projectService.getProjectDetail(project);
+		if (project == null) {
+			try {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			return null;
+		}
 		
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
@@ -407,15 +403,72 @@ public class ProjectController extends CoTopComponent {
 		if (!CommonFunction.isAdmin()) {
 			project.setPrjIds(new String[] {prjId});
 			permissionCheckList = CommonFunction.checkUserPermissions("", project.getPrjIds(), "project");
-			if (permissionCheckList.contains(loginUserName())) {
-				permissionFlag = true;
+			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+				for (String userId : permissionCheckList) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						permissionFlag = true;
+						break;
+					}
+				}
 			}
-
 		}
 		
-		if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
-				&& !CommonFunction.isAdmin()
-				&& !permissionFlag) {
+		if (project.getPublicYn().equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !permissionFlag) {
+			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
+			
+			return "project/view";
+		} else {
+			if (!CommonFunction.isAdmin() && !permissionFlag) {
+				List<T2Users> userList = userService.selectAllUsers();
+				
+				if (userList != null) {
+					model.addAttribute("userWithDivisionList", userList);
+				}
+				
+				return "project/view";
+			} else {
+				return "project/edit";
+			}
+		}
+	}
+	
+	@RequestMapping(value = { PROJECT.EDIT_DIV_ID }, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	public String editDiv(@PathVariable String prjId, @PathVariable String initDiv, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
+		project = projectService.getProjectDetail(project);
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
+		comHisBean.setReferenceId(project.getPrjId());
+		
+		project.setUserComment(commentService.getUserComment(comHisBean));
+
+		model.addAttribute("project", project);
+		model.addAttribute("detail", project);
+		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("initDiv", initDiv);
+		
+		List<String> permissionCheckList = null;
+		boolean permissionFlag = false;
+		
+		if (!CommonFunction.isAdmin()) {
+			project.setPrjIds(new String[] {prjId});
+			permissionCheckList = CommonFunction.checkUserPermissions("", project.getPrjIds(), "project");
+			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+				for (String userId : permissionCheckList) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						permissionFlag = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if (project.getPublicYn().equals(CoConstDef.FLAG_NO) && !CommonFunction.isAdmin() && !permissionFlag) {
 			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
 			
 			return "project/view";
@@ -441,7 +494,10 @@ public class ProjectController extends CoTopComponent {
 		
 		try {
 			project = projectService.getProjectDetail(project);
-			
+			if (project == null) {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+				return null;
+			}
 			if (CoConstDef.FLAG_YES.equals(project.getUseYn())) {
 				CommentsHistory comHisBean = new CommentsHistory();
 				comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
@@ -564,7 +620,7 @@ public class ProjectController extends CoTopComponent {
 		boolean isBatResult = !isEmpty(identification.getRefBatId());
 		boolean isSortOnBom = false;
 		
-		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(code)) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(code) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(code) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(code)) {
 			if (!isEmpty(identification.getSidxOrg())) {
 				String[] _sortIdxs = identification.getSidxOrg().split(",");
 				
@@ -1718,7 +1774,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@PostMapping(value = PROJECT.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+			HttpServletResponse res, Model model) throws InterruptedException {
 
 		Project projectInfo = projectService.getProjectDetail(project);
 		
@@ -1746,6 +1802,8 @@ public class ProjectController extends CoTopComponent {
 		
 		String rtnFlag = "11"; // default error
 		HashMap<String, Object> resMap = new HashMap<>();
+
+		Thread.sleep(3000);
 		
 		try {
 			projectService.deleteProject(project);
@@ -1891,10 +1949,9 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_3RD)
-	public @ResponseBody ResponseEntity<Object> save3rd(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> save3rd(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String prjId = (String) map.get("referenceId");
-		String identificationSubStatusPartner = (String) map.get("identificationSubStatusPartner");
+		String identificationSubStatusPartner = (String) map.getOrDefault("identificationSubStatusPartner", "");
 		String mainGrid = (String) map.get("mainData");
 		String thirdPartyGrid = (String) map.get("thirdPartyData");
 		String resetFlag = (String) map.get("resetFlag");
@@ -1913,7 +1970,7 @@ public class ProjectController extends CoTopComponent {
 		// 서브그리드
 		projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
 		
-		if (CoConstDef.FLAG_NO.equals(identificationSubStatusPartner)) {
+		if (CoConstDef.FLAG_NO.equals(avoidNull(identificationSubStatusPartner))) {
 			project.setPrjId(prjId);
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			project.setIdentificationSubStatusPartner(identificationSubStatusPartner);
@@ -1924,8 +1981,7 @@ public class ProjectController extends CoTopComponent {
 		
 		try {
 			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
-				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-				CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
+				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
 							
 				if (!isEmpty(changedLicenseName)) {
 					CommentsHistory commentHisBean = new CommentsHistory();
@@ -2440,8 +2496,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_SRC)
-	public @ResponseBody ResponseEntity<Object> saveSrc(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveSrc(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		// default validation
 		boolean isValid = true;
 		// last response map
@@ -2638,8 +2693,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.NICKNAME_CD)
-	public @ResponseBody ResponseEntity<Object> nickNameValid(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
+	public @ResponseBody ResponseEntity<Object> nickNameValid(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
 		Map<String, List<String>> result = null;
 
 		String mainDataString = (String) map.get("mainData");
@@ -2699,8 +2753,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@PostMapping(value = PROJECT.SAVE_BINANDROID)
-	public @ResponseBody ResponseEntity<Object> saveBinAndroid(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveBinAndroid(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		// default validation
 		boolean isValid = true;
 		// last response map
@@ -2802,10 +2855,8 @@ public class ProjectController extends CoTopComponent {
 			
 			// 분석결과서 업로드시 라이선스명(닉네임)이 변경된 사항이 있으면 이력으로 등록한다.
 			try {
-				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-						CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId)) != null) {
-					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-							CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId), true);
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, androidCsvFileId), true);
 					
 					if (!isEmpty(changedLicenseName)) {
 						CommentsHistory commentHisBean = new CommentsHistory();
@@ -2822,11 +2873,8 @@ public class ProjectController extends CoTopComponent {
 
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
 			try {
-				if (getSessionObject(
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId,
-								CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) != null) {
-					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID), true);
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID), true);
 					
 					if (!isEmpty(changedLicenseName)) {
 						CommentsHistory commentHisBean = new CommentsHistory();
@@ -3005,11 +3053,9 @@ public class ProjectController extends CoTopComponent {
 	 * @throws Exception the exception
 	 */
 	@GetMapping(value = PROJECT.IDENTIFICATION_ID_DIV, produces = "text/html; charset=utf-8")
-	public String identification(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId,
-			@PathVariable String initDiv) throws Exception {
+	public String identification(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId, @PathVariable String initDiv) throws Exception {
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project.setActType(CoConstDef.FLAG_NO);
 		Project projectMaster = projectService.getProjectDetail(project);
 		
 		boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
@@ -3223,8 +3269,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@RequestMapping(value = PROJECT.TRD_OSS)
-	public @ResponseBody ResponseEntity<Object> listAjax(OssComponents ossComponents, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> listAjax(OssComponents ossComponents, HttpServletRequest req, HttpServletResponse res, Model model) {
 		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 		Map<String, Object> map = projectService.getPartnerOssList(ossComponents);
 		projectService.setLoadToList(map, ossComponents.getReferenceId());
@@ -3242,8 +3287,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SEARCH_CD)
-	public @ResponseBody ResponseEntity<Object> thirdProject(ProjectIdentification projectIdentification,
-			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
+	public @ResponseBody ResponseEntity<Object> thirdProject(ProjectIdentification projectIdentification, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -3269,8 +3313,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.IDENTIFICATION_THIRD)
-	public @ResponseBody ResponseEntity<Object> identificationThird(OssComponents ossComponents, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> identificationThird(OssComponents ossComponents, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> map = projectService.getIdentificationThird(ossComponents);
 
 		return makeJsonResponseHeader(map);
@@ -3324,63 +3367,119 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.CHECK_CHANGE_DATA)
-	public @ResponseBody ResponseEntity<Object> getCheckChangeData(@RequestBody HashMap<String, Object> map) {
+	public @ResponseBody ResponseEntity<Object> getCheckChangeData(@RequestBody Map<String, Object> map) {
 		String prjId = (String) map.get("referenceId");
-		String partyGrid = (String) map.get("partyGrid");
-		String srcMainGrid = (String) map.get("srcMainGrid");
-		String binMainGrid = (String) map.get("binMainGrid");
+		String partyGrid = map.containsKey("partyGrid") ? (String) map.get("partyGrid") : "";
+		String srcMainGrid = map.containsKey("srcMainGrid") ? (String) map.get("srcMainGrid") : "";
+		String binMainGrid = map.containsKey("binMainGrid") ? (String) map.get("binMainGrid") : "";
+		String depMainGrid = map.containsKey("depMainGrid") ? (String) map.get("depMainGrid") : "";
+		String androidMainGrid = (String) map.get("androidMainGrid");
 		String status = (String) map.get("status");
+		String errMsg = "";
+		String bom = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 
-		// party
-		Type partyType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> partyData = new ArrayList<ProjectIdentification>();
-		partyData = (List<ProjectIdentification>) fromJson(partyGrid, partyType);
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = projectService.getProjectDetail(project);
+		if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(project.getNoticeType())) {
+			bom = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+			Type androidType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+			List<ProjectIdentification> androidData = new ArrayList<ProjectIdentification>();
+			androidData = (List<ProjectIdentification>) fromJson(androidMainGrid, androidType);
+			if (!CollectionUtils.isEmpty(androidData)) {
+				androidData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			}
 
-		// src
-		Type srcType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> srcData = new ArrayList<ProjectIdentification>();
-		srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
-		if (!CollectionUtils.isEmpty(srcData)) {
-			srcData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			List<List<ProjectIdentification>> androidSubData = CommonFunction.setOssComponentLicense(androidData);
+
+			if(androidSubData != null && !androidSubData.isEmpty()) {
+				androidSubData = CommonFunction.mergeGridAndSession(
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, prjId), androidData,
+						androidSubData,
+						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID, prjId));
+			}
+			errMsg = projectService.checkChangedIdentification(prjId, androidData, androidSubData, (String) map.get("applicableAndroid"));
+		} else {
+			List<ProjectIdentification> partyData = null;
+			List<ProjectIdentification> srcData = null;
+			List<List<ProjectIdentification>> srcSubData = null;
+			List<ProjectIdentification> depData = null;
+			List<List<ProjectIdentification>> depSubData = null;
+			List<ProjectIdentification> binData = null;
+			List<List<ProjectIdentification>> binSubData = null;
+			
+			// party
+			if (!isEmpty(partyGrid)) {
+				Type partyType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				partyData = new ArrayList<ProjectIdentification>();
+				partyData = (List<ProjectIdentification>) fromJson(partyGrid, partyType);
+			}
+
+			// src
+			if (!isEmpty(srcMainGrid)) {
+				Type srcType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				srcData = new ArrayList<ProjectIdentification>();
+				srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
+				if (CollectionUtils.isNotEmpty(srcData)) {
+					srcData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+				}
+				srcSubData = CommonFunction.setOssComponentLicense(srcData);
+				if (CollectionUtils.isNotEmpty(srcSubData)) {
+					srcSubData = CommonFunction.mergeGridAndSession(
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
+							srcSubData,
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+				}
+			}
+			
+			// dep
+			if (!isEmpty(depMainGrid)) {
+				Type depType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				depData = new ArrayList<ProjectIdentification>();
+				depData = (List<ProjectIdentification>) fromJson(depMainGrid, depType);
+				if (CollectionUtils.isNotEmpty(depData)) {
+					depData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+				}
+
+				depSubData = CommonFunction.setOssComponentLicense(depData);
+				if (CollectionUtils.isNotEmpty(depSubData)) {
+					depSubData = CommonFunction.mergeGridAndSession(
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData,
+							depSubData,
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+				}
+			}
+
+			// bin
+			if (!isEmpty(binMainGrid)) {
+				Type binType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				binData = new ArrayList<ProjectIdentification>();
+				binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
+				if (CollectionUtils.isNotEmpty(binData)) {
+					binData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+				}
+				
+				binSubData = CommonFunction.setOssComponentLicense(binData);
+				if (CollectionUtils.isNotEmpty(binSubData)) {
+					binSubData = CommonFunction.mergeGridAndSession(
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
+							binSubData,
+							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+				}
+			}
+
+			// 체크 서비스 호출
+			errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData, binSubData, depData, depSubData, map);
 		}
-		
-		List<List<ProjectIdentification>> srcSubData = CommonFunction.setOssComponentLicense(srcData);
-		
-		if(srcSubData != null && !srcSubData.isEmpty()) {
-			srcSubData = CommonFunction.mergeGridAndSession(
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
-					srcSubData,
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-		}		// bin
-		Type binType = new TypeToken<List<ProjectIdentification>>() {
-		}.getType();
-		List<ProjectIdentification> binData = new ArrayList<ProjectIdentification>();
-		binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
-		if (!CollectionUtils.isEmpty(binData)) {
-			binData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
-		}
-		
-		List<List<ProjectIdentification>> binSubData = CommonFunction.setOssComponentLicense(binData);
-		
-		if(binSubData != null && !binSubData.isEmpty()) {
-			binSubData = CommonFunction.mergeGridAndSession(
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
-					binSubData,
-					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
-		}
-		// 체크 서비스 호출
-		String errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData,
-				binSubData, (String) map.get("applicableParty"), (String) map.get("applicableSrc"),
-				(String) map.get("applicableBin"));
 		
 		if (!isEmpty(errMsg)) {
 			return makeJsonResponseHeader(false, errMsg);
 		}
 
-		if (!isEmpty(status) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(status.toUpperCase())){
+		if (!isEmpty(avoidNull(status)) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(status.toUpperCase())){
 			ProjectIdentification identification = new ProjectIdentification();
 			identification.setReferenceId(prjId);
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			identification.setReferenceDiv(bom);
 			identification.setMerge(CoConstDef.FLAG_YES);
 			errMsg = projectService.checkOssNicknameList(identification);
 			if (!isEmpty(errMsg)) {
@@ -3461,8 +3560,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the 3 rd map
 	 */
 	@GetMapping(value = PROJECT.TRD_MAP)
-	public @ResponseBody ResponseEntity<Object> get3rdMap(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> get3rdMap(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> map = null;
 		
 		try {
@@ -3739,8 +3837,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the 3 rd map
 	 */
 	@GetMapping(value = PROJECT.ADD_LIST)
-	public @ResponseBody ResponseEntity<Object> getSrcAddList(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> getSrcAddList(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> map = null;
 		
 		try {
@@ -3797,8 +3894,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@ResponseBody
 	@PostMapping(value = PROJECT.CSV_FILE)	
-	public String csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
-			HttpServletResponse res, Model model) throws Exception {
+	public String csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		ArrayList<Object> resultList = new ArrayList<Object>();
 		// 파일등록
 		List<UploadFile> list = new ArrayList<UploadFile>();
@@ -3811,8 +3907,7 @@ public class ProjectController extends CoTopComponent {
 		
 		// 파일 등록
 		try {
-			if (req.getContentType() != null
-					&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
+			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
 				if (fileId == null) {
 					list = fileService.uploadFile(req, file);
@@ -3977,8 +4072,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SHEET_DATA)
-	public @ResponseBody ResponseEntity<Object> getSheetData(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> getSheetData(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		log.info("Report Read Start");
 
 		try {
@@ -3996,13 +4090,11 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 			// 편집중인 Data 격납
-			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {
-			}.getType();
+			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
 			List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
 			ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
 
-			Type collectionType3 = new TypeToken<List<List<ProjectIdentification>>>() {
-			}.getType();
+			Type collectionType3 = new TypeToken<List<List<ProjectIdentification>>>() {}.getType();
 			List<List<ProjectIdentification>> ossComponentsLicense = new ArrayList<>();
 			ossComponentsLicense = (List<List<ProjectIdentification>>) fromJson(subDataString, collectionType3);
 
@@ -4011,8 +4103,7 @@ public class ProjectController extends CoTopComponent {
 			List<String> errMsgList = new ArrayList<>();
 			Map<String, String> emptyErrMsg = new HashMap<>();
 			try {
-				if (!ExcelUtil.readReport(readType, true, sheetList.toArray(new String[sheetList.size()]), fileSeq,
-						reportData, errMsgList, emptyErrMsg)) {
+				if (!ExcelUtil.readReport(readType, true, sheetList.toArray(new String[sheetList.size()]), fileSeq, reportData, errMsgList, emptyErrMsg)) {
 					// error 처리
 					for (String s : errMsgList) {
 						if (isEmpty(s)) {
@@ -4059,10 +4150,8 @@ public class ProjectController extends CoTopComponent {
 			
 			// license name이 변경된 내용이 있을 경우 사용자 표시
 			String systemChangeHisStr = "";
-			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-					CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq)) != null) {
-				systemChangeHisStr = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-						CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq));
+			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq)) != null) {
+				systemChangeHisStr = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, fileSeq));
 			}
 
 			if (resultMap.containsKey("versionChangedList")) {
@@ -4096,8 +4185,7 @@ public class ProjectController extends CoTopComponent {
 
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				resultMap.replace("mainData", CommonFunction.identificationSortByValidInfo(
-						(List<ProjectIdentification>) resultMap.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
+				resultMap.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) resultMap.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false));
 				return makeJsonResponseHeader(true, errMsg, resultMap, vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap());
 			}
 			
@@ -4238,8 +4326,7 @@ public class ProjectController extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@ResponseBody
 	@PostMapping(value = PROJECT.ANDROID_FILE)
-	public String androidFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
-			HttpServletResponse res, Model model) throws Exception {
+	public String androidFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		String fileType = req.getParameter("fileType");
 		ArrayList<Object> resultList = new ArrayList<Object>();
 		// 파일등록거
@@ -4270,9 +4357,8 @@ public class ProjectController extends CoTopComponent {
 			}
 			
 			String codeExt[] = StringUtil.split(codeMapper.selectExtType(type), ",");
-			
 			for (int i = 0; i < codeExt.length; i++) {
-				if (codeExt[i].equals(extType)) {
+				if (codeExt[i].equalsIgnoreCase(extType)) {
 					count++;
 				}
 			}
@@ -4282,7 +4368,7 @@ public class ProjectController extends CoTopComponent {
 			String codeExt[] = StringUtil.split(codeMapper.selectExtType(CoConstDef.CD_ANDROID_NOTICE_XML), ",");
 			
 			for (int i = 0; i < codeExt.length; i++) {
-				if (codeExt[i].equals(extType)) {
+				if (codeExt[i].equalsIgnoreCase(extType)) {
 					count++;
 				}
 			}
@@ -4291,8 +4377,7 @@ public class ProjectController extends CoTopComponent {
 				resultList = null;
 			} else {
 				// 파일 등록
-				if (req.getContentType() != null
-						&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
+				if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 					file.setCreator(loginUserName());
 					Map<String, Object> rtnMap = fileService.uploadNoticeXMLFile(req, file, fileId, prjId);
 					if (rtnMap.containsKey("msg")) {
@@ -4312,8 +4397,7 @@ public class ProjectController extends CoTopComponent {
 			}
 		} else {
 			// 파일 등록
-			if (req.getContentType() != null
-					&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
+			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
 				
 				if (isEmpty(fileId)) {
@@ -4747,14 +4831,14 @@ public class ProjectController extends CoTopComponent {
 			
 			ProjectIdentification beforeIdentification = new ProjectIdentification();
 			beforeIdentification.setReferenceId(beforePrjId);
+			beforeIdentification.setMerge(CoConstDef.FLAG_NO);
 			
-			if(!beforePrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			if (!beforePrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				beforeIdentification.setMerge("N");
 			} else {
-				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
-				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 			}
 			
 			Project afterPrjInfo = projectService.getProjectBasicInfo(afterPrjId);
@@ -4762,14 +4846,14 @@ public class ProjectController extends CoTopComponent {
 			
 			ProjectIdentification AfterIdentification = new ProjectIdentification();
 			AfterIdentification.setReferenceId(afterPrjId);
+			AfterIdentification.setMerge(CoConstDef.FLAG_NO);
 			
-			if(!afterPrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			if (!afterPrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				AfterIdentification.setMerge("N");
 			} else {
-				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
-				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 			}
 			
 			Map<String, Object> beforeBom = new HashMap<String, Object>();
@@ -4780,36 +4864,20 @@ public class ProjectController extends CoTopComponent {
 			boolean afterDataFlag = false;
 			
 			beforeBom = getOssComponentDataInfo(beforeIdentification, beforeReferenceDiv);
-			if (beforeReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
-				if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
-					beforeDataFlag = true;
-				} else {
-					beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
-				}
+			if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+				beforeDataFlag = true;
 			} else {
-				if (!beforeBom.containsKey("mainData") || (List<ProjectIdentification>) beforeBom.get("mainData") == null) {
-					beforeDataFlag = true;
-				} else {
-					beforeBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) beforeBom.get("mainData"));
-				}
+				beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
 			}
 			if (beforeDataFlag || beforeBomList == null) {
 				return makeJsonResponseHeader(false, "1");
 			}
 			
 			afterBom = getOssComponentDataInfo(AfterIdentification, afterReferenceDiv);
-			if (afterReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
-				if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
-					afterDataFlag = true;
-				} else {
-					afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
-				}
+			if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+				afterDataFlag = true;
 			} else {
-				if (!afterBom.containsKey("mainData") || (List<ProjectIdentification>) afterBom.get("mainData") == null) {
-					afterDataFlag = true;
-				} else {
-					afterBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) afterBom.get("mainData"));
-				}
+				afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
 			}
 			if (afterDataFlag || afterBomList == null) {
 				return makeJsonResponseHeader(false, "1");
@@ -4922,7 +4990,7 @@ public class ProjectController extends CoTopComponent {
 			permissionCheckList = CommonFunction.checkUserPermissions(loginUserName(), project.getPrjIds(), "project");
 		}
 		
-		if (permissionCheckList == null || permissionCheckList.isEmpty()){
+		if (CollectionUtils.isEmpty(permissionCheckList)) {
 			Map<String, List<Project>> updatePrjDivision = projectService.updateProjectDivision(project);
 			
 			if (updatePrjDivision.containsKey("before") && updatePrjDivision.containsKey("after")) {
@@ -5215,6 +5283,7 @@ public class ProjectController extends CoTopComponent {
 			result = projectService.getSecurityGridList(project);
 			rtnMap.put("totalGridData", (List<OssComponents>) result.get("totalList"));
 			rtnMap.put("fullDiscoveredGridData", (List<OssComponents>) result.get("fullDiscoveredList"));
+			rtnMap.put("overviewData", (Map<String, Object>) result.get("overviewData"));
 			
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 			pv.setProcType(pv.PROC_TYPE_SECURITY);
@@ -5312,10 +5381,14 @@ public class ProjectController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		
-		if (CoConstDef.FLAG_NO.equals(project.getViewOnlyFlag()) && project.getStatusPermission() == 1) {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=false");
+		if (project != null) {
+			if (CoConstDef.FLAG_NO.equals(project.getViewOnlyFlag()) && project.getStatusPermission() == 1) {
+				res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=false");
+			} else {
+				res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=true");
+			}
 		} else {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=true");
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
 		}
 	}
 	
@@ -5535,4 +5608,16 @@ public class ProjectController extends CoTopComponent {
 		return "project/fragments/dependencyTreePopup";
 	}
 
+	@PostMapping(value = PROJECT.INIT_AUTO_REVIEW)
+    public @ResponseBody ResponseEntity<Object> initAutoReview(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) throws SchedulerException {
+        return makeJsonResponseHeader(projectService.initAutoReview(project.getPrjId()), null);
+    }
+
+	@PostMapping(value = PROJECT.REVIEW_REPORT)
+	public @ResponseBody ResponseEntity<Object> reviewReport(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) throws SchedulerException, IOException {
+		Map<String, String> resMap = new HashMap<>();
+		verificationService.getReviewReportPdfFile(project.getPrjId());
+		resMap.put("isValid", "true");
+		return makeJsonResponseHeader(resMap);
+	}
 }

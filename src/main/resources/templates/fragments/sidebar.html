@@ -315,24 +315,26 @@
             $('.tab-empty').hide();
 
             _defaultTabs.forEach(function(tabUrl, index) {
-              if (tabUrl.includes('/license/list')) {
-                createTab_new('License', '/license/list', 'license-list', true);
-              } else if (tabUrl.includes('/oss/list')) {
-                createTab_new('Open Source', '/oss/list', 'oss-list', true);
-              } else if (tabUrl.includes('/project/list')) {
-                createTab_new('Project', '/project/list', 'project-list', true);
-              } else if (tabUrl.includes('/partner/list')) {
-                createTab_new('3rd Party', '/partner/list', 'partner-list', true);
-              } else if (tabUrl.includes('/system/bat')) {
-                createTab_new('Binary DB', '/binary', 'binary', true);
-              } else if (tabUrl.includes('/vulnerability/list')) {
-                createTab_new('Vulnerability', '/vulnerability/list', 'vulnerability-list', true);
-              } else if (tabUrl.includes('/selfCheck/list')) {
-                createTab_new('Self-Check', '/selfCheck/list', 'selfCheck-list', true);
-              }
+            	if (tabUrl.includes('/dashboard/list')) {
+        			createTab_new('Dashboard', '/dashboard/list', 'dashboard-list', true);
+        		} else if (tabUrl.includes('/license/list')) {
+                	createTab_new('License', '/license/list', 'license-list', true);
+              	} else if (tabUrl.includes('/oss/list')) {
+              	  	createTab_new('Open Source', '/oss/list', 'oss-list', true);
+              	} else if (tabUrl.includes('/project/list')) {
+                	createTab_new('Project', '/project/list', 'project-list', true);
+              	} else if (tabUrl.includes('/partner/list')) {
+                	createTab_new('3rd Party', '/partner/list', 'partner-list', true);
+              	} else if (tabUrl.includes('/system/bat')) {
+                	createTab_new('Binary DB', '/binary', 'binary', true);
+              	} else if (tabUrl.includes('/vulnerability/list')) {
+                	createTab_new('Vulnerability', '/vulnerability/list', 'vulnerability-list', true);
+              	} else if (tabUrl.includes('/selfCheck/list')) {
+                	createTab_new('Self-Check', '/selfCheck/list', 'selfCheck-list', true);
+              	}
 
-              /* the last default tab gives an open event when the sidebar is clicked */
-              if (index === _defaultTabs.length - 1) {
+              	/* the last default tab gives an open event when the sidebar is clicked */
+              	if (index === _defaultTabs.length - 1) {
                 	$.each(_sidebar, function(idx, val){
                   		var _href = $(this).attr("href");
                   		if ("#" != _href && !_href.startsWith("/system")) {

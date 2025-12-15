@@ -1,13 +1,7 @@
--- OSS data reset
-set FOREIGN_KEY_CHECKS = 0;
-DELETE FROM `OSS_DOWNLOADLOCATION`;
-DELETE FROM `OSS_LICENSE_DECLARED`;
-DELETE FROM `OSS_NICKNAME`;
-DELETE FROM `OSS_MASTER_LICENSE_FLAG`;
-DELETE FROM `OSS_VERSION`;
-DELETE FROM `OSS_COMMON`;
+-- OSS data update
+SET FOREIGN_KEY_CHECKS = 0;
 
-INSERT INTO `OSS_COMMON` (`OSS_COMMON_ID`, `OSS_NAME`, `DOWNLOAD_LOCATION`, `HOMEPAGE`, `SUMMARY_DESCRIPTION`, `USE_YN`, `DEACTIVATE_FLAG`) VALUES
+REPLACE INTO `OSS_COMMON` (`OSS_COMMON_ID`, `OSS_NAME`, `DOWNLOAD_LOCATION`, `HOMEPAGE`, `SUMMARY_DESCRIPTION`, `USE_YN`, `DEACTIVATE_FLAG`) VALUES
 	(1, 'DotNetZip', 'http://dotnetzip.codeplex.com/downloads/get/258012', 'http://dotnetzip.codeplex.com', '', 'Y', 'N'),
 	(2, 'XML-RPC for C/C++', 'http://xmlrpc-c.sourceforge.net/downloading.php', 'http://xmlrpc-c.sourceforge.net', '', 'Y', 'N'),
 	(3, 'jquery', 'https://github.com/jquery/jquery', 'https://jquery.com', '', 'Y', 'N'),
@@ -209,7 +203,7 @@ INSERT INTO `OSS_COMMON` (`OSS_COMMON_ID`, `OSS_NAME`, `DOWNLOAD_LOCATION`, `HOM
 	(199, 'iproute2', 'https://www.kernel.org/pub/linux/utils/net/iproute2', 'https://wiki.linuxfoundation.org/networking/iproute2', '', 'Y', 'N'),
 	(200, 'libmtp', 'https://sourceforge.net/projects/libmtp/files/libmtp/0.3.6/libmtp-0.3.6.tar.gz/download', 'http://libmtp.sourceforge.net', '', 'Y', 'N');
 
-INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
+REPLACE INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
 	(1, 1, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:40', 'wonjae.park', '2020-01-07 11:27:22', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', '', '', NULL, NULL),
 	(2, 2, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:40', 'oscAdmin', '2017-02-12 15:27:40', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2001 by First Peer, Inc.\nCopyright (c) 2001 by Eric Kidd', NULL, NULL, NULL),
 	(3, 3, '1.9.1', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:40', 'soim.kim', '2024-04-11 16:33:12', NULL, '6.1', 'CVE-2015-9251', 'Y', 'N', '2024-09-18 23:32:25', 'PMS', '10', 'Copyright (c) 2008 John Resig (jquery.com)', '', NULL, NULL),
@@ -340,7 +334,7 @@ INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DI
 	(143, 92, '2.17', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'wonjae.park', '2024-07-10 15:00:23', NULL, '10.0', 'CVE-2015-0235', 'Y', 'N', '2023-03-29 03:07:05', 'WCP', '11', '', '', NULL, NULL),
 	(144, 115, '1.20.6-r0', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'oscAdmin', '2017-02-12 15:27:41', NULL, NULL, NULL, NULL, 'N', NULL, 'CP', '11', '', NULL, NULL, NULL);
 
-INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
+REPLACE INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
 	(145, 116, '', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'soim.kim', '2017-08-29 02:07:36', NULL, '5.8', 'CVE-2010-3879', 'Y', 'N', '2024-08-21 10:24:20', 'CP', '11', 'Copyright (C) 2001-2007  Miklos Szeredi <miklos@szeredi.hu>\nCopyright (C) 2011       Sebastian Pipping <sebastian@pipping.org>\nCopyright (c) 2006-2008 Amit Singh/Google Inc.\nCopyright (c) 2011-2017 Benjamin Fleischer\nCopyright (C) 2008       SUSE Linux Products GmbH\nCopyright (C) 2008       Tejun Heo <teheo@suse.de>\nCopyright (c) 2012 Anatol Pomozov\nCopyright (C) 2000,02 Free Software Foundation, Inc.', NULL, NULL, NULL),
 	(146, 117, '1.4', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'oscAdmin', '2017-02-12 15:27:41', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2001-2008 The Apache Software Foundation', NULL, NULL, NULL),
 	(147, 92, '2.15', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'wonjae.park', '2024-07-10 15:00:23', NULL, '10.0', 'CVE-2015-0235', 'Y', 'N', '2023-03-29 03:07:05', 'WCP', '11', '', '', NULL, NULL),
@@ -429,7 +423,7 @@ INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DI
 	(243, 184, '1.42.11', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'soim.kim', '2023-07-27 21:46:07', NULL, '4.6', 'CVE-2015-0247', 'Y', 'N', '2024-09-06 15:03:35', 'CP', '11', 'Copyright (c) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 by Theodore Ts\'o\nCopyright (c) 1987, 1988, 1989 Massachusetts Institute of Technology Student Information Processing Board', '', NULL, 'Y'),
 	(244, 187, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-13 21:21:46', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', '', NULL, NULL, NULL);
 
-INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
+REPLACE INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
 	(245, 188, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2010 Robbie Hanson', NULL, NULL, NULL),
 	(246, 189, '0.1.3', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2015 dt-workshop', NULL, NULL, NULL),
 	(247, 190, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'CP', '11', '', NULL, NULL, NULL),
@@ -447,7 +441,7 @@ INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DI
 	(261, 199, '3.5.1', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-06-30 02:10:38', NULL, '4.4', 'CVE-2019-20795', 'Y', 'N', '2021-06-23 03:53:53', 'CP', '11', '', NULL, NULL, NULL),
 	(262, 200, '0.3.6', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, '6.8', 'CVE-2017-9832', 'Y', 'N', '2020-04-24 01:19:30', 'WCP', '11', '', NULL, NULL, NULL);
 	
-INSERT INTO `OSS_MASTER_LICENSE_FLAG` (`OSS_ID`, `MULTI_LICENSE_FLAG`, `DUAL_LICENSE_FLAG`, `VERSION_DIFF_FLAG`) VALUES
+REPLACE INTO `OSS_MASTER_LICENSE_FLAG` (`OSS_ID`, `MULTI_LICENSE_FLAG`, `DUAL_LICENSE_FLAG`, `VERSION_DIFF_FLAG`) VALUES
 	(1, 'N', 'N', 'Y'),
 	(2, 'N', 'N', 'N'),
 	(3, 'N', 'N', 'Y'),
@@ -706,7 +700,7 @@ INSERT INTO `OSS_MASTER_LICENSE_FLAG` (`OSS_ID`, `MULTI_LICENSE_FLAG`, `DUAL_LIC
 	(261, 'N', 'N', 'N'),
 	(262, 'N', 'N', 'N');
 	
-INSERT INTO `OSS_NICKNAME` (`OSS_COMMON_ID`, `OSS_NICKNAME`) VALUES
+REPLACE INTO `OSS_NICKNAME` (`OSS_COMMON_ID`, `OSS_NICKNAME`) VALUES
 	(2, 'xmlrpc-c'),
 	(3, 'jquery - jquery/jquery'),
 	(3, 'jQuery JavaScript Library'),
@@ -1138,7 +1132,7 @@ INSERT INTO `OSS_NICKNAME` (`OSS_COMMON_ID`, `OSS_NICKNAME`) VALUES
 	(199, 'shemminger-iproute2'),
 	(199, 'stephen_hemminger-iproute');
 	
-INSERT INTO `OSS_LICENSE_DECLARED` (`OSS_ID`, `LICENSE_ID`, `OSS_LICENSE_IDX`, `OSS_LICENSE_COMB`, `OSS_LICENSE_TEXT`, `OSS_COPYRIGHT`) VALUES
+REPLACE INTO `OSS_LICENSE_DECLARED` (`OSS_ID`, `LICENSE_ID`, `OSS_LICENSE_IDX`, `OSS_LICENSE_COMB`, `OSS_LICENSE_TEXT`, `OSS_COPYRIGHT`) VALUES
 	(1, 86, 1, '', NULL, NULL),
 	(2, 24, 1, '', NULL, NULL),
 	(3, 89, 1, '', NULL, ''),
@@ -1408,7 +1402,7 @@ INSERT INTO `OSS_LICENSE_DECLARED` (`OSS_ID`, `LICENSE_ID`, `OSS_LICENSE_IDX`, `
 	(261, 51, 1, '', NULL, NULL),
 	(262, 75, 1, '', NULL, NULL);
 	
-INSERT INTO `OSS_DOWNLOADLOCATION` (`OSS_COMMON_ID`, `DOWNLOAD_LOCATION`, `PURL`, `OSS_DL_IDX`) VALUES
+REPLACE INTO `OSS_DOWNLOADLOCATION` (`OSS_COMMON_ID`, `DOWNLOAD_LOCATION`, `PURL`, `OSS_DL_IDX`) VALUES
 	(1, 'http://dotnetzip.codeplex.com/downloads/get/258012', NULL, 1),
 	(1, 'https://www.nuget.org/packages/DotNetZip', NULL, 2),
 	(1, 'https://www.nuget.org/packages/DotNetZip/1.13.4#show-github-usage', NULL, 3),

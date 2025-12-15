@@ -6,6 +6,64 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [2.4.0](https://github.com/fosslight/fosslight/releases/tag/v2.4.0) (2025-12-16)
+
+### New
+
+* Security
+  - 프로젝트 보안 취약점 통계 및 차트 정보를 확인 할 수 있는 Overview 탭이 추가
+ 
+* Project
+  - Distribution Type에 오픈소스 공개 및 기여용인 Contribution과 내부 검토 및 사전 점검용인 Self-Check 추가
+  - Distribution Type이 transfer in-house의 경우 이관할 부서 입력 필드 추가
+
+* Self-Check
+  - FOSSLight Scanner Service와의 연동 추가
+
+* Common
+  - Project, 3rd party 삭제시, SBOM Export한 FOSSLight Report 파일이 메일로 발송되도록 추가
+ 
+### Changed
+
+* Project
+  - Packaging
+    - tar.bz2 포맷의 파일도 업로드 가능하도록 추가
+    - Verify 버튼과 Save 버튼이 통합됨
+    - Confirm시 Identification에서 notice와 source가 없는 OSS의 warning message는 체크 대상에서 제외
+   
+  - Distribution : 완료 메일에 action 수행자 정보가 표시되도록 개선
+ 
+* Security
+  - Need to resolve, Full discovered 탭에서 Affected SW Version Range 컬럼이 추가
+ 
+* History List
+  - OSS : include CPE, exclude CPE, version alias 정보 추가
+ 
+* OSS
+  - Dual 또는 Multi로 저장시 라이선스가 알파벳 순서대로 정렬되도록 변경
+  - Version Diff의 OSS의 경우, 등록 메일에서 하단의 버전 정보 테이블이 버전 순서로 정렬되도록 변경
+
+* Vulnerability
+  - Download location, homepage가 null인 경우 NVC sync를 하지 않도록 변경
+ 
+* 버그 수정
+  - Security > Need to resolve 탭에서 max score가 잘못 표시되는 이슈 수정
+  - OSS 저장시, declared에서 동일한 라이선스가 중복 저장되거나 declared, detected에 각각 동일한 라이선스가 저장되는 이슈 수정
+  - Identification
+    - admin check가 풀리는 이슈 수정
+    - 3rd party의 copyright이 SBOM탭에 표시되지 않는 이슈 수정
+    - required의 warning message가 있는 경우 export 되지 않는 이슈 수정
+    - exclude 후 저장시 입력한 라이선스가 사라지는 이슈 수정
+    - 라이선스 타입이 Proprietary의 경우에도 warning message가 나오도록 수정
+    - Pre-review > License의 변경 대상임에도 리스트에 표시되지 않는 이슈 수정
+  - Packaging에서 network service임에도 소스코드 공개 의무 OSS로 취합되어 나오는 이슈 수정
+
+* DataBase
+  - Column 추가
+    - PRE_PROJECT_MASTER: SRC_SCAN_FILE_ID
+    - PROJECT_MASTER : TRANSFER_DIVISION
+    - PARTNER_MASTER : CVE_ID, CVSS_SCORE_MAX
+
 ## [2.3.0](https://github.com/fosslight/fosslight/releases/tag/v2.3.0) (2025-07-09)
 
 ### New

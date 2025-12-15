@@ -1596,36 +1596,46 @@
         var src_fn_com = {
         		autoReviewStop : function(prjId) {
            	        $.ajax({
-           	            url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStop',
-           	            type : 'POST',
-           	            data : JSON.stringify({"prjId" : prjId}),
+//           	        url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStop',
+//         	            type : 'POST',
+//         	            data : JSON.stringify({"prjId" : prjId}),
+           	            url : "/autoReview/autoReviewStop/" + prjId,
+           	            type : 'GET',
            	            dataType : 'json',
            	            cache : false,
            	            async : false,
            	            contentType : 'application/json',
            	            success : function(data){
-           	                console.log("stop review");
+           	            	loadingIden.hide();
+           	            	$("#autoReview").show();
+           	            	$("#autoReviewStop").hide();
            	            },
            	            error : function(){
+           	            	loadingIden.hide();
            	                console.log("Fail stop review");
            	            }
            	        });
            	    },
             	autoReviewStatus : function(prjId){
             		$.ajax({
-            	    	url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStatus',
-            	      	type : 'POST',
-            	      	data : JSON.stringify({"prjId" :prjId}),
+//            	    	url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStatus',
+//            	      	type : 'POST',
+//            	      	data : JSON.stringify({"prjId" :prjId}),
+						url : "/autoReview/getStatus/" + prjId,
+						type : 'GET',
             	      	dataType : 'json',
             	     	cache : false,
             	     	async : false,
             	      	contentType : 'application/json',
             	      	success : function(data){
-            	      		var btn_review = $("i.fa-clock");
-            	           	if("false" == data.isValid && "running" == data.validMsg) {
-                                btn_review.show();
+            	      		var btn_review = $("#autoReview");
+            	      		var btn_review_stop = $("#autoReviewStop");
+            	           	if (!data.isValid && "running" == data.validMsg) {
+            	           		btn_review.hide();
+            	           		btn_review_stop.show();
             	           	} else {
-                                btn_review.hide();
+            	           		btn_review_stop.hide();
+                                btn_review.show();
             	         	}
             	      	},
             	    	error : function(){
@@ -1634,11 +1644,9 @@
             	    	}
             	  	});
           		},
-            	checkAutoReview : function(prjId) {
-            		var returnFlag = false;
-
-            		$.ajax({
-            	      	url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStatus',
+          		initAutoReview : function(prjId) {
+          			$.ajax({
+          				url : '/project/initAutoReview',
             	      	type : 'POST',
             	     	data : JSON.stringify({"prjId" : prjId}),
             	      	dataType : 'json',
@@ -1646,15 +1654,43 @@
             	       	async : false,
             	      	contentType : 'application/json',
             	       	success : function(data){
-            	       		if ("false" == data.isValid && "running" == data.validMsg) {
-            	               	alertify.alert("Auto review is running now.<br>It has not been completed yet.", function (e) {});
-            	           	} else if("true" == data.isValid) {
-            	              	alertify.success('<spring:message code="msg.common.start.autoreview" />');
-            	              	src_fn_com.autoReviewStart(prjId, true);
-            	           	}
+            	       		if (data.isValid) {
+            	       			src_fn_com.autoReviewStart(prjId, true);
+            	       		} else {
+            	       			loadingIden.hide();
+            	       			alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            	       		}
             	       	},
             	      	error : function(){
             	          	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            	     	}
+          			});
+          		},
+            	checkAutoReview : function(prjId) {
+            		var returnFlag = false;
+					
+            		$.ajax({
+//            	      	url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStatus',
+//            	      	type : 'POST',
+//            	     	data : JSON.stringify({"prjId" : prjId}),
+						url : '/autoReview/getStatus/' + prjId,
+						type : 'GET',
+            	      	dataType : 'json',
+            	       	cache : false,
+            	       	async : false,
+            	      	contentType : 'application/json',
+            	       	success : function(data){
+            	       		let isValid = data.isValid;
+            	       		if (!isValid && "running" == data.validMsg) {
+            	       			loadingIden.hide();
+            	               	alertify.alert("Auto review is running now.<br>It has not been completed yet.", function (e) {});
+            	           	} else if (isValid) {
+            	              	alertify.success([[#{msg.common.start.autoreview}]]);
+            	              	src_fn_com.initAutoReview(prjId);
+            	           	}
+            	       	},
+            	      	error : function(){
+            	          	alertify.error([[#{msg.common.valid2}]], 0);
             	     	}
             	   	});
             	  	return returnFlag;
@@ -1662,30 +1698,33 @@
             	autoReviewStart : function(prjId, startNow){
             	  	var url;
             		if (startNow == true) {
-            	    	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/true';
-                        if(prjId.startsWith("3rd_")){
-                            var partId = prjId.replace('3rd_','');
-                            reloadTabInframe('/partner/list');
-                            deleteTabInFrame("/partner/identification/" + partId);
-                            createTabInFrame(partId + '_3rdParty', "/partner/identification/" + partId);
-                        } else {
-                            reloadTabInframe("/project/list");
-                            deleteTabInFrame([[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
-                            createTabInFrame(prjId+'_Identify', [[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
-                        }
+//            	    	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/true';
+						url = '/autoReview/autoReviewStart/' + prjId + '/true/true';
             	 	} else {
-            	      	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/false';
+//            	      	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/false';
+            	 		url = '/autoReview/autoReviewStart/' + prjId + '/false/true';
             	  	}
 
             	  	$.ajax({
-            	      	type : 'POST',
+//            	      	type : 'POST',
             	      	url : url,
-            	      	data : JSON.stringify({"prjId" : prjId}),
+            	      	type : 'GET',
+//            	      	data : JSON.stringify({"prjId" : prjId}),
             	       	dataType : 'json',
             	       	cache : false,
-            	       	async : false,
+//            	       	async : false,
             	     	contentType : 'application/json',
             	       	success: function(data){
+            	       		if (prjId.startsWith("3rd_")){
+                                var partId = prjId.replace('3rd_','');
+                                reloadTabInframe('/partner/list');
+                                deleteTabInFrame("/partner/identification/" + partId);
+                                createTabInFrame(partId + '_3rdParty', "/partner/identification/" + partId);
+                            } else {
+                                reloadTabInframe("/project/list");
+                                deleteTabInFrame([[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
+                                createTabInFrame(prjId+'_Identify', [[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
+                            }
             	      	},
             	      	error: function(){
             	     	}

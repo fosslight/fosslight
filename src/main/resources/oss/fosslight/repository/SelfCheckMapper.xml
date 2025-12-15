@@ -295,6 +295,7 @@
 			
 			/** FILE_ID **/
 			, A.SRC_CSV_FILE_ID
+			, A.SRC_SCAN_FILE_ID
 			, A.CREATOR 
 			, A.CREATED_DATE
 			, A.MODIFIER 
@@ -444,6 +445,8 @@
 	<delete id="deleteProjectMaster" parameterType="oss.fosslight.domain.Project">
 		DELETE FROM PRE_PROJECT_MASTER WHERE PRJ_ID = #{prjId}
 	</delete>
+	
+	<delete id="deleteOssNotice">DELETE FROM PRE_OSS_NOTICE WHERE PRJ_ID = #{prjId}</delete>
 	
 	<delete id="deleteProjectModel" parameterType="oss.fosslight.domain.Project">
 		DELETE FROM PROJECT_MODEL
@@ -875,7 +878,13 @@
 		UPDATE PRE_PROJECT_MASTER 
 		<set>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcCsvFileId)">
-			SRC_CSV_FILE_ID = #{srcCsvFileId},
+				SRC_CSV_FILE_ID = #{srcCsvFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcCsvFileId) and !@oss.fosslight.util.StringUtil@isEmpty(srcScanFileId)">
+				, SRC_SCAN_FILE_ID = #{srcScanFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(srcCsvFileId) and !@oss.fosslight.util.StringUtil@isEmpty(srcScanFileId)">
+				SRC_SCAN_FILE_ID = #{srcScanFileId}
 			</if>
 		</set>
 		WHERE 
@@ -947,6 +956,17 @@
 		LIMIT 1
 	</select>
 	
+	<select id="selectScanFile" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.T2File">
+		SELECT
+			*
+		FROM
+			T2_FILE
+		WHERE
+			FILE_SEQ = #{srcScanFileId}
+		ORDER BY FILE_SEQ DESC
+		LIMIT 1
+	</select>
+	
 	<select id="selectLicenseComb" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="String">
 		SELECT
 			OSS_LICENSE_COMB
@@ -956,15 +976,6 @@
 			OSS_ID = #{ossId}
 			AND LICENSE_ID = #{licenseId}
 	</select>
-	
-	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
-		UPDATE
-			PROJECT_MASTER
-		SET
-			COMMENT = #{commId}
-		WHERE
-			PRJ_ID = #{referenceId}
-	</update>
 	
 	<update id="deleteComment" parameterType="oss.fosslight.domain.CommentsHistory">
 		UPDATE
@@ -3149,4 +3160,8 @@
 			AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
 		</if>
 	</delete>
+	
+	<update id="updateComment" parameterType="oss.fosslight.domain.Project">
+		UPDATE PRE_PROJECT_MASTER SET COMMENT = #{comment} WHERE PRJ_ID = #{prjId}
+	</update>
 </mapper>

@@ -320,7 +320,7 @@ public class NvdDataService {
 									configurationInsertParam.put("cveId", cveId);
 									configurationInsertParam.put("matchCriteriaId", matchCriteriaId);
 									configurationInsertParam.put("criteria", criteria);
-									final String[] criteriaArr = criteria.split(":");
+									final String[] criteriaArr = unescapedColon(criteria);
 									configurationInsertParam.put("vendor", criteriaArr[3]);
 									configurationInsertParam.put("product", criteriaArr[4]);
 									configurationInsertParam.put("version", criteriaArr[5]);
@@ -435,6 +435,19 @@ public class NvdDataService {
 
 		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
 		return responseMap;
+	}
+
+	private String[] unescapedColon(String criteria) {
+		String placeholder = "__ESCAPED_COLON__";
+        String temp = criteria.replaceAll("\\\\:", placeholder);
+
+        String[] parts = temp.split(":");
+
+        List<String> result = new ArrayList<>();
+        for (String part : parts) {
+            result.add(part.replace(placeholder, ":"));
+        }
+		return result.toArray(new String[result.size()]);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -579,15 +592,32 @@ public class NvdDataService {
 		Map<String, Object> cvssData = null;
 		Map<String, Object> cvssObj = null;
 		if (cvssMetricList.size() > 1) {
+			Map<String, Object> firstObj = null;
+			Map<String, Object> firstData = null;
+			Map<String, Object> secondObj = null;
+			Map<String, Object> secondData = null;
+			
 			for (Map<String, Object> cvssMetric : cvssMetricList) {
 				String source = String.valueOf(cvssMetric.get("source"));
 				String type = String.valueOf(cvssMetric.get("type"));
-				if (source.equalsIgnoreCase("nvd@nist.gov") && type.equalsIgnoreCase("Primary")) {
-					cvssObj = cvssMetric;
-					cvssData = (Map<String, Object>) cvssObj.get("cvssData");
-					break;
+				if (source.equalsIgnoreCase("nvd@nist.gov")) {
+					firstObj = cvssMetric;
+					firstData = (Map<String, Object>) firstObj.get("cvssData");
+				}
+				if (type.equalsIgnoreCase("Primary")) {
+					secondObj = cvssMetric;
+					secondData = (Map<String, Object>) secondObj.get("cvssData");
 				}
 			}
+			
+			if (firstObj != null) {
+				cvssObj = firstObj;
+				cvssData = firstData;
+			} else if (secondObj != null) {
+				cvssObj = secondObj;
+				cvssData = secondData;
+			}
+			
 			if (cvssObj == null) {
 				cvssObj = (Map<String, Object>) cvssMetricList.get(0);
 				cvssData = (Map<String, Object>) cvssObj.get("cvssData");

@@ -277,6 +277,7 @@ public final class Url {
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		public static final String EDIT_ID =  PATH + "/edit/{prjId}";
+		public static final String EDIT_DIV_ID =  PATH + "/edit/{initDiv}/{prjId}";
 		
 		public static final String VIEW_ID =  PATH + "/view/{prjId}";
 		public static final String VIEW_JSP = TILES_ROOT + PATH + "/view";
@@ -417,6 +418,11 @@ public final class Url {
 		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
 		public static final String CHANGE_PROJECT_STATUS = PATH + "/changeProjectStatus";
 		public static final String DEPENDENCY_TREE_POPUP = PATH + "/dependencyTreePopup";
+		public static final String CHECK_COMPONENTS_LOADED = PATH + "/checkComponentLoaded";
+		
+		public static final String INIT_AUTO_REVIEW = PATH + "/initAutoReview";
+		public static final String AI_VIEW = PATH + "/ai";
+		public static final String REVIEW_REPORT = PATH + "/reviewReport";
 	}
 	
 	public static final class VERIFICATION {
@@ -683,6 +689,8 @@ public final class Url {
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/external";
 		
 		public static final String REQUEST_FL_SCAN = PATH + "/request-fl-scan";
+		public static final String REQUEST_FL_SCAN_FILE = PATH + "/request-fl-scan-file";
+		public static final String REQUEST_FL_SCAN_SEARCH = PATH + "/request-fl-scan-search";
 	}
 	
 	public static final class CODE {
@@ -980,9 +988,9 @@ public final class Url {
 			/** API 3rd Party Add Editor */
 			public static final String FOSSLIGHT_API_PARTNER_ADD_EDITOR			= "/partners/{id}/editors";
 
-			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/bom/file";
+			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/sbom/file";
 
-		public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/bom/json-data";
+		public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/sbom/json-data";
 
 
 		/** OSS */
@@ -1023,13 +1031,13 @@ public final class Url {
 			public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/projects/{id}/models/upload";
 
 			/** API Project BOM Tab Export */
-			public static final String FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD = "/projects/{id}/bom/file";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD = "/projects/{id}/sbom/file";
 
 			/** API Project BOM Tab Export JSON*/
-			public static final String FOSSLIGHT_API_PROJECT_BOM_JSON	    = "/projects/{id}/bom/json-data";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_JSON	    = "/projects/{id}/sbom/json-data";
 
 			/** API BOM COMPARE */
-			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/bom/compare-with/{compareId}";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/sbom/compare-with/{compareId}";
 
 			/** API Project Add Editor */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_EDITOR		= "/projects/{id}/editors";
@@ -1092,7 +1100,6 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
-
 	}
 
 	public static final class API_LITE {

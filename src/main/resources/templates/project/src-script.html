@@ -305,6 +305,12 @@ var src_fn = {
 		var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
 		var mainData = target.jqGrid('getGridParam','data');
 		var srcAddListData = $("#_srcAddList").jqGrid("getRowData");
+		mainData.forEach (function (el, index) {
+			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
+				el.packageUrl = "";
+			}
+		});
+		
 		// 최종 데이터
 		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
 				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData), "srcAddListData" : JSON.stringify(srcAddListData)};
@@ -644,7 +650,7 @@ var src_fn = {
 		})
 	},
 	makeFileTag : function(obj){
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'1\')">X</span>'+appendHtml+'</li>';
@@ -720,30 +726,25 @@ var src_fn = {
 			});
     		alertify.alert(message, function(){});
     	} else {
-    		if (obj.isValid) {
-    			// download file
-                if (target === "report_sub") {
-                	src_fn.downloadExcel();
-                } else {
-                	loadingIden.hide();
-                	
-                	var identificationStatus = [[${project.identificationStatus}]];
-                	if ("CONF" != identificationStatus) {
-                		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-            				if (e) {
-            					com_fn.downloadYaml('SRC');
-            				} else {
-            					return false;
-            				}
-            			});
-                	} else {
-                		com_fn.downloadYaml('SRC');
-                	}
-                }
-    		} else {
-    			loadingIden.hide();
-    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    		}
+    		// download file
+            if (target === "report_sub") {
+            	src_fn.downloadExcel();
+            } else {
+            	loadingIden.hide();
+            	
+            	var identificationStatus = [[${project.identificationStatus}]];
+            	if ("CONF" != identificationStatus) {
+            		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+        				if (e) {
+        					com_fn.downloadYaml('SRC');
+        				} else {
+        					return false;
+        				}
+        			});
+            	} else {
+            		com_fn.downloadYaml('SRC');
+            	}
+            }
     	}
     },
 	// 다운로드 엑셀

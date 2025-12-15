@@ -88,7 +88,7 @@ public interface OssService extends HistoryConfig{
 	
 	int checkExistsOssByname(OssMaster bean);
 	
-	List<ProjectIdentification> checkOssName(List<ProjectIdentification> list);
+	List<ProjectIdentification> checkOssName(List<ProjectIdentification> list, boolean redirectCheckFlag);
 	
 	Map<String, Object> saveOssCheckName(List<ProjectIdentification> paramBean, String targetName);
 	
@@ -151,6 +151,8 @@ public interface OssService extends HistoryConfig{
 	boolean checkOssTypeForAnalysisResult(OssAnalysis ossAnalysis);
 
 	Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName);
+	
+	Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName, boolean checkRedirect);
 
 	Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName);
 

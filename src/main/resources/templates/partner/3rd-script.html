@@ -357,7 +357,7 @@ var fn = {
 	       			
 	       			if (e) {
 	       				var comment = $("#parSaveEditor").summernote('code');
-	       					if ("" != $(comment).text().trim() && !isStatusChangeFlag) {
+	       				if (("" != $(comment).text().trim() || $(comment).find('img').length > 0) && !isStatusChangeFlag) {
 	       					$("#userComment").val(comment);
 	       				} else {
 	       					$('#userComment').val("");
@@ -1252,7 +1252,7 @@ var fn = {
     	return checkEmptyFlag;
 	},
 	makeFileTag : function(obj, flag) {
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
 		

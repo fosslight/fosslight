@@ -23,6 +23,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -129,7 +130,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public List<OssComponents> getVerifyOssList(Project projectMaster) {
 		List<OssComponents> componentList = verificationMapper.selectVerifyOssList(projectMaster);
-		if (!CollectionUtils.isEmpty(componentList) && CoConstDef.FLAG_YES.equals(avoidNull(projectMaster.getNetworkServerFlag()))) {
+		if (!CollectionUtils.isEmpty(componentList) && CoConstDef.FLAG_YES.equals(avoidNull(projectMaster.getNetworkServerType()))) {
 			List<OssComponents> collateOssComponentList = null;
 			for (OssComponents ossComponent : componentList) {
 				String restrictionStr = ossComponent.getRestriction();
@@ -176,7 +177,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
-	public void savePath(Map<Object, Object> map) {
+	public Map<String, Object> savePath(Map<Object, Object> map) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		
 		try {
 			List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 			List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
@@ -189,22 +192,45 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String deleteComment = "";
 			String uploadComment = "";
 			
-			// verify 버튼 클릭시 file path를 저장한다.
+			boolean isVerify = false;
+			Map<String, String> verifyGridMap = new HashMap<>();
+			
 			if (gridComponentIds != null && !gridComponentIds.isEmpty()) {
+				try {
+					Project param = new Project();
+					param.setPrjId(prjId);
+					List<OssComponents> list = getVerifyOssList(param);
+					if (CollectionUtils.isNotEmpty(list)) {
+						list = setMergeGridData(list);
+						verifyGridMap = list.stream().collect(Collectors.toMap(OssComponents::getComponentId, OssComponents::getFilePath));
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
 				int idx = 0;
+				OssComponents param = new OssComponents();
 				
 				for (String s : gridComponentIds){
-					OssComponents param = new OssComponents();
-					param.setComponentId(s);
-					param.setFilePath(gridFilePaths.get(idx++));
-					
-					if (verifyFlag.equals(CoConstDef.FLAG_YES)){
-						param.setVerifyFileCount("");
+					String filePath = gridFilePaths.get(idx++);
+					if (!isEmpty(filePath)) {
+						param.setComponentId(s);
+						param.setFilePath(filePath);
 						
-						verificationMapper.updateVerifyFileCount(param);
+						if (verifyGridMap.containsKey(s) && !avoidNull(filePath).equals(verifyGridMap.get(s))) {
+							if (!isVerify) {
+								isVerify = true;
+							}
+							param.setVerifyFileCount("");
+							verificationMapper.updateVerifyFileCount(param);
+						} else if (!verifyGridMap.containsKey(s)) {
+							if (!isVerify) {
+								isVerify = true;
+							}
+						}
+						
+						verificationMapper.updateVerifyFilePath(param);
 					}
-					
-					verificationMapper.updateVerifyFilePath(param);
 				}
 			}
 			
@@ -257,6 +283,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						T2File fileInfo = new T2File();
 						
 						if (!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
+							if (!isVerify) {
+								isVerify = true;
+							}
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
@@ -273,6 +302,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
+							if (!isVerify) {
+								isVerify = true;
+							}
 							fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							oss.fosslight.domain.File result = verificationMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
@@ -305,18 +337,21 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				// delete physical file
 				for (T2File delFile : deletePhysicalFileList){
 					fileService.deletePhysicalFile(delFile, "VERIFY");
-					log.info("[Prj " + prjId + "] "+ "Remove physical file for " + delFile.getOrigNm() + " : "
-							+ delFile.getLogiPath() + "/" + delFile.getLogiNm());
+					log.info("[Prj " + prjId + "] "+ "Remove physical file for " + delFile.getOrigNm() + " : " + delFile.getLogiPath() + "/" + delFile.getLogiNm());
 				}
 				
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
 					projectMapper.updateReadmeContent(prjParam); // README Clear
 					projectMapper.updateVerifyContents(prjParam); // File List, Banned List Clear
 				}
+				
+				rtnMap.put("isVerify", isVerify);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+		
+		return rtnMap;
 	}
 	
 	@Override
@@ -602,7 +637,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String fileSeq =	(String)map.get("fileSeq");
 		int packagingFileIdx = (int)map.get("packagingFileIdx");
 		List<String> fileSeqs =	(List<String>)map.get("fileSeqs");
-		String filePath =	"";
+		List<String> fileNames = (List<String>)map.get("fileNames");
+		String filePath = "";
 		List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
 		List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 		boolean isChangedPackageFile = (boolean)map.get("isChangedPackageFile");
@@ -732,11 +768,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				boolean isFirst = true;
 				
 				for (String s : result) {
-					if (s.contains("?")) s = s.replaceAll("[?]", "0x3F");
+					if (s.contains("?")) {
+						s = s.replaceAll("[?]", "0x3F");
+					}
 					
-					if (!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
+					if (!isEmpty(s)) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
-
+						for (String fileName : fileNames) {
+							if (s.contains(fileName.trim())) {
+								continue;
+							}
+						}
+						
 						boolean isFile = s.endsWith("*");
 						s = s.replace(VERIFY_PATH_DECOMP +"/" + prjId + "/", "");
 						s = s.replaceAll("//", "/");
@@ -1357,25 +1400,28 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				log.info("VERIFY Copy Readme file START -----------------");
 				log.info("VERIFY README MV PATH : " + VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath);
 				
-				if (isChangedPackageFile){
+				File readmeFile = new File(VERIFY_PATH_OUTPUT +"/" + prjId +"/" + readmeFileName);
+				if (isChangedPackageFile || !readmeFile.exists()){
 					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
+				resMap.put("readmeFileName", readmeFileName);
 				log.info("VERIFY Copy Readme file END -----------------");
 			}
 			
 			//STEP 7 : README 파일 내용 DB 에 저장
-			if (doUpdate && packagingFileIdx == 1) {
-				log.debug("VERIFY readme 등록");
-				
-				project.setPrjId(prjId);
-				project.setReadmeFileName(readmeFileName);
-				project.setReadmeYn(StringUtil.isEmpty(readmeFileName) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES);
 			
-				projectService.registReadmeContent(project);
-				
-				log.debug("VERIFY readme 등록 완료");
-			}
+//			if (doUpdate && packagingFileIdx == 1) {
+//				log.debug("VERIFY readme 등록");
+//				
+//				project.setPrjId(prjId);
+//				project.setReadmeFileName(readmeFileName);
+//				project.setReadmeYn(StringUtil.isEmpty(readmeFileName) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES);
+//			
+//				projectService.registReadmeContent(project);
+//				
+//				log.debug("VERIFY readme 등록 완료");
+//			}
 			
 			//STEP 8 : Verify 동작 후 Except File Result DB 저장
 			log.info("VERIFY Read exceptFileContent file START -----------------");
@@ -1438,8 +1484,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 				if (isExistFile) {
 					String verify_binary_list = CommonFunction.getStringFromFile(VERIFY_PATH_OUTPUT +"/"+prjId+"/verify_binary_list").replaceAll(VERIFY_PATH_DECOMP +"/"+ prjId + "/", "");
-					FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_BINARY_LIST, verify_binary_list);
-					project.setBinaryFileYn(CoConstDef.FLAG_YES);
+					if (!isEmpty(verify_binary_list)) {
+						FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_BINARY_LIST, verify_binary_list);
+						project.setBinaryFileYn(CoConstDef.FLAG_YES);
+					} else {
+						project.setBinaryFileYn("");
+					}
 				} else {
 					project.setBinaryFileYn("");
 				}
@@ -3396,6 +3446,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> checkNoticeHtmlInfo(OssNotice ossNotice) {
 		Map<String, Object> rtnMap = new HashMap<>();
@@ -3411,7 +3462,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(referenceDiv)) {
 			map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
 		}
-		
+		if (MapUtils.isNotEmpty(map) && map.containsKey("rows")) {
+			List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
+			if (CollectionUtils.isNotEmpty(list)) {
+				list.removeIf(e -> e.getObligationType() == null || e.getObligationType().trim().isEmpty());
+				map.put("rows", list);
+			}
+		}
 		List<ProjectIdentification> bomList = (List<ProjectIdentification>) map.get("rows");
 		T2CoProjectValidator pv = new T2CoProjectValidator();
 		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
@@ -3452,5 +3509,19 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public String getNoticeAppendInfo(String prjId) {
 		return verificationMapper.selectNoticeAppendInfo(prjId);
+	}
+
+	@Override
+	public List<String> getPackageFileNameList(List<String> packageFileSeqList) {
+		List<String> packageFileNames = new ArrayList<>();
+		for (String fileSeq : packageFileSeqList) {
+			if (!isEmpty(fileSeq)) {
+				T2File file = fileService.selectFileInfo(fileSeq);
+				if (file != null && !isEmpty(file.getOrigNm())) {
+					packageFileNames.add(file.getOrigNm());
+				}
+			}
+		}
+		return packageFileNames;
 	}
 }

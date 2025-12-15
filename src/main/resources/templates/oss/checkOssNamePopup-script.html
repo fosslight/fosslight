@@ -211,7 +211,7 @@ var Ctrl_fn = {
 								opener.location.href = '/selfCheck/edit/' + rowdata["referenceId"];
 							} else if ("partner" == targetName) {
 								commentsParam["referenceDiv"] = "3rd";
-								opener.location.href = '/partner/identification/' + rowdata["referenceId"];
+								opener.party_evt.getPartyGridData();
 							} else {
 								var identificationTabOrder;
 								commentsParam["referenceDiv"] = "prj";

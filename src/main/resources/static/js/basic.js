@@ -101,9 +101,9 @@ $(document).ready(function () {
 
     $("#btnRejectNotice").click(function () {
         if (projectStatus == "COMP") {
-            alertify.warning('If you need to modify, please click a "request to open" button in the basic information tab of the project.');
+            alertify.alert('If you need to modify, please click a "request to open" button in the basic information tab of the project.', function(){});
         } else {
-            alertify.warning('If you need modify, please leave a comment on FOSSLight team.');
+            alertify.alert('If you need modify, please leave a comment on FOSSLight team.', function(){});
         }
 
         return false;

@@ -151,6 +151,11 @@ var bin_fn = {
 		
 		// 메인 그리드
 		var mainData = target.jqGrid('getGridParam','data');
+		mainData.forEach (function (el, index) {
+			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
+				el.packageUrl = "";
+			}
+		});
 		// 서브 그리드
 		var subData = [];
 		var binAddListData = $("#_binAddList").jqGrid("getRowData");
@@ -496,7 +501,7 @@ var bin_fn = {
 			$("#binCsvFileId").val(obj.registFileId);
 		}
 		
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" name=\"fileSeq\" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'1\')">X</span>'+appendHtml+'</li>';
@@ -505,7 +510,7 @@ var bin_fn = {
 	makeFileTag2 : function(obj){
 		$("#binBinaryFileId").val(obj.registFileId);
 		
-		var appendHtml = '<br>'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate + "_" + obj.loginUserName;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'2\')">X</span>'+appendHtml+'</li>';
@@ -574,7 +579,7 @@ var bin_fn = {
 		$("#_binAddListContainer").show();
 	},
     selectDownloadFile : function(target) {
-loadingIden.show();
+		loadingIden.show();
     	
     	let obj = com_fn.checkSelectDownloadFile('BIN');
     	if (typeof obj.overMaxLengthOssList !== "undefined") {
@@ -587,30 +592,25 @@ loadingIden.show();
 			});
     		alertify.alert(message, function(){});
     	} else {
-    		if (obj.isValid) {
-    			// download file
-                if (target === "report_sub") {
-                	bin_fn.downloadExcel();
-                } else {
-                	loadingIden.hide();
-                	
-                	var identificationStatus = [[${project.identificationStatus}]];
-                	if ("CONF" != identificationStatus) {
-                		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
-            				if (e) {
-            					com_fn.downloadYaml('BIN');
-            				} else {
-            					return false;
-            				}
-            			});
-                	} else {
-                		com_fn.downloadYaml('BIN');
-                	}
-                }
-    		} else {
-    			loadingIden.hide();
-    			alertify.error([[#{msg.common.check.sbom.export2}]], 0);
-    		}
+    		// download file
+            if (target === "report_sub") {
+            	bin_fn.downloadExcel();
+            } else {
+            	loadingIden.hide();
+            	
+            	var identificationStatus = [[${project.identificationStatus}]];
+            	if ("CONF" != identificationStatus) {
+            		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+        				if (e) {
+        					com_fn.downloadYaml('BIN');
+        				} else {
+        					return false;
+        				}
+        			});
+            	} else {
+            		com_fn.downloadYaml('BIN');
+            	}
+            }
     	}
     },
 	// 다운로드 엑셀

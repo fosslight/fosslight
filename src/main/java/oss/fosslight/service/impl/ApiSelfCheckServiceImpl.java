@@ -292,7 +292,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
             return new ArrayList<>();
         }
 
-        var checkedResult = ossService.checkOssName(result);
+        var checkedResult = ossService.checkOssName(result, true);
 
         var partitioned = checkedResult.stream().collect(Collectors.partitioningBy(prj ->
                 prj.getCheckOssList().equals("I")));

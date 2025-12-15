@@ -58,6 +58,7 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.util.YamlUtil;
 import oss.fosslight.validation.T2CoValidationResult;
@@ -135,14 +136,23 @@ public class SelfCheckController extends CoTopComponent {
 	/**
 	 * [API] 프로젝트 상세 조회 Edit Page
 	 */
-	@RequestMapping(value = SELF_CHECK.EDIT_ID, method = { RequestMethod.GET,
-			RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	@RequestMapping(value = SELF_CHECK.EDIT_ID, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
 	public String edit(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
 		project = selfCheckService.getProjectDetail(project);
+		if (project == null) {
+			try {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			return null;
+		}
 		T2Users user = userService.getLoginUserInfo();
-		if (user != null) project.setPrjEmail(user.getEmail());
+		if (user != null) {
+			project.setPrjEmail(user.getEmail());
+		}
 
 		model.addAttribute("project", project);
 		model.addAttribute("detail", project);
@@ -240,10 +250,17 @@ public class SelfCheckController extends CoTopComponent {
 		@SuppressWarnings("unchecked")
 		List<Project> list = (List<Project>) map.get("rows");
 		
+		boolean isPermission = false;
 		for (Project prj : list) {
 			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {prj.getPrjId()}, "selfCheck");
-			if (permissionCheckList != null) {
-				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+				for (String userId : permissionCheckList) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						isPermission = true;
+						break;
+					}
+				}
+				if (!CommonFunction.isAdmin() && !isPermission) {
 					prj.setStatusPermission(0);
 				} else {
 					prj.setStatusPermission(1);
@@ -880,6 +897,13 @@ public class SelfCheckController extends CoTopComponent {
 	
 	@GetMapping(value = SELF_CHECK.SHARE_URL)
 	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId) throws IOException {
-		res.sendRedirect(req.getContextPath() + "/index?id=" + prjId + "&menu=self&view=true");
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = selfCheckService.getProjectDetail(project);
+		if (project != null) {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + prjId + "&menu=self&view=true");
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+		}
 	}
 }
