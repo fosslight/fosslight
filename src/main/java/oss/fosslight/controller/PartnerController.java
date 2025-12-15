@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -651,11 +652,7 @@ public class PartnerController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=PARTNER.SAVE_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjax(
-			@RequestBody PartnerMaster partnerMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveAjax(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
 		// default validation
 		boolean isValid = true;
 		// last response map
@@ -670,9 +667,20 @@ public class PartnerController extends CoTopComponent{
 		Map<String, Object> retMap = new HashMap<String, Object>();
 		Map<String, Object> ruleMap = T2CoValidationConfig.getInstance().getRuleAllMap();
 		String msg = "";
-	        
+	    
+		if (isEmpty(partnerMaster.getPartnerName())) {
+			dupMap.put("partnerName", (String) ruleMap.get("PARTNER_NAME.REQUIRED.MSG"));
+		}
+		if (isEmpty(partnerMaster.getSoftwareName())) {
+			dupMap.put("softwareName", (String) ruleMap.get("SOFTWARE_NAME.REQUIRED.MSG"));
+		}
+		if (MapUtils.isNotEmpty(dupMap)) {
+			retMap.put("isValid", "false");
+			retMap.put("dupData", dupMap);
+			return makeJsonResponseHeader(retMap);
+		}
+		
 		if (result.size() > 0){
-
 			if (!isEmpty(partnerMaster.getPartnerName()) && partnerMaster.getPartnerName().equals(result.get(0).getPartnerName())){
 				msg = (String) ruleMap.get("PARTNER_NAME.DUPLICATED.MSG");
 				dupMap.put("partnerName", msg);
@@ -2022,8 +2030,7 @@ public class PartnerController extends CoTopComponent{
 	
 	@SuppressWarnings("unchecked")
 	@GetMapping(value=PARTNER.BOM_COMPARE_LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> bomCompareList(
-			@RequestParam("beforePartnerId") String beforePartnerId, @RequestParam("afterPartnerId") String afterPartnerId) throws Exception{
+	public @ResponseBody ResponseEntity<Object> bomCompareList(@RequestParam("beforePartnerId") String beforePartnerId, @RequestParam("afterPartnerId") String afterPartnerId) throws Exception{
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		try {

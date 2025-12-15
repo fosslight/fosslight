@@ -759,7 +759,7 @@ var fn = {
 	},
 	saveSubmit : function () {
 		cleanErrMsg("list");
-		$("div.retxt").hide();
+		$("span.retxt").hide();
 		$("input, textarea").removeClass("is-invalid");
 		$(".permissionRadio").find(".active").find("input").prop("checked", true);
 		
@@ -803,12 +803,14 @@ var fn = {
 		_mainLastsel = -1;
 		if ("false" == data.isValid) {
 			// 폼 메세지
-			if(data.partnerName){
-				$('input[name=partnerName]').next().text(data.partnerName).show();
+			if (typeof data.dupData.partnerName !== "undefined") {
+				$('input[name=partnerName]').addClass("is-invalid");
+				$('input[name=partnerName]').next().text(data.dupData.partnerName).show();
 			}
 			
-			if(data.softwareName){
-				$('input[name=softwareName]').next().text(data.softwareName).show();
+			if (typeof data.dupData.softwareName !== "undefined") {
+				$('input[name=softwareName]').addClass("is-invalid");
+				$('input[name=softwareName]').next().text(data.dupData.softwareName).show();
 			}
 			
 			if(data.confirmationFileId){
