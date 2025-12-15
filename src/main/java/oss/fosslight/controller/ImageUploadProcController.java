@@ -54,6 +54,15 @@ public class ImageUploadProcController extends CoTopComponent {
 							_host += ":" + String.valueOf(_port);
 						}
 					}
+
+					try {
+						Integer.parseInt(callback);
+					}catch (NumberFormatException e){
+						printWriter.print("<script type='text/javascript'>alert('参数错误');</script>");
+						printWriter.flush();
+						printWriter.close();
+						return;
+					}
 					
 					String fileUrl = _host + "/download/" + f.getRegistSeq() + "/" + f.getFileName();
 					printWriter.println("<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction("
