@@ -10,12 +10,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -4918,6 +4919,70 @@ public class CommonFunction extends CoTopComponent {
 		} else {
 			return null;
 		}
+	}
+	
+	public static File convertZIPToHtml(File zipFile) {
+		List<File> htmlFiles = new ArrayList<>();
+        List<File> xmlFiles = new ArrayList<>();
+        File outPath = zipFile;
+        
+        File[] files = zipFile.listFiles();
+        if (files == null) {
+        	return null;
+        }
+        
+        for (File file : files) {
+            if (!file.isFile()) {
+            	continue;
+            }
+
+            String fileName = file.getName().toLowerCase();
+
+            if (fileName.endsWith(".html")) {
+                htmlFiles.add(file);
+            } else if (fileName.endsWith(".xml")) {
+                xmlFiles.add(file);
+            }
+        }
+        
+        UUID randomUUID = UUID.randomUUID();
+		File outFile = new File(outPath + "/" + randomUUID + ".html");
+		
+		boolean convertFlag = LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, outFile);
+		if (convertFlag) {
+			if (!CollectionUtils.isEmpty(htmlFiles)) {
+				try {
+					Document mergedDoc = Document.createShell("");
+					Element mergedBody = mergedDoc.body();
+					
+					for (File htmlFile : htmlFiles) {
+						String html = readHtml(htmlFile);
+						Document doc = Jsoup.parse(html);
+						mergedBody.appendChild(doc.body().clone());
+					}
+					
+					String html = readHtml(outFile);
+					Document doc = Jsoup.parse(html);
+					
+					mergedBody.appendChild(doc.body().clone());
+					String mergedHtml = mergedDoc.outerHtml();
+					
+					outFile = new File(outPath + "/" + randomUUID + ".html");
+					try (FileOutputStream fos = new FileOutputStream(outFile)) {
+				        fos.write(mergedHtml.getBytes(StandardCharsets.UTF_8));
+				    }
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+			return outFile;
+		} else {
+			return null;
+		}
+	}
+	
+	private static String readHtml(File file) throws IOException {
+	    return new String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8);
 	}
 	
 	public static String mergeNickname(OssAnalysis bean, String newestNickName) {

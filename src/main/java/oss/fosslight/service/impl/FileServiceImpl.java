@@ -1083,7 +1083,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				} else if ("ZIP".equals(fileExt.toUpperCase())) {
 					zipFile = true;
 					FileUtil.decompress(uploadFilePath + "/" + file.getName(), uploadFilePath + "/" + randomUUID);
-					convertHTMLFile = CommonFunction.convertXMLToHTML(new File(uploadFilePath + "/" + randomUUID), true);
+					convertHTMLFile = CommonFunction.convertZIPToHtml(new File(uploadFilePath + "/" + randomUUID));
 				} else if ("TAR.GZ".equals(fileExt.toUpperCase())) {
 					CompressUtil.decompressTarGZ(file, uploadFilePath + "/" + randomUUID);
 					convertHTMLFile = CommonFunction.convertXMLToHTML(new File(uploadFilePath + "/" + randomUUID), true);
