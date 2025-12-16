@@ -3074,7 +3074,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			List<OssLicense> list = checkLicenseId((List<OssLicense>) fromJson(jsonString, collectionType));
 			ossMaster.setOssLicenses(list);
 		}
-
+		
+		ossMaster.setOssName(ossMaster.getOssName().trim());
+		
 		String action = "";
 		String ossCommonId = ossMaster.getOssCommonId();
 		String ossId = ossMaster.getOssId();
@@ -3192,13 +3194,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				String beforeDeactivateFlag = avoidNull(beforeBean.getDeactivateFlag(), CoConstDef.FLAG_NO);
 				String afterDeactivateFlag = avoidNull(afterBean.getDeactivateFlag(), CoConstDef.FLAG_NO);
 
-				if (CoConstDef.FLAG_NO.equals(beforeDeactivateFlag)
-						&& CoConstDef.FLAG_YES.equals(afterDeactivateFlag)) {
+				if (CoConstDef.FLAG_NO.equals(beforeDeactivateFlag) && CoConstDef.FLAG_YES.equals(afterDeactivateFlag)) {
 					isDeactivateFlag = true;
 				}
 
-				if (CoConstDef.FLAG_YES.equals(beforeDeactivateFlag)
-						&& CoConstDef.FLAG_NO.equals(afterDeactivateFlag)) {
+				if (CoConstDef.FLAG_YES.equals(beforeDeactivateFlag) && CoConstDef.FLAG_NO.equals(afterDeactivateFlag)) {
 					isActivateFlag = true;
 				}
 			} else { // OSS 등록
