@@ -2391,7 +2391,7 @@ public class CommonFunction extends CoTopComponent {
 		binaryEmList = doc.select("div.file-list");
 		
 		for (Element em : binaryEmList) {
-			String _fileStr = (em.html()).replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("\r\n", "\n").replaceAll("<span>", "").replaceAll("</span>", "");
+			String _fileStr = (em.html()).replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("\r\n", "\n").replaceAll("<span>", "").replaceAll("</span>", "").replaceAll(" ", "\n");
 			
 			for (String s : _fileStr.split("\n", -1)) {
 				if (isEmpty(s)) {

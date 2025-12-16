@@ -756,14 +756,14 @@ public class ProjectController extends CoTopComponent {
 					Project prjInfo = projectService.getProjectBasicInfo(identification.getReferenceId());
 					
 					if (prjInfo != null) {
-						if (!isEmpty(prjInfo.getSrcAndroidNoticeXmlId())) {
+						if (!isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
+							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
+						}
+						
+						if (isEmpty(prjInfo.getSrcAndroidNoticeFileId()) && !isEmpty(prjInfo.getSrcAndroidNoticeXmlId())) {
 							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeXmlId()));
 						}
 						
-						if (isEmpty(prjInfo.getSrcAndroidNoticeXmlId()) && !isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
-							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
-						}
-
 						if (!isEmpty(prjInfo.getSrcAndroidResultFileId())) {
 							existsBinaryName = CommonFunction.getExistsBinaryNames(fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
 						}
@@ -1132,8 +1132,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjax(@ModelAttribute Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveAjax(@ModelAttribute Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String jsonString = project.getPrjModelJson();
 		Type collectionType = new TypeToken<List<Project>>() {}.getType();
 		List<Project> list = (List<Project>) fromJson(jsonString, collectionType);
@@ -3582,8 +3581,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@PostMapping(value = PROJECT.ADD_WATCHER)
-	public @ResponseBody ResponseEntity<Object> addWatcher(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> addWatcher(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
@@ -5394,8 +5392,7 @@ public class ProjectController extends CoTopComponent {
 	
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SECURITY_SHEET_DATA)
-	public @ResponseBody ResponseEntity<Object> getSecuritySheetData(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> getSecuritySheetData(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		log.info("Security Report Read Start");
 
 		try {
