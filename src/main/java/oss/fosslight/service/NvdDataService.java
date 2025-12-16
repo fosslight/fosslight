@@ -524,29 +524,31 @@ public class NvdDataService {
 				List<String> vulnMatchCrtrIdList = new ArrayList<>();
 				List<String> notVulnMatchCriteriaList = new ArrayList<>();
 				
-				// 정의된 모든 cpe match 정보
-				for (Map<String, Object> node_data : (List<Map<String, Object>>) configurations.get("nodes")) {
-					// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
-					if (node_data.containsKey("cpeMatch")) {
-						List<Map<String, Object>> cpeMatchList = (List<Map<String, Object>>) node_data.get("cpeMatch");
-						for (Map<String, Object> cpeMatch : cpeMatchList) {
-							String matchCriteriaId = (String) cpeMatch.get("matchCriteriaId");
-							if ((boolean) cpeMatch.get("vulnerable")) {
-								vulnMatchCrtrIdList.add(matchCriteriaId);
-								cpe_match_all.add(cpeMatch);
-							} else {
-								notVulnMatchCriteriaList.add((String) cpeMatch.get("criteria"));
+				if (configurations.containsKey("nodes")) {
+					// 정의된 모든 cpe match 정보
+					for (Map<String, Object> node_data : (List<Map<String, Object>>) configurations.get("nodes")) {
+						// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
+						if (node_data.containsKey("cpeMatch")) {
+							List<Map<String, Object>> cpeMatchList = (List<Map<String, Object>>) node_data.get("cpeMatch");
+							for (Map<String, Object> cpeMatch : cpeMatchList) {
+								String matchCriteriaId = (String) cpeMatch.get("matchCriteriaId");
+								if ((boolean) cpeMatch.get("vulnerable")) {
+									vulnMatchCrtrIdList.add(matchCriteriaId);
+									cpe_match_all.add(cpeMatch);
+								} else {
+									notVulnMatchCriteriaList.add((String) cpeMatch.get("criteria"));
+								}
 							}
 						}
 					}
-				}
-				
-				if (!CollectionUtils.isEmpty(notVulnMatchCriteriaList)) {
-					for (String vulnMatchCrtrId : vulnMatchCrtrIdList) {
-						for (String notVulnMatchCriteria : notVulnMatchCriteriaList) {
-							String key = vulnMatchCrtrId + "|" + notVulnMatchCriteria;
-							if (!cpe_match_running_on_with_list.contains(key)) {
-								cpe_match_running_on_with_list.add(key);
+					
+					if (!CollectionUtils.isEmpty(notVulnMatchCriteriaList)) {
+						for (String vulnMatchCrtrId : vulnMatchCrtrIdList) {
+							for (String notVulnMatchCriteria : notVulnMatchCriteriaList) {
+								String key = vulnMatchCrtrId + "|" + notVulnMatchCriteria;
+								if (!cpe_match_running_on_with_list.contains(key)) {
+									cpe_match_running_on_with_list.add(key);
+								}
 							}
 						}
 					}
