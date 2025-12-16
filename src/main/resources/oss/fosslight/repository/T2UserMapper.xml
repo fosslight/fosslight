@@ -99,6 +99,36 @@
           AND DATEDIFF(U.EXPIRE_DATE, NOW()) >= 0
       </if>
     </select>
+    <!-- 특정 사용자 가져오기 (not checking the expired date) -->
+    <select id="checkExpiredUser" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users"> 
+        SELECT
+            A.AUTHORITY,
+            U.USER_ID,
+            U.USER_NAME,
+            U.EMAIL,
+            U.DIVISION,
+            U.ENABLED,
+            U.DEFAULT_TAB,
+            U.DEFAULT_LOCALE,
+            U.USE_YN,
+            U.CREATED_DATE,
+            U.TOKEN,
+            DATE_FORMAT(U.EXPIRE_DATE, '%Y-%m-%d') AS EXPIRE_DATE
+        FROM 
+            T2_USERS U
+            INNER JOIN (SELECT AUTHORITY
+                            , USER_ID
+                        FROM T2_AUTHORITIES
+                        <if test="!@oss.fosslight.util.StringUtil@isEmpty(userId)">
+	                        WHERE USER_ID = #{userId}
+	                        LIMIT 1
+                        </if>
+                        ) A ON U.USER_ID=A.USER_ID
+            INNER JOIN T2_ROLES R ON A.AUTHORITY = R.AUTHORITY
+      <if test="@oss.fosslight.util.StringUtil@isEmpty(userId)">
+        WHERE U.TOKEN = #{token}
+      </if>
+    </select>
     <!-- 특정 권한 사용자 목록 가져오기 -->
     <select id="getAuthorityUsers" parameterType="String" resultType="oss.fosslight.domain.T2Users"> 
         SELECT
@@ -184,7 +214,7 @@
     <!-- 유저 수정 -->
 	<update id="updateUsers" parameterType="oss.fosslight.domain.T2Users">
         UPDATE 
-        	T2_USERS 
+        	T2_USERS
         SET USER_ID = #{userId}
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(userName)">
             , USER_NAME = #{userName}
@@ -212,6 +242,9 @@
         </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(expireFlag) and @oss.fosslight.util.StringUtil@equals('Y', expireFlag)">
             , EXPIRE_DATE = now()
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(expireDate)">
+            , EXPIRE_DATE = #{expireDate}
         </if>
         	, USE_YN = #{useYn}
         WHERE 

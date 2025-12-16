@@ -5,6 +5,9 @@
 
 package oss.fosslight.service.impl;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,6 +44,7 @@ import com.google.gson.JsonObject;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.api.advice.CSigninFailedException;
+import oss.fosslight.api.advice.CUserAuthFailedException;
 import oss.fosslight.api.advice.CUserNotFoundException;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -340,7 +344,7 @@ public class T2UserServiceImpl implements T2UserService {
 				vo.get(i).setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 			}
 			
-			userMapper.updateUsers(vo.get(i));	
+			userMapper.updateUsers(vo.get(i));
 			
 			if ("V".equals(vo.get(i).getAuthority())) {
 				vo.get(i).setAuthority("ROLE_ADMIN");
@@ -508,18 +512,26 @@ public class T2UserServiceImpl implements T2UserService {
 	public T2Users checkApiUserAuth(String _token) {
 		T2Users params = new T2Users();
 		params.setToken(_token);
-		params = getUser(params); // 등록된 token 여부 확인
+		params = userMapper.checkExpiredUser(params);
 		
 		if (params == null) {
 			// 미등록 token
-			throw new CUserNotFoundException();
+			throw new CUserAuthFailedException("Token not found");
 		}
 		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate dbDate = LocalDate.parse(params.getExpireDate(), formatter);
+        LocalDate today = LocalDate.now();
+        long diff = ChronoUnit.DAYS.between(dbDate, today);
+        if (diff > 0) {
+        	throw new CUserAuthFailedException("Token expired");
+        }
+        
 		// Token 인증
 		if (checkToken(params, _token)) { // 추출된 USER 정보로 동일한 token이 생성이 되는지 확인.
             return getUserAndAuthorities(params);
         } else {
-            throw new CSigninFailedException();
+            throw new CUserAuthFailedException(CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE));
         }
 	}
 

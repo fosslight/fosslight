@@ -69,4 +69,6 @@ public interface T2UserMapper {
 	public int updateUserNameDivision(T2Users userInfo);
 	
 	public List<T2Users> selectUnusedDivisionUserList(@Param("unusedDivisionList") String[] unusedDivisionList);
+
+	public T2Users checkExpiredUser(T2Users bean);
 }
