@@ -592,7 +592,7 @@ public class ExcelUtil extends CoTopComponent {
 				// 1. final list sheet data 취득
 				Sheet sheet = wb.getSheet("Final List");
 				Map<String, String> finalListErrMsg = new HashMap<>();
-				finalListErrMsg = readSheet(wb, sheet, list, true, readType, errMsgList);
+				finalListErrMsg = readSheet(sheet, list, true, readType, errMsgList);
 				if (!finalListErrMsg.isEmpty()) {
 					errList.add(finalListErrMsg);
 				}
@@ -608,7 +608,7 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						List<OssComponents> _list = new ArrayList<>();
 						Map<String, String> errMsg = new HashMap<>();
-						errMsg = readSheet(wb, _sheet, _list, true, readType, errMsgList);
+						errMsg = readSheet(_sheet, _list, true, readType, errMsgList);
 						if (!errMsg.isEmpty()) {
 							errList.add(errMsg);
 						}
@@ -665,7 +665,7 @@ public class ExcelUtil extends CoTopComponent {
 					// get target sheet
 					Sheet sheet = wb.getSheetAt(StringUtil.string2integer(sheetIdx));
 					Map<String, String> errMsg = new HashMap<>();
-					errMsg = readSheet(wb, sheet, list, false, readType, errMsgList);
+					errMsg = readSheet(sheet, list, false, readType, errMsgList);
 					if (!errMsg.isEmpty()) {
 						errList.add(errMsg);
 					}
@@ -773,7 +773,7 @@ public class ExcelUtil extends CoTopComponent {
 		return true;
 	}
 
-	public static Map<String, String> readSheet(Workbook wb, Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList) {
+	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList) {
 		int DefaultHeaderRowIndex = 2; // header index
 		
 		int ossNameCol = -1;
@@ -1130,9 +1130,6 @@ public class ExcelUtil extends CoTopComponent {
 			List<String> duplicateCheckList = new ArrayList<>();
 			List<String> errRow = new ArrayList<>();
 			
-			CellStyle style = wb.createCellStyle();
-			CreationHelper ch = wb.getCreationHelper();
-			style.setDataFormat(ch.createDataFormat().getFormat("yyyy-MM-dd"));
 			DataFormatter formatter = new DataFormatter();
 			FormulaEvaluator evaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
 			
@@ -1192,9 +1189,7 @@ public class ExcelUtil extends CoTopComponent {
     					} else {
     						Cell cell = row.getCell(ossVersionCol);
     						if (cell != null) {
-    							cell.setCellStyle(style);
-        						String ossVersion = formatter.formatCellValue(cell, evaluator);
-        						bean.setOssVersion(avoidNull(ossVersion).trim().replaceAll("\t", ""));
+        						bean.setOssVersion(avoidNull(formatter.formatCellValue(cell, evaluator)).trim().replaceAll("\t", ""));
     						} else {
     							bean.setOssVersion("");
     						}
