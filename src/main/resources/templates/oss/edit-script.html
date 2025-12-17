@@ -321,45 +321,13 @@
 						break;
 					case 'includeCpes':
 						if (v != null) {
-							v.forEach(function(includeCpe, index, obj){
-								if (index == 0){
-									$('.multiTxtIncludeCpe').empty();
-								}
-								let includeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
-								includeCpeHtml 			+= 		'<div class="form-group mb-0">';
-	                            if(isReadOnly == 'true' || isReadOnly) {
-	                            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/ disabled>';
-	                            } else {
-	                            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/>';
-	                            	includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-	                            }
-	                            includeCpeHtml 			+=		'</div>';
-	                            includeCpeHtml 			+= 	'</div>';
-								
-								$(".multiTxtIncludeCpe").append(includeCpeHtml);
-							});
+							fn.addIncludeCpe(v);
 						}
 						
 						break;
 					case 'excludeCpes':
 						if (v != null) {
-							v.forEach(function(excludeCpe, index, obj){
-								if (index == 0){
-									$('.multiTxtExcludeCpe').empty();
-								}
-								let excludeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
-								excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
-	                            if(isReadOnly == 'true' || isReadOnly) {
-	                            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/ disabled>';
-	                            } else {
-	                            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/>';
-	                            	excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-	                            }
-	                            excludeCpeHtml 			+=		'</div>';
-	                            excludeCpeHtml 			+= 	'</div>';
-								
-								$(".multiTxtExcludeCpe").append(excludeCpeHtml);
-							});
+							fn.addExcludeCpe(v);
 						}
 						
 						break;
@@ -2138,6 +2106,36 @@
 				
 // 				renameFlag = 'N';
 // 				$('input[name=renameFlag]').val(renameFlag);
+			} else if ("hasExists" == json.validMsg) {
+				var existItems = "";
+				if (typeof json.resultData.addSummaryDescription !== "undefined") {
+					$("#summaryDescription").val("");
+					existItems += "Summary Description,";
+					$("#summaryDescription").val(json.resultData.addSummaryDescription);
+				}
+				if (typeof json.resultData.addImportantNotes !== "undefined") {
+					$("#importantNotes").val("");
+					existItems += "Important Notes,";
+					$("#importantNotes").val(json.resultData.addImportantNotes);
+				}
+				if (typeof json.resultData.addIncludeCpe !== "undefined") {
+					$(".multiTxtIncludeCpe").empty();
+					existItems += "Include CPE,";
+					let arr = json.resultData.addIncludeCpe.split(",");
+					fn.addIncludeCpe(arr);
+				}
+				if (typeof json.resultData.addExcludeCpe !== "undefined") {
+					$(".multiTxtExcludeCpe").empty();
+					existItems += "Exclude CPE,";
+					let arr = json.resultData.addExcludeCpe.split(",");
+					fn.addExcludeCpe(arr);
+				}
+				if ("" != existItems) {
+					existItems = existItems.substring(0, existItems.length-1);
+					var msg = [[#{msg.oss.information.exists}]];
+					msg = msg.replaceAll("items", existItems);
+					alertify.alert(msg, function(){});
+				}
 			} else if(json.validMsg == "notChange"){
 				alertify.alert([[#{msg.oss.name.nickname.sametime.notchange}]], function(){});
 			} else if(json.resultData) {
@@ -3595,6 +3593,44 @@
             _popup.close();
             _popup = window.open(url, "vulnListMorePopup", "width=950, height=600, toolbar=no, location=no, left=100, top=100");
         }
+    },
+    addIncludeCpe : function(includeCpes) {
+    	includeCpes.forEach(function(includeCpe, index, obj){
+			if (index == 0){
+				$('.multiTxtIncludeCpe').empty();
+			}
+			let includeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+			includeCpeHtml 			+= 		'<div class="form-group mb-0">';
+            if(isReadOnly == 'true' || isReadOnly) {
+            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/ disabled>';
+            } else {
+            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/>';
+            	includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+            }
+            includeCpeHtml 			+=		'</div>';
+            includeCpeHtml 			+= 	'</div>';
+			
+			$(".multiTxtIncludeCpe").append(includeCpeHtml);
+		});
+    },
+    addExcludeCpe : function(excludeCpes) {
+    	excludeCpes.forEach(function(excludeCpe, index, obj){
+			if (index == 0){
+				$('.multiTxtExcludeCpe').empty();
+			}
+			let excludeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+			excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
+            if(isReadOnly == 'true' || isReadOnly) {
+            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/ disabled>';
+            } else {
+            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/>';
+            	excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+            }
+            excludeCpeHtml 			+=		'</div>';
+            excludeCpeHtml 			+= 	'</div>';
+			
+			$(".multiTxtExcludeCpe").append(excludeCpeHtml);
+		});
     }
 }
 </script>

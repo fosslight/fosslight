@@ -410,11 +410,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.SAVE_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		Map<String, Object> resMap = new HashMap<String, Object>();
 		
 		try {
@@ -429,11 +425,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value={OSS.DEL_AJAX})
-	public @ResponseBody ResponseEntity<Object> delAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		String resCd="00";
 		HashMap<String, Object> resMap = new HashMap<>();
 		// mail 발송을 위해 삭제전 data 취득
@@ -641,10 +633,10 @@ public class OssController extends CoTopComponent{
 					if (_mergeNicknames.length > 0) {
 						Map<String, List<String>> diffMap = new HashMap<>();
 						diffMap.put("addNickArr", Arrays.asList(_mergeNicknames));
-						return makeJsonResponseHeader(false, null, diffMap);
+						return makeJsonResponseHeader(false, "hasDelNick", diffMap);
 					}
 					
-					if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getAnalysisDetailYn()))) {
+					if (checkOssInfo != null) {
 						boolean isSame = false;
 						Map<String, Object> diffMap = new HashMap<>();
 						
