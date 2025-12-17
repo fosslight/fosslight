@@ -30,8 +30,11 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -589,7 +592,7 @@ public class ExcelUtil extends CoTopComponent {
 				// 1. final list sheet data 취득
 				Sheet sheet = wb.getSheet("Final List");
 				Map<String, String> finalListErrMsg = new HashMap<>();
-				finalListErrMsg = readSheet(sheet, list, true, readType, errMsgList);
+				finalListErrMsg = readSheet(wb, sheet, list, true, readType, errMsgList);
 				if (!finalListErrMsg.isEmpty()) {
 					errList.add(finalListErrMsg);
 				}
@@ -605,7 +608,7 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						List<OssComponents> _list = new ArrayList<>();
 						Map<String, String> errMsg = new HashMap<>();
-						errMsg = readSheet(_sheet, _list, true, readType, errMsgList);
+						errMsg = readSheet(wb, _sheet, _list, true, readType, errMsgList);
 						if (!errMsg.isEmpty()) {
 							errList.add(errMsg);
 						}
@@ -662,7 +665,7 @@ public class ExcelUtil extends CoTopComponent {
 					// get target sheet
 					Sheet sheet = wb.getSheetAt(StringUtil.string2integer(sheetIdx));
 					Map<String, String> errMsg = new HashMap<>();
-					errMsg = readSheet(sheet, list, false, readType, errMsgList);
+					errMsg = readSheet(wb, sheet, list, false, readType, errMsgList);
 					if (!errMsg.isEmpty()) {
 						errList.add(errMsg);
 					}
@@ -770,7 +773,7 @@ public class ExcelUtil extends CoTopComponent {
 		return true;
 	}
 
-	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList) {
+	public static Map<String, String> readSheet(Workbook wb, Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList) {
 		int DefaultHeaderRowIndex = 2; // header index
 		
 		int ossNameCol = -1;
@@ -1127,6 +1130,12 @@ public class ExcelUtil extends CoTopComponent {
 			List<String> duplicateCheckList = new ArrayList<>();
 			List<String> errRow = new ArrayList<>();
 			
+			CellStyle style = wb.createCellStyle();
+			CreationHelper ch = wb.getCreationHelper();
+			style.setDataFormat(ch.createDataFormat().getFormat("yyyy-MM-dd"));
+			DataFormatter formatter = new DataFormatter();
+			FormulaEvaluator evaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+			
 			for (int rowIdx = DefaultHeaderRowIndex+1; rowIdx < sheet.getPhysicalNumberOfRows(); rowIdx++) {
 			    try {
     				// final list의 ref Data를 찾을 경우, No Cell이 없는 시트는 무시
@@ -1178,7 +1187,18 @@ public class ExcelUtil extends CoTopComponent {
     				} else {
     					// basic info
     					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", ""));
-    					bean.setOssVersion(ossVersionCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossVersionCol))).trim().replaceAll("\t", ""));
+    					if (ossVersionCol < 0) {
+    						bean.setOssVersion("");
+    					} else {
+    						Cell cell = row.getCell(ossVersionCol);
+    						if (cell != null) {
+    							cell.setCellStyle(style);
+        						String ossVersion = formatter.formatCellValue(cell, evaluator);
+        						bean.setOssVersion(avoidNull(ossVersion).trim().replaceAll("\t", ""));
+    						} else {
+    							bean.setOssVersion("");
+    						}
+    					}
     					
     					if (downloadLocationCol < 0) {
     						bean.setDownloadLocation("");

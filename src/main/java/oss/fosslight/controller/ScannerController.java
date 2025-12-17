@@ -328,7 +328,7 @@ public class ScannerController extends CoTopComponent {
 			                        if (!sheetName.trim().equalsIgnoreCase("scanner info")) {
 			                        	List<OssComponents> _list = new ArrayList<>();
 			    						Map<String, String> errMsgMap = null;
-			    						errMsgMap = ExcelUtil.readSheet(sheet, _list, true, readType, errMsgList);
+			    						errMsgMap = ExcelUtil.readSheet(workbook, sheet, _list, true, readType, errMsgList);
 			    						if (errMsgMap != null) {
 			    							errList.add(errMsgMap);
 			    						}
