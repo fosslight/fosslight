@@ -44,7 +44,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Version Diff의 OSS의 경우, 등록 메일에서 하단의 버전 정보 테이블이 버전 순서로 정렬되도록 변경
 
 * Vulnerability
-  - Download location, homepage가 null인 경우 NVC sync를 하지 않도록 변경
+  - Download location, homepage가 null인 경우 NVD sync를 하지 않도록 변경
  
 * 버그 수정
   - Security > Need to resolve 탭에서 max score가 잘못 표시되는 이슈 수정
