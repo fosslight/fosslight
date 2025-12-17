@@ -601,7 +601,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			boolean isMainRow = true;
 			
 			// main 정보
-			sb.append(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : " ");
+			sb.append(isMainRow ? (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx()) : " ");
 			sb.append(SEP).append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
 			sb.append(SEP).append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
 			sb.append(SEP).append(!isEmpty(bean.getLicenseName()) ? bean.getLicenseName() : " "); // LICENSE
