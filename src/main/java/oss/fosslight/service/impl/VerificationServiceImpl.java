@@ -793,10 +793,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							if (removePackageFileName.startsWith("/")) {
 								removePackageFileName = removePackageFileName.substring(1);
 							}
-							if (!deCompResultMap.containsKey(removePackageFileName)) collectDataDeCompResultList.add(removePackageFileName);
+							if (!deCompResultMap.containsKey(removePackageFileName)) {
+								collectDataDeCompResultList.add(removePackageFileName);
+							}
 						} else {
 							String addPackageFileName = packageFileName + "/" + s;
-							if (!deCompResultMap.containsKey(addPackageFileName)) collectDataDeCompResultList.add(addPackageFileName);
+							if (!deCompResultMap.containsKey(addPackageFileName)) {
+								collectDataDeCompResultList.add(addPackageFileName);
+							}
 						}
 						
 						if (!isEmpty(firstPathName) && !packageFileName.equals(firstPathName)) {
@@ -1325,7 +1329,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			//STEP 4 : README 파일 존재 유무 확인(README 여러개 일경우도 생각해야함 ---차후)
 			
 			// depth가 낮은 readme 파일을 구하기 위해 sort
-			if (packagingFileIdx == 1){ // packageFile에서 readMe File은 첫번째 file에서만 찾음.
+//			if (packagingFileIdx == 1){ // packageFile에서 readMe File은 첫번째 file에서만 찾음.
 //				List<String> sortList = new ArrayList<>(deCompResultMap.keySet());
 				Collections.sort(readmePathList, new Comparator<String>() {
 
@@ -1373,7 +1377,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 					}
 				}
-			}
+//			}
 
 			
 			String readmeFileName = "";
