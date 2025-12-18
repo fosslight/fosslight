@@ -640,33 +640,11 @@ public class OssController extends CoTopComponent{
 						boolean isSame = false;
 						Map<String, Object> diffMap = new HashMap<>();
 						
-						if (!isEmpty(checkOssInfo.getSummaryDescription())) {
-							String summaryDescription = checkOssInfo.getSummaryDescription();
-							isSame = false;
-							if (!isEmpty(ossMaster.getSummaryDescription())) {
-								if (ossMaster.getSummaryDescription().equalsIgnoreCase(checkOssInfo.getSummaryDescription())) {
-									isSame = true;
-								} else {
-									summaryDescription += ossMaster.getSummaryDescription();
-								}
-							}
-							if (!isSame) {
-								diffMap.put("addSummaryDescription", summaryDescription);
-							}
+						if (isEmpty(ossMaster.getSummaryDescription()) && !isEmpty(checkOssInfo.getSummaryDescription())) {
+							diffMap.put("addSummaryDescription", checkOssInfo.getSummaryDescription());
 						}
-						if (!isEmpty(checkOssInfo.getImportantNotes())) {
-							String importantNotes = checkOssInfo.getImportantNotes();
-							isSame = false;
-							if (!isEmpty(ossMaster.getImportantNotes())) {
-								if (ossMaster.getImportantNotes().equalsIgnoreCase(checkOssInfo.getImportantNotes())) {
-									isSame = true;
-								} else {
-									importantNotes += ossMaster.getImportantNotes();
-								}
-							}
-							if (!isSame) {
-								diffMap.put("addImportantNotes", importantNotes);
-							}
+						if (isEmpty(ossMaster.getImportantNotes()) && !isEmpty(checkOssInfo.getImportantNotes())) {
+							diffMap.put("addImportantNotes", checkOssInfo.getImportantNotes());
 						}
 						if (!isEmpty(checkOssInfo.getIncludeCpe())) {
 							isSame = false;
