@@ -1443,32 +1443,29 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			log.info("VERIFY Read exceptFileContent file END -----------------");
 			
-			// 2017.03.23 yuns contents 용량이 너무 커서 DB로 관리하지 않음 (flag만 처리, empty여부로 체크하기 때문에 내용이 있을 경우 "Y" 만 등록
-			project.setExceptFileContent(!isEmpty(exceptFileContent) ? CoConstDef.FLAG_YES : "");
-			project.setVerifyFileContent(!isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
-			
-			if (doUpdate) {
-				projectService.registVerifyContents(project);
-			}
-			
-			log.debug("VERIFY 파일내용 등록 완료");
+			boolean exceptFileContentFlag = false;
+			boolean verifyChkListFlag = false;
 			
 			// 서버 디렉토리를 replace한 내용으로 새로운 파일로 다시 쓴다.
 			if (!isEmpty(exceptFileContent)) {
 				log.info("VERIFY writeFile exceptFileContent file START -----------------");
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
-				
+				exceptFileContentFlag = true;
 				log.info("VERIFY writeFile exceptFileContent file END -----------------");
 			}
 			
 			if (!isEmpty(verify_chk_list)) {
 				log.info("VERIFY writeFile verify_chk_list file START -----------------");
-				
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_FILE_LIST, verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
-				
+				verifyChkListFlag = true;
 				log.info("VERIFY writeFile verify_chk_list file END -----------------");
 			}
 
+			project.setExceptFileContent(exceptFileContentFlag ? CoConstDef.FLAG_YES : "");
+			project.setVerifyFileContent(verifyChkListFlag ? CoConstDef.FLAG_YES : "");
+			
+			projectService.registVerifyContents(project);
+			
 			log.info("VERIFY Read fosslight_binary result file START -----------------");
 			String binaryFile = VERIFY_PATH_OUTPUT +"/" + prjId + "/binary_" + packagingFileIdx;
 			File f = new File(binaryFile);
