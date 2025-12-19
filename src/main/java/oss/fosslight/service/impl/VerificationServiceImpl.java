@@ -1841,7 +1841,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(spdxSheetFileId)) {
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
-				String fileName = "spdx_" + CommonFunction.getNoticeFileName(prjInfo.getPrjId(), prjInfo.getPrjName(), prjInfo.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "");
+				String fileName = "spdx_" + CommonFunction.getNoticeFileName(prjInfo.getPrjId(), prjInfo.getPrjName(), prjInfo.getPrjVersion(), null, CommonFunction.getCurrentDateTime("yyMMdd"), "", true);
 				fileName += "."+FilenameUtils.getExtension(spdxFileInfo.getOrigNm());
 				String filePath = NOTICE_PATH + "/" + prjInfo.getPrjId();
 				FileUtil.moveTo(spdxFileInfo.getLogiPath() + "/" + spdxFileInfo.getLogiNm(), filePath, fileName);
@@ -1849,7 +1849,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				spdxSheetFileId = ossNotice.getSpdxSheetFileId();
 				makeZipFile = true;
 			}
-
 		}
 		
 		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {

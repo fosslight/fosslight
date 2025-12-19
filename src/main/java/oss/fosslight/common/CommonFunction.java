@@ -5058,6 +5058,10 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 	public static String getNoticeFileName(String prjId, String prjName, String prjVersion, String fileName, String dateStr, String fileType) {
+		return getNoticeFileName(prjId, prjName, prjVersion, fileName, dateStr, fileType, false);
+	}
+	
+	public static String getNoticeFileName(String prjId, String prjName, String prjVersion, String fileName, String dateStr, String fileType, boolean isSpdx) {
 		if (isEmpty(fileName)) {
 			fileName = "OSSNotice-";
 			fileName += prjId + "_" + prjName;
@@ -5074,12 +5078,14 @@ public class CommonFunction extends CoTopComponent {
 		
 		fileName += "_" + dateStr;
 		
-		if (isEmpty(fileType) || fileType == "html"){
-			fileName += ".html";
-		}else if (fileType == "text"){
-			fileName += ".txt";
-		} else {
-			fileName += fileType;
+		if (!isSpdx) {
+			if (isEmpty(fileType) || fileType == "html"){
+				fileName += ".html";
+			} else if (fileType == "text"){
+				fileName += ".txt";
+			} else {
+				fileName += fileType;
+			}
 		}
 		
 		return fileName;
