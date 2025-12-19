@@ -258,6 +258,8 @@ public class Project extends ComBean implements Serializable {
 	// COPY
 	private String copy;
 	
+	private String confirmStatusCopy;
+	
 	/** The old id. */
 	private String oldId;
 	
@@ -395,7 +397,7 @@ public class Project extends ComBean implements Serializable {
 	/** The open source file name. */
 	private String openSourceFileName; // 오픈소스 파일명
 
-	/** The bin csv file id. */
+	/** The dep csv file id. */
 	private String depCsvFileId;
 	
 	/** The src csv file id. */
@@ -4853,5 +4855,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setDelScanFile(List<T2File> delScanFile) {
 		this.delScanFile = delScanFile;
+	}
+	
+	public String getConfirmStatusCopy() {
+		return confirmStatusCopy;
+	}
+
+	public void setConfirmStatusCopy(String confirmStatusCopy) {
+		this.confirmStatusCopy = confirmStatusCopy;
 	}
 }

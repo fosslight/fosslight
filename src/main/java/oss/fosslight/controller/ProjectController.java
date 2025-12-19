@@ -1156,8 +1156,8 @@ public class ProjectController extends CoTopComponent {
 		Boolean isNew = StringUtil.isEmpty(project.getPrjId());
 		Project beforeBean = null;
 		Project afterBean = null;
-		String copy = req.getParameter("copy");
-		String confirmStatusCopy = req.getParameter("confirmStatusCopy");
+		String copy = project.getCopy();
+		String confirmStatusCopy = project.getConfirmStatusCopy();
 		String creatorIdByName = null;
 		String secIdByName = null;
 

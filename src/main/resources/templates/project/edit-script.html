@@ -1194,30 +1194,35 @@
 					confirmStatusCopyFlag = false;
 				}
 				
+				var copy = "false";
+				var confirmStatusCopy = "false";
+				
 				if (data.copy) {
+					copy = "true";
 					if (confirmStatusCopyFlag) {
-						URL = '/project/saveAjax?copy=true&confirmStatusCopy='+confirmStatusCopyVal;
-					} else {
-						URL = '/project/saveAjax?copy=true&confirmStatusCopy=false';
+						confirmStatusCopy = confirmStatusCopyVal;
 					}
-				} else {
-					URL = '/project/saveAjax?copy=false&confirmStatusCopy=false';
 				}
 				
 				//public 값 넣어주기
 				var publicYn = $("input[name='permissionRadio']:checked").val();
 				$("input[name='publicYn']").val(publicYn);
 				 
- 				$("#projectForm").ajaxForm({
- 					url : URL,
+				var postData = $("#projectForm").serializeObject();
+				postData["copy"] = copy;
+				postData["confirmStatusCopy"] = confirmStatusCopy;
+				
+				$.ajax({
+					url : "/project/saveAjax",
  					type : 'POST',
  					dataType: "json",
  					cache : false,
+ 					data : postData,
  					success: function(data) {
  						fn.onRegistSuccess(data);
  					},
  					error : fn.onError
- 				}).submit();
+				});
 			},
 			// 삭제
 			deleteSubmit : function(){
