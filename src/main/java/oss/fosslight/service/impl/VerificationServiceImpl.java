@@ -1443,29 +1443,21 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			log.info("VERIFY Read exceptFileContent file END -----------------");
 			
-			boolean exceptFileContentFlag = false;
-			boolean verifyChkListFlag = false;
-			
 			// 서버 디렉토리를 replace한 내용으로 새로운 파일로 다시 쓴다.
 			if (!isEmpty(exceptFileContent)) {
 				log.info("VERIFY writeFile exceptFileContent file START -----------------");
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
-				exceptFileContentFlag = true;
+				resMap.put("exceptFileContent", CoConstDef.FLAG_YES);
 				log.info("VERIFY writeFile exceptFileContent file END -----------------");
 			}
 			
 			if (!isEmpty(verify_chk_list)) {
 				log.info("VERIFY writeFile verify_chk_list file START -----------------");
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_FILE_LIST, verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
-				verifyChkListFlag = true;
+				resMap.put("verifyChkList", CoConstDef.FLAG_YES);
 				log.info("VERIFY writeFile verify_chk_list file END -----------------");
 			}
 
-			project.setExceptFileContent(exceptFileContentFlag ? CoConstDef.FLAG_YES : "");
-			project.setVerifyFileContent(verifyChkListFlag ? CoConstDef.FLAG_YES : "");
-			
-			projectService.registVerifyContents(project);
-			
 			log.info("VERIFY Read fosslight_binary result file START -----------------");
 			String binaryFile = VERIFY_PATH_OUTPUT +"/" + prjId + "/binary_" + packagingFileIdx;
 			File f = new File(binaryFile);

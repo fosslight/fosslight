@@ -465,21 +465,33 @@ public class VerificationController extends CoTopComponent {
 			
 			// README 파일 내용 DB 에 저장
 			if (CollectionUtils.isNotEmpty(result)) {
+				String verifyChkList = "";
+				String exceptFileContent = "";
 				String readmeFileName = "";
+				
 				for (Map<String, Object> resultMap : result) {
-					if (resultMap.containsKey("readmeFileName")) {
+					if (isEmpty(verifyChkList) && resultMap.containsKey("verifyChkList")) {
+						verifyChkList = String.valueOf(resultMap.get("verifyChkList"));
+					}
+					if (isEmpty(exceptFileContent) && resultMap.containsKey("exceptFileContent")) {
+						exceptFileContent = String.valueOf(resultMap.get("exceptFileContent"));
+					}
+					if (isEmpty(readmeFileName) && resultMap.containsKey("readmeFileName")) {
 						readmeFileName = String.valueOf(resultMap.get("readmeFileName"));
-						break;
 					}
 				}
 				
 				Project param = new Project();
 				param.setPrjId(prjId);
+				param.setExceptFileContent(exceptFileContent);
+				param.setVerifyFileContent(verifyChkList);
+				
+				projectService.registVerifyContents(param);
+				
 				if (!isEmpty(readmeFileName)) {
 					param.setReadmeFileName(readmeFileName);
 					param.setReadmeYn(CoConstDef.FLAG_YES);
 				} else {
-					param.setReadmeFileName(null);
 					param.setReadmeYn(CoConstDef.FLAG_NO);
 				}
 				projectService.registReadmeContent(param);
