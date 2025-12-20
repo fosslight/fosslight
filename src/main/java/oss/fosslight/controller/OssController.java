@@ -1397,11 +1397,7 @@ public class OssController extends CoTopComponent{
 					result += ",";
 				}
 				
-				if (url.endsWith("/")) {
-					result += url.substring(0, url.length()-1);
-				}else {
-					result += url;
-				}
+				result += url;
 				
 				if (isFirst) {
 					ossMaster.setDownloadLocation(result);
@@ -1412,13 +1408,6 @@ public class OssController extends CoTopComponent{
 			}
 			
 			ossMaster.setDownloadLocations(result.split(","));
-		}
-		
-		if (!isEmpty(ossMaster.getHomepage())) {
-			if (ossMaster.getHomepage().endsWith("/")) {
-				String homepage = ossMaster.getHomepage();
-				ossMaster.setHomepage(homepage.substring(0, homepage.length()-1));
-			}
 		}
 		
 		// editor를 이용하지 않고, textarea로 등록된 코멘트의 경우 br 태그로 변경
@@ -2111,12 +2100,7 @@ public class OssController extends CoTopComponent{
 				if (!isEmpty(result)) {
 					result += ",";
 				}
-				
-				if (url.endsWith("/")) {
-					result += url.substring(0, url.length()-1);
-				} else {
-					result += url;
-				}
+				result += url;
 			}
 			
 			resultData.setDownloadLocations(result.split(","));
@@ -2126,12 +2110,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if (!isEmpty(analysisBean.getHomepage())) {
-			if (analysisBean.getHomepage().endsWith("/")) {
-				String homepage = analysisBean.getHomepage();
-				resultData.setHomepage(homepage.substring(0, homepage.length()-1));
-			} else {
-				resultData.setHomepage(analysisBean.getHomepage());
-			}
+			resultData.setHomepage(analysisBean.getHomepage());
 		} else {
 			resultData.setHomepage("");
 		}

@@ -3103,14 +3103,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setDownloadLocation("");
 		}
 
-		if (!isEmpty(ossMaster.getHomepage())) {
-			if (ossMaster.getHomepage().endsWith("/")) {
-				String homepage = ossMaster.getHomepage();
-				ossMaster.setHomepage(homepage.substring(0, homepage.length() - 1));
-			} else {
-				ossMaster.setHomepage(ossMaster.getHomepage());
-			}
-		} else {
+		if (isEmpty(ossMaster.getHomepage())) {
 			ossMaster.setHomepage("");
 		}
 
@@ -5166,10 +5159,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (downloadLocation.contains("@")) {
 					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
 				}
-			}
-			
-			if (downloadLocation.endsWith("/")) {
-				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
 			}
 			
 			if (urlSearchSeq > -1) {

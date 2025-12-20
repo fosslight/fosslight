@@ -724,11 +724,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			ossComponent.get(i).setComponentIdx(String.valueOf(componentIdx));
 			
 			String _componentId = ossComponent.get(i).getReferenceId() + "-" + ossComponent.get(i).getReferenceDiv() + "-" + ossComponent.get(i).getComponentIdx();
-			String downloadLocation = ossComponent.get(i).getDownloadLocation();
 			
-			if (downloadLocation != null && downloadLocation.endsWith("/")) {
-				ossComponent.get(i).setDownloadLocation(downloadLocation.substring(0, downloadLocation.length()-1));
-			}
 			if (!isEmpty(ossComponent.get(i).getCopyrightText())) {
 				ossComponent.get(i).setCopyrightText(StringUtils.trimWhitespace(ossComponent.get(i).getCopyrightText()));
 			}

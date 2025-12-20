@@ -411,9 +411,9 @@
 			$('#downloadLocationAdd').on('click', function(){
 				var isDuplicated = false;
 				var downloadLocation = $("#input_downloadLocations").val();
-				if (downloadLocation.endsWith("/")) {
-					downloadLocation = downloadLocation.slice(0, -1);
-				}
+// 				if (downloadLocation.endsWith("/")) {
+// 					downloadLocation = downloadLocation.slice(0, -1);
+// 				}
 				$("input[name='downloadLocations']").each(function (i) {
 					let dl = $("input[name='downloadLocations']").eq(i).val();
 					if ($.trim(dl) == $.trim(downloadLocation)) {
@@ -2826,10 +2826,10 @@
 			var value = $(target).val().trim();
 			$(target).val(value);
 			
-			if (value.charAt(value.length-1) == "/"){
-				value = value.slice(0, -1); // 마지막 문자열 제거
-				$(target).val(value);
-			}
+// 			if (value.charAt(value.length-1) == "/"){
+// 				value = value.slice(0, -1); // 마지막 문자열 제거
+// 				$(target).val(value);
+// 			}
 		
 			var pattern = /\s/g;
 			if (value.match(pattern)) {
@@ -2885,10 +2885,10 @@
 				var value = $(cur).val().trim();
 				$(cur).val(value);
 				
-				if (value.charAt(value.length-1) == "/"){
-					value = value.slice(0, -1); // 마지막 문자열 제거
-					$(target).val(value);
-				}
+// 				if (value.charAt(value.length-1) == "/"){
+// 					value = value.slice(0, -1); // 마지막 문자열 제거
+// 					$(target).val(value);
+// 				}
 				
 				if (value.match(pattern)) {
 					patternCnt++;

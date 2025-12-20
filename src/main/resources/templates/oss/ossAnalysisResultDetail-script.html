@@ -345,9 +345,9 @@ var Ctrl_fn = {
 	downloadLocationAdd : function(seq) {
 		var isDuplicated = false;
 		var downloadLocation = $("#input_downloadLocations" + seq).val();
-		if (downloadLocation.endsWith("/")) {
-			downloadLocation = downloadLocation.slice(0, -1);
-		}
+// 		if (downloadLocation.endsWith("/")) {
+// 			downloadLocation = downloadLocation.slice(0, -1);
+// 		}
 		$("input[name='downloadLocations"+seq+"']").each(function (i) {
 			let dl = $("input[name='downloadLocations"+seq+"']").eq(i).val();
 			if ($.trim(dl) == $.trim(downloadLocation)) {
@@ -735,10 +735,10 @@ var Ctrl_fn = {
 		var value = $(target).val();
 		var seq = $(target).attr("id").replace(/[^\d]+/g, "");
 		
-		if(value.charAt(value.length-1) == "/"){
-			value = value.slice(0, -1); // 마지막 문자열 제거
-			$(target).val(value);
-		}
+// 		if(value.charAt(value.length-1) == "/"){
+// 			value = value.slice(0, -1); // 마지막 문자열 제거
+// 			$(target).val(value);
+// 		}
 		
 		var pattern = /\s/g;
 		if (value.match(pattern)) {
@@ -787,10 +787,10 @@ var Ctrl_fn = {
 		$("#ossForm"+seq+" [name='downloadLocations']").each(function(idx, cur){
 			var value = $(cur).val();
 
-			if(value.charAt(value.length-1) == "/"){
-				value = value.slice(0, -1); // delete last string
-				$(cur).val(value);
-			}
+// 			if(value.charAt(value.length-1) == "/"){
+// 				value = value.slice(0, -1); // delete last string
+// 				$(cur).val(value);
+// 			}
 			
 			if (value.match(pattern)) {
 				patternCnt++;
