@@ -293,4 +293,7 @@ public interface SelfCheckMapper {
 	List<T2File> selectScanFile(Project project);
 	
 	void updateComment(Project project);
+
+	List<Project> selectSelfChecksModifiedBeforeMonths(@Param("months") int months);
+
 }

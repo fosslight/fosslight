@@ -429,4 +429,5 @@ public interface ProjectMapper {
 
 	void updateSecurityPerson(Project Project);
 
+	List<Project> selectProjectsModifiedBeforeMonths(@Param("months") int months);
 }

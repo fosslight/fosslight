@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -26,15 +25,9 @@ import org.springframework.stereotype.Component;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.service.CommentService;
-import oss.fosslight.service.MailService;
-import oss.fosslight.service.NvdDataService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.*;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.FileUtil;
-
-import oss.fosslight.repository.ProjectMapper;
 
 @Component
 public class SchedulerWorkerTask extends CoTopComponent {
@@ -47,7 +40,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
 	@Autowired ProjectService projectService;
-	@Autowired ProjectMapper projectMapper;
+	@Autowired PartnerService partnerService;
 	boolean serverLoadFlag = false; 
 	boolean distributionFlag;
 	
@@ -122,5 +115,14 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	//@Scheduled(cron="0 5,10,15,20,25,30,35,40,45,50,55 * * * *")
 	public void sendTempMail() {
 		mailService.sendTempMail();
+	}
+
+	@Scheduled(cron="0 0 9 1 * ?")
+	public void sendInactiveNotification() {
+		log.info("sendInactiveNotification start");
+		projectService.sendMailInactiveProject();
+		partnerService.sendMailInactivePartner();
+
+		log.info("sendInactiveNotification end");
 	}
 }
