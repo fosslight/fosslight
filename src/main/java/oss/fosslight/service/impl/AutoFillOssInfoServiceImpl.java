@@ -34,6 +34,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutException;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -554,20 +557,23 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> requestClearlyDefinedLicense(String location) {
-		WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(
-        		HttpClient.create()
-                	.responseTimeout(Duration.ofSeconds(10))   // read timeout
-                	.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // connect timeout
-				)).build();
+		HttpClient httpClient = HttpClient.create()
+								    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+								    .responseTimeout(Duration.ofSeconds(30))
+								    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(30)).addHandlerLast(new WriteTimeoutHandler(30)));
+		
+		WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
 
 		String responseString = webClient.get()
-    				.uri(location)
-    				.retrieve()
-    				.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new HttpServerErrorException(response.statusCode())))
-    				.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new HttpServerErrorException(response.statusCode())))
-    				.bodyToMono(String.class)
-    				.retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
-    				.block();
+							        .uri(location)
+							        .exchangeToMono(response -> {
+							            if (response.statusCode().isError()) {
+							                return response.createException().flatMap(Mono::error);
+							            }
+							            return response.bodyToMono(String.class);
+							        })
+							        .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)).filter(ex -> ex instanceof ReadTimeoutException))
+							        .block();
 		
 //		String responseString = webClient.get().uri(location).exchange()
 //			    				.flatMap(response -> {
