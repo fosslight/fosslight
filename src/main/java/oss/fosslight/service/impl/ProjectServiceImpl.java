@@ -1668,7 +1668,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				notice.setEditCompanyYn(CoConstDef.FLAG_YES);
 				notice.setEditDistributionSiteUrlYn(CoConstDef.FLAG_YES);
 				notice.setEditEmailYn(CoConstDef.FLAG_YES);
-				notice.setHideOssVersionYn(CoConstDef.FLAG_NO);
+				notice.setHideOssVersionYn(CoConstDef.FLAG_YES);
 				notice.setEditAppendedYn(CoConstDef.FLAG_NO);
 				notice.setPrjId(project.getPrjId());
 				
@@ -1691,7 +1691,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				notice.setNoticeFileFormat(new String[]{"chkAllowDownloadNoticeHTML"});
 			} else if (CoConstDef.FLAG_YES.equals(notice.getEditNoticeYn())
 					&& CoConstDef.CD_NOTICE_TYPE_GENERAL.equals(notice.getNoticeType())) {
-				
+				// modified OSS Notice 선택 시 hideOssVersionYn 기본값을 Y로 설정
+				if (isEmpty(notice.getHideOssVersionYn())) {
+					notice.setHideOssVersionYn(CoConstDef.FLAG_YES);
+				}
 			} else {
 				if (!isEmpty(notice.getCompanyNameFull())){
 					notice.setEditCompanyYn(CoConstDef.FLAG_YES);

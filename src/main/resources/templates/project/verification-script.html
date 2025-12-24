@@ -2732,6 +2732,9 @@
                 	$('#noticeForm input[name=appended]').val("");
                 }
 
+                var hideOssVersionChecked = $("#hideOssVersion").prop("checked");
+                $("#hideOssVersionYn").val(hideOssVersionChecked ? "Y" : "N");
+
                 $("#noticeFileFormat").prop("disabled", false);
                 
                 $('#noticeForm').ajaxForm({
@@ -3242,7 +3245,9 @@
                 $("#editDistributionSiteUrlYn").val("Y");
                 $("#email").prop("checked", true);
                 $("#editEmailYn").val("Y");
-            	
+                $("#hideOssVersion").prop("checked", true);
+                $("#hideOssVersionYn").val("Y");
+                
             	if (!checked) {
             		$("#editCompanyName").val($("#defaultCompanyNameFull").val());
             		$("#editOssDistributionSite").val($("#defaultDistributionSiteUrl").val());
@@ -3356,6 +3361,11 @@
                     if (editEmailYn == "Y") {
                     	$("#email").trigger("click").attr("checked", true);
                     }
+
+                    if(hideOssVersionYn == "Y") {
+                        $("#hideOssVersion").trigger("click").attr("checked", true);
+                        $("#hideOssVersionYn").val("Y");
+                    }
                     
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     var btn_Save = $("#save");
@@ -3367,6 +3377,7 @@
                         
                     	if (hideOssVersionYn == "Y") {
                             $("#hideOssVersion").trigger("click").attr("checked", true);
+							$("#hideOssVersionYn").val("Y");
                         }
 
                         if (editAppendedYn == "Y") {
@@ -3392,7 +3403,7 @@
                                 fn.defaultNotice(false, "init");
 
                                 break;
-                            default:console.log(checked);
+                            default:
                               	if ("notice" == targetId) btn_Save.show();
                                 fn.defaultNotice(checked, "init");
 

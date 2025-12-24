@@ -64,7 +64,7 @@ public class OssNotice extends ComBean implements Serializable {
 	private String editCompanyYn = "N";
 	private String editDistributionSiteUrlYn = "N";
 	private String editEmailYn = "N";
-	private String hideOssVersionYn = "N";
+	private String hideOssVersionYn = "Y";
 	private String editAppendedYn = "N";
 	private String isSimpleNotice;
 	private String previewOnly = "N";
