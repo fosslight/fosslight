@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
@@ -2807,12 +2808,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						downloadlocationUrl = downloadlocationUrl.replace("git@", "");
 					}
 					
-					if (downloadlocationUrl.startsWith("http://") 
-							|| downloadlocationUrl.startsWith("https://")
-							|| downloadlocationUrl.startsWith("git://")
-							|| downloadlocationUrl.startsWith("ftp://")
-							|| downloadlocationUrl.startsWith("svn://")) {
-						downloadlocationUrl = downloadlocationUrl.split("//")[1];
+					URI uri = URI.create(downloadlocationUrl);
+					if (uri.getScheme() != null) {
+					    downloadlocationUrl = uri.getSchemeSpecificPart();
+					    if (downloadlocationUrl.startsWith("//")) {
+					        downloadlocationUrl = downloadlocationUrl.substring(2);
+					    }
 					}
 					
 					if (downloadlocationUrl.startsWith("www.")) {
