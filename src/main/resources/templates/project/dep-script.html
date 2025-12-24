@@ -1320,23 +1320,7 @@ var dep_grid = {
 							dataInit: function (e) { 
 								$(e).on("change", function() {
 									var rowid = (e.id).split('_')[0];
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-	
-										$("#"+rowid+"_downloadLocation").val(value);
-									}
-	
 									fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
-								}).on("blur", function() {
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-	
-										$("#"+e.id).val(value);
-									}
 								});
 							}
 						}
@@ -1348,23 +1332,7 @@ var dep_grid = {
 								function (e) { 
 									$(e).on("change", function() {
 										var rowid = (e.id).split('_')[0];
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-	
-											$("#"+rowid+"_homepage").val(value);
-										}
-										
 										fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
-									}).on("blur", function() {
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-	
-											$("#"+e.id).val(value);
-										}
 									});
 								}
 						}

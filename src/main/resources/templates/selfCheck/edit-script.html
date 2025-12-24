@@ -2697,23 +2697,7 @@ var src_grid = {
 								function (e) { 
 									$(e).on("change", function() {
 										var rowid = (e.id).split('_')[0];
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-	
-											$("#"+rowid+"_homepage").val(value);
-										}
-										
 										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
-									}).on("blur", function() {
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-	
-											$("#"+e.id).val(value);
-										}
 									});
 								}
 						}
