@@ -1806,7 +1806,8 @@
 		var rows = getOssGridRows('#_licenseChoice');
 		
 		$('input[name=licenseDiv]').val(licenseDiv);
-				
+		
+		var duplicatedFlag = false;
 		var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
 		var newRows = [];
 		var checkLicenses = [];
@@ -1815,6 +1816,11 @@
 			var licenseName = rowData.licenseName;
 			if( licenseName.indexOf('<div') > -1){
 				rowData['licenseName'] = '';
+			}
+			if ($.inArray(rowData.licenseNameEx, checkLicenses) !== -1) {
+				duplicatedFlag = true;
+				var colName = $("#_licenseChoice #"+dataId).parents("table").attr("id") + "_licenseNameEx";
+				$("#_licenseChoice #"+dataId+" td[aria-describedby=\""+colName+"\"]").append('<div class=\"_licenseChoice_'+dataId+' retxt\">Duplicate declared license</div>');
 			}
 			checkLicenses.push(rowData.licenseNameEx);
 			newRows.push(rowData);
@@ -1870,7 +1876,8 @@
 			return false;
 		}
 
-		var duplicatedLicenseFlag = true;
+		var duplicatedFlag2 = false;
+		var duplicatedFlag3 = false;
  		if (checkLicenses.length > 0) {
  			$.each(checkLicenses, function(index, element){
  				$("[name='detectedLicenses']").each(function(idx, cur){
@@ -1883,9 +1890,36 @@
  	 			});
  			});
  		}
-	
- 		if (!duplicatedLicenseFlag) {
+ 		
+ 		if ($("[name='detectedLicenses']").length > 0) {
+ 			var seen = [];
+ 			$("[name='detectedLicenses']").each(function(idx, cur){
+ 				var detectedLicense = $(cur).val();
+ 				if ($.inArray(detectedLicense, seen) !== -1) {
+ 					duplicatedFlag2 = true;
+ 					$('input[name=detectedLicenses]:eq('+idx+')').parent().next("span.retxt").html("Duplicate detected license").show();
+ 				}
+ 				seen.push(detectedLicense);
+ 			});
+ 		}
+ 		
+ 		// check for duplicate declared licenses
+ 		if (duplicatedFlag) {
+ 			$("div.retxt").show();
+ 			alertify.error("There is a duplicate in Declared License", 0);
+ 		}
+ 		
+ 		// check for duplicate detected licenses
+ 		if (duplicatedFlag2) {
+ 			alertify.error("There is a duplicate in Detected License", 0);
+ 		}
+ 		
+ 		// check for duplicate between declared and detected licenses
+ 		if (duplicatedFlag3) {
  			alertify.error("License included in Declared", 0);
+ 		}
+		
+ 		if (duplicatedFlag || duplicatedFlag2 || duplicatedFlag3) {
  			return false;
  		}
 		
@@ -2028,8 +2062,7 @@
 						}
 						var colName = $("#"+gridStr+" #"+rowId).parents("table").attr("id")+"_"+seqSuffix[0];
 						// 그리드 메세지 그리기
-						$("#"+gridStr+" #"+rowId+" td[aria-describedby=\""+colName+"\"]")
-						.append('<div class=\"'+gridStr+"_"+rowId+' retxt"\">'+ value +'</div>');						
+						$("#"+gridStr+" #"+rowId+" td[aria-describedby=\""+colName+"\"]").append('<div class=\"'+gridStr+"_"+rowId+' retxt"\">'+ value +'</div>');						
 					}
 					$("div.retxt").show();
 				} else {
