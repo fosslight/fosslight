@@ -4550,15 +4550,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			bomParam.setSaveBomFlag(CoConstDef.FLAG_YES);
 			bomParam.setBomWithAndroidFlag(project.getAndroidFlag()); // android Project
 			
-			List<ProjectIdentification> bomList = projectMapper.selectBomList(bomParam);
-			Comparator<ProjectIdentification> compare = Comparator
-					.comparing(ProjectIdentification::getLicenseTypeIdx)
-					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-					.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
-					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
-					.thenComparing(ProjectIdentification::getMergeOrder);
+			List<ProjectIdentification> bomList = null;
+			Comparator<ProjectIdentification> compare = null;
+			
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(project.getReferenceDiv())) {
+				bomParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				bomList = projectMapper.selectBomList(bomParam);
+				compare = Comparator.comparing(ProjectIdentification::getLicenseTypeIdx)
+						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
+						.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
+						.thenComparing(ProjectIdentification::getMergeOrder);
+			} else {
+				bomParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+				bomList = projectMapper.selectOtherBomList(bomParam);
+				compare = Comparator.comparing(ProjectIdentification::getLicenseTypeIdx)
+						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getDownloadLocation, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder());
+			}
 			bomList.sort(compare);
 			
 			// 일괄 등록을 위해 대상 data의 component id 만 추출한다.
@@ -4576,7 +4590,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 									|| CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) 
 									|| CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY.equals(bean.getObligationType()))) {
 						componentList.add(bean.getComponentId()+"-"+bean.getAdminCheckYn());
-					}else {
+					} else {
 						componentList.add(bean.getComponentId());
 					}
 				}
