@@ -2831,6 +2831,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 					}
 					
+					if (downloadlocationUrl.contains("+")) {
+						downloadlocationUrl = downloadlocationUrl.split("[+]")[0];
+						downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.lastIndexOf("/"));
+					}
+					
 					String[] downloadlocationUrlSplit = downloadlocationUrl.split("/");
 					if (downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
 						downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.indexOf("#"));
@@ -3621,7 +3626,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<OssAnalysis> list = null;
 		String prjId = ossMaster.getPrjId();
 		
-		if (CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(ossMaster.getReferenceDiv())) {
+		if (CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(ossMaster.getReferenceDiv()) && !ossMaster.getPrjId().startsWith("3rd_")) {
 			ossMaster.setPrjId("3rd_" + prjId);
 		}
 		
