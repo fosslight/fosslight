@@ -19,12 +19,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -2838,15 +2841,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ossBean.setOssId(null);
 			}
 			downloadLocationUrl = ossBean.getDownloadLocation();
-			if (!StringUtil.isEmpty(downloadLocationUrl) && downloadLocationUrl.endsWith("/")) {
-				ossBean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
-			} else if (StringUtil.isEmpty(downloadLocationUrl)) {
+			if (StringUtil.isEmpty(downloadLocationUrl)) {
 				ossBean.setDownloadLocation("");
 			}
 			homepageUrl = ossBean.getHomepage();
-			if (!StringUtil.isEmpty(homepageUrl) && homepageUrl.endsWith("/")) {
-				ossBean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
-			} else if (StringUtil.isEmpty(homepageUrl)) {
+			if (StringUtil.isEmpty(homepageUrl)) {
 				ossBean.setHomepage("");
 			}
 			if (avoidNull(ossBean.getTlsh()).equalsIgnoreCase("TNULL")) {
@@ -5477,71 +5476,38 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	private List<String> makeCompareKey(String type, List<ProjectIdentification> data, List<List<ProjectIdentification>> subData, boolean convertShortLicenseName) {
 		List<String> list = new ArrayList<>();
-		List<String> chkList = new ArrayList<>();
 		
 		if (data != null) {
+			Set<String> chkSet = new HashSet<>();
 			for (ProjectIdentification bean : data) {
-				if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)) {
-					String key = type;
-					key += "|" + avoidNull(bean.getOssName()).trim();
-					key += "|" + avoidNull(bean.getOssVersion()).trim();
-					key += "|" + avoidNull(bean.getRefPartnerId()).trim();
-					key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-					key = key.toUpperCase();
-					
-					if (!list.contains(key)) {
-						list.add(key);
-					}
-				} else if (subData != null) {
-//					if (CoConstDef.LICENSE_DIV_SINGLE.equals(avoidNull(bean.getLicenseDiv(), CoConstDef.LICENSE_DIV_SINGLE))) {
-//						String key = type;
-//						key += "|" + avoidNull(bean.getOssName()).trim();
-//						key += "|" + avoidNull(bean.getOssVersion()).trim();
-//						key += "|" + avoidNull(convertLicenseShortName(bean.getLicenseName(), convertShortLicenseName)).trim();
-//						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-//						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-//						key = key.toUpperCase();
-//					
-//						list.add(key);
-//					} else {
-//					
-//					}
-				
-					if (bean.getComponentLicenseList() != null) {
-						for (ProjectIdentification license : bean.getComponentLicenseList()) {
-							String licenseName = avoidNull(convertLicenseShortName(license.getLicenseName(), convertShortLicenseName)).trim();
-							String _key = (bean.getComponentId() + "|" + licenseName).toUpperCase();
-							if (chkList.contains(_key)) {
-								continue;
-							} else {
-								chkList.add(_key);
-							}
-							
-							String key = type;
-							key += "|" + avoidNull(bean.getOssName()).trim();
-							key += "|" + avoidNull(bean.getOssVersion()).trim();
-							key += "|" + licenseName;
-							key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-							key += "|" + avoidNull(license.getExcludeYn(), CoConstDef.FLAG_NO);
-							key = key.toUpperCase();
-							
-							list.add(key);
-						}
-					} else {
-						String key = type;
-						key += "|" + avoidNull(bean.getOssName()).trim();
-						key += "|" + avoidNull(bean.getOssVersion()).trim();
-						key += "|" + avoidNull("").trim();
-						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-						key = key.toUpperCase();
-						
-						list.add(key);
-					}
-				}
+				String componentId = bean.getComponentId();
+			    String ossName = avoidNull(bean.getOssName()).trim();
+			    String ossVersion = avoidNull(bean.getOssVersion()).trim();
+			    String beanExcludeYn = avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
+
+			    if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)) {
+			    	String key = String.join("|", type, ossName, ossVersion, avoidNull(bean.getRefPartnerId()).trim(), beanExcludeYn).toUpperCase();
+			    	if (chkSet.add(key)) {
+			    		list.add(key);
+			    	}
+			    } else if (subData != null) {
+			        if (bean.getComponentLicenseList() != null) {
+			            for (ProjectIdentification license : bean.getComponentLicenseList()) {
+			                String licenseName = avoidNull(convertLicenseShortName(license.getLicenseName(), convertShortLicenseName)).trim();
+			                String _key = (componentId + "|" + licenseName).toUpperCase();
+			                if (chkSet.add(_key)) {
+			                	String key = String.join("|", type, ossName, ossVersion, licenseName, beanExcludeYn, avoidNull(license.getExcludeYn(), CoConstDef.FLAG_NO)).toUpperCase();
+			                	list.add(key);
+			                }
+			            }
+			        } else {
+			        	String key = String.join("|", type, ossName, ossVersion, "", beanExcludeYn, beanExcludeYn).toUpperCase();
+			        	list.add(key);
+			        }
+			    }
 			}
+			chkSet.clear();
 		}
-		chkList.clear();
 		
 		return list;
 	}
@@ -6729,7 +6695,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (flag.equals("delete")){
 			returnVal = "<span style=\"background-color:#FFCCCC;\">" + text + "</span>";
 		}else if (flag.equals("change") || flag.equals("add")){
-			returnVal = "<span style=\"background-color:yellow\">" + text + "</span>";
+			returnVal = "<span style=\"background-color:yellow;\">" + text + "</span>";
 		}
 
 		return returnVal;
