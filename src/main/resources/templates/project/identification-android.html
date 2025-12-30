@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="project/identification-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="project/common-script :: commonScript"></th:block>
+<th:block th:replace="project/binandroid-script :: binandroidScript"></th:block>
+<th:block th:replace="project/bat-script :: batScript"></th:block>
+<th:block th:replace="project/identification-android-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <div class="content-wrapper custom-layout">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                    	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
+                    	<div class="float-right align-items-center mt-2" style="margin-left: auto;">
+                            <div class="helpLink f-left dropdown float-right">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="|How to use FossLight Hub|"></a>
+                                    <a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|" th:text="'Role of Creator & Reviewer'"></a>
+                                </div>
+                            </div>
+                            <div class="float-right" sec:authorize="!hasRole('ROLE_ADMIN')" th:if="${project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV'}">
+                        		<button type="button" class="btn btn-dark-03 btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
+                        		<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments"></i> Comment</button>
+                        	</div>
+                        	<div class="float-right">
+                        		<button type="button" th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}"
+                                		class="btn btn-dark-03 btn-sm width-6rem px-1" id="autoReview" th:text="'Auto Review'"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-03 btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments"></i> Comment</button>
+                            </div>
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom projdecBtn" style="font-size: .85rem">
+                            	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                            		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
+                               		<label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
+                            	</th:block>
+                         	</span>
+                        </div>
+                        
+<!--                   	<div class="col-sm-8 text-left mt-2">
+                            <span class="description-percentage text-lg text-dark-gray" id="vPrjName"></span>
+                            <span class="text-dark-gray mx-1" id="vCreated"></span>
+                            <span class="ml-2">
+                                <span class="badge badge-info text-sm px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">Basic Information</span>
+                                <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
+                                    <span class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">Packaging</span>
+                                </th:block>
+                                <th:block th:if="${project.secCode != null}">
+                                   <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">Security</span>
+                                </th:block>
+                            </span>
+                        </div>
+                        <div class="col-sm-4 float-right mt-1">
+                            <div class="helpLink f-left dropdown float-right ml-3">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|">How to use FossLight Hub</a>
+                                </div>
+                            </div>
+                        	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
+                        		<button type="button" class="btn btn-danger btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
+                        	</div>
+                            <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y'}">
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="card card-dark card-tabs">
+                        <div class="card-header p-0 pt-1" style="display:inline-block;">
+                        	<div class="float-left" style="display:inline;">
+                        	<ul class="nav nav-tabs" id="menu-tab" role="tablist">
+                               	<li class="nav-item">
+                                    <a class="nav-link" id="tabMenuBinAndroid" data-toggle="pill" href="#menu-android" role="tab" aria-controls="menu-android" aria-selected="false" th:text="'BIN(Android)'"></a>
+                                </li>
+                                <li th:if="${batFlag}" class="nav-item">
+                                    <a class="nav-link" id="tabMenuBat" data-toggle="pill" href="#menu-bat" role="tab" aria-controls="menu-bat" aria-selected="false" th:text="'BAT(Optional)'"></a>
+                                </li>
+                            </ul>
+                        	</div>
+                            <div class="float-right mr-3" style="margin-top: .35rem">
+                                <button type="button" class="btn btn-purple btn-xs px-3 btnCommentHistory" data-toggle="on" th:text="'Show Comment History'"></button>
+                                <button type="button" class="btn btn-tool ml-3" id="expandBtn" data-card-widget="collapse" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-four-tabContent">
+                                <!-- bin android -->
+                                <div class="tab-pane fade" id="menu-android" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row mt-1">
+                                                <div class="col-md-4 binAndroidBtn" name="search-condition_android">
+                                                    <div class="icheck-secondary d-inline">
+                                                        <input type="radio" id="binAndroidR1" th:onchange="|binAndroid_fn.changeSelectOption()|" value="1" name="binAndroidSelectOption" checked>
+                                                        <label for="binAndroidR1" th:text="'Upload Analysis Result'"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 binAndroidBtn" name="search-condition_android">
+                                                    <div class="icheck-secondary d-inline">
+                                                        <input type="radio" id="binAndroidR2" th:onchange="|binAndroid_fn.changeSelectOption()|" value="2" name="binAndroidSelectOption">
+                                                        <label for="binAndroidR2" th:text="'Project Search'"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="icheck-danger d-inline">
+                                                        <input type="checkbox" id="applicableBinAndroid" value="N" th:onchange="|com_fn.checkAplicable(this, 'binAndroidBtn')|">
+                                                        <label for="applicableBinAndroid" th:text="'Not Applicable'"></label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-3">
+                                    <div id="content_android">
+                                    <form id="binAndroidUploadForm" class="binAndroidBtn">
+                                    <input type="hidden" id="srcAndroidCsvFileId" value="${project.srcAndroidCsvFileId}"/>
+									<input type="hidden" id="srcAndroidNoticeFileId" value="${project.srcAndroidNoticeFileId}"/>
+									<input type="hidden" id="srcAndroidNoticeXmlId" value="${project.srcAndroidNoticeXmlId}"/>
+									<input type="hidden" id="srcAndroidResultFileId" value="${project.srcAndroidResultFileId}"/>
+                                        <div name="content_android" id="binAndroidUploadSearch">
+                                            <div class="row mt-3" id="content_android">
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col-md-1 pl-3 mt-1 mr-3">
+                                                            <strong th:text="'Android Model'"></strong>
+                                                        </div>
+                                                        <div class="col-lg-10">
+                                                            <div class="row">
+                                                                <div class="col-lg-2 pl-3">
+                                                                    <p th:text="'FOSSLight Report'"></p>
+                                                                </div>
+                                                                <div class="col-lg-3">
+                                                                    <div class="multi-fileuploader" id="androidCsvFile" th:text="Upload"></div>
+                                                                </div>
+                                                                <div class="col-lg-5">
+                                                                	<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                                		<th:block th:if="${project.androidCsvFile != null}">
+                                                            				<ul class="androidCsvFileArea" th:each="csvFile : ${project.androidCsvFile}">
+                                                                    			<li th:if="${csvFile.delYn eq 'N'}">
+                                                                        			<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+                                                                        			<input type="hidden" value="${csvFile.fileSeq}"/>
+                                                                        			<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '2')|" th:text="X"></span>
+                                                                        			<br>[[${csvFile.createdDate}]]
+                                                                   				</li>
+                                                                			</ul>
+                                                            			</th:block>
+                                                            			<th:block th:unless="${project.androidCsvFile != null}">
+                                                            				<ul class="androidCsvFileArea"></ul>
+                                                            			</th:block>
+                                                                	</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-lg-2 pl-3">
+                                                                    <p class="text-danger" th:text="'NOTICE'"></p>
+                                                                </div>
+                                                                <div class="col-lg-3">
+                                                                    <div class="fileuploader" id="androidNoticeFile" th:text="Upload"></div>
+                                                                </div>
+                                                                <div class="col-lg-5">
+                                                                	<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                                		<th:block th:if="${project.androidNoticeFile != null}">
+                                                            				<ul class="androidNoticeFileArea" th:each="csvFile : ${project.androidNoticeFile}">
+                                                                    			<li th:if="${csvFile.delYn eq 'N'}">
+                                                                        			<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+                                                                        			<input type="hidden" value="${csvFile.fileSeq}"/>
+                                                                        			<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '3')|" th:text="X"></span>
+                                                                        			<br>[[${csvFile.createdDate}]]
+                                                                   				</li>
+                                                                			</ul>
+                                                            			</th:block>
+                                                            			<th:block th:unless="${project.androidNoticeFile != null}">
+                                                            				<ul class="androidNoticeFileArea"></ul>
+                                                            			</th:block>
+                                                                	</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-lg-2 pl-3">
+                                                                    <p style="margin-bottom: 0.4rem !important;" th:text="'fosslight_binary.txt'"></p>
+                                                                    <div class="ml-3">
+                                                                        <div class="form-check center-atom projdecBtn"
+                                                                             th:if="${@CommonFunction.isAdmin()}">
+                                                                            <th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                                                                                <input class="form-check-input text-orange" id="ignoreBinaryDbFlag"
+                                                                                       name="ignoreBinaryDbFlag" th:value="N" type="checkbox" style="margin-top: 0.42rem !important;">
+                                                                                <label class="form-check-label text-lg-gray text-sm" for="ignoreBinaryDbFlag"
+                                                                                       th:text="'Do not register in binary DB'"></label>
+                                                                            </th:block>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-3">
+                                                                    <div class="fileuploader" id="androidResultFile" th:text="Upload"></div>
+                                                                </div>
+                                                                <div class="col-lg-5">
+                                                                	<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                                		<th:block th:if="${project.androidResultFile != null}">
+                                                            				<ul class="androidResultFileArea" th:each="csvFile : ${project.androidResultFile}">
+                                                                    			<li th:if="${csvFile.delYn eq 'N'}">
+                                                                        			<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+                                                                        			<input type="hidden" th:value="${csvFile.fileSeq}"/>
+                                                                        			<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '4')|" th:text="X"></span>
+                                                                        			<br>[[${csvFile.createdDate}]]
+                                                                   				</li>
+                                                                			</ul>
+                                                            			</th:block>
+                                                            			<th:block th:unless="${project.androidResultFile != null}">
+                                                            				<ul class="androidResultFileArea"></ul>
+                                                            			</th:block>
+                                                                	</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </form>
+                                        <form id="binAndroidProjectForm" class="binAndroidBtn">
+                                        <input type="hidden" name="publicYn" value="Y">
+                                        <input type="hidden" name="prjName"/>
+										<input type="hidden" name="prjVersion"/>
+										<input type="hidden" name="prjId"/>
+										<input type="hidden" id="srcAndroidCsvFileId" th:value="${project.srcAndroidCsvFileId}"/>
+										<input type="hidden" id="srcAndroidNoticeFileId" th:value="${project.srcAndroidNoticeFileId}"/>
+										<input type="hidden" id="srcAndroidNoticeXmlId" th:value="${project.srcAndroidNoticeXmlId}"/>
+										<input type="hidden" id="srcAndroidResultFileId" th:value="${project.srcAndroidResultFileId}"/>
+                                        <div name="content_android" id="binAndroidProjectSearch" style="display: none;">
+                                            <div class="row mt-3">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <select class="custom-select" name="binAndroidProjectSelect">
+                                                            <option th:value="pNm" th:text="'Project Name'"></option>
+                                                            <option th:value="pVer" th:text="'Project Version'"></option>
+                                                            <option th:value="pId" th:text="'Project Id'"></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="input-group input-group-md">
+                                                        <input type="text" class="form-control" name="binAndroidPrjSearchText">
+                                                        <span class="input-group-append">
+                                                            <button type="button" class="btn btn-default btn-flat" id="binAndroidProjectSearchBtn" th:text="Search"></button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </form>
+                                        <div class="binAndroidProjectSearch binAndroidBtn">
+                                        	<div class="binAndroidProject1 card" style="display:none;">
+                                                <div class="card-header text-bold" th:text="'Search Results'"></div>
+                                                <div class="card-body">
+                                                    <div class="innerJqGridSet">
+                                                        <table id="_binAndroidProjectList1"><tr><td></td></tr></table>
+                                                        <div id="binAndroidProjectPager1"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="binAndroidProject2 card" style="display:none;">
+                                                <div class="card-header text-bold">
+                                                    <div class="row">
+                                                        <div class="col-2" th:text="'Detail preview'"></div>
+                                                        <div class="col-10">
+                                                            <a class="btn btn-outline-lg-red btn-sm float-right px-3" th:onclick="|binAndroid_fn.loadToList()|" th:text="load"></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row mt-3" id="content_android">
+                                                		<div class="col-12">
+                                                    		<div class="row">
+                                                        		<div class="col-md-2 pl-3 mt-1">
+                                                            		<strong th:text="'NOTICE'"></strong>
+                                                        		</div>
+                                                        		<div class="col-md-3">
+                                                            		<div class="row">
+                                                                		<div class="col-lg-1"></div>
+                                                                		<div class="col-lg-11" style="display: flex;">
+                                                                    		<div class="fileuploader" id="androidNoticeFileDummy" th:text="Upload"></div>
+                                                                		</div>
+                                                            		</div>
+                                                        		</div>
+                                                        		<div class="col-lg-7">
+                                                        			<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                        			<ul class="androidNoticeFileAreaDummy"></ul>
+                                                            		</div>
+                                                        		</div>
+                                                    		</div>
+                                                    		<hr class="my-3">
+                                                    		<div class="row">
+                                                        		<div class="col-md-2 pl-3 mt-1">
+                                                            		<strong th:text="'fosslight_binary.txt'"></strong>
+                                                        		</div>
+                                                        		<div class="col-md-3">
+                                                            		<div class="row">
+                                                                		<div class="col-lg-1"></div>
+                                                                		<div class="col-lg-11" style="display: flex;">
+                                                                    		<div class="fileuploader" id="androidResultFileDummy" th:text="Upload"></div>
+                                                                		</div>
+                                                            		</div>
+                                                        		</div>
+                                                        		<div class="col-lg-7">
+                                                        			<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                        			<ul class="androidResultFileAreaDummy"></ul>
+                                                            		</div>
+                                                        		</div>
+                                                    		</div>
+                                                    		<hr class="my-3">
+                                                    		<div class="row">
+                                                    			<div class="card" style="width:100%">
+                                                					<div class="card-header text-bold" th:text="'Loaded List'"></div>
+                                                					<div class="card-body">
+                                                    					<div class="innerJqGridSet">
+                                                        					<table id="_binAndroidProjectList2"><tr><td></td></tr></table>
+                                                    					</div>
+                                                					</div>
+                                            					</div>
+                                                    		</div>
+                                                		</div>
+                                            		</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.android -->
+
+                                <!-- bat(optional) -->
+                                <div class="tab-pane fade" id="menu-bat" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row mt-1">
+                                                <div class="col-md-4">
+                                                    <div class="icheck-secondary d-inline">
+                                                        <input type="radio" id="radio_bat-01" name="batselectOption" th:onchange="|bat_fn.changeSelectOption()|" value="1" checked>
+                                                        <label for="radio_bat-01">Upload</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="icheck-secondary d-inline">
+                                                        <input type="radio" id="radio_bat-02" name="batselectOption" th:onchange="|bat_fn.changeSelectOption()|" value="2">
+                                                        <label for="radio_bat-02">Url</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-3">
+                                    <div id="content_bat">
+                                        <div name="content_bat" id="binaryFile">
+                                            <div class="row">
+                                                <div class="col-lg-10">
+                                                    <div class="row">
+                                                        <div class="col-lg-5" style="display: flex;">
+                                                            <div class="fileuploader" id="batBinaryFile" th:text="Upload"></div>
+                                                            <input type="hidden" id="binaryFileId" value="${project.srcCsvFileId}"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div name="content_bat" id="wgetUrl" style="display: none;">
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <div class="row">
+                                                        <div class="col-5">
+                                                            <div class="input-group input-group-md">
+                                                                <input type="text" class="form-control">
+                                                                <span class="input-group-append">
+                                                                    <button type="button" class="btn btn-primary btn-flat" id="send" th:text="send"></button>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3 ml-3" id="content-bat">
+										 <div class="innerJqGridSet">
+                                            <table id="_binaryFileList"><tr><td></td></tr></table>
+                                        </div>
+                                        <p class="text-smaller">Binary analysis results are used only as reference data. Until the accuracy of the tool is improved, it is not included in the BOM and OSS Notice
+                                            <br />※ Uploaded firmware is only kept for one month.
+                                        </p>
+                                    </div>
+                                </div>
+                                <!-- /. bat(optional) -->
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row pl-2" name="gridArea" id="gridAreaBinAndroid" style="width: 100%;display: none;">
+                        <!-- buttons -->
+                        <div class="col-md-12 mb-3 pl-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row float-left pl-2">
+                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3"
+                                        		th:onclick="|binAndroid_fn.showD ialog('NOTICE')|" th:text="'Supplement NOTICE.html'"></button>
+                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3"
+                                        		th:onclick="|fn_grid_com.checkLicenseTextValidation('${project.prjId}')|" th:text="'Check License Text'"></button>
+                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" id="checkLicenseTextFile"
+                                        		th:onclick="|binAndroid_fn.downloadFile()|" th:text="'Check License Text'"></button>
+                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3"
+                                        		th:onclick="|com_fn.CheckOssViewPage('ANDROID')|" th:text="'Check OSS Name'"></button>
+                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3"
+                                        		th:onclick="|com_fn.CheckOssLicenseViewPage('ANDROID')|" th:text="'Check License'"></button>
+                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3"
+                                        		th:onclick="|com_fn.bulkEdit('ANDROID')|" th:text="'Bulk Edit'"></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row float-right">
+                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3"
+                                        		th:onclick="|binAndroid_fn.binaryDBSave('${project.prjId}')|" th:text="'Save (Binary DB)'"></button>
+                                        <button type="button" class="btn btn-lg-light-gray btn-sm width-10rem mr-xm px-3" th:onclick="|binAndroid_fn.downloadExcel()|" th:text="Export"></button>
+                                        <button type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.downloadYaml('ANDROID')|" th:text="Yaml"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset" th:text="Reset" id="binAndroidReset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-teal btn-sm width-6rem px-3 idenSave" th:text="Save" id="binAndroidSave"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- grids -->
+                        <div class="col-md-12 outerJqGridSet">
+                            <table id="binAndroidList"><tr><td></td></tr></table>
+                            <div id="binAndroidPager"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row pl-2" name="gridArea" id="gridAreaBat" style="width: 100%;display: none;">
+                    	<div class="col-md-12 outerJqGridSet batBtn">
+                            <table id="batList"><tr><td></td></tr></table>
+                            <div id="batPager"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

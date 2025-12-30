@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+$(document).ready(function(){
+	
+	var linkV = [[${@CoCodeManager.getAllValues(@CommonFunction.getCoConstDefVal("CD_EXTERNAL_LINK"))}]];
+	var cardBody = $('.linkCase');
+	
+	$.each(linkV, function(index, value) {
+		var strA = value[4].split("|"); 
+		var topPosition = 60 + (100  * index);
+		var linkSeq = (index+1);
+		
+		var row  = '<div class="row form-group">';
+			row += '<div class="col-1"></div>';			
+			row += '<div class="col-3 text-center">';
+			row += '<a class="right" id="helpLink_'+linkSeq+'" style="position:absolute; cursor: pointer; top:'+topPosition+'px; left:1060px; display:none;"></a>';
+			row += '<label>' + value[2] + '</label>';
+			row += "</div>";
+			row += "<div class='col-4'>"+strA[0]+"<br>"+strA[1] + "</div>";
+			row += "<div class='col-3'><a href='"+strA[1]+"' class='btn btn-lg-teal btn-sm text-smaller' style='width: 4rem;'";
+			
+			if (strA[1] != null && strA[1] != "") {
+				row += "target='_blank'";
+			}
+			
+			row += ">GO</a></div>";
+			row += "</div>";
+			row += '<div class="col-1"></div>';	
+			row += "</div>";
+		
+		$(cardBody).append(row);
+
+		showHelpLink("External_Link_"+linkSeq, "helpLink_"+linkSeq);
+	});
+});
+</script>
+</th:block>

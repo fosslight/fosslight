@@ -6,6 +6,7 @@
 package oss.fosslight.controller;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
@@ -39,7 +42,7 @@ public class DashboardController extends CoTopComponent{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 		
-		return DASHBOARD.LIST_JSP;
+		return "dashboard/list";
 	}
 	
 	@GetMapping(value=DASHBOARD.JOBSLIST)
@@ -48,26 +51,16 @@ public class DashboardController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		int page = Integer.parseInt(req.getParameter("page"));
-		int rows = Integer.parseInt(req.getParameter("rows"));
-		project.setCurPage(page);
-		project.setPageListSize(rows);
+		project.setCurPage(1);
+		project.setPageListSize(1);
 		
 		return makeJsonResponseHeader(dashboardService.getDashboardJobsList(project));
 	}
 	
-	@GetMapping(value=DASHBOARD.COMMENTLIST)
-    public @ResponseBody ResponseEntity<Object> commentsListAjax(
-    		CommentsHistory commentsHistory
-            , HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
-        int page = Integer.parseInt(req.getParameter("page"));
-        int rows = Integer.parseInt(req.getParameter("rows"));
-        commentsHistory.setCurPage(page);
-        commentsHistory.setPageListSize(rows);
-        
-        return makeJsonResponseHeader(dashboardService.getDashboardCommentsList(commentsHistory));
+	@PostMapping(value=DASHBOARD.COMMENTLIST)
+    public String commentsListAjax(@RequestBody Map<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("comments", dashboardService.getDashboardCommentsList(param));
+		return "dashboard/view/commentsView";
     }
 	
 	@GetMapping(value=DASHBOARD.OSSLIST)
@@ -95,7 +88,8 @@ public class DashboardController extends CoTopComponent{
         licenseMaster.setCurPage(page);
         licenseMaster.setPageListSize(rows);
         
-        return makeJsonResponseHeader(dashboardService.getDashboardLicenseList(licenseMaster));
+        Map<String, Object> map = dashboardService.getDashboardLicenseList(licenseMaster);
+        return makeJsonResponseHeader(map);
     }
 	
 	@PostMapping(value=DASHBOARD.READCONFIRM_ALL)
@@ -114,4 +108,39 @@ public class DashboardController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(resMap);
 	}
+	
+	@GetMapping(value=DASHBOARD.PROGPROJECTCNT)
+    public @ResponseBody ResponseEntity<Object> progProjectCnt(
+            HttpServletRequest req
+            , HttpServletResponse res
+            , Model model){
+		return makeJsonResponseHeader(dashboardService.getProgProjectCnt());
+    }
+	
+	@GetMapping(value=DASHBOARD.DISCOVEREDEMLLIST)
+    public String discoveredEmlListAjax(HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("discoveredEmlList", dashboardService.getDiscoveredEmlList());
+		return "dashboard/view/discoveredEmlView";
+    }
+	
+	@PostMapping(value=DASHBOARD.DISCOVEREDEMLMESSAGE)
+    public @ResponseBody ResponseEntity<Object> discoveredEmlMessage(
+    		@RequestBody HashMap<String, Object> param
+    		, HttpServletRequest req
+            , HttpServletResponse res
+            , Model model){
+		return makeJsonResponseHeader(dashboardService.getDiscoveredEmlMessage(param));
+    }
+	
+	@GetMapping(value=DASHBOARD.NVDDASHBOARDLIST)
+    public String nvdDashboardList(HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("nvdDashboard", dashboardService.getNvdDashboardList());
+		return "dashboard/view/nvdDashboardView";
+    }
+	
+	@GetMapping(value=DASHBOARD.LATESTSCOREDVULNS)
+    public String latestScoredVulns(HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("lstestScoredVulns", dashboardService.getLatestScoredVulns());
+		return "dashboard/view/latestScoredVulnsView";
+    }
 }

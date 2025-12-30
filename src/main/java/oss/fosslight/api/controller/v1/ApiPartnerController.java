@@ -51,7 +51,7 @@ public class ApiPartnerController extends CoTopComponent {
 	
 	protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 	
-	@ApiOperation(value = "3rd Party Search", notes = "3rd party 조회")
+	@ApiOperation(value = "3rd Party Search", notes = "Search 3rd Party Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -96,7 +96,7 @@ public class ApiPartnerController extends CoTopComponent {
 		}
     }
 	
-	@ApiOperation(value = "3rd Party Add Watcher", notes = "3rd Party Add Watcher")
+	@ApiOperation(value = "3rd Party Add Editor", notes = "Add Editor to 3rd Party")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })

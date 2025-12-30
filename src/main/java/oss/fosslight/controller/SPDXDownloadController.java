@@ -98,8 +98,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					
 					SPDXUtil2.convert(prjId, sheetFullPath, rdfFullPath);
 					
-					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm())+".rdf", 
-							FilenameUtils.getBaseName(sheetFile.getLogiNm())+".rdf");
+					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm())+".rdf", FilenameUtils.getBaseName(sheetFile.getLogiNm())+".rdf");
 					
 					try {
 						File spdxRdfFile = new File(rdfFullPath);
@@ -146,8 +145,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					
 					SPDXUtil2.convert(prjId, sheetFullPath, tagFullPath);
 					
-					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm())+".tag", 
-							FilenameUtils.getBaseName(sheetFile.getLogiNm())+".tag");
+					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm())+".tag", FilenameUtils.getBaseName(sheetFile.getLogiNm())+".tag");
 					
 					try {
 						File spdxTafFile = new File(tagFullPath);
@@ -192,8 +190,7 @@ public class SPDXDownloadController extends CoTopComponent {
 
 					SPDXUtil2.convert(prjId, sheetFullPath, jsonFullPath);
 
-					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".json",
-							FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".json");
+					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".json", FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".json");
 
 					try {
 						File spdxJsonFile = new File(jsonFullPath);
@@ -238,8 +235,7 @@ public class SPDXDownloadController extends CoTopComponent {
 
 					SPDXUtil2.convert(prjId, sheetFullPath, yamlFullPath);
 
-					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".yaml",
-							FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".yaml");
+					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".yaml", FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".yaml");
 
 					try {
 						File spdxYamlFile = new File(yamlFullPath);

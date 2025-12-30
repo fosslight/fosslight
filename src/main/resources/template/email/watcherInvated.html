@@ -24,97 +24,98 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$contentsSubTitle</p>
-							#end
-							#if( $project_basic_info )
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<col style="width:40%">
-        							<col style="width:*">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
-										<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
-										<td style="padding:5px;">($!project_basic_info.prjId) $!project_basic_info.prjName</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
-										<td style="padding:5px;">$!project_basic_info.prjVersion</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
-										<td style="padding:5px;">$!project_basic_info.osType</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type / Network Service Only? </th>
-										<td style="padding:5px;">$!project_basic_info.distributionType / $!project_basic_info.networkServerType</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
-										<td style="padding:5px;">$!project_basic_info.distributeTarget</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
-										<td style="padding:5px;">$!project_basic_info.noticeType</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Priority</th>
-										<td style="padding:5px;">$!project_basic_info.priority</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Additional Information</th>
-										<td style="padding:5px;">$!project_basic_info.comment</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;">$!project_basic_info.creator</td>
-									</tr>
-									#if( $project_basic_info.reviewer )
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										<td style="padding:5px;">$!project_basic_info.reviewer</td>
-									</tr>
-									#end
-								</table>
-							#end
-							#if( $selfcheck_basic_info )
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<col style="width:40%">
-        							<col style="width:*">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
-										<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Name</th>
-										<td style="padding:5px;">($!selfcheck_basic_info.prjId) $!selfcheck_basic_info.prjName</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Version</th>
-										<td style="padding:5px;">$!selfcheck_basic_info.prjVersion</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
-										<td style="padding:5px;">$!selfcheck_basic_info.osType</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type</th>
-										<td style="padding:5px;">$!selfcheck_basic_info.distributionType</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;">$!selfcheck_basic_info.creator</td>
-									</tr>
-								</table>
-							#end
+								<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+								<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+
+								<th:block th:if="${project_basic_info != null}">
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<col style="width:40%">
+										<col style="width:*">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+											<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
+											<td style="padding:5px;"><span th:utext="${project_basic_info.prjName}"></span></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.prjVersion}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.osType}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type / Network Service Only?</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.distributionType + ' / ' + project_basic_info.networkServerType}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.distributeTarget}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.noticeType}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Priority</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.priority}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Additional Information</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.comment}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.creator}"></td>
+										</tr>
+										<th:block th:if="${not #strings.isEmpty(project_basic_info.reviewer)}">
+											<tr>
+												<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
+												<td style="padding:5px;" th:utext="${project_basic_info.reviewer}"></td>
+											</tr>
+										</th:block>
+									</table>
+								</th:block>
+
+								<th:block th:if="${selfcheck_basic_info != null}">
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<col style="width:40%">
+										<col style="width:*">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+											<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Name</th>
+											<td style="padding:5px;"><span th:utext="${selfcheck_basic_info.prjName}"></span></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Version</th>
+											<td style="padding:5px;" th:utext="${selfcheck_basic_info.prjVersion}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
+											<td style="padding:5px;" th:utext="${selfcheck_basic_info.osType}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type</th>
+											<td style="padding:5px;" th:utext="${selfcheck_basic_info.distributionType}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+											<td style="padding:5px;" th:utext="${selfcheck_basic_info.creator}"></td>
+										</tr>
+									</table>
+								</th:block>
+
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

@@ -156,4 +156,18 @@ public interface PartnerMapper {
 	public List<OssComponents> selectOssComponentsSbomListClassAppend(PartnerMaster partnerMaster);
 
 	public List<OssComponents> checkSelectDownloadFile(PartnerMaster partnerMaster);
+	
+	int existsWatcherByUserDivistion(PartnerMaster project);
+	
+	void updateWatcherDivision(PartnerMaster project);
+
+	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
+	int updateOssFileId(PartnerMaster partnerMaster);
+	
+	void deleteFileBySeq(T2File file);
+
+	public List<OssComponents> selectVulnerabilityDataForPartner(@Param("prjId") String partnerId, @Param("referenceDiv") String referenceDiv);
+
+	public void updateVulnerabilityDataForPartner(OssComponents ossComponents);
 }

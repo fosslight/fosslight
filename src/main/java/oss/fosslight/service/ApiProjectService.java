@@ -14,15 +14,26 @@ import org.springframework.stereotype.Service;
 
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 
 @Service
 public interface ApiProjectService {
 	public Map<String, Object> selectProjectList(Map<String, Object> paramMap);
-	
+
+	public Map<String, Object> selectProjectList_V1(Map<String, Object> paramMap);
+
+	public boolean checkUserHasProject(T2Users userInfo, String prjId);
+
+	public boolean checkUserAvailableToEditProject(T2Users userInfo, String prjId);
+
+	public boolean checkProjectAvailability(T2Users userInfo, String prjId, String needToUploadReport);
+
 	public boolean existProjectCnt(Map<String, Object> paramMap);
 
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet);
+	
+	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet, boolean exactMatchFlag);
 	
 	public Map<String, Object> readAndroidBuildImage(UploadFile ossReportBean, UploadFile noticeHtmlBean, UploadFile resultTxtBean);
 	
@@ -76,7 +87,15 @@ public interface ApiProjectService {
 
 	public Map<String, Object> selectProjectMaster(String prjId);
 
-	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList);
+	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList, List<Map<String, Object>> gridDataList);
 
-	public void registDepOss(List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList, Project project, String refDiv);
+	public void updateSubStatus(Map<String, Object> param);
+	
+	public Map<String, Object> getProjectBasicInfo(String prjId);
+
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, String comment, String tabGubn, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx);
+
+	public Map<String, Object> registProjectOssComponent(Map<String, Object> param, String referenceDiv);
+
+	public void processResetTab(String tabName, Project project, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense);
 }

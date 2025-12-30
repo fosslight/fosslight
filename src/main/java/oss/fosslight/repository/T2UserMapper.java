@@ -44,7 +44,7 @@ public interface T2UserMapper {
 	
 	public String checkDuplicateId(T2Users vo);
 	
-	public List<T2Users> selectReviwer(@Param("adminYn") String adminYn, @Param("ldapFlag") String ldapFlag);
+	public List<T2Users> selectReviwer(@Param("ldapFlag") String ldapFlag);
 	
 	public List<T2Users> selectAdminUser();
 	
@@ -67,4 +67,8 @@ public interface T2UserMapper {
 	public void updateStatisticsMostUsedInfo(T2Users t2Users);
 
 	public int updateUserNameDivision(T2Users userInfo);
+	
+	public List<T2Users> selectUnusedDivisionUserList(@Param("unusedDivisionList") String[] unusedDivisionList);
+
+	public T2Users checkExpiredUser(T2Users bean);
 }

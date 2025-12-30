@@ -5,9 +5,7 @@
 
 package oss.fosslight.controller;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -26,8 +24,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -106,14 +102,10 @@ public class ExcelDownloadController extends CoTopComponent {
 		return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@GetMapping(value = EXCELDOWNLOAD.CHART_EXCEL)
-	public @ResponseBody ResponseEntity<Object> getChartExcel(@ModelAttribute OssMaster ossMaster,
+	public @ResponseBody ResponseEntity<Object> getChartExcel(@ModelAttribute Statistics params,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		
-		String chartParams = req.getParameter("params");
-		Type collectionType = new TypeToken<List<Statistics>>() {}.getType();
-		List<Statistics> params = (List<Statistics>) fromJson(chartParams, collectionType);
 		String downloadId = null;
 		
 		try {

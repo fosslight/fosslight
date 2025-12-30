@@ -17,6 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
@@ -25,19 +32,14 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.API;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.ApiOssService;
+import oss.fosslight.service.RefineOssService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
 
 @Api(tags = {"1. OSS & License"})
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 @RequestMapping(value = "/api/v1")
 public class ApiOssController extends CoTopComponent {
 	
@@ -49,7 +51,10 @@ public class ApiOssController extends CoTopComponent {
 
 	private final OssService ossService;
 	
-	@ApiOperation(value = "Search OSS List", notes = "OSS 조회")
+	private final RefineOssService refineOssService;
+
+	
+	@ApiOperation(value = "Search OSS List", notes = "Search OSS Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -81,7 +86,7 @@ public class ApiOssController extends CoTopComponent {
 		}
     }
 	
-	@ApiOperation(value = "Search OSS Info by downloadLocation", notes = "downloadLocation별 OSS Info 조회")
+	@ApiOperation(value = "Search OSS Info by downloadLocation", notes = "Search OSS Information by downloadLocation")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -107,8 +112,9 @@ public class ApiOssController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
     }
-	
-	@ApiOperation(value = "Search License Info", notes = "License Info 조회")
+
+
+	@ApiOperation(value = "Search License Info", notes = "Search License Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -136,7 +142,7 @@ public class ApiOssController extends CoTopComponent {
 		}
     }
 
-	@ApiOperation(value = "Register New OSS", notes = "신규 OSS 등록")
+	@ApiOperation(value = "Register New OSS", notes = "Register New OSS")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
 	})
@@ -159,4 +165,29 @@ public class ApiOssController extends CoTopComponent {
 		return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
 	}
+	
+	@ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL의 경우 다음 순서대로 처리합니다. <ol><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* doUpdateFlag가 N인 경우 Database를 Update하지 않습니다.")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@GetMapping(value = {"/refine-download-location"})
+    public CommonResult refineOssDownloadLocation(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
+    		@ApiParam(value = "Do Update Database", required = true, defaultValue = "N", allowableValues = "N,Y") @RequestParam(required = true) String doUpdateFlag,
+    		@ApiParam(value = "Refine Type", required = true, allowableValues = "0.UPDATE DOWNLOAD LOCATION FORMAT,1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
+		
+		// 사용자 인증
+		try {
+			if(!userService.isAdmin(_token)) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+			}
+			return responseService.getSingleResult(refineOssService.refineDownloadLocation(ossName, refineType, "Y".equalsIgnoreCase(doUpdateFlag)));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+		}
+    }
 }

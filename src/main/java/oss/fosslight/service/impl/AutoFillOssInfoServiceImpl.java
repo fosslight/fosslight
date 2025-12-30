@@ -6,6 +6,7 @@
 package oss.fosslight.service.impl;
 
 import java.net.URLDecoder;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,13 +14,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutException;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.DependencyType;
 import oss.fosslight.common.ExternalLicenseServiceType;
 import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.ProjectIdentification;
@@ -49,6 +57,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
+import reactor.util.retry.Retry;
 
 @Service
 @Slf4j
@@ -145,6 +155,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			
 			List<ProjectIdentification> prjOssLicenses;
 			String downloadLocation = oss.getDownloadLocation();
+			String dependencyTypeCheckUrl = "";
 			String ossVersion = oss.getOssVersion();
 			String currentLicense = getLicenseNameSort(oss.getLicenseName());
 			String checkedLicense = "";
@@ -175,25 +186,22 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 				
 				if (oss.getDownloadLocation().startsWith("www.")) {
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(4, oss.getDownloadLocation().length()));
 				}
 				
-				if (oss.getDownloadLocation().contains(".git")) {
-					if (oss.getDownloadLocation().endsWith(".git")) {
-						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
-					} else {
-						if (oss.getDownloadLocation().contains("#")) {
-							oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-							oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
-						}
-					}
+				if (oss.getDownloadLocation().contains(".git") && oss.getDownloadLocation().endsWith(".git")) {
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
 				}
 				
-				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
-				if (downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-				}
+//				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
+//				if (downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+//					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
+//				}
 				
+				dependencyTypeCheckUrl = oss.getDownloadLocation();
+				if (!dependencyTypeCheckUrl.startsWith("https://")) {
+					dependencyTypeCheckUrl = "https://" + dependencyTypeCheckUrl;
+				}
 				// Search Priority 2. find by oss download location and version
 				prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
 				checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
@@ -249,7 +257,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			// Search Priority 4. find by Clearly Defined And Github API
-			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
+			DependencyType dependencyType = DependencyType.downloadLocationToType(dependencyTypeCheckUrl);
 
 			if (dependencyType.equals(DependencyType.UNSUPPORTED) || !isExternalServiceEnable()) {
 				continue;
@@ -257,7 +265,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 			// Search Priority 4-1. Github API : empty oss version and download location
 			if (ossVersion.isEmpty() && ExternalLicenseServiceType.GITHUB.hasDependencyType(dependencyType) && isGitHubApiHealth) {
-				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
+				Matcher matcher = dependencyType.getPattern().matcher(dependencyTypeCheckUrl);
 				String owner = "", repo = "";
 
 				while (matcher.find()) {
@@ -281,19 +289,40 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 			// Search Priority 4-2. Clearly Defined : oss version and download location
 			if (!ossVersion.isEmpty() && ExternalLicenseServiceType.CLEARLY_DEFINED.hasDependencyType(dependencyType) && isClearlyDefinedApiHealth) {
-				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String type = dependencyType.getType();
 				String provider = dependencyType.getProvider();
 				String revision = ossVersion;
 				String namespace = "", name = "";
-
-				while (matcher.find()) {
-					if (dependencyType.equals(DependencyType.MAVEN_CENTRAL) || dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
-						namespace = matcher.group(3);
-						name = matcher.group(4);
-					} else {
-						namespace = "-";
-						name = matcher.group(3);
+				
+				if (dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
+					String urlPath = dependencyTypeCheckUrl.split("[#]")[1];
+					for (String pathString : urlPath.split("[:]")) {
+						if (isEmpty(namespace)) {
+							namespace = pathString;
+							continue;
+						}
+						if (isEmpty(name)) {
+							name = pathString;
+							break;
+						}
+					}
+				} else {
+					Matcher matcher = dependencyType.getPattern().matcher(dependencyTypeCheckUrl);
+					
+					while (matcher.find()) {
+						if (dependencyType.equals(DependencyType.MAVEN_CENTRAL) || dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
+							namespace = matcher.group(3);
+							name = matcher.group(4);
+						} else if (dependencyType.equals(DependencyType.NPM)) {
+							namespace = matcher.group(4);
+							name = matcher.group(5);
+						} else if (dependencyType.equals(DependencyType.NPM2)) {
+							namespace = "-";
+							name = matcher.group(4);
+						} else {
+							namespace = "-";
+							name = matcher.group(3);
+						}
 					}
 				}
 
@@ -311,10 +340,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 			}
 		}
-
 		// TODO : Request at once when using external API(Clearly Defined, Github API)
-
-
 
 		/* grouping same oss */
 		final Comparator<ProjectIdentification> comp = (p1, p2) -> p1.getDownloadLocation().compareTo(p2.getDownloadLocation());
@@ -378,13 +404,15 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return sortedValue;
     }
 	
+	@SuppressWarnings("unchecked")
 	private String requestClearlyDefinedLicenseApi(String requestUri) {
-		String checkedLicense;
+		String checkedLicense = "";
 		try {
-			Mono<Object> mono = requestClearlyDefinedLicense(requestUri);
-			Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
-			Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
-			checkedLicense = licenseInfo.get("declared");
+			Map<String, Object> ossInfo = requestClearlyDefinedLicense(requestUri);
+			if (ossInfo != null && ossInfo.containsKey("licensed")) {
+				Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
+				checkedLicense = licenseInfo.get("declared");
+			}
 		} catch (Exception e) {
 			log.error("Clearly Defined -> " + requestUri + " : " + e.getMessage());
 			checkedLicense = "NONE";
@@ -439,7 +467,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		Map<String, Object> res = new HashMap<>();
 
 		try {
-			res = (Map<String, Object>) requestClearlyDefinedLicense("https://api.clearlydefined.io/").block();
+			res = requestClearlyDefinedLicense("https://api.clearlydefined.io/");
 		} catch(HttpServerErrorException e) {
 			String message = "ClearlyDefined ";
 			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
@@ -451,7 +479,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				throw new HttpServerErrorException(e.getStatusCode(), message);
 			}
 		}
-		return res.get("status").equals("OK");
+		
+		if (res != null) {
+			return res.get("status").equals("OK");
+		} else {
+			return false;
+		}
 	}
 
 	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters, String currentLicense) {
@@ -513,137 +546,245 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			.flatMap(response -> response.bodyToMono(Object.class));
 	}
 
+//	@Override
+//	public ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations) {
+//		return Flux.fromIterable(locations)
+//				.parallel()
+//				.runOn(Schedulers.elastic())
+//				.flatMap(this::requestClearlyDefinedLicense);
+//	}
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations) {
-		return Flux.fromIterable(locations)
-				.parallel()
-				.runOn(Schedulers.elastic())
-				.flatMap(this::requestClearlyDefinedLicense);
+	public Map<String, Object> requestClearlyDefinedLicense(String location) {
+		HttpClient httpClient = HttpClient.create()
+								    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+								    .responseTimeout(Duration.ofSeconds(30))
+								    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(30)).addHandlerLast(new WriteTimeoutHandler(30)));
+		
+		WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
+
+		String responseString = webClient.get()
+							        .uri(location)
+							        .exchangeToMono(response -> {
+							            if (response.statusCode().isError()) {
+							                return response.createException().flatMap(Mono::error);
+							            }
+							            return response.bodyToMono(String.class);
+							        })
+							        .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)).filter(ex -> ex instanceof ReadTimeoutException))
+							        .block();
+		
+//		String responseString = webClient.get().uri(location).exchange()
+//			    				.flatMap(response -> {
+//			    					HttpStatus statusCode = response.statusCode();
+//			    					if (statusCode.is4xxClientError()) {
+//			    						return Mono.error(new HttpServerErrorException(statusCode));
+//			    					} else if (statusCode.is5xxServerError()) {
+//			    						return Mono.error(new HttpServerErrorException(statusCode));
+//			    					}
+//			    					return Mono.just(response);
+//			    				})
+//			    				.block()
+//			    				.bodyToMono(String.class)
+//			    				.retry(5)
+//			    				.block();
+		
+		Map<String, Object> returnMap = null;
+		ObjectMapper mapper = new ObjectMapper();
+        
+		if (!isEmpty(responseString) && (responseString.startsWith("{") && !responseString.endsWith("}"))) {
+			responseString += "}";
+		}
+		
+		try {
+			returnMap = mapper.readValue(responseString, Map.class);
+		} catch (JsonMappingException e) {
+			log.error(e.getMessage(), e);
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return returnMap;
 	}
 
 	@Override
-	public Mono<Object> requestClearlyDefinedLicense(String location) {
-		return webClient.get()
-				.uri(location)
-                .exchange()
-				.flatMap(response -> {
-					HttpStatus statusCode = response.statusCode();
-					if (statusCode.is4xxClientError()) {
-						return Mono.error(new HttpServerErrorException(statusCode));
-					}else if (statusCode.is5xxServerError()) {
-						return Mono.error(new HttpServerErrorException(statusCode));
-					}
-					return Mono.just(response);
-				})
-				.retry (1)
-				.flatMap(response -> response.bodyToMono(Object.class));
+	public Map<String, Object> saveOssCheckLicense(List<ProjectIdentification> paramBeanList, String targetName) {
+		return saveOssCheckLicense(paramBeanList, targetName, null, null, null, null, true);
 	}
-
+	
 	@Transactional
 	@Override
-	public Map<String, Object> saveOssCheckLicense(ProjectIdentification paramBean, String targetName) {
+	public Map<String, Object> saveOssCheckLicense(List<ProjectIdentification> paramBeanList, String targetName, String prjId, List<String> comments, List<String> successIdList, List<String> failIdList, boolean isSaveComments) {
 		Map<String, Object> map = new HashMap<String, Object>();
+		if (successIdList == null) {
+			successIdList = new ArrayList<>();
+		}
+		if (failIdList == null) {
+			failIdList = new ArrayList<>();
+		}
 		try {
 			int updateCnt = 0;
 
-			List<String> componentIds = paramBean.getComponentIdList();
-
-			for (String componentId : componentIds) {
-				OssComponents oc = new OssComponents();
-				oc.setComponentId(componentId);
-				switch(targetName.toUpperCase()) {
-					case CoConstDef.CD_CHECK_OSS_SELF:
-						selfCheckMapper.deleteOssComponentsLicense(oc);
-						break;
-					case CoConstDef.CD_CHECK_OSS_PARTNER:
-						partnerMapper.deleteOssComponentsLicense(oc);
-						break;
-					case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
-						projectMapper.deleteOssComponentsLicense(oc);
-						break;
-				}
-								
-				String[] checkLicense = paramBean.getCheckLicense().split(",");
-				String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
-				
-				for (String licenseName : checkLicense) {
-					ProjectIdentification comLicense = new ProjectIdentification();
-					comLicense.setComponentId(componentId);
-					comLicense.setLicenseName(licenseName);
-					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, licenseDev);
-					switch(targetName.toUpperCase()) {
-						case CoConstDef.CD_CHECK_OSS_SELF:
-							selfCheckMapper.registComponentLicense(license);
-							break;
-						case CoConstDef.CD_CHECK_OSS_PARTNER:
-							partnerMapper.insertOssComponentsLicense(license);
-							break;
-						case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
-							projectMapper.registComponentLicense(license);
-							break;
-					}
-					
-					updateCnt++;
-				}
-			}
+			List<String> changeOssLicenseInfoList = new ArrayList<>();
+			String referenceId = "";
+			String referenceDiv = "";
+			String commentId = "";
 			
-			if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())
-					|| CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
-				if (updateCnt >= 1) {
-					String commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
-					String checkOssLicenseComment = "";
-					String changeOssLicenseInfo = "<p>" + paramBean.getOssName();
+			if (paramBeanList != null) {
+				for (ProjectIdentification paramBean : paramBeanList) {
+					String rowId = paramBean.getGridId();
+					List<String> componentIds = paramBean.getComponentIdList();
 
-					if (!paramBean.getOssVersion().isEmpty()) {
-						changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ") ";
-					} else {
-						changeOssLicenseInfo += " ";
-					}
-
-					changeOssLicenseInfo += paramBean.getDownloadLocation() + " "
-							+ paramBean.getLicenseName() + " => " + paramBean.getCheckLicense() + "</p>";
-					CommentsHistory commentInfo = null;
-
-					if (isEmpty(commentId)) {
-						checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
-						checkOssLicenseComment += changeOssLicenseInfo;
-						CommentsHistory commHisBean = new CommentsHistory();
+					for (String componentId : componentIds) {
+						OssComponents oc = new OssComponents();
+						oc.setComponentId(componentId);
+						switch(targetName.toUpperCase()) {
+							case CoConstDef.CD_CHECK_OSS_SELF:
+								selfCheckMapper.deleteOssComponentsLicense(oc);
+								break;
+							case CoConstDef.CD_CHECK_OSS_PARTNER:
+								partnerMapper.deleteOssComponentsLicense(oc);
+								break;
+							case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+								projectMapper.deleteOssComponentsLicense(oc);
+								break;
+						}
+										
+						String[] checkLicense = paramBean.getCheckLicense().split(",");
+						String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
+						List<OssComponentsLicense> ossComponentsLicenseList = new ArrayList<>();
 						
-						if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
-							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
-							commHisBean.setReferenceId(paramBean.getReferenceId());
-						}else {
-							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-							commHisBean.setReferenceId(paramBean.getRefPrjId());
+						for (String licenseName : checkLicense) {
+							ProjectIdentification comLicense = new ProjectIdentification();
+							comLicense.setComponentId(componentId);
+							comLicense.setLicenseName(licenseName);
+							OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, licenseDev);
+							ossComponentsLicenseList.add(license);
+							switch(targetName.toUpperCase()) {
+								case CoConstDef.CD_CHECK_OSS_SELF:
+									selfCheckMapper.registComponentLicense(license);
+									break;
+								case CoConstDef.CD_CHECK_OSS_PARTNER:
+									partnerMapper.insertOssComponentsLicense(license);
+									break;
+								case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+									projectMapper.registComponentLicense(license);
+									break;
+							}
+							
+							updateCnt++;
 						}
 						
-						commHisBean.setContents(checkOssLicenseComment);
-						commentInfo = commentService.registComment(commHisBean, false);
-					} else {
-						commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+						oc.setObligationType(CommonFunction.checkObligationSelectedLicense(ossComponentsLicenseList));
+						projectMapper.updateBom(oc);
+					}
+					
+					if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())
+							|| CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
+						if (updateCnt >= 1) {
+							commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
+							String changeOssLicenseInfo = !isEmpty(paramBean.getOssName()) ? paramBean.getOssName() : "N/A";
+							if (!isEmpty(paramBean.getOssVersion())) {
+								changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ")";
+							}
+							if (!isEmpty(paramBean.getDownloadLocation())) {
+								changeOssLicenseInfo = "<a href='" + paramBean.getDownloadLocation() + "' class='urlLink2' target='_blank'>" + changeOssLicenseInfo + "</a>";
+							}
+							changeOssLicenseInfo += "|" + avoidNull(paramBean.getLicenseName(), "N/A") + "|" + paramBean.getCheckLicense();
+							changeOssLicenseInfoList.add(changeOssLicenseInfo);
 
-						if (commentInfo != null) {
-							if (!isEmpty(commentInfo.getContents())) {
-								checkOssLicenseComment  = commentInfo.getContents();
-								checkOssLicenseComment += changeOssLicenseInfo;
-								commentInfo.setContents(checkOssLicenseComment);
-
-								commentService.updateComment(commentInfo, false);
+							if (isEmpty(commentId)) {
+								if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
+									referenceDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
+									referenceId = paramBean.getReferenceId();
+								} else {
+									referenceDiv = CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS;
+									referenceId = paramBean.getRefPrjId();
+								}
 							}
 						}
 					}
-
-					if (commentInfo != null) {
-						map.put("commentId", commentInfo.getCommId());
+					
+					if (updateCnt >= 1) {
+						successIdList.add(rowId);
+					} else {
+						failIdList.add(rowId);
 					}
+				}
+			} else {
+				referenceId = prjId;
+				if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
+					referenceDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
+				} else {
+					referenceDiv = CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS;
 				}
 			}
 			
-			if (updateCnt >= 1) {
-				map.put("isValid", true);
-				map.put("returnType", "Success");
+			if (!isSaveComments) {
+				if (CollectionUtils.isNotEmpty(changeOssLicenseInfoList)) {
+					comments.addAll(changeOssLicenseInfoList);
+				}
 			} else {
-				throw new Exception("update Cnt가 비정상적인 값임.");
+				if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) || CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
+					List<String> ossLicenseInfoList = new ArrayList<>();
+					if (CollectionUtils.isNotEmpty(comments)) {
+						ossLicenseInfoList.addAll(comments);
+					}
+					if (CollectionUtils.isNotEmpty(changeOssLicenseInfoList)) {
+						ossLicenseInfoList.addAll(changeOssLicenseInfoList);
+					}
+					if (CollectionUtils.isNotEmpty(ossLicenseInfoList)) {
+						map.put("isValid", true);
+						map.put("returnType", "Success");
+						
+						String comment = CommonFunction.changeDataToTableFormat("license", CommonFunction.getCustomMessage("msg.common.change.name", "License Name"), ossLicenseInfoList);
+						CommentsHistory commentInfo = null;
+						
+						if (isEmpty(commentId)) {
+							CommentsHistory commHisBean = new CommentsHistory();
+							commHisBean.setReferenceDiv(referenceDiv);
+							commHisBean.setReferenceId(referenceId);
+							commHisBean.setContents(comment);
+							commHisBean.setStatus("pre-review > license");
+							commentInfo = commentService.registComment(commHisBean, false);
+						} else {
+							commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+
+							if (commentInfo != null) {
+								if (!isEmpty(commentInfo.getContents())) {
+									String contents = commentInfo.getContents();
+									contents += comment;
+									commentInfo.setContents(contents);
+									commentInfo.setStatus("pre-review > license");
+
+									commentService.updateComment(commentInfo, false);
+								}
+							}
+						}
+						
+						if (commentInfo != null) {
+							map.put("commentId", commentInfo.getCommId());
+						}
+						if (!successIdList.isEmpty()) {
+							map.put("successIds", successIdList);
+						}
+						if (!failIdList.isEmpty()) {
+							map.put("failIds", failIdList);
+						}
+					}
+				} else {
+					if (!successIdList.isEmpty() || !failIdList.isEmpty()) {
+						map.put("isValid", true);
+						map.put("returnType", "Success");
+						if (!successIdList.isEmpty()) {
+							map.put("successIds", successIdList);
+						}
+						if (!failIdList.isEmpty()) {
+							map.put("failIds", failIdList);
+						}
+					}
+				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());

@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -39,6 +40,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.common.Url.SELF_CHECK;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.LicenseMaster;
@@ -56,6 +58,7 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.util.YamlUtil;
 import oss.fosslight.validation.T2CoValidationResult;
@@ -99,7 +102,7 @@ public class SelfCheckController extends CoTopComponent {
 		
 		Project searchBean = null;
 		
-		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 			deleteSession(SESSION_KEY_SEARCH);
 			
 			searchBean = searchService.getSelfCheckSearchFilter(loginUserName());
@@ -113,7 +116,7 @@ public class SelfCheckController extends CoTopComponent {
 		model.addAttribute("searchBean", searchBean);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		
-		return SELF_CHECK.LIST_JSP;
+		return "selfCheck/list";
 	}
 
 	/**
@@ -125,28 +128,39 @@ public class SelfCheckController extends CoTopComponent {
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("project", new Project());
 
-		return SELF_CHECK.EDIT_JSP;
+		return "selfCheck/edit";
 	}
 	
 	/**
 	 * [API] 프로젝트 상세 조회 Edit Page
 	 */
-	@RequestMapping(value = SELF_CHECK.EDIT_ID, method = { RequestMethod.GET,
-			RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	@RequestMapping(value = SELF_CHECK.EDIT_ID, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
 	public String edit(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
 		project = selfCheckService.getProjectDetail(project);
+		if (project == null) {
+			try {
+				ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			return null;
+		}
 		T2Users user = userService.getLoginUserInfo();
-		project.setPrjEmail(user.getEmail());
+		if (user != null) {
+			project.setPrjEmail(user.getEmail());
+		}
 
 		model.addAttribute("project", project);
-		model.addAttribute("detail", toJson(project));
+		model.addAttribute("detail", project);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("ossNotice", new OssNotice());
 		
 		boolean permissionFlag = false;
 		// Admin인 경우 Creator 를 변경할 수 있도록 사용자 정보를 반환한다.
@@ -160,10 +174,12 @@ public class SelfCheckController extends CoTopComponent {
 			if (selfCheckService.checkUserPermissions(project, loginUserName())) {
 				permissionFlag = true;
 			}
-			if (!permissionFlag) model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
+			if (!permissionFlag) {
+				model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
+			}
 		}
 		
-		return SELF_CHECK.EDIT_JSP;
+		return "selfCheck/edit";
 	}
 	
 	/**
@@ -180,7 +196,7 @@ public class SelfCheckController extends CoTopComponent {
 			
 			if (CoConstDef.FLAG_YES.equals(project.getUseYn())) {
 				model.addAttribute("project", project);
-				model.addAttribute("detail", toJson(project));
+				model.addAttribute("detail", project);
 				model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 				model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 				model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
@@ -201,8 +217,9 @@ public class SelfCheckController extends CoTopComponent {
 			model.addAttribute("message", "Reqeusted URL contains Self-Check Project ID that doesn't exist. Please check the Self-Check Project ID again.");
 		}
 		
+		model.addAttribute("viewFlag", CoConstDef.FLAG_YES);
 		
-		return SELF_CHECK.VIEW_JSP;
+		return "selfCheck/edit";
 	}
 	
 	/**
@@ -230,6 +247,31 @@ public class SelfCheckController extends CoTopComponent {
 
 		Map<String, Object> map = selfCheckService.getProjectList(project);
 
+		@SuppressWarnings("unchecked")
+		List<Project> list = (List<Project>) map.get("rows");
+		
+		boolean isPermission = false;
+		for (Project prj : list) {
+			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {prj.getPrjId()}, "selfCheck");
+			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
+				for (String userId : permissionCheckList) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						isPermission = true;
+						break;
+					}
+				}
+				if (!CommonFunction.isAdmin() && !isPermission) {
+					prj.setStatusPermission(0);
+				} else {
+					prj.setStatusPermission(1);
+				}
+				prj.setPermission(1);
+			} else {
+				prj.setPermission(0);
+				prj.setStatusPermission(0);
+			}
+		}
+		
 		return makeJsonResponseHeader(map);
 	}
 	
@@ -285,11 +327,9 @@ public class SelfCheckController extends CoTopComponent {
 			if (!vr.isValid()) {
 				Map<String, String> validMap = vr.getValidMessageMap();
 				map.put("validData", validMap);
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo(mainDataList, validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo(mainDataList, validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
 			} else {
-				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo(mainDataList, null, null, null, true, true));
+				map.replace("mainData", CommonFunction.identificationSortByValidInfo(mainDataList, null, null, null, true, true));
 			}
 			
 			if (!vr.isDiff()){
@@ -311,7 +351,7 @@ public class SelfCheckController extends CoTopComponent {
 			model.addAttribute("project", new Project());
 		}
 		
-		return SELF_CHECK.VIEW_AJAX_JSP;
+		return "selfCheck/ajaxView";
 	}
 	
 	@GetMapping(value=SELF_CHECK.LICENSE_POPUP, produces = "text/html; charset=utf-8")
@@ -336,7 +376,7 @@ public class SelfCheckController extends CoTopComponent {
 
 		model.addAttribute("isValid", !resultList.isEmpty());
 		
-		return SELF_CHECK.LICENSE_POPUP_JSP;
+		return "license/fragments/license-fragments :: licensePopupFragment";
 	}
 	
 	@PostMapping(value=SELF_CHECK.SEND_COMMENT)
@@ -413,7 +453,18 @@ public class SelfCheckController extends CoTopComponent {
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid()) {
-				return makeJsonResponseHeader(vr.getValidMessageMap());
+				if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), true)) {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
+				} else if (CommonFunction.booleanValidationFormatForValidMsg(vr.getValidMessageMap(), false)) {
+					List<ProjectIdentification> exceedingMaxLengthList = CommonFunction.getItemsExceedingMaxLength(vr.getValidMessageMap(), ossComponents);
+					if (!CollectionUtils.isEmpty(exceedingMaxLengthList)) {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), exceedingMaxLengthList);
+					} else {
+						return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+					}
+				} else {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				}
 			}
 
 			Project project = new Project();
@@ -505,13 +556,36 @@ public class SelfCheckController extends CoTopComponent {
 	@PostMapping(value = SELF_CHECK.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
+		Project projectInfo = selfCheckService.getProjectDetail(project);
 		selfCheckService.deleteProject(project);
+		
+		try {
+			// Delete self_check ref files
+			selfCheckService.deleteProjectRefFiles(projectInfo);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		
 		HashMap<String, Object> resMap = new HashMap<>();
 		resMap.put("resCd", "10");
 		
 		return makeJsonResponseHeader(resMap);
 	}
+	
+	@PostMapping(value = SELF_CHECK.MULTI_DEL_AJAX)
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(@ModelAttribute Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		HashMap<String, Object> resMap = new HashMap<>();
+		
+		for (String prjId : project.getPrjIds()) {
+			project.setPrjId(prjId);
+			selfCheckService.deleteProject(project);
+			resMap.put("resCd", "10");
+		}
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
 	@GetMapping(value=SELF_CHECK.LICENSE_USERGUIDE_HTML_NM, produces = "text/html; charset=utf-8")
 	public @ResponseBody String getLicenseUserGuideHtml(@PathVariable String licenseName, HttpServletRequest req, HttpServletResponse res, Model model){
 		LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase());
@@ -621,7 +695,30 @@ public class SelfCheckController extends CoTopComponent {
 				s = s.toUpperCase().trim();
 				
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(s)) {
-					resultList.add(CoCodeManager.LICENSE_INFO_UPPER.get(s));
+					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(s);
+					if (!isEmpty(licenseMaster.getRestriction())) {
+						String restrictionString = CommonFunction.setLicenseRestrictionListById(null, licenseMaster.getRestriction());
+						String restrictionStr = "";
+						for (String restriction : licenseMaster.getRestriction().split(",")) {
+							if (isEmpty(restriction)) {
+								continue;
+							}
+							if (!isEmpty(restrictionStr)) {
+								restrictionStr += ", ";
+							}
+							restrictionStr += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restriction);
+							if (!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction))) {
+								restrictionStr += " (" + CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction) + ")";
+							}
+						}
+						if (!isEmpty(restrictionStr)) {
+							if (!isEmpty(restrictionString)) {
+								restrictionStr += "|" + restrictionString.split("[|]")[1];
+							}
+							licenseMaster.setRestrictionStr(restrictionStr);
+						}
+					}
+					resultList.add(licenseMaster);
 				}
 			}
 		}
@@ -778,5 +875,35 @@ public class SelfCheckController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = SELF_CHECK.CHANGE_MODE, produces = "text/html; charset=utf-8")
+	public String changeMode(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId, @PathVariable String mode) throws Exception {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = selfCheckService.getProjectDetail(project);
+		T2Users user = userService.getLoginUserInfo();
+		if (user != null) project.setPrjEmail(user.getEmail());
+
+		model.addAttribute("project", project);
+		model.addAttribute("mode", mode);
+		
+		if (mode.equals("edit")) {
+			return "selfCheck/fragments/edit :: editFragments";
+		} else {
+			return "selfCheck/fragments/edit :: viewFragments";
+		}
+	}
+	
+	@GetMapping(value = SELF_CHECK.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId) throws IOException {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = selfCheckService.getProjectDetail(project);
+		if (project != null) {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + prjId + "&menu=self&view=true");
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+		}
 	}
 }

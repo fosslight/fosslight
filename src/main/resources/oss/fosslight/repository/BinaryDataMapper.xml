@@ -41,6 +41,7 @@
     		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
     	</choose>
     </sql>
+
     <sql id="filters">
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(fileName)">
     		<choose>
@@ -90,10 +91,93 @@
     		AND TLSH_CHECK_SUM = #{tlshCheckSum}
     	</if>
     </sql>
-    
-    <select id="countBinaryList" resultType="int">
+
+	<sql id="toolbarFilters">
+		AND
+		<foreach collection="filtersMap.rules" item="item" separator="AND">
+			<choose>
+				<when test='item.field == "fileName"'>
+					FILE_NAME
+				</when>
+				<when test='item.field == "pathName"'>
+					PATH_NAME
+				</when>
+				<when test='item.field == "sourcePath"'>
+					SOURCE_PATH
+				</when>
+				<when test='item.field == "ossName"'>
+					OSS_NAME
+				</when>
+				<when test='item.field == "ossVersion"'>
+					OSS_VERSION
+				</when>
+				<when test='item.field == "license"'>
+					LICENSE
+				</when>
+				<when test='item.field == "downloadlocation"'>
+
+				</when>
+				<when test='item.field == "parentName"'>
+					PARENT_NAME
+				</when>
+				<when test='item.field == "platformName"'>
+					PLATFORM_NAME
+				</when>
+				<when test='item.field == "platformVersion"'>
+					PLATFORM_VERSION
+				</when>
+				<when test='item.field == "updateDate"'>
+					DATE_FORMAT(UPDATE_DATE , '%Y-%m-%d')
+				</when>
+			</choose>
+			<choose>
+				<when test='item.op == "eq"'>
+					= #{item.data}
+				</when>
+				<when test='item.op == "ne"'>
+					<![CDATA[<>]]> #{item.data}
+				</when>
+				<when test='item.op == "bw"'>
+					LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test='item.op == "bn"'>
+					NOT LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test='item.op == "ew"'>
+					LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test='item.op == "en"'>
+					NOT LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test='item.op == "cn"'>
+					LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test='item.op == "nc"'>
+					NOT LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test='item.op == "lt"'>
+					<![CDATA[<]]> #{item.data}
+				</when>
+				<when test='item.op == "le"'>
+					<![CDATA[<=]]> #{item.data}
+				</when>
+				<when test='item.op == "gt"'>
+					<![CDATA[>]]> #{item.data}
+				</when>
+				<when test='item.op == "ge"'>
+					<![CDATA[>=]]> #{item.data}
+				</when>
+				<otherwise></otherwise>
+			</choose>
+		</foreach>
+	</sql>
+
+	<select id="countBinaryList" resultType="int">
     	SELECT COUNT(1) FROM BINARY_DATA
     	WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
+			<include refid="toolbarFilters"/>
+		</if>
     	<include refid="filters"/>
     </select>
     
@@ -115,8 +199,10 @@
     	FROM BINARY_DATA
     	WHERE 1=1
     	<include refid="filters"/>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
+			<include refid="toolbarFilters"/>
+		</if>
     	<include refid="orderby"/>
-    	<include refid="limitPage"/>
     </select>
     
     <update id="updateBinaryData" parameterType="BinaryData">

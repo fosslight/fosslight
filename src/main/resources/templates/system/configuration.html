@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="system/configuration-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="system/configuration-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout ml-2 mr-2">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                 </div><!-- /.container-fluid -->
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card card-secondary">
+                            <div class="card-header d-flex">
+                                <h3 class="card-title" th:text="Settings"></h3>
+                                <div class="d-flex-align" style="margin-left: auto;">
+                                	<span class="px-2 pointer" title="save" th:onclick="|save()|">
+										<i class="fas fa-save customIcon2"></i>
+									</span>
+<!--                                <span class="btn btn-tool ml-1 mr-2 pointer" id="expandBtn" data-card-widget="collapse" title="Collapse">
+                            			<i class="fas fa-minus"></i>
+                           			</span> -->
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <p th:text="#{msg.configuration.guide.comment}"></p>
+                                </div>
+                                <div class="form-group clearfix">
+                                	<div class="icheck-warning d-inline checkSet">
+                                        <input type="checkbox" id="loginFlag" name="loginFlag" class="mainCategory" th:checked="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG')) == 'Y'} ? 'checked'">
+                                        <label for="loginFlag" th:text="'Authentication using LDAP'"></label>
+                                    </div>
+                                	<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LOGIN_SETTING'))}">
+                                		<th:block th:if="${#strings.contains(code.cdDtlNm, 'Flag')}">
+                                    		<div class="row mt-3 mx-3 detailArea" style="display:none;">
+                                       			<div class="col-2">
+                                       				<label class="text-gray" style="font-weight: normal;" th:text="${code.cdDtlNm}"></label>
+                                       			</div>
+                                       			<div class="col-8">
+                                       				<input type="checkbox" th:id="'ldap'+${code.cdDtlNo}" th:checked="${code.cdDtlExp == 'Y'} ? 'checked'"/>
+                                       			</div>
+                                    		</div>
+                                		</th:block>
+                                		<th:block th:unless="${#strings.contains(code.cdDtlNm, 'Flag')}">
+                                			<div class="row mt-3 mx-3 detailArea" style="display:none;">
+                                       			<div class="col-2">
+                                       				<label class="text-gray" style="font-weight: normal;" th:text="${code.cdDtlNm}"></label>
+                                       			</div>
+                                       			<div class="col-8">
+                                       				<input type="text" class="form-control" th:id="'ldap'+${code.cdDtlNo}" th:value="${code.cdDtlExp}"/>
+                                       			</div>
+                                    		</div>
+                                		</th:block>
+                                	</th:block>
+                                </div>
+                               
+                                <div class="form-group">
+                                    <label class="checkSet" th:text="'Notice Setting'"></label>
+                                    <div class="row mt-2 mx-3">
+                                    	<th:block th:each="code : ${@CoCodeManager.getValues('918')}">
+                                        	<th:block th:if="${#strings.contains(code[1], 'Flag')}" th:with="title=${code[1].replaceAll(' ', '')}">
+                                        		<th:block th:if="${not #strings.isEmpty(@CoCodeManager.getValues(code[2]))}">
+                                        			<th block th:if="${#strings.contains(title, 'NoticeFlag')}">
+                                        				<div class="col-2">
+                                            				<label class="text-gray" for="inputName" style="font-weight: normal;" th:text="'Notice Type'"></label>
+                                            			</div>
+                                            			<div class="col-8">
+                                            				<div class="form-group">
+                                        						<div class="row">
+                                            						<th:block th:each="code2, i : ${@CoCodeManager.getCodeDtls(code[2])}">
+                                            							<div class="col-2">
+                                        									<div class="custom-control custom-checkbox">
+																				<input class="custom-control-input" type="checkbox" name="noticeType" th:id="${i.count}" th:value="${code2.cdDtlNo}" 
+																						th:checked="${code2.cdDtlExp == 'Y'} ? 'checked'" th:disabled="${#strings.equals('HTML', code2.cdDtlNm)} ? 'disabled'"/>
+																				<label th:for="${i.count}" class="custom-control-label" th:text="${code2.cdDtlNm}"></label>
+																			</div>
+                                        								</div>
+                                            						</th:block>
+                                            					</div>
+                                            				</div>
+                                        				</div>
+                                        			</th>
+                                        		</th:block>
+                                        	</th:block>
+                                        	<th:block th:unless="${#strings.contains(code[1], 'Flag')}">
+                                        		<div class="col-2">
+                                            		<label class="text-gray" for="inputName" style="font-weight: normal;" th:text="${code.cdDtlNm}"></label>
+                                            	</div>
+                                            	<div class="col-8">
+                                            		<div class="form-group">
+                                        				<div class="row">
+                                        					<input type="text" class="form-control" th:id="${code[0]}" th:value="${code[3]}"/>
+                                        				</div>
+                                        			</div>
+                                        		</div>
+                                        	</th:block>
+                                        </th:block>
+                                    </div>
+                                </div>
+
+                                <div class="form-group clearfix">
+                                    <div class="icheck-warning d-inline checkSet">
+                                        <input type="checkbox" id="externalAnalysisFlag" name="externalAnalysisFlag" class="mainCategory" 
+                                        	th:checked="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_EXTERNAL_ANALYSIS_USED_FLAG')) == 'Y'} ? 'checked'">
+                                        <label for="externalAnalysisFlag" th:text="'External Analysis Setting'"></label>
+                                    </div>
+                                    <div class="detailArea" style="display:none;">
+                                    	<th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_EXTERNAL_ANALYSIS_SETTING'))}">
+											<div class="row mt-3 mx-3">
+												<div class="col-2">
+													<label class="text-gray" style="font-weight: normal;" th:text="${code[1]}"></label>
+												</div>
+												<th:block th:if="${#strings.contains(code[1], 'Flag')}">
+													<div class="col-5 checkSet">
+														<input type="checkbox" th:id="'externalAnalysis'+${code[0]}" th:checked="${code[3] == 'Y'} ? 'checked'"/>
+													</div>
+												</th:block>
+												<th:block th:unless="${#strings.contains(code[1], 'Flag')}">
+													<div class="col-5">
+														<input th:type="${code[1] == 'Admin Token'} ? 'password' : 'text'" th:id="'externalAnalysis'+${code[0]}" class="form-control" th:value="${code[0] != '401'} ? ${code[3]}"/>
+													</div>
+												</th:block>
+											</div>
+										</th:block>
+                                	</div>
+	                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

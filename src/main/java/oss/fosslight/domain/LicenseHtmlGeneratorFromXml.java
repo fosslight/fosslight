@@ -109,7 +109,7 @@ public class LicenseHtmlGeneratorFromXml extends ComBean implements Serializable
             writer.flush();
             writer.close();
             return true;
-        } catch (FileNotFoundException | SecurityException e) {
+        } catch (Exception e) {
             log.error(TAG, "Failed to generate " + outputFile, e);
             if (writer != null) {
                 writer.close();

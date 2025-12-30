@@ -19,6 +19,7 @@ public class Statistics extends ComBean implements Serializable {
 
 	private String[] colorArray; // 추후 관리가 필요함
 	private List<String> titleArray;
+	private List<Integer> dataSumArray;
 	private ArrayList<ArrayList<Integer>> dataArray = new ArrayList<ArrayList<Integer>>();
 	private String chartType;
 	private String categoryType;
@@ -43,6 +44,17 @@ public class Statistics extends ComBean implements Serializable {
 	private int category6Cnt = -1;
 	private int category7Cnt = -1;
 	private int category8Cnt = -1;
+	private int category9Cnt = -1;
+	private int category10Cnt = -1;
+	private int category11Cnt = -1;
+	private int category12Cnt = -1;
+	private int category13Cnt = -1;
+	private int category14Cnt = -1;
+	private int category15Cnt = -1;
+	private int category16Cnt = -1;
+	private int category17Cnt = -1;
+	private int category18Cnt = -1;
+	private int category19Cnt = -1;
 	private int total;
 	
 	public void addCategoryCnt(int categoryCnt, int idx) {
@@ -84,6 +96,17 @@ public class Statistics extends ComBean implements Serializable {
 		total += this.category6Cnt > 0 ? this.category6Cnt : 0;
 		total += this.category7Cnt > 0 ? this.category7Cnt : 0;
 		total += this.category8Cnt > 0 ? this.category8Cnt : 0;
+		total += this.category9Cnt > 0 ? this.category9Cnt : 0;
+		total += this.category10Cnt > 0 ? this.category10Cnt : 0;
+		total += this.category11Cnt > 0 ? this.category11Cnt : 0;
+		total += this.category12Cnt > 0 ? this.category12Cnt : 0;
+		total += this.category13Cnt > 0 ? this.category13Cnt : 0;
+		total += this.category14Cnt > 0 ? this.category14Cnt : 0;
+		total += this.category15Cnt > 0 ? this.category15Cnt : 0;
+		total += this.category16Cnt > 0 ? this.category16Cnt : 0;
+		total += this.category17Cnt > 0 ? this.category17Cnt : 0;
+		total += this.category18Cnt > 0 ? this.category18Cnt : 0;
+		total += this.category19Cnt > 0 ? this.category19Cnt : 0;
 		
 		this.total = total;
 	}

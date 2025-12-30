@@ -80,6 +80,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The file path. */
 	private String filePath;
 	
+	/** The package url */
+	private String packageUrl;
+	
 	/** The binary name. */
 	private String binaryName;
 	
@@ -330,6 +333,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private String adminCheckYn;
 	
+	private String notAdminCheck;
+	
 	private String ossNickName;
 	
 	private String attribution;
@@ -343,6 +348,18 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private String dependencies;
 	private String refOssName;
+	private String changeFlag;
+	private String addFlag;
+	
+	private String tlsh;
+	private String checkSum;
+	
+	private List<ProjectIdentification> deduplicatedComponentLicenseList;
+	
+	private Float standardScore;
+	private String linkToPopup;
+	
+	private String exportRowStr;
 	
 	public String getRedirectLocation() {
 		return redirectLocation;
@@ -2108,5 +2125,85 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setRefOssName(String refOssName) {
 		this.refOssName = refOssName;
+	}
+
+	public String getChangeFlag() {
+		return changeFlag;
+	}
+
+	public void setChangeFlag(String changeFlag) {
+		this.changeFlag = changeFlag;
+	}
+
+	public String getAddFlag() {
+		return addFlag;
+	}
+
+	public void setAddFlag(String addFlag) {
+		this.addFlag = addFlag;
+	}
+
+	public List<ProjectIdentification> getDeduplicatedComponentLicenseList() {
+		return deduplicatedComponentLicenseList;
+	}
+
+	public void setDeduplicatedComponentLicenseList(List<ProjectIdentification> deduplicatedComponentLicenseList) {
+		this.deduplicatedComponentLicenseList = deduplicatedComponentLicenseList;
+	}
+
+	public String getTlsh() {
+		return tlsh;
+	}
+
+	public void setTlsh(String tlsh) {
+		this.tlsh = tlsh;
+	}
+
+	public String getCheckSum() {
+		return checkSum;
+	}
+
+	public void setCheckSum(String checkSum) {
+		this.checkSum = checkSum;
+	}
+
+	public String getPackageUrl() {
+		return packageUrl;
+	}
+
+	public void setPackageUrl(String packageUrl) {
+		this.packageUrl = packageUrl;
+	}
+
+	public Float getStandardScore() {
+		return standardScore;
+	}
+
+	public void setStandardScore(Float standardScore) {
+		this.standardScore = standardScore;
+	}
+
+	public String getNotAdminCheck() {
+		return notAdminCheck;
+	}
+
+	public void setNotAdminCheck(String notAdminCheck) {
+		this.notAdminCheck = notAdminCheck;
+	}
+
+	public String getLinkToPopup() {
+		return linkToPopup;
+	}
+
+	public void setLinkToPopup(String linkToPopup) {
+		this.linkToPopup = linkToPopup;
+	}
+
+	public String getExportRowStr() {
+		return exportRowStr;
+	}
+
+	public void setExportRowStr(String exportRowStr) {
+		this.exportRowStr = exportRowStr;
 	}
 }

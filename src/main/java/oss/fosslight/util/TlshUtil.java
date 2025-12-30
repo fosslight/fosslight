@@ -19,6 +19,7 @@ public class TlshUtil {
 //			Tlsh tlshTest2 = getTlsh(tlsh2);
 //			
 //			return tlshTest1.totalDiff(tlshTest2, true);
+			log.error("tlsh {} / {}", tlsh1, tlsh2);
 			log.error(iae.getMessage(), iae);
 			return -1;
 		}

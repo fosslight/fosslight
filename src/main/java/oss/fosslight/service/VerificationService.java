@@ -30,9 +30,9 @@ public interface VerificationService {
 	
 	boolean getNoticeHtmlFile(OssNotice ossNotice, String html) throws IOException;
 
-	boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException;
+	boolean getReviewReportPdfFile(String prjId) throws IOException;
 
-	boolean getReviewReportPdfFile(OssNotice ossNotice, String html) throws IOException;
+	boolean getReviewReportPdfFile(String prjId, String html) throws IOException;
 	
 	ResponseEntity<FileSystemResource> getNotice(String fileName, String rESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX) throws IOException;
 
@@ -46,7 +46,7 @@ public interface VerificationService {
 	
 	Map<String, Object> processVerification(Map<Object, Object> map, T2File file, Project project);
 	
-	void savePath(Map<Object, Object> map);
+	Map<String, Object> savePath(Map<Object, Object> map);
 	
 	String getNoticeHtmlFileForPreview(OssNotice ossNotice) throws IOException;
 	
@@ -60,7 +60,11 @@ public interface VerificationService {
 	
 	Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice);
 	
+	Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice, boolean isProtocol);
+	
 	OssNotice selectOssNoticeOne(String prjId);
+	
+	OssNotice selectOssNoticeOne2(String prjId);
 	
 	void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception;
 	
@@ -68,9 +72,9 @@ public interface VerificationService {
 	
 	List<String> sortByValue(Map<String, Integer> map) throws Exception;
 	
-	void updateVerifyFileCount(HashMap<String,Object> fileCounts);
+	void updateVerifyFileCount(Map<String,Object> fileCounts);
 	
-	void updateVerifyFileCount(ArrayList<String> fileCounts);
+	void updateVerifyFileCountReset(List<String> fileCounts);
 	
 	boolean getChangedPackageFile(String prjId, List<String> fileSeqs);
 	
@@ -89,4 +93,14 @@ public interface VerificationService {
 	void registOssNoticeConfirmStatus(OssNotice ossNotice);
 
 	String changePackageFileNameCombine(String prjId);
+
+	void deleteFile(Map<Object, Object> map);
+
+	void updateFileWhenVerificationCopyConfirm(Project project, Project copyProject, List<String> packageFileSeqList) throws IOException;
+
+	Map<String, Object> checkNoticeHtmlInfo(OssNotice ossNotice);
+
+	String getNoticeAppendInfo(String prjId);
+
+	List<String> getPackageFileNameList(List<String> packageFileSeqList);
 }

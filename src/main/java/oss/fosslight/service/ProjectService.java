@@ -39,7 +39,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponents, List<PartnerMaster> thirdPartyList);
 	
-	public List<Project> getProjectNameList(Project project);
+	public List<Map<String, String>> getProjectNameList(Project project);
 	
 	public List<Project> getProjectModelNameList();
 	
@@ -53,13 +53,17 @@ public interface ProjectService extends HistoryConfig{
 	
 	public void registOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String refId, String refDiv);
 	
-	public Map<String, List<String>> nickNameValid(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
+	public Map<String, List<String>> nickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
 
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification);
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList);
+	
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid);
+	
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid, boolean isPartner);
 	
 	public void checkProjectReviewer(Project project);
 	
-	public Map<String, Object> updateProjectStatus(Project project) throws Exception;
+	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) throws Exception;
 	
 	public List<ProjectIdentification> getBomListExcel(ProjectIdentification bom);
 	
@@ -92,17 +96,20 @@ public interface ProjectService extends HistoryConfig{
 	
 	List<Project> getProjectVersionList(Project project);
 
+	List<Project> getProjectDivisionList(Project project);
+
 	void updateSubStatus(Project project);
 
 	List<UploadFile> selectAndroidFileDetail(Project project);
 	
-	void updateProjectIdentificationConfirm(Project project);
+	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm);
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 
-	String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData,
-			List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData,
-			List<ProjectIdentification> batData, List<List<ProjectIdentification>> batSubData, String applicableParty, String applicableSrc, String applicableBat);
+	String checkChangedIdentification(String prjId, List<ProjectIdentification> partyData, List<ProjectIdentification> srcData, List<List<ProjectIdentification>> srcSubData, List<ProjectIdentification> binData, List<List<ProjectIdentification>> binSubData,
+			List<ProjectIdentification> depData, List<List<ProjectIdentification>> depSubData, Map<String, Object> param);
+
+	String checkChangedIdentification(String prjId, List<ProjectIdentification> androidData, List<List<ProjectIdentification>> androidSubData, String applicableAndroid);
 
 	Map<String, Object> applySrcAndroidModel(List<ProjectIdentification> list, List<String> noticeBinaryList) throws IOException;
 
@@ -141,7 +148,7 @@ public interface ProjectService extends HistoryConfig{
 	public void insertProjectModel(Project project);
 	
 	public void updatePublicYn(Project project);
-	
+
 	Map<String, Object> getProjectToAddList(OssComponents ossComponents);
 	
 	Map<String, Object> getAddList(Project project);
@@ -155,6 +162,8 @@ public interface ProjectService extends HistoryConfig{
 	Map<String, Object> identificationSubGrid(ProjectIdentification identification);
 	
 	List<ProjectIdentification> setMergeGridData(List<ProjectIdentification> gridData);
+	
+	List<ProjectIdentification> setMergeGridDataByAndroid(List<ProjectIdentification> gridData);
 	
 	String checkValidData(Map<String, Object> map);
 	
@@ -193,8 +202,10 @@ public interface ProjectService extends HistoryConfig{
 	public void deleteUploadFile(Project project);
 	
 	public Map<String, Object> getSecurityGridList(Project project);
+	
+	public Map<String, Object> getSecurityGridList(Project project, boolean isVulnPopup);
 
-	public void registSecurity(String prjId, String tabName, List<OssComponents> ossComponents);
+	public void registSecurity(Project project, String tabName, List<OssComponents> ossComponents);
 
 	public List<Project> getProjectIdList(Project project);
 	
@@ -202,12 +213,37 @@ public interface ProjectService extends HistoryConfig{
 
 	public boolean checkReqEntrySecurity(Project project, String tabMenu);
 
-	public void copySecurityDataForProject(Project project);
+	public void copySecurityDataForProject(Project project, Project bean);
 	
 	public Map<String, Object> checkSelectDownloadFile(Project project);
 
 	public List<OssComponents> getDependenciesDataList(Project project);
+
+	public void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project);
+
+	public void registBinOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project);
+
+	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList);
+
+	public void updateSecurityDataForProject(String prjId);
+	
+	public void updatePreparedStatement(List<ProjectIdentification> updateOssComponentList, List<ProjectIdentification> insertOssComponentList, List<OssComponentsLicense> insertOssComponentLicenseList, List<String> deleteRows);
+	
+	public void deletePreparedStatement(List<OssComponents> componentIds);
+
+	public void setLoadToList(Map<String, Object> map, String prjId);
+
+	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
+	
+	public Map<String, Object> changeProjectStatus(Project project);
+
+	public void copyOssComponentList(Project project, boolean isBom);
+
+	public Map<String, Object> getDependencyTreeList(List<ProjectIdentification> ossComponents);
+
+	public void updateSecurityPerson(Project project);
+
+	public boolean initAutoReview(String prjId);
+
+	public void updateProjectNotification(Project project, Map<String, Object> param);
 }
-
-
-

@@ -5,8 +5,8 @@
 
 package oss.fosslight.controller;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -44,6 +45,7 @@ import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoOssValidator;
@@ -76,7 +78,7 @@ public class OssController extends CoTopComponent{
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model){
 		OssMaster searchBean = null;
 		
-		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 			deleteSession(SESSION_KEY_SEARCH);
 			searchBean = searchService.getOssSearchFilter(loginUserName());
 			if (searchBean == null) {
@@ -105,6 +107,11 @@ public class OssController extends CoTopComponent{
 			}
 			
 			searchBean.setOssName(req.getParameter("ossName"));
+			
+			if (req.getParameter("linkFlag") != null) {
+				searchBean.setOssNameAllSearchFlag(CoConstDef.FLAG_YES);
+				searchBean.setLinkFlag(CoConstDef.FLAG_YES);
+			}
 		}
 		
 		if (getSessionObject("defaultLoadYn") != null) {
@@ -115,7 +122,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return OSS.LIST_JSP;
+		return "oss/list";
 	}
 	
 	@GetMapping(value={OSS.LIST_LINK}, produces = "text/html; charset=utf-8")
@@ -140,7 +147,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return OSS.LIST_JSP;
+		return "oss/list";
 	}
 	
 	@GetMapping(value=OSS.LIST_AJAX)
@@ -174,11 +181,11 @@ public class OssController extends CoTopComponent{
 		// download location check
 		List<String> values = Arrays.asList("https://", "http://", "www.");
 		String homepage =req.getParameter("homepage");
-		if (!values.contains(homepage)){
-			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
-			homepage = homepage.replaceFirst("/$", "");
-			ossMaster.setHomepage(homepage);
-		}
+//		if (!values.contains(homepage)){
+//			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
+//			homepage = homepage.replaceFirst("/$", "");
+//			ossMaster.setHomepage(homepage);
+//		}
 
 		if ("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
@@ -203,9 +210,9 @@ public class OssController extends CoTopComponent{
 			OssMaster ossMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
-		List<OssMaster> list = ossService.getOssNameList();
-		CustomXssFilter.ossMasterFilter(list);
+			, Model model) {
+		List<Map<String, String>> list = ossService.getOssNameList();
+		CustomXssFilter.nameFilter(list);
 		return makeJsonResponseHeader(list);
 	}
 
@@ -214,6 +221,7 @@ public class OssController extends CoTopComponent{
 		if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NEWOSS_DEFAULT_DATA, null)) != null) {
 			OssMaster bean = (OssMaster) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NEWOSS_DEFAULT_DATA, null), true);
 			
+			model.addAttribute("detail", bean);
 			model.addAttribute("ossName", avoidNull(bean.getOssName()));
 			model.addAttribute("ossVersion", avoidNull(bean.getOssVersion()));
 			model.addAttribute("downloadLocation", avoidNull(bean.getDownloadLocation()));
@@ -234,6 +242,7 @@ public class OssController extends CoTopComponent{
 					if (master != null) {
 						String shortIDentifier = isEmpty(master.getShortIdentifier()) ? master.getLicenseName() : master.getShortIdentifier();
 						result.setLicenseId(master.getLicenseId());
+						result.setLicenseType(master.getLicenseType());
 						result.setLicenseName(master.getLicenseName());
 						result.setLicenseNameEx(shortIDentifier);
 						result.setObligation(master.getObligation());
@@ -249,7 +258,7 @@ public class OssController extends CoTopComponent{
 				}
 				
 				map.put("rows", licenseList);
-				model.addAttribute("list", toJson(map));
+				model.addAttribute("list", map);
 			}
 			
 			model.addAttribute("copyright", avoidNull(bean.getCopyright()));
@@ -257,21 +266,25 @@ public class OssController extends CoTopComponent{
 			// nick name 체크
 			// oss name으로 nickname이 존재할 경우 초기 표시되어야함
 			// 표시되지 않은 상태에서 save시 기존 nickname이 모두 삭제됨
-			model.addAttribute("ossNickList", toJson(ossService.getOssNickNameListByOssName(bean.getOssName())));
+			model.addAttribute("ossNickList", ossService.getOssNickNameListByOssName(bean.getOssName()));
 			
 			List<String> downloadLocationList = new ArrayList<>();
-			downloadLocationList.add(avoidNull(bean.getDownloadLocation()));
-			model.addAttribute("downloadLocationList", toJson(downloadLocationList));
+			String downloadLocation = avoidNull(bean.getDownloadLocation());
+			if (!isEmpty(downloadLocation)) {
+				downloadLocation += "|" + ossService.getPurlByDownloadLocation(bean);
+			}
+			downloadLocationList.add(downloadLocation);
+			model.addAttribute("downloadLocationList", downloadLocationList);
 		} else {
 			// 신규 등록시에도 ossNickList 은 필수(empty array를 설정)
 			List<String> nickList = new ArrayList<>();
-			model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
+			model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 			
 			List<String> downloadLocationList = new ArrayList<>();
-			model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
+			model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		}
 		
-		return OSS.EDIT_JSP;
+		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
@@ -279,7 +292,10 @@ public class OssController extends CoTopComponent{
 		OssMaster ossMaster = new OssMaster(ossId);
 		Map<String, Object> map = ossService.getOssLicenseList(ossMaster);
 		ossMaster = ossService.getOssMasterOne(ossMaster);
-
+		if (ossMaster == null) {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+			return null;
+		}
 		if (ossMaster.getOssVersion() == null) {
 			ossMaster.setOssVersion("");
 		}
@@ -290,13 +306,14 @@ public class OssController extends CoTopComponent{
 			for (String name : detectedLicenseNames) {
 				detectedLicenseIdByName.put(name, CommonFunction.getLicenseIdByName(name));
 			}
-			model.addAttribute("detectedLicenseIdByName", toJson(detectedLicenseIdByName));
+			model.addAttribute("detectedLicenseIdByName", detectedLicenseIdByName);
 		} else {
 			model.addAttribute("detectedLicenseIdByName", null);
 		}
-		model.addAttribute("list", toJson(map));
-		model.addAttribute("detail", toJson(ossMaster));
+		model.addAttribute("list", map);
+		model.addAttribute("detail", ossMaster);
 		model.addAttribute("ossId", ossMaster.getOssId());
+		model.addAttribute("ossCommonId", ossMaster.getOssCommonId());
 		
 		// 참조 프로젝트 목록 조회
 		boolean projectListFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
@@ -314,8 +331,12 @@ public class OssController extends CoTopComponent{
 				componentsPartner = partnerMapper.selectOssRefPartnerList(ossMaster);
 			}
 			
-			model.addAttribute("components", toJson(components));
-			model.addAttribute("componentsPartner", toJson(componentsPartner));
+			if (components != null && !components.isEmpty()) {
+				model.addAttribute("components", components);
+			}
+			if (componentsPartner != null && !componentsPartner.isEmpty()) {
+				model.addAttribute("componentsPartner", componentsPartner);
+			}
 		}
 		
 		model.addAttribute("projectListFlag", projectListFlag);
@@ -326,16 +347,16 @@ public class OssController extends CoTopComponent{
 			if (vulnInfoList.size() == 5) {
 				model.addAttribute("vulnListMore", "vulnListMore");
 			}
-			model.addAttribute("vulnInfoList", toJson(vulnInfoList));
+			model.addAttribute("vulnInfoList", vulnInfoList);
 		}
 		
 		List<String> nickList = new ArrayList<>();
-		model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
+		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 		
 		List<String> downloadLocationList = new ArrayList<>();
-		model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
-		
-		return CommonFunction.isAdmin() ? OSS.EDIT_JSP : OSS.VIEW_JSP;
+		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
+
+		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 	
 	@GetMapping(value={OSS.POPUPLIST_ID}, produces = "text/html; charset=utf-8")
@@ -378,22 +399,18 @@ public class OssController extends CoTopComponent{
 		
 		ossMaster.setOssLicenses((List<OssLicense>) map.get("rows"));
 		ossMaster.setOssId(null);
-		model.addAttribute("copyData", toJson(ossMaster));
+		model.addAttribute("copyData", ossMaster);
 		List<String> nickList = new ArrayList<>();
-		model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
+		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 		
 		List<String> downloadLocationList = new ArrayList<>();
-		model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
+		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		
-		return OSS.EDIT_JSP;
+		return "oss/edit";
 	}
 	
 	@PostMapping(value=OSS.SAVE_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		Map<String, Object> resMap = new HashMap<String, Object>();
 		
 		try {
@@ -408,11 +425,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value={OSS.DEL_AJAX})
-	public @ResponseBody ResponseEntity<Object> delAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		String resCd="00";
 		HashMap<String, Object> resMap = new HashMap<>();
 		// mail 발송을 위해 삭제전 data 취득
@@ -458,6 +471,80 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value={OSS.MULTI_DEL_AJAX})
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(
+			@ModelAttribute OssMaster ossMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		String resCd="00";
+		HashMap<String, Object> resMap = new HashMap<>();
+		String[] delOssIds = ossMaster.getOssIds();
+		List<String> notDelOssList = new ArrayList<>();
+		
+		for (String delOssId : delOssIds) {
+			String[] delOssIdInfo = delOssId.split("\\|");
+			String ossId = delOssIdInfo[1];
+			String existOssCnt = ossService.checkExistOssConf(ossId);
+			
+			if (Integer.parseInt(existOssCnt) > 0) {
+				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(ossId); 
+				String notDelOss = oss.getOssName() + " (" + avoidNull(oss.getOssVersion(), "N/A") + ")";
+				notDelOssList.add(notDelOss);
+			} else {
+				OssMaster ossMailBean = ossService.getOssInfo(ossId, true);
+				
+				OssMaster param = new OssMaster();
+				param.setOssCommonId(delOssIdInfo[0]);
+				param.setOssId(ossId);
+				param.setOssName(ossMailBean.getOssName());
+				param.setComment(ossMaster.getComment());
+				param.setLoginUserName(loginUserName());
+				param.setCreatedDate(ossMailBean.getCreatedDate());
+				
+				if (ossMailBean.getOssNicknames() != null) {
+					ossMailBean.setOssNickname(CommonFunction.arrayToString(ossMailBean.getOssNicknames(), "<br>"));	
+				}
+				
+				putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
+				
+				try {
+					History h = ossService.work(param);
+					
+					h.sethAction(CoConstDef.ACTION_CODE_DELETE);
+					historyService.storeData(h);
+				} catch(Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_DELETE);
+					mailBean.setParamOssId(ossId);
+					mailBean.setComment(param.getComment());
+					mailBean.setParamOssInfo(ossMailBean);
+					
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+
+				// 삭제처리
+				try {
+					ossService.deleteOssMaster(param);
+					resCd="10";
+					CoCodeManager.getInstance().refreshOssInfo();
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+		resMap.put("resCd", resCd);
+		if (notDelOssList != null && !notDelOssList.isEmpty()) resMap.put("notDelOssList", notDelOssList);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
 	@PostMapping(value=OSS.DEL_OSS_VERSION_MERGE_AJAX)
 	public @ResponseBody ResponseEntity<Object> delOssWithVersionMeregeAjax(
 			@ModelAttribute OssMaster ossMaster
@@ -482,11 +569,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.VALIDATION)
-	public @ResponseBody ResponseEntity<Object> validation(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> validation(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		/*Json String -> Json Object*/
 		String jsonString = ossMaster.getOssLicensesJson();
 		Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();
@@ -506,66 +589,12 @@ public class OssController extends CoTopComponent{
 		T2CoValidationResult vr = validator.validateObject(reqMap, list, "OSS"); 
 		
 		if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
-			boolean sameNameFlag = false;
-			boolean ossNicknameFlag= false;
-			
 			OssMaster ossInfo = ossService.getOssInfo(ossMaster.getOssId(), false);
 			
-			if (ossInfo != null && ossInfo.getOssName().equals(ossMaster.getOssName())) {
-				if (ossMaster.getOssNicknames() != null) {
-					if (ossInfo.getOssNicknames() != null) {
-						if (ossMaster.getOssNicknames().length == ossInfo.getOssNicknames().length) {
-							List<String> duplicateOssNicknames = Arrays.asList(ossMaster.getOssNicknames()).stream().filter(e -> !Arrays.asList(ossInfo.getOssNicknames()).contains(e.toString())).collect(Collectors.toList());
-							if (duplicateOssNicknames == null || duplicateOssNicknames.size() == 0) {
-								ossNicknameFlag = true;
-							}
-						}
-					}
-				}else {
-					if (ossInfo.getOssNicknames() == null) {
-						ossNicknameFlag = true;
-					}
-				}
-				
-				if (ossNicknameFlag) {
-					return makeJsonResponseHeader(false, "rename");
-				}
-			}
-			
-			List<String> checkList = new ArrayList<>();
-			List<String> duplicatedList = new ArrayList<>();
-			
-			checkList.add(ossMaster.getOssName());
-			
-			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
-				duplicatedList.add(ossMaster.getOssName());
-				return makeJsonResponseHeader(false, "rename", duplicatedList);
-			}
-			
-			if (ossMaster.getOssNicknames() != null) {
-				for (String _nick : ossMaster.getOssNicknames()) {
-					if (!isEmpty(_nick)) {
-						if (ossMaster.getOssName().equals(_nick) || checkList.contains(_nick)) {
-							duplicatedList.add(_nick + " (The same OSS Name or Nick Name exists.)");
-							sameNameFlag = true;
-							break;
-						}
-						
-						if (checkList.isEmpty() || !checkList.contains(_nick)) {
-							checkList.add(_nick);
-						}
-					}
-				}
-			}
-			
-			if (sameNameFlag) {
-				return makeJsonResponseHeader(false, "rename", duplicatedList);
-			}
-			
-			duplicatedList = ossService.getOssNicknameListWithoutOwn(ossInfo, checkList, duplicatedList);
-			
-			if (duplicatedList != null && duplicatedList.size() > 0) {
-				return makeJsonResponseHeader(false, "rename", duplicatedList);
+			if (!ossInfo.getOssName().equals(ossMaster.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
+				String ossName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(ossMaster.getOssName().toUpperCase());
+				OssMaster bean = ossService.getOssInfo(null, ossName, false);
+				return makeJsonResponseHeader(false, "rename", bean.getOssId() + "|" + ossMaster.getOssName());
 			}
 			
 			if (!vr.isValid()) {
@@ -579,123 +608,169 @@ public class OssController extends CoTopComponent{
 				}
 				
 				vr.setErrorCodeMap(checkErrMap);
-			}
-		}
-		
-		if (!vr.isValid()) {
-			return makeJsonResponseHeader(vr.getValidMessageMap());
-		}
-		
-		if (isEmpty(ossMaster.getOssId())) {
-			OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
-			
-			if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
-				return makeJsonResponseHeader(false, "deactivate");
-			} else {
-				// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
-				String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
-				
-				// 삭제는 불가능하기 때문에, 건수가 다르면 기존에 등록된 닉네임이 있다는 의미
-				// null을 반환하지는 않는다.
-				if (_mergeNicknames.length > 0) {
-					return makeJsonResponseHeader(false, null, _mergeNicknames);
-				}
+				return makeJsonResponseHeader(vr.getValidMessageMap());
 			}
 		} else {
-			// 수정이면서 oss name이 변경되었고, 변경하려고 하는 oss에 nick name이 등록되어 있는 경우, 사용자 confirm 필요
-			// 변경전 정보를 취득
-			OssMaster orgBean = ossService.getOssInfo(ossMaster.getOssId(), false);
-			
-			if (CoConstDef.FLAG_YES.equals(ossMaster.getDeactivateFlag()) 
-					&& CoConstDef.FLAG_YES.equals(orgBean.getDeactivateFlag())) {
-				return makeJsonResponseHeader(false, "deactivate");
+			if (!vr.isValid()) {
+				return makeJsonResponseHeader(vr.getValidMessageMap());
 			}
 			
-			// oss name 변경 여부 확인
-			if (orgBean != null && !ossMaster.getOssName().equalsIgnoreCase(orgBean.getOssNameTemp())) {
-				// 기존 oss name 이 변경되었는데, oss nick name 까지 동시에 변경 할 경우 제외
-				String[] orgNickNames = ossService.getOssNickNameListByOssName(orgBean.getOssNameTemp());
-				if (orgNickNames != null && orgNickNames.length > 0) {
-					boolean ossNameCheck = false;
+			if (isEmpty(ossMaster.getOssId())) {
+				OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
+				
+				if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
+					return makeJsonResponseHeader(false, "deactivate");
+				} else {
+					// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
+					String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
 					
-					if (ossMaster.getOssNicknames() != null) {
-						if (orgNickNames.length != ossMaster.getOssNicknames().length) {
-							ossNameCheck = true;
-						} else {
-							if (!Arrays.equals(orgNickNames, ossMaster.getOssNicknames())){
-								ossNameCheck = true;
+					// 삭제는 불가능하기 때문에, 건수가 다르면 기존에 등록된 닉네임이 있다는 의미
+					// null을 반환하지는 않는다.
+					if (_mergeNicknames.length > 0) {
+						Map<String, List<String>> diffMap = new HashMap<>();
+						diffMap.put("addNickArr", Arrays.asList(_mergeNicknames));
+						return makeJsonResponseHeader(false, "hasDelNick", diffMap);
+					}
+					
+					if (checkOssInfo != null) {
+						boolean isSame = false;
+						Map<String, Object> diffMap = new HashMap<>();
+						
+						if (isEmpty(ossMaster.getSummaryDescription()) && !isEmpty(checkOssInfo.getSummaryDescription())) {
+							diffMap.put("addSummaryDescription", checkOssInfo.getSummaryDescription());
+						}
+						if (isEmpty(ossMaster.getImportantNotes()) && !isEmpty(checkOssInfo.getImportantNotes())) {
+							diffMap.put("addImportantNotes", checkOssInfo.getImportantNotes());
+						}
+						if (!isEmpty(checkOssInfo.getIncludeCpe())) {
+							isSame = false;
+							String includeCpe = checkOssInfo.getIncludeCpe();
+							if (ossMaster.getIncludeCpes() != null) {
+								String[] includeCpeArr = checkOssInfo.getIncludeCpe().split(",");
+								isSame = Arrays.equals(includeCpeArr, ossMaster.getIncludeCpes());
+								if (!isSame) {
+									String[] mergeArr = Stream.concat(Arrays.stream(includeCpeArr), Arrays.stream(ossMaster.getIncludeCpes())).distinct().toArray(String[]::new);
+									includeCpe = String.join(",", mergeArr);
+								}
+							}
+							if (!isSame) {
+								diffMap.put("addIncludeCpe", includeCpe);
 							}
 						}
-					} else {
-						ossNameCheck = true;
-					}
-					
-					if (ossNameCheck) {
-						return makeJsonResponseHeader(false, "notChange");
-					}
-				}
-				
-				List<String> orgNickList = new ArrayList<>();
-				List<String> delNickList = new ArrayList<>();
-				// oss name이 변경 되었고, 변경 후 oss name이 이미 등록되어 있는 경우
-				Map<String, List<String>> diffMap = new HashMap<>();
-				String[] orgNicks = ossService.getOssNickNameListByOssName(ossMaster.getOssName());
-				
-				if (orgNicks != null && orgNicks.length > 0) {
-					for (String s : orgNicks) {
-						orgNickList.add(s);
-					}
-				}
-				
-				// 기존 oss name에 물려있는 nick name이 존재하는 경우, nick name은 무시됨
-				// 변경 후 oss name에 nick name이 존재하는 경우 이관됨
-				if (ossMaster.getOssNicknames() != null) {
-					for (String _nick : ossMaster.getOssNicknames()) {
-						if (!isEmpty(_nick)) {
-							// 삭제되는 oss
-							if (orgNickList.isEmpty() || !orgNickList.contains(_nick)) {
-								delNickList.add(_nick);
+						if (!isEmpty(checkOssInfo.getExcludeCpe())) {
+							isSame = false;
+							String excludeCpe = checkOssInfo.getExcludeCpe();
+							if (ossMaster.getExcludeCpes() != null) {
+								String[] excludeCpeArr = checkOssInfo.getExcludeCpe().split(",");
+								isSame = Arrays.equals(excludeCpeArr, ossMaster.getExcludeCpes());
+								if (!isSame) {
+									String[] mergeArr = Stream.concat(Arrays.stream(excludeCpeArr), Arrays.stream(ossMaster.getExcludeCpes())).distinct().toArray(String[]::new);
+									excludeCpe = String.join(",", mergeArr);
+								}
+							}
+							if (!isSame) {
+								diffMap.put("addExcludeCpe", excludeCpe);
 							}
 						}
+						return makeJsonResponseHeader(false, "hasExists", diffMap);
 					}
 				}
+			} else {
+				// 수정이면서 oss name이 변경되었고, 변경하려고 하는 oss에 nick name이 등록되어 있는 경우, 사용자 confirm 필요
+				// 변경전 정보를 취득
+				OssMaster orgBean = ossService.getOssInfo(ossMaster.getOssId(), false);
 				
-				// 변경하려는 oss name에 nick name이 등록되어 있는 상태이면 merge 해야함
-				if (!orgNickList.isEmpty()) {
-					boolean isChange = !delNickList.isEmpty();
-					
-					if (!isChange) {
-						// 대상 nick name과 현재 oss name이 동일하면 pass
-						List<String> currNickNameList = new ArrayList<>();
+				if (CoConstDef.FLAG_YES.equals(ossMaster.getDeactivateFlag()) 
+						&& CoConstDef.FLAG_YES.equals(orgBean.getDeactivateFlag())) {
+					return makeJsonResponseHeader(false, "deactivate");
+				}
+				
+				// oss name 변경 여부 확인
+				if (orgBean != null && !ossMaster.getOssName().equalsIgnoreCase(orgBean.getOssNameTemp())) {
+					// 기존 oss name 이 변경되었는데, oss nick name 까지 동시에 변경 할 경우 제외
+					String[] orgNickNames = ossService.getOssNickNameListByOssName(orgBean.getOssNameTemp());
+					if (orgNickNames != null && orgNickNames.length > 0) {
+						boolean ossNameCheck = false;
 						
 						if (ossMaster.getOssNicknames() != null) {
-							for (String _nick : ossMaster.getOssNicknames()) {
-								if (!isEmpty(_nick)) {
-									currNickNameList.add(_nick);
+							if (orgNickNames.length != ossMaster.getOssNicknames().length) {
+								ossNameCheck = true;
+							} else {
+								if (!Arrays.equals(orgNickNames, ossMaster.getOssNicknames())){
+									ossNameCheck = true;
+								}
+							}
+						} else {
+							ossNameCheck = true;
+						}
+						
+						if (ossNameCheck) {
+							return makeJsonResponseHeader(false, "notChange");
+						}
+					}
+					
+					List<String> orgNickList = new ArrayList<>();
+					List<String> delNickList = new ArrayList<>();
+					// oss name이 변경 되었고, 변경 후 oss name이 이미 등록되어 있는 경우
+					Map<String, List<String>> diffMap = new HashMap<>();
+					String[] orgNicks = ossService.getOssNickNameListByOssName(ossMaster.getOssName());
+					
+					if (orgNicks != null && orgNicks.length > 0) {
+						for (String s : orgNicks) {
+							orgNickList.add(s);
+						}
+					}
+					
+					// 기존 oss name에 물려있는 nick name이 존재하는 경우, nick name은 무시됨
+					// 변경 후 oss name에 nick name이 존재하는 경우 이관됨
+					if (ossMaster.getOssNicknames() != null) {
+						for (String _nick : ossMaster.getOssNicknames()) {
+							if (!isEmpty(_nick)) {
+								// 삭제되는 oss
+								if (orgNickList.isEmpty() || !orgNickList.contains(_nick)) {
+									delNickList.add(_nick);
+								}
+							}
+						}
+					}
+					
+					// 변경하려는 oss name에 nick name이 등록되어 있는 상태이면 merge 해야함
+					if (!orgNickList.isEmpty()) {
+						boolean isChange = !delNickList.isEmpty();
+						
+						if (!isChange) {
+							// 대상 nick name과 현재 oss name이 동일하면 pass
+							List<String> currNickNameList = new ArrayList<>();
+							
+							if (ossMaster.getOssNicknames() != null) {
+								for (String _nick : ossMaster.getOssNicknames()) {
+									if (!isEmpty(_nick)) {
+										currNickNameList.add(_nick);
+									}
+								}
+							}
+							
+							if (orgNickList.size() != currNickNameList.size()) {
+								isChange = true;
+							}
+							
+							for (String s : orgNickList) {
+								if (!currNickNameList.contains(s)) {
+									isChange = true;
+									break;
 								}
 							}
 						}
 						
-						if (orgNickList.size() != currNickNameList.size()) {
-							isChange = true;
-						}
-						
-						for (String s : orgNickList) {
-							if (!currNickNameList.contains(s)) {
-								isChange = true;
-								break;
+						if (isChange) {
+							diffMap.put("addNickArr", orgNickList);
+							
+							if (!delNickList.isEmpty()) {
+								diffMap.put("delNickArr", delNickList);
 							}
-						}
+							return makeJsonResponseHeader(false, "hasDelNick", diffMap);
+						}					
 					}
-					
-					if (isChange) {
-						diffMap.put("addNickArr", orgNickList);
-						
-						if (!delNickList.isEmpty()) {
-							diffMap.put("delNickArr", delNickList);
-						}
-						return makeJsonResponseHeader(false, "hasDelNick", diffMap);
-					}					
 				}
 			}
 		}
@@ -756,6 +831,21 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
+	@PostMapping(value =OSS.SEND_COMMENT)
+	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		commentService.registComment(commentsHistory);
+		
+		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT);
+		mailBean.setParamOssId(commentsHistory.getReferenceId());
+		mailBean.setParamReferenceDiv(commentsHistory.getReferenceDiv());
+		mailBean.setComment(commentsHistory.getContents());
+		
+		CoMailManager.getInstance().sendMail(mailBean);
+		
+		return makeJsonResponseHeader();
+	}
+	
 	@PostMapping(value=OSS.DELETE_COMMENT)
 	public @ResponseBody ResponseEntity<Object> deleteComment(
 			@ModelAttribute CommentsHistory commentsHistory
@@ -812,11 +902,13 @@ public class OssController extends CoTopComponent{
 		
 		T2CoValidationResult vr = validator.validateObject(ossMaster);
 		
+		String purl = ossService.getPurlByDownloadLocation(ossMaster);
+		
 		if (!vr.isDiff()) {
-			return makeJsonResponseHeader(true, null, null, null, vr.getDiffMessageMap());
+			return makeJsonResponseHeader(true, null, purl, null, vr.getDiffMessageMap());
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(true, null, purl);
 	}
 	
 	@PostMapping(value=OSS.SAVE_SESSION_OSS_INFO)
@@ -1008,7 +1100,7 @@ public class OssController extends CoTopComponent{
 	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model, @ModelAttribute Project projectData) {
 		model.addAttribute("projectData", projectData);
 
-		return OSS.OSS_BULK_REG_JSP;
+		return "oss/ossBulkReg";
 	}
 
 	@PostMapping(value = OSS.BULK_REG_AJAX)
@@ -1037,9 +1129,6 @@ public class OssController extends CoTopComponent{
 			LicenseMaster licenseMaster;
 			List<String> declaredLicenses = oss.getDeclaredLicenses();
 			String downloadLocation = oss.getDownloadLocation();
-			if (downloadLocation != null) {
-				oss.setDownloadLocations(downloadLocation.split(","));
-			}
 			boolean[] check = new boolean[declaredLicenses.size() + 1];
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
@@ -1056,13 +1145,47 @@ public class OssController extends CoTopComponent{
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
-
+			
+			OssMaster ossBean = ossService.getOssInfo(null, oss.getOssName(), true);
+			if (ossBean != null) {
+				List<String> downloadLocationList = new ArrayList<>();
+				List<String> purls = new ArrayList<>();
+				if (ossBean.getDownloadLocation() != null) {
+					OssMaster param = new OssMaster();
+					for (String location : ossBean.getDownloadLocation().split(",")) {
+						downloadLocationList.add(location);
+						param.setDownloadLocation(location);
+						String purl = ossService.getPurlByDownloadLocation(param);
+						if (!isEmpty(purl)) {
+							purls.add(purl);
+						}
+					}
+				}
+				if (downloadLocation != null) {
+					OssMaster param = new OssMaster();
+					for (String location : downloadLocation.split(",")) {
+						param.setDownloadLocation(location);
+						String purl = ossService.getPurlByDownloadLocation(param);
+						if (!purls.contains(purl)) {
+							downloadLocationList.add(location);
+						}
+					}
+				}
+				if (!downloadLocationList.isEmpty()) {
+					oss.setDownloadLocations(downloadLocationList.toArray(new String[downloadLocationList.size()]));
+				}
+			} else {
+				if (downloadLocation != null) {
+					oss.setDownloadLocations(downloadLocation.split(","));
+				}
+			}
+			
 			for (String licenseName : declaredLicenses) {
 				licenseMaster = new LicenseMaster();
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.debug("Unconfirmed license:" + licenseName);
+					log.debug("New license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
@@ -1095,14 +1218,14 @@ public class OssController extends CoTopComponent{
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.debug("Unconfirmed license:" + licenseName);
+					log.debug("New license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
 			}
 			if (licenseCheck) {
 				log.debug("Add failed due to declared license:" + oss.getOssName());
-				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Unconfirmed license)");
+				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (New license)");
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
@@ -1270,11 +1393,7 @@ public class OssController extends CoTopComponent{
 					result += ",";
 				}
 				
-				if (url.endsWith("/")) {
-					result += url.substring(0, url.length()-1);
-				}else {
-					result += url;
-				}
+				result += url;
 				
 				if (isFirst) {
 					ossMaster.setDownloadLocation(result);
@@ -1285,13 +1404,6 @@ public class OssController extends CoTopComponent{
 			}
 			
 			ossMaster.setDownloadLocations(result.split(","));
-		}
-		
-		if (!isEmpty(ossMaster.getHomepage())) {
-			if (ossMaster.getHomepage().endsWith("/")) {
-				String homepage = ossMaster.getHomepage();
-				ossMaster.setHomepage(homepage.substring(0, homepage.length()-1));
-			}
 		}
 		
 		// editor를 이용하지 않고, textarea로 등록된 코멘트의 경우 br 태그로 변경
@@ -1332,7 +1444,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("ossInfo", bean);
 		
-		return OSS.OSS_POPUP_JSP;
+		return "oss/view/viewPopup";
 	}
 	
 	@GetMapping(value=OSS.OSS_DETAIL_VIEW_AJAX, produces = "text/html; charset=utf-8")
@@ -1343,7 +1455,7 @@ public class OssController extends CoTopComponent{
 			OssMaster _bean = ossList.get(0);
 			_bean.setOssName(StringUtil.replaceHtmlEscape(_bean.getOssName()));
 			
-			model.addAttribute("ossInfo", ossList.get(0));
+			model.addAttribute("ossInfo", _bean);
 			
 			CommentsHistory commentsHistory = new CommentsHistory();
 			commentsHistory.setReferenceId(bean.getOssId());
@@ -1353,7 +1465,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("ossInfo", new OssMaster());
 		}
 		
-		return OSS.OSS_DETAILS_VIEW_AJAX_JSP;
+		return "oss/view/ossDetailView";
 	}
 	
 	@GetMapping(value = OSS.CHECK_EXISTS_OSS_BY_NAME)
@@ -1362,11 +1474,24 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(ossService.checkExistsOssByname(bean) > 0, "unconfirmed oss");
 	}
 
+
+	@GetMapping(value = OSS.SELECT_OSS_POPUP)
+	public String ossSelectPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		return "oss/fragments/ossSelectPopup";
+	}
+
+	@GetMapping(value = OSS.MERGE_OSS_CHECK_POPUP)
+	public String mergeOssCheckPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		return "oss/fragments/mergeOssCheckPopup";
+	}
+
 	@GetMapping(value = OSS.CHECK_OSS_LICENSE)
 	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		model.addAttribute("projectInfo", bean);
+		model.addAttribute("isNext", req.getParameter("isNext"));
 
-		return OSS.CHECK_OSS_LICENSE_JSP;
+
+		return "oss/checkOssLicensePopup";
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1415,7 +1540,7 @@ public class OssController extends CoTopComponent{
 			}
 			
 			if (!vr.isDiff()){
-				Map<String, String> diffMap = vr.getDiffMessageMap();
+				Map<String, String> diffMap = vr.getDiffMessageMap(true);
 				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
 				resMap.put("diffMap", diffMap);
 			}
@@ -1430,14 +1555,19 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_LICENSE)
 	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(
-			@RequestBody ProjectIdentification paramBean
+			@RequestBody Map<String, Object> param
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model
 			, @PathVariable String targetName){
-		Map<String, Object> map = autoFillOssInfoService.saveOssCheckLicense(paramBean, targetName);
+		String json = (String) param.get("list");
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> paramBeanList = new ArrayList<>();
+		paramBeanList = (List<ProjectIdentification>) fromJson(json, collectionType);
+		Map<String, Object> map = autoFillOssInfoService.saveOssCheckLicense(paramBeanList, targetName);
 
 		return makeJsonResponseHeader(map);
 	}
@@ -1446,11 +1576,11 @@ public class OssController extends CoTopComponent{
 	public String checkOssName(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
+		model.addAttribute("isNext", req.getParameter("isNext"));
 		
-		return OSS.CHECK_OSS_NAME_JSP;
+		return "oss/checkOssNamePopup";
 	}
 	
-	@SuppressWarnings("unchecked")
 	@GetMapping(value = OSS.CHECK_OSS_NAME_AJAX, produces = "text/html; charset=utf-8")
 	public @ResponseBody ResponseEntity<Object> getCheckOssNameAjax(
 			HttpServletRequest req, 
@@ -1459,7 +1589,8 @@ public class OssController extends CoTopComponent{
 			Model model,
 			@PathVariable String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
-		Map<String, Object> map = null;
+		resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
+/*		Map<String, Object> map = null;
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
 		switch(targetName.toUpperCase()) {
@@ -1517,19 +1648,24 @@ public class OssController extends CoTopComponent{
 			}
 			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
 					.collect(Collectors.toList()));
-		}
+		} */
 		
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_NAME)
 	public @ResponseBody ResponseEntity<Object> saveOssCheckName(
-			@RequestBody ProjectIdentification paramBean
+			@RequestBody Map<String, Object> param
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model
 			, @PathVariable String targetName){
-		Map<String, Object> map = ossService.saveOssCheckName(paramBean, targetName);
+		String json = (String) param.get("list");
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> paramBeanList = new ArrayList<>();
+		paramBeanList = (List<ProjectIdentification>) fromJson(json, collectionType);
+		Map<String, Object> map = ossService.saveOssCheckName(paramBeanList, targetName);
 		
 		return makeJsonResponseHeader(map);
 	}
@@ -1625,7 +1761,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
-		return OSS.OSS_AUTO_ANALYSIS_JSP;
+		return "oss/ossAutoAnalysispopup";
 	}
 	
 	@GetMapping(value=OSS.AUTO_ANALYSIS_LIST)
@@ -1652,7 +1788,7 @@ public class OssController extends CoTopComponent{
 			downloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
 			if (!isEmpty(downloadId)) {
-				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId);
+				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId, null);
 				return makeJsonResponseHeader(result);
 			}
 			
@@ -1736,6 +1872,18 @@ public class OssController extends CoTopComponent{
 		Type typeAnalysis = new TypeToken<List<OssAnalysis>>() {}.getType();
 		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
+		for (OssAnalysis oa : analysisResultData) {
+			if (oa.getTitle().contains("최신 등록 정보")) {
+				OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
+				if (bean != null) {
+					oa.setOssId(bean.getOssId());
+					if (!isEmpty(bean.getImportantNotes())) {
+						oa.setImportantNotes(bean.getImportantNotes());
+					}
+				}
+			}
+		}
+		
 		String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, groupId);
 		
 		if (getSessionObject(sessionKey) != null) {
@@ -1749,7 +1897,7 @@ public class OssController extends CoTopComponent{
 	public String analysisResultDetail(HttpServletRequest req, HttpServletResponse res, @PathVariable String groupId, Model model){
 		model.addAttribute("groupId", groupId);
 		
-		return OSS.ANALYSIS_RESULT_DETAIL_JSP;
+		return "oss/ossAnalysisResultDetailpopup";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -1765,6 +1913,54 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
 		
 		if (detailData != null) {
+			OssMaster bean = new OssMaster();
+			for (OssAnalysis oa : detailData) {
+				if (ossService.checkOssTypeForAnalysisResult(oa)) {
+					oa.setOssType("V");
+				}
+				if (!isEmpty(oa.getDownloadLocation())) {
+					StringBuilder sb = new StringBuilder();
+					if (oa.getDownloadLocation().contains(",")) {
+						for (String downloadLocation : oa.getDownloadLocation().split("[,]")) {
+							bean.setDownloadLocation(downloadLocation);
+							String purl = ossService.getPurlByDownloadLocation(bean);
+							if (!isEmpty(purl)) {
+								sb.append(downloadLocation + "|" + purl).append(",");
+							} else {
+								sb.append(downloadLocation);
+							}
+						}
+					} else {
+						bean.setDownloadLocation(oa.getDownloadLocation());
+						String purl = ossService.getPurlByDownloadLocation(bean);
+						if (!isEmpty(purl)) {
+							sb.append(oa.getDownloadLocation() + "|" + purl);
+						} else {
+							sb.append(oa.getDownloadLocation());
+						}
+					}
+					
+					oa.setDownloadLocation(sb.toString());
+				}
+				
+				String key = (oa.getOssName() + "_" + avoidNull(oa.getOssVersion())).toUpperCase();
+				if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
+					OssMaster param = new OssMaster();
+					param.setOssId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssId());
+					param.setOssCommonId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssCommonId());
+					param.setOssName(oa.getOssName());
+					param.setOssVersion(oa.getOssVersion());
+					if (oa.getTitle().contains("최신 등록 정보")) {
+						param.setOssVersionAliases(CoCodeManager.OSS_INFO_UPPER.get(key).getOssVersionAliases());
+					}
+				}
+				OssMaster ossBean = ossService.getOssInfo(null, oa.getOssName(), true);
+				if (ossBean != null && oa.getTitle().contains("최신 등록 정보")) {
+					oa.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+					oa.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+				}
+			}
+			
 			result.put("isValid", true);
 			result.put("detailData", detailData);
 			result.put("cloneLicenseData", new OssMaster());
@@ -1823,6 +2019,11 @@ public class OssController extends CoTopComponent{
 		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase());
 		if (isNewVersion) {
 			resultData.setExistOssNickNames(ossService.getOssNickNameListByOssName(resultData.getOssName()));
+			OssMaster ossBean = ossService.getOssInfo(null, analysisBean.getOssName(), true);
+			if (ossBean != null) {
+				resultData.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+				resultData.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+			}
 		}
 		
 		resultData.setGridId(analysisBean.getGridId());
@@ -1872,6 +2073,7 @@ public class OssController extends CoTopComponent{
 			
 			resultData.setLicenseName(analysisBean.getLicenseName());
 			resultData.setOssLicenses(ossLicenseList);
+			analysisBean.setOssLicenses(ossLicenseList);
 		} else {
 			resultData.setLicenseName("");
 		}
@@ -1894,12 +2096,7 @@ public class OssController extends CoTopComponent{
 				if (!isEmpty(result)) {
 					result += ",";
 				}
-				
-				if (url.endsWith("/")) {
-					result += url.substring(0, url.length()-1);
-				} else {
-					result += url;
-				}
+				result += url;
 			}
 			
 			resultData.setDownloadLocations(result.split(","));
@@ -1909,12 +2106,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if (!isEmpty(analysisBean.getHomepage())) {
-			if (analysisBean.getHomepage().endsWith("/")) {
-				String homepage = analysisBean.getHomepage();
-				resultData.setHomepage(homepage.substring(0, homepage.length()-1));
-			} else {
-				resultData.setHomepage(analysisBean.getHomepage());
-			}
+			resultData.setHomepage(analysisBean.getHomepage());
 		} else {
 			resultData.setHomepage("");
 		}
@@ -1975,6 +2167,11 @@ public class OssController extends CoTopComponent{
 			mailBean.setParamOssId(resultOssId);
 
 			mailBean.setComment(resultData.getComment());
+			
+			if (isNewVersion && !isEmpty(resultData.getOssName())) {
+				ossService.setExistedOssInfo(resultData);
+				mailBean.setParamOssInfo(resultData);
+			}
 			CoMailManager.getInstance().sendMail(mailBean);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -1988,7 +2185,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("ossInfo", bean);
 		
-		return OSS.OSS_SYNC_POPUP_JSP;
+		return "oss/fragments/syncPopup-fragments :: syncPopupFragment";
 	}
 	
 	@PostMapping(value=OSS.OSS_SYNC_LIST_VALIDATION)
@@ -2039,7 +2236,7 @@ public class OssController extends CoTopComponent{
 		}
 		model.addAttribute("syncCheckList" , syncCheckList);
 		
-		return OSS.OSS_SYNC_DETAILS_VIEW_AJAX_JSP;
+		return "oss/fragments/syncPopup-fragments :: syncDetailViewFragment";
 	}
 
 	@PostMapping(value=OSS.OSS_SYNC_UPDATE)
@@ -2062,14 +2259,17 @@ public class OssController extends CoTopComponent{
 			
 			boolean declaredLicenseCheckFlag;
 			boolean detectedLicenseCheckFlag;
-			boolean downloadLocationCheckFlag;
-			boolean ossMasterCheclFlag;
+			boolean restrictionCheckFlag;
+			boolean ossMasterCheckFlag;
 			boolean onlyCommentRegistFlag;
 		
 			for (int i=0; i<ossIdsArr.length; i++) {
 				param.setOssId(ossIdsArr[i]);
 				
 				OssMaster beforeBean = ossService.getOssMasterOne(param);
+				if (!CollectionUtils.isEmpty(beforeBean.getRestrictionCdNoList())) {
+					beforeBean.setRestriction(String.join(",", beforeBean.getRestrictionCdNoList()));
+				}
 				OssMaster syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
 				syncBean.setCopyright(CommonFunction.brReplaceToLine(syncBean.getCopyright()));
 				syncBean.setSummaryDescription(CommonFunction.brReplaceToLine(syncBean.getSummaryDescription()));
@@ -2084,8 +2284,8 @@ public class OssController extends CoTopComponent{
 				
 				declaredLicenseCheckFlag = false;
 				detectedLicenseCheckFlag = false;
-				downloadLocationCheckFlag = false;
-				ossMasterCheclFlag = false;
+				restrictionCheckFlag = false;
+				ossMasterCheckFlag = false;
 				onlyCommentRegistFlag = false;
 
 					for (int j=0; j<syncItemArr.length; j++) {
@@ -2104,18 +2304,26 @@ public class OssController extends CoTopComponent{
 								break;
 
 							case "Detected License" :
-								if (syncBean.getDetectedLicenses() == null) {
-									if (standardOss.getDetectedLicenses() != null) {
-										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
-										detectedLicenseCheckFlag = true;
+								if (CollectionUtils.isEmpty(syncBean.getDetectedLicenses())) {
+									if (!CollectionUtils.isEmpty(standardOss.getDetectedLicenses())) {
+										int emptyCnt = 0;
+										for (String detectedLicense : standardOss.getDetectedLicenses()) {
+											if (isEmpty(detectedLicense)) {
+												emptyCnt++;
+											}
+										}
+										if (emptyCnt != standardOss.getDetectedLicenses().size()) {
+											syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+											detectedLicenseCheckFlag = true;
+										}
 									}
-								}else {
-									if (standardOss.getDetectedLicenses() != null) {
+								} else {
+									if (!CollectionUtils.isEmpty(standardOss.getDetectedLicenses())) {
 										if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
 											syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
 											detectedLicenseCheckFlag = true;
 										}
-									}else {
+									} else {
 										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
 										detectedLicenseCheckFlag = true;
 									}
@@ -2125,62 +2333,43 @@ public class OssController extends CoTopComponent{
 							case "Copyright" :
 								if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
 									syncBean.setCopyright(standardOss.getCopyright());
-									ossMasterCheclFlag = true;
+									ossMasterCheckFlag = true;
 								}
 								break;
 
-							case "Download Location" :
-								if (standardOss.getDownloadLocations() != null) {
-									if (syncBean.getDownloadLocations() == null) {
-										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-										downloadLocationCheckFlag = true;
-									}else {
-										if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
-											syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-											syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-											downloadLocationCheckFlag = true;
+							case "Restriction" :
+								if (!isEmpty(standardOss.getRestriction())) {
+									if (!isEmpty(syncBean.getRestriction())) {
+										List<String> standardRestrictionCdNoList = standardOss.getRestrictionCdNoList();
+										List<String> syncRestrictionCdNoList = syncBean.getRestrictionCdNoList();
+										syncRestrictionCdNoList.removeAll(standardRestrictionCdNoList);
+										if (!CollectionUtils.isEmpty(syncRestrictionCdNoList)) {
+											syncBean.setRestriction(String.join(",", standardRestrictionCdNoList));
+											restrictionCheckFlag = true;
 										}
+									} else {
+										syncBean.setRestriction(String.join(",", standardOss.getRestrictionCdNoList()));
+										restrictionCheckFlag = true;
 									}
-								}else {
-									if (syncBean.getDownloadLocations() != null) {
-										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-										downloadLocationCheckFlag = true;
-									}
-								}
-								break;
-
-							case "Home Page" :
-								if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
-									syncBean.setHomepage(standardOss.getHomepage());
-									ossMasterCheclFlag = true;
-								}
-								break;
-
-							case "Summary Description" :
-								if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
-									syncBean.setSummaryDescription(standardOss.getSummaryDescription());
-									ossMasterCheclFlag = true;
 								}
 								break;
 
 							case "Attribution" :
 								if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
 									syncBean.setAttribution(standardOss.getAttribution());
-									ossMasterCheclFlag = true;
+									ossMasterCheckFlag = true;
 								}
 								break;
 						}
 				}
-				if (!ossMasterCheclFlag && !declaredLicenseCheckFlag && !detectedLicenseCheckFlag && !downloadLocationCheckFlag){
+				if (!ossMasterCheckFlag && !declaredLicenseCheckFlag && !detectedLicenseCheckFlag && !restrictionCheckFlag){
 					if (!isEmpty(comment)) {
 						onlyCommentRegistFlag = true;
 					}
 				}
 								
-				if ((ossMasterCheclFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || downloadLocationCheckFlag) || onlyCommentRegistFlag) {
-					ossService.syncOssMaster(syncBean, declaredLicenseCheckFlag, detectedLicenseCheckFlag, downloadLocationCheckFlag);
+				if ((ossMasterCheckFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || restrictionCheckFlag) || onlyCommentRegistFlag) {
+					ossService.syncOssMaster(syncBean, declaredLicenseCheckFlag, detectedLicenseCheckFlag, restrictionCheckFlag);
 					
 					if (!onlyCommentRegistFlag) {
 						History h = new History();
@@ -2189,9 +2378,10 @@ public class OssController extends CoTopComponent{
 						historyService.storeData(h);
 					}
 					
-					beforeBean.setDownloadLocation(String.join(",", beforeBean.getDownloadLocations()));
 					OssMaster afterBean = ossService.getOssMasterOne(param);
-					afterBean.setDownloadLocation(String.join(",", afterBean.getDownloadLocations()));
+					if (!CollectionUtils.isEmpty(afterBean.getRestrictionCdNoList())) {
+						afterBean.setRestriction(String.join(",", afterBean.getRestrictionCdNoList()));
+					}
 					
 					try {
 						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
@@ -2220,20 +2410,21 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.OSS_BULK_EDIT_POPUP)
-	public String bulkEditPopup(HttpServletRequest req, HttpServletResponse res, 
-			@RequestParam(value="rowId", required=true)String rowId,
-			@RequestParam(value="target", required=true)String target,
-			Model model){
+	public String bulkEditPopup(HttpServletRequest req, HttpServletResponse res, @RequestParam Map<String, String> param, Model model) {
+		model.addAttribute("rowId", (String) param.get("rowId"));
+		model.addAttribute("target", (String) param.get("target"));
 		
-		model.addAttribute("rowId", rowId);
-		model.addAttribute("target", target);
+		if (param.containsKey("menu")) {
+			model.addAttribute("menu", (String) param.get("menu"));
+		} else {
+			model.addAttribute("menu", "");
+		}
 		
-		return OSS.OSS_BULK_EDIT_POPUP_JSP;
+		return "oss/ossBulkEditPopup";
 	}
 	
 	@PostMapping(value = OSS.CHECK_OSS_VERSION_DIFF)
-	public @ResponseBody ResponseEntity<Object> checkOssVersionDiff(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res,
-			Model model) {
+	public @ResponseBody ResponseEntity<Object> checkOssVersionDiff(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		OssMaster om = new OssMaster();
 		om.setOssId((String) map.get("ossId"));
 		om.setOssName((String) map.get("ossName"));
@@ -2246,8 +2437,7 @@ public class OssController extends CoTopComponent{
 
 	@ResponseBody
 	@PostMapping(value = OSS.CSV_FILE)
-	public ResponseEntity<Object> csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
-										  HttpServletResponse res, Model model) throws Exception {
+	public ResponseEntity<Object> csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		List<Object> limitCheckFiles = new ArrayList<>();
 		List<UploadFile> list = new ArrayList<UploadFile>();
 		List<OssMaster> ossList = new ArrayList<>();
@@ -2282,5 +2472,14 @@ public class OssController extends CoTopComponent{
 		resMap.put("res", true);
 		resMap.put("value", ossWithStatusList);
 		return makeJsonResponseHeader(resMap);
+	}
+
+	@GetMapping(value = OSS.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String ossId) throws IOException {
+		if (CoCodeManager.OSS_INFO_BY_ID.containsKey(ossId)) {
+			res.sendRedirect(req.getContextPath() + "/oss/edit/" + ossId);
+		} else {
+			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
+		}
 	}
 }

@@ -16,11 +16,12 @@ import reactor.core.publisher.ParallelFlux;
 public interface AutoFillOssInfoService {
 	List<ProjectIdentification> checkOssLicenseData(List<ProjectIdentification> componentData, Map<String, String> validMap, Map<String, String> diffMap);
 	Map<String, Object> checkOssLicense(List<ProjectIdentification> list);
-	Map<String, Object> saveOssCheckLicense(ProjectIdentification paramBean, String targetName);
+	Map<String, Object> saveOssCheckLicense(List<ProjectIdentification> paramBean, String targetName);
+	Map<String, Object> saveOssCheckLicense(List<ProjectIdentification> paramBean, String targetName, String prjId, List<String> comments, List<String> successIdList, List<String> failIdList, boolean isSaveComments);
 	
 	ParallelFlux<Object> getGithubLicenses(List<String> locations);
 	Mono<Object> requestGithubLicense(String location);
 
-	ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations);
-	Mono<Object> requestClearlyDefinedLicense(String location);
+//	ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations);
+	Map<String, Object> requestClearlyDefinedLicense(String location);
 }

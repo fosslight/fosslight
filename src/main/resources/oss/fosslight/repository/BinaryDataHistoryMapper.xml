@@ -282,6 +282,7 @@
 			<include refid="filters"/>
 		</if>
 		<include refid="orderby"/>
+
 		<include refid="limitPage"/>
 	</select>
     

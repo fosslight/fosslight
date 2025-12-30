@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -166,10 +167,7 @@ public class FileUtil {
 			if (!dir.exists()) {
 				dir.mkdirs();
 			}
-
-			ByteArrayInputStream inputStream = PdfUtil.html2pdf(contents);
-
-			FileUtils.copyInputStreamToFile(inputStream, new File(filePath + "/" + fileName));
+			PdfUtil.html2pdf(contents, filePath + "/" + fileName);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 
@@ -460,6 +458,56 @@ public class FileUtil {
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+		}
+	}
+
+	public static File getAutoAnalysisFile(String fileformat, String path) {
+		File file = new File(path);
+
+		if (!file.exists()) {
+			log.error("파일정보를 찾을 수 없습니다. file path : " + path);
+			return null;
+		}
+		
+		boolean isFile = false;
+		for (File f : file.listFiles()) {
+			if (f.isFile()) {
+				String[] fileName = f.getName().split("\\.");
+				String fileExt = (fileName[fileName.length - 1]).toUpperCase();
+
+				if (fileExt.equals(fileformat.toUpperCase())) {
+					isFile = true;
+					file = f;
+					break;
+				}
+			}
+		}
+		
+		if (isFile) {
+			return file;
+		} else {
+			return null;
+		}
+	}
+	
+	public static void addFileContents(String targetPath, String path) {
+		File targetFile = new File(targetPath);
+		File file = new File(path);
+		
+		if (targetFile.exists() && file.exists()) {
+			try {
+				String targetFileText = Files.readString(targetFile.toPath());
+				String fileText = Files.readString(file.toPath());
+				String text = targetFileText + System.lineSeparator() + fileText;
+				
+				FileWriter fw = new FileWriter(targetFile);
+				BufferedWriter writer = new BufferedWriter(fw);
+				writer.write("");
+				writer.write(text);
+				writer.close();
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
 		}
 	}
 }

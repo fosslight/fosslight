@@ -5,10 +5,11 @@
 
 package oss.fosslight.util;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import java.security.Key;
+import java.util.UUID;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 public class JwtUtil {
 	private Key key;
@@ -21,7 +22,9 @@ public class JwtUtil {
         String token = Jwts.builder()
                 .claim("userId", id)
                 .claim("email", email)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .claim("uuid", UUID.randomUUID())
+                .signWith(key)
+                //.signWith(key, SignatureAlgorithm.HS256)
                 .compact();
         return token;
     }

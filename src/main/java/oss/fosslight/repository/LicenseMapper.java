@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssMaster;
@@ -38,12 +39,6 @@ public interface LicenseMapper {
 	
 	int deleteLicenseNickname(LicenseMaster licenseMaster);									//특정 라이센스 닉네임 전체 삭제
 	
-	String existNetworkServerLicense(String licenseId);
-	
-	int insertNetworkServerLicense(String licenseId);
-	
-	int deleteNetworkServerLicense(String licenseId);
-	
 	List<String> getOssListWithLicenseForTypeCheck(String licenseId);
 	
 	void insertLicenseMaster(LicenseMaster licenseMaster);									//라이센스 등록
@@ -71,4 +66,5 @@ public interface LicenseMapper {
 	LicenseMaster getLicenseInfoWithName(String licenseName);
 	LicenseMaster getLicenseInfoWithId(String licenseId);
 
+	List<LicenseMaster> getLicenseInfoByRestriction(@Param("restriction") String restriction);
 }

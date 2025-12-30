@@ -7,14 +7,12 @@ package oss.fosslight.service.impl;
 
 import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
@@ -22,16 +20,24 @@ import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.repository.ApiPartnerMapper;
 import oss.fosslight.service.ApiPartnerService;
+import oss.fosslight.service.ApiVulnerabilityService;
+import oss.fosslight.service.ProjectService;
+import oss.fosslight.util.YamlUtil;
 
 @Service
 @Slf4j
-public class ApiPartnerServiceImpl implements ApiPartnerService {
+public class ApiPartnerServiceImpl extends CoTopComponent implements ApiPartnerService {
 	@Autowired ApiPartnerMapper apiPartnerMapper;
+	@Autowired ProjectService projectService;
+	@Autowired ApiVulnerabilityService apiVulnerabilityService;
 	
 	@Override
 	public Map<String, Object> getPartnerMasterList(Map<String, Object> paramMap){
@@ -43,11 +49,26 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 		if (partnerCnt > 0) {
 			list = apiPartnerMapper.selectPartnerMaster(paramMap);
 		}
-		
-		result.put("content", list);
-		result.put("record", partnerCnt);
+
+		result.put("list", list);
+		result.put("totalCount", partnerCnt);
 		
 		return result;
+	}
+
+	@Override
+	public boolean checkUserHasPartnerProject(T2Users userInfo, String partnerId){
+		Map<String, Object> paramMap = new HashMap<>();
+		List<String> partnerIdList = new ArrayList<String>();
+		partnerIdList.add(partnerId);
+		String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
+
+		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("userRole", userRole(userInfo));
+		paramMap.put("partnerIdList", partnerIds);
+		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+		return existPartnertCnt(paramMap);
 	}
 
 	@Override
@@ -65,11 +86,19 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			List<String[]> result = ldapTemplate.search(query().where("mail").is(email), new AttributesMapper() {
 				public Object mapFromAttributes(Attributes attrs) throws NamingException {
-					return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+					String mail = (String) attrs.get("mail").get();
+					String displayName = (String) attrs.get("displayname").get();
+					
+					mail = mail.replace("mail:", "").trim();
+					displayName = displayName.replace("displayName:", "").trim();
+					
+					return new String[] {mail, displayName};
 				}
 			});
 			
-			if (result != null && !result.isEmpty()) ldapCheckFlag = true;
+			if (CollectionUtils.isNotEmpty(result)) {
+				ldapCheckFlag = true;
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -85,7 +114,7 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 		LdapContextSource contextSource = new LdapContextSource();
 		try {
 			contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-			contextSource.setBase("OU=LGE Users, DC=LGE, DC=NET");
+			contextSource.setBase("OU=LGE Users,DC=LGE,DC=NET");
 			contextSource.setUserDn(LDAP_SEARCH_ID+LDAP_SEARCH_DOMAIN);
 			contextSource.setPassword(LDAP_SEARCH_PW);
 			CommonFunction.setSslWithCert();
@@ -105,5 +134,36 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 	@Override
 	public void insertWatcher(Map<String, Object> paramMap) {
 		apiPartnerMapper.insertWatcher(paramMap);
+	}
+
+	@Override
+	public Map<String, Object> getExportJson(String partnerId) {
+
+		ProjectIdentification _param = new ProjectIdentification();
+		_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		_param.setReferenceId(partnerId);
+		String type = CoConstDef.CD_DTL_COMPONENT_ID_PARTNER;
+		Map<String, Object> map = projectService.getIdentificationGridList(_param);
+
+		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("mainData");
+		LinkedHashMap<String, List<Map<String, Object>>> resultYamlFormat = YamlUtil.checkYamlFormat(list, type);
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		// Integrate Yaml Format, Vulnerability
+		for (String resultYamlFormatKey: resultYamlFormat.keySet()){
+			List<Map<String, Object>> yamlFormatList = resultYamlFormat.get(resultYamlFormatKey);
+			for (Map<String, Object> yamlFormatMap: yamlFormatList) {
+				String version = (String) yamlFormatMap.get("version");
+				List<Map<String, Object>> maxScoreNvdInfoList = apiVulnerabilityService.selectMaxScoreNvdInfo(resultYamlFormatKey, version);
+
+				if (!maxScoreNvdInfoList.isEmpty()) {
+					Map<String, Object> maxScoreNvdInfoMap = apiVulnerabilityService.selectMaxScoreNvdInfo(resultYamlFormatKey, version).get(0);
+					yamlFormatMap.put("Vulnerability", maxScoreNvdInfoMap.get("cvssScore"));
+				}
+			}
+			resultMap.put(resultYamlFormatKey, yamlFormatList);
+		}
+		return resultMap;
 	}
 }

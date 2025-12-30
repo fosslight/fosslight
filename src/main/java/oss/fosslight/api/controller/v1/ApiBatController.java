@@ -45,7 +45,7 @@ public class ApiBatController extends CoTopComponent {
 	
 	private final ApiBatService apibatService;
 	
-	@ApiOperation(value = "Search Binary List", notes = "Binary Info 조회")
+	@ApiOperation(value = "Search Binary List", notes = "Search Binary Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })

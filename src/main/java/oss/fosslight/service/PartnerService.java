@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.config.HistoryConfig;
+import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.ProjectIdentification;
@@ -23,7 +24,9 @@ public interface PartnerService extends HistoryConfig{
 
 	public List<PartnerMaster> getPartnerNameList(PartnerMaster partnerMaster);
 
-	public void registPartnerMaster(PartnerMaster partnerMaster, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense);
+	public void registPartnerMaster(PartnerMaster partnerMaster);
+	
+	public void registOss(PartnerMaster partnerMaster, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense);
 
 	public PartnerMaster getPartnerMasterOne(PartnerMaster partnerMaster);
 
@@ -31,7 +34,7 @@ public interface PartnerService extends HistoryConfig{
 
 	public List<T2Users> getUserList(T2Users t2Users);
 
-	public void changeStatus(PartnerMaster partnerMaster);
+	public void changeStatus(PartnerMaster partnerMaster, boolean isCoReviewer);
 
 	public List<PartnerMaster> getPartnerSwNmList(PartnerMaster partnerMaster);
 
@@ -57,6 +60,8 @@ public interface PartnerService extends HistoryConfig{
 	
 	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster);
 	
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster, boolean coReview);
+	
 	public Map<String, Object> getFilterdList(Map<String, Object> paramMap);
 
 	public Map<String, Object> getIdentificationGridList(ProjectIdentification identification);
@@ -72,4 +77,12 @@ public interface PartnerService extends HistoryConfig{
 	public Map<String, Object> getExportDataForSbomInfo(PartnerMaster partnerMaster);
 
 	public Map<String, Object> checkSelectDownloadFile(PartnerMaster partnerMaster);
+
+	public List<OssComponents> getSecurityGridList(boolean isDemo, PartnerMaster partnerMaster);
+
+	public void registOssWhenRegistPartner(PartnerMaster partnerMaster);
+
+	public void deletePartnerRefFiles(PartnerMaster partnerMaster);
+
+	public void updateSecurityDataForPartner(String partnerId);
 }

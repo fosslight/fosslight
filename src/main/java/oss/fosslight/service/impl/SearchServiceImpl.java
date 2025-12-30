@@ -124,6 +124,20 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 							break;
 						case "publicYn" : project.setPublicYn(value);
 							break;
+						case "schBinaryName" : project.setSchBinaryName(value);
+							break;
+						case "ossName" : project.setOssName(value);
+							break;
+						case "ossVersion" : project.setOssVersion(value);
+							break;
+						case "comment" : project.setComment(value);
+							break;
+						case "userComment" : project.setUserComment(value);
+							break;
+						case "licenseName" : project.setLicenseName(value);
+							break;
+						case "refPartnerName" : project.setRefPartnerName(value);
+							break;
 						default : break;
 					}
 				}
@@ -160,6 +174,18 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 						case "status" : partner.setStatus(value);
 							break;
 						case "publicYn" : partner.setPublicYn(value);
+							break;
+						case "ossName" : partner.setOssName(value);
+							break;
+						case "ossVersion" : partner.setOssVersion(value);
+							break;
+						case "licenseName" : partner.setLicenseName(value);
+							break;
+						case "binaryName" : partner.setBinaryName(value);
+							break;
+						case "userComment" : partner.setUserComment(value);
+							break;
+						case "description" : partner.setDescription(value);
 							break;
 						default : break;
 					}
@@ -322,10 +348,28 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 		return "N";
 	}
 
-
 	@Override
     public History work(Object param) {
         return null;
     }
+
+	@Override
+	public String getUserColumns(Map<String, Object> params, String userId) {
+		String listType = (String)params.get("listType");
+		params.replace("listType", SearchType.valueOf(listType).getName());
+		params.put("userId", userId);
+
+		return searchMapper.selectUserColumns(params);
+	}
+
+	@Override
+	public void saveUserColumns(Map<String, Object> params, String userId) {
+		String listType = (String)params.get("listType");
+		params.replace("listType", SearchType.valueOf(listType).getName());
+		params.put("userId", userId);
+
+		searchMapper.insertUserColumns(params);
+	}
+
 
 }

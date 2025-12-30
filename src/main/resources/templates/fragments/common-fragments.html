@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="loadingWrapFragment">
+    <div class="loading" id="loading_wrap" style="display:none;">
+        <div class="loadingBlind"></div>
+        <img alt="loading" th:src="@{/images/loading.gif}"/>
+    </div>
+</th:block>
+<th:block th:fragment="loadingIdenFragment">
+    <div class="loading" id="loading_iden" style="display:none;">
+        <div class="loadingBlind"></div>
+        <img alt="loading" th:src="@{/images/loading.gif}"/>
+    </div>
+</th:block>
+<th:block th:fragment="promptPopupFragment">
+    <div id="promptPopup">
+        [[ ${data.context} ]]
+        <div class="row mt-3">
+            <div class="col-12">
+                <textarea class="form-control" id="promptPopupEditor" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

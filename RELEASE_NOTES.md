@@ -6,15 +6,507 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
-## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-09-15)
+## [2.4.0](https://github.com/fosslight/fosslight/releases/tag/v2.4.0) (2025-12-16)
+
+### New
+
+* Security
+  - Added an Overview tab to view project vulnerability statistics and chart information.  
+
+* Project  
+  - Added new Distribution Types:  
+    - Contribution for open-source disclosure and contribution purposes.  
+    - Self-Check for internal review and pre-assessment purposes.  
+  - Added a new input field for the transfer division when the Distribution Type is Transfer In-House.  
+
+* Self-Check 
+  - Added integration with the FOSSLight Scanner Service.  
+
+* Common 
+  - When deleting a Project or 3rd Party, the SBOM-exported FOSSLight Report file is now automatically sent via email.  
+
+### Changed
+
+* Project
+  - Packaging
+    - Added support for uploading files in the tar.bz2 format.  
+    - Verify and Save buttons have been merged into a single action.  
+    - During Confirm, OSS items without notice or source are now excluded from warning message checks.  
+  - Distribution
+    - The action performer’s information is now displayed in the completion email.  
+
+* Security 
+  - Added the Affected SW Version Range column to the Need to Resolve and Full Discovered tabs.  
+
+* History List 
+  - OSS: Added information for include CPE, exclude CPE, and *version alias*.  
+
+* OSS  
+  - When saving Dual or Multi licenses, licenses are now sorted in alphabetical order.  
+  - For OSS with Version Diff, the version information table in the registration email is now sorted by version order.  
+
+* Vulnerability 
+  - Modified NVD sync behavior to skip entries where download location, homepage is null.  
+
+* Bug Fixes  
+  - Security > Need to Resolve: Fixed an issue where the max score was displayed incorrectly.  
+  - OSS Save: Fixed an issue where identical licenses were duplicated in declared or both declared and detected fields.  
+  - Identification
+    - Fixed an issue where the admin check* status was unintentionally cleared.  
+    - Fixed an issue where 3rd party copyright was not displayed in the SBOM tab.  
+    - Fixed an issue where exports failed when required warning messages existed.  
+    - Fixed an issue where license information disappeared after exclude and save.  
+    - Fixed an issue where Proprietary license types did not display warning messages.  
+    - Fixed an issue where Pre-review > License change targets were not listed.  
+  - Packaging: Fixed an issue where network service OSS was incorrectly categorized as source disclosure required.  
+
+
+### DataBase
+
+* Columns Added  
+  - `PRE_PROJECT_MASTER`: `SRC_SCAN_FILE_ID`  
+  - `PROJECT_MASTER`: `TRANSFER_DIVISION`  
+  - `PARTNER_MASTER`: `CVE_ID`, `CVSS_SCORE_MAX`
+ 
+## [2.3.0](https://github.com/fosslight/fosslight/releases/tag/v2.3.0) (2025-07-09)
+
+### New
+* 3rd Party
+  - Added 3rd Party Information Sheet when exporting the FOSSLight Report.
+* Project
+  - A new field has been added to Project Information for specifying the Security Responsible Person.
+    - They will also receive security-related emails from FOSSLight Hub with creator and editors.
+  - OSORI DB Information Addition
+    - In the Pre-Review > Open Source and License tabs, users can now see  data from the OSORI database.
+  - DEP Tab Dependency Tree View
+    - When analysis is performed using the FOSSLight Dependency Scanner, the relationships between each dependency can be visualized in a tree structure.
+* API
+  - Added API to update the Security Responsible Person information.(/api/v2/projects/{id}/security-person)
+  - Added API to update the Security Mail information.(/api/v2/projects/{id}/security-mail)
+* Common
+  - Expanded Custom Column Feature
+    - The Custom Column feature is now available in the Security tab, Project/3rd Party Identification, and Self-Check sections.
+  - Tab refresh
+    - If you enter a tab in any way other than clicking on the open tab at the top, a refresh pop-up will appear. 
+
+### Changed
+* Project
+  - Packaging
+    - Previously, up to 4 OSS Package files could be uploaded, but with this update, the number of uploadable files has been increased to 5.
+  - SPDX, CycloneDX 
+    - When SPDX and CycloneDX documents are generated, the output will be based on the package URL in the DEP tab. 
+    - Even if the OSS Name and OSS Version are the same, each will be output separately if the package URLs are different, allowing all relationships to be displayed.
+  - Support CycloneDX 1.6
+* API
+  - In addition to email, the user can now check their issued Token information in the User Settings menu within the FOSSLight Hub.
+  - Added security mail, security person, editors and publicYn information in GEP /api/v2/projects API
+  - Added bomSave parameter in /api/v2/projects/{id}/{tab_name}/reports API
+  - Added modelNameExactYn parameter in GET /api/v2/projects API
+  - Added reset all option in /api/v2/projects/{id}/reset API
+* License, OSS
+  - Added Share URL button
+  - Change color of Restriction icon based on the level
+* DataBase
+  -  Added column
+    - PROJECT_MASTER: PACKAGE_FILE_ID5
+  - Deleted columns
+    - PROJECT_MASTER: PACKAGE_VUL_DOC_FILE_ID, VUL_DOC_SKIP_YN
+  - Added table  
+    - NVD_DATA_RUNNING_ON_WITH_TEMP, NVD_DATA_RUNNING_ON_WITH 
+
+## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
+
+### New
+* 3rd Party
+  - Added 3rd Party Information
+  - Added 3rd Party Identification(3rd Party tab/ BOM tab)
+  - Implemented a 3rd Party BOM Compare feature
+
+* Project
+  - Added codelinaro type to Pre-review
+ 
+### Changed
+* Project
+  - Enabled the ability to change the status of multiple projects simultaneously.
+  - Updated BOM merge conditions:
+     - If OSS Name is “-”, merge if license, homepage, and download location are the same.
+  - Adjusted the Loaded list to display items in the order of most recently added.
+* Open Source
+  - OSS name can now only be changed through the edit button in the detailed screen.
+  - Changed the initial list display to sort by modified date in descending order.
+* License
+  - Changed the initial list display to sort by modified date in descending order.
+  - Modified the License text field to allow null values.
+* Review Report
+  - Updated to include OSS Important Notes information in the output.
+  - Provided links to detailed screens when clicking on OSS and License names.
+* DataBase
+  -  Updated column names
+     - PROJECT_MASTER: DESTRIBUTION_STATUS > DISTRIBUTION_STATUS
+  - Deleted columns
+     - PRE_PROJECT_MASTER: OSS_TYPE, OS_TYPE_ETC, DISTRIBUTION_TYPE
+* Mail
+  - Added a notification feature for users in the division (Code No: 200) when USE_YN is changed to N in Code Management.
+
+* **Bug fix**
+  - Fixed an issue where the banned list of all files would merge and display when multiple package files are uploaded in Packaging.
+  - Resolved an issue where existing data would change when saving a copied OSS with a new name (added logic to reset oss_common_id).
+  - Fixed an issue where information was not displayed correctly in the Statistics menu.
+  - Resolved an issue where the Vulnerability menu could not be queried.
+  - Fixed an issue where the column width would not be maintained after filtering in the Grid table.
+  - Addressed an issue where no email was sent when adding a new OSS version.
+
+## [2.2.0](https://github.com/fosslight/fosslight/releases/tag/v2.2.0) (2025-02-19)
+
+### New
+* 3rd Party
+  - Added 3rd Party Information
+  - Added 3rd Party Identification(3rd Party tab/ BOM tab)
+  - Implemented a 3rd Party BOM Compare feature
+
+* Project
+  - Added codelinaro type to Pre-review
+ 
+### Changed
+* Project
+  - Enabled the ability to change the status of multiple projects simultaneously.
+  - Updated BOM merge conditions:
+     - If OSS Name is “-”, merge if license, homepage, and download location are the same.
+  - Adjusted the Loaded list to display items in the order of most recently added.
+* Open Source
+  - OSS name can now only be changed through the edit button in the detailed screen.
+  - Changed the initial list display to sort by modified date in descending order.
+* License
+  - Changed the initial list display to sort by modified date in descending order.
+  - Modified the License text field to allow null values.
+  - Added a notification feature for users in the division (Code No: 200) when USE_YN is changed to N in Code Management.
+* Review Report
+  - Updated to include OSS Important Notes information in the output.
+  - Provided links to detailed screens when clicking on OSS and License names.
+* DataBase
+  -  Updated column names
+     - PROJECT_MASTER: DESTRIBUTION_STATUS > DISTRIBUTION_STATUS
+  - Deleted columns
+     - PRE_PROJECT_MASTER: OSS_TYPE, OS_TYPE_ETC, DISTRIBUTION_TYPE
+
+* **Bug fix**
+  - Fixed an issue where the banned list of all files would merge and display when multiple package files are uploaded in Packaging.
+  - Resolved an issue where existing data would change when saving a copied OSS with a new name (added logic to reset oss_common_id).
+  - Fixed an issue where information was not displayed correctly in the Statistics menu.
+  - Resolved an issue where the Vulnerability menu could not be queried.
+  - Fixed an issue where the column width would not be maintained after filtering in the Grid table.
+  - Addressed an issue where no email was sent when adding a new OSS version.
+
+## [2.1.1](https://github.com/fosslight/fosslight/releases/tag/v2.1.1) (2024-12-13)
+
+### New
+* Open Source
+  - Added Important Notes section
+* Project
+  - Added cargo type to Pre-review
+  - Added functionality to allow appending in file format in the Packaging - Notice section
+* UI
+  - Added icon color based on level in Restrictions
+* API
+  - Added Project reset API
+  - Added Project delete API
+
+### Changed
+* Project
+  - Changed terminology in Information: Watcher -> Editor
+  - Removed unnecessary confirmation popup when saving BOM
+  - Changed warning message level in Identification > BIN tab
+    - OSS Name different and License cases, lowered level from Warning -> Info
+  - Modified Packaging to prevent '/' from being entered in the path
+  - Deleted fosslight_binary.txt area. Replaced with fosslight binary report to include tlsh and checksum values.
+  - Modified to prevent BOM Compare for projects without permissions
+  - Changed permission check logic to make modifications impossible in Request status
+  - Handled to disallow input of single and double quotes during Distribution
+* Open Source
+  - Deleted items corresponding to OSS_COMMON in Sync functionality
+  - Added restriction in Sync
+  - Modified Sync operation to add comment with current version
+  - Added CPE-related items to the List search criteria
+* Mail
+  - Displayed changes related to Open Source common information
+  - Changed format for Open Source all version comments
+  - Added Open Source purl information
+  - Modified query to retrieve info table from Vulnerability Discovered email. 
+    Adjusted query to ensure OSS Name is also used in the Dependency tab
+* Review Report
+  - Changed conditions for displaying License review
+* UI
+  - Automatically adds input box values when the save button is clicked in License / Open Source details.
+* API
+  - Changed API name according to the terminology change from Watcher to Editor
+  - Modified User permission check functionality in API calls to align with UI
+  - Project search API
+    - Added parameter for paging
+    - Changed key in return values
+  - Removed limit on the number of Project creations
+  - Changed to use random tokens during token generation
+* **Bug fix**
+  - Project > Identification
+    - Fixed status bar bug
+    - Corrected pre-review error
+    - Resolved issue with copyright information not updating
+  - Project > Packaging
+    - Fixed bug in the verify process
+    - Modified to prevent physical deletion of packaging files when referenced by multiple projects
+    - Fixed issue where the 4th packaging file was not visible when loading previous project or could not be copied
+  - Project > Security
+    - Fixed issue with status indication on the Security button
+    - Resolved issue where vulnerability list for open source without versions was not visible
+  - 3rd Party
+    - Fixed bug preventing deletion of related documents
+    - Corrected bug in the 3rd party creation screen
+  - License
+    - Fixed bug when sending mail with only comments added in License
+  - Open source
+    - Modified to display restrictions of licenses linked to open source on the detail page
+    - Fixed bug related to Purl creation
+  - Vulnerability
+    - Modified logic related to recalculation
+  - DB
+    - Fixed bug causing duplicate OSS COMMON IDs
+    - Added missing tables to fosslight_create.sql
+    - Added missing code data
+      - Source code disclosure scope
+      - Restriction
+* Other Changes
+  - Legacy code deletion: Removed unused JSP and library files
+  - Changed verify script path to an absolute path including root.dir
+
+## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-11-05)
+
+### New
+
+* **Added Security Tab Features**
+  - Renamed internal tabs to Need to Resolve / Full Discovered
+    - Changed from the previous Total / Fixed / Not Fixed classification to Need to Resolve / Full Discovered
+    - Need to Resolve: Displays CVE IDs above the standard score.
+      The standard score can be set in the Code management menu under Security Vulnerability Standard Score
+    - Full Discovered: Displays all detected CVE IDs
+  - Added Columns: Vulnerability Link, Security Comments
+    - Vulnerability Link:
+    - Security Comments: Added a Security Comments column to leave comments on the results of Vulnerability Resolution
+  - Added Excel upload feature
+* **Added Security Mail Enable/Disable Feature**
+  - Added an option to set whether to receive Security Mail for the project
+  - Can be set in Project Information
+  - Reason for disabling Security Mail is mandatory
+* **Added Binary List to Packaging > Source Tab**
+  - Added a binary list feature to prevent binaries from being collected instead of source code during the packaging process
+* **Added v2.1.0 Migration Script**
+  - 20241025020001_update_v2.1.0.sql: Migration script for v2.1.0 changes
+  - 20241104111630_update_v2.1.0_update_license_data.sql: Migration script to update license data used in open source
+
+### Changed
+
+* **Added Data to fosslight_create.sql**
+  - Added License data to fosslight_create.sql
+  - There was a bug where the Opensource List only showed part of the data due to missing License data
+* **Increased Number of Upload Files in Packaging Tab**
+  - Increased the number of packaging file uploads to 4 to support up to 20GB of upload capacity
+* **Bug Fixes**
+  - Fixed a bug where the file count was not correct due to a Packaging verify bug
+  - Fixed a bug when exporting Statistics to an Excel file
+  - Fixed a bug where saving was not possible when Project > Identification > Admin was checked due to OSS Component ID matching issues
+  - Fixed an error in the default column names displayed in License / Open Source List (Obligation -> Notice/Source)
+  - Fixed an error where the 3rd party name did not appear when loading 3rd party data in Project > Identification
+  - Fixed bugs related to Vulnerability matching
+
+## [2.0.2](https://github.com/fosslight/fosslight/releases/tag/v2.0.2) (2024-10-14)
+
+### Changed
+* **Changed License / Open Source Obligation Notation**
+  - Separated the Obligation column: Obligation -> Notice / Source
+  - Changed to a checkmark for cases where there are obligations in Notice / Source
+* **Changes to Database Minor**
+  - Added the previously missing Final Review Status to the T2_CODE_DTL table
+  - Foreign key removed from the OSS_COMPONENTS_LICENSE table
+* **Fixed errors occurring during the save process**
+  - Corrected the error in setting the component ID during the license aggregation process 
+    when a new entry is made in the grid data save process.
+  - Fixed issues occurring during identification save due to foreign key constraints
+* **Performance Improvement**
+  - Improved the save process speed for Project, 3rd party, and self-check.
+* **Packaging Bug Fixes and Features Added**
+  - Fixed the bug that occurred during Packaging verify after Project copy.
+  - Changed the Packaging process to disallow blank spaces in the path.
+* **Comment Bug Fixes and Features Added**
+  - Fixed the bug where the confirm process would not proceed if there was a comment message.
+  - Admin can now load draft comments when confirming/rejecting.
+* **Security Tab Bug Fixes and Features Added**
+  - Fixed the error that occurred when no vulnerabilities were detected in the Security tab.
+* Revised the 2.0.0 version release note
+  - Specific content updates regarding the features and fixes included in version 2.0.0.
+
+
+## [2.0.1](https://github.com/fosslight/fosslight/releases/tag/v2.0.1) (2024-09-30)
+
+### Changed
+* **Switched to using local resources for Jqgrid**
+  - Due to the discontinuation of CDN support for jqgrid, it has been changed to use local resources.
+
+
+## [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
+
+### NEW
+* **Opensource Database Schema Changes**
+  - For efficient management of open source information, 
+    The OSS Master has been separated into 'OSS_COMMON' and 'OSS_VERSION'.
+    - **'OSS_COMMON' Table**: Added to manage the common information of OSS.
+    - **'OSS_VERSION' Table**: Added to manage the version information of OSS.
+
+* **Enhanced License and Opensource Information**
+  - Restrictions have been updated based on OSORI data.
+  - Added Source Code Disclosing Scope information to License.
+  - Opensource now includes restriction information.
+  - Comments can be distinguished between the overall version of open source and specific versions.
+  - Download location information of open source is managed as common information.
+  - PURL has been added to the download location.
+
+* **Enhanced Matching of Open Source Security Vulnerabilities**
+  - 'Include CPE', 'Exclude CPE', and 'OSS Version Alias' have been added to open source 
+    to enhance security vulnerability matching.
+
+
+### Changed
+* **fosslight_create.sql Updated for Hub Version 2.0**
+  - The fosslight_create.sql has been updated to version 2.0.0.
+
+* **API V2 Updates**
+  - Changed the authorization method in the API v2 Swagger UI.
+  - Added 3rd party export API.
+  - Modified the name for BOM export/JSON API.
+
+* **Bugfixes**
+  - Fixed issues in the UI.
+
+* **Performance Improvement**
+  - Added a column to PROJECT_MASTER to improve the speed of the Project list screen.
+
+### Notes
+Hub version 2.0.0 is a major update that includes changes to the database schema.
+We provide a migration script to upgrade to Hub version 2.0.0 for existing users.  
+(Filename: 20240725150921_update_v2.0.0.sql)
+
+This migration script involves several schema changes, so it is recommended to review the overall content.  
+Please note that the migration script only supports normal cases.
+
+Errors may arise during the migration process depending on the data content. 
+**Particular attention should be given to the following points**:
+
+1. **Change of foreign key in OSS_LICENSE_DECLARED, OSS_LICENSE_DETECTED tables**
+  - If there is invalid data in OSS_ID, an error may occur when changing the foreign key.
+  - Therefore, it is necessary to check data integrity and perform corrections in advance if necessary.
+
+2. **Deletion and modification of data in T2_CODE, T2_CODE_DTL**
+  - The codes to be updated: 913, 230
+  - Please check if you have been using these codes by modifying them.
+  - This may affect related business logic or data references, so prior review is necessary.
+
+
+In addition, the main changes are summarized as follows:
+1. **Separation of Opensource related databases**
+ - Separated into 'OSS_COMMON' and 'OSS_VERSION'.
+
+2. **Addition of OSS_DOWNLOADLOCATION_COMMON and OSS_NICKNAME_COMMON Tables**
+  - The schema has been modified to link open source common information (OSS_COMMON_ID) with the download location.
+  - The schema has been modified to link open source common information (OSS_COMMON_ID) with the nickname.
+
+3. **Addition of OSS_INCLUDE_CPE, OSS_EXCLUDE_CPE, and OSS_VERSION_ALIAS Tables**
+  - Tables have been added to enhance data management for security vulnerability matching.
+
+4. **Schema Change of LICENSE_NICKNAME Table**
+  - The schema has been modified to use LICENSE_ID.
+
+5. **Addition of DISCLOSING_SRC Column in LICENSE_MASTER Table**
+  - A column has been added for DISCLOSING_SRC information.
+
+6. **Addition of Column in PROJECT_MASTER Table**
+  - A column has been added to improve the speed of the project list screen.
+
+Please review the Migration script thoroughly, referring to the above content.
+Before executing the Migration script, please make sure to back up the database,
+and first run the script in a test environment to ensure there are no issues.
+
+
+## [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
+
+### Changed
+* Fix wrong column name in fosslight_create.sql
+* Bug fix in API V2
+  - Change 3rd party search API return value type
+  - Fix the bug that source code analysis result was uploaded to BIN tab
+* Bug fix in email format
+* Bug fix in review report
+* Bug fix in search bar in Opensource menu
+* Bug fix in SPDX document 
+
+
+## [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+
+### New
+* UI 2.0 release 
+  - Switched UI Framework to Thymeleaf
+  - Enhanced with a more intuitive user interface
+  - Updated UX scenarios
+  - Detailed information about UI 2.0 will be available at https://fosslight.org/
+* Lite release (Thanks to @hjcdg1)
+  - Released Lite web for the FOSSLight system
+  - Designed for personal users to perform self-checks
+  - Features a simple UI and is mobile-compatible
+* API v2 release (Thanks to @cobaltblu27)
+  - Released API v2 for the FOSSLight system.
+  - Transitioned to RESTful API architecture.
+  - Improved response consistency.
+
+
+## [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+
+### New
+* Add 'sheetNames' parameter in oss report upload APIs
+  - /api/v1/oss_report_bin
+  - /api/v1/oss_report_dep
+  - /api/v1/oss_report_src
+  - /api/v1/oss_report_selfcheck
+
+### Changed
+* Modify uploaded packaging file size from 4GB to 5GB
+* Update CheckOSSName Button UI as disabled in DEP tab because it cannot be used in DEP tab
+* Notice Text Format was changed to include open source homapage link
+* Change Distribution Type Names
+* Some Mapper was changed:
+  * Apply DEPENDENCIES and REF_OSS_NAME in mapper for component copy
+  * Change DEPENDENCIES Column data type as text in DB
+
+
+## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-11-23)
+
 ### New
 * Added new API that can add a watcher in project, 3rd party, self-check. (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
+* Added new api /api/v1/prj_not_applicable which is possible to check “N/A” in 3rd, src, bin tab.
 * The parameter whether to reset or not when uploading report in Project/Self-check is newly added. (/api/v1/oss_report_src, /api/v1/oss_report_bin, /api/v1/oss_report_selfcheck)
 * A button to download the FOSSLight Report in yaml format has been added to “export” button.
 * Added a new popup which displays the detected license information for each saved version when an open source with a different license for each version is saved to the system for the first time.
-  
+* The DEP tab has been added to upload the results of FOSSLight Dependency Scanner.
+  - Relationship information for each package is added to the “Dependencies” column.
+  - The rename function does not apply to OSS names in the DEP tab.
+  - Relationship information is displayed when clicking the Dependencies icon on the BOM tab.
+  - When exporting a document in SPDX format, relationship information is included.
+* CycloneDX is now supported by FOSSLight Hub. You can select the form to be issued at the packaging stage and export the SBOM in project(identification).
+* "admin check" is possible to modify download location, homepage and copyright information in BOM tab. 
+
 ### Changed
 * All OSS are included in the BOM when exported in project and 3rd party, regardless of the notification obligation.
+* The OSS report form has been updated. 
+  - The "DEP" sheet has been added for the dependency analysis results
+  - The automatic selection form for the Operating System field and Category field within the Model Info sheet has also been updated with the latest information.
+* "Notice" shows before login screen.
+* “Not the same as property” warning message is added in copyright column of OSS table.
+
 
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
 

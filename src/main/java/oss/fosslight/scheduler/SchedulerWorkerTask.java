@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
@@ -28,9 +30,13 @@ import oss.fosslight.service.CommentService;
 import oss.fosslight.service.MailService;
 import oss.fosslight.service.NvdDataService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.FileUtil;
 
+import oss.fosslight.repository.ProjectMapper;
+
+@Component
 public class SchedulerWorkerTask extends CoTopComponent {
 	final static Logger log = LoggerFactory.getLogger("SCHEDULER_LOG");
 	
@@ -40,13 +46,15 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired CommentService commentService;
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
-	
+	@Autowired ProjectService projectService;
+	@Autowired ProjectMapper projectMapper;
 	boolean serverLoadFlag = false; 
-	boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+	boolean distributionFlag;
 	
 	@PostConstruct
 	public void init() {
 		serverLoadFlag = true;
+		distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		makeInternalLicense();
 	}
 	
@@ -75,19 +83,33 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Scheduled(cron="${nvd.scheduled.cron.value}")
 //	@Scheduled(fixedDelay=1000)
 	public void nvdDataIfJob() {
+		log.info("nvdDataIfJob start");
+		
 		String resCd = "";
 		try {
 			resCd = nvdService.executeNvdDataSync();
 			
 			if (resCd == "00") {
 				vulnerabilityService.doSyncOSSNvdInfo();
-				log.info("nvdDataIfJob end");
 			} else {
 				log.error("executeNvdDataSync - resCd : " + resCd);
 			}
 		} catch (IOException ioe) {
 			log.error(ioe.getMessage() + " (resCd : " + resCd + ")", ioe);
 		}
+	}
+	
+	@Scheduled(cron="0 0 9 * * ?")
+	public void sendMailNvdDataIfJob() {
+		log.info("sendMailNvdDataIfJob start");
+		
+		try {
+			vulnerabilityService.sendMailNvdDataIfJob();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		log.info("sendMailNvdDataIfJob end");
 	}
 	
 	// 0분 부터 5분 단위 스케줄 - 30분이 지난 메일은 삭제한다.

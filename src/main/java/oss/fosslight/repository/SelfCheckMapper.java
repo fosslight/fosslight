@@ -96,8 +96,6 @@ public interface SelfCheckMapper {
 
 	String selectLicenseComb(ProjectIdentification projectIdentification);
 
-	void updateComment(CommentsHistory result);
-
 	void deleteComment(CommentsHistory commentsHistory);
 	
 	List<OssComponents> selectOssRefPrjList(OssMaster ossMaster);
@@ -109,8 +107,6 @@ public interface SelfCheckMapper {
 	List<OssComponentsLicense> selectBomLicenseGrp(ProjectIdentification projectIdentification);
 	
 	int selectDuplicatedProject(Project project);		//프로젝트 리스트중 Name + Version이 중복될 경우 0 이상의 값 리턴
-
-	List<Project> selectProjectListExcel(Project project);
 
 	String selectLastPrjId();
 
@@ -289,4 +285,12 @@ public interface SelfCheckMapper {
 	List<String> findIdentificationMaxNvdInfoForVendorProduct(@Param("prjId")String prjId);
 
 	List<OssComponents> checkSelectDownloadFile(Project project);
+
+	void resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+
+	void deleteOssNotice(Project project);
+
+	List<T2File> selectScanFile(Project project);
+	
+	void updateComment(Project project);
 }

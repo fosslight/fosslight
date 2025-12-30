@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,14 +39,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.ShellCommander;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssComponentsLicense;
-import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.UploadFile;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.ApiFileMapper;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.repository.ApiProjectMapper;
@@ -52,14 +47,16 @@ import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.ApiProjectService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
+import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.ApiVulnerabilityService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.util.YamlUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 
@@ -74,6 +71,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@Autowired CommentService commentService;
 	@Autowired ApiOssMapper apiOssMapper;
 	@Autowired ApiVulnerabilityService apiVulnerabilityService;
+	@Autowired HistoryService historyService;
 	
 	HashMap<String, HashMap<String, Object>> OSS_INFO_UPPER = new HashMap<>();
 	HashMap<String, HashMap<String, Object>> OSS_INFO_BY_ID = new HashMap<>();
@@ -109,16 +107,78 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
 				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
-//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
+				map.put("EDITORS", map.get("editors") == null ? "" : map.get("editors").toString());
 			}
 		}
 		
-		result.put("content", list);
-		result.put("record", projectCnt);
+		result.put("list", list);
+		result.put("totalCount", projectCnt);
 		
 		return result;
 	}
-	
+
+	// NOTE: This method needs to be removed when V1 API is fade out
+	@Override
+	public Map<String, Object> selectProjectList_V1(Map<String, Object> paramMap){
+		Map<String, Object> result = new HashMap<String, Object>();
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		int projectCnt = apiProjectMapper.selectProjectTotalCount(paramMap);
+
+		if (projectCnt > 0) {
+			list = apiProjectMapper.selectProject_V1(paramMap);
+
+			for (Map<String, Object> map : list) {
+				String prjId = (String) map.get("prjId").toString();
+				String status = (String) map.get("status");
+				String distributionStatus = (String) map.get("distributionStatus");
+				distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(distributionStatus)
+						? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : distributionStatus;
+				String nvdMaxScore = apiProjectMapper.findIdentificationMaxNvdInfo(prjId);
+
+				map.put("DISTRIBUTION_TYPE", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, (String) map.get("distributionType")));
+				map.put("NETWORK_SERVICE", (String) map.get("networkService"));
+				map.put("NOTICE", CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, (String) map.get("notice")));
+				map.put("NOTICE_PLATFORM", CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, (String) map.get("noticePlatform")));
+				map.put("PRIORITY", CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, (String) map.get("priority")));
+				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
+				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
+				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
+				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));
+				map.put("VULNERABILITY_SCORE", nvdMaxScore);
+//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
+			}
+		}
+
+		result.put("content", list);
+		result.put("record", projectCnt);
+
+		return result;
+	}
+
+	@Override
+	public boolean checkProjectAvailability(T2Users userInfo, String prjId, String needToUploadReport){
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("loginUserName", userInfo.getUserName());
+		paramMap.put("userRole", userRole(userInfo));
+		paramMap.put("prjId", prjId);
+//		paramMap.put("distributionType", projectType);
+		paramMap.put("needToUploadReport", needToUploadReport);
+//		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+		return apiProjectMapper.checkProjectExist(paramMap);
+	}
+
+	public boolean checkUserAvailableToEditProject(T2Users userInfo, String prjId){
+		return checkProjectAvailability(userInfo, prjId, CoConstDef.FLAG_YES);
+	}
+
+	@Override
+	public boolean checkUserHasProject(T2Users userInfo, String prjId){
+		return checkProjectAvailability(userInfo, prjId, CoConstDef.FLAG_NO);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean existProjectCnt(Map<String, Object> paramMap) {
@@ -150,17 +210,22 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return records == prjIdList.size() ? true : false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet) {
+		return getSheetData(ufile, prjId, readType, sheet, false);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet, boolean exactMatchFlag) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		
 		String errMsg = "";
 		List<OssComponents> reportData = new ArrayList<OssComponents>();
 		List<String> errMsgList = new ArrayList<>();
-		
+		Map<String, String> emptyErrMsg = new HashMap<>();
 		try {
-			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList)) {
+			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList, emptyErrMsg, exactMatchFlag)) {
 				for (String s : errMsgList) { // error 처리
 					if (isEmpty(s)) {
 						continue;
@@ -365,7 +430,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			OssNotice noticeParam = new OssNotice();
 			noticeParam.setPrjId((String) paramMap.get("prjId").toString());
-			noticeParam.setNoticeType(CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL);
+			noticeParam.setNoticeType((String) paramMap.getOrDefault("noticeType", CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL));
+			noticeParam.setNoticeTypeEtc((String) paramMap.getOrDefault("noticeTypeEtc", ""));
 			
 			projectMapper.makeOssNotice(noticeParam);
 		}
@@ -379,87 +445,36 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return apiProjectMapper.makeOssNotice(paramMap);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Map<String, Object>> getBomList(String prjId){
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("prjId", prjId);
-		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(prjId);
+		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		identification.setMerge("N");
 		
-		if (CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
-			paramMap.put("roleOutLicenseIdList", CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST);
+		Map<String, Object> map = projectService.getIdentificationGridList(identification, true);
+		
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+		pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
+		T2CoValidationResult vr = pv.validate(new HashMap<>());
+		map.replace("rows", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+		
+		List<ProjectIdentification> bomList = (List<ProjectIdentification>) map.get("rows");
+		List<Map<String, Object>> gridDataList = new ArrayList<>();
+		
+		for (ProjectIdentification gridData : bomList) {
+			Map<String, Object> gridMap = new HashMap<>();
+			gridMap.put("ossName", avoidNull(gridData.getOssName()));
+			gridMap.put("ossVersion", avoidNull(gridData.getOssVersion()));
+			gridMap.put("licenseType", avoidNull(gridData.getLicenseType()));
+			gridMap.put("licenseName", avoidNull(gridData.getLicenseName()));
+			gridDataList.add(gridMap);
 		}
 		
-		paramMap.put("merge", CoConstDef.FLAG_NO);
-		
-		List<Map<String, Object>> list = apiProjectMapper.selectBomList(paramMap);
-		
-		for (Map<String, Object> li : list) {
-			String licenseId = CommonFunction.removeDuplicateStringToken(avoidNull((String) li.get("licenseId")).toString(), ",");
-			String licenseName = CommonFunction.removeDuplicateStringToken((String) li.get("licenseName"), ",");
-			String componentId = String.valueOf(li.get("componentId"));
-			List<HashMap<String, Object>> listLicense = apiProjectMapper.selectBomLicense(componentId);
-			
-			li.put("LICENSE_ID", licenseId);
-			li.put("LICENSE_NAME", licenseName);
-			li.put("ROLE_OUT_LICENSE", CoCodeManager.CD_ROLE_OUT_LICENSE);
-			li.put("OSS_COMPONENTS_LICENSE_LIST", listLicense);
-			
-			// convert max score
-			if (li.get("cvssScoreMax") != null || li.get("cvssScoreMax1") != null || li.get("cvssScoreMax2") != null
-					|| li.get("cvssScoreMax3") != null || li.get("cvssScoreMax4") != null || li.get("cvssScoreMax5") != null) {
-				List<String> cvssScoreMaxList = new ArrayList<>();
-				
-				if (li.get("cvssScoreMax") != null) {
-					cvssScoreMaxList.add((String) li.get("cvssScoreMax"));
-				}
-				if (li.get("cvssScoreMax1") != null) {
-					cvssScoreMaxList.add((String) li.get("cvssScoreMax1"));
-				}
-				if (li.get("cvssScoreMax2") != null) {
-					cvssScoreMaxList.add((String) li.get("cvssScoreMax2"));
-				}
-				if (li.get("cvssScoreMax3") != null) {
-					cvssScoreMaxList.add((String) li.get("cvssScoreMax3"));
-				}
-				if (li.get("cvssScoreMax4") != null) {
-					cvssScoreMaxList.add((String) li.get("cvssScoreMax4"));
-				}
-				if (li.get("cvssScoreMax5") != null) {
-					cvssScoreMaxList.add((String) li.get("cvssScoreMax5"));
-				}
-				
-				if (!cvssScoreMaxList.isEmpty()) {
-					String[] cvssScoreMaxString = null;
-					BigDecimal cvssScore = null;
-					BigDecimal cvssScoreMax = null;
-					String cveId = null;
-					
-					for (String cvssScoreMaxStr : cvssScoreMaxList) {
-						cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
-						if (cvssScoreMax != null) {
-							cvssScore = new BigDecimal(cvssScoreMaxString[0]);
-							if (cvssScoreMax.compareTo(cvssScore) == -1) {
-								cvssScoreMax = cvssScore;
-								cveId = cvssScoreMaxString[1];
-							}
-						} else {
-							cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
-							cveId = cvssScoreMaxString[1];
-						}
-					}
-					
-					if (cvssScoreMax != null) {
-						li.put("CVSS_SCORE", String.valueOf(cvssScoreMax));
-						li.put("YULN_YN", CoConstDef.FLAG_YES);
-						li.put("CVE_ID", cveId);
-					}
-				}
-			} else {
-				li.put("YULN_YN", CoConstDef.FLAG_NO);
-			}
-		}
-		
-		return setMergeGridData(list);
+		return gridDataList;
 	}
 	
 	@Override
@@ -470,30 +485,33 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		boolean ossNameEmptyFlag = false;
 		
 		for (Map<String, Object> li : list) {
+			String ossName = (String) li.get("ossName");
+			String ossVersion = (String) li.get("ossVersion");
+			String licenseType = (String) li.get("licenseType");
+			
 			if (isEmpty(groupColumn)) {
-				groupColumn = (String) li.get("ossName") + "-" + avoidNull((String) li.get("ossVersion"));
+				groupColumn = ossName + "-" + ossVersion;
 			}
 			
 			if ("-".equals(groupColumn)) {
-				if ("NA".equals((String) li.get("licenseType"))) {
+				if ("NA".equals(licenseType)) {
 					ossNameEmptyFlag = true;
 				}
 			}
 			
-			String ossVersion = avoidNull((String) li.get("ossVersion"));
-			String licenseType = avoidNull((String) li.get("licenseType"));
-			
-			if (groupColumn.equals((String) li.get("ossName") + "-" + ossVersion) // 같은 groupColumn이면 데이터를 쌓음
-					&& !("-".equals((String) li.get("ossName")) 
+			if (groupColumn.equals(ossName + "-" + ossVersion) // 같은 groupColumn이면 데이터를 쌓음
+					&& !("-".equals(ossName) 
 					&& !"NA".equals(licenseType))
 					&& !ossNameEmptyFlag) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
 				tempData.add(li);
 			} else { // 다른 grouping
 				setMergeData(tempData, resultGridData);
-				groupColumn = (String) li.get("ossName") + "-" + ossVersion;
+				groupColumn = ossName + "-" + ossVersion;
 				tempData.clear();
 				tempData.add(li);
 			}
+			
+			ossNameEmptyFlag = false;
 		}
 		
 		setMergeData(tempData, resultGridData); // bom data의 loop가 끝났지만 tempData에 값이 있다면 해당 값도 merge를 함.
@@ -549,27 +567,31 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					}
 					
 					if (!equalFlag) {
-						rtnBean.replace("LICENSE_NAME", rtnLicenseName + "," + tempStr);
+						rtnBean.replace("licenseName", rtnLicenseName + "," + tempStr);
 					}
 				}
 				
-				List<Map<String, Object>> rtnComponentLicenseList = new ArrayList<Map<String, Object>>();
-				List<Map<String, Object>> tempOssComponentsLicenseList = (List<Map<String, Object>>) temp.get("ossComponentsLicenseList");
-				List<Map<String, Object>> rtnOssComponentsLicenseList = (List<Map<String, Object>>) rtnBean.get("ossComponentsLicenseList");
-				
-				for (Map<String, Object> list : tempOssComponentsLicenseList) {
-					int equalsItemList = (int) rtnOssComponentsLicenseList
-														.stream()
-														.filter(e -> ((String) list.get("licenseName")).equals((String) e.get("licenseName"))) // 동일한 licenseName을 filter
-														.collect(Collectors.toList()) // return을 list로변환
-														.size(); // 해당 list의 size
+				if (temp.containsKey("ossComponentsLicenseList") && rtnBean.containsKey("ossComponentsLicenseList")) {
+					List<Map<String, Object>> rtnComponentLicenseList = new ArrayList<Map<String, Object>>();
+					List<Map<String, Object>> tempOssComponentsLicenseList = (List<Map<String, Object>>) temp.get("ossComponentsLicenseList");
+					List<Map<String, Object>> rtnOssComponentsLicenseList = (List<Map<String, Object>>) rtnBean.get("ossComponentsLicenseList");
 					
-					if (equalsItemList == 0) {
-						rtnComponentLicenseList.add(list);
+					if (tempOssComponentsLicenseList != null) {
+						for (Map<String, Object> list : tempOssComponentsLicenseList) {
+							int equalsItemList = (int) rtnOssComponentsLicenseList
+																.stream()
+																.filter(e -> ((String) list.get("licenseName")).equals((String) e.get("licenseName"))) // 동일한 licenseName을 filter
+																.collect(Collectors.toList()) // return을 list로변환
+																.size(); // 해당 list의 size
+							
+							if (equalsItemList == 0) {
+								rtnComponentLicenseList.add(list);
+							}
+						}
+						
+						rtnOssComponentsLicenseList.addAll(rtnComponentLicenseList);
 					}
 				}
-				
-				rtnOssComponentsLicenseList.addAll(rtnComponentLicenseList);
 			}
 			
 			resultGridData.add(rtnBean);
@@ -638,27 +660,31 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				.filter(bfList -> afterBomList
 									.stream()
 									.filter(afList -> 
-											((String) bfList.get("ossName") + "||" + (String) bfList.get("ossVersion") + "||" + getLicenseNameSort((String) bfList.get("licenseName")))
-											.equalsIgnoreCase((String) afList.get("ossName") + "||" + (String) afList.get("ossVersion") + "||" + getLicenseNameSort((String) afList.get("licenseName")))
+											((String) bfList.get("ossName") + "||" + (String) bfList.get("ossVersion") + "||" + getLicenseNameSort(((String) bfList.get("licenseName")).trim()))
+											.equalsIgnoreCase((String) afList.get("ossName") + "||" + (String) afList.get("ossVersion") + "||" + getLicenseNameSort(((String) afList.get("licenseName")).trim()))
 											).collect(Collectors.toList()).size() == 0
 				).collect(Collectors.toList());
+		
+		filteredBeforeBomList = filteredBeforeBomList.stream().filter(e -> !isEmpty((String) e.get("ossName")) && !((String) e.get("ossName")).equals("-")).collect(Collectors.toList());
+		List<String> filteredBeforeOssNameList = filteredBeforeBomList.stream().map(e -> (String) e.get("ossName")).collect(Collectors.toList());
 		
 		List<Map<String, Object>> filteredAfterBomList = afterBomList
 				.stream()
 				.filter(afList -> beforeBomList
 									.stream()
 									.filter(bfList -> 
-											((String) afList.get("ossName") + "||" + (String) afList.get("ossVersion") + "||" + getLicenseNameSort((String) afList.get("licenseName")))
-											.equalsIgnoreCase((String) bfList.get("ossName") + "||" + (String) bfList.get("ossVersion") + "||" + getLicenseNameSort((String) bfList.get("licenseName")))
+											((String) afList.get("ossName") + "||" + (String) afList.get("ossVersion") + "||" + getLicenseNameSort(((String) afList.get("licenseName")).trim()))
+											.equalsIgnoreCase((String) bfList.get("ossName") + "||" + (String) bfList.get("ossVersion") + "||" + getLicenseNameSort(((String) bfList.get("licenseName")).trim()))
 											).collect(Collectors.toList()).size() == 0
 				).collect(Collectors.toList());
+		
+		filteredAfterBomList = filteredAfterBomList.stream().filter(e -> !isEmpty((String) e.get("ossName")) && !((String) e.get("ossName")).equals("-")).collect(Collectors.toList());
+		List<String> filteredAfterOssNameList = filteredAfterBomList.stream().map(e -> (String) e.get("ossName")).collect(Collectors.toList());
 		
 		// status > add
 		for (Map<String, Object> after : filteredAfterBomList) {
 			String ossName = (String) after.get("ossName");
-			int addTargetCnt = filteredBeforeBomList.stream().filter(before -> ((String)before.get("ossName")).equals(ossName)).collect(Collectors.toList()).size();
-			
-			if (addTargetCnt == 0) {
+			if (!filteredBeforeOssNameList.contains(ossName)) {
 				Map<String, Object> addMap = new LinkedHashMap<String, Object>();
 				
 				addMap.put("name", (String) after.get("ossName"));
@@ -672,12 +698,10 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		// status > delete
 		for (Map<String, Object> before : filteredBeforeBomList) {
 			String ossName = (String) before.get("ossName");
-			List<Map<String, Object>> afterList = filteredAfterBomList.stream().filter(after -> ((String)after.get("ossName")).equals(ossName)).collect(Collectors.toList());
-			
-			if (afterList.size() == 0) {
+			if (!filteredAfterOssNameList.contains(ossName)) {
 				Map<String, Object> deleteMap = new LinkedHashMap<String, Object>();
 				
-				deleteMap.put("name", (String) before.get("ossName"));
+				deleteMap.put("name", ossName);
 				deleteMap.put("version", avoidNull((String) before.get("ossVersion"), ""));
 				deleteMap.put("license", Arrays.asList(((String) before.get("licenseName")).split(",")));
 				deleteList.put(getCompareKey(before), deleteMap);
@@ -839,10 +863,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		for (Map<String, Object> map : list) {
 			Map<String, Object> modelMap = new HashMap<String, Object>();
 			String prjId = (String) map.get("prjId").toString();
+			String distributionName = (String) map.get("distributionName");
 			List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(prjId);
 			
 			modelMap.put("prjId", prjId);
 			modelMap.put("modelList", modelList);
+			modelMap.put("distributionName", distributionName);
 			contents.add(modelMap);
 		}
 		
@@ -853,7 +879,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 	
 	private String getCompareKey(Map<String, Object> paramMap) {
-		return (String) paramMap.get("ossName") + "|" + avoidNull((String) paramMap.get("ossVersion"), "") + "|" + (String) paramMap.get("licenseName");
+		return (((String) paramMap.get("ossName")) + "|" + avoidNull((String) paramMap.get("ossVersion"), "") + "|" + (String) paramMap.get("licenseName")).toLowerCase();
 	}
 
 	@Override
@@ -871,28 +897,39 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	public List<Map<String, Object>> serMergeGridData(List<Map<String, Object>> gridData) {
 		List<Map<String, Object>> tempData = new ArrayList<Map<String, Object>>();
 		List<Map<String, Object>> resultGridData = new ArrayList<Map<String, Object>>();
-		
+		boolean ossNameEmptyFlag = false;
 		String groupColumn = "";
 
 		final Comparator<Map<String, Object>> comp = Comparator.comparing((Map<String, Object> o) -> o.get("ossName")+"|"+ o.get("ossVersion"));
 		gridData = gridData.stream().sorted(comp).collect(Collectors.toList());
 		
 		for (Map<String, Object> info : gridData) {
+			String ossName = (String) info.get("ossName");
+			String ossVersion = (String) info.get("ossVersion");
+			String licenseType = (String) info.get("licenseType");
+			
 			if (isEmpty(groupColumn)) {
-				groupColumn = (String) info.get("ossName") + "-" + (String) info.get("ossVersion");
+				groupColumn = ossName + "-" + ossVersion;
 			}
-						
-			if (groupColumn.equals((String) info.get("ossName") + "-" + (String) info.get("ossVersion")) // 같은 groupColumn이면 데이터를 쌓음
-					&& !("-".equals((String) info.get("ossName")) 
-					&& !"NA".equals((String) info.get("licenseType")))) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
+			
+			if ("-".equals(groupColumn)) {
+				if ("NA".equals(licenseType)) {
+					ossNameEmptyFlag = true;
+				}
+			}
+			if (groupColumn.equals(ossName + "-" + ossVersion) // 같은 groupColumn이면 데이터를 쌓음
+					&& !("-".equals(ossName) 
+					&& !"NA".equals(licenseType))
+					&& !ossNameEmptyFlag) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
 				tempData.add(info);
 			} else { // 다른 grouping
 				setVerifyMergeData(tempData, resultGridData);
-				groupColumn = (String) info.get("ossName") + "-" + (String) info.get("ossVersion");
+				groupColumn = ossName + "-" + ossVersion;
 				tempData.clear();
-				
 				tempData.add(info);
 			}
+			
+			ossNameEmptyFlag = false;
 		}
 		
 		setVerifyMergeData(tempData, resultGridData);
@@ -922,10 +959,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					continue;
 				}
 				
-				String key = (String) temp.get("ossName") + "-" + (String) temp.get("licenseType");
+				String ossName = (String) temp.get("ossName");
+				String licenseType = (String) temp.get("licenseType");
+				String licenseNameTemp = (String) temp.get("licenseName");
+				String licenseNameBean = (String) rtnBean.get("licenseName");
+				
+				String key = ossName + "-" + licenseType;
 				
 				if ("--NA".equals(key)) {
-					if (!((String) rtnBean.get("licenseName")).contains((String) temp.get("licenseName"))) {
+					if (!licenseNameBean.contains(licenseNameTemp)) {
 						resultGridData.add(rtnBean);
 						rtnBean = temp;
 						
@@ -933,10 +975,10 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					}
 				}
 				
-				for (String licenseName : ((String) temp.get("licenseName")).split(",")) {
+				for (String licenseName : licenseNameTemp.split(",")) {
 					boolean equalFlag = false;
 					
-					for (String rtnLicenseName : ((String) rtnBean.get("licenseName")).split(",")) {
+					for (String rtnLicenseName : licenseNameBean.split(",")) {
 						if (rtnLicenseName.equals(licenseName)) {
 							equalFlag = true;
 							
@@ -945,7 +987,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					}
 					
 					if (!equalFlag) {
-						rtnBean.put("licenseName", (String) rtnBean.get("licenseName") + "," + licenseName);
+						rtnBean.put("licenseName", licenseNameBean + "," + licenseName);
 					}
 				}
 			}
@@ -1771,7 +1813,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					prjParam.put("prjId", prjId);
 					prjParam.put("packageFileId", fileSeqs.get(0));
 					
-					if (prjInfo.containsKey("destributionStatus") && prjInfo.get("destributionStatus") != null && !("").equals(prjInfo.get("destributionStatus"))){
+					if (prjInfo.containsKey("distributionStatus") && prjInfo.get("distributionStatus") != null && !("").equals(prjInfo.get("distributionStatus"))){
 						prjParam.put("statusVerifyYn", "C");
 					} else {
 						prjParam.put("statusVerifyYn", CoConstDef.FLAG_YES);
@@ -1821,7 +1863,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		apiProjectMapper.updateReadmeContent(project);
 	}
 
-	private Map<String, Object> getProjectBasicInfo(String prjId) {
+	@Override
+	public Map<String, Object> getProjectBasicInfo(String prjId) {
 		Map<String, Object> param = new HashMap<>();
 		param.put("prjId", prjId);
 		
@@ -1921,22 +1964,24 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		// delete component
 		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("referenceId", (String) prjId);
-		paramMap.put("referenceDiv", (String) CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		paramMap.put("merge", (String) merge);
-		paramMap.put("roleOutLicense", (String) CoCodeManager.CD_ROLE_OUT_LICENSE);
-		paramMap.put("saveBomFlag", (String) CoConstDef.FLAG_YES);
+		paramMap.put("referenceId", prjId);
+		paramMap.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		paramMap.put("merge", merge);
+		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
+		paramMap.put("saveBomFlag", CoConstDef.FLAG_YES);
 		
-		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
 		
-		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
-		if (componentId.size() > 0){
-			for (int i = 0; i < componentId.size(); i++) {
-				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
-			}
-			
-			apiProjectMapper.deleteOssComponents(paramMap);
-		}
+		apiProjectMapper.resetOssComponentsAndLicense(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+//		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
+//		
+//		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
+//		if (componentId.size() > 0){
+//			for (int i = 0; i < componentId.size(); i++) {
+//				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
+//			}
+//			
+//			apiProjectMapper.deleteOssComponents(paramMap);
+//		}
 		
 		HashMap<String, Object> mergeListMap = getIdentificationGridList(paramMap);
 		
@@ -1961,6 +2006,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					}
 				}
 				bean = findOssIdAndName(bean);
+				
+				String copyrightText = (String) bean.get("copyrightText");
+				if(!isEmpty(copyrightText)) {
+					String[] copyrights = copyrightText.split("\\|");
+					String customCopyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
+					bean.put("copyrightText", customCopyrightText);
+				}
 				
 				// 컴포넌트 마스터 인서트
 				apiProjectMapper.registBomComponents(bean);
@@ -2817,11 +2869,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			List<String[]> result = ldapTemplate.search(query().where("mail").is(email), new AttributesMapper() {
 				public Object mapFromAttributes(Attributes attrs) throws NamingException {
-					return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+					String mail = (String) attrs.get("mail").get();
+					String displayName = (String) attrs.get("displayname").get();
+					
+					mail = mail.replace("mail:", "").trim();
+					displayName = displayName.replace("displayName:", "").trim();
+					
+					return new String[] {mail, displayName};
 				}
 			});
 			
-			if (result != null && !result.isEmpty()) ldapCheckFlag = true;
+			if (CollectionUtils.isNotEmpty(result)) {
+				ldapCheckFlag = true;
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -2837,7 +2897,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		LdapContextSource contextSource = new LdapContextSource();
 		try {
 			contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-			contextSource.setBase("OU=LGE Users, DC=LGE, DC=NET");
+			contextSource.setBase("OU=LGE Users,DC=LGE,DC=NET");
 			contextSource.setUserDn(LDAP_SEARCH_ID+LDAP_SEARCH_DOMAIN);
 			contextSource.setPassword(LDAP_SEARCH_PW);
 			CommonFunction.setSslWithCert();
@@ -2868,52 +2928,39 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList) {
+	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList, List<Map<String, Object>> gridDataList) {
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(prjId);
 		identification.setReferenceDiv(code);
 		Map<String, Object> map = projectService.getIdentificationGridList(identification, true);
+		
+		if (gridDataList != null) {
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+			pv.setAppendix("projectId", avoidNull(identification.getReferenceId()));
+			pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+			map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+		}
+		
 		if (map.containsKey("mainData")) {
 			List<ProjectIdentification> gridDatas = (List<ProjectIdentification>) map.get("mainData");
 			if (gridDatas != null && !gridDatas.isEmpty()) {
-				List<List<ProjectIdentification>> gridDataLicenses = CommonFunction.setOssComponentLicense(gridDatas);
-				Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(gridDatas, gridDataLicenses);
-				ossComponentList.addAll((List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
-				ossComponentsLicenseList.addAll((List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
-			}
-		}
-	}
-
-	@Override
-	public void registDepOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
-		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
-		if(ossComponent.size()==0){
-			Project projectSubStatus = new Project();
-			projectSubStatus.setPrjId(project.getPrjId());
-			
-			if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
-				projectSubStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
-			} else {
-				projectSubStatus.setIdentificationSubStatusDep("X");
-			}
-			
-			projectSubStatus.setModifier(projectSubStatus.getLoginUserName());
-			projectSubStatus.setReferenceDiv(refDiv);
-			projectMapper.updateProjectMaster(projectSubStatus);
-		}
-		
-		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
-		String refId = project.getReferenceId();
-		
-		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense);
-
-		// 파일 등록
-		if(!isEmpty(project.getDepCsvFileId())){
-			projectMapper.updateFileId(project);
-			
-			if(project.getCsvFileSeq() != null) {
-				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
-					projectMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
+				if (gridDataList == null) {
+					List<List<ProjectIdentification>> gridDataLicenses = CommonFunction.setOssComponentLicense(gridDatas);
+					Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(gridDatas, gridDataLicenses);
+					ossComponentList.addAll((List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
+					ossComponentsLicenseList.addAll((List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
+				} else {
+					for (ProjectIdentification gridData : gridDatas) {
+						Map<String, Object> gridMap = new HashMap<>();
+						gridMap.put("ossName", avoidNull(gridData.getOssName()));
+						gridMap.put("ossVersion", avoidNull(gridData.getOssVersion()));
+						gridMap.put("licenseType", avoidNull(gridData.getLicenseType()));
+						gridMap.put("licenseName", avoidNull(gridData.getLicenseName()));
+						gridDataList.add(gridMap);
+					}
 				}
 			}
 		}
@@ -2936,9 +2983,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		if(!ossComponent.isEmpty()) {
-			Project projectStatus = new Project();
-			projectStatus.setPrjId(refId);
-			projectStatus = projectMapper.selectProjectMaster(projectStatus);
+			final Project projectStatus = projectMapper.selectProjectMaster(refId);
 			
 			if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
 				projectStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
@@ -3165,7 +3210,302 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return ossComponentLicenseList;
 	}
 	
-	private void deleteUploadFile(Project project, String refDiv) {
+	@Override
+	public void updateSubStatus(Map<String, Object> param) {
+		apiProjectMapper.updateProjectSubStatus(param);
+
+		apiProjectMapper.resetOssComponentsAndLicense((String)param.get("referenceId"), (String)param.get("referenceDiv"));
 		
+//		List<String> componentIds = apiProjectMapper.selectComponentId(param);
+//		
+//		for (String componentId : componentIds) {
+//			apiProjectMapper.deleteOssComponentsLicense(componentId);
+//		}
+//		
+//		apiProjectMapper.deleteOssComponents(param);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
+			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		
+		String errorMsg = (String) result.get("errorMessage");
+
+		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
+		ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>());
+		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+
+		if (!isEmpty(errorMsg)) {
+			rtnMap.put("errorMessage", errorMsg);
+		}
+		
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+		pv.setAppendix("mainList", ossComponents); // sub grid
+		pv.setAppendix("subList", ossComponentsLicense);
+		T2CoValidationResult vr = pv.validate(new HashMap<>());
+		
+		if (!vr.isValid()) {
+			rtnMap.put("validError", "validError");
+			return rtnMap;
+		} else {
+			List<ProjectIdentification> ossComponentList = new ArrayList<>();
+			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+			
+			if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
+				getIdentificationGridList(prjId, tabName.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
+			}
+			
+			ossComponentList.addAll(ossComponents);
+			ossComponentsLicenseList.addAll(ossComponentsLicense);
+			
+			Project project = new Project();
+			project.setPrjId(prjId);
+			
+			if (tabName.equals("DEP")) {
+				project.setDepCsvFileId(registFileId); // set file id
+				projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
+			} else if (tabName.equals("SRC")){
+				project.setSrcCsvFileId(registFileId); // set file id
+				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+			} else if (tabName.equals("BIN")){
+				project.setBinCsvFileId(registFileId); // set file id
+				projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
+			}
+			
+			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
+			try {
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+						CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
+					if (!isEmpty(changedLicenseName)) {
+						CommentsHistory commentHisBean = new CommentsHistory();
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+						commentHisBean.setReferenceId(prjId);
+						commentHisBean.setExpansion1(tabName);
+						commentHisBean.setContents(changedLicenseName);
+						commentHisBean.setLoginUserName(userId);
+						commentService.registComment(commentHisBean, false);
+					}
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			if (comment != null) {
+				CommentsHistory commentHisBean = new CommentsHistory();
+				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+				commentHisBean.setReferenceId(prjId);
+				commentHisBean.setExpansion1(tabName);
+				commentHisBean.setContents(comment);
+				commentHisBean.setLoginUserName(userId);
+				commentService.registComment(commentHisBean, false);
+			}
+			
+			try {
+				History h = new History();
+				h = projectService.work(project);
+				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+				project = (Project) h.gethData();
+				h.sethEtc(project.etcStr());
+				historyService.storeData(h);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+		} 
+		
+		return rtnMap;
+	}
+
+	@Override
+	public Map<String, Object> registProjectOssComponent(Map<String, Object> param, String referenceDiv) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		
+		String targetPrjId = (String) param.getOrDefault("targetPrjId", null);
+		String prjIdToLoad = (String) param.getOrDefault("prjIdToLoad", null);
+		String prjNameToLoad = (String) param.getOrDefault("prjNameToLoad", null);
+		String prjVersionToLoad = (String) param.getOrDefault("prjVersionToLoad", null);
+		boolean resetFlag = Boolean.TRUE.equals(param.get("resetFlag"));
+
+		// check the existence of target Project by targetId
+		Project targetProjectParam = new Project();
+		targetProjectParam.setPrjId(targetPrjId);
+		targetProjectParam.setReferenceDiv(referenceDiv);
+		
+		List<Project> targetProjectInfo = apiProjectMapper.getProjectInfo(targetProjectParam);
+		
+		if (targetProjectInfo == null || targetProjectInfo.isEmpty()) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+			responseMap.put("msg", "Target project does not exist");
+			return responseMap;
+		} else {
+			if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(targetProjectInfo.get(0).getNoticeType()))) {
+				responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+			    responseMap.put("msg", "Fail to load (Target Project to load is Android/Yocto).");
+			    return responseMap;
+			}
+		}
+
+		// Check the existence of the project to load
+		Project registProjectParam = new Project();
+		registProjectParam.setPrjId(prjIdToLoad);
+		registProjectParam.setPrjName(prjNameToLoad);
+		registProjectParam.setPrjVersion(prjVersionToLoad);
+		registProjectParam.setReferenceDiv(referenceDiv);
+		registProjectParam.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+
+		List<Project> projectToLoadInfo = apiProjectMapper.getProjectInfo(registProjectParam);
+
+		if (projectToLoadInfo == null || projectToLoadInfo.isEmpty()) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+			if (isEmpty(prjIdToLoad)) {
+				responseMap.put("msg", "prjNameToLoad does not exist.");
+			} else {
+				responseMap.put("msg", "prjIdToLoad does not exist.");
+			}
+		    
+		    return responseMap;
+		} else {
+			if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(projectToLoadInfo.get(0).getNoticeType()))) {
+				responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+			    responseMap.put("msg", "Fail to load (Project to load is Android/Yocto).");
+			    return responseMap;
+			}
+		}
+
+		if (projectToLoadInfo.size() > 1) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+		    responseMap.put("msg", "Fail to load (more than 2 search results)");
+		    return responseMap;
+		}
+
+		// If prjIdToLoad is empty, set it to the first found project ID
+		if (StringUtils.isEmpty(prjIdToLoad)) {
+		    prjIdToLoad = projectToLoadInfo.get(0).getPrjId();
+		    registProjectParam.setPrjId(prjIdToLoad);
+		}
+		
+		// Check for duplication in the loaded list and load to project
+		if (!resetFlag) {
+		    List<Project> loadedList = projectMapper.selectAddList(targetProjectParam);
+		    
+		    for (Project project : loadedList) {
+		        if (project.getReferenceId().equals(prjIdToLoad)) {
+		        	responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+		        	responseMap.put("msg", "Project to load is already loaded");
+		            return responseMap;
+		        }
+		    }
+		}
+
+		Project registOssComponentParam = new Project();
+		registOssComponentParam.setReferenceId(prjIdToLoad);
+		registOssComponentParam.setReferenceDiv(referenceDiv);
+		
+		List<ProjectIdentification> components = apiProjectMapper.selectOssComponentsList(registOssComponentParam);
+		List<OssComponentsLicense> licenses;
+
+		if (components == null || components.isEmpty()) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+        	responseMap.put("msg", "There is no data in the retrieved project");
+            return responseMap;
+		}
+		
+		targetProjectParam.setReferenceId(targetPrjId);
+		int ossComponentIdx = 1;
+
+		if (resetFlag) {
+		    // Set parameters to delete OSS components of the target project
+		    ProjectIdentification projectIdParam = new ProjectIdentification();
+		    projectIdParam.setReferenceId(targetPrjId);
+		    projectIdParam.setReferenceDiv(referenceDiv);
+
+		    List<OssComponents> componentList = projectMapper.selectComponentId(projectIdParam);
+		    List<String> deleteComponentIds = new ArrayList<>();
+
+		    // Delete licenses of OSS components and collect component IDs
+		    for (OssComponents component : componentList) {
+		        projectMapper.deleteOssComponentsLicense(component);
+		        deleteComponentIds.add(component.getComponentId());
+		    }
+
+		    // Use the collected component IDs to delete the OSS components of the target project
+		    if (!deleteComponentIds.isEmpty()) {
+		        OssComponents deleteParam = new OssComponents();
+		        deleteParam.setReferenceDiv(referenceDiv);
+		        deleteParam.setReferenceId(targetPrjId);
+		        deleteParam.setOssComponentsIdList(deleteComponentIds);
+
+		        projectMapper.deleteOssComponentsWithIds2(deleteParam);
+		    }
+		} else {
+			ossComponentIdx = projectMapper.selectOssComponentMaxIdx(targetProjectParam);
+		}
+
+		for (ProjectIdentification bean : components) {
+			bean.setReferenceId(targetPrjId);
+			bean.setReportFileId(null);
+			licenses = projectMapper.selectOssComponentsLicenseList(bean);
+			bean.setComponentIdx(String.valueOf(ossComponentIdx++));
+			String loadToListComment = "(From Prj " + prjIdToLoad + ")";
+			bean.setComments(loadToListComment);
+			projectMapper.insertOssComponents(bean);
+
+			for (OssComponentsLicense licenseBean : licenses) {
+				licenseBean.setComponentId(bean.getComponentId());
+				projectMapper.insertOssComponentsLicense(licenseBean);
+			}
+		}
+		
+		// Insert the project information list to load
+		Project addProjectParam = new Project();
+		addProjectParam.setPrjId(targetPrjId);
+		addProjectParam.setReferenceId(prjIdToLoad);
+		addProjectParam.setReferenceDiv(referenceDiv);
+		addProjectParam.setComponentCount(Integer.toString(components.size()));
+
+		if (resetFlag) {
+		    projectService.existsAddList(targetProjectParam);
+		}
+
+		projectService.insertAddList(Collections.singletonList(addProjectParam));
+
+	    return responseMap;
+	}
+
+	public void processResetTab(String tabName, Project projectMaster, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense) {
+		Project project = new Project();
+		project.setPrjId(projectMaster.getPrjId());
+		switch(tabName) {
+			case "DEP":
+				project.setIdentificationSubStatusDep("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+				project.setCsvFile(projectMaster.getDepCsvFile());
+				project.setDepCsvFileId("");
+				projectService.registDepOss(ossComponents, ossComponentsLicense, project);
+
+				break;
+			case "SRC":
+				project.setIdentificationSubStatusSrc("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+				project.setCsvFile(projectMaster.getCsvFile());
+				project.setSrcCsvFileId("");
+				projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
+				break;
+			case "BIN":
+				project.setIdentificationSubStatusBin("Y");
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+				project.setCsvFile(projectMaster.getBinCsvFile());
+				project.setBinCsvFileId("");
+				projectService.registBinOss(ossComponents, ossComponentsLicense, project);
+				break;
+		}
+		projectService.existsAddList(project);
+		projectService.insertAddList(new ArrayList<Project>());
 	}
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.History;
 import oss.fosslight.repository.HistoryMapper;
 import oss.fosslight.service.HistoryService;
@@ -114,8 +115,23 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 		// EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
 		String[] inf = CoCodeManager.getCodeExpString(cdNm, dtlCd[0]).split("\\|");
 
-		if (inf[0].equals("String")) {
+		if (inf[0].equals("String") && isEmpty(dtlCd[2])) {
 			ret = dMap != null ? escapeSql(nvl((String)dMap.get(dtlCd[1]), "")) : "";
+		} else if (inf[0].equals("String") && "888".equals(dtlCd[2])) {
+			String asRet = dMap != null ? escapeSql(nvl((String)dMap.get(dtlCd[1]), "")) : "";
+			if (!isEmpty(asRet)) {
+				String resSt = "";
+				for (String resCd : asRet.split(",")) {
+					if (isEmpty(resCd)) continue;
+					if (!isEmpty(resSt)) {
+						resSt += ", ";
+					}
+					resSt += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, resCd);
+				}
+				ret = resSt;
+			} else {
+				ret = asRet;
+			}
 		} else if (inf[0].equals("Code")) {
 			if ((dtlCd[1]).equals("obligation")){
 				ret = dMap != null ? (String)dMap.get("obligationType"): "";
@@ -125,7 +141,7 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 		} else if (inf[0].equals("Array") && "999".equals(dtlCd[2])) {
 			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
 			ret = asArr != null && asArr.size() > 0 ? String.join("<br>", asArr) : "";
-		} else if (inf[0].equals("Array") && dtlCd[2] == null) {
+		} else if (inf[0].equals("Array") && isEmpty(dtlCd[2])) {
 			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
 			ret = asArr != null && asArr.size() > 0 ? String.join(", ", asArr) : "";
 		} else if (inf[0].equals("Array") && dtlCd[2] != null) {

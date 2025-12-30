@@ -5,6 +5,7 @@
 
 package oss.fosslight.repository;
 
+import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.domain.File;
 import java.util.List;
 
@@ -21,8 +22,14 @@ import oss.fosslight.domain.T2File;
 public interface VerificationMapper {
 	OssNotice selectOssNoticeOne(Project project);
 	
-	List<OssComponents> selectVerifyOssList(Project project);
+	OssNotice selectOssNoticeOne2(Project project);
 	
+	String selectNoticeAppendInfo(@Param("prjId") String prjId);
+	
+	List<OssComponents> selectVerifyOssList(Project project);
+
+	List<OssDto> selectSelfCheckVerifyOssList(String selfCheckId);
+
 	void updateComment(CommentsHistory commentHistory);
 	
 	void deleteComment(CommentsHistory commentHistory);
@@ -32,6 +39,8 @@ public interface VerificationMapper {
 	List<OssComponents> selectVerificationNotice(OssNotice ossNotice);
 	
 	File selectVerificationFile(String packageFileId);
+	
+	File selectVerificationVulDocFile(String packageVulDocFileId);
 	
 	T2File selectPackageFileName(@Param("prjId") String prjId, @Param("fileIdx") String fileIdx);
 	
@@ -59,8 +68,8 @@ public interface VerificationMapper {
 	
 	int updateOssNotice(OssNotice ossNotice);
 	
-	int checkPackagingFileId(@Param("prjId") String prjId, @Param("packageFileId") String packageFileId
-							, @Param("packageFileId2") String packageFileId2, @Param("packageFileId3") String packageFileId3);
+	int checkPackagingFileId(@Param("prjId") String prjId, @Param("packageFileId") String packageFileId, @Param("packageFileId2") String packageFileId2
+							, @Param("packageFileId3") String packageFileId3, @Param("packageFileId4") String packageFileId4, @Param("packageFileId5") String packageFileId5);
 	
 	int setPackagingReuseMap(@Param("prjId") String prjId, @Param("fileSeq") String fileSeq
 							, @Param("refPrjId") String refPrjId, @Param("refFileSeq") String refFileSeq);
@@ -68,4 +77,14 @@ public interface VerificationMapper {
 	int updatePackagingReuseMap(Project project);
 
 	OssComponents checkOssNickName2(OssComponents bean);
+
+	void deletePackagingFileInfo(T2File file);
+
+	void deleteReuseFileInfo(T2File file);
+
+	int countSameLogiFile(T2File file);
+	
+	void updateNoticeAppendFile(Project project);
+	
+	List<T2File> selectNoticeAppendFile(@Param("noticeAppendFileId") String noticeAppendFileId);
 }

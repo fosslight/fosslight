@@ -14,6 +14,20 @@
 			PRJ_ID = #{prjId}
 	</select>
 	
+	<select id="selectOssNoticeOne2" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssNotice">
+		SELECT
+			PRJ_ID, NOTICE_TYPE, NOTICE_TYPE_ETC, COMPANY_NAME_FULL, COMPANY_NAME_SHORT, DISTRIBUTION_SITE_URL, EMAIL, USE_COMPANY_NAME_TITLE, DISTRIBUTED_OTHER_COMPANY, MERGED_OTHER_OSS_NOTICE, ACCOMPANIED_SOURCE_CODE,
+			OSS_DISTRIBUTION_SITE, OSS_DISTRIBUTION_SITE_YN, EDIT_NOTICE_YN, EDIT_COMPANY_YN, EDIT_DISTRIBUTION_SITE_URL_YN, EDIT_EMAIL_YN, HIDE_OSS_VERSION_YN, EDIT_APPENDED_YN, NOTICE_APPEND_TYPE
+		FROM
+			OSS_NOTICE
+		WHERE
+			PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="selectNoticeAppendInfo" parameterType="string" resultType="string">
+		SELECT APPENDED FROM OSS_NOTICE WHERE PRJ_ID = #{prjId}
+	</select>
+	
 	<select id="selectVerifyOssList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
 	/* VerificationMapper.selectVerifyOssList */
 		SELECT
@@ -40,6 +54,7 @@
 			, GROUP_CONCAT(T3.LICENSE_NAME ORDER BY T3.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME 
 			, T2.FILE_PATH
 			, T2.VERIFY_FILE_COUNT
+			, T4.RESTRICTION
 		FROM (
 				SELECT 
 					A1.COMPONENT_ID
@@ -60,30 +75,59 @@
 					AND A1.REFERENCE_DIV='50' 
 					AND A1.MERGE_PRE_DIV IS NULL 
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossNameMergeFlag)">
-					AND A1.OBLIGATION_TYPE = '11'
+					AND (A1.OBLIGATION_TYPE = '11' OR A1.OBLIGATION_TYPE = '12')
 				</if>
 		) T2
 		INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
+		INNER JOIN LICENSE_MASTER T4 ON T3.LICENSE_ID = T4.LICENSE_ID
 		WHERE 1=1
-		<if test="@oss.fosslight.util.StringUtil@equals(networkServerType, 'Y')">
-		AND EXISTS (
-			SELECT 1 
-			FROM LICENSE_MASTER TSUB1 
-			WHERE 
-				TSUB1.USE_YN = 'Y' 
-				AND 
-					(
-						TSUB1.SHORT_IDENTIFIER REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
-						OR TSUB1.LICENSE_NAME REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
-					) 
-				AND T3.LICENSE_ID = TSUB1.LICENSE_ID
-			)
-		</if>
-		
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals(noticeType, '80')">
+			 	AND REFERENCE_DIV = '14'
+			</when>
+			<otherwise>
+				AND REFERENCE_DIV NOT IN ('14', '17')
+			</otherwise>
+		</choose>
  		GROUP BY COMPONENT_ID
 		ORDER BY COMPONENT_ID
 	</select>
-	
+
+	<select id="selectSelfCheckVerifyOssList" parameterType="String" resultType="oss.fosslight.api.dto.OssDto">
+		SELECT
+			T2.COMPONENT_ID
+			,T2.OSS_ID
+			,T2.OSS_NAME
+			,T2.OSS_VERSION
+			,T2.DOWNLOAD_LOCATION as DOWNLOAD_URL
+			,T2.HOMEPAGE as HOMEPAGE_URL
+			, GROUP_CONCAT(T3.LICENSE_NAME ORDER BY T3.LICENSE_ID DESC SEPARATOR ', ') AS LICENSE_NAME
+		FROM (
+			SELECT
+				CONCAT(A1.REFERENCE_ID, '-', A1.REFERENCE_DIV, '-', A1.COMPONENT_IDX) as COMPONENT_ID
+				,A1.OSS_ID
+				,A1.OSS_NAME
+				,A1.OSS_VERSION
+				,A1.DOWNLOAD_LOCATION
+				,A1.HOMEPAGE
+				,A1.FILE_PATH
+				,A1.VERIFY_FILE_COUNT
+				,A1.REF_COMPONENT_ID
+				,A1.REFERENCE_ID
+				,A1.REFERENCE_DIV
+				,A1.COMPONENT_IDX
+			FROM PRE_OSS_COMPONENTS A1
+			WHERE
+				A1.REFERENCE_ID = #{prjId}
+				AND A1.REFERENCE_DIV='10'
+				AND A1.MERGE_PRE_DIV IS NULL
+		) T2
+		INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
+		WHERE T3.LICENSE_NAME != ''
+		GROUP BY COMPONENT_ID
+		ORDER BY COMPONENT_ID
+	</select>
+
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
 	UPDATE
 		PROJECT_MASTER
@@ -131,6 +175,7 @@
 			, EDIT_EMAIL_YN
 			, HIDE_OSS_VERSION_YN
 			, EDIT_APPENDED_YN
+			, NOTICE_APPEND_TYPE
 		)VALUES(
 			#{prjId}                  
 			, #{noticeType}             
@@ -151,6 +196,7 @@
 			, #{editEmailYn}
 			, #{hideOssVersionYn}
 			, #{editAppendedYn} 		
+			, #{noticeAppendType}
 		) ON DUPLICATE KEY UPDATE
 			PRJ_ID                       	=  #{prjId}                    
 			, NOTICE_TYPE                	=  #{noticeType}            
@@ -171,6 +217,7 @@
 			, EDIT_EMAIL_YN					= #{editEmailYn}
 			, HIDE_OSS_VERSION_YN			= #{hideOssVersionYn}
 			, EDIT_APPENDED_YN				= #{editAppendedYn}
+			, NOTICE_APPEND_TYPE			= #{noticeAppendType}
 	</insert>
 	
 	<select id="selectVerificationNotice" parameterType="oss.fosslight.domain.OssNotice" resultType="oss.fosslight.domain.OssComponents">
@@ -188,27 +235,43 @@
  			, T5.ATTRIBUTION
 			, T2.ADMIN_CHECK_YN
 			, T5.LICENSE_TYPE
+			, T2.PACKAGE_URL
+			, T5.RESTRICTION
 		FROM PROJECT_MASTER T1 
 			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '50' AND T2.OSS_NAME != '-'
 			INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
-			 LEFT JOIN OSS_MASTER T4 ON T2.OSS_NAME = T4.OSS_NAME AND IFNULL(T2.OSS_VERSION, '') = IFNULL(T4.OSS_VERSION, '') AND T4.USE_YN = 'Y'
+			 LEFT JOIN (
+				SELECT
+			    	OV.OSS_ID,
+			    	OC.OSS_COMMON_ID,
+			    	OC.OSS_NAME,
+			    	OV.OSS_VERSION,
+			    	OC.HOMEPAGE,
+					OC.DOWNLOAD_LOCATION,
+			    	OC.SUMMARY_DESCRIPTION,
+			    	OV.LICENSE_DIV,
+			    	OV.USE_YN,
+			    	OV.VULN_CPE_NM,
+			    	OV.CVSS_SCORE,
+			    	OV.CVE_ID,
+			    	OV.VULN_YN,
+			    	OV.VULN_RECHECK,
+			    	OV.VULN_DATE,
+			    	OV.LICENSE_TYPE,
+			    	OV.OBLIGATION_TYPE,
+			    	OV.COPYRIGHT,
+			    	OV.ATTRIBUTION,
+					OC.DEACTIVATE_FLAG,
+					OV.CREATOR,
+					OV.CREATED_DATE,
+					OV.MODIFIER,
+					OV.MODIFIED_DATE
+				FROM OSS_COMMON OC
+				LEFT OUTER JOIN OSS_VERSION OV
+				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			 ) T4 ON T2.OSS_NAME = T4.OSS_NAME AND IFNULL(T2.OSS_VERSION, '') = IFNULL(T4.OSS_VERSION, '') AND T4.USE_YN = 'Y'
 			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
 		WHERE T1.PRJ_ID = #{prjId}
-		
-		<if test="@oss.fosslight.util.StringUtil@equals(networkServerFlag, 'Y')">
-		AND EXISTS (
-			SELECT 1 
-			FROM LICENSE_MASTER TSUB1 
-			WHERE 
-				TSUB1.USE_YN = 'Y' 
-				AND 
-					(
-						TSUB1.SHORT_IDENTIFIER REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
-						OR TSUB1.LICENSE_NAME REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
-					) 
-				AND T3.LICENSE_ID = TSUB1.LICENSE_ID
-			)
-		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(refDivUnExists)">
 			AND IFNULL(T2.REF_DIV, '') <![CDATA[<>]]> #{refDivUnExists}
 		</if>
@@ -333,6 +396,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxYamlFileId)">
 				, SPDX_YAML_FILE_ID = #{spdxYamlFileId}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdxJsonFileId)">
+				, CDX_JSON_FILE_ID = #{cdxJsonFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdxXmlFileId)">
+				, CDX_XML_FILE_ID = #{cdxXmlFileId}
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(zipFileId)">
 				, ZIP_FILE_ID = #{zipFileId}
 			</if>
@@ -355,9 +424,27 @@
 	   SET PACKAGE_FILE_ID = #{packageFileId}
 	     , PACKAGE_FILE_ID2 = #{packageFileId2}
 	     , PACKAGE_FILE_ID3 = #{packageFileId3}
+	     , PACKAGE_FILE_ID4 = #{packageFileId4}
+	     , PACKAGE_FILE_ID5 = #{packageFileId5}
+	     , PACKAGE_FILE_TYPE1 = #{packageFileType1}
+	     , PACKAGE_FILE_TYPE2 = #{packageFileType2}
+	     , PACKAGE_FILE_TYPE3 = #{packageFileType3}
+	     , PACKAGE_FILE_TYPE4 = #{packageFileType4}
+	     , PACKAGE_FILE_TYPE5 = #{packageFileType5}
 	     <if test="!@oss.fosslight.util.StringUtil@isEmpty(statusVerifyYn)">
 	     , STATUS_VERIFY_YN = #{statusVerifyYn} 
 	     </if>
+	 WHERE PRJ_ID = #{prjId}
+	</update>
+	
+	<update id="updateNoticeAppendFile" parameterType="oss.fosslight.domain.Project">
+	UPDATE PROJECT_MASTER
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeAppendFileId)">
+		SET NOTICE_APPEND_FILE_ID = #{noticeAppendFileId}
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(noticeAppendFileId)">
+		SET NOTICE_APPEND_FILE_ID = NULL
+		</if>
 	 WHERE PRJ_ID = #{prjId}
 	</update>
 	
@@ -391,6 +478,7 @@
 			 , EDIT_EMAIL_YN = 'N'
 			 , HIDE_OSS_VERSION_YN = 'N'
 			 , EDIT_APPENDED_YN = 'N'
+			 , NOTICE_APPEND_TYPE = NULL
 		 WHERE PRJ_ID = #{prjId}
 	</update>
 	
@@ -402,8 +490,14 @@
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId2)">
 		   AND PACKAGE_FILE_ID2 = #{packageFileId2}
 		 </if>
-		  <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId3)">
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId3)">
 		   AND PACKAGE_FILE_ID3 = #{packageFileId3}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId4)">
+		   AND PACKAGE_FILE_ID4 = #{packageFileId4}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId5)">
+		   AND PACKAGE_FILE_ID5 = #{packageFileId5}
 		 </if>
 		   AND STATUS_VERIFY_YN = 'Y'
 	</select>
@@ -437,15 +531,65 @@
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId3)">
 		   AND T2.PACKAGING_FILE_ID != #{packageFileId3}
 		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId4)">
+		   AND T2.PACKAGING_FILE_ID != #{packageFileId4}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId5)">
+		   AND T2.PACKAGING_FILE_ID != #{packageFileId5}
+		 </if>
 	</update>
 	
 	<select id="checkOssNickName2" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponents">
 		SELECT T2.OSS_ID, T2.OSS_NAME, T1.OSS_NICKNAME 
 		FROM OSS_NICKNAME T1 
-		INNER JOIN OSS_MASTER T2 ON T1.OSS_NAME = T2.OSS_NAME AND T2.USE_YN = 'Y'
+		INNER JOIN (
+				SELECT
+			    	OV.OSS_ID,
+			    	OC.OSS_COMMON_ID,
+			    	OC.OSS_NAME,
+			    	OV.OSS_VERSION,
+			    	OV.USE_YN
+				FROM OSS_COMMON OC
+				LEFT OUTER JOIN OSS_VERSION OV
+				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			 ) T2 
+		ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.USE_YN = 'Y'
 		WHERE T1.OSS_NICKNAME = #{ossName}
 		AND IFNULL(T2.OSS_VERSION, '') = IFNULL(#{ossVersion}, '')
 		ORDER BY T2.OSS_ID DESC
 		LIMIT 1
  	</select>
+
+	<delete id="deletePackagingFileInfo" parameterType="oss.fosslight.domain.T2File">
+		DELETE
+		FROM
+			T2_FILE
+		WHERE FILE_SEQ = #{fileSeq}
+	</delete>
+
+	<delete id="deleteReuseFileInfo" parameterType="oss.fosslight.domain.T2File">
+		DELETE
+		FROM
+			PACKAGING_REUSE_MAP
+		WHERE PACKAGING_FILE_ID = #{fileSeq}
+	</delete>
+
+	<select id="countSameLogiFile" parameterType="oss.fosslight.domain.T2File" resultType="int">
+		SELECT count(*)
+		FROM T2_FILE
+		WHERE LOGI_PATH = #{logiPath}
+			AND LOGI_NM = #{logiNm}
+	</select>
+	
+	<select id="selectNoticeAppendFile" parameterType="String" resultType="oss.fosslight.domain.T2File">
+		SELECT
+			T1.*
+			, DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+		FROM
+			T2_FILE T1
+		WHERE
+			T1.FILE_ID = #{noticeAppendFileId}
+		AND
+			T1.DEL_YN = 'N'
+	</select>
 </mapper>

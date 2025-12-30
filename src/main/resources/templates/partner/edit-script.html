@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<link rel="stylesheet" th:href="@{/css/datatables/dataTables.bootstrap4.min.css}">
+<script th:src="@{/js/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/js/datatables/dataTables.bootstrap4.min.js}"></script>
+<script th:inline="javascript">
+var userRole = [[${#authentication.authorities[0].authority}]];
+var objs = [];
+var isStatusChangeFlag = false;
+var isSort = false;
+var delDocumentsFile = [];
+var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+var partnerData = [[${detail}]];
+var prjList = [[${prjList}]];
+var sampleFile = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_SAMPLE_FILE'))}]];
+var saveFlag = false;
+var commentsParam = {referenceDiv : '3rd'};
+var documentsFileCnt = 0;
+var partnerStatus = [[${detail.status}]];
+var partnerId = [[${detail.partnerId}]];
+var ossFileObj;
+
+$(document).ready(function () {
+	'use strict';
+	evt.init();
+	datas.init();
+	
+	if (partnerData.documentsFileCnt != null) {
+		documentsFileCnt = partnerData.documentsFileCnt;
+	}
+	if (parseInt(documentsFileCnt) >= 5) {
+		$(".documentsUploader").attr("style", "display: none !important");
+	}
+	
+	// autoConplete 문제로 인한 처리
+	$("#partnerName").val(partnerData.partnerName);
+	$("#softwareName").val(partnerData.softwareName);
+	
+	if ([[${detail.partnerId}]] != null) {
+		$("input[name=creatorName]").val([[${detail.creatorName}]]);
+		
+		fn.displayPartnerInfo();
+	}
+	
+	if (prjList != null) {
+		grid.projectList();
+	}
+});
+
+var modifyCommentId = [[${detail.comment}]];
+var commentIdx= [[${detail.comment}]];
+var evt = {
+	init : function(){
+		$('select[name=userDivision]').trigger('change');
+		$('select[name=division]').trigger('change');
+		$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+		
+		$('div.multiTxtSet2 .smallDelete').on('click', function(){
+			$(this).parent().remove();
+		});
+		
+		if ([[${confirmationFile}]] == null) {
+			fn.confirmationUploadFile();
+		}
+		fn.documentsUploadFile();
+		
+		// file uploader hide in CONF status
+        if ('CONF' == [[${detail.status}]]) {
+            $(".ajax-upload-dragdrop").hide();
+        }
+		
+		if ([[${detail.partnerId}]] != null) {
+			fn.publicChange();
+			
+			let description = [[${detail.description}]];
+			if ("" != description && description != null) {
+				$("#descriptionTextarea").summernote('code', description);
+			}
+			if ([[${detail.ossFileId}]] == null) {
+				fn.ossUploadFile();
+			}
+		} else {
+			fn.ossUploadFile();
+		}
+		if ("Y" == [[${prjLiseMore}]]) {
+			$("#listMore").show();
+		}
+		$("#listMore").on("click",function(){
+			createTabInFrameWithCondition("Project List", '/project/list', 'PARTNERLISTMORE', $('input[name=partnerName]').val());
+		});
+
+		$("#createProject").on("click", function(){
+			var partnerId = [[${detail.partnerId}]];
+			var partnerName = [[${detail.partnerName}]];
+			var softwareName = [[${detail.softwareName}]];
+			if(softwareName.indexOf("/") > -1){
+				softwareName = softwareName.replace("/", "[]");
+			}
+			createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
+		});
+	}
+};
+
+var fn = {
+	displayPartnerInfo : function () {
+		var display = "";
+		
+		var softwareName = [[${detail.softwareName}]];
+		var softwareVersion = [[${detail.softwareVersion}]];
+		if ("" != softwareVersion && softwareVersion != null) {
+			softwareName += " (" + softwareVersion + ")";
+		}
+		
+		var partnerName = "<span class=\"text-dark-gray text-bold hover-line urlLink goToEditLink\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab()\">" + softwareName + "</span>";
+		display += partnerName
+		
+		var status = "<span class=\"ml-2\"> | </span>";
+		var partnerStatus = [[${detail.status}]];
+		
+		switch(partnerStatus){
+			case "REQ" :
+				status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
+
+				break;
+			case "REV" :
+				status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
+
+				break;
+			case "CONF" :
+				status += "<span class=\"text-dark text-bold ml-2\">Confirm</span>";
+
+				break;
+			default :
+				status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
+
+				break;
+		}
+		
+		display += status;
+		
+		var oscProgress = "<span class=\"ml-2\"> | </span>";
+		
+		let request = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST')}]];
+		let review = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW')}]];
+		let confirm = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}]];
+		let progress = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS')}]];
+		
+		switch (partnerStatus) {
+			case confirm : oscProgress += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+			case request : oscProgress += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+			case review : oscProgress += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+			case progress :
+			default : oscProgress += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+				break;
+		}
+		
+		display += oscProgress;
+		
+		$("#displayPartnerInfo").html(display);
+		
+		if ($(".goToEditLink").width() > 300) {
+			$(".goToEditLink").addClass("ellipsis");
+		}
+	},
+	ossUploadFile : function () {
+		//파일업로드
+		var accept2 = '';
+		var fileAccept2 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept2) {
+			if ('22' == fileAccept2[i].cdDtlNo) {
+				accept2 = fileAccept2[i].cdDtlExp;
+			}
+		}
+		
+		$('#ossFile').uploadFile({
+			url : '/partner/ossFile?excel=Y',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept2,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					if (result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function() {});
+					} else if(result[2] == "CSV_FILE") {
+						var result_ = result[0][0];
+
+						if (result && result_.uploadSucc) {
+							fn.makeFileTag(result[0][0], 'ossFile');
+							fn.getCsvData();
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "EXCEL_FILE") {
+						var result_ = result[0][0];
+						
+						if (result && result_.uploadSucc) {
+							if (result[1] && result[1].length != 0) {
+								for(var i = 0; i < result[1].length; i++){
+									var num = i+1;
+									var checkedTxt = "";
+									var sheetName = result[1][i].name.toUpperCase().trim();
+
+									if (sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST") {
+										checkedTxt = "checked";
+									}
+									
+									var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+									sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+									$("#sheetBody").append(sheetTr);
+								}
+								
+								const sheetHtml = $(".sheetSelectPop").html();
+								$("#sheetBody").empty();
+								
+								if(!alertify.selectSheet){
+									alertify.dialog('selectSheet', function() {
+										return {
+											setup: function() {
+												var settings = alertify.confirm().settings;
+												
+												for (var prop in settings) {
+													this.settings[prop] = settings[prop];
+												}
+												
+												var setup = alertify.confirm().setup();
+												setup.buttons = [];
+												setup.focus.element = 0;
+												
+												return setup;
+											},
+										    hooks: {
+										    	onshow: function() {
+										        	this.elements.dialog.style.maxWidth = 'none';
+										          	this.elements.dialog.style.width = '365px';
+										        }
+											}
+										};
+									}, false, 'alert');
+			                	}
+								
+								alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
+								
+								$('.ajax-file-upload-statusbar').fadeOut('slow');
+								$('.ajax-file-upload-statusbar').remove();
+								
+								ossFileObj = result_;
+							}
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "SPDX_SPREADSHEET_FILE") {
+						var result_ = result[0][0];
+						if (result && result_.uploadSucc) {
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+							
+							fn.makeFileTag(result_, 'ossFile');
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						}
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
+	},
+	getSheetData : function(){
+		fn.closePop();
+		
+		var sheetNum = [];
+		$('input:checkbox[name="sheetNameSelect"]').each(function(){
+			if ($(this).is(':checked')){
+				sheetNum.push($(this).val());
+			}
+		});
+		
+		var fileSeq = ossFileObj.registSeq;
+		
+		if (sheetNum.length == 0) {
+			alertify.alert([[#{msg.common.check.sheet}]], function(){});
+			
+			return;
+		} else {
+			loading.show();
+			
+			var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq};
+			fn.exeLoadReportData(finalData);
+		}
+	},
+	exeLoadReportData : function(finalData){
+		$.ajax({
+			url : suffixUrl + '/project/getSheetData',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if ("false" == data.isValid) {
+					if (data.validMsg) {
+						$('#ossFileId').val("");
+						$('#ossFileSheetNo').val("");
+						ossFileObj = undefined;
+						
+						alertify.alert(data.validMsg, function(){});
+					} else {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				} else {
+					$('#ossFileId').val(ossFileObj.registSeq);
+					$('#ossFileSheetNo').val(finalData.sheetNums);
+					fn.makeFileTag(ossFileObj, 'ossFile');
+					ossFileObj = undefined;
+					
+					if (data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+						alertify.alert(data.resultData.systemChangeHisStr, function(){});
+					}
+				}
+			},
+			error: function(data){
+				loading.hide();
+				$('.ossUpload').children().remove();
+				
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	mvEditTab : function () {
+		if (parseInt(partnerData.permission) > 0) {
+			createTabInFrame(partnerId+'_3rdParty', '/partner/edit/' + partnerData.partnerId);
+		} else {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
+		}
+	},
+	mvIdentification : function () {
+		if (partnerId != null) {
+			if (parseInt(partnerData.permission) > 0) {
+				createTabInFrame(partnerId + '_3rdParty_Identify', '/partner/identification/' + partnerData.partnerId);
+			} else {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
+			}
+		} else {
+			alertify.alert([[#{msg.partner.identification.move}]], function(){});
+		}
+	},
+	addWatcherFnc : function () {
+		/* division 정보 */
+		var $divSel	= $("#userDivision")
+		  , divVal	= $divSel.val()
+		  , divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+						
+		/* division 정보 */
+		var $userSel	= $("#userName")
+		  , userVal		= $userSel.val()||""
+		  , userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+
+		// 선택한 item이 없을 경우.
+		if(divVal == "" || userVal == "") {
+			return alertify.error([[#{msg.project.required.selectDivision}]], 0);
+		}
+		
+		/* tag 정보 */
+		var isNew = true;
+		
+		$(".watcherTags").each(function(i, tag){
+			var tagDiv = $(tag).val().split("/")[0]
+			  , tagUid = $(tag).val().split("/")[1];
+			
+			if(divVal == tagDiv) {
+				if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+					isNew = false;
+
+					return false;
+				}
+				
+				if(userVal == 'all') { // all을 선택했을 경우 기존 부서의 userId를 가진 tag를 삭제
+					$(tag).closest('span').remove();
+				} else if(tagUid == userVal) {
+					isNew = false;	// 이미 등록된 watcher가 있을경우
+				}
+			}
+		});
+		
+		if(isNew) {
+			var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+			fn.addWatcher(divVal, userVal, '');
+			fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+		}
+	},
+	addEmailFnc : function () {
+		/* AD ID 정보 */
+		var adId = $("#adId").val();
+		var adIdDomain = $("input[name=adIdDomain]").val();
+
+		if ("" == adId) {
+			$("#adId").focus();
+			return alertify.error([[#{enter.watcher.error}]], 0);
+		}
+		
+		if ("" == adIdDomain) {
+			return alertify.error([[#{select.watcher.domain.error}]], 0);
+		}
+		
+		var _email = adId + "@" + adIdDomain;
+		var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
+
+		if (regEmail.test(_email) == false) {
+			$("#adId").focus();
+			return alertify.error([[#{invalid.email.error}]], 0);
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/system/user/checkEmail', 
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'email' : _email},
+			success: function (data) {
+				if("true" == data.isValid) {
+					var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+					fn.addWatcher(data.division, data.userId, '');
+					fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+				} else {
+					fn.addWatcher('', '', _email);
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		$("#adId").val('');
+		$("input[name=adIdDomain]").val('');
+		$("select[name=prjDomain] option:eq(0)").prop("selected", true);
+		$("select[name=prjDomain]").next().find("#select2-prjDomain-container").text("Select Domain");
+	},
+	addListFnc : function () {
+		var listKind = $("#listKind").val(), listId = $("#listId").val();
+			
+		if (fn.chkListValidation(listKind, listId)) {
+			var obj = {};
+			
+			obj["listKind"] = listKind;
+			obj["listId"] = listId;
+			
+			fn.copyWatcher(obj);
+		}
+	},
+	publicChange : function () {
+		$("[name='publicYn']:checked").parent().addClass("active");
+		
+		$("[name='publicYn']").on('change',function(e){
+			var param = {partnerId : [[${detail.partnerId}]], publicYn : ($("[name='publicYn']:checked").val())};
+			
+			$.ajax({
+				url : '/partner/updatePublicYn',
+				type : 'POST',
+				data : JSON.stringify(param),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(){
+					alertify.success([[#{msg.common.success}]]);
+				},
+				error : fn.onError
+			});
+		});
+	},
+	setProjectInfo : function (cellvalue, options, rowObject) {
+		var display = cellvalue;
+		if ("" != rowObject.prjVersion) display = display + " [" + rowObject.prjVersion + "]";
+		return display;
+	},
+	confirmationUploadFile : function () {
+		//파일업로드
+		var accept1 = '';
+		var fileAccept1 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept1) {
+			if ('21' == fileAccept1[i].cdDtlNo) {
+				accept1 = fileAccept1[i].cdDtlExp;
+			}
+		}
+		
+		$('#confirmationFile').uploadFile({
+			url : '/partner/ossFile',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept1,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null){
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					result = result[0][0];
+					
+					if (result && result.uploadSucc) {
+						fn.makeFileTag(result, 'confirmationFile');
+					} else {
+						alertify.alert([[#{msg.common.upload.failed}]], function(){});
+					}
+				}
+				
+				$('.ajax-file-upload-statusbar').fadeOut('slow');
+				$('.ajax-file-upload-statusbar').remove();
+			}
+		});
+	},
+	documentsUploadFile : function () {
+		$('#documentsFile').uploadFile({
+			url : '/partner/documentsFile',
+			multiple:false,
+			dragDrop:true,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data ={ "registFileId" :$('#documentsFileId').val() }
+
+				return data;
+			},
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					result = result[0];
+					
+					if (result && result.uploadSucc) {
+						fn.makeFileTag(result, 'documentsFile');
+						
+						if ($(".documentsFileArea > li").length >= 5) {
+							$(".documentsUploader").attr("style", "display: none !important");
+						}
+					} else {
+						alertify.alert([[#{msg.common.upload.failed}]], function(){});
+					}
+				}
+				
+				$('.ajax-file-upload-statusbar').fadeOut('slow');
+				$('.ajax-file-upload-statusbar').remove();
+			}
+		});
+	},
+	handleUserCommentPopupOpen : function() {
+		// 코멘트 팝업
+        const param = {
+            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+            "referenceId" : $('input[name=partnerId]').val()
+        }
+		
+        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+        	if (!alertify.editDialog){
+        		commonAlertifyDialog('editDialog');
+    		}
+        	alertify.editDialog().set('onshow', function(e) {
+        		$(alertify.editDialog().elements.buttons.primary).empty();
+        	}).setContent(res).show();
+      	},
+       	null,
+      	function () {
+         	$("#modifiedCommentInPjtEditor").summernote({
+            	height: 180,
+              	callbacks: {
+                 	onInit: function () {
+                      	$(this).summernote('code', $("#userContents").val());
+                 	}
+              	}
+           	});
+     	});
+	},
+	sendEditor : function(type){
+		//코멘트 저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        if(!editorVal || editorVal == "") {
+            alertify.alert([[#{msg.project.enter.comment}]], function(){});
+            return false;
+        }
+
+		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]], contents : editorVal, mailSendType : type};
+		
+		$.ajax({
+			url : '/partner/sendComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+                    alertify.success([[#{msg.project.sent.comments.success}]]);
+                    $("#modifiedCommentInPjtEditor").summernote('code', '');
+                    $("#userContents").val('');
+                    $('.ajs-close').trigger("click");
+                    fn_comment.getCommentList(commentsParam);
+                    
+                    if (_popupComment == null || _popupComment.closed) {
+                    } else {
+                    	_popupComment.callbackFunction();
+                    }
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	saveEditor : function(){
+		//코멘트 임시저장
+		var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]], contents : editorVal};
+		
+		$.ajax({
+			url : '/project/saveComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					$("#userContents").val(editorVal);
+					$('.ajs-close').trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	editDescription : function(){
+		var linkText = "";
+		var data = {"partnerId" : $('input[name=partnerId]').val() , "description" : linkText};
+		$.ajax({
+			url : '/partner/updateDescription',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(){
+				alertify.success([[#{msg.common.success}]]);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	changeDivision : function() {
+		var divisionCd = $("#division option:selected").val();
+		if("" != divisionCd) {
+			var postData = { "partnerId" : [[${detail.partnerId}]], "division" : divisionCd};
+			$.ajax({
+				url : '/partner/changeDivisionAjax',
+				type : 'POST',
+				data : JSON.stringify(postData),
+				dataType : 'json',
+				contentType : 'application/json',
+				cache : false,
+				success: function(data) {
+					if(data.isValid == "false") {
+						alertify.error([[#{msg.common.valid2}]], 0);	
+					} else {
+						alertify.success([[#{msg.common.success}]]);	
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	save : function(){
+		if (fn.checkStatus()){
+			if (partnerId == null || (partnerId != null && isStatusChangeFlag)) {
+				if (typeof alertify.parSaveDialog === 'undefined') {
+					commonAlertifyDialog('parSaveDialog');
+	        	}
+				
+	           	var innerHtml = "";
+           		if (isStatusChangeFlag) {
+					innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.request', true)}]];
+				} else {
+					innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+				}
+           		innerHtml += '<br><textarea id="parSaveEditor"></textarea>';
+           		
+           		alertify.parSaveDialog()
+	       		.set('onok', function(e) {
+	       			if (e) {
+	       				var comment = $("#parSaveEditor").summernote('code');
+	       				if (("" != $(comment).text().trim() || $(comment).find('img').length > 0) && !isStatusChangeFlag) {
+	       					$("#userComment").val(comment);
+	       				} else {
+	       					$('#userComment').val("");
+	       				}
+	       				
+	       				fn.saveSubmit();
+	       			} else {
+	       				return false;
+	       			}
+	       		})
+	       		.set('title', 'Save').setContent(innerHtml)
+	       		.set('onshow', function(e){
+	       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	       			const parameter = {
+	    		   		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+	    		       	"referenceId" : $('input[name=partnerId]').val()
+	    		  	}
+	    		    var draftUserComment = draftUserComments(parameter);
+	    		    if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+	    		       	$("#parSaveEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+	    		    }
+	       		})
+				.show();
+           	} else {
+           		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+					if (e) {
+						fn.saveSubmit();
+					} else {
+						return false;
+					}
+				});
+           	}
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	saveSubmit : function () {
+		cleanErrMsg("list");
+		$("span.retxt").hide();
+		$("input, textarea").removeClass("is-invalid");
+		$(".permissionRadio").find(".active").find("input").prop("checked", true);
+		
+		var editorVal = $("#descriptionTextarea").summernote('code');
+		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+			$('#description').val(replaceWithLink(editorVal));
+		} else {
+			$('#description').val("");
+		}
+		
+		if ("CONF" == [[${detail.status}]]) {
+			fn.disabledComfirmedRow(false);
+		}
+		
+		var postData = $("#partnerForm").serializeObject();
+		
+		$.ajax({
+			url : '/partner/saveAjax',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			contentType : 'application/json',
+			cache : false,
+			success: fn.onRegistSuccess,
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	disabledComfirmedRow : function(disabledBoolean) {
+		var diabledNameList = ['partnerName', 'softwareName', 'softwareVersion', 'publicYn', 'division', 'reviewerName'];
+		diabledNameList.forEach(function(names){
+			$('input[name='+names+']').prop('disabled', disabledBoolean);
+		});
+		
+		$("#deliveryForm").prop("disabled", disabledBoolean);
+	},
+	onRegistSuccess : function(data) {
+		loadingIden.hide();
+		
+		_mainLastsel = -1;
+		if ("false" == data.isValid) {
+			// 폼 메세지
+			if (typeof data.dupData.partnerName !== "undefined") {
+				$('input[name=partnerName]').addClass("is-invalid");
+				$('input[name=partnerName]').next().text(data.dupData.partnerName).show();
+			}
+			
+			if (typeof data.dupData.softwareName !== "undefined") {
+				$('input[name=softwareName]').addClass("is-invalid");
+				$('input[name=softwareName]').next().text(data.dupData.softwareName).show();
+			}
+			
+			if(data.confirmationFileId){
+				$("div.retxt.confirmationFile").text(data.confirmationFileId).show();
+			}
+			
+			if(data.ossFileId){
+				$("div.retxt.ossFileId").text(data.ossFileId).show();
+			}
+			
+			if(data.softwareVersion){
+				$('input[name=softwareVersion]').next().text(data.softwareVersion).show();
+			}
+			
+			if(data.duplicatePartner){
+				$('input[name=partnerName]').next().text(data.duplicatePartner).show();
+				$('input[name=softwareName]').next().text(data.duplicatePartner).show();
+				$('input[name=softwareVersion]').next().text(data.duplicatePartner).show();
+			}
+			
+			alertify.error([[#{msg.common.valid}]], 0);
+		} else {
+			if ("10" == data.resCd){
+				var partnerId = $('input[name=partnerId]').val();
+				alertify.alert([[#{msg.common.success}]], function(){
+					reloadTabInframe('/partner/list');
+					if (partnerId){
+						deleteTabInFrame('/partner/edit' + partnerId);
+						createTabInFrame(data.partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+					} else {
+						deleteTabInFrame('/partner/edit');
+						if (data.partnerId) {
+							createTabInFrame(data.partnerId + '_3rdParty', "/partner/edit/" + data.partnerId);
+						}
+					}
+				});
+			} else {
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		}
+	},
+	deleteWatcher : function(obj){
+		$(obj).parent().remove();
+	},
+	deleteComment : function(obj){
+		if(!confirm([[#{msg.partner.confirm}]])) return;
+		var commId = $(obj).next().val();
+		$.ajax({
+			url : '/partner/deleteComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : {'commId' : commId},
+			success : function(data){},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	editorDialog : function(){
+		if(!alertify.myAlert){
+			//define a new dialog
+			alertify.dialog('myAlert',function factory(){
+				return{
+					main:function(message){
+						this.message = message;
+					},
+					setup:function(){
+						return { 
+							focus: { element:0 }
+						};
+					},
+					prepare:function(){
+						this.setContent(this.message);
+					}
+				}
+			});
+		}
+		//launch it.
+		var btnHtm = '<br/><b>Send an email to</b><br/>';
+		btnHtm += '<input type="button" value="Watcher Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'W\')"/>&nbsp;&nbsp;&nbsp;';
+
+		if(userRole == "ROLE_ADMIN") {
+			btnHtm += '<input type="button" value="Creator Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'C\')"/>&nbsp;&nbsp;&nbsp;';
+		} else {
+			btnHtm += '<input type="button" value="Reviewer Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'R\')"/>&nbsp;&nbsp;&nbsp;';
+		}
+		
+		btnHtm +='<input type="button" value="All" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="fn.sendEditor(\'WR\')"/>&nbsp;&nbsp;&nbsp;';
+
+		alertify.myAlert(btnHtm);
+	},
+	delete : function(){
+		if (fn.checkStatus()){
+			var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
+           	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
+			
+			if (!alertify.deleteParDialog){
+				alertify.dialog('deleteParDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+           	
+           	alertify.deleteParDialog()
+           	.set('onok', function(e){
+           		if (e) {
+           			var comment = $("#parDelEditor").summernote('code');
+               		if ("" != $(comment).text().trim() || $(editorVal).find('img').length > 0) {
+               			var partnerId = $('input[name=partnerId]').val();
+    					$.ajax({
+    						url : '/partner/delAjax',
+    						type : 'POST',
+    						dataType : 'json',
+    						cache : false,
+    						data : {'partnerId' : partnerId, userComment : replaceWithLink(comment)},
+    						success: function(data){
+    							if (partnerId) {
+    								deleteTabInFrame('/partner/edit/'+partnerId);			
+    							} else {
+    								deleteTabInFrame('/partner/edit');
+    							}
+    							
+    							callCreateTabInFrame('3rd Party', '/partner/list', 'partner-list', true);
+    						},
+    						error: function(){
+    							alertify.error([[#{msg.common.valid2}]], 0);
+    						}
+    					});
+               		} else {
+               			alertify.alert([[#{msg.project.required.comments}]], function(){});
+    				}
+           		} else {
+           			return false;
+           		}
+           	})
+           	.set('onshow', function(e){
+           		$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		const parameter = {
+           		 	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+           		   	"referenceId" : $('input[name=partnerId]').val()
+           		}
+           		var draftUserComment = draftUserComments(parameter);
+           		if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+           			$("#parDelEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+           		}
+           	})
+           	.setContent(innerHtml).show();
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	deleteConfirmationFile : function(obj){
+		$('.confirmationUpload').empty();
+		$(".confirmationUploader").attr("style", "display: flex !important");
+
+		evt.init();
+	},
+	selectDivision : function(){
+		var division = $('#userDivision').val();
+		$('#userName').children().remove();
+		if ("" == division) {
+			$("#userName").append("<option value=''>Select User</option>");
+			return false;
+		}
+		$('#userName').attr('disabled', false);
+		
+		$.ajax({
+			url : '/partner/getUserList',
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'division' : division},
+			success : function(data){					
+				data.forEach(function(obj){
+					$('#userName').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+				});
+				
+				$('#userName').change();
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	selectDomain : function() {
+		var adIdDomain = $("select[name=parDomain] option:checked").text();
+		if ("Select Domain" == adIdDomain) adIdDomain = "";
+		$("input[name=adIdDomain]").val(adIdDomain);
+	},
+	closePop : function(){
+		$('.ajs-close').trigger("click");
+	},
+	modeForStatus : function(status){
+		var fileDelete = $(".uploadCase .smallDelete");
+		var addWatcher = $("#addWatcher");
+		var partyDelete = $("#partyDelete");
+		var partyReset = $("#partyReset");
+		var partySave = $("#partySave");
+		var partyBulkRegist = $(".idenBulkRegist");
+		var objArr = [];
+		var autoAnalysis = $(".idenAnalysis");
+		var autoAnalysisResult = $(".idenAnalysisResult");
+		
+		objArr.push($("#list"));
+		
+		if ("ROLE_VIEWER" == userRole) {
+			fileDelete.hide(); addWatcher.hide();
+			partyDelete.hide(); partyReset.hide(); partySave.hide(); partyBulkRegist.hide();
+		} else {
+			switch (status) {
+				case "CONF" :
+					fileDelete.hide(); addWatcher.show();
+					partyDelete.hide(); partyReset.hide(); partySave.show();
+					autoAnalysis.hide(); autoAnalysisResult.hide(); partyBulkRegist.hide();
+					break;
+				// 추후 추가
+				default :
+					fileDelete.show(); addWatcher.show();
+					partyDelete.show(); partyReset.show(); partySave.show(); partyBulkRegist.show();
+
+					break;
+			}
+		}
+	},
+	
+	// 왓쳐 엘리먼트 그리기
+	addHtml : function(target, str, division, userId){
+		var rlt = division;
+		if ("" != userId) {
+			rlt += "/" + userId;
+		}
+		
+		var html  = "";
+		if ($("#multiDiv").find(".external-event").length == 0) {
+			html  = '<div class="external-event"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		} else {
+			html  = '<div class="external-event ml-1"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		}
+		
+		html += str;
+		html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i></div>';
+		
+		target.append(html);
+	},
+	addWatcher : function(uDiv, uId, uEmail) {
+		var partnerId = [[${detail.partnerId}]];
+
+		if (partnerId == "" || partnerId == null) {
+			return true;
+		}
+		
+		var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
+		
+		$.ajax({
+			url : '/partner/addWatcher',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				if (resultData.isValid == "true") {
+					if ('' != uEmail){
+						alertify.success([[#{msg.common.success}]]);
+						// TODO - ldap search를 통해 확인된 domain을 우선적으로 적용하도록 처리가 필요함.
+						fn.addHtml($("#multiDiv"), resultData.email, resultData.email, "Email");
+					}
+				} else {
+					// email로 watcher등록을 실패할 경우 error message를 띄움.
+					if ('' != uEmail){
+						alertify.error("Invalid email address.", 0);
+					}
+				}
+			},
+			error : fn.onError
+		});
+	},
+	removeWatcher : function(uDiv, uId, obj) {
+		var uEmail = "";
+
+		if ("Email" == uId) {
+			uEmail = uDiv;
+			uId = "";
+			uDiv = "";
+		}
+
+		var partnerId = [[${detail.partnerId}]];
+
+		if ("" == partnerId || partnerId == null) {
+			return true;
+		}
+		
+		var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
+
+		$.ajax({
+			url : '/partner/removeWatcher',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				if (resultData.isValid == "true") {
+					$(obj).parent().remove();
+					alertify.success([[#{msg.common.success}]]);
+				}
+			},
+			error : fn.onError
+		});
+	},
+	copyWatcher : function(obj) {
+		var partnerId = [[${detail.partnerId}]];
+		
+		obj["partnerId"] = partnerId;
+		
+		$.ajax({
+			url : '/partner/copyWatcher',
+			type : 'POST',
+			data : JSON.stringify(obj),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				var copyWatcher = resultData.copyWatcher;
+				
+				if(copyWatcher.length){
+					for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+						var isNew = true
+						  , division = copyWatcher[i].division || ""
+						  , divisionName = copyWatcher[i].parDivisionName || ""
+						  , userId = copyWatcher[i].parUserId || ""
+						  , userName = copyWatcher[i].parUserName || ""
+						  , email = copyWatcher[i].parEmail || ""
+						  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+						  , userUseYn = copyWatcher[i].userUseYn || "Y";
+						
+						$(".watcherTags").each(function(i, tag){
+							var tagDiv = $(tag).val().split("/")[0]
+							  , tagUid = $(tag).val().split("/")[1];
+							
+							if(division == tagDiv) {
+								if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+									isNew = false;
+
+									return false;
+								} else if(tagUid == userId) {
+									isNew = false;	// 이미 등록된 watcher가 있을경우
+								}
+							}
+							
+							if(tagUid == "Email") {
+								if(email == tagDiv) {
+									isNew = false;
+								}
+							}
+						});
+						
+						if (isNew) {
+							if (email != "") {
+								fn.addHtml($("#multiDiv"), email, email, "Email");
+							} else {
+								var str = "";
+								
+								if (userName == "") {
+									str = divisionName;
+								} else {
+									str = '<b';
+
+									if (divisionEmptyCd != divVal) {
+										if(deptUseYn == "N"){
+											str += ' class="deleteUser"';
+										}
+
+										str += '>'+divisionName+'</b>/<b';
+									}
+									
+									if (userUseYn == "N") {
+										str += ' class="deleteUser"';
+									}
+									
+									str += '>'+userName+'</b>';
+								}
+								
+								fn.addHtml($("#multiDiv"), str, division, userId);
+							}
+						}
+					}
+					
+					if (partnerId != null) {
+						alertify.success([[#{msg.common.success}]]);
+					}
+				}
+				
+				if(!copyWatcher.length)
+					alertify.warning([[#{msg.partner.id.warning}]]);
+			},
+			error : fn.onError
+		});
+	},
+	chkListValidation : function(listKind, listId){
+		if (listKind == "") {
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
+
+			return false;
+		}
+		
+		if (listId == "") {
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
+
+			return false;
+		}
+		
+		return true;
+	},
+	deleteDocumentsFile : function(obj){
+		var fileSeq = $(obj).closest("li").find("input:last").val();
+		$(obj).closest('li').remove();
+		delDocumentsFile.push(fileSeq);
+		$("#delDocumentsFile").val(delDocumentsFile);
+		
+		var fileCnt = $(".documentsFileArea > li").length;
+		if (fileCnt == 0) {
+			$("#documentsFileId").val("");
+		} else if (fileCnt < 5) {
+			$(".documentsUploader").attr("style", "display: flex !important");
+		}
+	},
+	CheckChar : function(){
+		if (event.keyCode == 64){//@ 특수문자 체크
+    		alertify.alert([[#{msg.login.check.char}]], function(){});
+    		event.returnValue = false;
+    	}
+	},
+	checkStatus : function(){
+		var partnerId = $("input[name=partnerId]").val();
+		var returnFlag = false;
+		
+		if (partnerId == "" || partnerId == null) {
+			returnFlag = true;
+		} else {
+			$.ajax({
+				url : '/partner/checkStatus/'+partnerId,
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				async : false,
+				success : function(data){
+					var status = data.status;
+					var editStatus = $("input[name=status]").val();
+
+					returnFlag = (status == editStatus);
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+					returnFlag = false;
+				}
+			});
+		}
+
+		return returnFlag;
+	},
+	shareUrl : function(){
+		var copyUrl = "";
+		var protocol = window.location.protocol;
+		var host =  window.location.host;
+		copyUrl = protocol + "//" + host + "/partner/shareUrl/" + [[${detail.partnerId}]];
+		
+		$("#copyUrl").val(copyUrl);
+		
+		//launch it.
+		var btnHtml 	= 	'<div class="row form-group">';
+		btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+		btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+		btnHtml 		+= 	'	</div>';
+		btnHtml 		+= 	'</div>';
+		btnHtml 		+= 	'<div class="row float-right custom-layout">';
+		btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+		btnHtml 		+= 	'</div>';
+		
+		if(!alertify.myAlert){
+			//define a new dialog
+			alertify.dialog('myAlert',function factory(){
+				return{
+					main:function(message){
+					this.message = message;
+				},
+				setup:function(){
+					return { 
+						focus: { element:0 }
+					};
+				},
+				prepare:function(){
+					this.setContent(this.message);
+				},
+				hooks: {
+			    	onshow: function() {
+			          	this.elements.content.style.height = '220px';
+			        }
+				}
+			}});
+		}
+		
+		alertify.myAlert(btnHtml);
+	},
+	copyUrl : function(target){
+		$('#copyUrl').attr('type', 'text');
+		$('#copyUrl').select();
+        var copyFlag = document.execCommand('copy');
+        $('#copyUrl').attr('type', 'hidden');
+        
+        if (copyFlag) {
+        	$('.ajs-close').trigger("click");
+    		alertify.success([[#{msg.common.success}]]);
+        } else {
+        	alertify.error([[#{msg.common.valid}]]);
+        }
+	},
+	makeFileTag : function(obj, flag) {
+		var appendHtml = '<br>'+obj.createdDate + " (" + obj.loginUserName + ")";
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var uploadFileTag = "";
+		
+		if ("confirmationFile" == flag) {
+			uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteConfirmationFile(this)">X</span>'+appendHtml+'</li>';
+			uploadFileTag += '<input type="hidden" name="confirmationFileId" value="'+obj.registSeq+'"/>';
+			$('.confirmationUpload').append(uploadFileTag);
+			$(".confirmationUploader").attr("style", "display: none !important");
+		} else if ("documentsFile" == flag) {
+			uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteDocumentsFile(this)">X</span>'+appendHtml+'</li>';
+			uploadFileTag += '<input type="hidden" value="'+obj.registSeq+'"/>';
+			if ("" == $("#documentsFileId").val()) $("#documentsFileId").val(obj.registFileId);
+			$('.documentsFileArea').append(uploadFileTag);
+		} else if ("ossFile" == flag) {
+			uploadFileTag = '<li><a class="ajax-file-upload-filename" style="cursor: pointer" onclick="fn.mvIdentification()">'+obj.originalFilename+'</a>';
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteOssFile(this)">X</span>'+appendHtml+'</li>';
+			$(".ossUpload").parent().attr("style", "display: flex !important");
+			$('.ossUpload').append(uploadFileTag);
+			$(".ossUploader").attr("style", "display: none !important");
+		}
+	},
+	deleteOssFile : function(obj){
+		$('.ossUpload').empty();
+		$(".ossUploader").attr("style", "display: flex !important");
+		$("#ossFileSheetNo").val("");
+		$("#ossFileId").val("");
+		
+		evt.init();
+	},
+	downloadSampleReport : function() {
+		var logiPath = "/sample/FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx";
+		var fileName = "FOSSLight-OSS-Checklist-for-3rdParty.xlsx";
+
+		location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
+	}
+}
+
+var datas = {
+	init : function(){
+		var userDivision = $('#division');
+		if ([[${detail.partnerId}]] != '' && [[${detail.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+			for(var i=0;i<userDivision.children().length;i++){
+				if(userDivision.children()[i].value == [[${detail.division}]]) {
+					break;
+				}
+				if(userDivision.children().length - 1 == i ) {
+					var divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail.division)}]];
+					userDivision.append("<option value='" + [[${detail.division}]] + "' >" + divisionName+ "</option>");
+					$('#division option:last').attr("selected", "selected");
+					$('#division option:last').change();
+				}
+			}
+		}
+
+		userDivision = $('#division');
+		for (var i=0;i<userDivision.children().length;i++){
+			if(userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+				break;
+			}
+			if(userDivision.children().length - 1 == i ) {
+				userDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
+				if([[${detail.division}]] == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
+					$('#division option:last').attr("selected", "selected");
+					$('#division option:last').change();
+				}
+			}
+		}
+
+		var prjDivision = $("#userDivision");
+		for (var i=0;i<prjDivision.children().length;i++){
+			if(prjDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] ){
+				break;
+			}
+			if(prjDivision.children().length-1 == i) {
+				prjDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
+			}
+		}
+		
+		if (partnerData != null && partnerData.partnerWatcher != null) {
+			datas.initPartnerWatcher(partnerData.partnerWatcher);
+		}
+		
+		if ([[${detail.partnerId}]] != null) {
+			commentsParam["referenceId"] = [[${detail.partnerId}]];
+		}
+		
+		commentsParam.height = $(window).height() - 120;
+		fn_comment.getCommentList(commentsParam);
+	},
+	initPartnerWatcher : function (watcherList) {
+		watcherList.forEach(function(watcher, index, obj){
+			var deptUseYn = watcher.deptUseYn || "Y";
+			var userUseYn = watcher.userUseYn || "Y";
+			
+			if (watcher) {
+				if (watcher.parEmail != null && "" != watcher.parEmail) {
+					fn.addHtml($("#multiDiv"), watcher.parEmail, watcher.parEmail, "Email");
+				} else {
+					var str = "";
+					
+					if (watcher.parUserName == null || "" == watcher.parUserName) {
+						str = watcher.parDivisionName;
+					} else {
+						if (watcher.parDivisionName != null && "" != watcher.parDivisionName) {
+							str += '<span class="text-bold">' + watcher.parDivisionName + '</span>/';
+						}
+						str += '<span class="text-bold">' + watcher.parUserName+ '</span>';
+					}
+					
+					fn.addHtml($("#multiDiv"), str, watcher.parDivision, watcher.parUserId);
+				}
+			}
+		});
+	}
+}
+var grid = {
+	projectList : function () {
+		var prjDataList = $('#_projectList').DataTable({
+	    	paging : false,
+	    	searching : false,
+	    	info : false,
+	    	autoWidth : false,
+	    	responsive : true,
+	    	lengthChange : true,
+	    	ordering : false,
+	    	data : prjList,
+	    	columns : [ {
+	    		data : "prjId"
+	    	}, {
+	      		data : "prjName",
+				render : function(data, type, row, meta){
+					var display = data;
+					if ("" != row.prjVersion) {
+						display + " (" + row.prjVersion + ")";
+					}
+					return display;
+				}
+	    	}],
+		  	columnDefs : [
+		      	{
+		      		targets : [0],
+		      		className : "text-center"
+		      	}
+		    ]
+	    });
+		
+		$("#_projectList > tbody").on('dblclick', 'tr', function () {
+			var data = prjDataList.row(this).data();
+			if ("Y" != data.oldSystemFlag) {
+				var url = '/project/edit/' + data.prjId;
+				createTabInFrame(data.prjId + '_Project', url);
+			}
+		});
+	}
+}
+
+	var fn_comment = {
+		callbackFunction : function () {
+        	fn_comment.getCommentList(commentsParam);
+        },
+		getCommentList : function(param) {
+			$.ajax({
+				type: "GET",
+				url: '/comment/getCusCommentList',
+				dataType : 'html',
+				cache : false,
+				data : param,
+				success: function (res) {
+					if (typeof param.height !== undefined) {
+						$(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+					}
+					$("#commentList").empty();
+					$("#commentList").html(res);
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		getMoreCommentsList : function() {
+			commentsParam["moreFlag"] = "Y";
+			commentsParam["height"] = $(".comment-card-body").height();
+			fn_comment.getCommentList(commentsParam);
+		},
+		editComments : function(_commId, _referenceDiv, _referenceId) {
+			$.ajax({
+	    		url : '/comment/getEditPopup',
+				type : 'POST',
+				data : {'commId' : _commId},
+				dataType : 'html',
+				cache : false,
+				success : function(res){
+					if (typeof alertify.editComments === "undefined"){
+						alertifyWithoutButtons('editComments');
+	        		}
+					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
+					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+				}
+	    	});
+		},
+		updateComments : function (_commId, _referenceDiv, _referenceId) {
+			var summernoteVal = $("#commentEdit").summernote('code');
+			if ("" == summernoteVal) {
+				alertify.alert("Please enter a comment", function(){});
+				return false;
+			} else {
+				var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
+				$.ajax({
+					url : '/comment/updateComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						alertify.success([[#{msg.common.success}]]);
+						$('.ajs-close').trigger("click");
+						fn_comment.getCommentList(commentsParam);
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		deleteComments : function (_commId) {
+			if (typeof alertify.delCommentParDialog === "undefined") {
+				basicAlertifyDialog('delCommentParDialog');
+			}
+			alertify.delCommentParDialog("Are you sure you want to delete this comment?", function (e) {
+				if (e) {
+					$.ajax({
+						url : '/comment/deleteComment',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : {'commId' : _commId},
+						success : function(data){
+							alertify.success([[#{msg.common.success}]]);
+							$('.ajs-close').trigger("click");
+							fn_comment.getCommentList(commentsParam);
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		},
+		activateCommentArea : function () {
+			var commentRow = $("#commentList .card-body").length;
+			
+			// change tab area
+			if (!$(".basicInfoCommentArea").is(":visible")) {
+				$(".basicInfoAreaTop").hide();
+				$(".basicInfoArea").removeClass("col-md-10");
+				$(".basicInfoAreaBottom").hide();
+				$(".basicInfoArea").addClass("col-md-9");
+				
+				fn_comment.getCommentList(commentsParam);
+				$(".basicInfoCommentArea").show();
+			} else {
+				$(".basicInfoAreaTop").show();
+				$(".basicInfoArea").removeClass("col-md-9");
+				$(".basicInfoArea").addClass("col-md-10");
+				$(".basicInfoAreaBottom").show();
+	 			$(".basicInfoCommentArea").hide();
+			}
+		},
+		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
+	        openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + [[${detail.partnerId}]]);
+		}
+	}
+</script>
+</th:block>

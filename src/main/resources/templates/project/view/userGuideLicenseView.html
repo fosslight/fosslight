@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="warningPop" style="display: none;">
+		<div class="row">
+			<div class="col-12">
+				<span th:utext="#{msg.project.packaging.verify.userguide}"></span>
+			</div>
+		</div>
+		<div class="row form-group" th:each="userGuide : ${userGuideLicenseList}">
+			<div class="col-12">
+				<br><p><b th:utext="${userGuide.licenseName}"></b></p>
+				<p th:utext="${userGuide.descriptionHtml}"></p><br>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

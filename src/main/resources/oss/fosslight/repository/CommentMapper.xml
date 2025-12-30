@@ -18,7 +18,10 @@
 			, STATUS_CODE
 			, CONTENTS
 			, CREATOR
-			, MODIFIER
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('30', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('40', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('42', referenceDiv)">
+				, MODIFIER
+				, MODIFIED_DATE
+			</if>
 			, EXPANSION1
 		)
 		VALUES
@@ -32,7 +35,10 @@
 			, #{statusCode}
 			, #{contents}
 			, #{loginUserName}
-			, #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('30', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('40', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('42', referenceDiv)">
+				, #{loginUserName}
+				, now()
+			</if>
 			, #{expansion1}
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
@@ -41,7 +47,10 @@
 			REFERENCE_ID = #{referenceId}
 			, REFERENCE_DIV = #{referenceDiv}
 			, CONTENTS = #{contents}
-			, MODIFIER = #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('30', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('40', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('42', referenceDiv)">
+				, MODIFIER = #{loginUserName}
+				, MODIFIED_DATE = now()
+			</if>
 	</insert>
 
 	<select id="getCommentList" parameterType="oss.fosslight.domain.CommentsHistory" resultType="oss.fosslight.domain.CommentsHistory">
@@ -83,7 +92,7 @@
 	UPDATE 
 		COMMENTS_HISTORY
 	SET 
-		USE_YN= 'N', MODIFIER = #{loginUserName}
+		USE_YN= 'N', MODIFIER = #{loginUserName}, MODIFIED_DATE = now()
 	WHERE 
 		COMM_ID = #{commId}
 	</update>
@@ -103,7 +112,7 @@
 	UPDATE 
 		COMMENTS_HISTORY
 	SET 
-		USE_YN= 'N', MODIFIER = #{loginUserName}
+		USE_YN= 'N', MODIFIER = #{loginUserName}, MODIFIED_DATE = now()
 	WHERE 
 		REFERENCE_ID = #{referenceId}
 		AND REFERENCE_DIV = #{referenceDiv}
@@ -127,12 +136,21 @@
 		COMM_ID = #{comments}
 		AND USE_YN = 'Y'
 	</select>
+	
 	<select id="getUserComment" parameterType="oss.fosslight.domain.CommentsHistory" resultType="String">
 	SELECT CONTENTS FROM COMMENTS_HISTORY
 	WHERE
 		USE_YN = 'Y'
 		AND REFERENCE_ID = #{referenceId}
-		AND REFERENCE_DIV = #{referenceDiv}
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+				AND REFERENCE_DIV IN ('19', '10', '12', '14', '60')
+			</when>
+			<otherwise>
+				AND REFERENCE_DIV = #{referenceDiv}
+			</otherwise>
+		</choose>
+		
 		AND CREATOR = #{loginUserName}
 	ORDER BY MODIFIED_DATE DESC
 	LIMIT 1
@@ -143,28 +161,33 @@
 		*
 	FROM
 		COMMENTS_HISTORY
-	WHERE
-		REFERENCE_ID = #{referenceId}
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
-				AND REFERENCE_DIV IN ('19', '10', '12', '14')
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
-				AND REFERENCE_DIV IN ('30')
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
-				AND REFERENCE_DIV IN ('40')
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-				AND REFERENCE_DIV IN ('20')
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
-				AND REFERENCE_DIV IN ('19', '10', '12', '14', '60')
-			</when>
-			<otherwise>
-				AND REFERENCE_DIV IN ('99')
-			</otherwise>
-		</choose>
+	WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			<if test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+				AND ((REFERENCE_ID = #{referenceId} AND REFERENCE_DIV = '40')
+				OR (REFERENCE_ID IN (SELECT OSS_ID FROM OSS_VERSION	WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{referenceId})) AND REFERENCE_DIV = '42'))
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@notEquals(referenceDiv,'oss')">
+				AND REFERENCE_ID = #{referenceId}
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+						AND REFERENCE_DIV IN ('19', '10', '12', '14')
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+						AND REFERENCE_DIV IN ('30')
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+						AND REFERENCE_DIV IN ('20', '22')
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+						AND REFERENCE_DIV = '60'
+					</when>
+					<otherwise>
+						AND REFERENCE_DIV IN ('99')
+					</otherwise>
+				</choose>
+			</if>
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
 			AND REFERENCE_DIV = #{schReferenceDiv}
 		</if>
@@ -180,14 +203,20 @@
 			CASE WHEN CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
 		</if>
 	COMM_ID DESC
-	LIMIT 5
+	<if test="@oss.fosslight.util.StringUtil@equals(moreFlag, 'N')">
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
+			LIMIT 5
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
+			LIMIT 1
+		</if>
+	</if>
 	</select>
 	
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
 		UPDATE COMMENTS_HISTORY 
-		SET CONTENTS = #{contents}, MODIFIER = #{loginUserName}
+		SET CONTENTS = #{contents}, MODIFIER = #{loginUserName}, MODIFIED_DATE = now()
 		WHERE COMM_ID = #{commId}
-			 
 	</update>
 	
 	<update id="updateHistoryReadYn" parameterType="oss.fosslight.domain.CommentsHistory">
@@ -216,24 +245,32 @@
 			COMMENTS_HISTORY T1
 			, (SELECT @ROWNUM := 0) R
 		WHERE
-			T1.REFERENCE_ID = #{referenceId}
-			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
-					AND T1.REFERENCE_DIV IN ('19', '10', '12', '14')
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
-					AND T1.REFERENCE_DIV IN ('30')
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
-					AND T1.REFERENCE_DIV IN ('40')
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-					AND T1.REFERENCE_DIV IN ('20')
-				</when>
-				<otherwise>
-					AND T1.REFERENCE_DIV IN ('99')
-				</otherwise>
-			</choose>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+				<if test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+					AND ((T1.REFERENCE_ID = #{referenceId} AND T1.REFERENCE_DIV = '40')
+					OR (T1.REFERENCE_ID IN (SELECT OSS_ID FROM OSS_VERSION	WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{referenceId})) AND T1.REFERENCE_DIV = '42'))
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@notEquals(referenceDiv,'oss')">
+					AND T1.REFERENCE_ID = #{referenceId}
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+							AND T1.REFERENCE_DIV IN ('19', '10', '12', '14')
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+							AND T1.REFERENCE_DIV IN ('30')
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+							AND T1.REFERENCE_DIV IN ('20', '22')
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+							AND T1.REFERENCE_DIV = '60'
+						</when>
+						<otherwise>
+							AND REFERENCE_DIV IN ('99')
+						</otherwise>
+					</choose>
+				</if>
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
 				AND T1.REFERENCE_DIV = #{schReferenceDiv}
 			</if>
@@ -259,25 +296,33 @@
 		COUNT(1)
 	FROM
 		COMMENTS_HISTORY
-	WHERE
-		REFERENCE_ID = #{referenceId}
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
-				AND REFERENCE_DIV IN ('19', '10', '12', '14')
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
-				AND REFERENCE_DIV IN ('30')
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
-				AND REFERENCE_DIV IN ('40')
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-				AND REFERENCE_DIV IN ('20')
-			</when>
-			<otherwise>
-				AND REFERENCE_DIV IN ('99')
-			</otherwise>
-		</choose>
+	WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			<if test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+				AND ((REFERENCE_ID = #{referenceId} AND REFERENCE_DIV = '40')
+				OR (REFERENCE_ID IN (SELECT OSS_ID FROM OSS_VERSION	WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{referenceId})) AND REFERENCE_DIV = '42'))
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@notEquals(referenceDiv,'oss')">
+				AND REFERENCE_ID = #{referenceId}
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+						AND REFERENCE_DIV IN ('19', '10', '12', '14')
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+						AND REFERENCE_DIV IN ('30')
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+						AND REFERENCE_DIV IN ('20', '22')
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+						AND REFERENCE_DIV = '60'
+					</when>
+					<otherwise>
+						AND REFERENCE_DIV IN ('99')
+					</otherwise>
+				</choose>
+			</if>
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
 			AND REFERENCE_DIV = #{schReferenceDiv}
 		</if>
@@ -287,6 +332,9 @@
 			</foreach>
 		</if>
 		AND USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
+		LIMIT 1
+		</if>
 	</select>
 	
 </mapper>

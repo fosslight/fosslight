@@ -29,12 +29,12 @@ public class StatisticsController extends CoTopComponent{
 	/** The statistics service. */
 	@Autowired StatisticsService statisticsService;
 	
-	@GetMapping(value=STATISTICS.VIEW)
+	@GetMapping("/statistics/view")
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
-		
-		return STATISTICS.VIEW_JSP;
+				
+		return "statistics/view";
 	}
 	
 	@GetMapping(value=STATISTICS.DIVISIONAL_PROJECT_CHART)
@@ -183,7 +183,6 @@ public class StatisticsController extends CoTopComponent{
 			model.addAttribute("chartType", chartType);
 		}
 		
-		return STATISTICS.STATISTICS_POPUP_JSP;
+		return "statistics/view/statisticsPopup";
 	}
-	
 }

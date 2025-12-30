@@ -6,6 +6,7 @@
 package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -55,7 +56,7 @@ public class UserController extends CoTopComponent {
 	
 	@GetMapping(value=USER.LIST, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return USER.LIST_JSP;
+		return "system/user";
 	}
 	
 	@GetMapping(value=USER.LIST_AJAX)
@@ -240,7 +241,9 @@ public class UserController extends CoTopComponent {
 			return makeJsonResponseHeader(resMap);
 		}
 
-		String generatedPassword = RandomStringUtils.randomAlphanumeric(10);
+		String generatedPassword = generatedPassword(10);
+//		String generatedPassword = RandomStringUtils.randomAlphanumeric(10);
+		
 		foundUser.setPassword(encodePassword(generatedPassword));
 		foundUser.setModifier(userId);
 
@@ -265,7 +268,7 @@ public class UserController extends CoTopComponent {
 
 		mailBean.setParamList(paramList);
 		mailBean.setParamUserId(userId);
-		mailBean.setToIds(new String[] { foundUser.getUserId() });
+		mailBean.setToIds(new String[] { foundUser.getEmail() });
 
 		boolean isMailSendingSuccessful = CoMailManager.getInstance().sendMail(mailBean);
 		if (!isMailSendingSuccessful) {
@@ -278,6 +281,22 @@ public class UserController extends CoTopComponent {
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	private String generatedPassword(int length) {
+		String ENGLISH_LOWER = "abcdefghijklmnopqrstuvwxyz";
+        String ENGLISH_UPPER = ENGLISH_LOWER.toUpperCase();
+        String NUMBER = "0123456789";
+		
+        String DATA_FOR_RANDOM_STRING = ENGLISH_LOWER + ENGLISH_UPPER + NUMBER;
+
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            sb.append(DATA_FOR_RANDOM_STRING.charAt(random.nextInt(DATA_FOR_RANDOM_STRING.length())));
+        }
+        return sb.toString();
+	}
+
 	@PostMapping(value=USER.UPDATE_USERNAME_DIVISION)
 	public  @ResponseBody ResponseEntity<Object> updateUserNameDivision(
 			@RequestBody Map<String, String> params

@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 public enum DependencyType {
 	GITHUB("git", "github", CoConstDef.GITHUB_PATTERN),
 	NPM("npm", "npmjs", CoConstDef.NPM_PATTERN),
+	NPM2("npm", "npmjs", CoConstDef.NPM_PATTERN2),
+	NPM3("npm", "npmjs", CoConstDef.NPM_PATTERN3),
 	PYPI("pypi", "pypi", CoConstDef.PYPI_PATTERN),
 	MAVEN_CENTRAL("maven", "mavencentral", CoConstDef.MAVEN_CENTRAL_PATTERN),
 	MAVEN_GOOGLE("maven", "mavengoogle", CoConstDef.MAVEN_GOOGLE_PATTERN),
