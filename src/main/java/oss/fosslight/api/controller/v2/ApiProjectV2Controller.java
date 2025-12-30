@@ -1313,6 +1313,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 mailBean.setParamPrjId(project.getPrjId());
                 mailBean.setCompareDataBefore(beforeProject);
                 mailBean.setCompareDataAfter(afterProject);
+                mailBean.setLoginUserName(userInfo.getUserId());
+
 
                 if (!isEmpty(diffComment)) {
                     CommentsHistory commHisBean = new CommentsHistory();
@@ -1397,6 +1399,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 mailBean.setParamPrjId(project.getPrjId());
                 mailBean.setCompareDataBefore(beforeProject);
                 mailBean.setCompareDataAfter(afterProject);
+                mailBean.setLoginUserName(userInfo.getUserId());
 
                 if (!isEmpty(diffComment)) {
                     CommentsHistory commHisBean = new CommentsHistory();
