@@ -2702,7 +2702,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 
 				for (String url : checkOssNameUrl) {
-					if (urlSearchSeq == -1 && bean.getDownloadLocation().contains(url)) {
+					if (urlSearchSeq == -1 && bean.getDownloadLocation().toLowerCase().contains(url.toLowerCase())) {
 						urlSearchSeq = seq;
 						break;
 					}
@@ -2732,7 +2732,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					int cnt = ossMapper.checkOssNameUrl2Cnt(bean);
 					if (cnt == 0) {
 						bean.setOssNickName(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
-						String checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
+						String checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean.getOssName(), downloadlocationUrl), ossInfoNames, bean.getOssNickName());
 						if (!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 							bean.setRecommendedNickname(bean.getOssNickName());
@@ -2762,7 +2762,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 												}
 												bean.setDownloadLocation(redirectlocationUrl);
 												bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
-												checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
+												checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean.getOssName(), bean.getDownloadLocation()), ossInfoNames, bean.getOssNickName());
 												if (!isEmpty(checkName)) {
 													bean.setCheckOssList("Y");
 													bean.setRecommendedNickname(bean.getOssNickName() + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
@@ -2829,11 +2829,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 								downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.length()-4);
 							}
 						}
-					}
-					
-					if (downloadlocationUrl.contains("+")) {
-						downloadlocationUrl = downloadlocationUrl.split("[+]")[0];
-						downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.lastIndexOf("/"));
 					}
 					
 					String[] downloadlocationUrlSplit = downloadlocationUrl.split("/");

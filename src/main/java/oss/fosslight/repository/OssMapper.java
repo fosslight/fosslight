@@ -251,7 +251,7 @@ public interface OssMapper {
 
 	List<String> getDeactivateOssList();
 
-	List<OssMaster> checkOssNameTotal(ProjectIdentification bean);
+	List<OssMaster> checkOssNameTotal(@Param("ossName") String ossName, @Param("downloadLocation") String downloadLocation);
 
 	Map<String, Object>  getRecentlyModifiedOss(OssMaster ossMaster);
 

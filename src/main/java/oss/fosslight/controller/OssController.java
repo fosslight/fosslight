@@ -569,11 +569,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.VALIDATION)
-	public @ResponseBody ResponseEntity<Object> validation(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> validation(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		/*Json String -> Json Object*/
 		String jsonString = ossMaster.getOssLicensesJson();
 		Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();

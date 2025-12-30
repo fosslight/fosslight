@@ -3358,7 +3358,7 @@
 		 GROUP BY OM.OSS_NAME
 	</select>
 
-	<select id="checkOssNameTotal" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
+	<select id="checkOssNameTotal" parameterType="string" resultType="oss.fosslight.domain.OssMaster">
 		SELECT GROUP_CONCAT(TBL.OSS_NAME) AS OSS_NAME
 		FROM
 		(	
