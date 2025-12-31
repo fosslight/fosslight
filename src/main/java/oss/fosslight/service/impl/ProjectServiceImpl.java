@@ -4246,7 +4246,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 				}
 			} else {
-				if (isAndroidModel) {
+				if (CoConstDef.FLAG_YES.equals(avoidNull(prjInfo.getAndroidFlag()))) {
 					project.setAndroidFlag(CoConstDef.FLAG_YES);
 				} else if (!hasNotificationOss) {
 					// Android model이 아니면서 bom 대상이 없는 경우
@@ -4589,7 +4589,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			List<ProjectIdentification> bomList = null;
 			Comparator<ProjectIdentification> compare = null;
 			
-			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(project.getReferenceDiv())) {
+			if (!CoConstDef.FLAG_YES.equals(avoidNull(project.getAndroidFlag()))) {
 				bomParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				bomList = projectMapper.selectBomList(bomParam);
 				compare = Comparator.comparing(ProjectIdentification::getLicenseTypeIdx)
