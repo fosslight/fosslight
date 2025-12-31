@@ -1881,7 +1881,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ArrayList<Map<String, String>> emailList = new ArrayList<Map<String, String>>();
 				String[] arr;
 				
+				List<String> watchers = new ArrayList<>();
+				List<String> emailWatcher = new ArrayList<>();
+				
 				for (String watcher : project.getWatchers()) {
+					if (watcher.endsWith("Email")) {
+						emailWatcher.add(watcher);
+					} else {
+						watchers.add(watcher);
+					}
+				}
+				watchers.addAll(emailWatcher);
+				
+				for (String watcher : watchers) {
+					boolean skipInsert = false;
 					Map<String, String> m = new HashMap<String, String>();
 					arr = watcher.split("\\/");
 					
@@ -1890,7 +1903,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						
 						if (arr.length > 1){
 							project.setPrjUserId(arr[1]);
-						}else{
+						} else{
 							project.setPrjUserId("");
 						}
 						
@@ -1903,15 +1916,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						project.setPrjDivision("");
 						project.setPrjUserId("");
 						project.setPrjEmail(arr[0]);
-
-						m.put("email", project.getPrjEmail());
-						emailList.add(m);
+						
+						if (projectMapper.existsWatcherByEmail(project) > 0) {
+							skipInsert = true;
+						} else {
+							m.put("email", project.getPrjEmail());
+							emailList.add(m);
+						}
 					}
 
-					List<Project> watcherList = projectMapper.selectWatchersCheck(project);
-					
-					if (watcherList.size() == 0){
-						projectMapper.insertProjectWatcher(project);
+					if (!skipInsert) {
+						List<Project> watcherList = projectMapper.selectWatchersCheck(project);
+						if (CollectionUtils.isEmpty(watcherList)) {
+							projectMapper.insertProjectWatcher(project);
+						}
 					}
 				}
 				
@@ -2073,7 +2091,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (project.getWatchers()!= null) {
 					String[] arr;
 					
+					List<String> watchers = new ArrayList<>();
+					List<String> emailWatcher = new ArrayList<>();
+					
 					for (String watcher : project.getWatchers()) {
+						if (watcher.endsWith("Email")) {
+							emailWatcher.add(watcher);
+						} else {
+							watchers.add(watcher);
+						}
+					}
+					watchers.addAll(emailWatcher);
+					
+					for (String watcher : watchers) {
+						boolean skipInsert = false;
 						Map<String, String> m = new HashMap<String, String>();
 						arr = watcher.split("\\/");
 						
@@ -2082,7 +2113,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							
 							if (arr.length > 1){
 								project.setPrjUserId(arr[1]);
-							}else{
+							} else{
 								project.setPrjUserId("");
 							}
 							
@@ -2095,15 +2126,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							project.setPrjDivision("");
 							project.setPrjUserId("");
 							project.setPrjEmail(arr[0]);
-
-							m.put("email", project.getPrjEmail());
-							emailList.add(m);
+							
+							if (projectMapper.existsWatcherByEmail(project) > 0) {
+								skipInsert = true;
+							} else {
+								m.put("email", project.getPrjEmail());
+								emailList.add(m);
+							}
 						}
 
-						List<Project> watcherList = projectMapper.selectWatchersCheck(project);
-						
-						if (watcherList.size() == 0){
-							projectMapper.insertProjectWatcher(project);
+						if (!skipInsert) {
+							List<Project> watcherList = projectMapper.selectWatchersCheck(project);
+							if (CollectionUtils.isEmpty(watcherList)) {
+								projectMapper.insertProjectWatcher(project);
+							}
 						}
 					}
 				}
