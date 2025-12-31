@@ -41,6 +41,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired NvdDataService nvdService;
 	@Autowired ProjectService projectService;
 	@Autowired PartnerService partnerService;
+	@Autowired SelfCheckService selfcheckService;
 	boolean serverLoadFlag = false; 
 	boolean distributionFlag;
 	
@@ -120,8 +121,10 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Scheduled(cron="0 0 9 1 * ?")
 	public void sendInactiveNotification() {
 		log.info("sendInactiveNotification start");
+
 		projectService.sendMailInactiveProject();
 		partnerService.sendMailInactivePartner();
+		selfcheckService.sendMailInactiveSelfCheck();
 
 		log.info("sendInactiveNotification end");
 	}
