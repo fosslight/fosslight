@@ -3280,7 +3280,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return componentMultiLicenseMap;
 	}
 	
-	@Transactional
+
 	private void addOssComponentByBinaryInfo(List<OssComponents> componentList, Map<String, List<Map<String, Object>>> binaryRegInfoMap) {
 		for (OssComponents bean : componentList) {
 			String binaryName = avoidNull(bean.getBinaryName());
@@ -3439,7 +3439,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 	
-	@Transactional
+
 	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList, Map<String, List<Map<String, Object>>> binaryRegInfoMap) {
 		for (OssComponents bean : componentList) {
 			String binaryName = avoidNull(bean.getBinaryName());
