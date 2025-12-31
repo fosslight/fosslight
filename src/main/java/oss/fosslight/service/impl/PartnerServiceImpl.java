@@ -323,7 +323,20 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			if (partnerMaster.getWatchers()!= null) {
 				String[] arr;
 				
-				for (String watcher : partnerMaster.getWatchers()) {
+				List<String> watchers = new ArrayList<>();
+				List<String> emailWatcher = new ArrayList<>();
+				
+				for (String wat : partnerMaster.getWatchers()) {
+					if (wat.endsWith("Email")) {
+						emailWatcher.add(wat);
+					} else {
+						watchers.add(wat);
+					}
+				}
+				watchers.addAll(emailWatcher);
+				
+				for (String watcher : watchers) {
+					boolean skipInsert = false;
 					Map<String, String> m = new HashMap<String, String>();
 					arr = watcher.split("\\/");
 
@@ -345,15 +358,19 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 						partnerMaster.setParUserId("");
 						partnerMaster.setParEmail(arr[0]);
 
-						m.put("email", partnerMaster.getParEmail());
-						
-						emailList.add(m);
+						if (partnerMapper.existsWatcherByEmail(partnerMaster) > 0) {
+							skipInsert = true;
+						} else {
+							m.put("email", partnerMaster.getParEmail());
+							emailList.add(m);
+						}
 					}
-
-					List<PartnerMaster> watcherList = partnerMapper.selectWatchersCheck(partnerMaster);
 					
-					if (watcherList.size() == 0){
-						partnerMapper.registPartnerWatcher(partnerMaster);
+					if (!skipInsert) {
+						List<PartnerMaster> watcherList = partnerMapper.selectWatchersCheck(partnerMaster);
+						if (CollectionUtils.isEmpty(watcherList)){
+							partnerMapper.registPartnerWatcher(partnerMaster);
+						}
 					}
 				}
 			}
@@ -428,15 +445,11 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			}
 			
 			downloadLocationUrl = bean.getDownloadLocation();
-			if (!StringUtil.isEmpty(downloadLocationUrl) && downloadLocationUrl.endsWith("/")) {
-				bean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
-			} else if (StringUtil.isEmpty(downloadLocationUrl)) {
+			if (StringUtil.isEmpty(downloadLocationUrl)) {
 				bean.setDownloadLocation("");
 			}
 			homepageUrl = bean.getHomepage();
-			if (!StringUtil.isEmpty(homepageUrl) && homepageUrl.endsWith("/")) {
-				bean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
-			} else if (StringUtil.isEmpty(homepageUrl)) {
+			if (StringUtil.isEmpty(homepageUrl)) {
 				bean.setHomepage("");
 			}
 			
