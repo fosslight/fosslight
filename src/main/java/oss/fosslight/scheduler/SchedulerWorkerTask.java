@@ -11,30 +11,28 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.service.CommentService;
 import oss.fosslight.service.MailService;
 import oss.fosslight.service.NvdDataService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.FileUtil;
 
-import oss.fosslight.repository.ProjectMapper;
 
 @Component
 public class SchedulerWorkerTask extends CoTopComponent {
@@ -42,20 +40,26 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	
 	@Autowired Environment env;
 	@Autowired MailService mailService;
-	@Autowired OssService ossService;
-	@Autowired CommentService commentService;
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
-	@Autowired ProjectService projectService;
-	@Autowired ProjectMapper projectMapper;
 	boolean serverLoadFlag = false; 
 	boolean distributionFlag;
+	
+	private final ThreadPoolTaskScheduler scheduler;
+	public SchedulerWorkerTask(@Qualifier("nvdTaskScheduler") ThreadPoolTaskScheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 	
 	@PostConstruct
 	public void init() {
 		serverLoadFlag = true;
 		distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		makeInternalLicense();
+		
+		String cronExpression = CommonFunction.emptyCheckProperty("nvd.scheduled.cron.value", "");
+		if (!isEmpty(cronExpression)) {
+			scheduler.schedule(this::nvdDataIfJob, new CronTrigger(cronExpression));
+		}
 	}
 	
 	public void makeInternalLicense() {
@@ -80,7 +84,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	}
 	
 	// 새벽 12시 스케줄 - CPE Dictionary, CVE Update Data Sync 
-	@Scheduled(cron="${nvd.scheduled.cron.value}")
+//	@Scheduled(cron="${nvd.scheduled.cron.value}")
 //	@Scheduled(fixedDelay=1000)
 	public void nvdDataIfJob() {
 		log.info("nvdDataIfJob start");
@@ -94,8 +98,8 @@ public class SchedulerWorkerTask extends CoTopComponent {
 			} else {
 				log.error("executeNvdDataSync - resCd : " + resCd);
 			}
-		} catch (IOException ioe) {
-			log.error(ioe.getMessage() + " (resCd : " + resCd + ")", ioe);
+		} catch (Exception e) {
+			log.error(e.getMessage() + " (resCd : " + resCd + ")", e);
 		}
 	}
 	
