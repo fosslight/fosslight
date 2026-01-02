@@ -17,12 +17,9 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import oss.fosslight.CoTopComponent;
@@ -45,21 +42,11 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	boolean serverLoadFlag = false; 
 	boolean distributionFlag;
 	
-	private final ThreadPoolTaskScheduler scheduler;
-	public SchedulerWorkerTask(@Qualifier("nvdTaskScheduler") ThreadPoolTaskScheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-	
 	@PostConstruct
 	public void init() {
 		serverLoadFlag = true;
 		distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		makeInternalLicense();
-		
-		String cronExpression = CommonFunction.emptyCheckProperty("nvd.scheduled.cron.value", "");
-		if (!isEmpty(cronExpression)) {
-			scheduler.schedule(this::nvdDataIfJob, new CronTrigger(cronExpression));
-		}
 	}
 	
 	public void makeInternalLicense() {
@@ -84,7 +71,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	}
 	
 	// 새벽 12시 스케줄 - CPE Dictionary, CVE Update Data Sync 
-//	@Scheduled(cron="${nvd.scheduled.cron.value}")
+	@Scheduled(cron="${nvd.scheduled.cron.value}")
 //	@Scheduled(fixedDelay=1000)
 	public void nvdDataIfJob() {
 		log.info("nvdDataIfJob start");
