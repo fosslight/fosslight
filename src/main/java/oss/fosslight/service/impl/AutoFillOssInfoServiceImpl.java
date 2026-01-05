@@ -468,16 +468,16 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 		try {
 			res = requestClearlyDefinedLicense("https://api.clearlydefined.io/");
-		} catch(HttpServerErrorException e) {
+		} catch (HttpServerErrorException e) {
+			res = null;
 			String message = "ClearlyDefined ";
 			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
 				message += getMessage("api.server.connect.limit");
-				throw new HttpServerErrorException(e.getStatusCode(), message);
 			}
 			if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
 				message += getMessage("api.server.connect.fail");
-				throw new HttpServerErrorException(e.getStatusCode(), message);
 			}
+			log.error(message, e);
 		}
 		
 		if (res != null) {
