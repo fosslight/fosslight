@@ -4605,6 +4605,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder())
 						.thenComparing(ProjectIdentification::getMergeOrder);
 			} else {
+				project.setNoticeType(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED);
 				bomParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 				bomList = projectMapper.selectOtherBomList(bomParam);
 				compare = Comparator.comparing(ProjectIdentification::getLicenseTypeIdx)
@@ -4679,11 +4680,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (isCopyConfirm) {
 				Project paramBean = new Project();
 				paramBean.setPrjId(project.getCopyPrjId());
+				paramBean.setNoticeType(project.getNoticeType());
 				
 				Map<String, OssComponents> copiedPackageInfoMap = new HashMap<>();
 				List<OssComponents> copiedPackagingList = verificationService.getVerifyOssList(paramBean);
-				
-				if (copiedPackagingList != null && !copiedPackagingList.isEmpty()) {
+				if (CollectionUtils.isNotEmpty(copiedPackagingList)) {
 					for (OssComponents copyBean : copiedPackagingList) {
 						if (!isEmpty(copyBean.getFilePath())) {
 							String key = (copyBean.getReferenceDiv() + "|" + copyBean.getOssName() + "|" + avoidNull(copyBean.getOssVersion()) + "|" + copyBean.getLicenseName()).toUpperCase();
@@ -4694,8 +4695,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				List<OssComponents> afterPackagingList = verificationService.getVerifyOssList(project);
-				
-				if (afterPackagingList != null && !afterPackagingList.isEmpty()) {
+				if (CollectionUtils.isNotEmpty(afterPackagingList)) {
 					for (OssComponents newBean : afterPackagingList) {
 						String key = (newBean.getReferenceDiv() + "|" + newBean.getOssName() + "|" + avoidNull(newBean.getOssVersion()) + "|" + newBean.getLicenseName()).toUpperCase();
 						
