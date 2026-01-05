@@ -4307,8 +4307,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					mailType = CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF;
 					_tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF));
 				} else {
-					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF;
-					_tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF));
+					if(prjInfo.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION) && prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_NA)) {
+						mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY;
+						_tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY));
+					} else {
+						mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF;
+						_tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF));
+					}
 				}
 				userComment = avoidNull(userComment) + "<br />" + _tempComment;
 			}
