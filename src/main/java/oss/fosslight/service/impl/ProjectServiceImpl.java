@@ -4557,7 +4557,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				// key = ref + oss name + oss version + license name
 				for (OssComponents oldBean : oldPackagingList) {
 					if (!isEmpty(oldBean.getFilePath())) {
-						String key = oldBean.getReferenceDiv() + "|" + oldBean.getOssId() + "|" + oldBean.getLicenseName();
+						String key = (oldBean.getReferenceDiv() + "|" + oldBean.getOssName() + "|" + avoidNull(oldBean.getOssVersion()) + "|" + oldBean.getLicenseName()).toUpperCase();
 						
 						oldPackageInfoMap.put(key, oldBean);
 					}
@@ -4661,7 +4661,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					// key value 형식으로
 					// key = ref + oss name + oss version + license name
 					for (OssComponents newBean : afterPackagingList) {
-						String key = newBean.getReferenceDiv() + "|" + newBean.getOssId() + "|" + newBean.getLicenseName();
+						String key = (newBean.getReferenceDiv() + "|" + newBean.getOssName() + "|" + avoidNull(newBean.getOssVersion()) + "|" + newBean.getLicenseName()).toUpperCase();
 						
 						if (oldPackageInfoMap.containsKey(key)) {
 							newBean.setFilePath(oldPackageInfoMap.get(key).getFilePath());
@@ -4681,7 +4681,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (copiedPackagingList != null && !copiedPackagingList.isEmpty()) {
 					for (OssComponents copyBean : copiedPackagingList) {
 						if (!isEmpty(copyBean.getFilePath())) {
-							String key = copyBean.getReferenceDiv() + "|" + copyBean.getOssId() + "|" + copyBean.getLicenseName();
+							String key = (copyBean.getReferenceDiv() + "|" + copyBean.getOssName() + "|" + avoidNull(copyBean.getOssVersion()) + "|" + copyBean.getLicenseName()).toUpperCase();
 							
 							copiedPackageInfoMap.put(key, copyBean);
 						}
@@ -4692,7 +4692,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				if (afterPackagingList != null && !afterPackagingList.isEmpty()) {
 					for (OssComponents newBean : afterPackagingList) {
-						String key = newBean.getReferenceDiv() + "|" + newBean.getOssId() + "|" + newBean.getLicenseName();
+						String key = (newBean.getReferenceDiv() + "|" + newBean.getOssName() + "|" + avoidNull(newBean.getOssVersion()) + "|" + newBean.getLicenseName()).toUpperCase();
 						
 						if (copiedPackageInfoMap.containsKey(key)) {
 							newBean.setFilePath(copiedPackageInfoMap.get(key).getFilePath());
