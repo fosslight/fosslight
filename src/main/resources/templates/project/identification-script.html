@@ -27,12 +27,17 @@ $(document).ready(function () {
 	bom_evt.init();
 //	if (batFlag) bat_evt.init();
 	fn.displayProjectInfo();
+	com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
 	
 	$("[id^=tabMenu]").on("click", function() {
 		var tabId = $(this).attr("id");
 		tabId = tabId.replace("tabMenu", "");
 		$("[name=gridArea]").hide();
 
+//     	var applicable = $("#applicable" + tabId).is(':checked');
+		$("#gridArea"+tabId).show();
+		var btnClass = "." + tabId.toLowerCase() + "Btn";
+		$(btnClass).show();
 		$('#save').attr('onclick', "com_fn.save('"+tabId+"')");
 		
 		if ("Bom" == tabId) {
@@ -44,13 +49,10 @@ $(document).ready(function () {
 			$('#reset').show();
 		}
 		
-        var applicable = $("#applicable" + tabId).is(':checked');
-		$("#gridArea"+tabId).show();
-		
-		if (applicable) {
-			var btnClass = "." + tabId.toLowerCase() + "Btn";
-			$(btnClass).hide();
-		}
+// 		if (applicable) {
+// 			var btnClass = "." + tabId.toLowerCase() + "Btn";
+// 			$(btnClass).hide();
+// 		}
 		
 		switch (tabId) {
 			case "Party" : 

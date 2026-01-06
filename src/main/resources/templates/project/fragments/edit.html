@@ -59,25 +59,34 @@
 			</form>
 				<form id="projectSearchForm" class="partyBtn" th:object="${project}">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
-					<div id="projectSearch" class="partyProjectSearch" style="display: none;">
+					<div class="partyProjectSearch" style="display: none;">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item" name="3rdProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="3rdProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, '3rd')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="3rdProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name" style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item ui-autocomplete-input resetAutoComp" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|party_evt.projectSearch()|" name="partnerProjectSearch" id="partnerProjectSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="3rdProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjSearchText">
+									<input type="text" class="form-control ui-autocomplete-input autoComProjectIdConf custom-narrow-item" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|party_evt.projectSearch()|" id="partnerProjectSearch" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|party_evt.projectSearch()|" name="partnerProjectSearch" id="partnerProjectSearch" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -165,7 +174,7 @@
 				<div class="mt-3" id="_3rdAddListContainer" style="display: none;">
 					<div class="pl-1 py-2">
 						<i class="fas fa-caret-square-right pr-1"></i>
-						<span>Loaded List</span>
+						<span id="_3rdAddListTitle">Loaded List</span>
 					</div>
 					<div class="px-2 pt-1">
 						<div class="innerJqGridSet">
@@ -173,7 +182,7 @@
 								<tr>
 									<td></td>
 								</tr>
-							</table>
+							</table>		
 							<div id="_3rdAddPager"></div>
 						</div>
 					</div>
@@ -258,25 +267,34 @@
 			<div id="depProjectSearch" style="display: none;">
 				<form id="depProjectForm" class="depBtn">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
 					<div name="content_dep">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item custom-narrow-item" name="depProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="depProjectSelect" onchange="com_fn.updateProjectFields(this, 'dep')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="depProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control ui-autocomplete-input autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name" style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item ui-autocomplete-input resetAutoComp" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|dep_fn.projectSearch()|" name="depProjectSearchBtn" id="depProjectSearchBtn" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="depProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="depPrjSearchText">
+									<input type="text" class="form-control custom-narrow-item ui-autocomplete-input autoComProjectIdConf" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|dep_fn.projectSearch()|" id="depProjectSearchBtn" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|dep_fn.projectSearch()|" name="depProjectSearchBtn" id="depProjectSearchBtn" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -325,7 +343,7 @@
 				<div class="mt-3" id="_depAddListContainer" style="display: none">
 					<div class="pl-1 py-2">
 						<i class="fas fa-caret-square-right pr-1"></i>
-						<span>Loaded List</span>
+						<span id="_depAddListTitle">Loaded List</span>
 					</div>
 					<div class="px-2 pt-1">
 						<div class="innerJqGridSet">
@@ -364,7 +382,6 @@
 						<div class="icheck-danger d-inline">
 							<input type="checkbox" id="applicableSrc" class="idenCbx" value="N" th:onchange="|com_fn.checkAplicable(this, 'srcBtn')|">
 							<label for="applicableSrc" th:text="'Not Applicable'"></label>
-							<input type="hidden" name="identificationSubStatusSrc" th:value="${project.identificationSubStatusSrc}">
 						</div>
 					</div>
 				</div>
@@ -393,8 +410,7 @@
 										</div>
 									</div>
 									<div class="col-lg-6">
-										<div class="ajax-file-upload-container"
-											style="margin-top: 0px; width: 100%;">
+										<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
 											<ul class="csvFileArea">
 												<th:block th:if="${project.csvFile != null}">
 													<th:block th:each="csvFile : ${project.csvFile}">
@@ -418,25 +434,34 @@
 			<div id="srcProjectSearch" style="display: none;">
 				<form id="srcProjectForm" class="srcBtn">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
 					<div name="content_src">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item" name="srcProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="srcProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, 'src')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="srcProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control ui-autocomplete-input autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name"style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|src_fn.projectSearch()|" name="srcProjectSearch" id="srcProjectSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="srcProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="srcPrjSearchText">
+									<input type="text" class="form-control autoComProjectIdConf custom-narrow-item" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|src_fn.projectSearch()|" id="srcProjectSearch" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|src_fn.projectSearch()|" name="srcProjectSearch" id="srcProjectSearch" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -485,7 +510,7 @@
 				<div class="mt-3" id="_srcAddListContainer" style="display: none">
 					<div class="pl-1 py-2">
 						<i class="fas fa-caret-square-right pr-1"></i>
-						<span>Loaded List</span>
+						<span id="_srcAddListTitle">Loaded List</span>
 					</div>
 					<div class="px-2 pt-1">
 						<div class="innerJqGridSet">
@@ -608,25 +633,34 @@
 			<div id="binProjectSearch" style="display: none;">
 				<form id="binProjectForm" class="binBtn">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
 					<div name="content_bin">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item" name="binProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="binProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, 'bin')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="binProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name" style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|bin_fn.projectSearch()|" name="binProjectSearch" id="binProjectSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="binProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="binPrjSearchText">
+									<input type="text" class="form-control autoComProjectIdConf custom-narrow-item" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|bin_fn.projectSearch()|" id="binProjectSearch" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|bin_fn.projectSearch()|" name="binProjectSearch" id="binProjectSearch" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -674,7 +708,7 @@
 				<div class="mt-3" id="_binAddListContainer" style="display: none">
 					<div class="pl-1 py-2">
 						<i class="fas fa-caret-square-right pr-1"></i>
-						<span>Loaded List</span>
+						<span id="_binAddListTitle">Loaded List</span>
 					</div>
 					<div class="px-2 pt-1">
 						<div class="innerJqGridSet">
@@ -682,9 +716,9 @@
 								<tr>
 									<td></td>
 								</tr>
-							</table>								
-							<div id="_binAddPager"></div>
+							</table>
 						</div>
+						<div id="_binAddPager"></div>
 					</div>
 				</div>
 			</div>
@@ -730,13 +764,10 @@
 					<div class="row mt-5" id="content_android">
 						<div class="col-12">
 							<div class="row">
-								<div class="col-lg-2 pl-3 mt-1">
-									<strong th:text="'Android Model'"></strong>
-								</div>
-								<div class="col-lg-9">
+								<div class="col-lg-12">
 									<div class="row">
-										<div class="col-lg-2">
-											<p style="text-align: center;" th:text="'FOSSLight Report'"></p>
+										<div class="col-lg-2 pl-3 m-2">
+											<strong style="text-align: center;" th:text="'FOSSLight Report'"></strong>
 											<div class="col-lg-12 pl-0">
 												<a href="javascript:void(0);" th:onclick="|com_fn.downloadSampleReport()|">
 													<i class="far fa-file-excel hover-icon mr-1 text-primary" style="font-size: .9rem;" title="FOSSLight Report" th:text=" Sample"></i>
@@ -764,8 +795,8 @@
 										</div>
 									</div>
 									<div class="row">
-										<div class="col-lg-2">
-											<p class="text-danger" style="text-align: center;" th:text="'NOTICE'"></p>
+										<div class="col-lg-2 pl-3 m-2">
+											<strong class="text-danger" style="text-align: center;" th:text="'NOTICE'"></strong>
 										</div>
 										<div class="col-lg-4">
 											<div class="fileuploader" id="androidNoticeFile" th:text="Upload"></div>
@@ -787,9 +818,9 @@
 											</div>
 										</div>
 									</div>
-									<div class="row">
-										<div class="col-lg-2">
-											<p style="text-align: center;" th:text="'fosslight_binary.txt'"></p>
+									<div class="row androidResultFileDiv" th:if="${project.androidResultFile != null}">
+										<div class="col-lg-2 pl-3 m-2">
+											<strong style="text-align: center;" th:text="'fosslight_binary.txt'"></strong>
 										</div>
 										<div class="col-lg-4">
 											<div class="fileuploader" id="androidResultFile" th:text="Upload"></div>
@@ -797,15 +828,13 @@
 										<div class="col-lg-5">
 											<div class="ajax-file-upload-container mt-0" style="width: 100%;">
 												<ul class="androidResultFileArea">
-													<th:block th:if="${project.androidResultFile != null}">
-														<th:block th:each="csvFile : ${project.androidResultFile}">
-															<li th:if="${csvFile.delYn eq 'N'}">
-																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-																<input type="hidden" class="androidResultFile" th:value="${csvFile.fileSeq}" />
-																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '4')|" th:text="X"></span>
-																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
-															</li>
-														</th:block>
+													<th:block th:each="csvFile : ${project.androidResultFile}">
+														<li th:if="${csvFile.delYn eq 'N'}">
+															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+															<input type="hidden" class="androidResultFile" th:value="${csvFile.fileSeq}" />
+															<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '4')|" th:text="X"></span>
+															<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
+														</li>
 													</th:block>
 												</ul>
 											</div>
@@ -823,25 +852,34 @@
 			
 			<form id="binAndroidProjectForm" class="binAndroidBtn">
 				<input type="hidden" name="publicYn" value="Y">
-				<input type="hidden" name="prjName" />
-				<input type="hidden" name="prjVersion" />
-				<input type="hidden" name="prjId" />
 				<div name="content_android" id="binAndroidProjectSearch" style="display: none;">
-					<div class="row mt-3">
+					<div class="row mt-5">
 						<div class="col-md-2">
 							<div class="form-group">
-								<select class="custom-select" name="binAndroidProjectSelect">
-									<option th:value="pNm" th:text="'Project Name'"></option>
-									<option th:value="pVer" th:text="'Project Version'"></option>
+								<select class="custom-select custom-narrow-item" name="binAndroidProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, 'binAndroid')">
+									<option th:value="pNm" th:text="'Project Name + Version'"></option>
 									<option th:value="pId" th:text="'Project Id'"></option>
 								</select>
 							</div>
 						</div>
-						<div class="col-md-5">
+						<div class="col-md-7" id="binAndroidProjectVersionInputArea">
+							<div class="row">
+								<div class="col-lg-12">
+									<div class="input-group input-group-md">
+										<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name" style="width:30%">
+										<input type="text" class="form-control custom-narrow-item" name="prjVersion" placeholder="Version">
+										<span class="input-group-append">
+											<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|binAndroid_fn.projectSearch()|" id="binAndroidProjectSearch" th:text="Search"></button>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-5" id="binAndroidProjectIdInputArea" style="display: none;">
 							<div class="input-group input-group-md">
-								<input type="text" class="form-control autoComProjectNmConf" name="binAndroidPrjSearchText">
+								<input type="text" class="form-control autoComConfPartyId custom-narrow-item" name="prjId">
 								<span class="input-group-append">
-									<button type="button" class="btn btn-outline-dark btn-flat" th:onclick="|binAndroid_fn.projectSearch()|" id="binAndroidProjectSearch" th:text="Search"></button>
+									<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|binAndroid_fn.projectSearch()|" id="binAndroidProjectSearch" th:text="Search"></button>
 								</span>
 							</div>
 						</div>
@@ -886,32 +924,13 @@
 										<div class="row">
 											<div class="col-lg-1"></div>
 											<div class="col-lg-11" style="display: flex;">
-												<div class="fileuploader" id="androidNoticeFileDummy"
-													th:text="Upload"></div>
+												<div class="fileuploader" id="androidNoticeFileDummy" th:text="Upload"></div>
 											</div>
 										</div>
 									</div>
 									<div class="col-lg-7">
 										<div class="ajax-file-upload-container" style="margin-top: 0px;">
 											<ul class="androidNoticeFileAreaDummy"></ul>
-										</div>
-									</div>
-								</div>
-								<div class="row mt-2">
-									<div class="col-lg-2 pl-3 mt-1">
-										<strong th:text="'fosslight_binary.txt'"></strong>
-									</div>
-									<div class="col-lg-3">
-										<div class="row">
-											<div class="col-lg-1"></div>
-											<div class="col-lg-11" style="display: flex;">
-												<div class="fileuploader" id="androidResultFileDummy" th:text="Upload"></div>
-											</div>
-										</div>
-									</div>
-									<div class="col-lg-7">
-										<div class="ajax-file-upload-container" style="margin-top: 0px;">
-											<ul class="androidResultFileAreaDummy"></ul>
 										</div>
 									</div>
 								</div>
@@ -1002,6 +1021,338 @@
 				accuracy of the tool is improved, it is not included in the BOM and
 				OSS Notice <br />※ Uploaded firmware is only kept for one month.
 			</p>
+		</div>
+	</div>
+</th:block>
+<th:block th:fragment="uploadFragments">
+<div class="wrapper">
+	<div class="custom-layout">
+		<div class="row ml-2 mb-2">
+			<h5 th:text="'Please upload FOSSLight report or load Project/3rd Party.'"></h5>
+		</div>
+		<div class="card-body bg-ivory">
+			<div id="content_entire">
+				<div class="row">
+					<div class="col-lg-5 ml-2" name="search-condition_identification">
+						<div class="icheck-secondary d-inline">
+							<input type="radio" id="idenR1" class="idenCbx" name="identificationSelectOption" th:onchange="|com_fn.changeSelectOption()|" value="1" checked>
+							<label for="idenR1" th:text="'Upload Analysis Result'"></label>
+						</div>
+					</div>
+					<div class="col-lg-5 ml-2" name="search-condition_identification">
+						<div class="icheck-secondary d-inline">
+							<input type="radio" id="idenR2" class="idenCbx" name="identificationSelectOption" th:onchange="|com_fn.changeSelectOption()|" value="2">
+							<label for="idenR2" th:text="'Project Search'"></label>
+						</div>
+					</div>
+				</div>
+			</div>
+				<form id="idenUploadForm" class="idenBtn">
+					<div name="content_iden" id="idenUploadSearch">
+						<div class="row mt-5" id="content-iden">
+							<div class="col-12">
+								<div class="row">
+									<div class="col-lg-4 pl-3">
+										<strong th:text="'FOSSLight Report'"></strong>
+										<div class="col-lg-12 pl-0">
+											<a href="javascript:void(0);" th:onclick="|com_fn.downloadSampleReport()|">
+												<i class="far fa-file-excel hover-icon mr-1 text-primary" style="font-size: .9rem;" title="FOSSLight Report" th:text=" Sample"></i>
+											</a>
+										</div>
+									</div>
+									<div class="col-lg-6 fileUploader">
+										<div class="row">
+											<div class="col-lg-12">
+												<div class="fileuploader" id="identificationCsvFile" th:text="Upload"></div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-4"></div>
+									<div class="col-lg-6">
+										<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+											<ul class="identificationFileArea" style="padding-left: 0px;">
+												
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+			</form>
+			<div id="idenProjectSearch" style="display: none;">
+				<form id="commonSearchForm" class="identificationBtn">
+					<input type="hidden" name="publicYn" value="Y">
+					<div name="content_src">
+						<div class="row mt-5">
+							<div class="col-lg-2">
+								<div class="form-group">
+									<select class="custom-select custom-narrow-item" name="searchSelect" id="searchSelect" onchange="com_fn.changeSearchOption(this)">
+										<option th:value="prj" th:text="'Project'"></option>
+										<option th:value="3rd" th:text="'3rd Party'"></option>
+									</select>
+								</div>
+							</div>
+							<div class="col-lg-8" id="projectInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control autoComProjectNmConf" id="prjIdName" name="prjIdName" placeholder="Project ID or Name">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|com_fn.projectSearch()|" name="projectSearch" id="projectSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-8" id="partnerInputArea" style="display: none;">
+								<input type="hidden" name="partnerName" />
+								<input type="hidden" name="softwareName" />
+								<input type="hidden" name="partnerId" />
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control autoComConfParty" id="uploadSearchText" name="uploadSearchText" placeholder="partner ID or Name">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|com_fn.partnerSearch()|" name="partnerSearch" id="partnerSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="partnerSearchDiv">
+					<div class="threeSearch1Area mt-3" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<table id="_threeSearch1list">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+							<div id="threeSearchPager1"></div>
+						</div>
+					</div>
+					<div class="threeSearch2Area mt-5" style="display: none;">	
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|com_fn.partnerLoadToList()|" th:text="Load"></a>
+							</div>
+						</div>
+						<div class="px-2 pt-1">
+							<table id="_threeSearch2list">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+							<div id="threeSearchPager2"></div>
+						</div>
+					</div>
+				</div>
+				<div class="searchProject">
+					<div class="searchProject1 mt-3" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="jqGridSet">
+								<table id="_searchProjectList1">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+								<div id="searchProjectPager1"></div>
+							</div>
+						</div>
+					</div>
+					<div class="searchProject2 mt-5" style="display: none;">
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|com_fn.showDialog()|" th:text="Load"></a>
+							</div>
+						</div>
+						
+						<div class="px-2 pt-1">
+							<div class="jqGridSet">
+								<table id="_searchProjectList2">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="mt-3" id="_searchProjectAddListContainer" style="display: none">
+					<div class="pl-1 py-2">
+						<i class="fas fa-caret-square-right pr-1"></i>
+						<span id="_searchProjectAddListTitle">Loaded List</span>
+					</div>
+					<div class="px-2 pt-1">
+						<div class="jqGridSet">
+							<table id="_searchProjectAddList">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+							<div id="_searchProjectAddPager"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</th:block>
+<th:block th:fragment="selectSheetFragments">
+	<div class="row" style="width: 650px;">
+		<div class="col-12">
+			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        		<div class="row">
+    				<div class="col-12">
+						<table class="table table-hover text-nowrap sheetTable">
+							<thead id="identification_bom">
+								<tr>
+                       				<th class="vertical-align-middle text-center" rowspan="2" th:text="'Sheet List'"></th>
+                       				<th class="text-center" colspan="3" th:text="'Upload Tab'"></th>
+                  				</tr>
+                  				<tr>
+                  					<th class="text-center" th:text="DEP"></th>
+                  					<th class="text-center" th:text="SRC"></th>
+                  					<th class="text-center" th:text="BIN"></th>
+                  				</tr>
+							</thead>
+							<thead id="identification_android" style="display: none;">
+								<tr>
+                       				<th class="vertical-align-middle text-center" th:text="'Sheet List'"></th>
+                       				<th class="text-center" th:text="'Upload Tab'"></th>
+                  				</tr>
+                  				<tr>
+                  					<th class="text-center" th:text="'BIN(Android|Yocto)'"></th>
+                  				</tr>
+							</thead>
+							<tbody id="selectSheetBody"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row custom-layout" style="width: 650px;">
+		<div class="col-12">
+			<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right selectSheetApply" id="selectSheetApply" th:text="Save" th:onclick="|com_fn.getSheetData()|"></button>
+			<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Back" th:onclick="|com_fn.closeSelectSheet()|"></button>
+		</div>
+	</div>
+</th:block>
+<th:block th:fragment="searchSheetFragments">
+	<div class="row">
+		<div class="col-12">
+			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        		<div class="row">
+    				<div class="col-12">
+						<table class="table table-hover text-nowrap sheetTable">
+							<thead>
+								<tr>
+                       				<th class="text-center" id="prjNameVersion"></th>
+                  				</tr>
+							</thead>
+							<tbody id="selectSearchBom">
+								<tr>
+									<td class="text-center" th:text="'Select Tab to load.'"></td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="searchCheck" id="3rdCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}" class="ml-4"><span class="ml-5" th:text="'3rd Party'"></span>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="searchCheck" id="depCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}" class="ml-4"><span class="ml-5" th:text="DEP"></span>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="searchCheck" id="srcCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}" class="ml-4"><span class="ml-5" th:text="SRC"></span>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="searchCheck" id="binCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}" class="ml-4"><span class="ml-5" th:text="BIN"></span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row custom-layout">
+		<div class="col-12">
+			<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right selectSheetApply" id="selectSearchApply" th:text="Save" th:onclick="|com_fn.getSearchData()|"></button>
+			<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Back" th:onclick="|com_fn.closeSelectSearch()|"></button>
+		</div>
+	</div>
+</th:block>
+<th:block th:fragment="deleteUploadFragments">
+	<div class="row">
+		<div class="col-12">
+			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        		<div class="row">
+    				<div class="col-12">
+						<table class="table table-hover text-nowrap sheetTable">
+							<tbody id="selectSearchBom">
+								<tr>
+									<td class="text-center" th:text="'Delete Tab to load.'"></td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="deleteCheck" id="3rdCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}" class="ml-4" th:disabled="true"><span class="ml-5" th:text="'3rd Party'"></span>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="deleteCheck" id="depCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}" class="ml-4" th:disabled="true"><span class="ml-5" th:text="DEP"></span>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="deleteCheck" id="srcCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}" class="ml-4" th:disabled="true"><span class="ml-5" th:text="SRC"></span>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="deleteCheck" id="binCheck" th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}" class="ml-4" th:disabled="true"><span class="ml-5" th:text="BIN"></span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row custom-layout">
+		<div class="col-12">
+			<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right selectSheetApply" id="deleteUploadApply" th:text="Save" th:onclick="|com_fn.selectDeleteUpload()|"></button>
+			<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Back" th:onclick="|com_fn.closeDeleteUpload()|"></button>
 		</div>
 	</div>
 </th:block>
