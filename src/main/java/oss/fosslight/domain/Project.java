@@ -375,10 +375,6 @@ public class Project extends ComBean implements Serializable {
 	/** add watcher list. */
 	private ArrayList<Map<String, String>> changeWatcherList;
 	
-	private List<String> reqPerUserIds;
-	private String reqPerUserNms;
-	private String rejPerUserNm;
-	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
 	}
@@ -4867,29 +4863,5 @@ public class Project extends ComBean implements Serializable {
 
 	public void setConfirmStatusCopy(String confirmStatusCopy) {
 		this.confirmStatusCopy = confirmStatusCopy;
-	}
-	
-	public List<String> getReqPerUserIds() {
-		return reqPerUserIds;
-	}
-
-	public void setReqPerUserIds(List<String> reqPerUserIds) {
-		this.reqPerUserIds = reqPerUserIds;
-	}
-
-	public String getReqPerUserNms() {
-		return reqPerUserNms;
-	}
-
-	public void setReqPerUserNms(String reqPerUserNms) {
-		this.reqPerUserNms = reqPerUserNms;
-	}
-
-	public String getRejPerUserNm() {
-		return rejPerUserNm;
-	}
-
-	public void setRejPerUserNm(String rejPerUserNm) {
-		this.rejPerUserNm = rejPerUserNm;
 	}
 }

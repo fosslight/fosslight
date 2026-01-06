@@ -217,12 +217,6 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String ossFileSheetNo;
 	
-	private List<String> reqPerUserIds;
-	
-	private String reqPerUserNms;
-	
-	private String rejPerUserNm;
-	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1288,29 +1282,5 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setOssFile(List<T2File> ossFile) {
 		this.ossFile = ossFile;
-	}
-
-	public List<String> getReqPerUserIds() {
-		return reqPerUserIds;
-	}
-
-	public void setReqPerUserIds(List<String> reqPerUserIds) {
-		this.reqPerUserIds = reqPerUserIds;
-	}
-
-	public String getReqPerUserNms() {
-		return reqPerUserNms;
-	}
-
-	public void setReqPerUserNms(String reqPerUserNms) {
-		this.reqPerUserNms = reqPerUserNms;
-	}
-
-	public String getRejPerUserNm() {
-		return rejPerUserNm;
-	}
-
-	public void setRejPerUserNm(String rejPerUserNm) {
-		this.rejPerUserNm = rejPerUserNm;
 	}
 }

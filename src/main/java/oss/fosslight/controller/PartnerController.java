@@ -9,7 +9,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -84,7 +83,6 @@ public class PartnerController extends CoTopComponent{
 	@Autowired HistoryService historyService;
 	@Autowired ProjectService projectService;
 	@Autowired FileService fileService;
-	@Autowired T2UserService t2UserService;
 	
 	@Autowired PartnerMapper partnerMapper;
 	@Autowired FileMapper fileMapper;
@@ -2094,61 +2092,5 @@ public class PartnerController extends CoTopComponent{
 			log.error(e.getMessage(), e);
 			return makeJsonResponseHeader(false, "1");
 		}
-	}
-	
-	@PostMapping(value = PARTNER.REQUEST_PERMISSION)
-	public @ResponseBody ResponseEntity<Object> requestPermission(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
-		Map<String, Object> map = projectService.requestProjectPermission("3rd_" + partnerMaster.getPartnerId(), loginUserName(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
-		return makeJsonResponseHeader(true, null, map);
-	}
-	
-	@PostMapping(value = PARTNER.CANCEL_REQUEST_PERMISSION)
-	public @ResponseBody ResponseEntity<Object> cancelRequestPermission(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
-		Map<String, Object> map = projectService.requestProjectPermission("3rd_" + partnerMaster.getPartnerId(), loginUserName(), CoConstDef.ACTION_CODE_CANCELED);
-		return makeJsonResponseHeader(true, null, map);
-	}
-	
-	@PostMapping(value = PARTNER.SET_PROEJCT_PERMISSION)
-	public @ResponseBody ResponseEntity<Object> setProjectPermission(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
-		PartnerMaster parInfo = partnerService.getPartnerMasterOne(partnerMaster);
-		
-		if (isEmpty(partnerMaster.getRejPerUserNm())) {
-			if (CollectionUtils.isNotEmpty(parInfo.getReqPerUserIds())) {
-				T2Users user = new T2Users();
-				for (String userId : parInfo.getReqPerUserIds()) {
-					user.setUserId(userId);
-					user = t2UserService.getUser(user);
-					// update permission status
-					projectService.updateRequestProjectPermission("3rd_" + partnerMaster.getPartnerId(), userId, partnerMaster.getStatus(), null);
-					
-					if (partnerMaster.getStatus().equalsIgnoreCase("APP")) {
-						// add watcher
-						partnerMaster.setParUserId(userId);
-						partnerMaster.setParDivision(user.getDivision());
-						partnerService.addWatcher(partnerMaster);
-					} else {
-						// send reject email
-						String reviewerName = avoidNull(parInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
-						String en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
-						en = en.replace("User", user.getUserName()).replace("Reviewer", reviewerName);
-						String ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
-						ko = ko.replace("User", user.getUserName()).replace("Reviewer", reviewerName);
-						
-						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION);
-						mailBean.setLoginUserName(userId);
-						mailBean.setParamPartnerId(partnerMaster.getPartnerId());
-						mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
-						CoMailManager.getInstance().sendMail(mailBean);
-					}
-				}
-			}
-		} else {
-			if (!isEmpty(parInfo.getRejPerUserNm()) && partnerMaster.getRejPerUserNm().equals(parInfo.getRejPerUserNm())) {
-				String userId = parInfo.getRejPerUserNm().split("[|]")[0];
-				projectService.updateRequestProjectPermission("3rd_" + partnerMaster.getPartnerId(), userId, null, parInfo.getRejPerUserNm());
-			}
-		}
-		
-		return makeJsonResponseHeader();
 	}
 }

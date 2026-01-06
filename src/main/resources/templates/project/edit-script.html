@@ -91,54 +91,6 @@
                 $('#transfer').hide();
             }
         });
-        
-        if ([[${project.reqPerUserNms}]] != null) {
-			if (typeof alertify.prjPermissionDialog === 'undefined') {
-				alertify.dialog("prjPermissionDialog", function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							setup.buttons = [];
-
-							return setup;
-						},
-						hooks: {
-							onshow: function() {
-								const footer = this.elements.footer;
-								
-								const btnArea = document.createElement('span');
-								btnArea.style.display = 'flex';
-								btnArea.style.justifyContent = 'flex-end';
-								
-				                const appBtn = document.createElement('button');
-				                appBtn.id = "approvePermission";
-				                appBtn.className = "approveBtn width-6rem px-1 mr-2";
-				                appBtn.textContent = "Approve";
-				                
-				                const rejBtn = document.createElement('button');
-				                rejBtn.id = "rejectPermission";
-				                rejBtn.className = "rejectBtn width-6rem px-1 mr-2";
-				                rejBtn.textContent = "Reject";
-				                
-				                btnArea.appendChild(appBtn);
-				                btnArea.appendChild(rejBtn);
-				                
-				                footer.appendChild(btnArea);
-							}
-						}
-					};
-				}, false, 'confirm');
-			}
-			
-			alertify.prjPermissionDialog().setContent([[${@CommonFunction.getCustomMessage('msg.common.check.approve.permission', project.reqPerUserNms)}]]).show();
-		}
 	});
 	
 	// 이벤트
@@ -630,61 +582,12 @@
 					$("#emailTemp").val(domain).hide();
 				}
 			});
-			
-			$(document).on('click', '#approvePermission', function () {
-				fn.approvePermission();
-			});
-			
-			$(document).on('click', '#rejectPermission', function () {
-				fn.rejectPermission();
-			});
 		}
 	};
 	
 	var displayInfo;
 	
 	var fn = {
-		approvePermission : function () {
-			$.ajax({
-				url : "/project/setProjectPermission",
-				type : 'POST',
-				data : JSON.stringify({"prjId" : [[${project.prjId}]], "status" : "APP"}),
-				dataType : 'json',
-				cache : false,
-				async : false,
-				contentType : 'application/json',
-				success : function(data){
-					alertify.success([[#{msg.common.success}]]);
-					$(".ajs-close").trigger("click");
-					
-					setTimeout(function () {
-						deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
-						createTabInFrame([[${project.prjId}]] + '_Project', '/project/edit/' + [[${project.prjId}]]);
-					}, 300);
-				},
-				error : function(){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		},
-		rejectPermission : function () {
-			$.ajax({
-				url : "/project/setProjectPermission",
-				type : 'POST',
-				data : JSON.stringify({"prjId" : [[${project.prjId}]], "status" : "REJ"}),
-				dataType : 'json',
-				cache : false,
-				async : false,
-				contentType : 'application/json',
-				success : function(data){
-					alertify.success([[#{msg.common.success}]]);
-					$(".ajs-close").trigger("click");
-				},
-				error : function(){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-		},
 		getProjectStatus : function () {
 			$.ajax({
 				url : "/project/getProjectStatus",
