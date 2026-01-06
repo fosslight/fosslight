@@ -8459,4 +8459,58 @@
 		WHERE
 		PRJ_ID = #{prjId}
 	</update>
+
+	<select id="checkRequestProjectPermission" parameterType="string" resultType="int">
+		SELECT COUNT(1) FROM REQUEST_PERMISSION WHERE REQ_ID = #{prjId} AND REQ_USER_ID = #{userId} AND STATUS = #{status}
+	</select>
+	
+	<insert id="insertRequestProjectPermission" parameterType="string">
+		INSERT INTO
+			REQUEST_PERMISSION
+			(
+				REQ_ID
+				, REQ_USER_ID
+				, STATUS
+				, REQ_DT
+			)
+			VALUES
+			(
+				#{prjId}
+				, #{userId}
+				, #{status}
+				, NOW()
+			)
+	</insert>
+	
+	<select id="selectRequestProjectPermissionList" parameterType="string" resultType="string">
+		SELECT REQ_USER_ID 
+		FROM REQUEST_PERMISSION 
+		WHERE REQ_ID = #{prjId} 
+		AND STATUS = #{status}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status) and @oss.fosslight.util.StringUtil@equals('REJ', status)">
+			AND REJ_VIEW_DT IS NULL
+		</if>
+	</select>
+	
+	<update id="updateRequestProjectPermission" parameterType="string">
+		UPDATE REQUEST_PERMISSION
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(rejPerUserNm)">
+			SET REJ_VIEW_DT = NOW()
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(rejPerUserNm)">
+			SET STATUS = #{status}, APP_DT = NOW()
+		</if>
+		WHERE REQ_ID = #{prjId}
+		AND REQ_USER_ID = #{userId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(rejPerUserNm)">
+			AND STATUS = 'REJ'
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(rejPerUserNm)">
+			AND STATUS = 'REQ'
+		</if>
+	</update>
+	
+	<delete id="cancelRequestPermission" parameterType="string">
+		DELETE FROM REQUEST_PERMISSION WHERE REQ_ID = #{prjId} AND REQ_USER_ID = #{userId}
+	</delete>
 </mapper>

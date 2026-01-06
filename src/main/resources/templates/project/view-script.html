@@ -15,6 +15,35 @@
 	    	
 	    	data.init();
 		}
+		
+		if ([[${project.rejPerUserNm}]] != null) {
+			var rejPerUserNm = [[${project.rejPerUserNm}]];
+			var reviewerName = [[${project.reviewerName}]];
+			if (reviewerName == null || "" == reviewerName) {
+				reviewerName = "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)";
+			}
+			var msg = [[#{msg.common.reject.permission}]];
+			msg = msg.replace("User", rejPerUserNm.split("|")[1]);
+			msg = msg.replace("Reviewer", reviewerName);
+			alertify.confirm(msg, function(){}).set('onok', function(closeEvent){fn.confirmRejectPermission(rejPerUserNm); return;});
+		}
+		
+		if ([[${project.reqPerUserIds}]] != null) {
+			var reqUserIds = [[${project.reqPerUserIds}]];
+			var userId = [[${project.loginUserName}]];
+			var reqPermission = false;
+			
+			for (var i in reqUserIds) {
+				if ($.trim(userId) == $.trim(reqUserIds[i])) {
+					reqPermission = true;
+					break;
+				}
+			}
+			if (reqPermission) {
+				$("#requestPermission").hide();
+				$("#cancelRequestPermission").show();
+			}
+		}
   	});
 	
 	var data = {
@@ -421,6 +450,85 @@
 			} else {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 			}
+		},
+		requestPermission : function() {
+			var msg = [[${@CommonFunction.getCustomMessage('msg.common.request.permission', 'project')}]];
+			alertify.confirm(msg, function(e){
+				if (e) {
+					$.ajax({
+						url : "/project/requestPermission",
+						type : 'POST',
+						data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+						dataType : 'json',
+						cache : false,
+						async : false,
+						contentType : 'application/json',
+						success: function(data) {
+							if (typeof data.resultData !== "undefined") {
+								if (typeof data.resultData.msg !== "undefined") {
+									alertify.alert(data.resultData.msg, function(){});
+								} else {
+									if (data.resultData.isValid) {
+										alertify.success([[#{msg.common.success}]], 0);
+										$("#requestPermission").hide();
+										$("#cancelRequestPermission").show();
+									} else {
+										alertify.error([[#{msg.common.valid2}]], 0);
+									}
+								}
+							}
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		},
+		confirmRejectPermission : function (user) {
+			$.ajax({
+				url : "/project/setProjectPermission",
+				type : 'POST',
+				data : JSON.stringify({"prjId" : [[${project.prjId}]], "rejPerUserNm" : user}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success : function(data){
+					$(".ajs-close").trigger("click");
+				},
+				error : function(){}
+			});
+		},
+		cancelRequestPermission : function() {
+			var msg = [[${@CommonFunction.getCustomMessage('msg.common.check.cancel.permission', 'project')}]];
+			alertify.confirm(msg, function(e){
+				if (e) {
+					$.ajax({
+						url : "/project/cancelRequestPermission",
+						type : 'POST',
+						data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+						dataType : 'json',
+						cache : false,
+						async : false,
+						contentType : 'application/json',
+						success: function(data) {
+							if (typeof data.resultData !== "undefined") {
+								if (data.resultData.isValid) {
+									alertify.success([[#{msg.common.success}]], 0);
+									$("#cancelRequestPermission").hide();
+									$("#requestPermission").show();
+								} else {
+									alertify.error([[#{msg.common.valid2}]], 0);
+								}
+							} else {
+								alertify.error([[#{msg.common.valid2}]], 0);
+							}
+						}
+					});
+				} else {
+					return false;
+				}
+			});
 		}
 	}
 </script>

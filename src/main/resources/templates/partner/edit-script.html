@@ -46,6 +46,54 @@ $(document).ready(function () {
 	if (prjList != null) {
 		grid.projectList();
 	}
+	
+	if ([[${detail.reqPerUserNms}]] != null) {
+		if (typeof alertify.parPermissionDialog === 'undefined') {
+			alertify.dialog("parPermissionDialog", function() {
+				return {
+					setup: function() {
+						var settings = alertify.confirm().settings;
+						
+						for (var prop in settings) {
+							this.settings[prop] = settings[prop];
+						}
+						
+						var setup = alertify.confirm().setup();
+						setup.focus.element = 0;
+						setup.buttons = [];
+
+						return setup;
+					},
+					hooks: {
+						onshow: function() {
+							const footer = this.elements.footer;
+							
+							const btnArea = document.createElement('span');
+							btnArea.style.display = 'flex';
+							btnArea.style.justifyContent = 'flex-end';
+							
+			                const appBtn = document.createElement('button');
+			                appBtn.id = "approvePermission";
+			                appBtn.className = "approveBtn width-6rem px-1 mr-2";
+			                appBtn.textContent = "Approve";
+			                
+			                const rejBtn = document.createElement('button');
+			                rejBtn.id = "rejectPermission";
+			                rejBtn.className = "rejectBtn width-6rem px-1 mr-2";
+			                rejBtn.textContent = "Reject";
+			                
+			                btnArea.appendChild(appBtn);
+			                btnArea.appendChild(rejBtn);
+			                
+			                footer.appendChild(btnArea);
+						}
+					}
+				};
+			}, false, 'confirm');
+		}
+		
+		alertify.parPermissionDialog().setContent([[${@CommonFunction.getCustomMessage('msg.common.check.approve.permission', detail.reqPerUserNms)}]]).show();
+	}
 });
 
 var modifyCommentId = [[${detail.comment}]];
@@ -99,10 +147,59 @@ var evt = {
 			}
 			createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
 		});
+		
+		$(document).on('click', '#approvePermission', function () {
+			fn.approvePermission();
+		});
+		
+		$(document).on('click', '#rejectPermission', function () {
+			fn.rejectPermission();
+		});
 	}
 };
 
 var fn = {
+	approvePermission : function () {
+		$.ajax({
+			url : "/partner/setProjectPermission",
+			type : 'POST',
+			data : JSON.stringify({"partnerId" : [[${detail.partnerId}]], "status" : "APP"}),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success : function(data){
+				alertify.success([[#{msg.common.success}]]);
+				$(".ajs-close").trigger("click");
+				
+				setTimeout(function () {
+					deleteTabInFrame('/partner/edit/' + [[${detail.partnerId}]]);
+					createTabInFrame([[${detail.partnerId}]] + '_3rdParty', '/partner/edit/' + [[${detail.partnerId}]]);
+				}, 300);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	rejectPermission : function () {
+		$.ajax({
+			url : "/partner/setProjectPermission",
+			type : 'POST',
+			data : JSON.stringify({"partnerId" : [[${detail.partnerId}]], "status" : "REJ"}),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success : function(data){
+				alertify.success([[#{msg.common.success}]]);
+				$(".ajs-close").trigger("click");
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
 	displayPartnerInfo : function () {
 		var display = "";
 		

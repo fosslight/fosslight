@@ -423,6 +423,10 @@ public final class Url {
 		public static final String INIT_AUTO_REVIEW = PATH + "/initAutoReview";
 		public static final String AI_VIEW = PATH + "/ai";
 		public static final String REVIEW_REPORT = PATH + "/reviewReport";
+		
+		public static final String REQUEST_PERMISSION = PATH + "/requestPermission";
+		public static final String CANCEL_REQUEST_PERMISSION = PATH + "/cancelRequestPermission";
+		public static final String SET_PROEJCT_PERMISSION = PATH + "/setProjectPermission";
 	}
 	
 	public static final class VERIFICATION {
@@ -569,6 +573,10 @@ public final class Url {
 		public static final String SHARE_URL = PATH + "/shareUrl/{partnerId}";
 		
 		public static final String DELETE_FILES = PATH + "/deleteFiles";
+		
+		public static final String REQUEST_PERMISSION = PATH + "/requestPermission";
+		public static final String CANCEL_REQUEST_PERMISSION = PATH + "/cancelRequestPermission";
+		public static final String SET_PROEJCT_PERMISSION = PATH + "/setProjectPermission";
 	}
 	
 	public static final class USER {
