@@ -2285,8 +2285,8 @@ public class ProjectController extends CoTopComponent {
 			
 			Project project = new Project();
 			project.setPrjId(prjId);
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
-			projectService.existsAddList(project);
+//			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+			projectService.existsAddList(binAddList);
 			projectService.insertAddList(binAddList);
 			
 			// session 삭제
@@ -2467,8 +2467,8 @@ public class ProjectController extends CoTopComponent {
 
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-		projectService.existsAddList(project);
+//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+		projectService.existsAddList(depAddList);
 		projectService.insertAddList(depAddList);
 
 		// 정상처리된 경우 세션 삭제
@@ -2663,8 +2663,8 @@ public class ProjectController extends CoTopComponent {
 		
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
-		projectService.existsAddList(project);
+//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+		projectService.existsAddList(srcAddList);
 		projectService.insertAddList(srcAddList);
 		
 		// 정상처리된 경우 세션 삭제
@@ -3091,7 +3091,7 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 		
-		model.addAttribute("editMode", isNew);
+//		model.addAttribute("editMode", isNew);
 		model.addAttribute("initDiv", initDiv);
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
