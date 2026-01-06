@@ -35,8 +35,6 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	
 	@Autowired Environment env;
 	@Autowired MailService mailService;
-	@Autowired OssService ossService;
-	@Autowired CommentService commentService;
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
 	@Autowired ProjectService projectService;
@@ -88,8 +86,8 @@ public class SchedulerWorkerTask extends CoTopComponent {
 			} else {
 				log.error("executeNvdDataSync - resCd : " + resCd);
 			}
-		} catch (IOException ioe) {
-			log.error(ioe.getMessage() + " (resCd : " + resCd + ")", ioe);
+		} catch (Exception e) {
+			log.error(e.getMessage() + " (resCd : " + resCd + ")", e);
 		}
 	}
 	

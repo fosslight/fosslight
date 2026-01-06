@@ -3832,7 +3832,9 @@ public class CoMailManager extends CoTopComponent {
 		String sql = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_NAME, key);
 		List<Map<String, Object>> dataList = new ArrayList<>();
 		// sql param 생성
-		sql = sql.replace("?", createInQuery(params));
+		if (!isEmpty(sql) && sql.contains("?")) {
+			sql = sql.replace("?", createInQuery(params));
+		}
 		try (
 			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
 			PreparedStatement pstmt = conn.prepareStatement(sql);
