@@ -5920,4 +5920,30 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 	}
+	
+	@PostMapping(value = PROJECT.DEL_IDENTIFICATION_UPLOAD)
+	public @ResponseBody ResponseEntity<Object> delIdentificationUpload(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
+		try {
+			String referenceId = (String) map.get("referenceId");
+			String fileSeq = (String) map.get("fileSeq");
+			
+			if (map.containsKey("reset")) {
+				projectService.deleteIdentificationUploadFile(map);
+				projectService.deleteIdentificationUploadSearchData(map);
+			} else {
+				// delete file
+				if (!isEmpty(fileSeq)) {
+					projectService.deleteIdentificationUploadFile(map);
+				}
+				// delete search data
+				if (!isEmpty(referenceId)) {
+					projectService.deleteIdentificationUploadSearchData(map);
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, null);
+		}
+		return makeJsonResponseHeader(true, null);
+	}
 }

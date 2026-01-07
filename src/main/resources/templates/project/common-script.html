@@ -3728,7 +3728,7 @@ var com_fn = {
     },
     exeLoadReportData : function (finalData, referenceDiv) {
     	$.ajax({
-			url : suffix + '/project/getIdentificationSheetData',
+			url : '/project/getIdentificationSheetData',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
