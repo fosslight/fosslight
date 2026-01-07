@@ -1796,7 +1796,7 @@
 						
 						span = document.createElement("span");
 						span.classList.add("mb-1");
-						span.innerText = "Are you sure you want to reject";
+						span.innerText = "Are you sure you want to Reopen";
 						divTemp.appendChild(span);
 						divTemp.appendChild(textarea);
 						$("#reqToOpenDiv3").append(divTemp);
@@ -2252,7 +2252,7 @@
 					
 					if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
 					} else {
-						alertify.alert([[#{msg.project.required.comments.reject}]], function(){});
+						alertify.alert([[#{msg.project.required.comments.reopen}]], function(){});
 						return false;
 					}
 					
