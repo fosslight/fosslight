@@ -22,11 +22,13 @@
 	var copyFlag = [[${project.copyFlag}]];
 	var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
     var isReadOnly = [[${isReadOnly}]];
+    var userIdList;
 	
  	$(document).ready(function() {
 		'use strict';
 		data.init();
 		evt.init();
+		fn.getUserIdList("Y", "REVIEWER");
 		
 		if ("" != [[${project.prjId}]] && 'Y' != [[${project.copyFlag}]]) {
 			$("input[name=creatorNm]").val([[${project.prjUserName}]]);
@@ -582,6 +584,29 @@
 					$("#emailTemp").val(domain).hide();
 				}
 			});
+			
+			$("input[name='reviewer']").autocomplete({
+				source: function(req, res){
+					res(
+						$.grep(Object.keys(userIdList)
+								.map(function(e) {
+									  return userIdList[e]
+								}), function(cur){
+						    return cur;
+						})
+					);
+				}
+				, minLength: 0
+				, position : { my : 'left top', at : 'left bottom'}
+				, open: function() { $(this).attr('state', 'open');}
+				, close: function () { $(this).attr('state', 'closed');}
+			}).focus(function() {
+				if ($(this).attr('state') != 'open') {
+					$(this).autocomplete("search");
+				}
+			}).blur(function(){
+				$(this).attr('state', 'closed');
+			}).on('autocompletechange', fn.changeReviewer);
 		}
 	};
 	
@@ -2283,7 +2308,49 @@
             },
             mvSecurity : function(){
             	createTabInFrame([[${project.prjId}]] + "_Security", "/project/security/" + [[${project.prjId}]]);
-            }
+            },
+			getUserIdList : function(reviewerFlag, type) {
+				return $.ajax({
+					type: 'GET',
+					url: '/project/getUserIdList',
+					data: {reviewerFlag : reviewerFlag},
+					success : function(data){
+						if(data != null){
+							temp = data.split(";").reduce(function(obj, cur){
+							    var keys = Object.keys(obj);
+							    var pairData = cur.split(":");
+
+							    if(keys.indexOf(pairData[0]) == -1 && pairData[0].trim() != ""){
+							        obj[pairData[0]] = pairData[1];
+							    }
+
+							    return obj;
+							}, {});
+							
+							userIdList = temp;console.log(userIdList);
+						}
+					}
+				});
+			},
+			changeReviewer : function() {
+				var reviewer = Object.keys(userIdList)[Object.keys(userIdList).map(function(e) {return userIdList[e]}).indexOf(this.value)];
+				var data = {"prjId" : [[${project.prjId}]], "reviewer" : reviewer};
+				
+				$.ajax({
+					url : '/project/updateReviewer',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(data){
+						alertify.success([[#{msg.common.success}]]);
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
 		}
 	
 	var fn_comment = {
