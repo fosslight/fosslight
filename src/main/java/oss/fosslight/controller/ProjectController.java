@@ -5907,6 +5907,7 @@ public class ProjectController extends CoTopComponent {
 						if (uploadFile != null) {
 							projectService.setFileAddList(uploadFile, project, readType, depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
 						}
+						rtnMap.put("identificationStatus", projectService.getProjectDetail(project).getIdentificationStatus());
 					}
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);

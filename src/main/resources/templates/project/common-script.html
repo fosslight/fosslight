@@ -3745,6 +3745,9 @@ var com_fn = {
 						alertify.error([[#{msg.common.valid}]], 0);
 					}
 				} else {
+					if (typeof data.resultData.identificationStatus !== "undefined") {
+						curIdenStatus = data.resultData.identificationStatus;
+					}
 					if (typeof data.resultData.isExistsExcludeYn !== "undefined") {
 						alertify.confirm([[#{msg.common.exists.excludeYn}]], function(){
 							bom_fn.beforeSave(true);
