@@ -51,9 +51,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.reflect.TypeToken;
-
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
@@ -76,7 +73,6 @@ import oss.fosslight.domain.ProjectIdentificationTree;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
-import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -105,7 +101,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private OssService ossService;
 	@Autowired private VerificationService verificationService;
 	@Autowired private FileService fileService;
-	@Autowired private VulnerabilityService vulnerabilityService;
 	@Autowired private CommentService commentService;
 	@Autowired private T2UserService t2UserService;
 	@Autowired private PartnerService partnerService;
@@ -116,7 +111,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private T2UserMapper userMapper;
 	@Autowired private PartnerMapper partnerMapper;
 	@Autowired private CodeMapper codeMapper;
-	@Autowired private CacheService cacheService;
 
 	@Autowired Environment env;
 	
@@ -590,39 +584,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				});
 				
 				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
- 				list.forEach(ll -> {
- 					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
- 						String key = ll.getOssName() + "_" + ll.getOssVersion();
-						if (!vulnerabilityInfoMap.containsKey(key.toUpperCase())) {
-							OssMaster ossMaster = null;
-							if (ossInfoMap.containsKey(key.toUpperCase())) {
-								ossMaster = ossInfoMap.get(key.toUpperCase());
-							} else {
-								for (String ossInfoKey : ossInfoMap.keySet()) {
-									if (ossInfoKey.startsWith((ll.getOssName() + "_").toUpperCase())) {
-										ossMaster = ossInfoMap.get(ossInfoKey);
-										break;
-									}
-								}
-								if (ossMaster != null) {
-									ossMaster.setOssVersionAliases(null);
-								} else {
-									ossMaster = new OssMaster();
-									ossMaster.setOssName(ll.getOssName());
-								}
-								ossMaster.setOssVersion(ll.getOssVersion());
-							}
-							if (isEmpty(ossMaster.getOssVersion())) {
-								ossMaster.setOssVersion("-");
-							}
-							OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-							if (om != null && !isEmpty(om.getCvssScore())) {
-								vulnerabilityInfoMap.put(key.toUpperCase(), om);
-							}
-						}
- 					}
- 					
-					ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
+				Set<String> uniqueKeys = new HashSet<>();
+				for (ProjectIdentification ll : list) {
+				    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
+				        continue;
+				    }
+
+				    String ossVersion = avoidNull(ll.getOssVersion());
+				    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
+				    
+				    ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
 					ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
 	  				ll.setCopyrightText(ll.getCopyrightText());
 					ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
@@ -677,6 +648,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						String _key = ll.getOssName() + "-" + avoidNull(ll.getOssVersion());
 						mergeDepMap.put(_key, ll);
 					}
+				}
+				
+				uniqueKeys.parallelStream().forEach(key -> {
+				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+				    if (om != null && !isEmpty(om.getCvssScore())) {
+				        vulnerabilityInfoMap.put(key, om);
+				    }
 				});
 				
  				// bat merget
@@ -832,6 +811,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 				
+				uniqueKeys.clear();
 				vulnerabilityInfoMap.clear();
 				
 				// src oss중에서 bat와 merge할 수 있는 동일한 oss에 최신 version 외 라이선스까지 동일한 bat가 존재하는 경우
@@ -874,37 +854,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				list.sort(compare);
 				
 				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-				list.forEach(ll -> {
-					if (!isEmpty(ll.getOssName()) && !ll.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
-						String key = ll.getOssName() + "_" + ll.getOssVersion();
-	 					if (!vulnerabilityInfoMap.containsKey(key.toUpperCase())) {
-	 						OssMaster ossMaster = null;
-	 						if (ossInfoMap.containsKey(key.toUpperCase())) {
-	 							ossMaster = ossInfoMap.get(key.toUpperCase());
-	 						} else {
-	 							for (String ossInfoKey : ossInfoMap.keySet()) {
-									if (ossInfoKey.startsWith((ll.getOssName() + "_").toUpperCase())) {
-										ossMaster = ossInfoMap.get(ossInfoKey);
-										break;
-									}
-								}
-								if (ossMaster != null) {
-									ossMaster.setOssVersionAliases(null);
-								} else {
-									ossMaster = new OssMaster();
-									ossMaster.setOssName(ll.getOssName());
-								}
-								ossMaster.setOssVersion(ll.getOssVersion());
-	 						}
-	 						if (isEmpty(ossMaster.getOssVersion())) {
-	 							ossMaster.setOssVersion("-");
-	 						}
-	 						OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-	 						if (om != null && !isEmpty(om.getCvssScore())) {
-	 							vulnerabilityInfoMap.put(key.toUpperCase(), om);
-	 						}
-	 					}
-					}
+				Set<String> uniqueKeys = new HashSet<>();
+				for (ProjectIdentification ll : list) {
+				    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
+				        continue;
+				    }
+
+				    String ossVersion = avoidNull(ll.getOssVersion());
+				    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
+				}
+				
+				uniqueKeys.parallelStream().forEach(key -> {
+				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+				    if (om != null && !isEmpty(om.getCvssScore())) {
+				        vulnerabilityInfoMap.put(key, om);
+				    }
 				});
 				
 				// convert max score
@@ -979,74 +944,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					// License Restriction 저장
 					ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId(), ossRestriction));
 					
-//					boolean setCveInfoFlag = false;
-//					
-//					if (ll.getCvssScoreMax() != null) {
-//						String cveId = ll.getCvssScoreMax().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
-//					}
-//					if (ll.getCvssScoreMax1() != null) {
-//						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
-//					}
-//					if (ll.getCvssScoreMax2() != null) {
-//						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
-//					}
-//					if (ll.getCvssScoreMax3() != null) {
-//						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
-//					}
-//					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-//						if (cvssScoreMaxList.size() > 1) {
-//							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-//								@Override
-//								public int compare(String o1, String o2) {
-//									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-//										return -1;
-//									}else {
-//										return 1;
-//									}
-//								}
-//							});
-//						}
-//						
-//						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-//						ll.setCvssScore(cveData[3]);
-//						ll.setCveId(cveData[4]);
-//						ll.setVulnYn(CoConstDef.FLAG_YES);
-//					} else {
-//						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
-//						if (conversionCveInfo != null) {
-//							String[] conversionCveData = conversionCveInfo.split("\\@");
-//							ll.setCvssScore(conversionCveData[3]);
-//							ll.setCveId(conversionCveData[4]);
-//							ll.setVulnYn(CoConstDef.FLAG_YES);
-//						} else {
-//							setCveInfoFlag = true;
-//						}
-//					}
-//					
-//					cvssScoreMaxList.clear();
-//					
-//					if (ossInfoMap.containsKey(key)) {
-//						OssMaster om = ossInfoMap.get(key);
-//						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
-//							String cveId = om.getCveId();
-//							String cvssScore = om.getCvssScore();
-//							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-//								ll.setCvssScore(cvssScore);
-//								ll.setCveId(cveId);
-//								ll.setVulnYn(CoConstDef.FLAG_YES);
-//							}
-//						}
-//					}
-					
 					if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
 						adminCheckList.add(ll.getComponentId());
 					}
 				});
 				
+				uniqueKeys.clear();
 				vulnerabilityInfoMap.clear();
 				
 				map.put("rows", list);
@@ -1087,42 +990,32 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 			if (list != null && !list.isEmpty()) {
+				Set<String> uniqueKeys = new HashSet<>();
+				for (ProjectIdentification ll : list) {
+				    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
+				        continue;
+				    }
+
+				    String ossVersion = avoidNull(ll.getOssVersion());
+				    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
+				}
+				
+				uniqueKeys.parallelStream().forEach(key -> {
+				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+				    if (om != null && !isEmpty(om.getCvssScore())) {
+				        vulnerabilityInfoMap.put(key, om);
+				    }
+				});
+				
+				ProjectIdentification param = new ProjectIdentification();
+				OssMaster ossParam = new OssMaster();
 				Map<String, Object> ossInfoCheckMap = new HashMap<>();
 				
 				for (ProjectIdentification project : list){
 					String _test = project.getOssName().trim() + "_" + project.getOssVersion().trim();
 					String _test2 = project.getOssName().trim() + "_" + project.getOssVersion().trim() + ".0";
 					String licenseDiv = "";
-					
-					if (!isEmpty(project.getOssName()) && !project.getOssName().equals("-") && !CoConstDef.FLAG_YES.equals(avoidNull(project.getExcludeYn()))) {
-						if (!vulnerabilityInfoMap.containsKey(_test.toUpperCase())) {
-							OssMaster ossMaster = null;
-							if (ossInfoMap.containsKey(_test.toUpperCase())) {
-								ossMaster = ossInfoMap.get(_test.toUpperCase());
-							} else {
-								for (String ossInfoKey : ossInfoMap.keySet()) {
-									if (ossInfoKey.startsWith((project.getOssName() + "_").toUpperCase())) {
-										ossMaster = ossInfoMap.get(ossInfoKey);
-										break;
-									}
-								}
-								if (ossMaster != null) {
-									ossMaster.setOssVersionAliases(null);
-								} else {
-									ossMaster = new OssMaster();
-									ossMaster.setOssName(project.getOssName());
-								}
-								ossMaster.setOssVersion(project.getOssVersion());
-							}
-							if (isEmpty(ossMaster.getOssVersion())) {
-								ossMaster.setOssVersion("-");
-							}
-							OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-							if (om != null && !isEmpty(om.getCvssScore())) {
-								vulnerabilityInfoMap.put(_test.toUpperCase(), om);
-							}
-						}
-					}
 					
 					if (CoCodeManager.OSS_INFO_UPPER.containsKey(_test.toUpperCase())){
 						licenseDiv = CoCodeManager.OSS_INFO_UPPER.get(_test.toUpperCase()).getLicenseDiv(); 
@@ -1144,7 +1037,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							comments += " " + project.getComments();
 						}
 					} else {
-						if (!isEmpty(project.getComments())) comments += " " + project.getComments();
+						if (!isEmpty(project.getComments())) {
+							comments += " " + project.getComments();
+						}
 					}
 					
 					if (!isEmpty(comments)) {
@@ -1154,86 +1049,23 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) {
 						project.setDependencies(avoidNull(project.getDependencies()));
 					}
-				}
-				
-				ProjectIdentification param = new ProjectIdentification();
-				OssMaster ossParam = new OssMaster();
-				
-				// components license 정보를 한번에 가져온다
-				for (ProjectIdentification bean : list) {
-					param.addComponentIdList(bean.getComponentId());
 					
-					if (!isEmpty(bean.getOssId())) {
-						ossParam.addOssIdList(bean.getOssId());
+					param.addComponentIdList(project.getComponentId());
+					
+					if (!isEmpty(project.getOssId())) {
+						ossParam.addOssIdList(project.getOssId());
 					}
 					
-					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-					if (vulnerabilityInfoMap.containsKey(key)) {
-						OssMaster om = vulnerabilityInfoMap.get(key);
-						bean.setCveId(om.getCveId());
-						bean.setCvssScore(om.getCvssScore());
-						bean.setVulnYn(CoConstDef.FLAG_YES);
+					String key2 = (project.getOssName() + "_" + avoidNull(project.getOssVersion())).toUpperCase();
+					if (vulnerabilityInfoMap.containsKey(key2)) {
+						OssMaster om = vulnerabilityInfoMap.get(key2);
+						project.setCveId(om.getCveId());
+						project.setCvssScore(om.getCvssScore());
+						project.setVulnYn(CoConstDef.FLAG_YES);
 					}
-//					boolean setCveInfoFlag = false;
-//					
-//					if (bean.getCvssScoreMax() != null) {
-//						String cveId = bean.getCvssScoreMax().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) {
-//							cvssScoreMaxList.add(bean.getCvssScoreMax());
-//						}
-//					}
-//					if (bean.getCvssScoreMax1() != null) {
-//						String cveId = bean.getCvssScoreMax1().split("\\@")[4];
-//						if (!inCpeMatchCheckList.contains(cveId)) {
-//							cvssScoreMaxList.add(bean.getCvssScoreMax1());
-//						}
-//					}
-//					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-//						if (cvssScoreMaxList.size() > 1) {
-//							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-//								@Override
-//								public int compare(String o1, String o2) {
-//									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-//										return -1;
-//									}else {
-//										return 1;
-//									}
-//								}
-//							});
-//						}
-//						
-//						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-//						bean.setCvssScore(cveData[3]);
-//						bean.setCveId(cveData[4]);
-//						bean.setVulnYn(CoConstDef.FLAG_YES);
-//					}
-//					
-//					cvssScoreMaxList.clear();
-//					
-//					if (ossInfoMap.containsKey(key)) {
-//						OssMaster om = ossInfoMap.get(key);
-//						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
-//							String cveId = om.getCveId();
-//							String cvssScore = om.getCvssScore();
-//							String _cvssScore = bean.getCvssScore();
-//							
-//							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-//								if (!isEmpty(_cvssScore)) {
-//									if (new BigDecimal(cvssScore).compareTo(new BigDecimal(_cvssScore)) > 0) {
-//										bean.setCvssScore(cvssScore);
-//										bean.setCveId(cveId);
-//										bean.setVulnYn(CoConstDef.FLAG_YES);
-//									}
-//								} else {
-//									bean.setCvssScore(cvssScore);
-//									bean.setCveId(cveId);
-//									bean.setVulnYn(CoConstDef.FLAG_YES);
-//								}
-//							}
-//						}
-//					}
 				}
 				
+				uniqueKeys.clear();
 				vulnerabilityInfoMap.clear();
 				
 				// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
@@ -1523,6 +1355,35 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 
+	private OssMaster buildOssMasterFromKey(String key, Map<String, OssMaster> ossInfoMap) {
+		if (ossInfoMap.containsKey(key)) {
+			return ossInfoMap.get(key);
+		} else {
+			String[] parts = key.split("_", 2);
+		    String ossName = parts[0];
+		    String ossVersion = (parts.length > 1) ? parts[1] : "";
+		    String namePrefix = (ossName + "_").toUpperCase();
+		    
+		    OssMaster ossMaster = null;
+	        for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
+	            if (entry.getKey().startsWith(namePrefix)) {
+	                ossMaster = entry.getValue();
+	                ossMaster.setOssVersionAliases(null);
+	                break;
+	            }
+	        }
+		    
+	        if (ossMaster != null) {
+	        	return ossMaster;
+	        } else {
+	        	ossMaster = new OssMaster();
+	        	ossMaster.setOssName(ossName);
+			    ossMaster.setOssVersion(ossVersion);
+			    return ossMaster;
+	        }
+		}
+	}
+	
 	private String findAddedOssCopyright(String ossId, String licenseId, String ossCopyright) {
 		if (!isEmpty(ossId) && !isEmpty(licenseId)) {
 			OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
@@ -1661,14 +1522,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					&& CoConstDef.FLAG_NO.equals(notice.getEditEmailYn())
 					&& CoConstDef.FLAG_NO.equals(notice.getHideOssVersionYn())
 					&& CoConstDef.FLAG_NO.equals(notice.getEditAppendedYn())
-					&& (CoConstDef.CD_NOTICE_TYPE_GENERAL.equals(notice.getNoticeType()) 
-							|| CoConstDef.CD_NOTICE_TYPE_NA.equals(notice.getNoticeType()))){
+					&& (CoConstDef.CD_NOTICE_TYPE_GENERAL.equals(notice.getNoticeType()) || CoConstDef.CD_NOTICE_TYPE_NA.equals(notice.getNoticeType()))){
 				// OSS_NOTICE와 OSS_NOTICE_NEW에 정보가 없을경우 default setting
 				notice.setEditNoticeYn(CoConstDef.FLAG_NO);
 				notice.setEditCompanyYn(CoConstDef.FLAG_YES);
 				notice.setEditDistributionSiteUrlYn(CoConstDef.FLAG_YES);
 				notice.setEditEmailYn(CoConstDef.FLAG_YES);
-				notice.setHideOssVersionYn(CoConstDef.FLAG_NO);
+				notice.setHideOssVersionYn(CoConstDef.FLAG_YES);
 				notice.setEditAppendedYn(CoConstDef.FLAG_NO);
 				notice.setPrjId(project.getPrjId());
 				
@@ -1691,7 +1551,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				notice.setNoticeFileFormat(new String[]{"chkAllowDownloadNoticeHTML"});
 			} else if (CoConstDef.FLAG_YES.equals(notice.getEditNoticeYn())
 					&& CoConstDef.CD_NOTICE_TYPE_GENERAL.equals(notice.getNoticeType())) {
-				
+				notice.setHideOssVersionYn(CoConstDef.FLAG_YES);
 			} else {
 				if (!isEmpty(notice.getCompanyNameFull())){
 					notice.setEditCompanyYn(CoConstDef.FLAG_YES);
@@ -1722,7 +1582,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			notice.setDefaultCompanyNameFull(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_FULLNAME));
 			notice.setDefaultDistributionSiteUrl(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_DISTRIBUTE_SITE));
 			notice.setDefaultEmail(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_EMAIL));
-		} catch (Exception e) {e.printStackTrace();
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 		
