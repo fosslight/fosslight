@@ -612,32 +612,32 @@ public class CoMailManager extends CoTopComponent {
 							}
 						}
 						
-						if (subTitle.indexOf("${3rd Party Name}") > -1) {
+						if (subTitle.indexOf("${3rd Name}") > -1) {
 							String _s = "";
 							if (!isEmpty(bean.getParamPartnerId())) {
 								partner = mailManagerMapper.getPartnerInfo(bean.getParamPartnerId());
 							}
 							
 							if (partner != null) {
-								if (subTitle.indexOf("${3rd Party Name}") > -1) {
-									if (subTitle.indexOf("${3rd Party ID}") < 0) {
+								if (subTitle.indexOf("${3rd Name}") > -1) {
+									if (subTitle.indexOf("${3rd ID}") < 0) {
 										_s += "(" + partner.getPartnerId() +")";
 									}
 									_s += partner.getPartnerName();
 								}
 							}
 
-							subTitle = StringUtil.replace(subTitle, "${3rd Party Name}", _s);
-							if (subTitle.indexOf("${3rd Party Name}") > -1) {
-								subTitle = StringUtil.replace(subTitle, "${3rd Party Name}", _s);
+							subTitle = StringUtil.replace(subTitle, "${3rd Name}", _s);
+							if (subTitle.indexOf("${3rd Name}") > -1) {
+								subTitle = StringUtil.replace(subTitle, "${3rd Name}", _s);
 							}
 						}
 						
-						if (subTitle.indexOf("${3rd Party ID}") > -1) {
+						if (subTitle.indexOf("${3rd ID}") > -1) {
 							String _s = avoidNull(bean.getParamPartnerId());
-							subTitle = StringUtil.replace(subTitle, "${3rd Party ID}", _s);
-							if (subTitle.indexOf("${3rd Party ID}") > -1) {
-								subTitle = StringUtil.replace(subTitle, "${3rd Party ID}", _s);
+							subTitle = StringUtil.replace(subTitle, "${3rd ID}", _s);
+							if (subTitle.indexOf("${3rd ID}") > -1) {
+								subTitle = StringUtil.replace(subTitle, "${3rd ID}", _s);
 							}
 						}
 						
@@ -1796,7 +1796,7 @@ public class CoMailManager extends CoTopComponent {
 			}
 		}
 		
-		if (title.indexOf("${3rd Party Name}") > -1) {
+		if (title.indexOf("${3rd Name}") > -1) {
 			String _s = "";
 			String _s2 = "";
 			String _s3 = "";
@@ -1807,8 +1807,8 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			if (partnerInfo != null) {
-				if (title.indexOf("${3rd Party Name}") > -1) {
-					if (title.indexOf("${3rd Party ID}") < 0) {
+				if (title.indexOf("${3rd Name}") > -1) {
+					if (title.indexOf("${3rd ID}") < 0) {
 						_s += "(" + bean.getParamPartnerId() +")";
 					}
 					_s += partnerInfo.getPartnerName();
@@ -1830,8 +1830,8 @@ public class CoMailManager extends CoTopComponent {
 			}
 
 			
-			if (title.indexOf("${3rd Party Name}") > -1) {
-				title = StringUtil.replace(title, "${3rd Party Name}", _s);
+			if (title.indexOf("${3rd Name}") > -1) {
+				title = StringUtil.replace(title, "${3rd Name}", _s);
 			}
 
 			if (title.indexOf("${Creator}") > -1) {
@@ -1848,8 +1848,8 @@ public class CoMailManager extends CoTopComponent {
 				title = StringUtil.replace(title, "${Reviewer}", _s3);
 			}
 			
-			if (title.indexOf("${3rd Party ID}") > -1) {
-				title = StringUtil.replace(title, "${3rd Party ID}", avoidNull(bean.getParamPartnerId()));
+			if (title.indexOf("${3rd ID}") > -1) {
+				title = StringUtil.replace(title, "${3rd ID}", avoidNull(bean.getParamPartnerId()));
 			}
 		}
 		

@@ -1719,7 +1719,7 @@
                                 var partId = prjId.replace('3rd_','');
                                 reloadTabInframe('/partner/list');
                                 deleteTabInFrame("/partner/identification/" + partId);
-                                createTabInFrame(partId + '_3rdParty', "/partner/identification/" + partId);
+                                createTabInFrame(partId + '_3rd', "/partner/identification/" + partId);
                             } else {
                                 reloadTabInframe("/project/list");
                                 deleteTabInFrame([[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');

@@ -32,7 +32,7 @@
 		requestReview : function() {
 			if (com_fn.checkStatus()) {
 				if ("Y" != $("#mergeYn").val()) {
-					alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.required.binandroidBomSave', '3rd Party')}]], function(){
+					alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.required.binandroidBomSave', '3rd')}]], function(){
 						$("#tabMenuPartyBom").trigger("click");
 					});
 					
@@ -76,7 +76,7 @@
 		    						if (partnerId != null && "" != partnerId) {
 		    							alertify.alert([[#{msg.common.success}]], function() {
 		    								deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
-		    								createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+		    								createTabInFrame([[${detail.partnerId}]] + '_3rd_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
 		    							});
 		    						}
 		    					},
@@ -128,7 +128,7 @@
 						
 						if (partnerId != null && partnerId != ''){
 							deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
-							createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+							createTabInFrame([[${detail.partnerId}]] + '_3rd_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
 						}
 					},
 					error : function(){
@@ -143,7 +143,7 @@
 		confirm : function(){
 			if (com_fn.checkStatus()){
 				if ("Y" != $("#mergeYn").val()) {
-					alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.required.binandroidBomSave', '3rd Party')}]], function(){
+					alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.required.binandroidBomSave', '3rd')}]], function(){
 						$("#tabMenuPartyBom").trigger("click");
 					});
 					
@@ -218,7 +218,7 @@
 		    						if (partnerId != null && partnerId != ''){
 		    							alertify.alert([[#{msg.common.success}]], function() {
 		    								deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
-		    								createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+		    								createTabInFrame([[${detail.partnerId}]] + '_3rd_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
 		    							});
 		    						}
 		    					}
@@ -344,7 +344,7 @@
 			}
 		},
 		mvEditTab : function () {
-			createTabInFrame(partnerId+'_3rdParty', '/partner/edit/' + [[${detail.partnerId}]]);
+			createTabInFrame(partnerId+'_3rd', '/partner/edit/' + [[${detail.partnerId}]]);
 		},
 		deleteLicense : function(target){
 			$(target).parent().remove();
@@ -422,7 +422,7 @@
 			} else if ("bom" == status) {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', "BOM")}]], function(){});
 			} else if ("CONF" == status) {
-				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd')}]], function(){});
 			} else if ("REQ" == status) {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 			} else {
@@ -589,7 +589,7 @@
 			} else if ("bom" == gubn) {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
 			} else if ("CONF" == status) {
-				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd party')}]], function(){});
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd')}]], function(){});
 			} else if ("REQ" == status) {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 			} else {
@@ -604,7 +604,7 @@
 			} else if ("bom" == tab) {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
 			} else if ("CONF" == status) {
-				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd')}]], function(){});
 			} else if ("REQ" == status) {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 			} else {

@@ -287,8 +287,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
 			for (int i = 0; i < sheetCnt; i++) {
 				String sheetName = wb.getSheetName(i);
-				if (!sheetName.equalsIgnoreCase("3rd Party Info")) {
-					if (!sheetName.equalsIgnoreCase("3rd Party")) {
+				if (!sheetName.equalsIgnoreCase("3rd Info")) {
+					if (!sheetName.equalsIgnoreCase("3rd")) {
 						wb.removeSheetAt(i);
 						isRemoveSheet = true;
 					}
@@ -303,7 +303,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				if (!sheetName.equalsIgnoreCase("Project Info") && !sheetName.equalsIgnoreCase("Model Info") && !sheetName.equalsIgnoreCase(".Data")) {
 					switch (type) {
 						case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER :
-							if (!sheetName.equalsIgnoreCase("3rd Party")) {
+							if (!sheetName.equalsIgnoreCase("3rd")) {
 								wb.removeSheetAt(i);
 								isRemoveSheet = true;
 							}
@@ -577,7 +577,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 									referenceDivChk = "BIN(YOCTO)";
 								}
 							case CoConstDef.CD_DTL_COMPONENT_PARTNER:
-								referenceDivChk = "3rd Party";
+								referenceDivChk = "3rd";
 								break;
 							default:
 								break;
@@ -663,7 +663,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						break;
 					case CoConstDef.CD_DTL_COMPONENT_PARTNER:
 						if (!isEmpty(refSrcTab)) refSrcTab += ",";
-						refSrcTab += "3rd Party";
+						refSrcTab += "3rd";
 						break;
 					default:
 						break;
@@ -2375,7 +2375,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId = getBomCompareExcelId(dataStr, true);
 				
 				break;
-			case "3rdParty_bomcompare" :
+			case "3rd_bomcompare" :
 				downloadId = getBomCompareExcelId(dataStr, false);
 				
 				break;

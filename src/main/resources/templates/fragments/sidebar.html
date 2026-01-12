@@ -74,7 +74,7 @@
           <li th:if="${partnerFlag}" class="nav-item">
             <a th:href="@{/partner/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
-              	<p th:text="'3rd Party'"></p>
+              	<p th:text="'3rd'"></p>
             </a>
           </li>
           <li th:if="${batFlag}" class="nav-item">
@@ -116,7 +116,7 @@
               <li class="nav-item" th:if="${partnerFlag}">
                 <a th:href="@{/compliance/3rdList}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p th:text="'3rd Party Status'"></p>
+                  <p th:text="'3rd Status'"></p>
                 </a>
               </li>
             </ul>
@@ -300,7 +300,7 @@
 			    	createTabNew(id + "_Project", "/project/" + page + "/" + id);			        
 			        break;
 			    case 'par':
-			       	createTabNew(id + "_3rdParty", "/partner/" + page + "/" + id);	
+			       	createTabNew(id + "_3rd", "/partner/" + page + "/" + id);
 			        break;
 			    case 'self':
 			        createTabNew(id + "_selfCheck", "/selfCheck/" + page + "/" + id);
@@ -324,7 +324,7 @@
               	} else if (tabUrl.includes('/project/list')) {
                 	createTab_new('Project', '/project/list', 'project-list', true);
               	} else if (tabUrl.includes('/partner/list')) {
-                	createTab_new('3rd Party', '/partner/list', 'partner-list', true);
+                	createTab_new('3rd', '/partner/list', 'partner-list', true);
               	} else if (tabUrl.includes('/system/bat')) {
                 	createTab_new('Binary DB', '/binary', 'binary', true);
               	} else if (tabUrl.includes('/vulnerability/list')) {

@@ -203,7 +203,7 @@ var fn = {
 	   	return display;
 	},
 	mvEditTab : function (partnerId) {
-		createTabInFrame(partnerId+'_3rdParty', '/partner/edit/'+partnerId);
+		createTabInFrame(partnerId+'_3rd', '/partner/edit/'+partnerId);
 	},
 	unformatter : function(cellvalue, options, rowObject){
 		return cellvalue;
@@ -348,7 +348,7 @@ var fn = {
 	},
 	mvIdentification: function (partnerId, permission) {
 		if (parseInt(permission) > 0){
-			createTabInFrame(partnerId + '_3rdParty_Identify', '/partner/identification/'+partnerId);
+			createTabInFrame(partnerId + '_3rd_Identify', '/partner/identification/'+partnerId);
 		} else {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
 		}
@@ -551,7 +551,7 @@ var fn = {
 			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
 			msg += '<br/> - '
 			for (var i in notPermissionPartnerIds) {
-				msg += '3rd Party-' + notPermissionPartnerIds[i];
+				msg += '3rd-' + notPermissionPartnerIds[i];
 				if(i < notPermissionPartnerIds.length-1){
 					msg += ', ';
 				}
@@ -623,7 +623,7 @@ var fn = {
 			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
 			msg += '<br/> - '
 			for (var i in notPermissionPartnerIds) {
-				msg += '3rd Party-' + notPermissionPartnerIds[i];
+				msg += '3rd-' + notPermissionPartnerIds[i];
 				if(i < notPermissionPartnerIds.length-1){
 					msg += ', ';
 				}
@@ -1183,7 +1183,7 @@ var fn = {
 					break;
 			}
 			
-			var tabNm = "3rdParty_SBOM_Compare";
+			var tabNm = "3rd_SBOM_Compare";
 			var tabLk = '/partner/bomCompare/'+beforePrjId+'/'+afterPrjId+'';
 	
 			createTabInFrame(tabNm, tabLk);
@@ -1321,7 +1321,7 @@ var partnerList = {
 			var listType = 'THIRD_PARTY';
 			var totalColInfos = [
 				{'ID': 'partnerId'},
-				{'3rd Party Name': 'partnerName'},
+				{'3rd Name': 'partnerName'},
 				{'Software Name (Version)': 'softwareName'},
 				{'Status': 'status'},
 				{'Vulnerability': 'cvssScore'},
@@ -1346,7 +1346,7 @@ var partnerList = {
 				total:function(obj){return obj.total;},
 				records:function(obj){return obj.records;}
 			},
-		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'OSC Process', 'Delivery<br/>Form','Description'
+		  	colNames: ['ID','3rd Name','Software Name (Version)','Software<br/>Version', 'Status', 'OSC Process', 'Delivery<br/>Form','Description'
 			  	, 'CVE ID', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName', 'permission', 'statusPermission'],
             colModel: colModelArr,
 			onSelectRow: function(id){},
@@ -1426,9 +1426,9 @@ var partnerList = {
                     var pageButtonArea = $('#list_toppager_left');
                     if (pageButtonArea.find('button').length == 0) {
 	               		var appendIcon = "";
-	               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add 3rd Party\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
-	                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete 3rd Party\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
-	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export 3rd Party List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+	               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add 3rd\" onclick=\"createTabInFrame('New_3rd', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
+	                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete 3rd\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
+	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export 3rd List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 	                            
 	                  	pageButtonArea.append(appendIcon);
 	            	}

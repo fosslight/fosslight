@@ -436,7 +436,7 @@ var com_fn = {
 		var tabContent = $(".tabContent");
 		var tabMenuA = $("[id^='tabMenu'] a");
 		
-		tabMenuA.eq("0").text("3rd party");
+		tabMenuA.eq("0").text("3rd");
 		tabMenuA.eq("1").text("DEP");
 		tabMenuA.eq("2").text("SRC");
 		tabMenuA.eq("3").text("BIN");
@@ -1675,7 +1675,7 @@ var com_fn = {
 	},
 	bulkEdit : function(tab, permission, status){
 		if ("3RD" == tab) {
-    		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', "3rd Party")}]], function(){});
+    		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', "3rd")}]], function(){});
     		return false;
     	} else if ("bom" == tab) {
     		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', "BOM")}]], function(){});
@@ -2133,7 +2133,7 @@ var com_fn = {
 	},
 	gridAddFunc : function (tab, targetId, permission, status) {
 		if ("3RD" == tab) {
-			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd')}]], function(){});
 		} else if ("bom" == tab) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
 		} else if (!permission) {
@@ -2150,7 +2150,7 @@ var com_fn = {
 	},
 	gridDelFunc : function (gubn, targetId, target, permission, status) {
 		if ("3RD" == gubn) {
-			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd')}]], function(){});
 		} else if ("bom" == gubn) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
 		} else if (!permission) {

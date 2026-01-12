@@ -406,10 +406,10 @@ public class PartnerController extends CoTopComponent{
 				model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
 				model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 			} else {
-				model.addAttribute("message", "Reqeusted URL is for a deleted 3rd Party Software. Please contact the creator or watcher of the 3rd Party Software.");
+				model.addAttribute("message", "Reqeusted URL is for a deleted 3rd Software. Please contact the creator or watcher of the 3rd Software.");
 			}
 		} catch (Exception e) {
-			model.addAttribute("message", "Reqeusted URL contains 3rd Party Software ID that doesn't exist. Please check the 3rd Party Software ID again.");
+			model.addAttribute("message", "Reqeusted URL contains 3rd Software ID that doesn't exist. Please check the 3rd Software ID again.");
 		}
 		
 		model.addAttribute("viewFlag", CoConstDef.FLAG_YES);

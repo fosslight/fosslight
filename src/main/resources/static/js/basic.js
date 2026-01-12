@@ -202,9 +202,9 @@ $(document).ready(function () {
 		
 		if (id != null && prjFlag != null) {
 			if ("false" == viewFlag) {
-				createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
+				createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rd", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
 			} else {
-				createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/view/" + id : "/partner/view/" + id);
+				createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rd", prjFlag == 'true' ? "/project/view/" + id : "/partner/view/" + id);
 			}
 		} else {
 //			var _defaultTabStr = $("#defaultTabAnchorArr").val()||"";
@@ -547,7 +547,7 @@ var activeTabInFrameList = function (targetTab) {
     if ("PROJECT" == targetTab) {
         tabName = "Project List";
     } else if ("PARTNER" == targetTab) {
-        tabName = "3rd Party List";
+        tabName = "3rd List";
     } else if ("OSS" == targetTab) {
 
     } else if ("LICENSE" == targetTab) {
@@ -2635,7 +2635,7 @@ function moveTabInFrameByCommentPopup(prjId, stage) {
         tabIdx = prjId + "_Distribute";
         urlTxt = '#/project/distribution/' + prjId;
     } else if (stage == "basicInfo3rd") {
-        tabIdx = prjId + "_3rdParty";
+        tabIdx = prjId + "_3rd";
         urlTxt = '#/partner/edit/' + prjId;
     }
 
@@ -2670,7 +2670,7 @@ function moveTabInFrameByCommentPopup2(prjId, stage) {
         urlTxt = '/project/distribution/' + prjId;
         uniqueName = "pjt-distribution" + prjId;
     } else if (stage == "basicInfo3rd") {
-        tabIdx = prjId + "_3rdParty";
+        tabIdx = prjId + "_3rd";
         urlTxt = '/partner/edit/' + prjId;
         uniqueName = "pjg-basicInfo3rd" + prjId;
     }
@@ -3024,7 +3024,7 @@ var createTabNew = function (tabNm, tabLk) {
     var tabName = tabNm.replace(pattern, '-');
 	
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
-    	if ("PRJ_BOM_Compare" == tabName || "History" == tabName || "3rdParty_BOM_Compare" == tabName) {
+    	if ("PRJ_BOM_Compare" == tabName || "History" == tabName || "3rd_BOM_Compare" == tabName) {
 			deleteTabNew(tabName);
 			createTabFnc(tabNm, tabName, tabLk);
 		} else {

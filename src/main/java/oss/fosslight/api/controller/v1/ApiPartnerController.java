@@ -35,7 +35,7 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.ApiPartnerService;
 import oss.fosslight.service.T2UserService;
 
-@Api(tags = {"2. 3rd Party"})
+@Api(tags = {"2. 3rd"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
@@ -51,14 +51,14 @@ public class ApiPartnerController extends CoTopComponent {
 	
 	protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 	
-	@ApiOperation(value = "3rd Party Search", notes = "Search 3rd Party Information")
+	@ApiOperation(value = "3rd Search", notes = "Search 3rd Information")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_PARTNER_SEARCH})
     public CommonResult getVulnerabilityData(
     		@RequestHeader String _token,
-    		@ApiParam(value = "3rd Party ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
+    		@ApiParam(value = "3rd ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
     		@ApiParam(value = "Division", required = false) @RequestParam(required = false) String division,
     		@ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
     		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false, allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
@@ -96,14 +96,14 @@ public class ApiPartnerController extends CoTopComponent {
 		}
     }
 	
-	@ApiOperation(value = "3rd Party Add Editor", notes = "Add Editor to 3rd Party")
+	@ApiOperation(value = "3rd Add Editor", notes = "Add Editor to 3rd")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
     public CommonResult addPrjWatcher(
     		@RequestHeader String _token,
-    		@ApiParam(value = "3rd Party ID", required = true) @RequestParam(required = true) String partnerId,
+    		@ApiParam(value = "3rd ID", required = true) @RequestParam(required = true) String partnerId,
     		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList){
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token);
