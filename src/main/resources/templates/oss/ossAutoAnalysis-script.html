@@ -683,6 +683,7 @@ var fn_grid = {
 	   		if (comment.indexOf("target='_blank'") > -1) {
 	   			comment = comment.replaceAll("target='_blank'", "class='urlLink' target='_blank'");
 	   		}
+	   		comment = $.jgrid.htmlEncode(comment);
 	   		comment = comment.replaceAll("<br>", "\n").replaceAll("\\n", "\n");
 	   	}
 	   	return comment;
