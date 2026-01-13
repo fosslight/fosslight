@@ -4083,8 +4083,7 @@ public class CommonFunction extends CoTopComponent {
 		return null;
 	}
 
-	public static List<OssComponentsLicense> findOssLicenseIdAndName(String ossId,
-			List<OssComponentsLicense> ossComponentsLicenseList) {
+	public static List<OssComponentsLicense> findOssLicenseIdAndName(String ossId, List<OssComponentsLicense> ossComponentsLicenseList) {
 		// 먼저 license Id는 찾을수 있으면 모두 설정한다.
 		if (ossComponentsLicenseList != null) {
 			for (OssComponentsLicense licenseBean : ossComponentsLicenseList) {

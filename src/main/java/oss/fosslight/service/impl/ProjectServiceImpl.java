@@ -485,7 +485,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		final HashMap<String, Object> map = new HashMap<>();
 		List<ProjectIdentification> list = null;
 		final Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
-		final List<String> inCpeMatchCheckList = ossInfoMap.values().stream().filter(e -> CoConstDef.FLAG_YES.equals(e.getInCpeMatchFlag())).map(OssMaster::getCveId).distinct().collect(Collectors.toList());
 		
 		identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		
@@ -592,7 +591,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 				    String ossVersion = avoidNull(ll.getOssVersion());
 				    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
-				    
+				}
+				
+				uniqueKeys.parallelStream().forEach(key -> {
+				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+				    if (om != null && !isEmpty(om.getCvssScore())) {
+				        vulnerabilityInfoMap.put(key, om);
+				    }
+				});
+				
+				for (ProjectIdentification ll : list) {
 				    ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
 					ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
 	  				ll.setCopyrightText(ll.getCopyrightText());
@@ -650,15 +659,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 				
-				uniqueKeys.parallelStream().forEach(key -> {
-				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-				    if (om != null && !isEmpty(om.getCvssScore())) {
-				        vulnerabilityInfoMap.put(key, om);
-				    }
-				});
-				
- 				// bat merget
+				// bat merget
 				// bat 분석 결과 중에서 oss version이 명시되지 않고, src 또는 3rd party에 동일한 oss 가 존재하는 경우
 				// bat 분석 결과를 src 또는 3rd party에 merge 한다.
 				List<ProjectIdentification> _list = new ArrayList<>();
@@ -3684,7 +3685,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		if (!removeAdminCheckComponentIds.isEmpty()) adminCheckComponentIds.removeAll(removeAdminCheckComponentIds);
+		if (!removeAdminCheckComponentIds.isEmpty()) {
+			adminCheckComponentIds.removeAll(removeAdminCheckComponentIds);
+		}
 		List<OssComponents> componentId = projectMapper.selectComponentId(identification);
 		
 		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
