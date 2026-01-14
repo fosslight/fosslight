@@ -3245,17 +3245,22 @@
                 $("#editDistributionSiteUrlYn").val("Y");
                 $("#email").prop("checked", true);
                 $("#editEmailYn").val("Y");
-                $("#hideOssVersion").prop("checked", true);
-                $("#hideOssVersionYn").val("Y");
-                
+
+                if(isHideOssVersion) {
+                    $("#hideOssVersion").prop("checked", true);
+                    $("#hideOssVersionYn").val("Y");
+                }
+
             	if (!checked) {
             		$("#editCompanyName").val($("#defaultCompanyNameFull").val());
             		$("#editOssDistributionSite").val($("#defaultDistributionSiteUrl").val());
             		$("#editEmail").val($("#defaultEmail").val());
-            		
-            		if (isHideOssVersion) {
-                    	$("#hideOssVersion").trigger("click");
+
+                    if(!isHideOssVersion) {
+                        $("#hideOssVersion").prop("checked", false);
+                        $("#hideOssVersionYn").val("N");
                     }
+
                     if (isAppend) {
                     	$(".appendFileUpload").empty();
                     	$('input[name=noticeAppendFileId]').val("");
