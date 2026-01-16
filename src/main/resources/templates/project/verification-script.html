@@ -1380,7 +1380,7 @@
 
                         var html = $('.uploadList_2 ul li').html();
                         $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
-                        $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                        $('input[name=fileSeq_1]').val(fileSeq2);
                         $('input[name=packageFileType1]').val(fileType2);
 
                         $('.verifyFile_1').hide();
@@ -1388,7 +1388,7 @@
                         $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_1").find("span").removeClass("uploadFile2");
                         $(".uploadList_1").find("span").addClass("uploadFile1");
-                        $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                        $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ fileSeq2 +"\", \"1\")");
                         
                         $("#uploadRemove_2").hide();
                         $("#uploadAdd_2").hide();
@@ -1396,7 +1396,7 @@
                         var html = $('.uploadList_3 ul li').html();
                         $('.uploadList_2 ul').empty();
                         $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
-                        $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                        $('input[name=fileSeq_2]').val(fileSeq3);
                         $('input[name=packageFileType2]').val(fileType3);
                         
                         $('.verifyFile_2').hide();
@@ -1404,7 +1404,7 @@
                         $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_2").find("span").removeClass("uploadFile3");
                         $(".uploadList_2").find("span").addClass("uploadFile2");
-                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ fileSeq3 +"\", \"2\")");
                         
                         $("#uploadRemove_3").hide();
                         $("#uploadAdd_3").hide();
@@ -1412,7 +1412,7 @@
                         var html = $('.uploadList_4 ul li').html();
                         $('.uploadList_3 ul').empty();
                         $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                        $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                        $('input[name=fileSeq_3]').val(fileSeq4);
                         $('input[name=packageFileType3]').val(fileType4);
                         
                         $('.verifyFile_3').hide();
@@ -1420,7 +1420,7 @@
                         $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_3").find("span").removeClass("uploadFile4");
                         $(".uploadList_3").find("span").addClass("uploadFile3");
-                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ fileSeq4 +"\", \"3\")");
                         
                         $("#uploadRemove_4").hide();
                         $("#uploadAdd_4").hide();
@@ -1428,7 +1428,7 @@
                         var html = $('.uploadList_5 ul li').html();
                         $('.uploadList_4 ul').empty();
                         $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
-                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=fileSeq_4]').val(fileSeq5);
                         $('input[name=packageFileType4]').val(fileType5);
                         
                         $('.verifyFile_4').hide();
@@ -1436,7 +1436,7 @@
                         $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_4").find("span").removeClass("uploadFile5");
                         $(".uploadList_4").find("span").addClass("uploadFile4");
-                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ fileSeq5 +"\", \"4\")");
                         
                         $('input[name=fileSeq_5]').val("");
                         $('input[name=packageFileType5]').val("");
@@ -1453,7 +1453,7 @@
 
                             var html = $('.uploadList_2 ul li').html();
                             $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
-                            $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                            $('input[name=fileSeq_1]').val(fileSeq2);
                             $('input[name=packageFileType1]').val(fileType2);
 
                             $('.verifyFile_1').hide();
@@ -1461,7 +1461,7 @@
                             $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_1").find("span").removeClass("uploadFile2");
                             $(".uploadList_1").find("span").addClass("uploadFile1");
-                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ fileSeq2 +"\", \"1\")");
                             
                             $("#uploadRemove_2").hide();
                             $("#uploadAdd_2").hide();
@@ -1469,7 +1469,7 @@
                             var html = $('.uploadList_3 ul li').html();
                             $('.uploadList_2 ul').empty();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
-                            $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                            $('input[name=fileSeq_2]').val(fileSeq3);
                             $('input[name=packageFileType2]').val(fileType3);
                             
                             $('.verifyFile_2').hide();
@@ -1477,7 +1477,7 @@
                             $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_2").find("span").removeClass("uploadFile3");
                             $(".uploadList_2").find("span").addClass("uploadFile2");
-                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ fileSeq3 +"\", \"2\")");
                             
                             $("#uploadRemove_3").hide();
                             $("#uploadAdd_3").hide();
@@ -1485,7 +1485,7 @@
                             var html = $('.uploadList_4 ul li').html();
                             $('.uploadList_3 ul').empty();
                             $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=fileSeq_3]').val(fileSeq4);
                             $('input[name=packageFileType3]').val(fileType4);
                             
                             $('.verifyFile_3').hide();
@@ -1493,7 +1493,7 @@
                             $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_3").find("span").removeClass("uploadFile4");
                             $(".uploadList_3").find("span").addClass("uploadFile3");
-                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ fileSeq4 +"\", \"3\")");
                             
                             $('input[name=fileSeq_4]').val("");
                             $('input[name=packageFileType4]').val("");
@@ -1508,7 +1508,7 @@
 
                             var html = $('.uploadList_2 ul li').html();
                             $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
-                            $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                            $('input[name=fileSeq_1]').val(fileSeq2);
                             $('input[name=packageFileType1]').val(fileType2);
 
                             $('.verifyFile_1').hide();
@@ -1516,7 +1516,7 @@
                             $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_1").find("span").removeClass("uploadFile2");
                             $(".uploadList_1").find("span").addClass("uploadFile1");
-                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ fileSeq2 +"\", \"1\")");
                             
                             $("#uploadRemove_2").hide();
                             $("#uploadAdd_2").hide();
@@ -1524,7 +1524,7 @@
                             var html = $('.uploadList_3 ul li').html();
                             $('.uploadList_2 ul').empty();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
-                            $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                            $('input[name=fileSeq_2]').val(fileSeq3);
                             $('input[name=packageFileType2]').val(fileType3);
                             
                             $('.verifyFile_2').hide();
@@ -1532,7 +1532,7 @@
                             $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_2").find("span").removeClass("uploadFile3");
                             $(".uploadList_2").find("span").addClass("uploadFile2");
-                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ fileSeq3 +"\", \"2\")");
                             
                             $('input[name=fileSeq_3]').val("");
                             $('input[name=packageFileType3]').val("");
@@ -1546,7 +1546,7 @@
 
                             var html = $('.uploadList_2 ul li').html();
                             $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
-                            $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                            $('input[name=fileSeq_1]').val(fileSeq2);
                             $('input[name=packageFileType1]').val(fileType2);
                             $('input[name=fileSeq_2]').val("");
                             $('input[name=packageFileType2]').val("");
@@ -1556,7 +1556,7 @@
                             $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_1").find("span").removeClass("uploadFile2");
                             $(".uploadList_1").find("span").addClass("uploadFile1");
-                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ fileSeq2 +"\", \"1\")");
                             
                             $("#uploadRemove_2").hide();
                             $("#uploadAdd_2").hide();
@@ -1582,7 +1582,7 @@
 
                         var html = $('.uploadList_3 ul li').html();
                         $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
-                        $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                        $('input[name=fileSeq_2]').val(fileSeq3);
                         $('input[name=packageFileType2]').val(fileType3);
 
                         $('.verifyFile_2').hide();
@@ -1590,7 +1590,7 @@
                         $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_2").find("span").removeClass("uploadFile3");
                         $(".uploadList_2").find("span").addClass("uploadFile2");
-                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ fileSeq3 +"\", \"2\")");
                         
                         $("#uploadRemove_3").hide();
                         $("#uploadAdd_3").hide();
@@ -1598,7 +1598,7 @@
                         var html = $('.uploadList_4 ul li').html();
                         $('.uploadList_3 ul').empty();
                         $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                        $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                        $('input[name=fileSeq_3]').val(fileSeq4);
                         $('input[name=packageFileType3]').val(fileType4);
                         
                         $('.verifyFile_3').hide();
@@ -1606,7 +1606,7 @@
                         $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_3").find("span").removeClass("uploadFile4");
                         $(".uploadList_3").find("span").addClass("uploadFile3");
-                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                        $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ fileSeq4 +"\", \"3\")");
                         
                         $("#uploadRemove_4").hide();
                         $("#uploadAdd_4").hide();
@@ -1614,7 +1614,7 @@
                         var html = $('.uploadList_5 ul li').html();
                         $('.uploadList_4 ul').empty();
                         $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
-                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                        $('input[name=fileSeq_4]').val(fileSeq5);
                         $('input[name=packageFileType4]').val(fileType5);
                         
                         $('.verifyFile_4').hide();
@@ -1622,7 +1622,7 @@
                         $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_4").find("span").removeClass("uploadFile5");
                         $(".uploadList_4").find("span").addClass("uploadFile4");
-                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ fileSeq5 +"\", \"4\")");
                         
                         $('input[name=fileSeq_5]').val("");
                         $('input[name=packageFileType5]').val("");
@@ -1638,7 +1638,7 @@
 
                             var html = $('.uploadList_3 ul li').html();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
-                            $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                            $('input[name=fileSeq_2]').val(fileSeq3);
                             $('input[name=packageFileType2]').val(fileType3);
 
                             $('.verifyFile_2').hide();
@@ -1646,7 +1646,7 @@
                             $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_2").find("span").removeClass("uploadFile3");
                             $(".uploadList_2").find("span").addClass("uploadFile2");
-                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ fileSeq3 +"\", \"2\")");
                             
                             $("#uploadRemove_3").hide();
                             $("#uploadAdd_3").hide();
@@ -1654,7 +1654,7 @@
                             var html = $('.uploadList_4 ul li').html();
                             $('.uploadList_3 ul').empty();
                             $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=fileSeq_3]').val(fileSeq4);
                             $('input[name=packageFileType3]').val(fileType4);
                             
                             $('.verifyFile_3').hide();
@@ -1662,7 +1662,7 @@
                             $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_3").find("span").removeClass("uploadFile4");
                             $(".uploadList_3").find("span").addClass("uploadFile3");
-                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ fileSeq4 +"\", \"3\")");
                             
                             $('input[name=fileSeq_4]').val("");
                             $('input[name=packageFileType4]').val("");
@@ -1676,7 +1676,7 @@
 
                             var html = $('.uploadList_3 ul li').html();
                             $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
-                            $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                            $('input[name=fileSeq_2]').val(fileSeq3);
                             $('input[name=packageFileType2]').val(fileType3);
                             $('input[name=fileSeq_3]').val("");
                             $('input[name=packageFileType3]').val("");
@@ -1686,7 +1686,7 @@
                             $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_2").find("span").removeClass("uploadFile3");
                             $(".uploadList_2").find("span").addClass("uploadFile2");
-                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                            $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ fileSeq3 +"\", \"2\")");
                             
                             $("#uploadRemove_3").hide();
                             $("#uploadAdd_3").hide();
@@ -1719,7 +1719,7 @@
 
                             var html = $('.uploadList_4 ul li').html();
                             $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=fileSeq_3]').val(fileSeq4);
                             $('input[name=packageFileType3]').val(fileType4);
 
                             $('.verifyFile_3').hide();
@@ -1727,7 +1727,7 @@
                             $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_3").find("span").removeClass("uploadFile4");
                             $(".uploadList_3").find("span").addClass("uploadFile3");
-                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ fileSeq4 +"\", \"3\")");
                             
                             $("#uploadRemove_4").hide();
                             $("#uploadAdd_4").hide();
@@ -1736,7 +1736,7 @@
                             var html = $('.uploadList_5 ul li').html();
                             $('.uploadList_4 ul').empty();
                             $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
-                            $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
+                            $('input[name=fileSeq_4]').val(fileSeq5);
                             $('input[name=packageFileType4]').val(fileType5);
                             
                             $('.verifyFile_4').hide();
@@ -1744,7 +1744,7 @@
                             $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_4").find("span").removeClass("uploadFile5");
                             $(".uploadList_4").find("span").addClass("uploadFile4");
-                            $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                            $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ fileSeq5 +"\", \"4\")");
                             
                             $('input[name=fileSeq_5]').val("");
                             $('input[name=packageFileType5]').val("");
@@ -1757,14 +1757,14 @@
                             var html = $('.uploadList_4 ul li').html();
                             $('.uploadList_3 ul').empty();
                             $('.uploadList_3 ul').append('<li>' + html.split("'4'").join("'3'") + '</li>');
-                            $('input[name=fileSeq_3]').val($('input[name=fileSeq_4]').val());
+                            $('input[name=fileSeq_3]').val(fileSeq4);
                             $('input[name=packageFileType3]').val($('input[name=packageFileType4]').val());
                             
                             $('.verifyFile_3').hide();
                             $(".uploadList_4 > ul > li > span > .smallDelete").trigger("click");
                             $(".uploadList_3").find("span").removeClass("uploadFile4");
                             $(".uploadList_3").find("span").addClass("uploadFile3");
-                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_4]').val() +"\", \"3\")");
+                            $(".uploadFile3").attr('onclick', "fn.deleteFile(this, \""+ fileSeq4 +"\", \"3\")");
                             
                             $('input[name=fileSeq_4]').val("");
                             $('input[name=packageFileType4]').val("");
@@ -1775,6 +1775,7 @@
                 
                 $("#uploadRemove_4").click(function (e) {
                 	var fileSeq = $('input[name=fileSeq_5]').val();
+                	var fileType = $('input[name=packageFileType5]').val();
                 	
                 	if ("" == fileSeq) {
                 		$('input[name=packageFileType4]').val("");
@@ -1788,14 +1789,14 @@
                         var html = $('.uploadList_5 ul li').html();
                         $('.uploadList_4 ul').empty();
                         $('.uploadList_4 ul').append('<li>' + html.split("'5'").join("'4'") + '</li>');
-                        $('input[name=fileSeq_4]').val($('input[name=fileSeq_5]').val());
-                        $('input[name=packageFileType4]').val($('input[name=packageFileType5]').val());
+                        $('input[name=fileSeq_4]').val(fileSeq);
+                        $('input[name=packageFileType4]').val(fileType);
                         
                         $('.verifyFile_4').hide();
                         $(".uploadList_5 > ul > li > span > .smallDelete").trigger("click");
                         $(".uploadList_4").find("span").removeClass("uploadFile5");
                         $(".uploadList_4").find("span").addClass("uploadFile5");
-                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_5]').val() +"\", \"4\")");
+                        $(".uploadFile4").attr('onclick', "fn.deleteFile(this, \""+ fileSeq +"\", \"4\")");
                         
                         $('input[name=fileSeq_5]').val("");
                         $('input[name=packageFileType5]').val("");
@@ -2215,7 +2216,39 @@
                 	$("#sendWgetUrl_" + i).parent().parent().show();;
                 	$("#sendWgetUrl_" + i).show();
                 } else {
+                	$('#registFileDiv_' + i).parent().hide();
+                    $('#registFileDiv_' + i).hide();
                 	$("#projectSearch_" + i).show();
+                	
+                	switch (i) {
+	                    case 1:
+	                        projectList_1.load();
+	                        projectList_1.packagingLoad();
+	
+	                        break;
+	                    case 2:
+	                        projectList_2.load();
+	                        projectList_2.packagingLoad();
+	
+	                        break;
+	                    case 3:
+	                        projectList_3.load();
+	                        projectList_3.packagingLoad();
+	
+	                        break;
+	                    case 4:
+	                        projectList_4.load();
+	                        projectList_4.packagingLoad();
+	
+	                        break;
+	                    case 5:
+	                        projectList_5.load();
+	                        projectList_5.packagingLoad();
+	
+	                        break;
+	                    default:
+	                        break;
+	                }
                 }
                 
                 deleteFileList.push(i);
