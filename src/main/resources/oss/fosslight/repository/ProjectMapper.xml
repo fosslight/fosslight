@@ -715,6 +715,7 @@
 	        , A.DISTRIBUTE_OSD_KEY
 			
 			/** FILE_ID **/
+	  		, A.IDENTIFICATION_CSV_FILE_ID
 			, A.DEP_CSV_FILE_ID
 			, A.SRC_CSV_FILE_ID
 			, A.SRC_ANDROID_CSV_FILE_ID
@@ -1650,31 +1651,34 @@
 		UPDATE PROJECT_MASTER 
 		<set>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(depCsvFileId)">
-			DEP_CSV_FILE_ID = #{depCsvFileId},
+				DEP_CSV_FILE_ID = #{depCsvFileId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcCsvFileId)">
-			SRC_CSV_FILE_ID = #{srcCsvFileId},
+				SRC_CSV_FILE_ID = #{srcCsvFileId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binCsvFileId)">
-			BIN_CSV_FILE_ID = #{binCsvFileId},
+				BIN_CSV_FILE_ID = #{binCsvFileId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binBinaryFileId)">
-			BIN_BINARY_FILE_ID = #{binBinaryFileId},
+				BIN_BINARY_FILE_ID = #{binBinaryFileId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcAndroidCsvFileId)">
-			SRC_ANDROID_CSV_FILE_ID = #{srcAndroidCsvFileId},
+				SRC_ANDROID_CSV_FILE_ID = #{srcAndroidCsvFileId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcAndroidNoticeFileId)">
-			SRC_ANDROID_NOTICE_FILE_ID = #{srcAndroidNoticeFileId},
+				SRC_ANDROID_NOTICE_FILE_ID = #{srcAndroidNoticeFileId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcAndroidNoticeXmlId)">
-			SRC_ANDROID_NOTICE_XML_ID = #{srcAndroidNoticeXmlId},
+				SRC_ANDROID_NOTICE_XML_ID = #{srcAndroidNoticeXmlId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcAndroidResultFileId)">
-			SRC_ANDROID_RESULT_FILE_ID = #{srcAndroidResultFileId}
+				SRC_ANDROID_RESULT_FILE_ID = #{srcAndroidResultFileId},
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(scrtCsvFileId)">
-			SCRT_CSV_FILE_ID = #{scrtCsvFileId}
+				SCRT_CSV_FILE_ID = #{scrtCsvFileId},
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationCsvFileId)">
+				IDENTIFICATION_CSV_FILE_ID = #{identificationCsvFileId},
 			</if>
 		</set>
 		WHERE 
@@ -1707,6 +1711,9 @@
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcAndroidResultFileFlag)">
 				SRC_ANDROID_RESULT_FILE_ID = null,
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', identificationCsvFileFlag)">
+				IDENTIFICATION_CSV_FILE_ID = null,
 			</if>
 		</set>
 		WHERE 
@@ -3046,7 +3053,8 @@
 			M.REF_PARTNER_ID,
 			M.OBLIGATION_TYPE,
 			M.DEPENDENCIES,
-			M.REF_OSS_NAME
+			M.REF_OSS_NAME,
+			M.REF_LOADED_VAL
 			<if test="@oss.fosslight.util.StringUtil@equals('30', referenceDiv)">
 				, BAR.GUIREPORT_FLAG
 			</if>
@@ -3288,6 +3296,7 @@
 		, T3.VULN_YN
 		, T3.CVSS_SCORE
 		, T3.CVE_ID
+		, T1.REF_LOADED_VAL
 	FROM 
 		OSS_COMPONENTS T1 
 		LEFT JOIN OSS_COMPONENTS_LICENSE T2 ON T1.COMPONENT_ID = T2.COMPONENT_ID AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
@@ -3359,7 +3368,14 @@
 		) NVD1 ON NVD1.PRODUCT = REPLACE(T1.OSS_NAME, ' ', '_') AND NVD1.VERSION = IF(IFNULL(T1.OSS_VERSION, '') = '','-', T1.OSS_VERSION) 
 	WHERE 
 		T1.REFERENCE_ID=#{referenceId}
-		AND T1.REFERENCE_DIV=#{referenceDiv}
+	<choose>
+		<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
+			AND T1.REFERENCE_DIV IN ('10', '11', '16', '15')
+		</when>
+		<otherwise>
+			AND T1.REFERENCE_DIV = '14'
+		</otherwise>
+	</choose>
 	GROUP BY T1.COMPONENT_ID
 	<if test="sortField eq 'componentId'">
 		<if test="sortOrder eq 'asc'">
@@ -3862,6 +3878,9 @@
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
 						, PACKAGE_URL
 						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refLoadedVal)">
+						, REF_LOADED_VAL
+						</if>
 					)
 			VALUES
 					(
@@ -3934,6 +3953,9 @@
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
 						, #{packageUrl}
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refLoadedVal)">
+						, #{refLoadedVal}
 						</if>
 					)
 	</insert>
@@ -4603,6 +4625,14 @@
 	  ORDER BY A.PRJ_REF_IDX
 	</select>
 	
+	<select id="checkAddProject" parameterType="string" resultType="int">
+		SELECT COUNT(1) 
+		FROM OSS_COMPONENTS
+		WHERE REFERENCE_ID = #{prjId}
+		AND REFERENCE_DIV = #{referenceDiv}
+	 	AND REF_LOADED_VAL = #{referenceId}
+	</select>
+	
 	<insert id="insertAddList" parameterType="oss.fosslight.domain.Project">
 	/* ProjectMapper insertSrcAddList */
 		INSERT INTO	PROJECT_ADDLIST(
@@ -4627,10 +4657,26 @@
 	 	   AND REFERENCE_DIV = #{referenceDiv}
 	</delete>
 	
+	<delete id="deleteAddList2" parameterType="oss.fosslight.domain.Project">
+	/* ProjectMapper deleteSrcAddList2 */
+		DELETE FROM PROJECT_ADDLIST 
+	 	 WHERE PRJ_ID = #{prjId}
+	 	   AND REFERENCE_ID = #{referenceId}
+	 	   AND REFERENCE_DIV = #{referenceDiv}
+	</delete>
+	
 	<select id="existsAddList" resultType="int">
 		SELECT COUNT(*)
 		  FROM PROJECT_ADDLIST
 		 WHERE PRJ_ID = #{prjId}
+		   AND REFERENCE_DIV = #{referenceDiv}
+	</select>
+	
+	<select id="existsAddList2" resultType="int">
+		SELECT COUNT(*)
+		  FROM PROJECT_ADDLIST
+		 WHERE PRJ_ID = #{prjId}
+		   AND REFERENCE_ID = #{referenceId}
 		   AND REFERENCE_DIV = #{referenceDiv}
 	</select>
 	
@@ -8459,6 +8505,105 @@
 		WHERE
 		PRJ_ID = #{prjId}
 	</update>
+	
+	<select id="selectFileList" parameterType="oss.fosslight.domain.Project" resultType="Map">
+	/* ProjectMapper selectFileList */
+		SELECT A.REFERENCE_ID AS referenceId
+			 , A.REFERENCE_DIV AS referenceDiv
+		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT ORIG_NM FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END fileNm
+		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT LOGI_NM FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END logiNm
+		     , A.COMPONENT_COUNT AS componentCount
+		     , A.FILE_ID AS fileId
+		     , A.FILE_SEQ AS fileSeq
+		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT REG_ID FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END regId
+		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT REG_DT FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END regDt
+		  FROM PROJECT_FILELIST A 
+		 INNER JOIN PROJECT_MASTER P 
+		    ON A.REFERENCE_ID = P.PRJ_ID
+		 WHERE P.PRJ_ID = #{prjId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+		   AND A.REFERENCE_DIV = #{referenceDiv}
+		</if>
+	  ORDER BY A.REG_DT
+	</select>
+	
+	<insert id="insertFileAddList" parameterType="oss.fosslight.domain.Project">
+	/* ProjectMapper insertFileAddList */
+		INSERT INTO	PROJECT_FILELIST (
+			REFERENCE_ID,
+			REFERENCE_DIV,
+			FILE_ID,
+			FILE_SEQ,
+			COMPONENT_COUNT,
+			REG_DT
+		) VALUES (
+			#{prjId},
+			#{referenceDiv},
+			#{identificationCsvFileId},
+			#{identificationCsvFileSeq},
+			#{componentCount},
+			now()
+		)
+	</insert>
+	
+	<select id="selectProjectFileList" parameterType="string" resultType="int">
+		SELECT COUNT(1) 
+		FROM PROJECT_FILELIST
+		WHERE REFERENCE_ID = #{prjId}
+		AND FILE_ID = #{fileId}
+	</select>
+	
+	<select id="selectProjectAddList" parameterType="string" resultType="oss.fosslight.domain.Project">
+		SELECT *
+		FROM PROJECT_ADDLIST
+		WHERE PRJ_ID = #{prjId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			AND REFERENCE_DIV = #{referenceDiv}
+		</if>
+	</select>
+	
+	<delete id="deleteProjectFileList" parameterType="string">
+		DELETE FROM PROJECT_FILELIST
+		WHERE REFERENCE_ID = #{prjId}
+		AND REFERENCE_DIV = #{referenceDiv}
+		AND FILE_SEQ = #{fileSeq}
+	</delete>
+	
+	<update id="updateProjectFileList" parameterType="string">
+		UPDATE PROJECT_FILELIST
+		SET COMPONENT_COUNT = #{componentCount}
+		WHERE REFERENCE_ID = #{referenceId}
+		AND REFERENCE_DIV = #{referenceDiv}
+		AND FILE_SEQ = #{fileSeq}
+	</update>
+	
+	<delete id="deleteProjectAddList" parameterType="string">
+		DELETE FROM PROJECT_ADDLIST
+		WHERE PRJ_ID = #{prjId}
+		AND REFERENCE_ID = #{referenceId}
+		AND REFERENCE_DIV = #{referenceDiv}
+	</delete>
+	
+	<update id="updateProjectAddList" parameterType="string">
+		UPDATE PROJECT_ADDLIST
+		SET COMPONENT_COUNT = #{componentCount}
+		WHERE PRJ_ID = #{prjId}
+		AND REFERENCE_ID = #{referenceId}
+		AND REFERENCE_DIV = #{referenceDiv}
+	</update>
+	
+	<delete id="deleteProjectPartnerAddList" parameterType="string">
+		DELETE FROM PROJECT_PARTNER_MAP
+		WHERE PRJ_ID = #{prjId}
+		AND PARTNER_ID = #{referenceId}
+	</delete>
+	
+	<delete id="deleteLoadedOssComponents" parameterType="string">
+		DELETE FROM OSS_COMPONENTS
+		WHERE REFERENCE_ID = #{prjId}
+		AND REFERENCE_DIV = #{referenceDiv}
+		AND REF_LOADED_VAL = #{refLoadedVal}
+	</delete>
 
 	<select id="selectProjectsModifiedBeforeMonths" resultType="oss.fosslight.domain.Project">
 		/* ProjectMapper.selectProjectsModifiedBeforeMonths */

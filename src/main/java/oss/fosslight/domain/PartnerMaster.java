@@ -217,6 +217,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String ossFileSheetNo;
 	
+	private String refLoadedVal;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1282,5 +1284,13 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setOssFile(List<T2File> ossFile) {
 		this.ossFile = ossFile;
+	}
+
+	public String getRefLoadedVal() {
+		return refLoadedVal;
+	}
+
+	public void setRefLoadedVal(String refLoadedVal) {
+		this.refLoadedVal = refLoadedVal;
 	}
 }

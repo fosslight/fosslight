@@ -352,6 +352,7 @@ public class Project extends ComBean implements Serializable {
 	private String srcAndroidNoticeFileFlag = "N";
 	private String srcAndroidNoticeXmlFileFlag = "N";
 	private String srcAndroidResultFileFlag = "N";
+	private String identificationCsvFileFlag = "N";
 	
 	private String identificationStatusConfFlag = "N";
 	
@@ -396,7 +397,11 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The open source file name. */
 	private String openSourceFileName; // 오픈소스 파일명
-
+	
+	/** The identification csv file id. */
+	private String identificationCsvFileId;
+	private String identificationCsvFileSeq;
+	
 	/** The dep csv file id. */
 	private String depCsvFileId;
 	
@@ -4863,5 +4868,29 @@ public class Project extends ComBean implements Serializable {
 
 	public void setConfirmStatusCopy(String confirmStatusCopy) {
 		this.confirmStatusCopy = confirmStatusCopy;
+	}
+
+	public String getIdentificationCsvFileFlag() {
+		return identificationCsvFileFlag;
+	}
+
+	public void setIdentificationCsvFileFlag(String identificationCsvFileFlag) {
+		this.identificationCsvFileFlag = identificationCsvFileFlag;
+	}
+
+	public String getIdentificationCsvFileId() {
+		return identificationCsvFileId;
+	}
+
+	public void setIdentificationCsvFileId(String identificationCsvFileId) {
+		this.identificationCsvFileId = identificationCsvFileId;
+	}
+
+	public String getIdentificationCsvFileSeq() {
+		return identificationCsvFileSeq;
+	}
+
+	public void setIdentificationCsvFileSeq(String identificationCsvFileSeq) {
+		this.identificationCsvFileSeq = identificationCsvFileSeq;
 	}
 }

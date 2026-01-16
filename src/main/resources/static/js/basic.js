@@ -4397,3 +4397,91 @@ function basicAlertifyDialog(target) {
 		};
 	}, false, 'confirm');
 }
+
+function basicAlertifyDialog(target) {
+	alertify.dialog(target, function() {
+		var settings;
+
+		return {
+			setup: function() {
+				var settings = alertify.confirm().settings;
+
+				for (var prop in settings) {
+					this.settings[prop] = settings[prop];
+				}
+				
+				var setup = alertify.confirm().setup();
+				
+				setup.focus.element = 0;
+				
+				return setup;
+			}
+		};
+	}, false, 'confirm');
+}
+
+function alertifyUploadDialog(target, width, id) {
+	alertify.dialog(target, function() {
+		var settings;
+
+		return {
+			setup: function() {
+				var settings = alertify.confirm().settings;
+
+				for (var prop in settings) {
+					this.settings[prop] = settings[prop];
+				}
+				
+				var setup = alertify.confirm().setup();
+				
+				setup.focus.element = 0;
+				
+				setup.buttons = [];
+				
+				return setup;
+			},
+			build: function() {
+				this.elements.root.setAttribute('id', id);
+			},
+			hooks: {
+				onshow: function() {
+					this.elements.dialog.style.maxWidth = 'none';
+					this.elements.dialog.style.width = width + 'px';
+				}
+			}
+		};
+	}, false, 'alert');
+}
+
+function alertifyDeleteDialog(target, width, id) {
+	alertify.dialog(target, function() {
+		var settings;
+
+		return {
+			setup: function() {
+				var settings = alertify.confirm().settings;
+
+				for (var prop in settings) {
+					this.settings[prop] = settings[prop];
+				}
+				
+				var setup = alertify.confirm().setup();
+				
+				setup.focus.element = 0;
+				
+				setup.buttons = [];
+				
+				return setup;
+			},
+			build: function() {
+				this.elements.root.setAttribute('id', id);
+			},
+			hooks: {
+				onshow: function() {
+					this.elements.dialog.style.maxWidth = 'none';
+					this.elements.dialog.style.width = width + 'px';
+				}
+			}
+		};
+	}, false, 'confirm');
+}
