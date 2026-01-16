@@ -476,7 +476,7 @@
 			 , EDIT_COMPANY_YN = 'N'
 			 , EDIT_DISTRIBUTION_SITE_URL_YN = 'N'
 			 , EDIT_EMAIL_YN = 'N'
-			 , HIDE_OSS_VERSION_YN = 'N'
+			 , HIDE_OSS_VERSION_YN = #{hideOssVersionYn}
 			 , EDIT_APPENDED_YN = 'N'
 			 , NOTICE_APPEND_TYPE = NULL
 		 WHERE PRJ_ID = #{prjId}
