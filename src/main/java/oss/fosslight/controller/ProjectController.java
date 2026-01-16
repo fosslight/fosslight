@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -5616,6 +5617,63 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value = PROJECT.REQUEST_PERMISSION)
+	public @ResponseBody ResponseEntity<Object> requestPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), loginUserName(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+		return makeJsonResponseHeader(true, null, map);
+	}
+	
+	@PostMapping(value = PROJECT.CANCEL_REQUEST_PERMISSION)
+	public @ResponseBody ResponseEntity<Object> cancelRequestPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), loginUserName(), CoConstDef.ACTION_CODE_CANCELED);
+		return makeJsonResponseHeader(true, null, map);
+	}
+	
+	@PostMapping(value = PROJECT.SET_PROEJCT_PERMISSION)
+	public @ResponseBody ResponseEntity<Object> setProjectPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Project prjInfo = projectService.getProjectDetail(project);
+
+		if (isEmpty(project.getRejPerUserNm())) {
+			if (CollectionUtils.isNotEmpty(prjInfo.getReqPerUserIds())) {
+				T2Users user = new T2Users();
+
+				for (String userId : prjInfo.getReqPerUserIds()) {
+					user.setUserId(userId);
+					user = t2UserService.getUser(user);
+					// update permission status
+					projectService.updateRequestProjectPermission(project.getPrjId(), userId, project.getStatus(), null);
+
+					if (project.getStatus().equalsIgnoreCase("APP")) {
+						// add watcher
+						project.setPrjUserId(userId);
+						project.setPrjDivision(user.getDivision());
+						projectService.addWatcher(project);
+					} else {
+						// send reject email
+						String reviewer = avoidNull(prjInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
+						String en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
+						en = en.replace("User", user.getUserName()).replace("Reviewer", reviewer);
+						String ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
+						ko = ko.replace("User", user.getUserName()).replace("Reviewer", reviewer);
+
+						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION);
+						mailBean.setLoginUserName(userId);
+						mailBean.setParamPrjId(project.getPrjId());
+						mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+						CoMailManager.getInstance().sendMail(mailBean);
+					}
+				}
+			}
+		} else {
+			if (!isEmpty(prjInfo.getRejPerUserNm()) && project.getRejPerUserNm().equals(prjInfo.getRejPerUserNm())) {
+				String userId = prjInfo.getRejPerUserNm().split("[|]")[0];
+				projectService.updateRequestProjectPermission(project.getPrjId(), userId, null, prjInfo.getRejPerUserNm());
+			}
+		}
+
+		return makeJsonResponseHeader();
+	}
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = PROJECT.SAVE_TRD_OSS)
 	public @ResponseBody ResponseEntity<Object> saveTrdOss(@RequestBody HashMap<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model) {

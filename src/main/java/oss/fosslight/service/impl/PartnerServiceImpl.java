@@ -57,6 +57,7 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
@@ -71,6 +72,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Autowired private OssService ossService;
 	@Autowired VulnerabilityService vulnerabilityService;
 	@Autowired CommentService commentService;
+	@Autowired private T2UserService t2UserService;
 
 	// Mapper
 	@Autowired private PartnerMapper partnerMapper;
@@ -148,6 +150,57 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				
 				result.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
 				result.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
+			}
+			
+			List<String> reqPerUserIds = projectMapper.selectRequestProjectPermissionList("3rd_" + partnerMaster.getPartnerId(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+			if (CollectionUtils.isNotEmpty(reqPerUserIds)) {
+				result.setReqPerUserIds(reqPerUserIds);
+				boolean isExist = false;
+				if (result.getCreator().equals(loginUserName())) {
+					isExist = true;
+				}
+				if (CollectionUtils.isNotEmpty(watcher)) {
+					int cnt = watcher.stream().filter(e -> e.getParUserId().equals(loginUserName())).collect(Collectors.toList()).size();
+					if (cnt > 0) {
+						isExist = true;
+					}
+				}
+				if (isExist) {
+					String reqPerUserNms = "";
+					for (String userId : reqPerUserIds) {
+						T2Users user = new T2Users();
+						user.setUserId(userId);
+						user = t2UserService.getUser(user);
+						if (!isEmpty(user.getUserName())) {
+							if (!isEmpty(reqPerUserNms)) {
+								reqPerUserNms += ", ";
+							}
+							reqPerUserNms += user.getUserName();
+						}
+					}
+					if (!isEmpty(reqPerUserNms)) {
+						result.setReqPerUserNms(reqPerUserNms);
+					}
+				}
+			}
+			
+			List<String> rejectUserIds = projectMapper.selectRequestProjectPermissionList("3rd_" + partnerMaster.getPartnerId(), "REJ");
+			if (CollectionUtils.isNotEmpty(rejectUserIds)) {
+				String rejUserName = "";
+				for (String userId : rejectUserIds) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						T2Users user = new T2Users();
+						user.setUserId(userId);
+						user = t2UserService.getUser(user);
+						if (!isEmpty(user.getUserName())) {
+							rejUserName = userId + "|" + user.getUserName();
+							break;
+						}
+					}
+				}
+				if (!isEmpty(rejUserName)) {
+					result.setRejPerUserNm(rejUserName);
+				}
 			}
 		}
 		

@@ -750,6 +750,18 @@ public class CoMailManager extends CoTopComponent {
 				}
     		}
 
+    		if (CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType()) || CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())) {
+    			String _s = "";
+				if (!isEmpty(bean.getParamPrjId())) {
+					_s = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId();
+				} else if (!isEmpty(bean.getParamPartnerId())) {
+					_s = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + bean.getParamPartnerId();
+				}
+				if (!isEmpty(_s)) {
+					convertDataMap.put("permissionUrl", _s);
+				}
+    		}
+    		
 			if (CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT.equals(bean.getMsgType())) {
 				var flhSelfCheckUrl = avoidNull(bean.getParamExpansion1())
 						+ "/self-check/"
@@ -797,6 +809,8 @@ public class CoMailManager extends CoTopComponent {
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED:
 			case CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED :
+			case CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION:
+			case CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION:
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
@@ -858,6 +872,10 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT:
+    		case CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION:
+    		case CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION:
+    		case CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION:
+    		case CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION :
 			case CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION :
     			
@@ -1019,6 +1037,10 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
     						) {
 						toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함
     				} else if (CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION.equals(bean.getMsgType())){
@@ -1337,7 +1359,13 @@ public class CoMailManager extends CoTopComponent {
     		
     		if ((Boolean) convertDataMap.get("isModify")) {
     			if (CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType())
-						||  CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())) {
+						||  CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION.equals(bean.getMsgType())) {
     				convertDataMap.put("isModify", false);
     			} else if ((CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType()) 
 						|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())

@@ -429,6 +429,15 @@ public interface ProjectMapper {
 
 	void updateSecurityPerson(Project Project);
 
+	int checkRequestProjectPermission(@Param("prjId") String prjId, @Param("userId") String userId, @Param("status") String status);
+
+	void insertRequestProjectPermission(@Param("prjId") String prjId, @Param("userId") String userId, @Param("status") String status);
+
+	List<String> selectRequestProjectPermissionList(@Param("prjId") String prjId, @Param("status") String status);
+
+	void updateRequestProjectPermission(@Param("prjId") String prjId, @Param("userId") String userId, @Param("status") String status, @Param("rejPerUserNm") String rejPerUserNm);
+
+	void cancelRequestPermission(@Param("prjId") String prjId, @Param("userId") String userId);
 	int existsAddList2(Project project);
 	
 	void deleteAddList2(Project project);

@@ -472,6 +472,57 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
+		List<String> reqPerUserIds = projectMapper.selectRequestProjectPermissionList(project.getPrjId(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+		if (CollectionUtils.isNotEmpty(reqPerUserIds)) {
+			project.setReqPerUserIds(reqPerUserIds);
+			boolean isExist = false;
+			if (project.getCreator().equals(loginUserName())) {
+				isExist = true;
+			}
+			if (CollectionUtils.isNotEmpty(watcherList)) {
+				int cnt = watcherList.stream().filter(e -> e.getPrjUserId().equals(loginUserName())).collect(Collectors.toList()).size();
+				if (cnt > 0) {
+					isExist = true;
+				}
+			}
+			if (isExist) {
+				String reqPerUserNms = "";
+				for (String userId : reqPerUserIds) {
+					T2Users user = new T2Users();
+					user.setUserId(userId);
+					user = t2UserService.getUser(user);
+					if (!isEmpty(user.getUserName())) {
+						if (!isEmpty(reqPerUserNms)) {
+							reqPerUserNms += ", ";
+						}
+						reqPerUserNms += user.getUserName();
+					}
+				}
+				if (!isEmpty(reqPerUserNms)) {
+					project.setReqPerUserNms(reqPerUserNms);
+				}
+			}
+		}
+		
+		List<String> rejectUserIds = projectMapper.selectRequestProjectPermissionList(project.getPrjId(), "REJ");
+		if (CollectionUtils.isNotEmpty(rejectUserIds)) {
+			String rejUserName = "";
+			for (String userId : rejectUserIds) {
+				if (userId.equalsIgnoreCase(loginUserName())) {
+					T2Users user = new T2Users();
+					user.setUserId(userId);
+					user = t2UserService.getUser(user);
+					if (!isEmpty(user.getUserName())) {
+						rejUserName = userId + "|" + user.getUserName();
+						break;
+					}
+				}
+			}
+			if (!isEmpty(rejUserName)) {
+				project.setRejPerUserNm(rejUserName);
+			}
+		}
+		
 		project.setStandardScore(null);
 		return project;
 	}
@@ -9188,6 +9239,77 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	}
 
 	@Override
+	public Map<String, Object> requestProjectPermission(String prjId, String userId, String status) {
+		Map<String, Object> rtnMap = new HashMap<>();
+
+		try {
+			T2Users user = new T2Users();
+			user.setUserId(userId);
+			user = t2UserService.getUser(user);
+
+			String en = "";
+			String ko = "";
+
+			String mailType = "";
+
+			if (CoConstDef.ACTION_CODE_CANCELED.equals(status)) {
+				projectMapper.cancelRequestPermission(prjId, userId);
+
+				// send mail
+				en = messageSource.getMessage("msg.common.cancel.permission", null, Locale.ENGLISH);
+				en = en.replace("User", user.getUserName());
+				ko = messageSource.getMessage("msg.common.cancel.permission", null, Locale.KOREAN);
+				ko = ko.replace("User", user.getUserName());
+
+				mailType = !prjId.startsWith("3rd_") ? CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION : CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION;
+				CoMail mailBean = new CoMail(mailType);
+				mailBean.setLoginUserName(userId);
+				if (!prjId.startsWith("3rd_")) {
+					mailBean.setParamPrjId(prjId);
+				} else {
+					mailBean.setParamPartnerId(prjId.replaceFirst("3rd_", ""));
+				}
+				mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+				CoMailManager.getInstance().sendMail(mailBean);
+
+				rtnMap.put("isValid", true);
+			} else {
+				// exists permission request information
+				int cnt = projectMapper.checkRequestProjectPermission(prjId, userId, status);
+				if (cnt == 0) {
+					// Save permission request information
+					projectMapper.insertRequestProjectPermission(prjId, userId, status);
+
+					// send mail
+					en = messageSource.getMessage("msg.common.approve.permission", null, Locale.ENGLISH);
+					en = en.replace("User", user.getUserName());
+					ko = messageSource.getMessage("msg.common.approve.permission", null, Locale.KOREAN);
+					ko = ko.replace("User", user.getUserName());
+
+					mailType = !prjId.startsWith("3rd_") ? CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION : CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION;
+					CoMail mailBean = new CoMail(mailType);
+					mailBean.setLoginUserName(userId);
+					if (!prjId.startsWith("3rd_")) {
+						mailBean.setParamPrjId(prjId);
+					} else {
+						mailBean.setParamPartnerId(prjId.replaceFirst("3rd_", ""));
+					}
+					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+					CoMailManager.getInstance().sendMail(mailBean);
+
+					rtnMap.put("isValid", true);
+				} else {
+					rtnMap.put("isValid", false);
+					rtnMap.put("msg", "You have already requested editing access to this project. The Creator/Editor will review your request.");
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			rtnMap.put("isValid", false);
+		}
+		return rtnMap;
+	}
+		
 	public Map<String, Object> getIdentificationAddList(Project project) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		Map<String, Integer> countMap = new LinkedHashMap<>();
@@ -9541,5 +9663,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		} else {
 			log.info("No inactive projects found (not modified for 6 months)");
 		}
-	}
+  }
+    
+  public void updateRequestProjectPermission(String prjId, String userId, String status, String rejPerUserNm) {
+    projectMapper.updateRequestProjectPermission(prjId, userId, status, rejPerUserNm);
+  }
+    
 }
+ 

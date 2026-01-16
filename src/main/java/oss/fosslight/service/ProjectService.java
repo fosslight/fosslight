@@ -80,8 +80,7 @@ public interface ProjectService extends HistoryConfig{
 
 	Map<String, Object> getIdentificationProject(Project project);
 
-	void registComponentsBat(String prjId, String identificationSubStatusBat, List<ProjectIdentification> ossComponents,
-			List<List<ProjectIdentification>> ossComponentsLicense, boolean prjYn);
+	void registComponentsBat(String prjId, String identificationSubStatusBat, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, boolean prjYn);
 
 	Map<String, Object> getIdentificationGridList(ProjectIdentification identification);
 	
@@ -252,6 +251,9 @@ public interface ProjectService extends HistoryConfig{
 
 	public void updateProjectNotification(Project project, Map<String, Object> param);
 
+	public Map<String, Object> requestProjectPermission(String prjId, String userId, String status);
+
+	public void updateRequestProjectPermission(String prjId, String userId, String status, String rejPerUserNm);
 	public Map<String, Object> getIdentificationAddList(Project project);
 
 	public void setFileAddList(T2File uploadFile, Project project, String readType, int depComponentCount, int srcComponentCount, int binComponentCount, boolean isDepLoaded, boolean isSrcLoaded, boolean isBinLoaded);

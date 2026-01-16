@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<style>
+			.marker{background-color: Yellow;}
+			.commentDiv table {border: 1px solid #ddd;}
+			.commentDiv table th {border: 1px solid #ddd;}
+			.commentDiv table td {border: 1px solid #ddd;}
+			.approve {display:inline-block; padding:3px 10px; margin-left:10px; color:white !important; background-color:#17a2b8; border-color:#17a2b8; text-decoration:none; border-radius:6px; transition:background-color 0.3s;}
+		</style>
+		<title>FOSSLight Hub</title>
+	</head>
+	<body>
+		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td width="60" style="background:#f9f9f9"></td>
+				<td>
+					<table cellspacing="0" cellpadding="0" border="0">
+						<tr>
+							<td colspan="3" height="25" style="background:#c00c3f">
+								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+							</td>
+						</tr>
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px 40px 0px 40px;">
+								<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+								<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+								<div th:if="${comment != null and comment != ''}" class="commentDiv">
+									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
+									<div style="padding:10px;font-size:12px;font-color:#000;" th:utext="${comment}"></div>
+									<th:block th:if="${permissionUrl != null}">
+										<a class="approve" th:text="approve" th:href="${permissionUrl}" target="_blank"></a>
+									</th:block>
+								</div>
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px;">
+								<th:block th:if="${project_basic_info != null}">
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<col style="width:40%">
+										<col style="width:*">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+											<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
+											<td style="padding:5px;" th:utext="${project_basic_info.prjName}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.prjVersion}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Security Mail</th>
+											<td style="padding:5px;" th:utext="|${project_basic_info?.secMailDesc}|"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Security Responsible Person</th>
+											<td style="padding:5px;" th:utext="|${project_basic_info?.secPersonNm} |"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.osType}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type / Network Service Only? </th>
+											<td style="padding:5px;" th:utext="|${project_basic_info?.distributionType} / ${project_basic_info?.networkServerType}|"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.distributeTarget}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.noticeType}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Priority</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.priority}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Additional Information</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.comment}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.creator}"></td>
+										</tr>
+										<tr th:if="${project_basic_info.reviewer}">
+											<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
+											<td style="padding:5px;" th:utext="${project_basic_info?.reviewer}"></td>
+										</tr>
+									</table>
+								</th:block>
+								<th:block th:if="${partner_basic_info != null}">
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<col style="width:40%">
+	        							<col style="width:*">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+											<th style="padding:5px;background:#f0f0f0;">3rd Party Information</th>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">3rd party Name</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.partnerName}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Software Name</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.softwareName}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.softwareVersion}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Delivery Form</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.deliveryForm}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Description</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.description}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">OSS Commitment</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.confirmationFileId}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">OSS Checklist</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.ossFileId}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.creator}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
+											<td style="padding:5px;" th:utext="${partner_basic_info?.division}"></td>
+										</tr>
+										<tr th:if="${partner_basic_info != null && partner_basic_info?.reviewer != null}">
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Reviewer'" th:align="'left'"></th>
+											<td th:style="'padding:5px;'" th:utext="${partner_basic_info?.reviewer}"></td>
+										</tr>
+									</table>
+								</th:block>
+								<br />
+								<div style="margin:20px 0;border:1px dashed #666;"></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+						<tr>
+							<td colspan="3" height="1" style="background:#ddd"></td>
+						</tr>
+					</table>
+				</td>
+				<td width="60" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+		</table>
+		
+	</body>
+</html>
