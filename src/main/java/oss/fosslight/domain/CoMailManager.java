@@ -874,8 +874,6 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT:
     		case CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION:
     		case CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION:
-    		case CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION:
-    		case CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION :
 			case CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION :
     			
@@ -1039,8 +1037,6 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
-    						|| CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
-    						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
     						) {
 						toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함
     				} else if (CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION.equals(bean.getMsgType())){
@@ -1152,6 +1148,8 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT:
 			case CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION :
+			case CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION:
+    		case CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION:
 				// to :  creator + cc : watcher + reviewer
     			partnerInfo = mailManagerMapper.getPartnerInfo(bean.getParamPartnerId());
     			if (CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT.equals(bean.getMsgType())
@@ -1264,6 +1262,8 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_CANCELED_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
     						) {
     					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getCreator()})));
     					toList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId()));
