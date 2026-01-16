@@ -855,7 +855,7 @@ ul.ui-autocomplete {
     box-shadow: inset 0 0 0 transparent  !important;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out !important;
 }
-ul.ui-autocomplete {z-index:1001;max-height:240px;overflow-y: auto;overflow-x: hidden;}
+ul.ui-autocomplete {z-index:2000;max-height:240px;overflow-y: auto;overflow-x: hidden;}
 ul.ui-autocomplete .ui-menu-item { border: none; padding: 6px 12px; }
 ul.ui-autocomplete .ui-menu-item:hover {
     background-color: #0074f0;

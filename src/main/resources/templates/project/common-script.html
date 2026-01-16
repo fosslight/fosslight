@@ -3260,11 +3260,15 @@ var com_fn = {
 		
 		for (const key in data) {
 			if ("Project" == key || "FILE" == key) {
+				var name = key;
 				totalCnt += data[key];
 				if ("" != total) {
 					total += " ";
 				}
-				total += key + "(" + data[key] + ")";
+				if ("Project" == key) {
+					name = "Project/3rd party";
+				}
+				total += name + "(" + data[key] + ")";
 			} else {
 				if ("" != components) {
 					components += " ";
