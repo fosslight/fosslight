@@ -294,6 +294,7 @@ public final class Url {
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
 		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
+		public static final String DEL_IDENTIFICATION_UPLOAD = PATH + "/delIdentificationUpload";
 		
 		public static final String SAVE_3RD = PATH + "/save3rd";
 		public static final String SAVE_DEP = PATH + "/saveDep";
@@ -335,6 +336,7 @@ public final class Url {
 
 		public static final String IDENTIFICATION_MERGED_GRID_ID_CD = PATH + "/identificationMergedGrid/{prjId}/{code}";
 		public static final String TRD_OSS = PATH + "/3rdOss";
+		public static final String SAVE_TRD_OSS = PATH + "/save3rdOss";
 		
 		public static final String ANDROID_SHEET_NAME = PATH + "/androidSheetName";
 		
@@ -358,11 +360,13 @@ public final class Url {
 		
 		public static final String PROJECT_TO_ADD_LIST = PATH + "/projectToAddList";
 		public static final String ADD_LIST = PATH + "/getAddList";
+		public static final String IDENTIFICATION_ADD_LIST = PATH + "/getIdentificationAddList";
 		public static final String PARTNER_LIST = PATH + "/getPartnerList";
 		
 		public static final String BIN_CSV_FILE = PATH + "/binCsvFile";
 		public static final String CSV_FILE = PATH + "/csvFile";
 		public static final String SHEET_DATA = PATH + "/getSheetData";
+		public static final String IDENTIFICATION_SHEET_DATA = PATH + "/getIdentificationSheetData";
 		public static final String SECURITY_SHEET_DATA = PATH + "/getSecuritySheetData";
 		
 		public static final String SEND_COMMENT = PATH + "/sendComment";

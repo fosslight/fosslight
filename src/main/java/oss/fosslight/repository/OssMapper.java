@@ -292,4 +292,6 @@ public interface OssMapper {
 	List<OssMaster> getOssInfoByRestriction(@Param("restriction") String restriction);
 
 	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
+
+	List<String> getPrjIdsToSendCoReviewerEamils();
 }

@@ -438,4 +438,31 @@ public interface ProjectMapper {
 	void updateRequestProjectPermission(@Param("prjId") String prjId, @Param("userId") String userId, @Param("status") String status, @Param("rejPerUserNm") String rejPerUserNm);
 
 	void cancelRequestPermission(@Param("prjId") String prjId, @Param("userId") String userId);
+	int existsAddList2(Project project);
+	
+	void deleteAddList2(Project project);
+
+	void insertFileAddList(Project Project);
+
+	List<Map<String, Object>> selectFileList(Project Project);
+
+	void deleteProjectFileList(@Param("prjId") String prjId, @Param("referenceDiv") String referenceDiv, @Param("fileSeq") String fileSeq);
+
+	void deleteProjectAddList(@Param("prjId") String prjId, @Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv);
+
+	void deleteProjectPartnerAddList(@Param("prjId") String prjId, @Param("referenceId") String referenceId);
+
+	void deleteLoadedOssComponents(@Param("prjId") String prjId, @Param("referenceDiv") String referenceDiv, @Param("refLoadedVal") String refLoadedVal);
+
+	int selectProjectFileList(@Param("prjId") String prjId, @Param("fileId") String fileId);
+
+	List<Project> selectProjectAddList(@Param("prjId") String prjId, @Param("referenceDiv") String referenceDiv);
+
+	void updateProjectAddList(Project project);
+
+	void updateProjectFileList(@Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv, @Param("fileSeq") String fileSeq, @Param("componentCount") String componentCount);
+
+	int checkAddProject(@Param("prjId") String prjId, @Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv);
+	
+  List<Project> selectProjectsModifiedBeforeMonths(@Param("months") int months);
 }

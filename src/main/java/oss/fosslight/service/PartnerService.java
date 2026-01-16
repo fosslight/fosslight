@@ -85,4 +85,6 @@ public interface PartnerService extends HistoryConfig{
 	public void deletePartnerRefFiles(PartnerMaster partnerMaster);
 
 	public void updateSecurityDataForPartner(String partnerId);
+
+	public void sendMailInactivePartner();
 }

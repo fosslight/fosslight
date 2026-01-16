@@ -549,7 +549,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DROPPED = "812"; // Project drop
 	public static final String CD_MAIL_TYPE_PROJECT_REOPENED = "36"; // Project reopen
 	public static final String CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT = "38"; // Project RequestToOpen Comment 추가  2018-07-23 choye 추가
-
+    public static final String CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION = "101";
+	
 	/** Project Request Review(Identification) */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW = "40";
 	/** Project Identification confirm */
@@ -638,6 +639,9 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PARTER_DELETED = "77";
 	public static final String CD_MAIL_TYPE_PARTER_WATCHER_INVATED = "78";
 	public static final String CD_MAIL_TYPE_PARTER_WATCHER_REGISTED = "79";
+
+	public static final String CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION = "844";
+	public static final String CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION ="845";
 	/** Binary Analysis 완료시*/
 	public static final String CD_MAIL_TYPE_BAT_COMPLETE = "80";
 	/** Binary Analysis 실패시*/

@@ -46,20 +46,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.CoMail;
-import oss.fosslight.domain.CoMailManager;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssComponentsLicense;
-import oss.fosslight.domain.OssLicense;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.T2File;
-import oss.fosslight.domain.T2Users;
-import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.LicenseMapper;
@@ -1462,7 +1449,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				notice.setEditCompanyYn(CoConstDef.FLAG_YES);
 				notice.setEditDistributionSiteUrlYn(CoConstDef.FLAG_YES);
 				notice.setEditEmailYn(CoConstDef.FLAG_YES);
-				notice.setHideOssVersionYn(CoConstDef.FLAG_NO);
+				notice.setHideOssVersionYn(CoConstDef.FLAG_YES);
 				notice.setEditAppendedYn(CoConstDef.FLAG_NO);
 				notice.setPrjId(project.getPrjId());
 				
@@ -1486,7 +1473,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}
 			} else if (CoConstDef.FLAG_YES.equals(notice.getEditNoticeYn())
 					&& CoConstDef.CD_NOTICE_TYPE_GENERAL.equals(notice.getNoticeType())) {
-				
+				// modified OSS Notice 선택 시 hideOssVersionYn 기본값을 Y로 설정
+				if (isEmpty(notice.getHideOssVersionYn())) {
+					notice.setHideOssVersionYn(CoConstDef.FLAG_YES);
+				}
 			} else {
 				if (!isEmpty(notice.getCompanyNameFull())){
 					notice.setEditCompanyYn(CoConstDef.FLAG_YES);
@@ -2768,5 +2758,28 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Override
 	public void updateComment(Project project) {
 		selfCheckMapper.updateComment(project);
+	}
+
+	public void sendMailInactiveSelfCheck() {
+
+		// 6개월 전 modified date를 가진 프로젝트 조회
+		List<Project> inactiveSelfChecks = selfCheckMapper.selectSelfChecksModifiedBeforeMonths(6);
+		if (inactiveSelfChecks != null && !inactiveSelfChecks.isEmpty()) {
+			log.info("Found " + inactiveSelfChecks.size() + " inactive selfcheck (not modified for 6 months)");
+
+			for (Project project : inactiveSelfChecks) {
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION);
+					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION));
+					mailBean.setComment(_tempComment);
+					mailBean.setParamPrjId(project.getPrjId());
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error("Error sending inactive notification email for selfcheck: " + project.getPrjId(), e);
+				}
+			}
+		} else {
+			log.info("No inactive selfcheck found (not modified for 6 months)");
+		}
 	}
 }

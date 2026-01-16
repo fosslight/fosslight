@@ -1766,4 +1766,29 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		}
 		partnerMapper.updateVulnerabilityDataForPartner(bean);
 	}
+
+	public void sendMailInactivePartner() {
+
+		// 6개월 전 modified date를 가진 프로젝트 조회
+		List<PartnerMaster> inactivePartners = partnerMapper.selectPartnersModifiedBeforeMonths(6);
+
+		if (inactivePartners != null && !inactivePartners.isEmpty()) {
+			log.info("Found " + inactivePartners.size() + " inactive 3rd (not modified for 6 months)");
+
+			for (PartnerMaster partner : inactivePartners) {
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION);
+					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION));
+					mailBean.setComment(_tempComment);
+					mailBean.setParamPartnerId(partner.getPartnerId());
+					CoMailManager.getInstance().sendMail(mailBean);
+
+				} catch (Exception e) {
+					log.error("Error sending inactive notification email for 3rd: " + partner.getPartnerId(), e);
+				}
+			}
+		} else {
+			log.info("No inactive 3rd found (not modified for 6 months)");
+		}
+	}
 }
