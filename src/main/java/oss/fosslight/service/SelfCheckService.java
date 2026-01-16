@@ -84,5 +84,5 @@ public interface SelfCheckService extends HistoryConfig{
 	public void deleteProjectRefFiles(Project project);
 
 	public void updateComment(Project project);
-	
+	public void sendMailInactiveSelfCheck();
 }

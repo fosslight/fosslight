@@ -246,4 +246,6 @@ public interface ProjectService extends HistoryConfig{
 	public boolean initAutoReview(String prjId);
 
 	public void updateProjectNotification(Project project, Map<String, Object> param);
+
+	public void sendMailInactiveProject();
 }

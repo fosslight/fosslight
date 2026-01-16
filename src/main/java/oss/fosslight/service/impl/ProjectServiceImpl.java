@@ -9030,4 +9030,30 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
         }
         return status;
 	}
+
+	public void sendMailInactiveProject() {
+
+		// 6개월 전 modified date를 가진 프로젝트 조회
+		List<Project> inactiveProjects = projectMapper.selectProjectsModifiedBeforeMonths(6);
+
+		if (inactiveProjects != null && !inactiveProjects.isEmpty()) {
+			log.info("Found " + inactiveProjects.size() + " inactive projects (not modified for 6 months)");
+
+			for (Project project : inactiveProjects) {
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION);
+					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION));
+					mailBean.setComment(_tempComment);
+					mailBean.setParamPrjId(project.getPrjId());
+					mailBean.setParamPrjInfo(project);
+					CoMailManager.getInstance().sendMail(mailBean);
+
+				} catch (Exception e) {
+					log.error("Error sending inactive notification email for project: " + project.getPrjId(), e);
+				}
+			}
+		} else {
+			log.info("No inactive projects found (not modified for 6 months)");
+		}
+	}
 }

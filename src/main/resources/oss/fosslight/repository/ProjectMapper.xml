@@ -8459,4 +8459,24 @@
 		WHERE
 		PRJ_ID = #{prjId}
 	</update>
+
+	<select id="selectProjectsModifiedBeforeMonths" resultType="oss.fosslight.domain.Project">
+		/* ProjectMapper.selectProjectsModifiedBeforeMonths */
+		SELECT 
+			PRJ_ID,
+			PRJ_NAME,
+			PRJ_VERSION,
+			CREATOR,
+			MODIFIER,
+			MODIFIED_DATE,
+			CREATED_DATE,
+			REVIEWER,
+			DIVISION
+		FROM PROJECT_MASTER
+		WHERE USE_YN = 'Y' AND (COMPLETE_YN != 'Y' or COMPLETE_YN is null) AND (DROP_YN != 'Y' or DROP_YN is null)
+		  AND (IDENTIFICATION_STATUS = 'PROG' or IDENTIFICATION_STATUS is null or VERIFICATION_STATUS = 'PROG' or VERIFICATION_STATUS is null  or Distribution_STATUS = 'PROG' or DISTRIBUTION_STATUS is null)
+		  AND MODIFIED_DATE IS NOT NULL
+			AND MODIFIED_DATE <![CDATA[<=]]> DATE_SUB(NOW(), INTERVAL #{months} MONTH)
+		ORDER BY MODIFIED_DATE ASC
+	</select>
 </mapper>

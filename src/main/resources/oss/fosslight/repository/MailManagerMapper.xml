@@ -145,4 +145,17 @@
 	<delete id="deleteTempMail" parameterType="String">
 		DELETE FROM EMAIL_SND_TEMP WHERE MAIL_SEQ = #{mailSeq}
 	</delete>
+	<select id="setSelfCheckWatcherMailListNotCheckDivision" parameterType="String" resultType="String">
+		SELECT DISTINCT T1.EMAIL
+		FROM T2_USERS T1
+				 INNER JOIN PRE_PROJECT_WATCHER T2 ON T1.USER_ID = T2.USER_ID
+		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId}
+		UNION
+		SELECT DISTINCT T1.EMAIL
+		FROM T2_USERS T1 INNER JOIN PRE_PROJECT_WATCHER T2 ON T1.EMAIL = T2.EMAIL
+		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId}
+		UNION
+		SELECT T1.EMAIL FROM T2_USERS T1 INNER JOIN PRE_PROJECT_MASTER T2 ON T1.USER_ID = T2.CREATOR
+		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId}
+	</select>
  </mapper>

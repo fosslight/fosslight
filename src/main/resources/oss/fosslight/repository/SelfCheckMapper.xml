@@ -3164,4 +3164,18 @@
 	<update id="updateComment" parameterType="oss.fosslight.domain.Project">
 		UPDATE PRE_PROJECT_MASTER SET COMMENT = #{comment} WHERE PRJ_ID = #{prjId}
 	</update>
+
+	<select id="selectSelfChecksModifiedBeforeMonths" resultType="oss.fosslight.domain.Project">
+		SELECT
+			PRJ_ID,
+			PRJ_NAME,
+			PRJ_VERSION,
+			CREATOR,
+			DIVISION
+		FROM PRE_PROJECT_MASTER
+		WHERE USE_YN = 'Y'
+		  AND MODIFIED_DATE IS NOT NULL
+		  AND MODIFIED_DATE <![CDATA[<=]]> DATE_SUB(NOW(), INTERVAL #{months} MONTH)
+		ORDER BY MODIFIED_DATE ASC
+	</select>
 </mapper>

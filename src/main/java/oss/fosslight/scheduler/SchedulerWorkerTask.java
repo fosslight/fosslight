@@ -25,11 +25,9 @@ import org.springframework.stereotype.Component;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.service.MailService;
-import oss.fosslight.service.NvdDataService;
+import oss.fosslight.service.*;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.FileUtil;
-
 
 @Component
 public class SchedulerWorkerTask extends CoTopComponent {
@@ -39,6 +37,9 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired MailService mailService;
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
+	@Autowired ProjectService projectService;
+	@Autowired PartnerService partnerService;
+	@Autowired SelfCheckService selfcheckService;
 	boolean serverLoadFlag = false; 
 	boolean distributionFlag;
 	
@@ -113,5 +114,16 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	//@Scheduled(cron="0 5,10,15,20,25,30,35,40,45,50,55 * * * *")
 	public void sendTempMail() {
 		mailService.sendTempMail();
+	}
+
+	@Scheduled(cron="0 0 9 1 * ?")
+	public void sendInactiveNotification() {
+		log.info("sendInactiveNotification start");
+
+		projectService.sendMailInactiveProject();
+		partnerService.sendMailInactivePartner();
+		selfcheckService.sendMailInactiveSelfCheck();
+
+		log.info("sendInactiveNotification end");
 	}
 }
