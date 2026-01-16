@@ -5632,17 +5632,17 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value = PROJECT.SET_PROEJCT_PERMISSION)
 	public @ResponseBody ResponseEntity<Object> setProjectPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project prjInfo = projectService.getProjectDetail(project);
-		
+
 		if (isEmpty(project.getRejPerUserNm())) {
 			if (CollectionUtils.isNotEmpty(prjInfo.getReqPerUserIds())) {
 				T2Users user = new T2Users();
-				
+
 				for (String userId : prjInfo.getReqPerUserIds()) {
 					user.setUserId(userId);
 					user = t2UserService.getUser(user);
 					// update permission status
 					projectService.updateRequestProjectPermission(project.getPrjId(), userId, project.getStatus(), null);
-					
+
 					if (project.getStatus().equalsIgnoreCase("APP")) {
 						// add watcher
 						project.setPrjUserId(userId);
@@ -5655,7 +5655,7 @@ public class ProjectController extends CoTopComponent {
 						en = en.replace("User", user.getUserName()).replace("Reviewer", reviewer);
 						String ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
 						ko = ko.replace("User", user.getUserName()).replace("Reviewer", reviewer);
-						
+
 						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION);
 						mailBean.setLoginUserName(userId);
 						mailBean.setParamPrjId(project.getPrjId());
@@ -5670,8 +5670,10 @@ public class ProjectController extends CoTopComponent {
 				projectService.updateRequestProjectPermission(project.getPrjId(), userId, null, prjInfo.getRejPerUserNm());
 			}
 		}
-		
+
 		return makeJsonResponseHeader();
+	}
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = PROJECT.SAVE_TRD_OSS)
 	public @ResponseBody ResponseEntity<Object> saveTrdOss(@RequestBody HashMap<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model) {

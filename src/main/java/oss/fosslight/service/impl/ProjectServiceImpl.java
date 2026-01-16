@@ -9241,26 +9241,26 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	@Override
 	public Map<String, Object> requestProjectPermission(String prjId, String userId, String status) {
 		Map<String, Object> rtnMap = new HashMap<>();
-		
+
 		try {
 			T2Users user = new T2Users();
 			user.setUserId(userId);
 			user = t2UserService.getUser(user);
-			
+
 			String en = "";
 			String ko = "";
-			
+
 			String mailType = "";
-			
+
 			if (CoConstDef.ACTION_CODE_CANCELED.equals(status)) {
 				projectMapper.cancelRequestPermission(prjId, userId);
-				
+
 				// send mail
 				en = messageSource.getMessage("msg.common.cancel.permission", null, Locale.ENGLISH);
 				en = en.replace("User", user.getUserName());
 				ko = messageSource.getMessage("msg.common.cancel.permission", null, Locale.KOREAN);
 				ko = ko.replace("User", user.getUserName());
-				
+
 				mailType = !prjId.startsWith("3rd_") ? CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION : CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION;
 				CoMail mailBean = new CoMail(mailType);
 				mailBean.setLoginUserName(userId);
@@ -9271,7 +9271,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				}
 				mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
 				CoMailManager.getInstance().sendMail(mailBean);
-				
+
 				rtnMap.put("isValid", true);
 			} else {
 				// exists permission request information
@@ -9279,13 +9279,13 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				if (cnt == 0) {
 					// Save permission request information
 					projectMapper.insertRequestProjectPermission(prjId, userId, status);
-					
+
 					// send mail
 					en = messageSource.getMessage("msg.common.approve.permission", null, Locale.ENGLISH);
 					en = en.replace("User", user.getUserName());
 					ko = messageSource.getMessage("msg.common.approve.permission", null, Locale.KOREAN);
 					ko = ko.replace("User", user.getUserName());
-					
+
 					mailType = !prjId.startsWith("3rd_") ? CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION : CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION;
 					CoMail mailBean = new CoMail(mailType);
 					mailBean.setLoginUserName(userId);
@@ -9296,7 +9296,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					}
 					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
 					CoMailManager.getInstance().sendMail(mailBean);
-					
+
 					rtnMap.put("isValid", true);
 				} else {
 					rtnMap.put("isValid", false);
@@ -9307,6 +9307,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			log.error(e.getMessage(), e);
 			rtnMap.put("isValid", false);
 		}
+		return rtnMap;
+	}
 		
 	public Map<String, Object> getIdentificationAddList(Project project) {
 		Map<String, Object> rtnMap = new HashMap<>();

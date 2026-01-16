@@ -1313,6 +1313,7 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setRejPerUserNm(String rejPerUserNm) {
 		this.rejPerUserNm = rejPerUserNm;
+	}
 	public String getRefLoadedVal() {
 		return refLoadedVal;
 	}
