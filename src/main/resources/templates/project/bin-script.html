@@ -794,6 +794,10 @@ var bin_fn = {
 							alertify.error([[#{msg.common.valid}]], 0);
 						}
 					} else {
+						if (typeof data.resultData.isExistsExcludeYn !== "undefined") {
+							alertify.confirm([[#{msg.common.exists.excludeYn}]], function(){});
+						}
+						
 						if(data.externalData) { // validData 표시
 							binValidMsgData = data.externalData;
 						}

@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <style>
+        .marker{background-color: Yellow;}
+        .commentDiv table {border: 1px solid #ddd;}
+        .commentDiv table th {border: 1px solid #ddd;}
+        .commentDiv table td {border: 1px solid #ddd;}
+    </style>
+    <title>FOSSLight Hub</title>
+</head>
+<body>
+<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+    <tr>
+        <td colspan="3" height="28" style="background:#f9f9f9"></td>
+    </tr>
+    <tr>
+        <td width="60" style="background:#f9f9f9"></td>
+        <td>
+            <table cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                    <td colspan="3" height="25" style="background:#c00c3f">
+                        <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="1" style="background:#ddd"></td>
+                    <td style="padding:40px;">
+                        <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:utext="${contentsTitle}"></div>
+                        <p style="font-size:12px;" th:if="${contentsSubTitle != null && contentsSubTitle != ''}" th:utext="${contentsSubTitle}"></p>
+                        <div th:if="${comment != null and comment != ''}" class="commentDiv">
+                            <h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
+                            <div style="padding:10px;font-size:12px;font-color:#000;" th:utext="${comment}"></div>
+                        </div>
+                        <table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+                            <col style="width:40%">
+                            <col style="width:*">
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+                                <th style="padding:5px;background:#f0f0f0;">Self Check Information</th>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Self Check Name</th>
+                                <td style="padding:5px;" th:utext="${selfcheck_basic_info.prjName}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
+                                <td style="padding:5px;" th:utext="${selfcheck_basic_info.prjVersion}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+                                <td style="padding:5px;" th:utext="${selfcheck_basic_info.creator}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
+                                <td style="padding:5px;" th:utext="${selfcheck_basic_info.division}"></td>
+                            </tr>
+                        </table>
+                        <div style="margin:20px 0;border:1px dashed #666;"></div>
+                        <div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+                             style="font-size:12px;">
+                            * This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+                        </div>
+                    </td>
+                    <td width="1" style="background:#ddd"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" height="1" style="background:#ddd"></td>
+                </tr>
+            </table>
+        </td>
+        <td width="60" style="background:#f9f9f9"></td>
+    </tr>
+    <tr>
+        <td colspan="3" height="28" style="background:#f9f9f9"></td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -327,7 +327,7 @@
                                 <div class="row form-group">
                                 	<div class="col-12">
                                 		<label th:text="#{msg.common.field.reviewer}"></label>
-                                    	<input type="text" name="reviewer" class="form-control autoComReviewer" th:value="${project?.reviewerName}" th:disabled="${@CommonFunction.isAdmin() == false} ? 'disabled'" />
+                                    	<input type="text" name="reviewer" class="form-control" th:value="${project?.reviewerName}" th:disabled="${@CommonFunction.isAdmin() == false} ? 'disabled'" />
                                 	</div>
                                 </div>
                                 </th:block>

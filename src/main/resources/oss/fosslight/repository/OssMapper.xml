@@ -4500,4 +4500,17 @@
 		ORDER BY CVE.CVSS_SCORE DESC
 		LIMIT 1
 	</select>
+	
+	<select id="getPrjIdsToSendCoReviewerEamils" resultType="string">
+		SELECT OAS.PRJ_ID
+		FROM OSS_ANALYSIS_STATUS OAS
+		WHERE OAS.STATUS = 'SUCCESS'
+		AND DATE_FORMAT(OAS.ANALYSIS_END_DATE, '%Y%m%d') = DATE_FORMAT(NOW(), '%Y%m%d')
+		AND EXISTS (
+			SELECT 1
+			FROM OSS_ANALYSIS_MAP
+			WHERE REFERENCE_ID = OAS.PRJ_ID
+			AND COREVIEWER_YN = 'N'
+		)
+	</select>
 </mapper>

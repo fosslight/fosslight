@@ -454,4 +454,6 @@ public interface ProjectMapper {
 	void updateProjectFileList(@Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv, @Param("fileSeq") String fileSeq, @Param("componentCount") String componentCount);
 
 	int checkAddProject(@Param("prjId") String prjId, @Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv);
+	
+  List<Project> selectProjectsModifiedBeforeMonths(@Param("months") int months);
 }

@@ -259,4 +259,6 @@ public interface ProjectService extends HistoryConfig{
 	public void deleteIdentificationUploadFile(HashMap<String, Object> param);
 
 	public void deleteIdentificationUploadSearchData(HashMap<String, Object> param);
+	
+  public void sendMailInactiveProject();
 }

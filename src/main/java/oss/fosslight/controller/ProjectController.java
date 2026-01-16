@@ -2940,8 +2940,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_BOM)
-	public @ResponseBody ResponseEntity<Object> saveBom(@RequestBody Map<String, Object> map, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveBom(@RequestBody Map<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String prjId = (String) map.get("referenceId");
 		String merge = (String) map.get("merge");
 		String gridString = (String) map.get("gridData");
@@ -2981,10 +2980,9 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the response entity
 	 */
-	@SuppressWarnings({ "unchecked", "unused" })
+	@SuppressWarnings({ "unchecked" })
 	@PostMapping(value = PROJECT.UPDATE_PROJECT_STATUS)
-	public @ResponseBody ResponseEntity<Object> updateProjectStatus(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> updateProjectStatus(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		log.info("URI: "+ "/project/updateProjectStatus");
 		log.debug("PARAM: " + "useCustomNoticeYn="+project.getUseCustomNoticeYn());
 		/* 2018-07-27 choye 추가 */
