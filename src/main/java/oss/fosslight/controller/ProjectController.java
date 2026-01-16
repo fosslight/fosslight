@@ -5652,14 +5652,15 @@ public class ProjectController extends CoTopComponent {
 						// send reject email
 						String reviewer = avoidNull(prjInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
 						String en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
-						en = en.replace("User", user.getUserName()).replace("Reviewer", reviewer);
+						en = en.replaceAll("Reviewer", reviewer);
 						String ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
-						ko = ko.replace("User", user.getUserName()).replace("Reviewer", reviewer);
+						ko = ko.replaceAll("Reviewer", reviewer);
 
 						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION);
 						mailBean.setLoginUserName(userId);
 						mailBean.setParamPrjId(project.getPrjId());
 						mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+						mailBean.setReviewer(reviewer);
 						CoMailManager.getInstance().sendMail(mailBean);
 					}
 				}

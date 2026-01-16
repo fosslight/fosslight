@@ -149,6 +149,8 @@ public class CoMail extends ComBean {
 	
 	private String paramReferenceDiv;
 	
+	private String reviewer;
+	
 	/**
 	 * Gets the snd seq.
 	 *
@@ -979,5 +981,13 @@ public class CoMail extends ComBean {
 
 	public void setParamMap(Map<String, Object> paramMap) {
 		this.paramMap = paramMap;
+	}
+
+	public String getReviewer() {
+		return reviewer;
+	}
+
+	public void setReviewer(String reviewer) {
+		this.reviewer = reviewer;
 	}
  } 

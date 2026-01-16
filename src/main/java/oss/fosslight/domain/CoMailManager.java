@@ -1780,7 +1780,7 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			if (title.indexOf("${ReviewerTo}") == -1 && title.indexOf("${Reviewer}") > -1) {
-				title = StringUtil.replace(title, "${Reviewer}", _s3);
+				title = StringUtil.replace(title, "${Reviewer}", avoidNull(_s3, bean.getReviewer()));
 			}
 			
 			if (title.indexOf("${LastDistributor}") > -1) {
@@ -1873,7 +1873,7 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			if (title.indexOf("${Reviewer}") > -1 && title.indexOf("${ReviewerTo}") == -1) {
-				title = StringUtil.replace(title, "${Reviewer}", _s3);
+				title = StringUtil.replace(title, "${Reviewer}", avoidNull(_s3, bean.getReviewer()));
 			}
 			
 			if (title.indexOf("${3rd Party ID}") > -1) {

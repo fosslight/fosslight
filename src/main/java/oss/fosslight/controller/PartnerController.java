@@ -2130,14 +2130,15 @@ public class PartnerController extends CoTopComponent{
 						// send reject email
 						String reviewerName = avoidNull(parInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
 						String en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
-						en = en.replace("User", user.getUserName()).replace("Reviewer", reviewerName);
+						en = en.replaceAll("Reviewer", reviewerName);
 						String ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
-						ko = ko.replace("User", user.getUserName()).replace("Reviewer", reviewerName);
+						ko = ko.replaceAll("Reviewer", reviewerName);
 						
 						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION);
 						mailBean.setLoginUserName(userId);
 						mailBean.setParamPartnerId(partnerMaster.getPartnerId());
 						mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+						mailBean.setReviewer(reviewerName);
 						CoMailManager.getInstance().sendMail(mailBean);
 					}
 				}
