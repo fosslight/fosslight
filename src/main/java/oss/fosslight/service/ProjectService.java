@@ -104,7 +104,7 @@ public interface ProjectService extends HistoryConfig{
 
 	List<UploadFile> selectAndroidFileDetail(Project project);
 	
-	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm);
+	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm, List<ProjectIdentification> rows);
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 
@@ -254,6 +254,7 @@ public interface ProjectService extends HistoryConfig{
 	public Map<String, Object> requestProjectPermission(String prjId, String userId, String status);
 
 	public void updateRequestProjectPermission(String prjId, String userId, String status, String rejPerUserNm);
+	
 	public Map<String, Object> getIdentificationAddList(Project project);
 
 	public void setFileAddList(T2File uploadFile, Project project, String readType, int depComponentCount, int srcComponentCount, int binComponentCount, boolean isDepLoaded, boolean isSrcLoaded, boolean isBinLoaded);
@@ -262,5 +263,5 @@ public interface ProjectService extends HistoryConfig{
 
 	public void deleteIdentificationUploadSearchData(HashMap<String, Object> param);
 	
-  public void sendMailInactiveProject();
+  	public void sendMailInactiveProject();
 }

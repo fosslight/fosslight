@@ -438,6 +438,7 @@ public interface ProjectMapper {
 	void updateRequestProjectPermission(@Param("prjId") String prjId, @Param("userId") String userId, @Param("status") String status, @Param("rejPerUserNm") String rejPerUserNm);
 
 	void cancelRequestPermission(@Param("prjId") String prjId, @Param("userId") String userId);
+	
 	int existsAddList2(Project project);
 	
 	void deleteAddList2(Project project);
@@ -464,5 +465,13 @@ public interface ProjectMapper {
 
 	int checkAddProject(@Param("prjId") String prjId, @Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv);
 	
-  List<Project> selectProjectsModifiedBeforeMonths(@Param("months") int months);
+	List<Project> selectProjectsModifiedBeforeMonths(@Param("months") int months);
+	
+	List<ProjectIdentification> selectOssComponentsCopyList(@Param("list") List<String> refComponentIds);
+
+	List<OssComponents> selectOssComponentsLicenseCopyList(@Param("list") List<String> refComponentIds, @Param("adminCheckYn") String adminCheckYn);
+
+	void insertProjectIdentificationCopy(ProjectIdentification bean);
+
+	void insertOssComponentsLicenseCopy2(OssComponents bean);
 }
