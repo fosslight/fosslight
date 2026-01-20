@@ -3699,20 +3699,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return result;
 	}
 
-	@SuppressWarnings({ "serial", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	@Override
 	public List<PartnerMaster> nickNameValidMessage(String prjId, String partnerId, List<OssComponents> thirdPartyData, String code) {
 		ObjectMapper mapper = new ObjectMapper();
+		
+		List<ProjectIdentification> ossComponent = new ArrayList<>();
 		String convertListToJson = "";
 		try {
-			convertListToJson = mapper.writeValueAsString(thirdPartyData);
+			if (CollectionUtils.isNotEmpty(thirdPartyData)) {
+				convertListToJson = mapper.writeValueAsString(thirdPartyData);
+				Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				ossComponent = (List<ProjectIdentification>) fromJson(convertListToJson, collectionType);
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
-		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponent = new ArrayList<>();
-		ossComponent = (List<ProjectIdentification>) fromJson(convertListToJson, collectionType);
 		
 		List<PartnerMaster> thirdPartyList = new ArrayList<>();
 		PartnerMaster partnerMaster = new PartnerMaster();
@@ -9452,20 +9454,24 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			if (CollectionUtils.isNotEmpty(partnerList)) {
 				for (PartnerMaster bean : partnerList) {
 					int existCnt = projectMapper.checkAddProject(project.getPrjId(), bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-					if (existCnt > 0) {
-						String softwareName = bean.getSoftwareName();
-						if (!isEmpty(bean.getSoftwareVersion())) {
-							softwareName += "(" + bean.getSoftwareVersion() + ")";
-						}
-						String loadedTab = "3rdParty(" + bean.getComponentCount() + ")";
-						partyCnt += Integer.parseInt(bean.getComponentCount());
-						
-						Map<String, Object> map = new LinkedHashMap<>();
-						map.put("item", "3rd-" + bean.getPartnerId());
-						map.put("loadedItem", softwareName);
-						map.put("loadedTab", loadedTab);
-						prjAddMap.put("3rd-" + bean.getPartnerId(), map);
+					String softwareName = bean.getSoftwareName();
+					if (!isEmpty(bean.getSoftwareVersion())) {
+						softwareName += "(" + bean.getSoftwareVersion() + ")";
 					}
+					String loadedTab = "";
+					if (existCnt > 0) {
+						loadedTab = "3rdParty(" + bean.getComponentCount() + ")";
+						partyCnt += Integer.parseInt(bean.getComponentCount());
+					} else {
+						loadedTab = "3rdParty(" + existCnt + ")";
+						partyCnt += existCnt;
+					}
+					
+					Map<String, Object> map = new LinkedHashMap<>();
+					map.put("item", "3rd-" + bean.getPartnerId());
+					map.put("loadedItem", softwareName);
+					map.put("loadedTab", loadedTab);
+					prjAddMap.put("3rd-" + bean.getPartnerId(), map);
 				}
 			}
 			
