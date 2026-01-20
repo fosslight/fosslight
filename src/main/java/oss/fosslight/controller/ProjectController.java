@@ -5686,61 +5686,67 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> map = projectService.getPartnerOssList(oc);
 		projectService.setLoadToList(map, oc.getReferenceId());
 		
-		if (MapUtils.isNotEmpty(map) && map.containsKey("rows")) {
-			try {
-				List<OssComponents> rows = (List<OssComponents>) map.get("rows");
-				if (CollectionUtils.isNotEmpty(rows)) {
-					Project project = new Project();
-					project.setPrjId(prjId);
-					
-					String identificationSubStatusPartner = CoConstDef.FLAG_YES;
-					String mainGrid = (String) param.get("mainData");
-					
-					Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
-					List<OssComponents> ossComponents = new ArrayList<>();
-					ossComponents = (List<OssComponents>) fromJson(mainGrid, collectionType);
-					ossComponents.addAll(rows);
-					
-					List<PartnerMaster> thirdPartyList = new ArrayList<>();
-					Map<String, Object> thirdPartyMap = projectService.get3rdMapList(project, true);
-					List<PartnerMaster> thirdPartyRows = (List<PartnerMaster>) thirdPartyMap.get("rows");
-					if (CollectionUtils.isNotEmpty(thirdPartyRows)) {
-						thirdPartyList.addAll(thirdPartyRows);
-					}
-					// add nickname valid Message
-					List<PartnerMaster> addThirdPartyList = projectService.nickNameValidMessage(prjId, oc.getReferenceId(), rows, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-					if (CollectionUtils.isNotEmpty(addThirdPartyList)) {
-						thirdPartyList.addAll(addThirdPartyList);
-					}
-					// save 3rd oss
-					projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
-					
-					if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
-						String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
-									
-						if (!isEmpty(changedLicenseName)) {
-							CommentsHistory commentHisBean = new CommentsHistory();
-							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-							commentHisBean.setReferenceId(prjId);
-							commentHisBean.setExpansion1("3rd party");
-							commentHisBean.setContents(changedLicenseName);
-							commentService.registComment(commentHisBean, false);
-						}
-					}
-					
-					History h = new History();
-					h = projectService.work(project);
-					h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-					project = (Project) h.gethData();
-					h.sethEtc(project.etcStr());
-					historyService.storeData(h);
-				} else {
-					return makeJsonResponseHeader(false);
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				return makeJsonResponseHeader(false);
+		try {
+			Project project = new Project();
+			project.setPrjId(prjId);
+			
+			String identificationSubStatusPartner = CoConstDef.FLAG_YES;
+			String mainGrid = (String) param.get("mainData");
+			
+			Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
+			List<OssComponents> ossComponents = new ArrayList<>();
+			ossComponents = (List<OssComponents>) fromJson(mainGrid, collectionType);
+			
+			List<OssComponents> rows = null;
+			if (map.containsKey("rows")) {
+				rows = (List<OssComponents>) map.get("rows");
+				ossComponents.addAll(rows);
 			}
+			
+			List<PartnerMaster> thirdPartyList = new ArrayList<>();
+			Map<String, Object> thirdPartyMap = projectService.get3rdMapList(project, true);
+			List<PartnerMaster> thirdPartyRows = (List<PartnerMaster>) thirdPartyMap.get("rows");
+			if (CollectionUtils.isNotEmpty(thirdPartyRows)) {
+				thirdPartyList.addAll(thirdPartyRows);
+			}
+			// add nickname valid Message
+			if (CollectionUtils.isNotEmpty(rows)) {
+				List<PartnerMaster> addThirdPartyList = projectService.nickNameValidMessage(prjId, oc.getReferenceId(), rows, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+				if (CollectionUtils.isNotEmpty(addThirdPartyList)) {
+					thirdPartyList.addAll(addThirdPartyList);
+				}
+			} else {
+				PartnerMaster partnerMaster = new PartnerMaster();
+				partnerMaster.setPartnerId((String) param.get("referenceId"));
+				partnerMaster.setComponentCount("0");
+				thirdPartyList.add(partnerMaster);
+			}
+			
+			// save 3rd oss
+			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
+			
+			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
+				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
+							
+				if (!isEmpty(changedLicenseName)) {
+					CommentsHistory commentHisBean = new CommentsHistory();
+					commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+					commentHisBean.setReferenceId(prjId);
+					commentHisBean.setExpansion1("3rd party");
+					commentHisBean.setContents(changedLicenseName);
+					commentService.registComment(commentHisBean, false);
+				}
+			}
+			
+			History h = new History();
+			h = projectService.work(project);
+			h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+			project = (Project) h.gethData();
+			h.sethEtc(project.etcStr());
+			historyService.storeData(h);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false);
 		}
 		
 		return makeJsonResponseHeader(true);
