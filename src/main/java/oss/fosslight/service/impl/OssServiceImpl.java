@@ -2289,6 +2289,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList, String downloadlocationUrl) {
 		String checkName = "";
 		boolean isValid = false;
+		if(downloadlocationUrl.endsWith("/")) {
+			downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.length()-1);
+		}
 		Matcher ossNameMatcher = p.matcher("https://" + downloadlocationUrl);
 		String[] android = null;
 		while (ossNameMatcher.find()) {
