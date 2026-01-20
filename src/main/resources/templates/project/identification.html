@@ -27,8 +27,8 @@
                             </div>
                             <div class="float-right">
                                 <button th:if="${@CommonFunction.isAdmin() and @environment.getProperty('ai.server.url') != null}" type="button" class="btn btn-outline-lg-red btn-sm width-10rem px-1" id="ai"><i class="fas fa-user-astronaut pt-1"></i> AI(Experimental)</button>
-                                <button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" id="autoReview">CoReviewer</button>
-                            	<button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" style="display: none;" id="autoReviewStop">Stop CoReviewer</button>
+                                <button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.dropYn != 'Y'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" id="autoReview">CoReviewer</button>
+                            	<button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.dropYn != 'Y'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" style="display: none;" id="autoReviewStop">Stop CoReviewer</button>
                         		<th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
                                 	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm" th:onclick="|com_fn.confirm()|"></button>
                                 	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
@@ -105,7 +105,7 @@
 				                            </ul>
 				                        </div>
 			                            <div class="d-flex-align" style="margin-left: auto;">
-			                                <span th:if="${project.statusPermission > 0 and project.identificationStatus == 'PROG'}" class="ml-2 mr-2 px-2 pointer" id="coReviewerBtn" th:onclick="|fn.onCheckIdentification()|" title="coReviewer">
+			                                <span th:if="${project.statusPermission > 0 and project.identificationStatus == 'PROG' and project.dropYn != 'Y'}" class="ml-2 mr-2 px-2 pointer" id="coReviewerBtn" th:onclick="|fn.onCheckIdentification()|" title="coReviewer">
 			                            		<i class="fas fa-clipboard-check customIcon2"></i>
 			                           		</span>
 			                            	<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="px-2 pointer idenReset" id="reset" title="reset" th:onclick="|com_fn.reset('Bom')|">

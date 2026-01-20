@@ -4485,3 +4485,204 @@ function alertifyDeleteDialog(target, width, id) {
 		};
 	}, false, 'confirm');
 }
+
+function displayProjectStage(displayInfo, pId, pNm, distributeTarget) {
+	var display = "";
+	
+	// project name
+	var prjName = "<span class=\"description-percentage text-dark-gray\">";
+	prjName += "<a class=\"text-dark-gray text-bold hover-line urlLink text-highlighting goToEditLink text-shadow\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab(" + pId + ")\" title=\"" + pNm + "\">" + pNm + "</a></span>";
+	display += prjName;
+	
+	// status
+	var status = "<span class=\"ml-2\"> | </span>";
+	var projectStatus = displayInfo.projectStatus;
+	
+	switch(projectStatus) {
+		case 'REQ':
+			status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
+			break;
+		case 'REV':
+			status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
+			break;
+		case 'DROP':
+			status += "<span class=\"text-gray text-bold ml-2\">Drop</span>";
+			break;
+		case 'FREV':
+			status += "<span class=\"text-purple text-bold ml-2\">Final Review</span>";
+			break;
+		case 'COMP':
+			status += "<span class=\"text-dark-blue text-bold ml-2\">Complete</span>";
+			break;
+		default:
+			status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
+			break;
+	}
+	display += status;
+
+	// osc progress
+	var identificationStatus = displayInfo.identificationStatus;
+	identificationStatus = identificationStatus||"";
+	var verificationStatus = displayInfo.verificationStatus;
+	verificationStatus = verificationStatus||"";
+	var distributionStatus = displayInfo.distributionStatus;
+	distributionStatus = distributionStatus||"";
+	var statusRequestYn = displayInfo.statusRequestYn;
+	statusRequestYn = statusRequestYn||"";
+
+	var oscProgress = "<span class=\"ml-2\"> | </span>";
+	if ("" != identificationStatus) {
+		if ("DROP" == projectStatus) {
+			oscProgress += "<span class=\"badge badge-gray size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+		} else if ("FREV" == projectStatus) {
+			oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+		} else {
+			if ("CONF" == identificationStatus) {
+				oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+			} else if ("PROG" == projectStatus) {
+				oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+			} else if ("REQ" == projectStatus) {
+				oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+			} else if ("REV" == projectStatus) {
+				oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+			}
+		}
+	} else {
+		if ("DROP" == projectStatus) {
+			oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>';
+		} else {
+			oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+		}
+	}
+	
+	if ("CONF" != identificationStatus) {
+		oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+		oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+	} else {
+		if ("DROP" == projectStatus) {
+			oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+			oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2" style=\"cursor:pointer;\" onclick=\"fn.mvVerification()\">Packaging</span>';
+		} else {
+			oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+			if ("" == verificationStatus) {
+				if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+				} else if ("" != identificationStatus) {
+					oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+				}
+			} else if ("PROG" == verificationStatus) {
+				if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+				} else {
+					oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+				}
+			} else if ("REV" == verificationStatus) {
+				oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+			} else if ("REQ" == verificationStatus) {
+				oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+			} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
+				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+			} else {
+				if ("CONF" == verificationStatus) {
+					oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+				} else {
+					if ("NA" == distributeTarget) {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+					} else {
+						if ("PROG" == projectStatus) {
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						} else if ("REQ" == projectStatus) {
+							oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						} else if ("REV" == projectStatus) {
+							oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						} else if ("FREV" == projectStatus) {
+							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	if ("CONF" == identificationStatus && "NA" == verificationStatus && "NA" == distributionStatus) {
+		oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+		oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+	} else if ("CONF" != verificationStatus) {
+		oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+		oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+	} else {
+		if ("DROP" == projectStatus){
+			oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+			oscProgress += "<span class=\"badge badge-gray size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvDistribution()\">Distribution</span>";
+		} else {
+			switch (distributionStatus){
+				case "":
+					if ("COMP" != projectStatus){
+						oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+						oscProgress += "<span class='badge badge-success size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvDistribution()\">Distribution</span>";
+					} else {
+						oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Distribution</span>';
+					}
+					
+					break;
+				case "ERROR":
+					oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+					oscProgress += "<span class='badge badge-danger size-sm width-6rem ml-2' style='cursor:pointer;' onMouseOver='this.innerHTML=\"Error\"' onMouseOut='this.innerHTML=\"Distribution\"' onclick=\"fn.mvDistribution()\">Distribution</span>";
+
+					break;
+				case "NA":
+					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+
+					break;
+				default:
+					if ("NA" == distributeTarget){
+						oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+					} else{
+						oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+						if ("DONE" == distributionStatus) {
+							oscProgress += "<span class='badge badge-outline-dark-blue size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvDistribution()\">Distribution</span>";
+						} else {
+							if ("PROG" == projectStatus) {
+								oscProgress += "<span class='badge badge-success size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvDistribution()\">Distribution</span>";
+							} else if ("REQ" == projectStatus) {
+								oscProgress += "<span class='badge badge-pink size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvDistribution()\">Distribution</span>";
+							} else if ("REV" == projectStatus) {
+								oscProgress += "<span class='badge badge-yellow size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvDistribution()\">Distribution</span>";
+							} else if ("FREV" == projectStatus) {
+								oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvDistribution()\">Distribution</span>";
+							} 
+						}
+					}
+					
+				break;
+			}
+		}
+	}
+	
+	display += oscProgress;
+	
+	// vulnerability score
+	var vulnerability = "<span class=\"ml-2\"> | </span>";
+	var cvssScoreMax = displayInfo.cvssScoreMax;
+	if (typeof displayInfo.vulnerabilityResolution !== "undefined") {
+		var vulnerabilityResolution = displayInfo.vulnerabilityResolution;
+		if ("Need to resolve" == vulnerabilityResolution) {
+			vulnerability += '<span type="button" class="badge badge-dark-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
+		} else {
+			vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
+		}
+	} else {
+		if (typeof cvssScoreMax !== "undefined") {
+			vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(' + cvssScoreMax + ')</span>';
+		} else {
+			vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>';
+		}
+	}
+	
+	display += vulnerability;
+	
+	return display;
+}

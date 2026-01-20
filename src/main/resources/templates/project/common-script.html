@@ -550,83 +550,90 @@ var com_fn = {
 		var chkStatus = status||"";
 		var permission = [[${project.permission}]] == 1;
 		
-		if (role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
-			switch(chkStatus){
-				case "":
-					btn_div.hide();
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "PROG":
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "REQ":
-					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();btn_Analysis.hide();
-					
-					break;
-				case "REV":
-					btn_reject.removeClass("btn-lg-red");
-                    btn_reject.addClass("btn-outline-lg-red");
-					btn_confirm.show();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "CONF":
-					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
-					btn_Analysis_Result.hide();
-					btn_check.hide();
-					
-					break;
-			}
-		} else if([[${project.viewOnlyFlag}]] == 'Y'){
-			btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();cbx_iden.prop("disabled", false);
-		} else { // 일반 사용자 일 경우
-			switch(status){
-				case "":
-					btn_div.hide();
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					if (permission) {
-						btn_Reset.show();btn_Merge.show();btn_Save.show();
-					} else {
-						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
-					}
-					
-					break;
-				case "PROG":
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					if (permission) {
-						btn_Reset.show();btn_Merge.show();btn_Save.show();
-					} else {
-						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
-					}
-					btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "REQ":
-					btn_reject.addClass("btn-lg-red");
-					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
+		if ("Y" == [[${project.dropYn}]]) {
+			btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
+			btn_Analysis_Result.hide();
+			btn_check.hide();
+		} else {
+			if (role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
+				switch(chkStatus){
+					case "":
+						btn_div.hide();
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "PROG":
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "REQ":
+						btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();btn_Analysis.hide();
+						
+						break;
+					case "REV":
+						btn_reject.removeClass("btn-lg-red");
+	                    btn_reject.addClass("btn-outline-lg-red");
+						btn_confirm.show();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "CONF":
+						btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
+						btn_Analysis_Result.hide();
+						btn_check.hide();
+						
+						break;
+				}
+			} else if([[${project.viewOnlyFlag}]] == 'Y'){
+				btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
+				btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();cbx_iden.prop("disabled", false);
+			} else { // 일반 사용자 일 경우
+				switch(status){
+					case "":
+						btn_div.hide();
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						if (permission) {
+							btn_Reset.show();btn_Merge.show();btn_Save.show();
+						} else {
+							btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+						}
+						
+						break;
+					case "PROG":
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						if (permission) {
+							btn_Reset.show();btn_Merge.show();btn_Save.show();
+						} else {
+							btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+						}
+						btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "REQ":
+						btn_reject.addClass("btn-lg-red");
+						btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
 
-					break;
-				case "REV":
-					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
+						break;
+					case "REV":
+						btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
 
-					break;
-				case "CONF":
-					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();btn_bulkRegist.hide();fileUploader.hide();
-					btn_Analysis.hide();btn_Analysis_Result.hide();
-					btn_check.hide();
+						break;
+					case "CONF":
+						btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();btn_bulkRegist.hide();fileUploader.hide();
+						btn_Analysis.hide();btn_Analysis_Result.hide();
+						btn_check.hide();
 
-					break;
+						break;
+				}
 			}
 		}
 	},
@@ -3046,9 +3053,12 @@ var com_fn = {
  		}
 		
  		var reference = "";
-		if (data.length > 0){
+		if (data.length > 0) {
  			reference = data[0].referenceId;
  		}
+		if ("" == reference) {
+			reference = selrow;
+		}
 		
 		var mainData = $('#list3').jqGrid('getGridParam','data');
 		
@@ -3213,10 +3223,11 @@ var com_fn = {
 				if ($("#identificationAddList_toppager_left").find('button').length == 0) {
 					var permission = [[${project.statusPermission}]] == 1;
                 	var identificationStatus = [[${project.identificationStatus}]];
-					
+                	var dropYn = [[${project.dropYn}]];
+                	
                 	var appendBtn = "";
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"add\" onclick=\"com_fn.addUploadFunc('identificationAddList', "+permission+", '"+refDiv+"')\">";
-                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -3226,7 +3237,7 @@ var com_fn = {
                 		}
                 	}
             		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete\" onclick=\"com_fn.delUploadFunc('identificationAddList', 'main', "+permission+", '"+refDiv+"')\">";
-            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -3236,7 +3247,7 @@ var com_fn = {
                 		}
                 	}
             		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"reset\" onclick=\"com_fn.resetUploadFunc('identificationAddList', 'main', "+permission+", '"+refDiv+"')\">";
-            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-undo-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {

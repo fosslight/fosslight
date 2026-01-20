@@ -325,10 +325,14 @@ var fn = {
 		// identification
 		switch(identificationStatus){
 			case "":
-				if (projectStatus == dropStatus){
-                    display += '<span type=\"button\" class="badge badge-outline-gray-white size-sm width-6rem d-flex-align fs-77p">Identification</span>';
+				if (projectStatus == dropStatus) {
+					if ("Y" == rowObject.androidFlag) {
+						display += "<span type=\"button\" class=\"badge badge-gray size-sm width-6rem d-flex-align fs-77p\" onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					} else {
+						display += "<span type=\"button\" class=\"badge badge-gray size-sm width-6rem d-flex-align fs-77p\" onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
+					}
                 } else {
-                    if("Y" == rowObject.androidFlag) {
+                    if ("Y" == rowObject.androidFlag) {
                         display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
                     } else {
                         display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
@@ -340,11 +344,11 @@ var fn = {
 				break;
 			default:
 				if (projectStatus == dropStatus){
-                    if ("Confirm" == identificationStatus) {
-                        display += '<span type=\"button\" class="badge badge-gray size-sm width-6rem d-flex-align fs-77p">Identification</span>';
-                    } else {
-                        display += '<span type=\"button\" class="badge badge-outline-gray-white size-sm width-6rem d-flex-align fs-77p">Identification</span>';
-                    }
+					if ("Y" == rowObject.androidFlag) {
+						display += "<span type=\"button\" class=\"badge badge-gray size-sm width-6rem d-flex-align fs-77p\" onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					} else {
+						display += "<span type=\"button\" class=\"badge badge-gray size-sm width-6rem d-flex-align fs-77p\" onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
+					}
 				} else if (projectStatus == finalReview) {
 					if ("Y" == rowObject.androidFlag) {
 						display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
@@ -382,21 +386,20 @@ var fn = {
 		
 		// packaging
 		if (identificationStatus != 'Confirm') {
-            display += '<span class="d-flex text-gray-white text-bold text-md mx-1 d-flex-vm">&gt;</span>';
+			if (projectStatus == dropStatus){
+				display += '<span class="d-flex text-gray-white text-bold text-md mx-1 d-flex-vm">&gt;</span>';
+			} else {
+				display += '<span class="d-flex text-blue-gray text-bold text-md mx-1 d-flex-vm">&gt;</span>';
+			}
 			display += '<span type=\"button\" class="badge badge-outline-gray-white size-sm width-6rem d-flex-align fs-77p">Packaging</span>';
 		} else {
-			display += '<span class="d-flex text-blue-gray text-bold text-md mx-1 d-flex-vm">&gt;</span>';
+			if (projectStatus == dropStatus){
+				display += '<span class="d-flex text-gray-white text-bold text-md mx-1 d-flex-vm">&gt;</span>';
+			} else {
+				display += '<span class="d-flex text-blue-gray text-bold text-md mx-1 d-flex-vm">&gt;</span>';
+			}
 			if (projectStatus == dropStatus) {
-				switch(verificationStatus) {
-					case "Confirm":
-						display += '<span type=\"button\" class="badge badge-gray size-sm width-6rem d-flex-align fs-77p">Packaging</span>';
-
-						break;
-					default:
-						display += '<span type=\"button\" class="badge badge-outline-gray-white size-sm width-6rem d-flex-align fs-77p">Packaging</span>';
-
-					break;
-				}
+				display += "<span type=\"button\" class=\"badge badge-gray size-sm width-6rem d-flex-align fs-77p\" onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 			} else {
 				switch(verificationStatus) {
 					case "":
@@ -1914,6 +1917,8 @@ var fn = {
 		$(".ajs-close").trigger("click");
 	},
 	deleteProject : function() {
+		var isAdmin = [[${@CommonFunction.isAdmin()}]];
+		
 		var prjIds = new Array();
 		prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
 		
@@ -1922,11 +1927,16 @@ var fn = {
 			var permissions = new Array();
 			
 			for (var i in prjIds) {
-				var rowData = $('#list').jqGrid('getRowData', prjIds[i]);
-				if (rowData.statusPermission > 0) {
+				if (isAdmin) {
 					permissions.push(prjIds[i]);
 				} else {
-					notPermissions.push(prjIds[i]);
+					var rowData = $('#list').jqGrid('getRowData', prjIds[i]);
+					var distributionStatus = rowData.distributionStatus.toUpperCase();
+					if (rowData.statusPermission > 0 && ("DONE" != distributionStatus || "PROC" != distributionStatus)) {
+						permissions.push(prjIds[i]);
+					} else {
+						notPermissions.push(prjIds[i]);
+					}
 				}
 			}
 			
@@ -1966,7 +1976,9 @@ var fn = {
 	           	
 			} else {
 				var notPermissionsLength = notPermissions.length;
-				if (notPermissionsLength > 0) notPermissions.sort();
+				if (notPermissionsLength > 0) {
+					notPermissions.sort();
+				}
 				
 				var message = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
 				message += "<br>&emsp;- ";
@@ -2178,7 +2190,7 @@ var list = {
 		
 		var customSecurityColumn = "<span title='Vunlerability (Max Score)'>Security</span>";
 		var colNameArr = [ 'ID', 'Project Name', 'Status', 'OSC Process', 'Download', 'Distribution Type', customSecurityColumn, 'Division', 'Creator', 'Created Date', 'Modified Date', 'Reviewer'
-							, 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission', 'Reviewer Name'];
+							, 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission', 'Reviewer Name', 'Distribution Status'];
 		var colModelArr = [];
         var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int', title: false};
 		colModelArr.push(colModelObj);
@@ -2255,6 +2267,8 @@ var list = {
 		colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'reviewerName', index: 'reviewerName', hidden: true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'distributionStatus', index: 'distributionStatus', hidden: true};
 		colModelArr.push(colModelObj);
 		
 		// apply user columns setting on

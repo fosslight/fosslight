@@ -1516,10 +1516,11 @@ var dep_grid = {
 				if ($("#depList_toppager_left").find('button').length == 0) {
 					var permission = [[${project.statusPermission}]] == 1;
                 	var identificationStatus = [[${project.identificationStatus}]];
+                	var dropYn = [[${project.dropYn}]];
 					
                 	var appendBtn = "";
                		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('DEP', 'depList', "+permission+", '"+identificationStatus+"')\">";
-               		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+               		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -1529,7 +1530,7 @@ var dep_grid = {
                 		}
                 	}
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('DEP', 'depList', 'main', "+permission+", '"+identificationStatus+"')\">";
-                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -1539,7 +1540,7 @@ var dep_grid = {
                 		}
                 	}
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('DEP', "+permission+", '"+identificationStatus+"')\">";
-                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {

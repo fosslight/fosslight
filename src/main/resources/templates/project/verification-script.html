@@ -2061,11 +2061,7 @@
         			var oscProgress = "<span class=\"ml-2\"> | </span>";
         			if ("" != identificationStatus) {
         				if ("DROP" == projectStatus) {
-        					if ("CONF" == identificationStatus) {
-        						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2">Identification</span>';
-        					} else {
-        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Identification</span>';
-        					}
+        					oscProgress += "<span class=\"badge badge-gray size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         				} else if ("FREV" == projectStatus) {
         					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         				} else {
@@ -2081,7 +2077,7 @@
         				}
         			} else {
         				if ("DROP" == projectStatus) {
-        					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2">Identification</span>';
+        					oscProgress += "<span class=\"badge badge-gray size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         				} else {
         					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         				}
@@ -2091,14 +2087,11 @@
         				oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
         				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
         			} else {
-        				oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
         				if ("DROP" == projectStatus) {
-        					if ("CONF" == verificationStatus) {
-        						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2">Packaging</span>';
-        					} else {
-        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
-        					}
+        					oscProgress += "<span class=\"text-gray-white text-bold text-md ml-2\">&gt;</span>";
+        					oscProgress += "<span class=\"badge badge-gray size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvVerification()\">Packaging</span>";
         				} else {
+        					oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
         					if ("" == verificationStatus) {
         						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
         							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
@@ -2328,181 +2321,204 @@
 
                 status = status||"";
                 btn_div.show();
-                if (role == "ROLE_ADMIN") { // 관리자 권한 일 경우
-                	$("#approve").attr("disabled", false);
-                	
-                    switch (status) {
-                        case "":
-                            btn_confirm.hide();
-                            btn_reject.hide();
-                            btn_review.show();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-                            	btn_save.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_verify.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_savePath.show();
-                            }
-                            verFileUploder.prop("disabled", false);
-
-                            break;
-                        case "PROG":
-                            btn_confirm.hide();
-                            btn_reject.hide();
-                            btn_review.show();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-                            	btn_save.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_verify.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_savePath.show();
-                            }
-                            verFileUploder.prop("disabled", false);
-
-                            break;
-                        case "REQ":
-                            btn_confirm.hide();
-                            btn_reject.hide();
-                            btn_review.hide();
-                            btn_restart.show();
-                            if ("notice" == targetId) {
-                            	btn_save.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_verify.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_savePath.show();
-                            }
-                            verFileUploder.prop("disabled", true);
-                            
-                            break;
-
-                        case "REV":
-                            btn_confirm.show();
-                            btn_reject.removeClass("btn-lg-red");
-                            btn_reject.addClass("btn-outline-lg-red");
-                            btn_reject.show();
-                            btn_review.hide();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-                            	btn_save.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_verify.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_savePath.show();
-                            }
-                            verFileUploder.prop("disabled", false);
-                            
-                            break;
-
-                        case "CONF":
-                            btn_confirm.hide();
-                            btn_reject.show();
-                            btn_review.hide();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-                            	btn_save.hide();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_verify.show();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_savePath.hide();
-                            }
-                            verFileUploder.prop("disabled", true);
-
-                            // 고지문구 버튼 비활성
-                            $('#chkUseCustomNotice').prop('disabled', true);
-                            $('#noticeEditor').prop('disabled', true);
-                            $('#noticeEditor').css('opacity', 0.5);
-                            
-                            break;
-
-                    }
-                } else if ('Y' == [[${project.viewOnlyFlag}]]) {
-                    btn_confirm.hide();
-                    btn_reject.hide();
+                
+                if ("Y" == [[${project.dropYn}]]) {
+                	btn_confirm.hide();
+                    btn_reject.show();
                     btn_review.hide();
                     btn_restart.hide();
-                    btn_save.hide();
-                    btn_savePath.hide();
+                    if ("notice" == targetId) {
+                    	btn_save.hide();
+                    }
+                    if ("notice" != targetId) {
+                    	btn_verify.show();
+                    }
+                    if ("notice" != targetId) {
+                    	btn_savePath.hide();
+                    }
                     verFileUploder.prop("disabled", true);
-                } else {	// 일반 사용자 일 경우
-                    switch (status) {
-                        case "":
-                            btn_review.show();
-                            btn_confirm.hide();
-                            btn_reject.hide();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-//                            	btn_save.show();
-                            }
-                            if ([[${project.statusPermission}]] == 1) {
-                            	verFileUploder.prop("disabled", false);
-                            } else {
-                            	verFileUploder.prop("disabled", true);
-                            }
-                            break;
-                        case "PROG":
-                            btn_review.show();
-                            btn_confirm.hide();
-                            btn_reject.hide();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-//                            	btn_save.show();
-                            }
-                            if ([[${project.statusPermission}]] == 1) {
-                            	verFileUploder.prop("disabled", false);
-                            } else {
-                            	verFileUploder.prop("disabled", true);
-                            }
-                            break;
 
-                        case "REQ":
-                            btn_confirm.hide();
-                            btn_reject.show();
-                            btn_review.hide();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-                            	btn_save.hide();
-                            }
-                            verFileUploder.prop("disabled", true);
-                            break;
+                    // 고지문구 버튼 비활성
+                    $('#chkUseCustomNotice').prop('disabled', true);
+                    $('#noticeEditor').prop('disabled', true);
+                    $('#noticeEditor').css('opacity', 0.5);
+                } else {
+                	if (role == "ROLE_ADMIN") { // 관리자 권한 일 경우
+                    	$("#approve").attr("disabled", false);
+                    	
+                        switch (status) {
+                            case "":
+                                btn_confirm.hide();
+                                btn_reject.hide();
+                                btn_review.show();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+                                	btn_save.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_verify.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_savePath.show();
+                                }
+                                verFileUploder.prop("disabled", false);
 
-                        case "REV":
-                            btn_confirm.hide();
-                            btn_reject.removeClass("btn-lg-red");
-                            btn_reject.hide();
-                            btn_review.hide();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-                            	btn_save.hide();
-                            }
-                            verFileUploder.prop("disabled", true);
-                            break;
+                                break;
+                            case "PROG":
+                                btn_confirm.hide();
+                                btn_reject.hide();
+                                btn_review.show();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+                                	btn_save.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_verify.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_savePath.show();
+                                }
+                                verFileUploder.prop("disabled", false);
 
-                        case "CONF":
-                            btn_confirm.hide();
-                            btn_reject.show();
-                            btn_review.hide();
-                            btn_restart.hide();
-                            if ("notice" == targetId) {
-                            	btn_save.hide();
-                            }
-                            if ("notice" != targetId) {
-                            	btn_savePath.hide();
-                            }
-                            verFileUploder.prop("disabled", true);
-                            break;
+                                break;
+                            case "REQ":
+                                btn_confirm.hide();
+                                btn_reject.hide();
+                                btn_review.hide();
+                                btn_restart.show();
+                                if ("notice" == targetId) {
+                                	btn_save.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_verify.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_savePath.show();
+                                }
+                                verFileUploder.prop("disabled", true);
+                                
+                                break;
+
+                            case "REV":
+                                btn_confirm.show();
+                                btn_reject.removeClass("btn-lg-red");
+                                btn_reject.addClass("btn-outline-lg-red");
+                                btn_reject.show();
+                                btn_review.hide();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+                                	btn_save.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_verify.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_savePath.show();
+                                }
+                                verFileUploder.prop("disabled", false);
+                                
+                                break;
+
+                            case "CONF":
+                                btn_confirm.hide();
+                                btn_reject.show();
+                                btn_review.hide();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+                                	btn_save.hide();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_verify.show();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_savePath.hide();
+                                }
+                                verFileUploder.prop("disabled", true);
+
+                                // 고지문구 버튼 비활성
+                                $('#chkUseCustomNotice').prop('disabled', true);
+                                $('#noticeEditor').prop('disabled', true);
+                                $('#noticeEditor').css('opacity', 0.5);
+                                
+                                break;
+
+                        }
+                    } else if ('Y' == [[${project.viewOnlyFlag}]]) {
+                        btn_confirm.hide();
+                        btn_reject.hide();
+                        btn_review.hide();
+                        btn_restart.hide();
+                        btn_save.hide();
+                        btn_savePath.hide();
+                        verFileUploder.prop("disabled", true);
+                    } else {	// 일반 사용자 일 경우
+                        switch (status) {
+                            case "":
+                                btn_review.show();
+                                btn_confirm.hide();
+                                btn_reject.hide();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+//                                	btn_save.show();
+                                }
+                                if ([[${project.statusPermission}]] == 1) {
+                                	verFileUploder.prop("disabled", false);
+                                } else {
+                                	verFileUploder.prop("disabled", true);
+                                }
+                                break;
+                            case "PROG":
+                                btn_review.show();
+                                btn_confirm.hide();
+                                btn_reject.hide();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+//                                	btn_save.show();
+                                }
+                                if ([[${project.statusPermission}]] == 1) {
+                                	verFileUploder.prop("disabled", false);
+                                } else {
+                                	verFileUploder.prop("disabled", true);
+                                }
+                                break;
+
+                            case "REQ":
+                                btn_confirm.hide();
+                                btn_reject.show();
+                                btn_review.hide();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+                                	btn_save.hide();
+                                }
+                                verFileUploder.prop("disabled", true);
+                                break;
+
+                            case "REV":
+                                btn_confirm.hide();
+                                btn_reject.removeClass("btn-lg-red");
+                                btn_reject.hide();
+                                btn_review.hide();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+                                	btn_save.hide();
+                                }
+                                verFileUploder.prop("disabled", true);
+                                break;
+
+                            case "CONF":
+                                btn_confirm.hide();
+                                btn_reject.show();
+                                btn_review.hide();
+                                btn_restart.hide();
+                                if ("notice" == targetId) {
+                                	btn_save.hide();
+                                }
+                                if ("notice" != targetId) {
+                                	btn_savePath.hide();
+                                }
+                                verFileUploder.prop("disabled", true);
+                                break;
+                        }
                     }
                 }
             },
