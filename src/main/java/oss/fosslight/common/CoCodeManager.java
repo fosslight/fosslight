@@ -237,6 +237,128 @@ public class CoCodeManager extends CoTopComponent {
 		}
 	}
 	
+	public void refreshOssInfoByOssId(String ossId) {
+		loadOssInfoByOssId(ossId);
+	}
+	
+	private void loadOssInfoByOssId(String ossId) {
+		try {
+			List<OssMaster> list = ossMapper.getOssInfoByOssId(ossId);
+			if (list != null) {
+				List<OssMaster> nickNameList = ossMapper.getOssInfoWithNickByOssId(ossId);
+				OssMaster beforeOssInfo = OSS_INFO_BY_ID.get(ossId);
+				String ossInfoKey2 = (beforeOssInfo.getOssName() + "_" + avoidNull(beforeOssInfo.getOssVersion())).toUpperCase();
+				Map<String, OssMaster> _ossMap = new HashMap<>();
+				Map<String, String> _ossNamesMap = new HashMap<>();
+				boolean isDel = false;
+				
+				for (OssMaster bean : list) {
+					OssMaster targetBean = null;
+					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+					if (!isDel && beforeOssInfo != null && (!bean.getOssName().equalsIgnoreCase(beforeOssInfo.getOssName()) || !key.equals(ossInfoKey2))) {
+						isDel = true;
+						OSS_INFO_UPPER.remove(ossInfoKey2);
+						OSS_INFO_UPPER_NAMES.entrySet().removeIf(entry -> entry.getValue() == beforeOssInfo.getOssName());
+					}
+					
+					if (_ossMap.containsKey(key)) {
+						targetBean = _ossMap.get(key);
+					} else {
+						targetBean = bean;
+					}
+					
+					OssMaster nickNames = ossMapper.getOssNickNameListByOssCommonId(bean.getOssCommonId());
+					if (nickNames != null && nickNames.getOssNickname() != null) {
+						targetBean.setOssNicknames(nickNames.getOssNickname().split(","));
+					}
+					
+					OssLicense subBean = new OssLicense();
+					subBean.setOssId(bean.getOssId());
+					subBean.setLicenseId(bean.getLicenseId());
+					subBean.setLicenseName(bean.getLicenseName());
+					subBean.setLicenseType(bean.getOssLicenseType());
+					subBean.setOssLicenseIdx(bean.getOssLicenseIdx());
+					subBean.setOssLicenseComb(bean.getOssLicenseComb());
+					subBean.setOssLicenseText(bean.getOssLicenseText());
+					subBean.setOssCopyright(bean.getOssCopyright());
+					
+					// oss의 license type을 license의 license type 적용 이후에 set
+					targetBean.setLicenseType(bean.getOssLicenseType());
+					
+					targetBean.addOssLicense(subBean);
+					
+					if (_ossMap.containsKey(key)) {
+						_ossMap.replace(key, targetBean);
+					} else {
+						_ossMap.put(key, targetBean);
+					}
+					
+					if (!_ossNamesMap.containsKey(bean.getOssName().toUpperCase())) {
+						_ossNamesMap.put(bean.getOssName().toUpperCase(), bean.getOssName());
+					}
+				}
+				
+				for (OssMaster bean : _ossMap.values()) {
+					OSS_INFO_BY_ID.put(bean.getOssId(), bean);
+				}
+				
+				if (nickNameList != null) {
+					for (OssMaster bean : nickNameList) {
+						String key = bean.getOssName() +"_"+ avoidNull(bean.getOssVersion());
+						String ossNickNameKey = bean.getOssName().toUpperCase();
+
+						if (!_ossNamesMap.containsKey(ossNickNameKey)) {
+							_ossNamesMap.put(ossNickNameKey, bean.getOssNameTemp());
+						}
+						
+						String sourceKey = (bean.getOssNameTemp() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+						OssMaster sourceBean = _ossMap.get(sourceKey);
+						if (sourceBean != null) {
+							bean.setLicenseDiv(sourceBean.getLicenseDiv());
+							bean.setDownloadLocation(sourceBean.getDownloadLocation());
+							bean.setDownloadLocationGroup(sourceBean.getDownloadLocationGroup());
+							bean.setHomepage(sourceBean.getHomepage());
+							bean.setSummaryDescription(sourceBean.getSummaryDescription());
+							bean.setAttribution(sourceBean.getAttribution());
+							bean.setCopyright(sourceBean.getCopyright());
+							bean.setCvssScore(sourceBean.getCvssScore());
+							bean.setCveId(sourceBean.getCveId());
+							bean.setVulnYn(sourceBean.getVulnYn());
+							bean.setVulnRecheck(sourceBean.getVulnRecheck());
+							bean.setVulnDate(sourceBean.getVulnDate());
+							bean.setLicenseType(sourceBean.getLicenseType());
+							bean.setOssLicenses(sourceBean.getOssLicenses());
+							bean.setOssType(sourceBean.getOssType());
+							bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
+							bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
+							bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
+							bean.setImportantNotes(sourceBean.getImportantNotes());
+							if (sourceBean.getDetectedLicenses() != null) {
+								bean.setDetectedLicenses(sourceBean.getDetectedLicenses());
+							}
+
+							_ossMap.put(key.toUpperCase(), bean);
+						}
+					}
+				}
+				
+				if (!_ossMap.isEmpty()) {
+					for (String key : _ossMap.keySet()) {
+						OSS_INFO_UPPER.put(key, _ossMap.get(key));
+					}
+				}
+				
+				if (!_ossNamesMap.isEmpty()) {
+					for (String key : _ossNamesMap.keySet()) {
+						OSS_INFO_UPPER_NAMES.put(key, _ossNamesMap.get(key));
+					}
+				}
+			}
+		} catch(Exception e) {
+        	log.error(e.getMessage(), e);
+		}
+	}
+
 	/**
 	 * 모든 라이선스 정보를 load
 	 */
