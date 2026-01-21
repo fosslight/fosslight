@@ -3632,7 +3632,10 @@
                         $("#projectList_" + targetSeq).clearGridData();
                         
                         $('.verifyFile_' + targetSeq).hide();
-                        $("#uploadAdd_" + targetSeq).show();
+                        var seq = parseInt(targetSeq)+1;
+                        if ("block" != $("#fileUploader_" + seq).css("display")) {
+                        	$("#uploadAdd_" + targetSeq).show();
+                        }
                         $("#uploadRemove_" + targetSeq).hide();
                         $("#projectSearch_" + targetSeq).hide();
                         if (!$(".uploadList_" + targetSeq).is("visible")) {
