@@ -1834,7 +1834,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossIdListByName = ossIdListByName.stream().distinct().collect(Collectors.toList());
 			updateParam.setOssIdList(ossIdListByName);
 			updateParam.setVersionDiffFlag(vDiffFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-			
+			if (vDiffFlag) {
+				master.setVersionDiffFlag(CoConstDef.FLAG_YES);
+			}
 			ossMapper.updateOssLicenseVDiffFlag(updateParam);
 		}
 	}
@@ -4851,9 +4853,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				mailBean.setParamOssInfo(ossMaster);
 			}
 			
-			if (CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(mailType)
-					|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(mailType)
-					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(mailType)) {
+			if (CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getVersionDiffFlag()))
+					&& (CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(mailType) || CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(mailType) || CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(mailType))) {
 				setVdiffInfoForSentMail(ossMaster.getOssName(), mailBean);
 			}
 			
@@ -4893,42 +4894,38 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	public void setVdiffInfoForSentMail(String ossName, CoMail mailBean) {
 		List<Map<String, Object>> resultData  = new ArrayList<>();
-		boolean vDiffFlag = ossMapper.checkOssVersionDiff(ossName) > 0 ? true : false;
-
-		if (vDiffFlag) {
-			OssMaster param = new OssMaster();
-			param.setOssNames(new String[] {ossName});
-			Map<String, OssMaster> ossMap = getBasicOssInfoList(param);
-			if (MapUtils.isNotEmpty(ossMap)) {
-				LinkedHashMap<String, OssMaster> sortedMap = ossMap.entrySet().stream().sorted((e1, e2) -> {
-			            	String s1 = avoidNull(e1.getValue().getOssVersion());
-			                String s2 = avoidNull(e2.getValue().getOssVersion());
-			                if (isEmpty(s1) && isEmpty(s2)) {
-			                	return 0;
-			                }
-			                if (isEmpty(s1)) {
-			                	return 1;
-			                }
-			                if (isEmpty(s2)) {
-			                	return -1;
-			                }
-			                return s2.trim().compareTo(s1.trim());
-			            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-				ossMap = sortedMap;
-			}
-			for (String key : ossMap.keySet()) {
-				OssMaster om = ossMap.get(key);
-				Map<String, Object> contentMap = new HashMap<>();
-				contentMap.put("ossNameInfo", om.getOssName() + " (" + om.getOssVersion() + ")");
-				contentMap.put("licenseInfo", CommonFunction.makeLicenseExpression(om.getOssLicenses()));
-				resultData.add(contentMap);
-			}
-			
-			if (resultData != null && !resultData.isEmpty()) {
-				mailBean.setParamList(resultData);
-			} else {
-				mailBean.setParamList(new ArrayList<>());
-			}
+		OssMaster param = new OssMaster();
+		param.setOssNames(new String[] {ossName});
+		Map<String, OssMaster> ossMap = getBasicOssInfoList(param);
+		if (MapUtils.isNotEmpty(ossMap)) {
+			LinkedHashMap<String, OssMaster> sortedMap = ossMap.entrySet().stream().sorted((e1, e2) -> {
+		            	String s1 = avoidNull(e1.getValue().getOssVersion());
+		                String s2 = avoidNull(e2.getValue().getOssVersion());
+		                if (isEmpty(s1) && isEmpty(s2)) {
+		                	return 0;
+		                }
+		                if (isEmpty(s1)) {
+		                	return 1;
+		                }
+		                if (isEmpty(s2)) {
+		                	return -1;
+		                }
+		                return s2.trim().compareTo(s1.trim());
+		            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+			ossMap = sortedMap;
+		}
+		for (String key : ossMap.keySet()) {
+			OssMaster om = ossMap.get(key);
+			Map<String, Object> contentMap = new HashMap<>();
+			contentMap.put("ossNameInfo", om.getOssName() + " (" + om.getOssVersion() + ")");
+			contentMap.put("licenseInfo", CommonFunction.makeLicenseExpression(om.getOssLicenses()));
+			resultData.add(contentMap);
+		}
+		
+		if (resultData != null && !resultData.isEmpty()) {
+			mailBean.setParamList(resultData);
+		} else {
+			mailBean.setParamList(new ArrayList<>());
 		}
 	}
 	
