@@ -2961,9 +2961,10 @@
 			PROJECT_MASTER
 		SET
 			EXCEPT_FILE_CONTENT = #{exceptFileContent},
-			VERIFY_FILE_CONTENT = #{verifyFileContent},
-			BINARY_FILE_YN = #{binaryFileYn}
-
+			VERIFY_FILE_CONTENT = #{verifyFileContent}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryFileYn)">
+			,BINARY_FILE_YN = #{binaryFileYn}
+			</if>
 		WHERE
 			PRJ_ID	= #{prjId}
 	</update>

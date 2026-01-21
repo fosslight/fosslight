@@ -468,6 +468,7 @@ public class VerificationController extends CoTopComponent {
 				String verifyChkList = "";
 				String exceptFileContent = "";
 				String readmeFileName = "";
+				String verifyBinary = "";
 				
 				for (Map<String, Object> resultMap : result) {
 					if (isEmpty(verifyChkList) && resultMap.containsKey("verifyChkList")) {
@@ -479,12 +480,16 @@ public class VerificationController extends CoTopComponent {
 					if (isEmpty(readmeFileName) && resultMap.containsKey("readmeFileName")) {
 						readmeFileName = String.valueOf(resultMap.get("readmeFileName"));
 					}
+					if(isEmpty(verifyBinary) && resultMap.containsKey("verifyBinary")) {
+						verifyBinary = String.valueOf(resultMap.get("verifyBinary"));
+					}
 				}
 				
 				Project param = new Project();
 				param.setPrjId(prjId);
 				param.setExceptFileContent(exceptFileContent);
 				param.setVerifyFileContent(verifyChkList);
+				param.setBinaryFileYn(verifyBinary);
 				
 				projectService.registVerifyContents(param);
 				
@@ -554,7 +559,7 @@ public class VerificationController extends CoTopComponent {
 	}
 	
 	@PostMapping(value=VERIFICATION.SAVE_PATH,  produces = {
-			MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", 
+			MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8",
 			MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
 	public @ResponseBody ResponseEntity<Object> savePath(@RequestBody Map<Object, Object> map, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception{
 		log.info("URI: "+ "/project/verification/savePath");
