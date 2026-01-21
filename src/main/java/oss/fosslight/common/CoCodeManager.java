@@ -247,7 +247,11 @@ public class CoCodeManager extends CoTopComponent {
 			if (list != null) {
 				List<OssMaster> nickNameList = ossMapper.getOssInfoWithNickByOssId(ossId);
 				OssMaster beforeOssInfo = OSS_INFO_BY_ID.get(ossId);
-				String ossInfoKey2 = (beforeOssInfo.getOssName() + "_" + avoidNull(beforeOssInfo.getOssVersion())).toUpperCase();
+				String ossInfoKey2 = "";
+				if (beforeOssInfo != null) {
+					ossInfoKey2 = (beforeOssInfo.getOssName() + "_" + avoidNull(beforeOssInfo.getOssVersion())).toUpperCase();
+				}
+				
 				Map<String, OssMaster> _ossMap = new HashMap<>();
 				Map<String, String> _ossNamesMap = new HashMap<>();
 				boolean isDel = false;
@@ -255,7 +259,7 @@ public class CoCodeManager extends CoTopComponent {
 				for (OssMaster bean : list) {
 					OssMaster targetBean = null;
 					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-					if (!isDel && beforeOssInfo != null && (!bean.getOssName().equalsIgnoreCase(beforeOssInfo.getOssName()) || !key.equals(ossInfoKey2))) {
+					if (!isDel && !isEmpty(ossInfoKey2) && beforeOssInfo != null && (!bean.getOssName().equalsIgnoreCase(beforeOssInfo.getOssName()) || !key.equals(ossInfoKey2))) {
 						isDel = true;
 						OSS_INFO_UPPER.remove(ossInfoKey2);
 						OSS_INFO_UPPER_NAMES.entrySet().removeIf(entry -> entry.getValue() == beforeOssInfo.getOssName());
