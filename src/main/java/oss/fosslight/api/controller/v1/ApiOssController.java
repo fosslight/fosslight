@@ -166,7 +166,7 @@ public class ApiOssController extends CoTopComponent {
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
 	}
 	
-	@ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL의 경우 다음 순서대로 처리합니다. <ol><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* doUpdateFlag가 N인 경우 Database를 Update하지 않습니다.")
+	@ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL is processed in the following order. <ol><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* If doUpdateFlag is N, the database will not be updated.")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })

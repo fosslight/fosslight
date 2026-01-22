@@ -208,7 +208,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
     }
     
-    @ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL의 경우 다음 순서대로 처리합니다. <ol><li>UPDATE DOWNLOAD LOCATION FORMAT</li><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* doUpdateFlag가 N인 경우 Database를 Update하지 않습니다.")
+    @ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL is processed in the following order. <ol><li>UPDATE DOWNLOAD LOCATION FORMAT</li><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* If doUpdateFlag is N, the database will not be updated.")
 	@GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION})
     public ResponseEntity<Map<String, Object>> refineOssDownloadLocation(
             @ApiParam(hidden=true) @RequestHeader String authorization,
