@@ -60,6 +60,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 		('304', '006', 'modifier', '', 'String|Modifier', 6, 'Y'),
 		('304', '007', 'modifiedDate', '', 'String|Modified Date', 7, 'Y'),
 		('304', '008', 'useYn', '', 'String|Use Yn', 8, 'Y');
+		
+ALTER TABLE `OSS_ANALYSIS_STATUS` ADD `SEND_MAIL_FLAG` CHAR(1) DEFAULT NULL;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
