@@ -49,6 +49,17 @@ CREATE TABLE `PROJECT_FILELIST` (
 
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Project Information탭 우측하단의 "Repoen" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Reopen" button on Project Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '35';
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Project Informatoin탭 우측하단의 "Repopen" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \''Drop\'', so you don\''t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Reopen" button on Project information Tab.</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '812';
+
+INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES ('304', 'User', 'User Entity', 'N');
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+       	('304', '001', 'userName', '', 'String|USER Namee', 1, 'Y'),
+		('304', '002', 'email', '', 'String|Email', 2, 'Y'),
+		('304', '003', 'divisionName', '', 'String|Division Name', 3, 'Y'),
+		('304', '004', 'token', '', 'String|Token', 4, 'Y'),
+		('304', '005', 'expireDate', '', 'String|Expire Date', 5, 'Y'),
+		('304', '006', 'modifier', '', 'String|Modifier', 6, 'Y'),
+		('304', '007', 'modifiedDate', '', 'String|Modified Date', 7, 'Y'),
+		('304', '008', 'useYn', '', 'String|Use Yn', 8, 'Y');
 -- //@UNDO
 -- SQL to undo the change goes here.
 

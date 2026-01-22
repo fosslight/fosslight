@@ -707,7 +707,7 @@ public class CoConstDef {
 	public static final String	EVENT_CODE_OSS = "301";
 	public static final String	EVENT_CODE_OSS_LICENSE = "302";
 	public static final String	EVENT_CODE_PROJECT = "303";
-	public static final String	EVENT_CODE_PROJECT_MODEL = "304";
+	public static final String	EVENT_CODE_USER = "304";
 	public static final String	EVENT_CODE_PROJECT_WATCHER = "305";
 	public static final String 	EVENT_CODE_PROJECT_STATUS = "306";
 	public static final String	EVENT_CODE_PARTNER = "Partner";

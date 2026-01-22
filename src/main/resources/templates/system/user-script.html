@@ -220,14 +220,15 @@ var ajax = {
 			type: 'POST',
 			url: '/system/user/modAjax',
 			data: param,
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json' 
+			contentType: 'application/json',
+			dataType: 'json',
+			success: function (data, status, xhr) {
+				alertify.success([[#{msg.common.success}]]);
+				var postData = $('#userSearch').serializeObject();
+	            $('#list').jqGrid('setGridParam', {postData:postData, page : 1, datatype:"json"}).trigger('reloadGrid');
 			},
-		}).success(function (data, status, headers, config) {
-			$("#list").jqGrid().trigger('reloadGrid');
-            alertify.success([[#{msg.common.success}]]);
-		}).error(function (data, status, headers, config) {});
+			error: function (xhr, status, error) {}
+		});
 	}
 };
 
@@ -246,6 +247,7 @@ var userList = {
         colNameArr.push('Name');
         colNameArr.push('Division');
         colNameArr.push('Registered Date');
+        colNameArr.push('Modified Date');
         colNameArr.push('Token');
         colNameArr.push('Expire Date');
         colNameArr.push('Token Proc');
@@ -270,6 +272,8 @@ var userList = {
 		};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'createdDate', index: 'createdDate', width: 100, align: 'center'};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 100, align: 'center'};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'token', index: 'token', width:100};
 		colModelArr.push(colModelObj);
