@@ -5709,6 +5709,12 @@ public class ProjectController extends CoTopComponent {
 			if (CollectionUtils.isNotEmpty(thirdPartyRows)) {
 				thirdPartyList.addAll(thirdPartyRows);
 			}
+			
+			Map<String, Object> beforeThirdPartyMap = projectService.get3rdMapList(project, false);
+			List<PartnerMaster> beforeThirdPartyRows = (List<PartnerMaster>) beforeThirdPartyMap.get("rows");
+			if (CollectionUtils.isNotEmpty(beforeThirdPartyRows)) {
+				thirdPartyList.addAll(beforeThirdPartyRows);
+			}
 			// add nickname valid Message
 			if (CollectionUtils.isNotEmpty(rows)) {
 				List<PartnerMaster> addThirdPartyList = projectService.nickNameValidMessage(prjId, oc.getReferenceId(), rows, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
