@@ -295,7 +295,7 @@ public interface OssMapper {
 
 	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
 
-	List<String> getPrjIdsToSendCoReviewerEamils();
+	List<String> getPrjIdsToSendCoReviewerEmails();
 	
 	List<OssMaster> getOssInfoByOssId(@Param("ossId") String ossId);
 	
@@ -306,4 +306,6 @@ public interface OssMapper {
 	List<ProjectIdentification> selectBulkOssInfoByNames(@Param("ossNames") List<String> ossNames);
 
 	List<ProjectIdentification> selectBulkOssInfoByUrls(@Param("urls") List<String> urls);
+
+	void updateSendMailFlagForCoReviewerEmails();
 }
