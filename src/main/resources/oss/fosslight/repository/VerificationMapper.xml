@@ -83,7 +83,7 @@
 		WHERE 1=1
 		<choose>
 			<when test="@oss.fosslight.util.StringUtil@equals(noticeType, '80')">
-			 	AND REFERENCE_DIV = '14'
+			 	AND REFERENCE_DIV IN ('14', '17')
 			</when>
 			<otherwise>
 				AND REFERENCE_DIV NOT IN ('14', '17')
