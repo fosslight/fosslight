@@ -6,6 +6,7 @@
 package oss.fosslight.domain;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -36,6 +37,7 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.jsoup.Jsoup;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -4068,12 +4070,43 @@ public class CoMailManager extends CoTopComponent {
 					}
 					
 					String url = CommonFunction.emptyCheckProperty("fl.scan.service.url", "");
-					if (!isEmpty(url)) {
+					if (!isEmpty(url) && ossMapper.ossAnalysisListCnt(prjId, CoConstDef.FLAG_YES, null) > 0) {
 						url += "/api/project/" + prjId + "/logs";
 						ResponseEntity<byte[]> response = new RestTemplate().exchange(url, HttpMethod.GET, null, byte[].class);
 						if (response.getStatusCode() == HttpStatus.OK) {
 							DataSource dataSource = new ByteArrayDataSource(response.getBody(), "application/json");
 							helper.addAttachment("auto_analysis_result_" + prjId + ".json", dataSource);
+						}
+					}
+					
+					if (coMail.isIncludeAttachment() && !prjId.startsWith("3rd_")) {
+						String reviewReportPath = CommonFunction.emptyCheckProperty("reviewReport.path", "");
+						if (!isEmpty(reviewReportPath)) {
+							String targetDirPath = reviewReportPath + "/" + prjId;
+							File dir = new File(targetDirPath);
+							if (dir.exists() && dir.isDirectory()) {
+								File[] pdfFiles = dir.listFiles(new FilenameFilter() {
+							        @Override
+							        public boolean accept(File dir, String name) {
+							            return name.toLowerCase().endsWith(".pdf");
+							        }
+							    });
+								
+								if (pdfFiles != null && pdfFiles.length > 0) {
+							        for (File pdfFile : pdfFiles) {
+							            FileSystemResource fileResource = new FileSystemResource(pdfFile);
+							            try {
+							                helper.addAttachment(pdfFile.getName(), fileResource);
+							            } catch (Exception e) {
+							                log.error(e.getMessage(), e);
+							            }
+							        }
+							    } else {
+							    	log.info("[PRJ-{}] There is no review report file", prjId);
+							    }
+							}
+						} else {
+							log.info("[PRJ-{}] There is no review report directory", prjId);
 						}
 					}
 					
