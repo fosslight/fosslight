@@ -4641,6 +4641,6 @@
 	</select>
 	
 	<update id="updateSendMailFlagForCoReviewerEmails">
-		UPDATE OSS_ANALYSIS_STATUS SET SEND_MAIL_FLAG = 'Y' AND SEND_MAIL_FLAG = 'N'
+		UPDATE OSS_ANALYSIS_STATUS SET SEND_MAIL_FLAG = 'Y' WHERE SEND_MAIL_FLAG = 'N'
 	</update>
 </mapper>
