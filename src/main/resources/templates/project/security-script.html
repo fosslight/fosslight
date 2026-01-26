@@ -636,21 +636,8 @@ var com_fn = {
 	checkDownloadExcel : function(target) {
 		loading.show();
 		
-		var prjId = [[${project.prjId}]];
 		var tabMenu = target;
-
-        if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
-			com_fn.downloadExcel(tabMenu);
-		} else {
-			loading.hide();
-			alertify.confirm([[#{msg.project.security.check.export}]], function (e) {
-				if (e) {
-					com_fn.downloadExcel(tabMenu);
-				} else {
-					return false;
-				}
-			});
-		}
+		com_fn.downloadExcel(tabMenu);
 	},
 	downloadExcel : function(target){
 		var data = {
