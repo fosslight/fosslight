@@ -1206,9 +1206,27 @@ var autoComplete = {
         if ($(".autoComOss").length > 0) {
             commonAjax.getOssTags().success(function (data, status, headers, config) {
                 if (data != null) {
+                	var entityPattern = /&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});/i;
                     data.forEach(function (obj) {
                         if (obj != null) {
-                            autoComplete.ossTags.push(obj.ossName);
+                            var rawValue = obj.ossName;
+                            var txt = document.createElement("textarea");
+                            var loopSafety = 0;
+                            
+                            while (entityPattern.test(rawValue) && loopSafety < 10) {
+                            	var before = rawValue;
+                            	
+                            	txt.innerHTML = rawValue;
+                            	rawValue = txt.value;
+                            	
+                            	if (before === rawValue) {
+                            		break;
+                            	}
+                            	
+                            	loopSafety++;
+                            }
+                            
+                            autoComplete.ossTags.push(rawValue);
                         }
                     })
                 }
