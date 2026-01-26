@@ -13,7 +13,7 @@ var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
 var ossNames = [];
 var licenseNames = [];
 
-var uploadGridData;
+var uploadGridData = [];
 var searchedData = {};
 var partyLoadSuccess = true;
 var depLoadSuccess = true;
@@ -2572,8 +2572,14 @@ var com_fn = {
 			},
 			gridComplete: function() {
 				$('#_searchProjectList1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "360px"});
-				$("#_searchProjectList1").jqGrid("setGridWidth", 0, true);
-		        $("#_searchProjectList1").jqGrid("setGridWidth", 760, true);
+				
+				if ([[${hasLoadedItems}]]) {
+					$("#_searchProjectList1").jqGrid("setGridWidth", 0, true);
+			        $("#_searchProjectList1").jqGrid("setGridWidth", 760, true);
+				} else {
+					adjustMultiPageGridSize();
+					updateGridRowCount('_searchProjectList1', 'searchProjectPager1');
+				}
 			}
 		}
 	},

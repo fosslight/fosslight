@@ -59,23 +59,32 @@
 											<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
 												<i class="fas fa-minus"></i>
 											</button>
-		<!-- 								<button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove"> -->
-		<!-- 									<i class="fas fa-times"></i> -->
-		<!-- 								</button> -->
 										</div>
 									</div>
-									<div class="card-body bottom-component grid-area">
+									<div class="card-body">
 										<input type="hidden" id="identificationCsvFileId" th:value="${project.identificationCsvFileId}">
-										<div class="row">
-											<div class="jqGridSet identificationAddArea">
-												<table id="identificationAddList">
-													<tr>
-														<td></td>
-													</tr>
-												</table>
-												<div id="identificationAddPager"></div>
+										<th:block th:if="${hasLoadedItems}">
+											<div class="bottom-component grid-area">
+												<div class="row">
+													<div class="jqGridSet identificationAddArea">
+														<table id="identificationAddList">
+															<tr>
+																<td></td>
+															</tr>
+														</table>
+														<div id="identificationAddPager"></div>
+													</div>
+												</div>
 											</div>
-										</div>
+										</th:block>
+										<th:block th:unless="${hasLoadedItems}">
+											<th:block th:if="${@CommonFunction.isAdmin()}">
+												<th:block th:if="${project.identificationStatus != 'REQ' and project.identificationStatus != 'CONF'}" th:replace="project/fragments/edit :: uploadFragments"></th:block>
+											</th:block>
+											<th:block th:unless="${@CommonFunction.isAdmin()}">
+												<th:block th:if="${project.identificationStatus != 'REQ' and project.identificationStatus != 'REV' and project.identificationStatus != 'CONF'}" th:replace="project/fragments/edit :: uploadFragments"></th:block>
+											</th:block>
+										</th:block>
 									</div>
 								</div>
 							</div>

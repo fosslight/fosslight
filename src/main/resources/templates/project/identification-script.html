@@ -27,7 +27,16 @@ $(document).ready(function () {
 	bom_evt.init();
 //	if (batFlag) bat_evt.init();
 	fn.displayProjectInfo();
-	com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
+	if ([[${hasLoadedItems}]]) {
+		com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
+	} else {
+		com_fn.identificationUploadFile([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
+		callAutoCompleteFnc("autoComProjectNmConf");
+		
+		$('#_threeSearch1list').jqGrid(com_fn.setParamParty1());
+		$('#_searchProjectList1').jqGrid(com_fn.setParamProject1([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]));
+		$('#_searchProjectList2').jqGrid(com_fn.setParamProject2());
+	}
 	
 	$("[id^=tabMenu]").on("click", function() {
 		var tabId = $(this).attr("id");

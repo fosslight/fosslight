@@ -3056,6 +3056,14 @@ public class ProjectController extends CoTopComponent {
 		project.setPrjId(prjId);
 		Project projectMaster = projectService.getProjectDetail(project);
 		
+		boolean hasLoadedItems = false;
+		Map<String, Object> loadedItems = projectService.getIdentificationAddList(projectMaster);
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> loadedItemList = (List<Map<String, Object>>) loadedItems.get("rows");
+		if (CollectionUtils.isNotEmpty(loadedItemList)) {
+			hasLoadedItems = true;
+		}
+		
 		boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICATION_USER);
@@ -3091,6 +3099,7 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 //		model.addAttribute("editMode", isNew);
+		model.addAttribute("hasLoadedItems", hasLoadedItems);
 		model.addAttribute("initDiv", initDiv);
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
