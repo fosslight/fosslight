@@ -62,6 +62,26 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 		('304', '008', 'useYn', '', 'String|Use Yn', 8, 'Y');
 		
 ALTER TABLE `OSS_ANALYSIS_STATUS` ADD `SEND_MAIL_FLAG` CHAR(1) DEFAULT NULL;
+
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+		('102', '850', '[FOSSLight][PRJ-${Project ID}] : "${User}" requested edit permission : "${Project Name}"', '', '', 850, 'Y'),
+		('102', '851', '[FOSSLight][PRJ-${Project ID}] : "${Reviewer}" rejected edit permission : "${Project Name}"', '', '', 851, 'Y'),
+		('102', '852', '[FOSSLight][3rd-${3rd Party ID}] : "${User}" requested edit permission : "${3rd Party Name}"', '', '', 852, 'Y'),
+		('102', '853', '[FOSSLight][3rd-${3rd Party ID}] : "${Reviewer}" rejected edit permission : "${3rd Party Name}"', '', '', 853, 'Y'),
+		('102', '854', '[FOSSLight][PRJ-${Project ID}] : "${User}" canceled requested edit permission : "${Project Name}"', '', '', 854, 'Y'),
+		('102', '855', '[FOSSLight][3rd-${3rd Party ID}] : "${User}" canceled requested edit permission : "${3rd Party Name}"', '', '', 855, 'Y'),
+       	('102', '856', '[FOSSLight][PRJ-${Project ID}] : "${User}" approved edit permission : "${Project Name}"', '', '', 856, 'Y'),
+       	('102', '857', '[FOSSLight][3rd-${3rd Party ID}] : "${User}" approved edit permission : "${3rd Party Name}"', '', '', 857, 'Y'),
+       	('103', '850', 'Request Permission For Project', '', '200', 850, 'Y'),
+		('103', '851', 'Reject Permission For Project', '', '200', 851, 'Y'),
+		('103', '852', 'Request Permission For Partner', '', '205', 852, 'Y'),
+		('103', '853', 'Reject Permission For Partner', '', '205', 853, 'Y'),
+		('103', '854', 'Cancel Request Permission For Project', '', '200', 854, 'Y'),
+		('103', '855', 'Cancel Request Permission For Partner', '', '205', 855, 'Y'),
+       	('103', '856', 'Approved Permission For Project', '', '200', 856, 'Y'),
+       	('103', '857', 'Approved Permission For Partner', '', '205', 857, 'Y');
+       
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '850,851,852,853,854,855,856,857' WHERE CD_NO = '110' AND CD_DTL_NO = '90';
 -- //@UNDO
 -- SQL to undo the change goes here.
 

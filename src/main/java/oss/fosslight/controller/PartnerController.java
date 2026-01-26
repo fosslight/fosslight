@@ -1346,11 +1346,7 @@ public class PartnerController extends CoTopComponent{
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value=PARTNER.CHANGE_STATUS)
-	public @ResponseBody ResponseEntity<Object> changeStatus(
-			PartnerMaster partnerMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> changeStatus(PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		CoMail mailbean = null;
 		
 		String commentDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS;
@@ -2121,26 +2117,34 @@ public class PartnerController extends CoTopComponent{
 					// update permission status
 					projectService.updateRequestProjectPermission("3rd_" + partnerMaster.getPartnerId(), userId, partnerMaster.getStatus(), null);
 					
+					CoMail mailBean = null;
+					String reviewerName = avoidNull(parInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
+					String en = "";
+					String ko = "";
+					
 					if (partnerMaster.getStatus().equalsIgnoreCase("APP")) {
 						// add watcher
 						partnerMaster.setParUserId(userId);
 						partnerMaster.setParDivision(user.getDivision());
 						partnerService.addWatcher(partnerMaster);
+						
+						mailBean = new CoMail(CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION);
+						en = messageSource.getMessage("msg.common.approved.permission", null, Locale.ENGLISH);
+						ko = messageSource.getMessage("msg.common.approved.permission", null, Locale.KOREAN);
 					} else {
 						// send reject email
-						String reviewerName = avoidNull(parInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
-						String en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
-						en = en.replaceAll("Reviewer", reviewerName);
-						String ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
-						ko = ko.replaceAll("Reviewer", reviewerName);
-						
-						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION);
-						mailBean.setLoginUserName(userId);
-						mailBean.setParamPartnerId(partnerMaster.getPartnerId());
-						mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
-						mailBean.setReviewer(reviewerName);
-						CoMailManager.getInstance().sendMail(mailBean);
+						mailBean = new CoMail(CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION);
+						en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
+						ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
 					}
+					en = en.replaceAll("Reviewer", reviewerName);
+					ko = ko.replaceAll("Reviewer", reviewerName);
+					
+					mailBean.setLoginUserName(userId);
+					mailBean.setParamPartnerId(partnerMaster.getPartnerId());
+					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+					mailBean.setReviewer(reviewerName);
+					CoMailManager.getInstance().sendMail(mailBean);
 				}
 			}
 		} else {

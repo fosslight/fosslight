@@ -5652,26 +5652,35 @@ public class ProjectController extends CoTopComponent {
 					// update permission status
 					projectService.updateRequestProjectPermission(project.getPrjId(), userId, project.getStatus(), null);
 
+					CoMail mailBean = null;
+					String reviewer = avoidNull(prjInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
+					String en = "";
+					String ko = "";
+					
 					if (project.getStatus().equalsIgnoreCase("APP")) {
 						// add watcher
 						project.setPrjUserId(userId);
 						project.setPrjDivision(user.getDivision());
 						projectService.addWatcher(project);
+						
+						mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION);
+						en = messageSource.getMessage("msg.common.approved.permission", null, Locale.ENGLISH);
+						ko = messageSource.getMessage("msg.common.approved.permission", null, Locale.KOREAN);
 					} else {
 						// send reject email
-						String reviewer = avoidNull(prjInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
-						String en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
-						en = en.replaceAll("Reviewer", reviewer);
-						String ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
-						ko = ko.replaceAll("Reviewer", reviewer);
-
-						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION);
-						mailBean.setLoginUserName(userId);
-						mailBean.setParamPrjId(project.getPrjId());
-						mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
-						mailBean.setReviewer(reviewer);
-						CoMailManager.getInstance().sendMail(mailBean);
+						mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION);
+						en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
+						ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
 					}
+					en = en.replaceAll("Reviewer", reviewer);
+					ko = ko.replaceAll("Reviewer", reviewer);
+					
+					mailBean.setLoginUserName(userId);
+					mailBean.setParamPrjId(project.getPrjId());
+					mailBean.setReviewer(reviewer);
+					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+					
+					CoMailManager.getInstance().sendMail(mailBean);
 				}
 			}
 		} else {

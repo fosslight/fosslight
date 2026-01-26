@@ -815,6 +815,15 @@ public class CoMailManager extends CoTopComponent {
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
     			break;
+			case CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION:
+				bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
+				
+				ccList = new ArrayList<>();
+				ccList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId()));
+				if (!CollectionUtils.isEmpty(ccList)) {
+    				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+    			}
+				break;
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
     		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
@@ -1337,6 +1346,15 @@ public class CoMailManager extends CoTopComponent {
     			bean.setToIds(new String[]{bean.getParamEmail()});
 				bean.setCcIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			break;
+    		case CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION:
+    			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
+    			
+    			ccList = new ArrayList<>();
+    			ccList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId()));
+				if (!CollectionUtils.isEmpty(ccList)) {
+    				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+    			}
+    			break;
     		default:
     			// 호출하는 쪽에서 설정된 경우
     			if (bean.getToIds() != null && bean.getToIds().length > 0) {
@@ -1363,9 +1381,11 @@ public class CoMailManager extends CoTopComponent {
 						|| CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
-						|| CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION.equals(bean.getMsgType())) {
+						|| CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION.equals(bean.getMsgType())) {
     				convertDataMap.put("isModify", false);
     			} else if ((CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType()) 
 						|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
