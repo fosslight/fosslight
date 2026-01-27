@@ -5644,16 +5644,23 @@ public class ProjectController extends CoTopComponent {
 
 		if (isEmpty(project.getRejPerUserNm())) {
 			if (CollectionUtils.isNotEmpty(prjInfo.getReqPerUserIds())) {
-				T2Users user = new T2Users();
-
+				T2Users bean = new T2Users();
+				bean.setUserId(loginUserName());
+				bean = userService.getUser(bean);
+				String reviewer = "";
+				if (bean != null) {
+					reviewer = bean.getUserName();
+				}
+				
 				for (String userId : prjInfo.getReqPerUserIds()) {
+					T2Users user = new T2Users();
 					user.setUserId(userId);
 					user = t2UserService.getUser(user);
 					// update permission status
 					projectService.updateRequestProjectPermission(project.getPrjId(), userId, project.getStatus(), null);
 
 					CoMail mailBean = null;
-					String reviewer = avoidNull(prjInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
+					reviewer = avoidNull(reviewer, "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
 					String en = "";
 					String ko = "";
 					

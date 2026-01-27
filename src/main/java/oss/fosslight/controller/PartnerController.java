@@ -2110,15 +2110,23 @@ public class PartnerController extends CoTopComponent{
 		
 		if (isEmpty(partnerMaster.getRejPerUserNm())) {
 			if (CollectionUtils.isNotEmpty(parInfo.getReqPerUserIds())) {
-				T2Users user = new T2Users();
+				T2Users bean = new T2Users();
+				bean.setUserId(loginUserName());
+				bean = userService.getUser(bean);
+				String reviewer = "";
+				if (bean != null) {
+					reviewer = bean.getUserName();
+				}
+				
 				for (String userId : parInfo.getReqPerUserIds()) {
+					T2Users user = new T2Users();
 					user.setUserId(userId);
 					user = t2UserService.getUser(user);
 					// update permission status
 					projectService.updateRequestProjectPermission("3rd_" + partnerMaster.getPartnerId(), userId, partnerMaster.getStatus(), null);
 					
 					CoMail mailBean = null;
-					String reviewerName = avoidNull(parInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
+					reviewer = avoidNull(reviewer, "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
 					String en = "";
 					String ko = "";
 					
@@ -2137,13 +2145,13 @@ public class PartnerController extends CoTopComponent{
 						en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
 						ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
 					}
-					en = en.replaceAll("Reviewer", reviewerName);
-					ko = ko.replaceAll("Reviewer", reviewerName);
+					en = en.replaceAll("Reviewer", reviewer);
+					ko = ko.replaceAll("Reviewer", reviewer);
 					
 					mailBean.setLoginUserName(userId);
 					mailBean.setParamPartnerId(partnerMaster.getPartnerId());
 					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
-					mailBean.setReviewer(reviewerName);
+					mailBean.setReviewer(reviewer);
 					CoMailManager.getInstance().sendMail(mailBean);
 				}
 			}
