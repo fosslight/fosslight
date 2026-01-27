@@ -1574,10 +1574,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Project project = new Project();
         project.setPrjId(prjId);
         Project projectInfo = projectService.getProjectDetail(project);
-
-        if (Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) ||
-                Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS)) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
+        
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && projectInfo.getStatusPermission() == 0) {
+        	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete project.");
+        } else if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && projectInfo.getStatusPermission() > 0
+        		&& (Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) || Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS))) {
+        	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
         }
 
         try {
