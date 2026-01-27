@@ -371,7 +371,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		makeSheet(modelSheet, rows, 2);
 	}
 
-	private static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo) {
+	public static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo) {
 		reportIdentificationSheet(type, sheet, listMap, projectInfo, false);
 	}
 
@@ -385,7 +385,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @param isSelfCheck
 	 */
 	@SuppressWarnings("unchecked")
-	private static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo, boolean isSelfCheck) {
+	public static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo, boolean isSelfCheck) {
 		List<ProjectIdentification> list = null;
 		if (listMap != null && (listMap.containsKey("mainData") || listMap.containsKey("rows") )) {
 			list = (List<ProjectIdentification>) listMap.get(listMap.containsKey("mainData") ? "mainData" : "rows");
