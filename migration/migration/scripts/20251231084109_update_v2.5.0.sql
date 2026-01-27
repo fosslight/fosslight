@@ -82,6 +82,9 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
        	('103', '857', 'Approved Permission For Partner', '', '205', 857, 'Y');
        
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '850,851,852,853,854,855,856,857' WHERE CD_NO = '110' AND CD_DTL_NO = '90';
+
+UPDATE `T2_CODE_DTL` SET CD_DTL_NM = '[FOSSLight][PRJ-${Project ID}] : "${Reviewer}" approved edit permission : "${Project Name}"' WHERE CD_NO = '102' AND CD_DTL_NO = '856';
+UPDATE `T2_CODE_DTL` SET CD_DTL_NM = '[FOSSLight][3rd-${3rd Party ID}] : "${Reviewer}" approved edit permission : "${3rd Party Name}"' WHERE CD_NO = '102' AND CD_DTL_NO = '857';
 -- //@UNDO
 -- SQL to undo the change goes here.
 
