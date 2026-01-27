@@ -1837,7 +1837,7 @@ public class ProjectController extends CoTopComponent {
 			param.setUserComment(project.getUserComment());
 			
 			Project projectInfo = projectService.getProjectDetail(param);
-			if (CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE.equalsIgnoreCase(projectInfo.getStatus()) || CoConstDef.CD_DTL_PROJECT_STATUS_FINAL_REVIEW.equalsIgnoreCase(projectInfo.getStatus())) {
+			if (!CommonFunction.isAdmin() && projectInfo.getStatusPermission() == 0) {
 				rtnFlag = "10";
 				noDelPrjIds.add(prjId);
 				continue;
