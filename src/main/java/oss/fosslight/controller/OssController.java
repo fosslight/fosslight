@@ -1419,7 +1419,9 @@ public class OssController extends CoTopComponent{
 			return makeJsonResponseHeader(false);
 		}
 		
-		CoCodeManager.getInstance().refreshOssInfo();
+		if (!isEmpty(resultOssId)) {
+			CoCodeManager.getInstance().refreshOssInfoByOssId(resultOssId);
+		}
 		
 		History h = ossService.work(ossMaster);
 		h.sethAction(CoConstDef.ACTION_CODE_INSERT);
@@ -2155,7 +2157,9 @@ public class OssController extends CoTopComponent{
 			return makeJsonResponseHeader(false, "Fail");
 		}
 		
-		CoCodeManager.getInstance().refreshOssInfo(); // 등록된 oss info 갱신
+		if (!isEmpty(resultOssId)) {
+			CoCodeManager.getInstance().refreshOssInfoByOssId(resultOssId); // 등록된 oss info 갱신
+		}
 		
 		History h = ossService.work(resultData);
 		h.sethAction(CoConstDef.ACTION_CODE_INSERT);

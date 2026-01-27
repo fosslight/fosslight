@@ -76,6 +76,7 @@ public class CommentServiceImpl implements CommentService {
 				|| CoConstDef.CD_DTL_COMMENT_SECURITY_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_LICENSE.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_OSS.equals(bean.getReferenceDiv()))) {
+			boolean isDel = true;
 			switch (bean.getReferenceDiv()) {
 				case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICATION_USER);
@@ -109,11 +110,11 @@ public class CommentServiceImpl implements CommentService {
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS_USER);
 					
 					break;
-				default:
+				default: isDel = false;
 					break;
 			}
 			
-			if (!StringUtil.isEmpty(bean.getReferenceDiv())) {
+			if (isDel && !StringUtil.isEmpty(bean.getReferenceDiv())) {
 				commentMapper.deleteCommentUserTemp(bean);
 			}
 		}

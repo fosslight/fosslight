@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `HISTORY` (
   `H_ACTION` varchar(8) DEFAULT NULL COMMENT 'CUD Action Type',
   `H_DATA` longtext DEFAULT NULL COMMENT 'Json Data',
   PRIMARY KEY (`IDX`,`H_KEY`,`H_TYPE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.HISTORY:~0 rows (대략적) 내보내기
 DELETE FROM `HISTORY`;
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS `LICENSE_MASTER` (
   PRIMARY KEY (`LICENSE_ID`),
   KEY `idx_LICENSE_NAME` (`LICENSE_NAME`),
   KEY `USE_YN` (`USE_YN`)
-) ENGINE=InnoDB AUTO_INCREMENT=986 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=986 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.LICENSE_MASTER:~189 rows (대략적) 내보내기
 DELETE FROM `LICENSE_MASTER`;
@@ -1114,7 +1114,7 @@ CREATE TABLE IF NOT EXISTS `LICENSE_NICKNAME` (
   `LICENSE_ID` int(11) NOT NULL,
   `LICENSE_NICKNAME` varchar(200) NOT NULL,
   PRIMARY KEY (`LICENSE_ID`,`LICENSE_NICKNAME`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.LICENSE_NICKNAME:~355 rows (대략적) 내보내기
 DELETE FROM `LICENSE_NICKNAME`;
@@ -1730,7 +1730,7 @@ CREATE TABLE IF NOT EXISTS `NVD_CPE_MATCH` (
   `VER_END_EXC` varchar(100) DEFAULT NULL COMMENT 'CPE Match Range versionEndExcluding',
   PRIMARY KEY (`MATCH_CRITERIA_ID`),
   KEY `CPE23URI_VER_START_INC_VER_END_INC_VER_START_EXC_VER_END_EXC` (`CPE23URI`(255),`VER_START_INC`,`VER_END_INC`,`VER_START_EXC`,`VER_END_EXC`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.NVD_CPE_MATCH:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_CPE_MATCH`;
@@ -1738,6 +1738,7 @@ DELETE FROM `NVD_CPE_MATCH`;
 /*!40000 ALTER TABLE `NVD_CPE_MATCH` ENABLE KEYS */;
 
 -- 테이블 fosslight.NVD_CPE_MATCH_TEMP 구조 내보내기
+DROP TABLE IF EXISTS `NVD_CPE_MATCH_TEMP`;
 CREATE TABLE `NVD_CPE_MATCH_TEMP` (
 	`MATCH_CRITERIA_ID` VARCHAR(128) NOT NULL COMMENT 'Cpe Match Index' COLLATE 'utf8mb4_general_ci',
 	`CPE23URI` VARCHAR(256) NOT NULL COMMENT 'cpe23Uri' COLLATE 'utf8mb4_general_ci',
@@ -1747,8 +1748,7 @@ CREATE TABLE `NVD_CPE_MATCH_TEMP` (
 	`VER_END_EXC` VARCHAR(100) NULL DEFAULT NULL COMMENT 'CPE Match Range versionEndExcluding' COLLATE 'utf8mb4_general_ci',
 	PRIMARY KEY (`MATCH_CRITERIA_ID`) USING BTREE,
 	INDEX `CPE23URI_VER_START_INC_VER_END_INC_VER_START_EXC_VER_END_EXC` (`CPE23URI`(255), `VER_START_INC`, `VER_END_INC`, `VER_START_EXC`, `VER_END_EXC`) USING BTREE
-) ENGINE=InnoDB COLLATE='utf8mb4_general_ci';
-;
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 -- 테이블 fosslight.NVD_CPE_MATCH_NAMES 구조 내보내기
 DROP TABLE IF EXISTS `NVD_CPE_MATCH_NAMES`;
@@ -1758,7 +1758,7 @@ CREATE TABLE IF NOT EXISTS `NVD_CPE_MATCH_NAMES` (
   `CPE23URI` varchar(256) NOT NULL,
   PRIMARY KEY (`MATCH_CRITERIA_ID`,`IDX`),
   KEY `CPE23URI` (`CPE23URI`(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.NVD_CPE_MATCH_NAMES:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_CPE_MATCH_NAMES`;
@@ -1766,13 +1766,14 @@ DELETE FROM `NVD_CPE_MATCH_NAMES`;
 /*!40000 ALTER TABLE `NVD_CPE_MATCH_NAMES` ENABLE KEYS */;
 
 -- 테이블 fosslight.NVD_CPE_MATCH_NAMES_TEMP 구조 내보내기
+DROP TABLE IF EXISTS `NVD_CPE_MATCH_NAMES_TEMP`;
 CREATE TABLE `NVD_CPE_MATCH_NAMES_TEMP` (
 	`MATCH_CRITERIA_ID` VARCHAR(128) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`IDX` INT(11) NOT NULL COMMENT 'Version 정렬 순서를 위한 sub index',
 	`CPE23URI` VARCHAR(256) NOT NULL COLLATE 'utf8mb4_general_ci',
 	PRIMARY KEY (`MATCH_CRITERIA_ID`, `IDX`) USING BTREE,
 	INDEX `CPE23URI` (`CPE23URI`(255)) USING BTREE
-) ENGINE=InnoDB COLLATE='utf8mb4_general_ci';
+) ENGINE=InnoDB COLLATE=utf8mb4_general_ci;
 
 -- 테이블 fosslight.NVD_CVE_V3 구조 내보내기
 DROP TABLE IF EXISTS `NVD_CVE_V3`;
@@ -1785,7 +1786,7 @@ CREATE TABLE IF NOT EXISTS `NVD_CVE_V3` (
   `BASE_METRIC` varchar(10) DEFAULT NULL COMMENT 'CVSS Score Version',
   `REG_DATE` timestamp NULL DEFAULT current_timestamp() COMMENT 'Data registration date',
   PRIMARY KEY (`CVE_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.NVD_CVE_V3:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_CVE_V3`;
@@ -1802,11 +1803,15 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_SCORE_V3` (
   `VULN_SUMMARY` text NOT NULL,
   `MODI_DATE` datetime NOT NULL,
   `VENDOR` varchar(128) NOT NULL,
-  `VENDORPRODUCT` varchar(255) NULL,
-  PRIMARY KEY (`PRODUCT`,`VERSION`),
-  FULLTEXT KEY `PRODUCT` (`PRODUCT`),
-  KEY `VENDORPRODUCT_VERSION` (`VENDORPRODUCT`,`VERSION`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+  `VENDORPRODUCT` VARCHAR(191) NULL,
+  PRIMARY KEY (`PRODUCT`,`VERSION`, `VENDOR`) USING BTREE,
+  KEY `PRODUCT` (`PRODUCT`),
+  KEY `VERSION` (`VERSION`),
+  KEY `CVE_ID` (`CVE_ID`),
+  KEY `CVSS_SCORE` (`CVSS_SCORE`),
+  KEY `VENDOR` (`VENDOR`),
+  KEY `VENDORPRODUCT` (`VENDORPRODUCT`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.NVD_DATA_SCORE_V3:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_DATA_SCORE_V3`;
@@ -1814,6 +1819,7 @@ DELETE FROM `NVD_DATA_SCORE_V3`;
 /*!40000 ALTER TABLE `NVD_DATA_SCORE_V3` ENABLE KEYS */;
 
 -- 테이블 fosslight.NVD_DATA_SCORE_V3_TEMP 구조 내보내기
+DROP TABLE IF EXISTS `NVD_DATA_SCORE_V3_TEMP`;
 CREATE TABLE `NVD_DATA_SCORE_V3_TEMP` (
 	`PRODUCT` VARCHAR(128) NOT NULL COMMENT 'Product Name(OSS Name)' COLLATE 'utf8mb4_general_ci',
 	`VERSION` VARCHAR(128) NOT NULL COMMENT 'Major.Minor.Point 형식' COLLATE 'utf8mb4_general_ci',
@@ -1830,7 +1836,7 @@ CREATE TABLE `NVD_DATA_SCORE_V3_TEMP` (
 	INDEX `CVSS_SCORE` (`CVSS_SCORE`) USING BTREE,
 	INDEX `CVE_ID` (`CVE_ID`) USING BTREE,
 	FULLTEXT INDEX `PRODUCT` (`PRODUCT`)
-) COLLATE='utf8mb4_general_ci' ENGINE=InnoDB ROW_FORMAT=COMPACT;
+) CHARSET=utf8mb4 ENGINE=InnoDB ROW_FORMAT=COMPACT;
 
 -- 테이블 fosslight.NVD_DATA_TEMP_V3 구조 내보내기
 DROP TABLE IF EXISTS `NVD_DATA_TEMP_V3`;
@@ -1844,7 +1850,7 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_TEMP_V3` (
   `VENDOR` varchar(128) NOT NULL,
   `VENDORPRODUCT` varchar(255) NULL,
   PRIMARY KEY (`PRODUCT`,`VERSION`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.NVD_DATA_TEMP_V3:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_DATA_TEMP_V3`;
@@ -1858,14 +1864,14 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_V3` (
   `PRODUCT` varchar(128) NOT NULL COMMENT 'Product Name(OSS Name)',
   `VERSION` varchar(128) NOT NULL COMMENT 'Major.Minor.Point Format',
   `VENDOR` varchar(128) NOT NULL,
-  `VENDORPRODUCT` varchar(255) NULL,
+  `VENDORPRODUCT` VARCHAR(191) NULL,
   PRIMARY KEY (`CVE_ID`,`PRODUCT`,`VERSION`,`VENDOR`),
   KEY `NVD_DATA_V3_CVE_ID` (`CVE_ID`),
   KEY `NVD_DATA_V3_PRODUCT` (`PRODUCT`),
   KEY `NVD_DATA_V3_VERSION` (`VERSION`),
   KEY `NVD_DATA_V3_VENDOR` (`VENDOR`),
   KEY `NVD_DATA_V3_VENDORPRODUCT` (`VENDORPRODUCT`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.NVD_DATA_V3:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_DATA_V3`;
@@ -1887,7 +1893,7 @@ CREATE TABLE IF NOT EXISTS `NVD_META` (
   `REG_DATE` timestamp NULL DEFAULT current_timestamp() COMMENT 'Data registration date',
   `JOB_STATUS` varchar(1) DEFAULT 'W' COMMENT 'JOB Status\n- W(Wait): I/F JOB Waiting\n- C(Complete): I/F JOB Complete',
   PRIMARY KEY (`IDX`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 fosslight.NVD_DATA_PATCH_LINK 구조 내보내기
 DROP TABLE IF EXISTS `NVD_DATA_PATCH_LINK`;
@@ -1896,7 +1902,7 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_PATCH_LINK` (
 	`PATCH_LINK` VARCHAR(1024) NOT NULL,
 	`PUBL_DATE` DATETIME NOT NULL,
 	KEY `CVE_ID` (`CVE_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 fosslight.NVD_DATA_CONFIGURATIONS_TEMP 구조 내보내기
 DROP TABLE IF EXISTS `NVD_DATA_CONFIGURATIONS_TEMP`;
@@ -1911,7 +1917,7 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_CONFIGURATIONS_TEMP` (
 	`VER_END_INC` VARCHAR(100) NULL DEFAULT NULL,
 	`VER_START_EXC` VARCHAR(100) NULL DEFAULT NULL,
 	`VER_END_EXC` VARCHAR(100) NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 fosslight.NVD_DATA_CONFIGURATIONS 구조 내보내기
 DROP TABLE IF EXISTS `NVD_DATA_CONFIGURATIONS`;
@@ -1932,7 +1938,7 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_CONFIGURATIONS` (
 	INDEX `PRODUCT` (`PRODUCT`) USING BTREE,
 	INDEX `VERSION` (`VERSION`) USING BTREE,
 	INDEX `VENDOR` (`VENDOR`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 fosslight.NVD_DATA_PATCH_LINK 구조 내보내기
 DROP TABLE IF EXISTS `NVD_DATA_PATCH_LINK`;
@@ -1941,7 +1947,7 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_PATCH_LINK` (
 	`PATCH_LINK` VARCHAR(1024) NOT NULL,
 	`PUBL_DATE` DATETIME NOT NULL,
 	KEY `CVE_ID` (`CVE_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 fosslight.NVD_DATA_RUNNING_ON_WITH_TEMP 구조 내보내기
 DROP TABLE IF EXISTS `NVD_DATA_RUNNING_ON_WITH_TEMP`;
@@ -1984,7 +1990,7 @@ CREATE TABLE IF NOT EXISTS `NVD_DATA_SECURITY` (
 	INDEX `CVE_ID` (`CVE_ID`) USING BTREE,
 	INDEX `CVSS_SCORE` (`CVSS_SCORE`) USING BTREE,
 	INDEX `VULNERABILITY_RESOLUTION` (`VULNERABILITY_RESOLUTION`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.NVD_META:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_META`;
@@ -2002,7 +2008,7 @@ CREATE TABLE IF NOT EXISTS `NVD_OSS_HIS` (
   `CVE_ID_TO` varchar(50) DEFAULT NULL,
   `CVSS_SCORE_TO` varchar(32) DEFAULT NULL,
   `REG_DT` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.NVD_OSS_HIS:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_OSS_HIS`;
@@ -2021,7 +2027,7 @@ CREATE TABLE IF NOT EXISTS `OSS_DISCOVERED_SND_EMAIL` (
 	`SND_DATE` DATETIME NULL DEFAULT now(),
 	INDEX `OSS_ID` (`OSS_ID`) USING BTREE,
 	INDEX `SND_YN` (`SND_YN`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 fosslight.OSS_ANALYSIS_MAP 구조 내보내기
 DROP TABLE IF EXISTS `OSS_ANALYSIS_MAP`;
@@ -2039,7 +2045,7 @@ CREATE TABLE IF NOT EXISTS `OSS_ANALYSIS_MAP` (
   `COMMENTS_FLAG` char(1) DEFAULT NULL,
   `COMMENTS` mediumtext DEFAULT NULL,
   PRIMARY KEY (`COMPONENT_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.OSS_ANALYSIS_MAP:~0 rows (대략적) 내보내기
 DELETE FROM `OSS_ANALYSIS_MAP`;
@@ -2058,8 +2064,9 @@ CREATE TABLE IF NOT EXISTS `OSS_ANALYSIS_STATUS` (
   `MODIFIED_DATE` datetime DEFAULT current_timestamp(),
   `MODIFIER` varchar(50) DEFAULT NULL,
   `COMMENTS` mediumtext DEFAULT NULL,
+  `SEND_MAIL_FLAG` char(1) DEFAULT NULL,
   PRIMARY KEY (`PRJ_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.OSS_ANALYSIS_STATUS:~0 rows (대략적) 내보내기
 DELETE FROM `OSS_ANALYSIS_STATUS`;
@@ -2109,12 +2116,13 @@ CREATE TABLE IF NOT EXISTS `OSS_COMPONENTS` (
   `TLSH` text DEFAULT NULL,
   `CHECK_SUM` text DEFAULT NULL,
   `REF_OSS_NAME` varchar(200) DEFAULT NULL,
+  `REF_LOADED_VAL` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`COMPONENT_ID`),
   KEY `REFERENCE_ID_REFERENCE_DIV` (`REFERENCE_ID`,`REFERENCE_DIV`),
   KEY `OSS_COMPONENTS_REFERENCE_ID3` (`REFERENCE_ID`,`REFERENCE_DIV`,`COMPONENT_ID`),
   KEY `OSS_COMPONENTS_OSS_ID` (`OSS_ID`),
   KEY `OSS_NAME_OSS_VERSION` (`OSS_NAME`,`OSS_VERSION`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.OSS_COMPONENTS:~0 rows (대략적) 내보내기
 DELETE FROM `OSS_COMPONENTS`;
@@ -2150,7 +2158,7 @@ CREATE TABLE IF NOT EXISTS `OSS_DOWNLOADLOCATION` (
   KEY `OSS_COMMON_ID` (`OSS_COMMON_ID`) USING BTREE,
   KEY `OSS_DL_IDX` (`OSS_DL_IDX`),
   KEY `DOWNLOAD_LOCATION` (`DOWNLOAD_LOCATION`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.OSS_DOWNLOADLOCATION:~1 rows (대략적) 내보내기
 DELETE FROM `OSS_DOWNLOADLOCATION`;
@@ -2917,7 +2925,7 @@ CREATE TABLE IF NOT EXISTS `OSS_LICENSE_DETECTED` (
   KEY `OSS_LICENSE_IDX` (`OSS_LICENSE_IDX`),
   KEY `LICENSE_ID` (`LICENSE_ID`),
   CONSTRAINT `fk_OSS_LICENSE_DETECTED_LICENSE_ID` FOREIGN KEY (`LICENSE_ID`) REFERENCES `LICENSE_MASTER` (`LICENSE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 fosslight.OSS_COMMON 구조 내보내기
 DROP TABLE IF EXISTS `OSS_COMMON`;
@@ -2934,7 +2942,7 @@ CREATE TABLE IF NOT EXISTS `OSS_COMMON` (
   UNIQUE KEY `OSS_NAME_UNIQUE_KEY` (`OSS_NAME`),
   KEY `OSS_NAME` (`OSS_NAME`) USING BTREE,
   KEY `OSS_COMMON_ID` (`OSS_COMMON_ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `OSS_COMMON` (`OSS_COMMON_ID`, `OSS_NAME`, `DOWNLOAD_LOCATION`, `HOMEPAGE`, `SUMMARY_DESCRIPTION`, `USE_YN`, `DEACTIVATE_FLAG`) VALUES
 	(1, 'DotNetZip', 'http://dotnetzip.codeplex.com/downloads/get/258012', 'http://dotnetzip.codeplex.com', '', 'Y', 'N'),
@@ -3172,7 +3180,7 @@ CREATE TABLE IF NOT EXISTS `OSS_VERSION` (
   KEY `CVE_ID` (`CVE_ID`) USING BTREE,
   KEY `OSS_COMMON_ID` (`OSS_COMMON_ID`) USING BTREE,
   KEY `IN_CPE_MATCH_FLAG` (`IN_CPE_MATCH_FLAG`)
-) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
 	(1, 1, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:40', 'wonjae.park', '2020-01-07 11:27:22', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', '', '', NULL, NULL),
@@ -3422,7 +3430,7 @@ CREATE TABLE `OSS_EXCLUDE_CPE` (
 	`OSS_COMMON_ID` INT(11) NOT NULL,
 	`CPE23URI` VARCHAR(256) NULL DEFAULT NULL,
 	INDEX `OSS_COMMON_ID` (`OSS_COMMON_ID`) USING BTREE
-) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 -- 테이블 fosslight.OSS_VERSION_ALIAS 구조 내보내기
 DROP TABLE IF EXISTS `OSS_VERSION_ALIAS`;
@@ -3430,7 +3438,7 @@ CREATE TABLE `OSS_VERSION_ALIAS` (
 	`OSS_ID` INT(11) NOT NULL,
 	`OSS_VERSION_ALIAS` VARCHAR(100) NOT NULL ,
 	INDEX `OSS_ID` (`OSS_ID`) USING BTREE
-) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 -- 테이블 fosslight.OSS_MASTER_LICENSE_FLAG 구조 내보내기
 DROP TABLE IF EXISTS `OSS_MASTER_LICENSE_FLAG`;
@@ -3440,7 +3448,7 @@ CREATE TABLE IF NOT EXISTS `OSS_MASTER_LICENSE_FLAG` (
   `DUAL_LICENSE_FLAG` char(1) DEFAULT 'N',
   `VERSION_DIFF_FLAG` char(1) DEFAULT 'N',
   PRIMARY KEY (`OSS_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To manage sorting and display for the OSS list,\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='To manage sorting and display for the OSS list,\
 	    only manage whether it\'s MULTI / DUAL / V-DIFF.';
 
 -- 테이블 데이터 fosslight.OSS_MASTER_LICENSE_FLAG:~27 rows (대략적) 내보내기
@@ -3713,7 +3721,7 @@ CREATE TABLE IF NOT EXISTS `OSS_NICKNAME` (
   `OSS_NICKNAME` varchar(200) NOT NULL COMMENT 'OSS NICKNAME',
   PRIMARY KEY (`OSS_COMMON_ID`,`OSS_NICKNAME`) USING BTREE,
   KEY `OSS_COMMON_ID` (`OSS_COMMON_ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.OSS_NICKNAME:~0 rows (대략적) 내보내기
 DELETE FROM `OSS_NICKNAME`;
@@ -4177,7 +4185,7 @@ CREATE TABLE IF NOT EXISTS `OSS_NOTICE` (
   `NOTICE_APPEND_TYPE` char(50) DEFAULT 'E',
   PRIMARY KEY (`PRJ_ID`),
   CONSTRAINT `fk_PROJECT_NOTICE_PROJECT_MASTER1` FOREIGN KEY (`PRJ_ID`) REFERENCES `PROJECT_MASTER` (`PRJ_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.OSS_NOTICE:~0 rows (대략적) 내보내기
 DELETE FROM `OSS_NOTICE`;
@@ -4209,7 +4217,7 @@ CREATE TABLE IF NOT EXISTS `PRE_OSS_NOTICE` (
   `EDIT_APPENDED_YN` char(1) DEFAULT 'N',
   PRIMARY KEY (`PRJ_ID`),
   CONSTRAINT `fk_PROJECT_NOTICE_PRE_PROJECT_MASTER1` FOREIGN KEY (`PRJ_ID`) REFERENCES `PRE_PROJECT_MASTER` (`PRJ_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PRE_OSS_NOTICE:~0 rows (대략적) 내보내기
 DELETE FROM `PRE_OSS_NOTICE`;
@@ -4225,7 +4233,7 @@ CREATE TABLE IF NOT EXISTS `PACKAGING_REUSE_MAP` (
   `REF_PACKAGING_FILE_ID` int(11) DEFAULT NULL,
   `DEL_YN` char(1) NOT NULL DEFAULT 'N',
   `HIDDEN_FLAG` char(1) NOT NULL DEFAULT 'N'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PACKAGING_REUSE_MAP:~0 rows (대략적) 내보내기
 DELETE FROM `PACKAGING_REUSE_MAP`;
@@ -4240,7 +4248,7 @@ CREATE TABLE IF NOT EXISTS `PACKAGING_TEMP_MAP` (
   `PACKAGING_FILE_SEQ` int(1) NOT NULL,
   `DEL_YN` char(1) DEFAULT 'N',
   `COMPLETE_YN` char(1) DEFAULT 'N'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To enable changing the packaging file after Distribution DONE and when complete,\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='To enable changing the packaging file after Distribution DONE and when complete,\
 	     use packaging file management table\r\n* batch, which is good for file deletion';
 
 -- 테이블 데이터 fosslight.PACKAGING_TEMP_MAP:~0 rows (대략적) 내보내기
@@ -4275,7 +4283,7 @@ CREATE TABLE IF NOT EXISTS `PARTNER_MASTER` (
   `CVSS_SCORE_MAX` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`PARTNER_ID`),
   KEY `REVIEWER` (`REVIEWER`)
-) ENGINE=InnoDB AUTO_INCREMENT=399 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=399 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PARTNER_MASTER:~5 rows (대략적) 내보내기
 DELETE FROM `PARTNER_MASTER`;
@@ -4290,7 +4298,7 @@ CREATE TABLE IF NOT EXISTS `PARTNER_WATCHER` (
   `USER_ID` varchar(50) DEFAULT NULL,
   `EMAIL` varchar(50) DEFAULT NULL,
   KEY `PARTNER_ID` (`PARTNER_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PARTNER_WATCHER:~0 rows (대략적) 내보내기
 DELETE FROM `PARTNER_WATCHER`;
@@ -4304,7 +4312,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_PARTNER_MAP` (
   `PARTNER_ID` int(11) NOT NULL COMMENT '3rd ID',
   `COMPONENT_COUNT` int(11) DEFAULT 0,
   PRIMARY KEY (`PRJ_ID`,`PARTNER_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PROJECT_PARTNER_MAP:~4 rows (대략적) 내보내기
 DELETE FROM `PROJECT_PARTNER_MAP`;
@@ -4318,7 +4326,7 @@ CREATE TABLE IF NOT EXISTS `PRE_OSS_COMPONENTS` (
   `REFERENCE_DIV` varchar(6) NOT NULL COMMENT 'Common code : Project Identification(3rd,src,bat) / 3rd / bat etc',
   `COMPONENT_IDX` int(11) NOT NULL,
   `OSS_ID` int(11) DEFAULT NULL,
-  `OSS_NAME` varchar(200) DEFAULT NULL,
+  `OSS_NAME` VARCHAR(191) DEFAULT NULL,
   `OSS_VERSION` varchar(100) DEFAULT NULL,
   `DOWNLOAD_LOCATION` text DEFAULT NULL,
   `HOMEPAGE` varchar(2000) DEFAULT NULL,
@@ -4346,7 +4354,7 @@ CREATE TABLE IF NOT EXISTS `PRE_OSS_COMPONENTS` (
   `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`COMPONENT_IDX`,`REFERENCE_ID`,`REFERENCE_DIV`),
   KEY `PRE_OSS_COMPONENTS_OSS_NAME2` (`OSS_NAME`,`OSS_VERSION`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED;
 
 -- 테이블 데이터 fosslight.PRE_OSS_COMPONENTS:~0 rows (대략적) 내보내기
 DELETE FROM `PRE_OSS_COMPONENTS`;
@@ -4364,7 +4372,7 @@ CREATE TABLE IF NOT EXISTS `PRE_OSS_COMPONENTS_LICENSE` (
   `COPYRIGHT_TEXT` text DEFAULT NULL,
   `EXCLUDE_YN` char(1) DEFAULT 'N',
   KEY `COMPONENT_ID` (`COMPONENT_ID`,`COMPONENT_LICENSE_IDX`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.PRE_OSS_COMPONENTS_LICENSE:~0 rows (대략적) 내보내기
 DELETE FROM `PRE_OSS_COMPONENTS_LICENSE`;
@@ -4390,7 +4398,7 @@ CREATE TABLE IF NOT EXISTS `PRE_PROJECT_MASTER` (
   `DELETE_MEMO` longtext DEFAULT NULL,
   `PACKAGE_FILE_IDS` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`PRJ_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.PRE_PROJECT_MASTER:~0 rows (대략적) 내보내기
 DELETE FROM `PRE_PROJECT_MASTER`;
@@ -4404,7 +4412,7 @@ CREATE TABLE IF NOT EXISTS `PRE_PROJECT_WATCHER` (
   `DIVISION` varchar(6) DEFAULT NULL COMMENT 'If it applies to the entire department, set only the department code.',
   `USER_ID` varchar(50) DEFAULT NULL COMMENT 'For individual user additions, set only the user ID.',
   `EMAIL` varchar(200) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.PRE_PROJECT_WATCHER:~0 rows (대략적) 내보내기
 DELETE FROM `PRE_PROJECT_WATCHER`;
@@ -4438,7 +4446,7 @@ CREATE TABLE IF NOT EXISTS `PROCESS_GUIDE` (
   `URL` varchar(300) DEFAULT NULL,
   `USE_YN` char(1) NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PROCESS_GUIDE:~0 rows (대략적) 내보내기
 DELETE FROM `PROCESS_GUIDE`;
@@ -4461,7 +4469,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_ADDLIST` (
   `PRJ_REF_IDX` int(11) DEFAULT NULL,
   PRIMARY KEY (`PRJ_ID`,`REFERENCE_ID`,`REFERENCE_DIV`),
   KEY `PRJ_REF_IDX` (`PRJ_REF_IDX`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PROJECT_ADDLIST:~0 rows (대략적) 내보내기
 DELETE FROM `PROJECT_ADDLIST`;
@@ -4485,7 +4493,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_DISTRIBUTE_HIS` (
   `DISTRIBUTE_YN` varchar(6) NOT NULL DEFAULT 'N' COMMENT 'N when distribution starts, Y when complete',
   `CREATED_DATE` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`PRJ_ID`, `CREATED_DATE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PROJECT_DISTRIBUTE_HIS:~0 rows (대략적) 내보내기
 DELETE FROM `PROJECT_DISTRIBUTE_HIS`;
@@ -4530,6 +4538,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `DISTRIBUTE_RESERVED_USER` varchar(50) DEFAULT NULL COMMENT 'Reserved user for distribution',
   `DISTRIBUTE_REJECTOR` varchar(50) DEFAULT NULL,
   `DISTRIBUTE_REJECTED_TIME` datetime DEFAULT NULL,
+  `IDENTIFICATION_CSV_FILE_ID` int(11) DEFAULT NULL,
   `DEP_CSV_FILE_ID` int(11) DEFAULT NULL,
   `SRC_CSV_FILE_ID` int(11) DEFAULT NULL,
   `SRC_ANDROID_CSV_FILE_ID` int(11) DEFAULT NULL,
@@ -4607,7 +4616,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `TRANSFER_DIVISION` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`PRJ_ID`),
   KEY `REVIEWER` (`REVIEWER`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PROJECT_MASTER:~4 rows (대략적) 내보내기
 DELETE FROM `PROJECT_MASTER`;
@@ -4630,7 +4639,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MODEL` (
   `UPD_RELEASE_DATE` char(1) DEFAULT 'N',
   PRIMARY KEY (`PRJ_ID`,`MODEL_NAME`,`SUBCATEGORY`,`CATEGORY`),
   CONSTRAINT `fk_PROJECT_OS_PROJECT_MASTER1` FOREIGN KEY (`PRJ_ID`) REFERENCES `PROJECT_MASTER` (`PRJ_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PROJECT_MODEL:~0 rows (대략적) 내보내기
 DELETE FROM `PROJECT_MODEL`;
@@ -4653,7 +4662,7 @@ CREATE TABLE IF NOT EXISTS `PRE_PROJECT_MODEL` (
   `UPD_RELEASE_DATE` char(1) DEFAULT 'N',
   PRIMARY KEY (`PRJ_ID`,`MODEL_NAME`,`SUBCATEGORY`,`CATEGORY`),
   CONSTRAINT `fk_PROJECT_OS_PRE_PROJECT_MASTER1` FOREIGN KEY (`PRJ_ID`) REFERENCES `PRE_PROJECT_MASTER` (`PRJ_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PRE_PROJECT_MODEL:~0 rows (대략적) 내보내기
 DELETE FROM `PRE_PROJECT_MODEL`;
@@ -4668,7 +4677,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_WATCHER` (
   `USER_ID` varchar(50) DEFAULT NULL COMMENT 'For individual user additions, set only the user ID.',
   `EMAIL` varchar(200) DEFAULT NULL,
   KEY `PRJ_ID` (`PRJ_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.PROJECT_WATCHER:~0 rows (대략적) 내보내기
 DELETE FROM `PROJECT_WATCHER`;
@@ -4681,7 +4690,7 @@ CREATE TABLE IF NOT EXISTS `T2_AUTHORITIES` (
   `USER_ID` varchar(100) NOT NULL,
   `AUTHORITY` varchar(50) NOT NULL,
   PRIMARY KEY (`USER_ID`,`AUTHORITY`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_AUTHORITIES:~1 rows (대략적) 내보내기
 DELETE FROM `T2_AUTHORITIES`;
@@ -4699,7 +4708,7 @@ CREATE TABLE IF NOT EXISTS `T2_CODE` (
   `CD_EXP` varchar(255) DEFAULT NULL COMMENT 'Code description',
   `SYS_CD_YN` char(1) DEFAULT 'N' COMMENT 'System code flag',
   PRIMARY KEY (`CD_NO`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_CODE:~77 rows (대략적) 내보내기
 DELETE FROM `T2_CODE`;
@@ -4738,6 +4747,7 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('301', 'OSS', 'OSS Entity', 'N'),
 	('302', 'OSS License', 'OSS License List Entity', 'N'),
 	('303', 'Project', 'Project Entity', 'N'),
+	('304', 'User', 'User Entity', 'N'),
 	('307', 'platform generated', '', 'N'),
 	('308', 'Project Priority', '', 'N'),
 	('700', 'User Configuration', 'User Configuration', 'N'),
@@ -4782,7 +4792,7 @@ CREATE TABLE IF NOT EXISTS `T2_CODE_DTL` (
   PRIMARY KEY (`CD_NO`,`CD_DTL_NO`),
   KEY `fk_T2_CODE_DTL_T2_CODE_idx` (`CD_NO`),
   CONSTRAINT `fk_T2_CODE_DTL_T2_CODE` FOREIGN KEY (`CD_NO`) REFERENCES `T2_CODE` (`CD_NO`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_CODE_DTL:~506 rows (대략적) 내보내기
 DELETE FROM `T2_CODE_DTL`;
@@ -4884,6 +4894,14 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('102', '817', '[FOSSLight] Your password has been reset : ${User}', '', '${User}''s password has been reset.', 817, 'Y'),
 	('102', '844', '[FOSSLight][3rd-${3rd Party ID}] : Action Required for Inactive 3rd party : "${3rd Party Name}"', '', '', 844, 'Y'),
 	('102', '845', '[FOSSLight][SelfCheck-${SelfCheck Project ID}] : Action Required for Inactive Self-Check : "${SelfCheck Project Name}"', '', '', 845, 'Y'),
+	('102', '850', '[FOSSLight][PRJ-${Project ID}] : "${User}" requested edit permission : "${Project Name}"', '', '', 850, 'Y'),
+	('102', '851', '[FOSSLight][PRJ-${Project ID}] : "${Reviewer}" rejected edit permission : "${Project Name}"', '', '', 851, 'Y'),
+	('102', '852', '[FOSSLight][3rd-${3rd Party ID}] : "${User}" requested edit permission : "${3rd Party Name}"', '', '', 852, 'Y'),
+	('102', '853', '[FOSSLight][3rd-${3rd Party ID}] : "${Reviewer}" rejected edit permission : "${3rd Party Name}"', '', '', 853, 'Y'),
+	('102', '854', '[FOSSLight][PRJ-${Project ID}] : "${User}" canceled requested edit permission : "${Project Name}"', '', '', 854, 'Y'),
+	('102', '855', '[FOSSLight][3rd-${3rd Party ID}] : "${User}" canceled requested edit permission : "${3rd Party Name}"', '', '', 855, 'Y'),
+	('102', '856', '[FOSSLight][PRJ-${Project ID}] : "${User}" approved edit permission : "${Project Name}"', '', '', 856, 'Y'),
+	('102', '857', '[FOSSLight][3rd-${3rd Party ID}] : "${User}" approved edit permission : "${3rd Party Name}"', '', '', 857, 'Y'),
 	('102', '82', '[FOSSLight] ${User} Requested ${Email} to Register at FOSSLight', '', '${User} Added ${Email} as a Watcher of ${Binary Name}<br><br>Please Register at FOSSLight to Watch ${Binary Name}', 82, 'Y'),
 	('102', '83', '[FOSSLight] ${User} Registered at FOSSLight', '', '${User} Registered at FOSSLight.<br><br>Now, ${User} has "Watcher"\'s Authority for ${Binary Name}', 83, 'Y'),
 	('102', '90', '[FOSSLight] Vulnerability Discovered : "${Project Name}"', '', 'Possible open source vulnerability on your project has been discovered', 90, 'Y'),
@@ -4986,6 +5004,14 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('103', '101', 'Notice Inactive Project', '', '200', 101, 'Y'),
 	('103', '844', 'Notice Inactive 3rd Party', '', '205', 844, 'Y'),
 	('103', '845', 'Notice Inactive self-check', '', '213', 845, 'Y'),
+	('103', '850', 'Request Permission For Project', '', '200', 850, 'Y'),
+	('103', '851', 'Reject Permission For Project', '', '200', 851, 'Y'),
+	('103', '852', 'Request Permission For Partner', '', '205', 852, 'Y'),
+	('103', '853', 'Reject Permission For Partner', '', '205', 853, 'Y'),
+	('103', '854', 'Cancel Request Permission For Project', '', '200', 854, 'Y'),
+	('103', '855', 'Cancel Request Permission For Partner', '', '205', 855, 'Y'),
+	('103', '856', 'Approved Permission For Project', '', '200', 856, 'Y'),
+	('103', '857', 'Approved Permission For Partner', '', '205', 857, 'Y'),
 	('104', '100', 'oss_basic_info', '', 'SELECT T1.CREATOR, T1.CREATED_DATE, T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, IFNULL(( SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION, IFNULL(( SELECT GROUP_CONCAT(D.PURL ORDER BY D.OSS_DL_IDX ASC) FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), \'\') AS PURL, T1.HOMEPAGE, T1.SUMMARY_DESCRIPTION, T1.ATTRIBUTION, T1.IMPORTANT_NOTES, T1.COPYRIGHT, T1.LICENSE_TYPE AS OSS_LICENSE_TYPE, T1.OBLIGATION_TYPE AS OSS_OBLIGATION_TYPE, GROUP_CONCAT(T4.OSS_NICKNAME SEPARATOR \'\n\') AS OSS_NICKNAME, T2.LICENSE_ID, T2.OSS_LICENSE_IDX, T2.OSS_LICENSE_COMB, T2.OSS_COPYRIGHT, T2.OSS_LICENSE_TEXT, IF(IFNULL(T3.SHORT_IDENTIFIER, \'\') = \'\', T3.LICENSE_NAME, T3.SHORT_IDENTIFIER) AS LICENSE_NAME, T3.LICENSE_TYPE, SUB1.OSS_TYPE, IFNULL(( SELECT GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = \'\' OR LM.SHORT_IDENTIFIER IS NULL, LM.LICENSE_NAME, LM.SHORT_IDENTIFIER) ORDER BY OSS_LICENSE_IDX ASC) FROM OSS_LICENSE_DETECTED ODT INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID WHERE ODT.OSS_ID = T1.OSS_ID), \'\') AS DETECTED_LICENSE, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS INCLUDE_CPE, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS EXCLUDE_CPE, (SELECT GROUP_CONCAT(OSS_VERSION_ALIAS) FROM OSS_VERSION_ALIAS WHERE OSS_ID = T1.OSS_ID) AS OSS_VERSION_ALIAS FROM OSS_MASTER T1 INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID LEFT OUTER JOIN OSS_NICKNAME T4 ON T1.OSS_COMMON_ID = T4.OSS_COMMON_ID INNER JOIN ( SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = \'N\', \'0\', \'1\'), IF(DUAL_LICENSE_FLAG = \'N\', \'0\', \'1\'), IF(VERSION_DIFF_FLAG = \'N\', \'0\', \'1\')) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG) SUB1 ON T1.OSS_ID = SUB1.OSS_ID WHERE T1.OSS_ID = ? GROUP BY OSS_ID, OSS_LICENSE_IDX', 1, 'Y'),
 	('104', '101', 'license_basic_info', '', 'SELECT T1.LICENSE_ID, T1.LICENSE_NAME, T1.LICENSE_TYPE, T1.OBLIGATION_DISCLOSING_SRC_YN, T1.OBLIGATION_NOTIFICATION_YN, T1.OBLIGATION_NEEDS_CHECK_YN, T1.SHORT_IDENTIFIER, GROUP_CONCAT(T2.WEBPAGE ORDER BY SORT_ORDER ASC) AS WEBPAGE, T1.DESCRIPTION, T1.LICENSE_TEXT, T1.ATTRIBUTION, T1.USE_YN, T1.CREATOR, T1.CREATED_DATE, T1.MODIFIER, T1.MODIFIED_DATE, T1.REQ_LICENSE_TEXT_YN, T1.RESTRICTION, T1.LICENSE_NICKNAME FROM (SELECT T1.*, GROUP_CONCAT(T2.LICENSE_NICKNAME) AS LICENSE_NICKNAME FROM LICENSE_MASTER T1 LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME WHERE T1.LICENSE_ID = ?) T1 LEFT JOIN LICENSE_WEBPAGE T2 ON T1.LICENSE_ID = T2.LICENSE_ID', 2, 'Y'),
 	('104', '200', 'project_basic_info', '', 'SELECT T1.*, T3.USER_NAME AS SECPERSON_NM , T2.NOTICE_TYPE FROM PROJECT_MASTER T1 LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID LEFT JOIN T2_USERS T3 ON T1.SECPERSON = T3.USER_ID WHERE T1.PRJ_ID = ?', 3, 'Y'),
@@ -5023,10 +5049,11 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('110', '60', 'vulnerabilityInfo.html', '', '91,93', 9, 'Y'),
 	('110', '70', 'binaryDBDataCommitInfo.html', '', '47,470', 17, 'Y'),
 	('110', '71', 'resetUserPassword.html', '', '817', 18, 'Y'),
+	('110', '90', 'commentWithPermission.html', '', '850,851,852,853,854,855,856,857', 24, 'Y'),
 	('110', '91', 'selfcheckInfo.html', '', '845', 25, 'Y'),
 	('110', '232', 'licenseInvalidNotify.html', '', '232', 20, 'Y'),
-	('111', '35', 'project complete default contents', '', '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Basic Information탭 우측하단의 "Request to Open" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Request to Open" button on Basic Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>', 35, 'Y'),
-	('111', '812', 'project drop default contents', '', '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Basic Informatoin탭 우측하단의 "Open" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \'Drop\', so you don\'t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Open" button on Basic information Tab.</p>', 812, 'Y'),
+	('111', '35', 'project complete default contents', '', '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Project Information탭 우측하단의 "Repoen" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Reopen" button on Project Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>', 35, 'Y'),
+	('111', '812', 'project drop default contents', '', '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Project Informatoin탭 우측하단의 "Repopen" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \'Drop\', so you don\'t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Reopen" button on Project information Tab.</p>', 812, 'Y'),
 	('111', '33', 'Project Created', '', '<p>Identification 탭에 Open Source 목록을 작성 후 SBOM 탭에서 Request를 클릭하여 리뷰 요청하십시오.<br />Fill out the Open Source list in the Identification  and request a review by clicking Request in the SBOM tab.<br /><br />- Guide : https://fosslight.org/fosslight-guide-en/tutorial/1_project.html#2-identification</p>', 33, 'Y'),
 	('111', '37', 'Project Copied', '', '<p>Identification 탭에 Open Source 목록을 작성 후 SBOM 탭에서 Request를 클릭하여 리뷰 요청하십시오.<br />Fill out the Open Source list in the Identification  and request a review by clicking Request in the SBOM tab.<br /><br />- Guide : https://fosslight.org/fosslight-guide-en/tutorial/1_project.html#2-identification</p>', 37, 'Y'),
 	('111', '41', 'Project Identification Confirmed', '', '<p>SBOM 탭의 Download Location, Homepage, Copyright text 정보가 DB 기반으로 업데이트 되었습니다.<br />Packaging 수행 후 Request 클릭하여 리뷰 요청해주시기 바랍니다.<br /> OSS Notice에 대하여 수정이 필요한 경우 (ex- text형식으로 발행), Packaging내 Notice탭에서 설정바랍니다.<br /><br />Download Location, Homepage and Copyright text in SBOM tab have been updated based on DB.<br />After performing Packaging, click Request to request a review.<br />If it is necessary to modify the OSS Notice (ex- should be issued in text format), please set it in the Notice tab in Packaging.</p>', 41, 'Y'),
@@ -5225,6 +5252,14 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('303', '006', 'modelList', '304', 'Array|Model Information', 6, 'Y'),
 	('303', '007', 'comment', NULL, 'String|Comment', 7, 'Y'),
 	('303', '008', 'watcherList', '305', 'Array|Watcher', 8, 'Y'),
+	('304', '001', 'userName', '', 'String|USER Namee', 1, 'Y'),
+	('304', '002', 'email', '', 'String|Email', 2, 'Y'),
+	('304', '003', 'divisionName', '', 'String|Division Name', 3, 'Y'),
+	('304', '004', 'token', '', 'String|Token', 4, 'Y'),
+	('304', '005', 'expireDate', '', 'String|Expire Date', 5, 'Y'),
+	('304', '006', 'modifier', '', 'String|Modifier', 6, 'Y'),
+	('304', '007', 'modifiedDate', '', 'String|Modified Date', 7, 'Y'),
+	('304', '008', 'useYn', '', 'String|Use Yn', 8, 'Y'),
 	('307', '1', 'Android', '', '', 1, 'Y'),
 	('307', '2', 'Yocto', '', '', 2, 'Y'),
 	('308', '10', 'P0', '', '', 1, 'Y'),
@@ -5339,7 +5374,7 @@ CREATE TABLE IF NOT EXISTS `T2_FILE` (
   PRIMARY KEY (`FILE_SEQ`),
   KEY `FILE_SEQ_FILE_ID` (`FILE_SEQ`,`FILE_ID`),
   KEY `T2_FILE_FILE_ID` (`FILE_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_FILE:~0 rows (대략적) 내보내기
 DELETE FROM `T2_FILE`;
@@ -5354,7 +5389,7 @@ CREATE TABLE IF NOT EXISTS `T2_ROLES` (
   `LOGIN_SUCC_URL` varchar(200) NOT NULL,
   `ORDER` int(11) NOT NULL,
   PRIMARY KEY (`AUTHORITY`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_ROLES:~4 rows (대략적) 내보내기
 DELETE FROM `T2_ROLES`;
@@ -5372,7 +5407,7 @@ CREATE TABLE IF NOT EXISTS `T2_ROLES_HIERARCHY` (
   `PARENT_ROLE` varchar(45) NOT NULL,
   `CHILD_ROLE` varchar(45) NOT NULL,
   PRIMARY KEY (`PARENT_ROLE`,`CHILD_ROLE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_ROLES_HIERARCHY:~4 rows (대략적) 내보내기
 DELETE FROM `T2_ROLES_HIERARCHY`;
@@ -5395,7 +5430,7 @@ CREATE TABLE IF NOT EXISTS `T2_SECURED_RESOURCES` (
   `SORT_ORDER` int(11) NOT NULL,
   `DEPTH` int(11) NOT NULL,
   PRIMARY KEY (`RESOURCE_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_SECURED_RESOURCES:~4 rows (대략적) 내보내기
 DELETE FROM `T2_SECURED_RESOURCES`;
@@ -5415,7 +5450,7 @@ CREATE TABLE IF NOT EXISTS `T2_SECURED_RESOURCES_ROLE` (
   PRIMARY KEY (`RESOURCE_ID`,`AUTHORITY`),
   KEY `fk_T2_SECURED_RESOURCES_ROLE_T2_SECURED_RESOURCES1_idx` (`RESOURCE_ID`),
   CONSTRAINT `fk_T2_SECURED_RESOURCES_ROLE_T2_SECURED_RESOURCES1` FOREIGN KEY (`RESOURCE_ID`) REFERENCES `T2_SECURED_RESOURCES` (`RESOURCE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_SECURED_RESOURCES_ROLE:~16 rows (대략적) 내보내기
 DELETE FROM `T2_SECURED_RESOURCES_ROLE`;
@@ -5458,7 +5493,7 @@ CREATE TABLE IF NOT EXISTS `T2_USERS` (
   `MODIFIER` varchar(50) NOT NULL,
   `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`USER_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.T2_USERS:~1 rows (대략적) 내보내기
 DELETE FROM `T2_USERS`;
@@ -5482,7 +5517,7 @@ CREATE TABLE IF NOT EXISTS `USER_NOTICE` (
   `CREATOR` varchar(50) NOT NULL,
   `CREATED_DATE` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`SEQ`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.USER_NOTICE:~0 rows (대략적) 내보내기
 DELETE FROM `USER_NOTICE`;
@@ -5495,7 +5530,7 @@ CREATE TABLE IF NOT EXISTS `LICENSE_WEBPAGE` (
   `LICENSE_ID` int(11) NOT NULL,
   `WEBPAGE` varchar(2048) NOT NULL,
   `SORT_ORDER` INT(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 fosslight.LICENSE_WEBPAGE:~0 rows (대략적) 내보내기
 DELETE FROM `LICENSE_WEBPAGE`;
@@ -5510,13 +5545,6 @@ SHOW VARIABLES WHERE Variable_name = 'max_allowed_packet';
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
 
-CREATE USER IF NOT EXISTS 'fosslight'@'%' IDENTIFIED BY 'fosslight';
-CREATE USER IF NOT EXISTS 'fosslight'@'localhost' IDENTIFIED BY 'fosslight';
-GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'%';
-GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'localhost';
-FLUSH PRIVILEGES;
-
-
 /* `search` table : save data related search info  */
 DROP TABLE IF EXISTS `SEARCH`;
 CREATE TABLE IF NOT EXISTS `SEARCH` (
@@ -5526,7 +5554,7 @@ CREATE TABLE IF NOT EXISTS `SEARCH` (
   `UPDATED_TIME` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `USER_ID` varchar(45) NOT NULL DEFAULT '',
   PRIMARY KEY (`USER_ID`,`SEARCH_TYPE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 /* Add Binary data */
 DROP TABLE IF EXISTS `BINARY_DATA_HIS`;
@@ -5552,7 +5580,7 @@ CREATE TABLE `BINARY_DATA_HIS` (
 	INDEX `ACTION_ID_ACTION_TYPE` (`ACTION_ID`, `ACTION_TYPE`) USING BTREE
 )
 COMMENT='binary data history'
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `BINARY_DATA`;
 CREATE TABLE `BINARY_DATA` (
@@ -5570,7 +5598,7 @@ CREATE TABLE `BINARY_DATA` (
 	`UPDATE_DATE` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
 	INDEX `FILE_NAME_CHECK_SUM` (`FILE_NAME`, `CHECK_SUM`) USING BTREE
 )
-ENGINE=INNODB DEFAULT CHARSET=utf8;
+ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- Add user columns table
 DROP TABLE IF EXISTS `USER_COLUMNS`;
@@ -5584,3 +5612,36 @@ CREATE TABLE `USER_COLUMNS` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE SEQUENCE NEXT_FILE_ID START WITH 1 INCREMENT BY 1;
+
+DROP TABLE IF EXISTS `REQUEST_PERMISSION`;
+CREATE TABLE `REQUEST_PERMISSION` (
+	`REQ_SEQ` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`REQ_ID` VARCHAR(50) NOT NULL,
+	`REQ_USER_ID` VARCHAR(50) NOT NULL,
+	`STATUS` VARCHAR(6) NOT NULL,
+	`REQ_DT` DATETIME NULL DEFAULT NULL,
+	`APP_DT` DATETIME NULL DEFAULT NULL,
+	`REJ_VIEW_DT` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`REQ_SEQ`) USING BTREE,
+	UNIQUE INDEX `PRJ_ID` (`REQ_ID`, `REQ_USER_ID`, `REQ_SEQ`) USING BTREE,
+	INDEX `STATUS` (`STATUS`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 AUTO_INCREMENT=1;
+DROP TABLE IF EXISTS `PROJECT_FILELIST`;
+CREATE TABLE `PROJECT_FILELIST` (
+	`UPL_FILE_SEQ` INT(11) NOT NULL AUTO_INCREMENT,
+	`REFERENCE_ID` INT(11) NOT NULL,
+	`REFERENCE_DIV` VARCHAR(6) NOT NULL,
+	`FILE_SEQ` INT(11) NOT NULL,
+	`FILE_ID` INT(11) NOT NULL,
+	`COMPONENT_COUNT` INT(11) NULL DEFAULT '0',
+	`REG_DT` DATETIME NULL DEFAULT current_timestamp(),
+	PRIMARY KEY (`UPL_FILE_SEQ`, `REFERENCE_ID`, `REFERENCE_DIV`, `FILE_SEQ`) USING BTREE,
+	INDEX `FILE_SEQ` (`FILE_SEQ`) USING BTREE,
+	INDEX `FILE_ID` (`FILE_ID`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE USER IF NOT EXISTS 'fosslight'@'%' IDENTIFIED BY 'fosslight';
+CREATE USER IF NOT EXISTS 'fosslight'@'localhost' IDENTIFIED BY 'fosslight';
+GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'%';
+GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'localhost';
+FLUSH PRIVILEGES;

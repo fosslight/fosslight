@@ -322,51 +322,43 @@ var party_evt = {
 		});
 	},	
 	reset : function(){
- 		alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
-			if (e) {
-				$("#list3").jqGrid('clearGridData');
-				$("#_3rdAddList").jqGrid('clearGridData');
-			} else {
-				return false;
+		if (com_fn.checkStatus()){
+			$("#list3").jqGrid('clearGridData');
+//			$("#_3rdAddList").jqGrid('clearGridData');
+			
+			var mainData = $('#list3').jqGrid('getGridParam','data');
+			var thirdPartyDiv = [];
+			var finalData = {
+				referenceId : [[${project.prjId}]],
+				identificationSubStatusPartner : $("input[name='identificationSubStatusPartner']").val(),
+				mainData : JSON.stringify(mainData),
+				thirdPartyData : JSON.stringify(thirdPartyDiv),
+				resetFlag : "Y"
 			}
-		});
+			
+			party_evt.exeSave(finalData, false);
+		} else {
+			alertify.alert([[#{msg.project.warn.third.party.status}]], function(){});
+		}
 	},
 	save : function(){
 		if (com_fn.checkStatus()){
-			alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			var notApplicable = false;
+			var saveMsg = [[#{msg.common.confirm.save}]];
+			var identificationSubStatusPartner = $("input[name='identificationSubStatusPartner']").val();
+			if ("N" == identificationSubStatusPartner) {
+				notApplicable = true;
+				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
+				_3rdLoadListLength = 0;
+			}
+			
+			alertify.confirm(saveMsg, function (e) {
 				if (e) {
-					var mainData = $('#list3').jqGrid('getGridParam','data');
-					var thirdPartyDiv = $('#_3rdAddList').jqGrid('getRowData');
-					var finalData = {
-						referenceId : [[${project.prjId}]],
-						identificationSubStatusPartner : $("#applicableParty:checked").val(),
-						mainData : JSON.stringify(mainData),
-						thirdPartyData : JSON.stringify(thirdPartyDiv)
+					if (notApplicable) {
+						party_evt.reset();
+					} else {
+						party_evt.saveMakeData(null);
 					}
-					
-					$.ajax({
-						url : "/project/save3rd",
-						type : 'POST',
-						dataType : 'json',
-						cache : false,
-						data : JSON.stringify(finalData),
-						contentType : 'application/json',
-						success : function(data){
-							alertify.success([[#{msg.common.success}]]);
-							var param = {referenceId : [[${project.prjId}]]}
-							party_evt.getPartGridData(param);
-							$("#_3rdAddList").jqGrid('setGridParam', {postData:param}).trigger('reloadGrid');
-							$("#mergeYn").val("N");
-							
-							if(curIdenStatus == ""){
-								curIdenStatus = "PROG";
-								com_fn.btnCtl(userRole, curIdenStatus);
-							}
-						},
-						error : function(){
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					});
 				} else {
 					return false;
 				}
@@ -374,6 +366,115 @@ var party_evt = {
 		}else {
 			alertify.alert([[#{msg.project.warn.third.party.status}]], function(){});
 		}
+	},
+	saveMakeData : function(addLoadData) {
+		var excludeNicknameAlert = false;
+		var mainData = $('#list3').jqGrid('getGridParam','data');
+		
+		var finalData = {
+			referenceId : [[${project.prjId}]],
+			identificationSubStatusPartner : $("input[name='identificationSubStatusPartner']").val(),
+			mainData : JSON.stringify(mainData),
+			resetFlag : "N"
+		}
+		
+		var addDataList = [];
+		if (addLoadData != null) {
+			excludeNicknameAlert = true;
+			
+			let thirdInfo = addLoadData.thirdInfo;
+			let thirdData = addLoadData.thirdData;
+			let referenceId = "";
+			thirdData.forEach(function (el, index) {
+				if ("" == referenceId) {
+					referenceId = el.referenceId;
+				}
+				mainData.push(el);
+			});
+			finalData["mainData"] = JSON.stringify(mainData);
+			
+			thirdInfo.forEach(function (el, index) {
+				el["prjId"] = [[${project.prjId}]];
+				addDataList.push(el);
+			});
+		}
+		finalData["thirdPartyData"] = JSON.stringify(addDataList);
+		
+		party_evt.nickNameValid(mainData, finalData, excludeNicknameAlert);
+	},
+	nickNameValid : function(mainData, finalData, excludeNicknameAlert) {
+		var prjId = [[${project.prjId}]];
+		var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
+
+		$.ajax({
+			url : '/project/nickNameValid/10',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				party_evt.makeNickNamePopup(data, finalData, excludeNicknameAlert);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	makeNickNamePopup : function(obj, finalData, excludeNicknameAlert) {
+		if (excludeNicknameAlert) {
+			party_evt.exeSave(finalData, true);
+		} else {
+			if (obj.validMsg && obj.validMsg.length != 0) {
+				if (typeof alertify.nicknameValidDialog === "undefined") {
+					com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
+	        	}
+				alertify.nicknameValidDialog()
+				.set('onok', function(e) {
+					if (e) {
+						party_evt.exeSave(finalData, false);
+					} else {
+						return false;
+					}
+				})
+				.setContent(obj.validMsg).show();
+			} else {
+				party_evt.exeSave(finalData, false);
+			}
+		}
+	},
+	exeSave : function(finalData, reloadTab) {
+		$.ajax({
+			url : '/project/save3rd',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : JSON.stringify(finalData),
+			contentType : 'application/json',
+			success : function(data) {
+				partyLoadSuccess = true;
+				if (reloadTab) {
+					if (partyLoadSuccess && depLoadSuccess && srcLoadSuccess && binLoadSuccess) {
+						bom_fn.beforeSave(true);
+					}
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					var param = {referenceId : [[${project.prjId}]]};
+					party_evt.getPartGridData(param);
+					$("#mergeYn").val("N");
+
+					curIdenStatus = data.resultData||"";
+					if ("PROG" == curIdenStatus) {
+						com_fn.btnCtl(userRole, curIdenStatus);
+					}
+					
+					com_fn.changeMode("view", false);
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
 	},
 	setParamParty1 : function(){
 		return {
@@ -612,6 +713,7 @@ var party_evt = {
 				
 				if (data.rows.length > 0) {
 					_3rdLoadListLength = data.rows.length;
+					$("#partyFragmentsDiv").show();
                     $("#_3rdAddListContainer").show();
 
 					var multRowIds = []; 
@@ -847,6 +949,8 @@ var part_grid = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'refComponentId', index: 'refComponentId', width: 40, align: 'center', hidden:true};
 			colModelArr.push(colModelObj);
+			colModelObj = {name: 'refLoadedVal', index: 'refLoadedVal', hidden:true};
+			colModelArr.push(colModelObj);
 			
 			// apply user columns setting on
 			var listType = 'IDENTIFICATION_3RD';
@@ -863,7 +967,7 @@ var part_grid = {
 				data : partMainData,
 				colNames: ['gridId','ID_KEY','ID','3rd', 'Binary Name or Source Path','ReferenceId','RefPrjId','ReferenceDiv', 'OssId','OSS Name','OSS Version','License','Download Location'
 							, 'Homepage','LicenseId','Copyright Text', 'Vulnera<br/>bility', 'CVE ID'	
-							, '<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list3\');">Exclude', 'refComponentId'],
+							, '<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list3\');">Exclude', 'refComponentId', 'refLoadedVal'],
 				colModel: colModelArr,
 				autoencode: true,
 				editurl:'clientArray',

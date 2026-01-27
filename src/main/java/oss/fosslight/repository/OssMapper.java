@@ -163,6 +163,8 @@ public interface OssMapper {
 	
 	List<OssMaster> getOssAllNickNameList();
 	
+	OssMaster getOssAllNickNameListByOssCommonId(String ossCommonId);
+	
 	List<OssMaster> checkExistsOssDownloadLocationWithOssName(OssMaster param);
 	
 	List<OssMaster> checkExistsOssHomepageWithOssName(OssMaster param);
@@ -293,5 +295,17 @@ public interface OssMapper {
 
 	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
 
-	List<String> getPrjIdsToSendCoReviewerEamils();
+	List<String> getPrjIdsToSendCoReviewerEmails();
+	
+	List<OssMaster> getOssInfoByOssId(@Param("ossId") String ossId);
+	
+	OssMaster getOssNickNameListByOssCommonId(@Param("ossCommonId") String ossCommonId);
+
+	List<OssMaster> getOssInfoWithNickByOssId(@Param("ossId") String ossId);
+
+	List<ProjectIdentification> selectBulkOssInfoByNames(@Param("ossNames") List<String> ossNames);
+
+	List<ProjectIdentification> selectBulkOssInfoByUrls(@Param("urls") List<String> urls);
+
+	void updateSendMailFlagForCoReviewerEmails();
 }

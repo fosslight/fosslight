@@ -42,7 +42,7 @@ var bom_fn = {
 			}
 		});
 	},
-	beforeSave : function () {
+	beforeSave : function (reloadFlag) {
 		if (com_fn.checkStatus()) {
 			$("#mergeYn").val("Y");
 			Bom_Save_Flg = false;
@@ -50,12 +50,12 @@ var bom_fn = {
 			// 메인, 서브 그리드 세이브 모드
 			fn_grid_com.totalGridSaveMode('bomList');
 			
-			bom_fn.save();
+			bom_fn.save(reloadFlag);
 		} else {
 			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 		}
 	},
-	save : function(){
+	save : function(reloadFlag) {
 		cleanErrMsg("bomList");
 		
 		var bomList = $("#bomList");
@@ -169,37 +169,42 @@ var bom_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(data){
-				curIdenStatus = data.identificationStatus;
-				
-				var param = {referenceId : [[${project.prjId}]], merge : 'N'};
-				bom_data.getJqGrid(param);
-				
-				Bom_Save_Flg = true;
-				
-				alertify.success([[#{msg.common.success}]]);
-				
-				var checkObligationFlag = false;
-				var arr = [];
-				arr = bomList.jqGrid('getRowData');
-		 		
-		 		for(var i in arr){
-		 			if(arr[i].obligationType == "90") {
-		 				checkObligationFlag = true;
+				if (reloadFlag) {
+					deleteTabInFrame('/project/identification/' + [[${project.prjId}]] + '/5');
+					createTabInFrame([[${project.prjId}]] + '_Identify', '/project/identification/' + [[${project.prjId}]] + '/5');
+				} else {
+					curIdenStatus = data.identificationStatus;
+					
+					var param = {referenceId : [[${project.prjId}]], merge : 'N'};
+					bom_data.getJqGrid(param);
+					
+					Bom_Save_Flg = true;
+					
+					alertify.success([[#{msg.common.success}]]);
+					
+					var checkObligationFlag = false;
+					var arr = [];
+					arr = bomList.jqGrid('getRowData');
+			 		
+			 		for(var i in arr){
+			 			if(arr[i].obligationType == "90") {
+			 				checkObligationFlag = true;
 
-		 				break;
-		 			}
-		 		}
-		 		
-				if(checkObligationFlag) {
-					alertify.alert([[#{msg.info.include.needcheck.license.guide}]], function(){});
-				}
-				
-				if("" == [[${project.identificationStatus}]] && $(".projdecBtn").css("display") == "none" ) {
-					$(".confirm").hide();
-					$(".reject").hide();
-					$(".restart").hide();
-					$(".review").show();
-					$(".projdecBtn").show();
+			 				break;
+			 			}
+			 		}
+			 		
+					if(checkObligationFlag) {
+						alertify.alert([[#{msg.info.include.needcheck.license.guide}]], function(){});
+					}
+					
+					if("" == [[${project.identificationStatus}]] && $(".projdecBtn").css("display") == "none" ) {
+						$(".confirm").hide();
+						$(".reject").hide();
+						$(".restart").hide();
+						$(".review").show();
+						$(".projdecBtn").show();
+					}
 				}
 			},
 			error: function(data){

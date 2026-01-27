@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -2285,8 +2286,8 @@ public class ProjectController extends CoTopComponent {
 			
 			Project project = new Project();
 			project.setPrjId(prjId);
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
-			projectService.existsAddList(project);
+//			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+			projectService.existsAddList(binAddList);
 			projectService.insertAddList(binAddList);
 			
 			// session 삭제
@@ -2467,8 +2468,8 @@ public class ProjectController extends CoTopComponent {
 
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-		projectService.existsAddList(project);
+//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+		projectService.existsAddList(depAddList);
 		projectService.insertAddList(depAddList);
 
 		// 정상처리된 경우 세션 삭제
@@ -2663,8 +2664,8 @@ public class ProjectController extends CoTopComponent {
 		
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
-		projectService.existsAddList(project);
+//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+		projectService.existsAddList(srcAddList);
 		projectService.insertAddList(srcAddList);
 		
 		// 정상처리된 경우 세션 삭제
@@ -3055,6 +3056,14 @@ public class ProjectController extends CoTopComponent {
 		project.setPrjId(prjId);
 		Project projectMaster = projectService.getProjectDetail(project);
 		
+		boolean hasLoadedItems = false;
+		Map<String, Object> loadedItems = projectService.getIdentificationAddList(projectMaster);
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> loadedItemList = (List<Map<String, Object>>) loadedItems.get("rows");
+		if (CollectionUtils.isNotEmpty(loadedItemList)) {
+			hasLoadedItems = true;
+		}
+		
 		boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICATION_USER);
@@ -3089,7 +3098,8 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 		
-		model.addAttribute("editMode", isNew);
+//		model.addAttribute("editMode", isNew);
+		model.addAttribute("hasLoadedItems", hasLoadedItems);
 		model.addAttribute("initDiv", initDiv);
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
@@ -3561,7 +3571,7 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> map = null;
 		
 		try {
-			map = projectService.get3rdMapList(project);
+			map = projectService.get3rdMapList(project, false);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
@@ -5614,5 +5624,414 @@ public class ProjectController extends CoTopComponent {
 		verificationService.getReviewReportPdfFile(project.getPrjId());
 		resMap.put("isValid", "true");
 		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = PROJECT.REQUEST_PERMISSION)
+	public @ResponseBody ResponseEntity<Object> requestPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), loginUserName(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+		return makeJsonResponseHeader(true, null, map);
+	}
+	
+	@PostMapping(value = PROJECT.CANCEL_REQUEST_PERMISSION)
+	public @ResponseBody ResponseEntity<Object> cancelRequestPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), loginUserName(), CoConstDef.ACTION_CODE_CANCELED);
+		return makeJsonResponseHeader(true, null, map);
+	}
+	
+	@PostMapping(value = PROJECT.SET_PROEJCT_PERMISSION)
+	public @ResponseBody ResponseEntity<Object> setProjectPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Project prjInfo = projectService.getProjectDetail(project);
+
+		if (isEmpty(project.getRejPerUserNm())) {
+			if (CollectionUtils.isNotEmpty(prjInfo.getReqPerUserIds())) {
+				T2Users user = new T2Users();
+
+				for (String userId : prjInfo.getReqPerUserIds()) {
+					user.setUserId(userId);
+					user = t2UserService.getUser(user);
+					// update permission status
+					projectService.updateRequestProjectPermission(project.getPrjId(), userId, project.getStatus(), null);
+
+					CoMail mailBean = null;
+					String reviewer = avoidNull(prjInfo.getReviewerName(), "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
+					String en = "";
+					String ko = "";
+					
+					if (project.getStatus().equalsIgnoreCase("APP")) {
+						// add watcher
+						project.setPrjUserId(userId);
+						project.setPrjDivision(user.getDivision());
+						projectService.addWatcher(project);
+						
+						mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION);
+						en = messageSource.getMessage("msg.common.approved.permission", null, Locale.ENGLISH);
+						ko = messageSource.getMessage("msg.common.approved.permission", null, Locale.KOREAN);
+					} else {
+						// send reject email
+						mailBean = new CoMail(CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION);
+						en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
+						ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
+					}
+					en = en.replaceAll("Reviewer", reviewer);
+					ko = ko.replaceAll("Reviewer", reviewer);
+					
+					mailBean.setLoginUserName(userId);
+					mailBean.setParamPrjId(project.getPrjId());
+					mailBean.setReviewer(reviewer);
+					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+					
+					CoMailManager.getInstance().sendMail(mailBean);
+				}
+			}
+		} else {
+			if (!isEmpty(prjInfo.getRejPerUserNm()) && project.getRejPerUserNm().equals(prjInfo.getRejPerUserNm())) {
+				String userId = prjInfo.getRejPerUserNm().split("[|]")[0];
+				projectService.updateRequestProjectPermission(project.getPrjId(), userId, null, prjInfo.getRejPerUserNm());
+			}
+		}
+
+		return makeJsonResponseHeader();
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = PROJECT.SAVE_TRD_OSS)
+	public @ResponseBody ResponseEntity<Object> saveTrdOss(@RequestBody HashMap<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model) {
+		String prjId = (String) param.get("prjId");
+		
+		OssComponents oc = new OssComponents();
+		oc.setReferenceId((String) param.get("referenceId"));
+		oc.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+		Map<String, Object> map = projectService.getPartnerOssList(oc);
+		projectService.setLoadToList(map, oc.getReferenceId());
+		
+		try {
+			Project project = new Project();
+			project.setPrjId(prjId);
+			
+			String identificationSubStatusPartner = CoConstDef.FLAG_YES;
+			String mainGrid = (String) param.get("mainData");
+			
+			Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
+			List<OssComponents> ossComponents = new ArrayList<>();
+			ossComponents = (List<OssComponents>) fromJson(mainGrid, collectionType);
+			
+			List<OssComponents> rows = null;
+			if (map.containsKey("rows")) {
+				rows = (List<OssComponents>) map.get("rows");
+				ossComponents.addAll(rows);
+			}
+			
+			List<PartnerMaster> thirdPartyList = new ArrayList<>();
+			Map<String, Object> thirdPartyMap = projectService.get3rdMapList(project, true);
+			List<PartnerMaster> thirdPartyRows = (List<PartnerMaster>) thirdPartyMap.get("rows");
+			if (CollectionUtils.isNotEmpty(thirdPartyRows)) {
+				thirdPartyList.addAll(thirdPartyRows);
+			}
+			
+			Map<String, Object> beforeThirdPartyMap = projectService.get3rdMapList(project, false);
+			List<PartnerMaster> beforeThirdPartyRows = (List<PartnerMaster>) beforeThirdPartyMap.get("rows");
+			if (CollectionUtils.isNotEmpty(beforeThirdPartyRows)) {
+				thirdPartyList.addAll(beforeThirdPartyRows);
+			}
+			// add nickname valid Message
+			if (CollectionUtils.isNotEmpty(rows)) {
+				List<PartnerMaster> addThirdPartyList = projectService.nickNameValidMessage(prjId, oc.getReferenceId(), rows, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+				if (CollectionUtils.isNotEmpty(addThirdPartyList)) {
+					thirdPartyList.addAll(addThirdPartyList);
+				}
+			} else {
+				PartnerMaster partnerMaster = new PartnerMaster();
+				partnerMaster.setPartnerId((String) param.get("referenceId"));
+				partnerMaster.setComponentCount("0");
+				thirdPartyList.add(partnerMaster);
+			}
+			
+			// save 3rd oss
+			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
+			
+			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
+				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
+							
+				if (!isEmpty(changedLicenseName)) {
+					CommentsHistory commentHisBean = new CommentsHistory();
+					commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+					commentHisBean.setReferenceId(prjId);
+					commentHisBean.setExpansion1("3rd party");
+					commentHisBean.setContents(changedLicenseName);
+					commentService.registComment(commentHisBean, false);
+				}
+			}
+			
+			History h = new History();
+			h = projectService.work(project);
+			h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+			project = (Project) h.gethData();
+			h.sethEtc(project.etcStr());
+			historyService.storeData(h);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false);
+		}
+		
+		return makeJsonResponseHeader(true);
+	}
+	
+	@PostMapping(value = PROJECT.IDENTIFICATION_ADD_LIST)
+	public @ResponseBody ResponseEntity<Object> getIdentificationAddList(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> rtnMap = null;
+		try {
+			rtnMap = projectService.getIdentificationAddList(project);
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		return makeJsonResponseHeader(rtnMap);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.IDENTIFICATION_SHEET_DATA)
+	public @ResponseBody ResponseEntity<Object> getIdentificationSheetData(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
+		log.info("Report Read Start");
+
+		try {
+			String prjId = (String) map.get("prjId");
+			String fileSeq = (String) map.get("fileSeq");
+			List<String> sheetNums = (List<String>) map.get("sheetNums");
+			String readType = (String) map.get("readType");
+			Map<String, Object> rtnMap = new HashMap<>();
+			
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(avoidNull(readType))) {
+				String depDataString = (String) map.get("depMainData");
+				String srcDataString = (String) map.get("srcMainData");
+				String binDataString = (String) map.get("binMainData");
+				
+				List<String> sheetList = new ArrayList<>();
+				List<String> readTypeList = new ArrayList<>();
+				for (String s : sheetNums) {
+					String sheetNum = s.split("_")[0];
+					if (!sheetList.contains(sheetNum)) {
+						sheetList.add(sheetNum);
+						readTypeList.add(s.split("_")[1].toLowerCase());
+					}
+				}
+				
+				// set dep data
+				Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				List<ProjectIdentification> depOssComponents = new ArrayList<ProjectIdentification>();
+				depOssComponents = (List<ProjectIdentification>) fromJson(depDataString, collectionType);
+				
+				// set src data
+				Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				List<ProjectIdentification> srcOssComponents = new ArrayList<ProjectIdentification>();
+				srcOssComponents = (List<ProjectIdentification>) fromJson(srcDataString, collectionType2);
+				
+				// set bin data
+				Type collectionType3 = new TypeToken<List<ProjectIdentification>>() {}.getType();
+				List<ProjectIdentification> binOssComponents = new ArrayList<ProjectIdentification>();
+				binOssComponents = (List<ProjectIdentification>) fromJson(binDataString, collectionType3);
+				
+				String errMsg = "";
+				Map<String, List<OssComponents>> reportDataMap = new HashMap<>();
+				Map<String, List<String>> errMsgListMap = new HashMap<>();
+				Map<String, Map<String, String>> emptyErrMsgMap = new HashMap<>();
+				
+				try {
+					List<String> sheetNumList = new ArrayList<>();
+					int idx = 0;
+					for (String sheetNum : sheetList) {
+						List<OssComponents> reportData = new ArrayList<OssComponents>();
+						List<String> errMsgList = new ArrayList<>();
+						Map<String, String> emptyErrMsg = new HashMap<>();
+						sheetNumList.add(sheetNum);
+						
+						if (!ExcelUtil.readReport(readTypeList.get(idx), true, sheetNumList.toArray(new String[sheetNumList.size()]), fileSeq, reportData, errMsgList, emptyErrMsg)) {
+							// error 처리
+							for (String s : errMsgList) {
+								if (isEmpty(s)) {
+									continue;
+								}
+								if (!isEmpty(errMsg)) {
+									errMsg += "<br/>";
+								}
+								errMsg += s;
+							}
+						}
+						
+						reportDataMap.put(sheetNum, reportData);
+						errMsgListMap.put(sheetNum, errMsgList);
+						emptyErrMsgMap.put(sheetNum, emptyErrMsg);
+						
+						sheetNumList.clear();
+						idx++;
+					}
+					
+					boolean isDepLoaded = false;
+					boolean isSrcLoaded = false;
+					boolean isBinLoaded = false;
+					
+					int depComponentCount = 0;
+					int srcComponentCount = 0;
+					int binComponentCount = 0;
+					
+					if (MapUtils.isNotEmpty(reportDataMap)) {
+						T2File uploadFile = fileService.selectFileInfo(fileSeq);
+						String fileNm = uploadFile.getOrigNm();
+						
+						String systemChangeHisStr = "";
+						for (String key : reportDataMap.keySet()) {
+							List<String> versionChangedList = null;
+							
+							for (String sheetNum : sheetNums) {
+								if (sheetNum.startsWith(key)) {
+									if (sheetNum.toUpperCase().endsWith("DEP")) {
+										isDepLoaded = true;
+										Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(null, null, null, reportDataMap.get(key), fileSeq, "dep");
+										List<ProjectIdentification> reportData = (List<ProjectIdentification>) resultMap.get("mainData");
+										if (CollectionUtils.isNotEmpty(reportData)) {
+											for (ProjectIdentification oc : reportData) {
+												String comments = oc.getComments();
+												if (!isEmpty(comments.trim())) {
+													comments = comments.trim() + "\n";
+												}
+												comments += "(From " + fileNm + ")";
+												oc.setComments(comments);
+												oc.setRefLoadedVal(fileSeq);
+											}
+											depComponentCount += reportData.size();
+											depOssComponents.addAll(reportData);
+										}
+										if (MapUtils.isNotEmpty(resultMap) && resultMap.containsKey("versionChangedList")) {
+											if (versionChangedList == null) {
+												versionChangedList = new ArrayList<>();
+											}
+											versionChangedList.addAll((List<String>) resultMap.get("versionChangedList"));
+										}
+									} else if (sheetNum.toUpperCase().endsWith("SRC")) {
+										isSrcLoaded = true;
+										Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(null, null, null, reportDataMap.get(key), fileSeq, "src");
+										List<ProjectIdentification> reportData = (List<ProjectIdentification>) resultMap.get("mainData");
+										if (CollectionUtils.isNotEmpty(reportData)) {
+											for (ProjectIdentification oc : reportData) {
+												String comments = oc.getComments();
+												if (!isEmpty(comments.trim())) {
+													comments = comments.trim() + "\n";
+												}
+												comments += "(From " + fileNm + ")";
+												oc.setComments(comments);
+												oc.setRefLoadedVal(fileSeq);
+											}
+											srcComponentCount += reportData.size();
+											srcOssComponents.addAll(reportData);
+										}
+										if (MapUtils.isNotEmpty(resultMap) && resultMap.containsKey("versionChangedList")) {
+											if (versionChangedList == null) {
+												versionChangedList = new ArrayList<>();
+											}
+											versionChangedList.addAll((List<String>) resultMap.get("versionChangedList"));
+										}
+									} else if (sheetNum.toUpperCase().endsWith("BIN")) {
+										isBinLoaded = true;
+										Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(null, null, null, reportDataMap.get(key), fileSeq, "bin");
+										List<ProjectIdentification> reportData = (List<ProjectIdentification>) resultMap.get("mainData");
+										if (CollectionUtils.isNotEmpty(reportData)) {
+											for (ProjectIdentification oc : reportData) {
+												String comments = oc.getComments();
+												if (!isEmpty(comments.trim())) {
+													comments = comments.trim() + "\n";
+												}
+												comments += "(From " + fileNm + ")";
+												oc.setComments(comments);
+												oc.setRefLoadedVal(fileSeq);
+											}
+											binComponentCount += reportData.size();
+											binOssComponents.addAll(reportData);
+										}
+										if (MapUtils.isNotEmpty(resultMap) && resultMap.containsKey("versionChangedList")) {
+											if (versionChangedList == null) {
+												versionChangedList = new ArrayList<>();
+											}
+											versionChangedList.addAll((List<String>) resultMap.get("versionChangedList"));
+										}
+									}
+								}
+							}
+							
+							if (versionChangedList != null) {
+								String versionChangedStr = "<b>The following open source version below has been changed to a registered version</b><br><br>";
+								for (String s : versionChangedList) {
+									versionChangedStr += "<br>" + s;
+								}
+								
+								putSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, fileSeq), versionChangedStr);
+
+								if (!isEmpty(systemChangeHisStr)) {
+									systemChangeHisStr += "<br><br>" + versionChangedStr;
+								}
+							}
+						}
+						
+						Project project = projectService.getProjectBasicInfo(prjId);
+						if (isDepLoaded) {
+							List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(depOssComponents);
+							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(depOssComponents, ossComponentsLicense);
+							depOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+							projectService.registDepOss(depOssComponents, ossComponentsLicense, project);
+						}
+						if (isSrcLoaded) {
+							List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(srcOssComponents);
+							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(srcOssComponents, ossComponentsLicense);
+							srcOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+							projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project);
+						}
+						if (isBinLoaded) {
+							List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(binOssComponents);
+							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(binOssComponents, ossComponentsLicense);
+							binOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+							projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+						}
+						if (uploadFile != null) {
+							projectService.setFileAddList(uploadFile, project, readType, depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
+						}
+						rtnMap.put("identificationStatus", projectService.getProjectDetail(project).getIdentificationStatus());
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					return makeJsonResponseHeader(false, e.getMessage());
+				}
+			}
+			
+			return makeJsonResponseHeader(true, null, rtnMap);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+	}
+	
+	@PostMapping(value = PROJECT.DEL_IDENTIFICATION_UPLOAD)
+	public @ResponseBody ResponseEntity<Object> delIdentificationUpload(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
+		try {
+			String referenceId = (String) map.get("referenceId");
+			String fileSeq = (String) map.get("fileSeq");
+			
+			if (map.containsKey("reset")) {
+				projectService.deleteIdentificationUploadFile(map);
+				projectService.deleteIdentificationUploadSearchData(map);
+			} else {
+				// delete file
+				if (!isEmpty(fileSeq)) {
+					projectService.deleteIdentificationUploadFile(map);
+				}
+				// delete search data
+				if (!isEmpty(referenceId)) {
+					projectService.deleteIdentificationUploadSearchData(map);
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, null);
+		}
+		return makeJsonResponseHeader(true, null);
 	}
 }

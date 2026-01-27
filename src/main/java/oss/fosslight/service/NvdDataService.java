@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -462,11 +463,14 @@ public class NvdDataService {
 		// summary
 		final List<Map<String, Object>> descriptions = (List<Map<String, Object>>) cveItem.get("descriptions");
 		String descriptionStr = "";
-		for (Map<String, Object> description : descriptions) {
-			if (!StringUtil.isEmpty(descriptionStr)) {
-				descriptionStr += "\n";
-			}
-			descriptionStr += description.get("value");
+		if (!CollectionUtils.isEmpty(descriptions)) {
+			List<String> enValues = descriptions.stream().filter(map -> "en".equals(map.get("lang"))).map(map -> String.valueOf(map.get("value"))).collect(Collectors.toList());
+		    if (!enValues.isEmpty()) {
+		        descriptionStr = String.join("\n", enValues);
+		    } else {
+		        Object firstValue = descriptions.get(0).get("value");
+		        descriptionStr = (firstValue != null) ? firstValue.toString() : "";
+		    }
 		}
 		
 		// metrics

@@ -694,12 +694,22 @@ public class CoConstDef {
 	public static final String CD_MAIL_COMPONENT_TEMPLATE = "110";
 	public static final String CD_MAIL_DEFAULT_CONTENTS = "111";
 
+	/** REQUEST PERMISSION */
+	public static final String CD_MAIL_PROJECT_REQUEST_PERMISSION = "850";
+	public static final String CD_MAIL_PROJECT_REJECT_PERMISSION = "851";
+	public static final String CD_MAIL_PARTNER_REQUEST_PERMISSION = "852";
+	public static final String CD_MAIL_PARTNER_REJECT_PERMISSION = "853";
+	public static final String CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION = "854";
+	public static final String CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION = "855";
+	public static final String CD_MAIL_PROJECT_APPROVE_PERMISSION = "856";
+	public static final String CD_MAIL_PARTNER_APPROVE_PERMISSION = "857";
+	
 	// 이벤트 코드 : TODO MAIL-SERVICE
 	public static final String	EVENT_CODE_LICENSE = "300";
 	public static final String	EVENT_CODE_OSS = "301";
 	public static final String	EVENT_CODE_OSS_LICENSE = "302";
 	public static final String	EVENT_CODE_PROJECT = "303";
-	public static final String	EVENT_CODE_PROJECT_MODEL = "304";
+	public static final String	EVENT_CODE_USER = "304";
 	public static final String	EVENT_CODE_PROJECT_WATCHER = "305";
 	public static final String 	EVENT_CODE_PROJECT_STATUS = "306";
 	public static final String	EVENT_CODE_PARTNER = "Partner";

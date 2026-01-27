@@ -6,6 +6,7 @@
 package oss.fosslight.service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +55,8 @@ public interface ProjectService extends HistoryConfig{
 	public void registOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String refId, String refDiv);
 	
 	public Map<String, List<String>> nickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
+	
+	public List<PartnerMaster> nickNameValidMessage(String prjId, String partnerId, List<OssComponents> thirdPartyData, String code);
 
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList);
 	
@@ -77,8 +80,7 @@ public interface ProjectService extends HistoryConfig{
 
 	Map<String, Object> getIdentificationProject(Project project);
 
-	void registComponentsBat(String prjId, String identificationSubStatusBat, List<ProjectIdentification> ossComponents,
-			List<List<ProjectIdentification>> ossComponentsLicense, boolean prjYn);
+	void registComponentsBat(String prjId, String identificationSubStatusBat, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, boolean prjYn);
 
 	Map<String, Object> getIdentificationGridList(ProjectIdentification identification);
 	
@@ -102,7 +104,7 @@ public interface ProjectService extends HistoryConfig{
 
 	List<UploadFile> selectAndroidFileDetail(Project project);
 	
-	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm);
+	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm, List<ProjectIdentification> rows);
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 
@@ -125,7 +127,7 @@ public interface ProjectService extends HistoryConfig{
 	
 	Map<String, Object> getFileInfo(ProjectIdentification identification);
 	
-	Map<String, Object> get3rdMapList(Project project);
+	Map<String, Object> get3rdMapList(Project project, boolean isCommon);
 
 	List<Project> getWatcherList(Project project);
 
@@ -154,6 +156,8 @@ public interface ProjectService extends HistoryConfig{
 	Map<String, Object> getAddList(Project project);
 	
 	boolean existsAddList(Project project);
+	
+	public void existsAddList(List<Project> addProjectList);
 	
 	void insertAddList(List<Project> project);
 	
@@ -247,5 +251,17 @@ public interface ProjectService extends HistoryConfig{
 
 	public void updateProjectNotification(Project project, Map<String, Object> param);
 
-	public void sendMailInactiveProject();
+	public Map<String, Object> requestProjectPermission(String prjId, String userId, String status);
+
+	public void updateRequestProjectPermission(String prjId, String userId, String status, String rejPerUserNm);
+	
+	public Map<String, Object> getIdentificationAddList(Project project);
+
+	public void setFileAddList(T2File uploadFile, Project project, String readType, int depComponentCount, int srcComponentCount, int binComponentCount, boolean isDepLoaded, boolean isSrcLoaded, boolean isBinLoaded);
+
+	public void deleteIdentificationUploadFile(HashMap<String, Object> param);
+
+	public void deleteIdentificationUploadSearchData(HashMap<String, Object> param);
+	
+  	public void sendMailInactiveProject();
 }

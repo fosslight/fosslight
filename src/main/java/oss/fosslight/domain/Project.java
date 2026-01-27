@@ -352,6 +352,7 @@ public class Project extends ComBean implements Serializable {
 	private String srcAndroidNoticeFileFlag = "N";
 	private String srcAndroidNoticeXmlFileFlag = "N";
 	private String srcAndroidResultFileFlag = "N";
+	private String identificationCsvFileFlag = "N";
 	
 	private String identificationStatusConfFlag = "N";
 	
@@ -375,6 +376,10 @@ public class Project extends ComBean implements Serializable {
 	/** add watcher list. */
 	private ArrayList<Map<String, String>> changeWatcherList;
 	
+	private List<String> reqPerUserIds;
+	private String reqPerUserNms;
+	private String rejPerUserNm;
+	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
 	}
@@ -396,7 +401,11 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The open source file name. */
 	private String openSourceFileName; // 오픈소스 파일명
-
+	
+	/** The identification csv file id. */
+	private String identificationCsvFileId;
+	private String identificationCsvFileSeq;
+	
 	/** The dep csv file id. */
 	private String depCsvFileId;
 	
@@ -4863,5 +4872,53 @@ public class Project extends ComBean implements Serializable {
 
 	public void setConfirmStatusCopy(String confirmStatusCopy) {
 		this.confirmStatusCopy = confirmStatusCopy;
+	}
+	
+	public List<String> getReqPerUserIds() {
+		return reqPerUserIds;
+	}
+
+	public void setReqPerUserIds(List<String> reqPerUserIds) {
+		this.reqPerUserIds = reqPerUserIds;
+	}
+
+	public String getReqPerUserNms() {
+		return reqPerUserNms;
+	}
+
+	public void setReqPerUserNms(String reqPerUserNms) {
+		this.reqPerUserNms = reqPerUserNms;
+	}
+
+	public String getRejPerUserNm() {
+		return rejPerUserNm;
+	}
+
+	public void setRejPerUserNm(String rejPerUserNm) {
+		this.rejPerUserNm = rejPerUserNm;
+	}
+
+	public String getIdentificationCsvFileFlag() {
+		return identificationCsvFileFlag;
+	}
+
+	public void setIdentificationCsvFileFlag(String identificationCsvFileFlag) {
+		this.identificationCsvFileFlag = identificationCsvFileFlag;
+	}
+
+	public String getIdentificationCsvFileId() {
+		return identificationCsvFileId;
+	}
+
+	public void setIdentificationCsvFileId(String identificationCsvFileId) {
+		this.identificationCsvFileId = identificationCsvFileId;
+	}
+
+	public String getIdentificationCsvFileSeq() {
+		return identificationCsvFileSeq;
+	}
+
+	public void setIdentificationCsvFileSeq(String identificationCsvFileSeq) {
+		this.identificationCsvFileSeq = identificationCsvFileSeq;
 	}
 }

@@ -52,6 +52,7 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
+import oss.fosslight.domain.History;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2Authorities;
@@ -63,6 +64,7 @@ import oss.fosslight.repository.T2AuthoritiesMapper;
 import oss.fosslight.repository.T2RolesMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.FileService;
+import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.JwtUtil;
 import oss.fosslight.util.StringUtil;
@@ -80,6 +82,7 @@ public class T2UserServiceImpl implements T2UserService {
 	
 	// Service
 	@Autowired FileService fileService;
+	@Autowired HistoryService historyService;
 	
 	// Mapper
 	@Autowired T2UserMapper userMapper;
@@ -337,28 +340,63 @@ public class T2UserServiceImpl implements T2UserService {
 
 	@Override
 	public void modUser(List<T2Users> vo) {
-		for (int i = 0;i<vo.size();i++) {
-			vo.get(i).setModifier(vo.get(i).getUserId());
-			vo.get(i).setPassword("");
-			if (vo.get(i).getDivision() != null && vo.get(i).getDivision().trim().equals("")){
-				vo.get(i).setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+		History h;
+		for (int i = 0; i < vo.size(); i++) {
+			T2Users user = vo.get(i);
+			if (user.getUserId() == null || user.getUserId().isEmpty()) {
+				continue;
 			}
 			
-			userMapper.updateUsers(vo.get(i));
+			T2Users userInfo = userMapper.getUser(user);
 			
-			if ("V".equals(vo.get(i).getAuthority())) {
-				vo.get(i).setAuthority("ROLE_ADMIN");
-				userMapper.updateAuthorities(vo.get(i));
+			user.setModifier(user.getUserId());
+			user.setModifiedFlag(CoConstDef.FLAG_YES);
+			user.setPassword("");
+			if (user.getDivision() != null && user.getDivision().trim().equals("")){
+				user.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+			}
+			if (CoConstDef.FLAG_NO.equals(user.getUseYn())) {
+				user.setExpireFlag(CoConstDef.FLAG_YES);
+			} else if (CoConstDef.FLAG_YES.equals(user.getUseYn())) {
+				user.setExpireDate(CoConstDef.CD_TOKEN_END_DATE);
+			}
+			
+			userMapper.updateUsers(user);
+			
+			if ("V".equals(user.getAuthority())) {
+				user.setAuthority("ROLE_ADMIN");
+				userMapper.updateAuthorities(user);
 			} else {
-				vo.get(i).setAuthority("ROLE_USER");
-				userMapper.updateAuthorities(vo.get(i));
+				user.setAuthority("ROLE_USER");
+				userMapper.updateAuthorities(user);
 			}
+			
+			userInfo = userMapper.getUser(user);
+			user.setModifiedDate(userInfo.getModifiedDate());
+			user.setDivisionName(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, userInfo.getDivision()));
+			h = work(user);
+			h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+			historyService.storeData(h);
 			
 			// statisticsMostUsed > div_no value update
-			userMapper.updateStatisticsMostUsedInfo(vo.get(i));
+			userMapper.updateStatisticsMostUsedInfo(user);
 		}		
 	}
 	
+	private History work(T2Users user) {
+		History h = new History();
+		
+		h.sethKey(user.getUserId());
+		h.sethTitle(user.getUserName());
+		h.sethType(CoConstDef.EVENT_CODE_USER);
+		h.setModifier(user.getLoginUserName());
+		h.setModifiedDate(user.getModifiedDate());
+		h.sethComment("");
+		h.sethData(user);
+		
+		return h;
+	}
+
 	@Override
 	public List<T2Users> getAuthorityUsers(String authority) {
 		return userMapper.getAuthorityUsers(authority);

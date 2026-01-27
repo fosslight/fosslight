@@ -114,7 +114,9 @@ var bin_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(resetFlag){
+	saveMakeData : function(resetFlag, addLoadData) {
+		var excludeNicknameAlert = false;
+		
 		cleanErrMsg("binList");
 		var target = $("#binList");
 		var prjId = [[${project.prjId}]];
@@ -158,21 +160,41 @@ var bin_fn = {
 		});
 		// 서브 그리드
 		var subData = [];
-		var binAddListData = $("#_binAddList").jqGrid("getRowData");
  		
 		// 최종 데이터
-		var finalData = {"prjId" : prjId, "binCsvFileId" : binCsvFileId , "binBinaryFileId" : binBinaryFileId, "csvDelFileIds" : JSON.stringify(delFileData)
-					   , "identificationSubStatusBin" : identificationSubStatusBin, "mainData" : JSON.stringify(mainData), "subData" : JSON.stringify(subData), "binAddListData" : JSON.stringify(binAddListData)};
-
+		var finalData = {"prjId" : prjId, "binCsvFileId" : binCsvFileId , "binBinaryFileId" : binBinaryFileId, "csvDelFileIds" : JSON.stringify(delFileData), "identificationSubStatusBin" : identificationSubStatusBin, "mainData" : JSON.stringify(mainData), "subData" : JSON.stringify(subData)};
+		
+		var binAddDataList = [];
+		if (addLoadData != null) {
+			excludeNicknameAlert = true;
+			let referenceId = "";
+			addLoadData.forEach (function (el, index) {
+				if ("" == referenceId) {
+					referenceId = el.referenceId;
+				}
+				mainData.push(el);
+			});
+			finalData["mainData"] = JSON.stringify(mainData);
+			
+			
+			var binAddDataObj = {};
+			binAddDataObj["prjId"] = [[${project.prjId}]];
+			binAddDataObj["referenceId"] = referenceId;
+			binAddDataObj["referenceDiv"] = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]];
+			binAddDataObj["componentCount"] = addLoadData.length;
+			binAddDataList.push(binAddDataObj);
+		}
+		finalData["binAddListData"] = JSON.stringify(binAddDataList);
+		
 		if (resetFlag) {
 			bin_fn.resetExeSave(finalData);
 		} else {
 			// 닉네임 체크
-			bin_fn.nickNameValid(mainData, subData, finalData);
+			bin_fn.nickNameValid(mainData, subData, finalData, excludeNicknameAlert);
 		}
 	},
 	// 저장
-	exeSave : function(finalData, refreshComment){
+	exeSave : function(finalData, refreshComment, reloadTab) {
 		$.ajax({
 			url : '/project/saveBin',
 			type : 'POST',
@@ -202,24 +224,35 @@ var bin_fn = {
 						alertify.alert(data.validMsg, function(){});
 					}
 				} else {
-					if("10" == data.resCd){
-						bin_fn.getBinGridData();
-						$("#mergeYn").val("N");
-						bin_evt.csvDelFileSeq = [];
-						com_fn.saveFlagObject["BIN"] = true;
-						com_fn.changeMode("view", false);
-						alertify.success([[#{msg.common.success}]]);
-						
-						if(data.changeBySystemNotice && data.changeBySystemNotice && data.changeBySystemNotice != "") {
-							alertify.alert(data.changeBySystemNotice, function(){});
-						}
+					if ("10" == data.resCd) {
+						binLoadSuccess = true;
+						if (reloadTab) {
+							if (partyLoadSuccess && depLoadSuccess && srcLoadSuccess && binLoadSuccess) {
+								bom_fn.beforeSave(true);
+							}
+						} else {
+							bin_fn.getBinGridData();
+							$("#mergeYn").val("N");
+							bin_evt.csvDelFileSeq = [];
+							com_fn.saveFlagObject["BIN"] = true;
+//							com_fn.changeMode("view", false);
+							alertify.success([[#{msg.common.success}]]);
+							
+							if(data.changeBySystemNotice && data.changeBySystemNotice && data.changeBySystemNotice != "") {
+								alertify.alert(data.changeBySystemNotice, function(){});
+							}
 
-						curIdenStatus = data.resultData||"";
-						if(curIdenStatus == "PROG"){
-							com_fn.btnCtl(userRole, curIdenStatus);
+							curIdenStatus = data.resultData||"";
+							if(curIdenStatus == "PROG"){
+								com_fn.btnCtl(userRole, curIdenStatus);
+							}
+							
+							if (refreshComment) {
+								fn_comment.getCommentList(commentsParam);
+							}
+							
+							com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
 						}
-						
-						if (refreshComment) fn_comment.getCommentList(commentsParam);
 					} else {
 						alertify.error([[#{msg.common.valid2}]]);
 					}
@@ -437,6 +470,7 @@ var bin_fn = {
 			mtype: 'GET',
 			loadComplete: function(data){
                 if (data.rows.length > 0) {
+                	$("#binFragmentsDiv").show();
                 	_binLoadListLength = data.rows.length;
                     $("#_binAddListContainer").show();
                     if (typeof $(".binCsvFileSeq").val() !== "undefined" || typeof $(".binBinaryFileSeq").val() !== "undefined") {
@@ -445,7 +479,12 @@ var bin_fn = {
 						$(".existFileBin").hide();
 					}
                 } else {
-                	$(".existFileBin").show();
+                	if (typeof $(".binCsvFileSeq").val() !== "undefined" || typeof $(".binBinaryFileSeq").val() !== "undefined") {
+                		$("#binFragmentsDiv").show();
+                    	$(".existFileBin").show();
+                	} else {
+						$(".existFileBin").hide();
+                	}
                 }
             }, 
 			gridComplete: function() {
@@ -771,7 +810,7 @@ var bin_fn = {
 							binInfoMsgData = data.externalData3;
 						}
 						
-						bin_fn.makeOssList(data.resultData);
+						bin_fn.makeOssList(data.resultData.mainData);
 						
 						bin_fn.makeFileTag(_binUploadFile, 'excel');
 						_binUploadFile = undefined
@@ -795,7 +834,7 @@ var bin_fn = {
 		}
 	},
 	makeOssList : function(data){
-		binMainData = data.mainData;
+		binMainData = data;
 		
 		// 리로드 대신 그리드 삭제 후 다시 그리기
 		$("#binList").jqGrid('GridUnload');
@@ -1052,7 +1091,7 @@ var bin_fn = {
 		// 메인, 서브 그리드 세이브 모드
 		fn_grid_com.totalGridSaveMode('binList');
 		// 닉네임 체크
-		bin_fn.saveMakeData(true);
+		bin_fn.saveMakeData(true, null);
 	},
 	projectSearch : function () {
 		var searchSelect = $("select[name='binProjectSelect'] option:selected").val();
@@ -1102,7 +1141,7 @@ var bin_fn = {
 						// 메인, 서브 그리드 세이브 모드
 						fn_grid_com.totalGridSaveMode('binList');
 						// 닉네임 체크
-						bin_fn.saveMakeData(false);
+						bin_fn.saveMakeData(false, null);
 					}
 				} else {
 					return false;
@@ -1413,6 +1452,8 @@ var bin_grid = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'checkSum', index: 'checkSum', editable:false, hidden:true};
 		colModelArr.push(colModelObj);
+		colModelObj = {name: 'refLoadedVal', index: 'refLoadedVal', hidden:true};
+		colModelArr.push(colModelObj);
 		
 		// apply user columns setting on
 		var listType = 'IDENTIFICATION_BIN';
@@ -1428,7 +1469,7 @@ var bin_grid = {
 			datatype: 'local',
 			data : binMainData,
 			colNames: ['gridId', 'ID_KEY','ID','Binary Name', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location','Homepage','LicenseId','Copyright Text'/*,'License Text'*/
-			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'binList\');">Exclude','LicenseDiv', 'customBinaryYn', 'Comment', 'Tlsh', 'Check Sum'],
+			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'binList\');">Exclude','LicenseDiv', 'customBinaryYn', 'Comment', 'Tlsh', 'Check Sum', 'refLoadedVal'],
 			colModel: colModelArr,
 			autoencode: true,
 			editurl:'clientArray',
@@ -1492,10 +1533,11 @@ var bin_grid = {
 				if ($("#binList_toppager_left").find('button').length == 0) {
 					var permission = [[${project.statusPermission}]] == 1;
                 	var identificationStatus = [[${project.identificationStatus}]];
+                	var dropYn = [[${project.dropYn}]];
 					
                 	var appendBtn = "";
                     appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('BIN', 'binList', "+permission+", '"+identificationStatus+"')\">";
-                    if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+                    if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -1505,7 +1547,7 @@ var bin_grid = {
                 		}
                 	}
                     appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('BIN', 'binList', 'main', "+permission+", '"+identificationStatus+"')\">";
-                    if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+                    if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -1515,7 +1557,7 @@ var bin_grid = {
                 		}
                 	}
                     appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('BIN', "+permission+", '"+identificationStatus+"')\">";
-                    if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+                    if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {

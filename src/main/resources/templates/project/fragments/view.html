@@ -3,15 +3,15 @@
 <body>
 <th:block th:fragment="partyFragments">
 	<input type="hidden" id="thirdEditMode" value="N"/>
-		<div class="card-body bg-ivory">
+		<div class="card-body bg-ivory" id="partyFragmentsDiv" style="display: none;">
 			<div th:if="${project.identificationSubStatusPartner == 'N'}" class="row">
 				<div class="col-lg-6">
-					<div id="chkApplicableParty" class="icheck-danger d-inline">
+<!-- 				<div id="chkApplicableParty" class="icheck-danger d-inline">
 						<label th:text="'Not Applicable'"></label>
-					</div>
+					</div> -->
 				</div>
 				<div class="col-lg-6">
-					<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+<!--				<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 						<div class="row d-flex-align-right float-right">
 							<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
 								<i class="fas fa-edit customIcon2 text-gray"></i>
@@ -24,7 +24,7 @@
 								<i class="fas fa-edit customIcon2 text-gray"></i>
 							</span>
 						</div>
-					</th:block>
+					</th:block> -->
 				</div>
 			</div>
 			<input type="hidden" name="identificationSubStatusPartner" th:value="${project.identificationSubStatusPartner}">
@@ -38,7 +38,7 @@
 						<div th:if="${project.statusPermission == 1}" class="row">
 							<div class="col-lg-6"></div>
 							<div class="col-lg-6">
-								<div class="row d-flex-align-right float-right">
+<!--							<div class="row d-flex-align-right float-right">
 									<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 										<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
 											<i class="fas fa-edit customIcon2 text-gray"></i>
@@ -49,7 +49,7 @@
 											<i class="fas fa-edit customIcon2 text-gray"></i>
 										</span>
 									</th:block>
-								</div>
+								</div> -->
 							</div>
 						</div>
 						<div class="row" style="display: none;">
@@ -184,7 +184,7 @@
 				<!--<hr class="my-3">-->
 				<div class="pl-1 py-2">
 					<i class="fas fa-caret-square-right pr-1"></i>
-					<span>Loaded List</span>
+					<span th:text="'Loaded List (Data before common upload development is displayed)'"></span>
 				</div>
 				<div class="px-2 pt-1">
 					<div class="innerJqGridSet">
@@ -201,15 +201,15 @@
 </th:block>
 <th:block th:fragment="depFragments">
 	<input type="hidden" id="depEditMode" value="N"/>
-		<div class="card-body bg-ivory">
+		<div class="card-body bg-ivory" id="depFragmentsDiv" style="display: none;">
 			<div th:if="${project.identificationSubStatusDep == 'N'}" class="row">
 				<div class="col-lg-6">
-					<div id="chkApplicableDep" class="icheck-danger d-inline">
+<!-- 				<div id="chkApplicableDep" class="icheck-danger d-inline">
 						<label th:text="'Not Applicable'"></label>
-					</div>
+					</div> -->
 				</div>
 				<div class="col-lg-6">
-					<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+<!--				<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 						<div class="row d-flex-align-right float-right">
 							<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
 								<i class="fas fa-edit customIcon2 text-gray"></i>
@@ -222,7 +222,7 @@
 								<i class="fas fa-edit customIcon2 text-gray"></i>
 							</span>
 						</div>
-					</th:block>
+					</th:block> -->
 				</div>
 			</div>
 			<input type="hidden" name="identificationSubStatusDep" th:value="${project.identificationSubStatusDep}">
@@ -232,7 +232,7 @@
 					<div name="content_dep" id="depUploadSearch">
 						<div class="row" id="content-dep">
 							<div class="col-12">
-								<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+<!--							<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 									<div class="row">
 										<div class="col-lg-6">
 										</div>
@@ -257,8 +257,8 @@
 											</div>
 										</div>
 									</div>
-								</th:block>
-								<div class="row existFileDep">
+								</th:block> -->
+								<div class="row existFileDep" th:if="${!#lists.isEmpty(project.depCsvFile)}">
 									<div class="col-lg-2 pl-3 mt-1">
 										<strong th:text="'FOSSLight Report'"></strong>
 									</div>
@@ -354,7 +354,7 @@
 					<hr class="my-3 existFileDep">
 					<div class="pl-1 py-2">
 						<i class="fas fa-caret-square-right pr-1"></i>
-						<span>Loaded List</span>
+						<span id="_depAddListTitle" th:text="'Loaded List (Data before common upload development is displayed)'"></span>
 					</div>
 					<div class="px-2 pt-1">
 						<div class="outerJqGridSet">
@@ -372,15 +372,15 @@
 </th:block>
 <th:block th:fragment="srcFragments">
 		<input type="hidden" id="srcEditMode" value="N"/>
-		<div class="card-body bg-ivory">
+		<div class="card-body bg-ivory" id="srcFragmentsDiv" style="display: none;">
 			<div th:if="${project.identificationSubStatusSrc == 'N'}" class="row">
 				<div class="col-lg-6">
-					<div id="chkApplicableDep" class="icheck-danger d-inline">
+<!-- 				<div id="chkApplicableDep" class="icheck-danger d-inline">
 						<label th:text="'Not Applicable'"></label>
-					</div>
+					</div> -->
 				</div>
 				<div class="col-lg-6">
-					<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+<!--				<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 						<div class="row d-flex-align-right float-right">
 							<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
 								<i class="fas fa-edit customIcon2 text-gray"></i>
@@ -393,7 +393,7 @@
 								<i class="fas fa-edit customIcon2 text-gray"></i>
 							</span>
 						</div>
-					</th:block>
+					</th:block> -->
 				</div>
 			</div>
 			<input type="hidden" name="identificationSubStatusSrc" th:value="${project.identificationSubStatusSrc}">
@@ -403,7 +403,7 @@
 					<div name="content_src" id="srcUploadSearch">
 						<div class="row" id="content-src">
 							<div class="col-12">
-								<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+<!--							<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 									<div class="row">
 										<div class="col-lg-6"></div>
 										<div class="col-lg-6">
@@ -426,9 +426,9 @@
 											</div>
 										</div>
 									</div>
-								</th:block>
+								</th:block> -->
 								<div class="row existFileSrc">
-									<div class="col-lg-2 pl-3 mt-1">
+									<div class="col-lg-2 pl-3 mt-1" th:if="${!#lists.isEmpty(project.csvFile)}">
 										<strong th:text="'FOSSLight Report'"></strong>
 									</div>
 									<div class="col-lg-9">
@@ -523,7 +523,7 @@
 						<hr class="my-3 existFileSrc">
 						<div class="pl-1 py-2">
 							<i class="fas fa-caret-square-right pr-1"></i>
-							<span>Loaded List</span>
+							<span id="_srcAddListTitle" th:text="'Loaded List (Data before common upload development is displayed)'"></span>
 						</div>
 						<div class="px-2 pt-1">
 							<div class="innerJqGridSet">
@@ -538,15 +538,15 @@
 </th:block>
 <th:block th:fragment="binFragments">
 	<input type="hidden" id="binEditMode" value="N"/>
-		<div class="card-body bg-ivory">
+		<div class="card-body bg-ivory" id="binFragmentsDiv" style="display: none;">
 			<div th:if="${project.identificationSubStatusBin == 'N'}" class="row">
 				<div class="col-lg-6">
-					<div id="chkApplicableDep" class="icheck-danger d-inline">
+<!-- 				<div id="chkApplicableDep" class="icheck-danger d-inline">
 						<label th:text="'Not Applicable'"></label>
-					</div>
+					</div> -->
 				</div>
 				<div class="col-lg-6">
-					<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+<!--				<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 						<div class="row d-flex-align-right float-right">
 							<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
 								<i class="fas fa-edit customIcon2 text-gray"></i>
@@ -559,7 +559,7 @@
 								<i class="fas fa-edit customIcon2 text-gray"></i>
 							</span>
 						</div>
-					</th:block>
+					</th:block> -->
 				</div>
 			</div>
 			<input type="hidden" name="identificationSubStatusBin" th:value="${project.identificationSubStatusBin}">
@@ -570,7 +570,7 @@
 					<div name="content_bin" id="binUploadSearch">
 						<div class="row" id="content-bin">
 							<div class="col-12">
-								<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+<!--							<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
 									<div class="row">
 	          							<div class="col-lg-6"></div>
 	           							<div class="col-lg-6">
@@ -593,7 +593,7 @@
 	           								</div>
 	             						</div>
 	                      			</div>
-								</th:block>
+								</th:block> -->
 								<div class="row existFileBin">
 									<div class="col-lg-2 pl-3 mt-1">
 										<strong th:text="'FOSSLight Report'"></strong>
@@ -710,7 +710,7 @@
 					<hr class="my-3 existFileBin">
 					<div class="pl-1 py-2">
 						<i class="fas fa-caret-square-right pr-1"></i>
-						<span>Loaded List</span>
+						<span id="_binAddListTitle" th:text="'Loaded List (Data before common upload development is displayed)'"></span>
 					</div>
 					<div class="px-2 pt-1">
 						<div class="innerJqGridSet">
@@ -731,16 +731,25 @@
 	<div class="card-body bg-ivory">
 		<div th:if="${project.identificationSubStatusAndroid == 'N'}" class="row">
           	<div class="col-lg-6">
-             	<div id="chkApplicableBinAndroid" class="icheck-danger d-inline">
+         	  	<div id="chkApplicableBinAndroid" class="icheck-danger d-inline">
                  	<label th:text="'Not Applicable'"></label>
               	</div>
           	</div>
           	<div class="col-lg-6">
-             	<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row d-flex-align-right float-right">
-                  	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
-                      	<i class="fas fa-edit customIcon2 text-gray"></i>
-                 	</span>
-             	</div>
+	       		<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+          			<div class="row d-flex-align-right float-right">
+	                  	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+	                      	<i class="fas fa-edit customIcon2 text-gray"></i>
+	                 	</span>
+	             	</div>
+          		</th:block>
+          		<th:block th:if="${!@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REV' and project.identificationStatus != 'REQ'}">
+          			<div class="row d-flex-align-right float-right">
+	                  	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+	                      	<i class="fas fa-edit customIcon2 text-gray"></i>
+	                 	</span>
+	             	</div>
+          		</th:block>
           	</div>
        	</div>
 		<input type="hidden" name="identificationSubStatusAndroid" th:value="${project.identificationSubStatusAndroid}">
@@ -754,29 +763,40 @@
 				<div name="content_android" id="binAndroidUploadSearch">
 					<div class="row" id="content_android">
 						<div class="col-12">
-							<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row">
-                            	<div class="col-lg-6"></div>
-                                <div class="col-lg-6">
-                                	<div class="row d-flex-align-right float-right">
-                                    	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
-                                        	<i class="fas fa-edit customIcon2 text-gray"></i>
-                                       	</span>
-                                   	</div>
-                               	</div>
-                           	</div>
+							<th:block th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REQ'}">
+								<div class="row">
+	                            	<div class="col-lg-6"></div>
+	                                <div class="col-lg-6">
+	                                	<div class="row d-flex-align-right float-right">
+	                                    	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+	                                        	<i class="fas fa-edit customIcon2 text-gray"></i>
+	                                       	</span>
+	                                   	</div>
+	                               	</div>
+	                           	</div>
+							</th:block>
+							<th:block th:if="${!@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.identificationStatus != 'REV' and project.identificationStatus != 'REQ'}">
+								<div class="row">
+	                            	<div class="col-lg-6"></div>
+	                                <div class="col-lg-6">
+	                                	<div class="row d-flex-align-right float-right">
+	                                    	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+	                                        	<i class="fas fa-edit customIcon2 text-gray"></i>
+	                                       	</span>
+	                                   	</div>
+	                               	</div>
+	                           	</div>
+							</th:block>
 							<div class="row">
-								<div class="col-lg-2 pl-3 mt-1">
-									<strong th:text="'Android Model'"></strong>
-								</div>
-								<div class="col-lg-10">
+								<div class="col-lg-12">
 									<div class="row">
-										<div class="col-lg-2">
-											<p th:text="'FOSSLight Report'"></p>
+										<div class="col-lg-2 pl-3 m-2">
+											<strong th:text="'FOSSLight Report'"></strong>
 										</div>
-										<div class="col-lg-10">
+										<div class="col-lg-9">
 											<div class="ajax-file-upload-container mt-0" style="width: 100%;">
 												<ul class="androidCsvFileArea">
-													<th:block th:if="${project.androidCsvFile != null}">
+													<th:block th:if="${!#lists.isEmpty(project?.androidCsvFile)}">
 														<th:block th:each="csvFile : ${project.androidCsvFile}">
 															<li th:if="${csvFile.delYn == 'N'}">
 																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
@@ -785,7 +805,7 @@
 															</li>
 														</th:block>
 													</th:block>
-													<th:block th:if="${project.androidCsvFile == null}">
+													<th:block th:unless="${!#lists.isEmpty(project?.androidCsvFile)}">
 														<li th:text="'No File'"></li>
 													</th:block>
 												</ul>
@@ -793,10 +813,10 @@
 										</div>
 									</div>
 									<div class="row">
-										<div class="col-lg-2">
-											<p class="text-danger" th:text="'NOTICE'"></p>
+										<div class="col-lg-2 pl-3 m-2">
+											<strong class="text-danger" th:text="'NOTICE'"></strong>
 										</div>
-										<div class="col-lg-10">
+										<div class="col-lg-9">
 											<div class="ajax-file-upload-container mt-0" style="width: 100%;">
 												<ul class="androidNoticeFileArea">
 													<th:block th:if="${project.androidNoticeFile != null}">
@@ -815,24 +835,19 @@
 											</div>
 										</div>
 									</div>
-									<div class="row">
-										<div class="col-lg-2">
-											<p th:text="'fosslight_binary.txt'"></p>
+									<div class="row" th:if="${project.androidResultFile != null}">
+										<div class="col-lg-2 pl-3 m-2">
+											<strong th:text="'fosslight_binary.txt'"></strong>
 										</div>
-										<div class="col-lg-10">
+										<div class="col-lg-9">
 											<div class="ajax-file-upload-container mt-0" style="width: 100%;">
 												<ul class="androidResultFileArea">
-													<th:block th:if="${project.androidResultFile != null}">
-														<th:block th:each="csvFile : ${project.androidResultFile}">
-															<li th:if="${csvFile.delYn eq 'N'}">
-																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-																<input type="hidden" class="androidResultFile" th:value="${csvFile.fileSeq}" />
-																<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
-															</li>
-														</th:block>
-													</th:block>
-													<th:block th:unless="${project.androidResultFile != null}">
-														<li th:text="'No File'"></li>
+													<th:block th:each="csvFile : ${project.androidResultFile}">
+														<li th:if="${csvFile.delYn eq 'N'}">
+															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+															<input type="hidden" class="androidResultFile" th:value="${csvFile.fileSeq}" />
+															<br>[[${csvFile.createdDate}]]<span th:if="${csvFile.regId != null}" th:text="' (' + ${csvFile.regId} + ')'"></span>
+														</li>
 													</th:block>
 												</ul>
 											</div>
@@ -895,8 +910,7 @@
 							<span>Detail Preview</span>
 						</div>
 						<div class="col-8 pr-1 pb-2">
-							<a class="btn btn-outline-dark btn-xs float-right px-3" 
-								th:onclick="|binAndroid_fn.loadToList()|" th:text="Load"></a>
+							<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|binAndroid_fn.loadToList()|" th:text="Load"></a>
 						</div>
 					</div>
 					<div class="px-2 pt-1">
@@ -910,8 +924,7 @@
 										<div class="row">
 											<div class="col-lg-1"></div>
 											<div class="col-lg-11" style="display: flex;">
-												<div class="fileuploader" id="androidNoticeFileDummy"
-													th:text="Upload"></div>
+												<div class="fileuploader" id="androidNoticeFileDummy" th:text="Upload"></div>
 											</div>
 										</div>
 									</div>
@@ -922,29 +935,11 @@
 									</div>
 								</div>
 								<hr class="my-3">
-								<div class="row">
-									<div class="col-lg-2 pl-3 mt-1">
-										<strong th:text="'fosslight_binary.txt'"></strong>
-									</div>
-									<div class="col-lg-3">
-										<div class="row">
-											<div class="col-lg-1"></div>
-											<div class="col-lg-11" style="display: flex;">
-												<div class="fileuploader" id="androidResultFileDummy" th:text="Upload"></div>
-											</div>
-										</div>
-									</div>
-									<div class="col-lg-7">
-										<div class="ajax-file-upload-container" style="margin-top: 0px;">
-											<ul class="androidResultFileAreaDummy"></ul>
-										</div>
-									</div>
-								</div>
 								<div class="row" id="_binandroidAddListContainer">
 									<hr class="my-3">
 									<div class="pl-3 py-2">
 										<i class="fas fa-caret-square-right pr-1"></i>
-										<span>Loaded List</span>
+										<span class="_binAndroidProjectList2Title" th:text="'Loaded List (Data before common upload development is displayed)'"></span>
 									</div>
 									<div class="px-4 pt-1">
 										<div class="innerJqGridSet">
@@ -975,11 +970,11 @@
 			<div class="row">
 				<div class="col-lg-6"></div>
 				<div class="col-lg-6">
-					<div class="row d-flex-align-right float-right">
+<!-- 				<div class="row d-flex-align-right float-right">
 						<span th:if="${project.permission > 0 and project.identificationStatus != 'CONF'}" class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
 							<i class="fas fa-edit customIcon2 text-gray"></i>
 						</span>
-					</div>
+					</div> -->
 				</div>
 			</div>
 			<div id="content_bat">
