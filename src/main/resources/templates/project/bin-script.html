@@ -497,26 +497,30 @@ var bin_fn = {
 		}
 	},	
 	// 닉네임 팝업 띄우기
-	makeNickNamePopup : function(obj, finalData){
-		if (obj.validMsg && obj.validMsg.length != 0) {
-			if (typeof alertify.nicknameValidDialog === "undefined") {
-				com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
-        	}
-			alertify.nicknameValidDialog()
-			.set('onok', function(e) {
-				if (e) {
-					bin_fn.exeSave(finalData, true);
-				} else {
-					return false;
-				}
-			})
-			.setContent(obj.validMsg).show();
+	makeNickNamePopup : function(obj, finalData, excludeNicknameAlert){
+		if (excludeNicknameAlert) {
+			bin_fn.exeSave(finalData, false, true);
 		} else {
-			bin_fn.exeSave(finalData, false);
+			if (obj.validMsg && obj.validMsg.length != 0) {
+				if (typeof alertify.nicknameValidDialog === "undefined") {
+					com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
+	        	}
+				alertify.nicknameValidDialog()
+				.set('onok', function(e) {
+					if (e) {
+						bin_fn.exeSave(finalData, true, false);
+					} else {
+						return false;
+					}
+				})
+				.setContent(obj.validMsg).show();
+			} else {
+				bin_fn.exeSave(finalData, false, false);
+			}
 		}
 	},
 	// 닉네임 체크
-	nickNameValid : function(mainData, subData, finalData){
+	nickNameValid : function(mainData, subData, finalData, excludeNicknameAlert){
 		var prjId = [[${project.prjId}]];
 		var postData = {"mainData" : JSON.stringify(mainData), "subData" : JSON.stringify(subData), "prjId" : prjId};
 		
@@ -528,7 +532,7 @@ var bin_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(data){
-				bin_fn.makeNickNamePopup(data, finalData);
+				bin_fn.makeNickNamePopup(data, finalData, excludeNicknameAlert);
 			},
 			error: function(data){
 				alertify.error([[#{msg.common.valid2}]], 0);

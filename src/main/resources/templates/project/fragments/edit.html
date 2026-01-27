@@ -1033,16 +1033,22 @@
 		<div class="card-body bg-ivory">
 			<div id="content_entire">
 				<div class="row">
-					<div class="col-lg-5 ml-2" name="search-condition_identification">
+					<div class="col-lg-4 pl-3" name="search-condition_identification">
 						<div class="icheck-secondary d-inline">
 							<input type="radio" id="idenR1" class="idenCbx" name="identificationSelectOption" th:onchange="|com_fn.changeSelectOption()|" value="1" checked>
 							<label for="idenR1" th:text="'Upload Analysis Result'"></label>
 						</div>
 					</div>
-					<div class="col-lg-5 ml-2" name="search-condition_identification">
+					<div class="col-lg-4 pl-3" name="search-condition_identification">
 						<div class="icheck-secondary d-inline">
 							<input type="radio" id="idenR2" class="idenCbx" name="identificationSelectOption" th:onchange="|com_fn.changeSelectOption()|" value="2">
-							<label for="idenR2" th:text="'Project/3rd Party Search'"></label>
+							<label for="idenR2" th:text="'Project Search'"></label>
+						</div>
+					</div>
+					<div class="col-lg-4 pl-3" name="search-condition_identification">
+						<div class="icheck-secondary d-inline">
+							<input type="radio" id="idenR3" class="idenCbx" name="identificationSelectOption" th:onchange="|com_fn.changeSelectOption()|" value="3">
+							<label for="idenR3" th:text="'3rd Party Search'"></label>
 						</div>
 					</div>
 				</div>
@@ -1087,14 +1093,6 @@
 					<input type="hidden" name="publicYn" value="Y">
 					<div name="content_src">
 						<div class="row mt-5">
-							<div class="col-lg-2">
-								<div class="form-group">
-									<select class="custom-select custom-narrow-item" name="searchSelect" id="searchSelect" onchange="com_fn.changeSearchOption(this)">
-										<option th:value="prj" th:text="'Project'"></option>
-										<option th:value="3rd" th:text="'3rd Party'"></option>
-									</select>
-								</div>
-							</div>
 							<div class="col-lg-8" id="projectInputArea">
 								<div class="row">
 									<div class="col-lg-12">
@@ -1107,59 +1105,9 @@
 									</div>
 								</div>
 							</div>
-							<div class="col-lg-8" id="partnerInputArea" style="display: none;">
-								<input type="hidden" name="partnerName" />
-								<input type="hidden" name="softwareName" />
-								<input type="hidden" name="partnerId" />
-								<div class="row">
-									<div class="col-lg-12">
-										<div class="input-group input-group-md">
-											<input type="text" class="form-control autoComConfParty" id="uploadSearchText" name="uploadSearchText" placeholder="partner ID or Name">
-											<span class="input-group-append">
-												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|com_fn.partnerSearch()|" name="partnerSearch" id="partnerSearch" th:text="Search"></button>
-											</span>
-										</div>
-									</div>
-								</div>
-							</div>
 						</div>
 					</div>
 				</form>
-				<div class="partnerSearchDiv">
-					<div class="threeSearch1Area mt-3" style="display: none;">
-						<div class="pl-1 py-2">
-							<i class="fas fa-caret-square-right pr-1"></i>
-							<span>Search Results</span>
-						</div>
-						<div class="px-2 pt-1">
-							<table id="_threeSearch1list">
-								<tr>
-									<td></td>
-								</tr>
-							</table>
-							<div id="threeSearchPager1"></div>
-						</div>
-					</div>
-					<div class="threeSearch2Area mt-5" style="display: none;">	
-						<div class="row pl-1 pr-4">
-							<div class="col-4 pr-3">
-								<i class="fas fa-caret-square-right pr-1"></i>
-								<span>Detail Preview</span>
-							</div>
-							<div class="col-8 pr-1 pb-2">
-								<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|com_fn.partnerLoadToList()|" th:text="Load"></a>
-							</div>
-						</div>
-						<div class="px-2 pt-1">
-							<table id="_threeSearch2list">
-								<tr>
-									<td></td>
-								</tr>
-							</table>
-							<div id="threeSearchPager2"></div>
-						</div>
-					</div>
-				</div>
 				<div class="searchProject">
 					<div class="searchProject1 mt-3" style="display: none;">
 						<div class="pl-1 py-2">
@@ -1212,6 +1160,65 @@
 								</tr>
 							</table>
 							<div id="_searchProjectAddPager"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="idenPartnerSearch" style="display: none;">
+				<form id="commonSearchForm" class="identificationBtn">
+					<input type="hidden" name="publicYn" value="Y">
+					<div name="content_src">
+						<div class="row mt-5">
+							<div class="col-lg-8" id="partnerInputArea">
+								<input type="hidden" name="partnerName" />
+								<input type="hidden" name="softwareName" />
+								<input type="hidden" name="partnerId" />
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control autoComConfParty" id="uploadSearchText" name="uploadSearchText" placeholder="3rd Party ID or Name">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|com_fn.partnerSearch()|" name="partnerSearch" id="partnerSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="partnerSearchDiv">
+					<div class="threeSearch1Area mt-3" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<table id="_threeSearch1list">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+							<div id="threeSearchPager1"></div>
+						</div>
+					</div>
+					<div class="threeSearch2Area mt-5" style="display: none;">	
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|com_fn.partnerLoadToList()|" th:text="Load"></a>
+							</div>
+						</div>
+						<div class="px-2 pt-1">
+							<table id="_threeSearch2list">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+							<div id="threeSearchPager2"></div>
 						</div>
 					</div>
 				</div>
