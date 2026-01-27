@@ -102,6 +102,22 @@
                                             <input id="addEmail" type="button" class="btn btn btn-default" th:value="|Add|"></input>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <select class="form-control select2" id="listKind" style="width: 100%;">
+                                                <option th:value="''" th:text="'Select List'"></option>
+                                                <option th:value="prj" th:text="'Project List'"></option>
+                                                <option th:if="${partnerFlag}" th:value="par" th:text="'3rd List'"></option>
+                                                <option th:if="${batFlag}" th:value="bat" th:text="'BAT List'" ></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-7">
+                                            <input type="text" class="form-control" id="listId" name="listId" placeholder="Input ID you want to copy">
+                                        </div>
+                                        <div class="col-1">
+                                            <input id="addList" type="button" class="btn btn-default" th:value="|Add|"></input>
+                                        </div>
+                                    </div>
                                     <div class="form-group submit-form mt-2">
                                         <div id="multiDiv" class="external-events ml-1 row"></div>
                                     </div>

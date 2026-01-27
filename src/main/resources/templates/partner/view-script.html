@@ -156,7 +156,7 @@
 		},
 		mvIdentification : function () {
 			if ([[${detail.permission}]] > 0) {
-				createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', '/partner/identification/' + [[${detail.partnerId}]]);
+				createTabInFrame([[${detail.partnerId}]] + '_3rd_Identify', '/partner/identification/' + [[${detail.partnerId}]]);
 			} else {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
 			}

@@ -134,7 +134,7 @@ var evt = {
 		tabContent.hide();
 		tabMenuA.click(function () {
 			$(".tabMenu a span").remove();
-			tabMenuA.eq("0").text("3rd party");
+			tabMenuA.eq("0").text("3rd");
 			if ([[${batFlag}]]) {
 				tabMenuA.eq("1").text("BAT(Optional)");
 			}
@@ -624,7 +624,7 @@ var fn = {
 								reloadTabInframe('/partner/list');
 								alertify.alert([[#{msg.common.success}]], function(){
 									deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
-									createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+									createTabInFrame([[${detail.partnerId}]] + '_3rd_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
 								});
 							}
 						},
@@ -1078,7 +1078,7 @@ var fn = {
 					break;
 			}
 		} else {
-			alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			alertify.alert('Status of the 3rd software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 		}
 	},
 	showOssAutoAnalysis : function(status){
@@ -1159,7 +1159,7 @@ var fn = {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
 			}
 		}else{
-			alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			alertify.alert('Status of the 3rd software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 		}
 	},
 	CheckOssViewPage : function(){
@@ -1801,7 +1801,7 @@ var grid = {
 					var status = partnerData.status;
 					
 	            	var appendBtn = "";
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3rdParty', 'list', "+permission+", '"+status+"')\">";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3rd', 'list', "+permission+", '"+status+"')\">";
 					if (!permission || "CONF" == status || 'REQ' == status) {
 						appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
             		} else {
@@ -1811,7 +1811,7 @@ var grid = {
                 			appendBtn += "<i class=\"fas fa-plus\"></i></button>";
             			}
             		}
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('3rdParty', 'list', 'main', "+permission+", '"+status+"')\">";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('3rd', 'list', 'main', "+permission+", '"+status+"')\">";
 	            	if (!permission || "CONF" == status || 'REQ' == status) {
 						appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
             		} else {

@@ -33,7 +33,7 @@ import javax.validation.constraints.Min;
 import java.util.HashMap;
 import java.util.Map;
 
-@Api(tags = {"2. 3rd Party"})
+@Api(tags = {"2. 3rd"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
@@ -56,11 +56,11 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-    @ApiOperation(value = "3rd Party Search", notes = "Search 3rd Party Information")
+    @ApiOperation(value = "3rd Search", notes = "Search 3rd Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_SEARCH})
     public ResponseEntity<Map<String, Object>> getPartners(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID List") @RequestParam(required = false) String[] partnerIdList,
+            @ApiParam(value = "3rd ID List") @RequestParam(required = false) String[] partnerIdList,
             @ApiParam(value = "Division") @RequestParam(required = false) String division,
             @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)") @RequestParam(required = false) String createDate,
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
@@ -102,11 +102,11 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     }
 
-    @ApiOperation(value = "3rd Party Add Editor", notes = "3rd Party Add Editor")
+    @ApiOperation(value = "3rd Add Editor", notes = "3rd Add Editor")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_EDITOR})
     public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
+            @ApiParam(value = "3rd ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
             @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -146,20 +146,20 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
+    @ApiOperation(value = "3rd Export report", notes = "3rd > Export report")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
             @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
+            @ApiParam(value = "3rd ID", required = true) @PathVariable(name = "id") String partnerId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
         return get3rdDownloadInternal(authorization, partnerId, format);
     }
 
-    @ApiOperation(value = "3rd Party Export report (Deprecated)", notes = "3rd Party > Export report", hidden = true)
+    @ApiOperation(value = "3rd Export report (Deprecated)", notes = "3rd > Export report", hidden = true)
     @GetMapping(value = {"/partners/{id}/bom/file"})
     public ResponseEntity<FileSystemResource> get3rdDownloadDeprecated(
             @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
+            @ApiParam(value = "3rd ID", required = true) @PathVariable(name = "id") String partnerId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
         return get3rdDownloadInternal(authorization, partnerId, format);
     }
@@ -188,19 +188,19 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "3rd Party Export Json", notes = "3rd Party > Export Json")
+    @ApiOperation(value = "3rd Export Json", notes = "3rd > Export Json")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON})
     public ResponseEntity<Map<String, Object>> get3rdAsJson(
             @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+            @ApiParam(value = "3rd ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
         return get3rdAsJsonInternal(authorization, partnerId);
     }
 
-    @ApiOperation(value = "3rd Party Export Json (Deprecated)", notes = "3rd Party > Export Json", hidden = true)
+    @ApiOperation(value = "3rd Export Json (Deprecated)", notes = "3rd > Export Json", hidden = true)
     @GetMapping(value = {"/partners/{id}/bom/json-data"})
     public ResponseEntity<Map<String, Object>> get3rdAsJsonDeprecated(
             @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+            @ApiParam(value = "3rd ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
         return get3rdAsJsonInternal(authorization, partnerId);
     }
 

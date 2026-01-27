@@ -31,7 +31,7 @@
            			<div th:class="${detail?.partnerId != null} ? 'col-md-9 basicInfoArea' : 'col-md-10 basicInfoArea'">
            				<div class="card card-secondary submit-form">
                             <div class="card-header">
-                            	<h3 class="card-title" th:text="'3rd Party Information'"></h3>
+                            	<h3 class="card-title" th:text="'3rd Information'"></h3>
                             	<div class="card-tools">
                             		<button th:if="${detail.partnerId != null}" class="btn btn-tool" type="button" th:onclick="|fn.shareUrl()|" data-toggle="tooltip" data-placement="right" title="Share">
                             			<i class="fas fa-share-alt customIcon2"></i>

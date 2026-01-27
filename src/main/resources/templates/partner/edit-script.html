@@ -468,7 +468,7 @@ var fn = {
 	},
 	mvEditTab : function () {
 		if (parseInt(partnerData.permission) > 0) {
-			createTabInFrame(partnerId+'_3rdParty', '/partner/edit/' + partnerData.partnerId);
+			createTabInFrame(partnerId+'_3rd', '/partner/edit/' + partnerData.partnerId);
 		} else {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
 		}
@@ -476,7 +476,7 @@ var fn = {
 	mvIdentification : function () {
 		if (partnerId != null) {
 			if (parseInt(partnerData.permission) > 0) {
-				createTabInFrame(partnerId + '_3rdParty_Identify', '/partner/identification/' + partnerData.partnerId);
+				createTabInFrame(partnerId + '_3rd_Identify', '/partner/identification/' + partnerData.partnerId);
 			} else {
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
 			}
@@ -960,11 +960,11 @@ var fn = {
 					reloadTabInframe('/partner/list');
 					if (partnerId){
 						deleteTabInFrame('/partner/edit' + partnerId);
-						createTabInFrame(data.partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+						createTabInFrame(data.partnerId + '_3rd', "/partner/edit/" + partnerId);
 					} else {
 						deleteTabInFrame('/partner/edit');
 						if (data.partnerId) {
-							createTabInFrame(data.partnerId + '_3rdParty', "/partner/edit/" + data.partnerId);
+							createTabInFrame(data.partnerId + '_3rd', "/partner/edit/" + data.partnerId);
 						}
 					}
 				});
@@ -1073,7 +1073,7 @@ var fn = {
     								deleteTabInFrame('/partner/edit');
     							}
     							
-    							callCreateTabInFrame('3rd Party', '/partner/list', 'partner-list', true);
+    							callCreateTabInFrame('3rd', '/partner/list', 'partner-list', true);
     						},
     						error: function(){
     							alertify.error([[#{msg.common.valid2}]], 0);
@@ -1504,8 +1504,8 @@ var fn = {
 		evt.init();
 	},
 	downloadSampleReport : function() {
-		var logiPath = "/sample/FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx";
-		var fileName = "FOSSLight-OSS-Checklist-for-3rdParty.xlsx";
+		var logiPath = "/sample/FOSSLight-OSS-Checklist-for-3rd_Eng_1.0.xlsx";
+		var fileName = "FOSSLight-OSS-Checklist-for-3rd.xlsx";
 
 		location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
 	},

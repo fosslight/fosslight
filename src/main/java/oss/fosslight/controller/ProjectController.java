@@ -1987,7 +1987,7 @@ public class ProjectController extends CoTopComponent {
 					CommentsHistory commentHisBean = new CommentsHistory();
 					commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 					commentHisBean.setReferenceId(prjId);
-					commentHisBean.setExpansion1("3rd party");
+					commentHisBean.setExpansion1("3rd");
 					commentHisBean.setContents(changedLicenseName);
 					commentService.registComment(commentHisBean, false);
 				}
@@ -1997,8 +1997,8 @@ public class ProjectController extends CoTopComponent {
 				CommentsHistory commentHisBean = new CommentsHistory();
 				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 				commentHisBean.setReferenceId(prjId);
-				commentHisBean.setExpansion1("3rd party");
-				commentHisBean.setContents("reset all data in 3rd party");
+				commentHisBean.setExpansion1("3rd");
+				commentHisBean.setContents("reset all data in 3rd");
 				commentService.registComment(commentHisBean, false);
 				
 				CommonFunction.addSystemLogRecords(prjId, loginUserName());

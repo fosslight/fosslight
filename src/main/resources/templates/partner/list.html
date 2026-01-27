@@ -24,7 +24,7 @@
                                                 <div class="col-12">
                                                     <div class="input-group">
                                                         <input class="save-value" name="defaultSearchType" th:value="THIRD_PARTY" type="hidden"/>
-                                                        <button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="|+ Add|"></button>
+                                                        <button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_3rd', '/partner/edit')|" th:text="|+ Add|"></button>
                                                         <input type="text" name="partnerName" class="form-control autoComParty save-value" style="border-right: 0px solid #fff;" placeholder="Partner ID or Partner Name" th:value="${searchBean?.partnerName}">
                                                         <div class="input-group-append">
                                                     		<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
@@ -135,12 +135,12 @@
                                         <div class="row">
                                         	<div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}" type="text"/>
+                                                    <input class="form-control save-value" name="softwareName" placeholder="3rd Software Name" th:value="${searchBean?.softwareName}" type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
+                                                    <input class="form-control save-value" name="softwareVersion" placeholder="3rd Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">

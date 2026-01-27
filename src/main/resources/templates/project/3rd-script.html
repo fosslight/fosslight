@@ -488,7 +488,7 @@ var party_evt = {
 				total:function(obj){return obj.total;},
 				records:function(obj){return obj.records;}
 			},
-			colNames: ['ID','3rd party Name','Software Name','Software Version', 'Delivery Form','Description'],
+			colNames: ['ID','3rd Name','Software Name','Software Version', 'Delivery Form','Description'],
 			colModel: [
 				{name: 'partnerId', index: 'partnerId', width: 42, align: 'center', key:true},
 				{name: 'partnerName', index: 'partnerName', width: 240, align: 'left'},
@@ -685,7 +685,7 @@ var party_evt = {
 				total:function(obj){return obj.total;},
 				records:function(obj){return obj.records;}
 			},
-			colNames: ['ID','3rd party Name','Software Name','Software Version', 'Component Count', 'userRole', 'Delete'],
+			colNames: ['ID','3rd Name','Software Name','Software Version', 'Component Count', 'userRole', 'Delete'],
 			colModel: [
 				{name: 'partnerId', index: 'partnerId', width: 57, align: 'center', key:true},
 				{name: 'partnerName', index: 'partnerName', width: 327, align: 'left'},
@@ -745,7 +745,7 @@ var party_evt = {
 					var _userRole = $('#_3rdAddList').jqGrid('getCell',rowid,'userRole');
 					
 					if(_partnerId && _userRole != "N") {
-						createTabInFrame(_partnerId+'_3rdParty', '/partner/edit/'+_partnerId);
+						createTabInFrame(_partnerId+'_3rd', '/partner/edit/'+_partnerId);
 					}
 				}
 			},
@@ -955,7 +955,7 @@ var part_grid = {
 			// apply user columns setting on
 			var listType = 'IDENTIFICATION_3RD';
 			var totalColInfos = [
-					{'ID' : 'componentIdx'}, {'3rd Party' : 'refPartnerId'}, {'Binary Name or Source Path' : 'filePath'}, {'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'License' : 'licenseName'},
+					{'ID' : 'componentIdx'}, {'3rd' : 'refPartnerId'}, {'Binary Name or Source Path' : 'filePath'}, {'OSS Name' : 'ossName'}, {'OSS Version' : 'ossVersion'}, {'License' : 'licenseName'},
 					{'Download Location' : 'downloadLocation'}, {'Homepage' : 'homepage'}, {'Copyright Text' : 'copyrightText'}, {'Vulnerability' : 'cvssScore'}, {'Exclude' : 'excludeYn'}
 	  		];
 			var defaultTotalColNames = ['componentIdx', 'refPartnerId', 'filePath', 'ossName', 'ossVersion', 'licenseName', 'downloadLocation', 'homepage', 'copyrightText', 'cvssScore', 'excludeYn'];
@@ -965,7 +965,7 @@ var part_grid = {
 			partList.jqGrid({
 				datatype: 'local',
 				data : partMainData,
-				colNames: ['gridId','ID_KEY','ID','3rd Party', 'Binary Name or Source Path','ReferenceId','RefPrjId','ReferenceDiv', 'OssId','OSS Name','OSS Version','License','Download Location'
+				colNames: ['gridId','ID_KEY','ID','3rd', 'Binary Name or Source Path','ReferenceId','RefPrjId','ReferenceDiv', 'OssId','OSS Name','OSS Version','License','Download Location'
 							, 'Homepage','LicenseId','Copyright Text', 'Vulnera<br/>bility', 'CVE ID'	
 							, '<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list3\');">Exclude', 'refComponentId', 'refLoadedVal'],
 				colModel: colModelArr,
