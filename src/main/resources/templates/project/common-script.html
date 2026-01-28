@@ -2661,6 +2661,7 @@ var com_fn = {
 	            cache : false,
 	            async : false,
 	            success : function(data) {
+	            	var isExcluded = data.isExcluded;
 	            	var searchData = [];
 	            	var thirdInfo = [];
 	            	var thirdData = [];
@@ -2735,7 +2736,7 @@ var com_fn = {
 						if (binData.length > 0) {
 							searchedData["bin"] = binData;
 						}
-            			tempBody.find('#selectSearchApply').attr('onclick', 'com_fn.getSearchData(' + id + ',' + referenceDiv + ')');
+            			tempBody.find('#selectSearchApply').attr('onclick', 'com_fn.getSearchData(' + id + ',' + referenceDiv + ',' + isExcluded + ')');
             		} else {
             			
             		}
@@ -2777,7 +2778,7 @@ var com_fn = {
 	        });
 	    });
 	},
-	getSearchData : function (referenceId, referenceDiv) {
+	getSearchData : function (referenceId, referenceDiv, isExcluded) {
 		var selectTabs = [];
 		$('input:checkbox[name="searchCheck"]').each(function(){
 			if ($(this).is(':checked')){
@@ -2877,7 +2878,16 @@ var com_fn = {
 				}
 			}
 			
-			com_fn.saveDataAfterSearch(selectTabs, searchedData);
+			if (isExcluded) {
+				loadingIden.hide();
+				
+				alertify.alert([[#{msg.common.exists.excludeYn}]], function() {
+					loadingIden.show();
+					com_fn.saveDataAfterSearch(selectTabs, searchedData);
+				});
+			} else {
+				com_fn.saveDataAfterSearch(selectTabs, searchedData);
+			}
 		}
 	},
 	saveDataAfterSearch : function (tabs, data) {

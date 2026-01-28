@@ -5269,6 +5269,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public Map<String, Object> getIdentificationProjectSearch(ProjectIdentification projectIdentification) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
+		boolean isExcluded = false;
 		
 		Project project = getProjectBasicInfo(projectIdentification.getReferenceId());
 		if (!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(avoidNull(projectIdentification.getReferenceDiv()))) {
@@ -5279,6 +5280,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		List<ProjectIdentification> list = projectMapper.getIdentificationProjectSearch(projectIdentification);
+		if (CollectionUtils.isNotEmpty(list)) {
+			List<ProjectIdentification> customList = list.stream().filter(e -> !CoConstDef.FLAG_YES.equals(avoidNull(e.getExcludeYn()))).collect(Collectors.toList());
+			if (list.size() != customList.size()) {
+				isExcluded = true;
+				list = customList;
+			}
+		}
+		
 		int thirdCount = list.stream().filter(e -> CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(e.getReferenceDiv())).collect(Collectors.toList()).size();
 		if (thirdCount > 0) {
 			OssComponents ossComponent = new OssComponents();
@@ -5307,6 +5316,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
+		map.put("isExcluded", isExcluded);
 		map.put("rows", list);
 		map.put("project", project);
 		
