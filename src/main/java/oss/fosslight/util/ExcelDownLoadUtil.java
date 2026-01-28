@@ -1822,7 +1822,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		List<String[]> rows = null;
 		
 		try {
-			inFile= new FileInputStream(new File(downloadpath+ (CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? "/SKS_ModelList.xlsx" : "/ModelList.xlsx") ));
+			inFile= new FileInputStream(new File(downloadpath + "/ModelList.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			String mainModelCode = CoConstDef.CD_MODEL_TYPE;
 			
