@@ -440,14 +440,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			project.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
 		}
 		
+		project.setStandardScore(Float.valueOf(standardScore));
 		if (project.getAndroidFlag().equals(CoConstDef.FLAG_YES)) {
-			project.setStandardScore(Float.valueOf(standardScore));
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 		} else {
-			if (!project.getIdentificationSubStatusBom().equals("0")) {
-				project.setStandardScore(Float.valueOf(standardScore));
-				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			}
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 		}
 		
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {project.getPrjId()}, "project");
