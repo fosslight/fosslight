@@ -107,12 +107,14 @@ public class VerificationController extends CoTopComponent {
 		
 		List<OssComponents> list = null;
 		try {
-			if(!projectMaster.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION)) {
+			if (!projectMaster.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION)) {
 				list = verificationService.getVerifyOssList(projectMaster);
-				if (list != null) list = verificationService.setMergeGridData(list);
+				if (CollectionUtils.isNotEmpty(list)) {
+					list = verificationService.setMergeGridData(list);
+				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();

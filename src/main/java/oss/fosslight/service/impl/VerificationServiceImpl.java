@@ -2656,7 +2656,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					ossComponent.addOssComponentsLicense(license);
 				}
 				
-				if (CoConstDef.FLAG_NO.equals(bean.getAdminCheckYn())) {
+				if (CoConstDef.FLAG_NO.equals(avoidNull(bean.getAdminCheckYn(), CoConstDef.FLAG_NO))) {
 					String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
 					
 					// multi license 추가 copyright
@@ -2668,15 +2668,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 				
 				// 중복제거
-				copyrightList = copyrightList.stream()
-												.filter(CommonFunction.distinctByKey(c -> avoidNull(c).trim().toUpperCase()))
-												.collect(Collectors.toList()); 
+				copyrightList = copyrightList.stream().filter(CommonFunction.distinctByKey(c -> avoidNull(c).trim().toUpperCase())).collect(Collectors.toList());
 				ossComponent.setCopyrightText(String.join("\r\n", copyrightList));
 				componentCopyright.put(componentKey, copyrightList);
 				
-				attributionList = attributionList.stream()
-													.filter(CommonFunction.distinctByKey(a -> avoidNull(a).trim().toUpperCase()))
-													.collect(Collectors.toList()); 
+				attributionList = attributionList.stream().filter(CommonFunction.distinctByKey(a -> avoidNull(a).trim().toUpperCase())).collect(Collectors.toList());
 				ossComponent.setOssAttribution(String.join("\r\n", attributionList));
 				componentAttribution.put(componentKey, attributionList);
 				
@@ -2716,7 +2712,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					// verification단계에서의 oss_component_license는 oss_license의 license등록 순번을 가지고 있지 않기 때문에 (exclude된 license는 이관하지 않음)
 					// 여기서 oss id와 license id를 이용하여 찾는다.
 					// 동이한 라이선스를 or 구분으로 여러번 정의한 경우 문제가 될 수 있으나, 동일한 oss의 동일한 license의 경우 같은 copyright를 추가한다는 전제하에 적용함 (이부분에서 추가적인 이슉가 발생할 경우 대응방법이 복잡해짐)
-					if (CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
+					if (CoConstDef.FLAG_NO.equals(avoidNull(ossComponent.getAdminCheckYn(), CoConstDef.FLAG_NO))) {
 						bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
 						
 						// multi license 추가 copyright
@@ -2771,7 +2767,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// OSS NAME을 하이픈 ('-') 으로 등록한 경우 (고지문구에 라이선스만 추가)
 		List<OssComponents> addOssComponentList = verificationMapper.selectVerificationNoticeClassAppend(ossNotice);
 		
-		if (addOssComponentList != null) {
+		if (CollectionUtils.isNotEmpty(addOssComponentList)) {
 			List<String> checkKeyInfo = new ArrayList<>();
 			
 			for (OssComponents bean : addOssComponentList) {
@@ -2818,6 +2814,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Map<String, String> ossAttributionMap = new HashMap<>();
 		// 개행처리 및 velocity용 list 생성
 		List<OssComponents> noticeList = new ArrayList<>();
+		String regex = "(?i)(<br\\s*/?>\\s*)+";
 		
 		for (OssComponents bean : noticeInfo.values()) {
 			if (isTextNotice) {
@@ -2829,6 +2826,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
+			if (!isEmpty(bean.getCopyrightText())) {
+				bean.setCopyrightText(bean.getCopyrightText().replaceAll(regex, "<br>"));
+			}
 
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
@@ -2838,7 +2838,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
-			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) bean.setHomepage("http://" + bean.getHomepage());
+			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) {
+				bean.setHomepage("http://" + bean.getHomepage());
+			}
 			
 			noticeList.add(bean);
 		}
@@ -2862,7 +2864,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
-			
+			if (!isEmpty(bean.getCopyrightText())) {
+				bean.setCopyrightText(bean.getCopyrightText().replaceAll(regex, "<br>"));
+			}
 
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
@@ -2901,6 +2905,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			} else {
 				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+			}
+			if (!isEmpty(bean.getCopyrightText())) {
+				bean.setCopyrightText(bean.getCopyrightText().replaceAll(regex, "<br>"));
 			}
 			
 			// 배포사이트 license text url
