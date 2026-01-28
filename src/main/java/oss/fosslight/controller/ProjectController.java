@@ -5892,6 +5892,9 @@ public class ProjectController extends CoTopComponent {
 									if (sheetNum.toUpperCase().endsWith("DEP")) {
 										isDepLoaded = true;
 										Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(null, null, null, reportDataMap.get(key), fileSeq, "dep");
+										if (resultMap.containsKey("isExistsExcludeYn")) {
+											rtnMap.put("isExistsExcludeYn", true);
+										}
 										List<ProjectIdentification> reportData = (List<ProjectIdentification>) resultMap.get("mainData");
 										if (CollectionUtils.isNotEmpty(reportData)) {
 											for (ProjectIdentification oc : reportData) {
@@ -5915,6 +5918,9 @@ public class ProjectController extends CoTopComponent {
 									} else if (sheetNum.toUpperCase().endsWith("SRC")) {
 										isSrcLoaded = true;
 										Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(null, null, null, reportDataMap.get(key), fileSeq, "src");
+										if (resultMap.containsKey("isExistsExcludeYn")) {
+											rtnMap.put("isExistsExcludeYn", true);
+										}
 										List<ProjectIdentification> reportData = (List<ProjectIdentification>) resultMap.get("mainData");
 										if (CollectionUtils.isNotEmpty(reportData)) {
 											for (ProjectIdentification oc : reportData) {
@@ -5938,6 +5944,9 @@ public class ProjectController extends CoTopComponent {
 									} else if (sheetNum.toUpperCase().endsWith("BIN")) {
 										isBinLoaded = true;
 										Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(null, null, null, reportDataMap.get(key), fileSeq, "bin");
+										if (resultMap.containsKey("isExistsExcludeYn")) {
+											rtnMap.put("isExistsExcludeYn", true);
+										}
 										List<ProjectIdentification> reportData = (List<ProjectIdentification>) resultMap.get("mainData");
 										if (CollectionUtils.isNotEmpty(reportData)) {
 											for (ProjectIdentification oc : reportData) {
