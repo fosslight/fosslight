@@ -3801,7 +3801,34 @@ var com_fn = {
 						curIdenStatus = data.resultData.identificationStatus;
 					}
 					if (typeof data.resultData.isExistsExcludeYn !== "undefined") {
-						alertify.confirm([[#{msg.common.exists.excludeYn}]], function(){
+						if (!alertify.hasExcludeYnAlert) {
+							alertify.dialog('hasExcludeYnAlert', function() {
+								var settings;
+								
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons.pop();
+										setup.focus.element = 0;
+										
+										return setup;
+									},
+									settings: {
+										oncontinue: null
+									},
+									callback: function(closeEvent) {
+										alertify.confirm().callback.call(this, closeEvent);
+									}
+								};
+							}, false, 'confirm');
+						}
+						alertify.hasExcludeYnAlert([[#{msg.common.exists.excludeYn}]], function(){
 							bom_fn.beforeSave(true);
 						});
 					} else {
