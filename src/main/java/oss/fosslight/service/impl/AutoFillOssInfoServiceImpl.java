@@ -720,7 +720,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							
 							if (!isEmpty(afterLicense)) {
 								licenseTypeList.clear();
-								for (String license : beforeLicense.split(",")) {
+								for (String license : afterLicense.split(",")) {
 									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
 										licenseTypeList.add(CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase()).getLicenseType());
 									}

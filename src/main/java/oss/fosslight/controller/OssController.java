@@ -1559,12 +1559,7 @@ public class OssController extends CoTopComponent{
 
 	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_LICENSE)
-	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(
-			@RequestBody Map<String, Object> param
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model
-			, @PathVariable String targetName){
+	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(@RequestBody Map<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String targetName){
 		String json = (String) param.get("list");
 		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> paramBeanList = new ArrayList<>();
