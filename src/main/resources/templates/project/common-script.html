@@ -3830,9 +3830,11 @@ var com_fn = {
 						}
 						alertify.hasExcludeYnAlert([[#{msg.common.exists.excludeYn}]], function(){
 							bom_fn.beforeSave(true);
+							com_fn.closeSelectSheet();
 						});
 					} else {
 						bom_fn.beforeSave(true);
+						com_fn.closeSelectSheet();
 					}
 				}
 			},
