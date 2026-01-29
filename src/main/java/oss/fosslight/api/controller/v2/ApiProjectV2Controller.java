@@ -1381,15 +1381,17 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             // Security enable 설정
-            project.setSecMailYn(secMailYn);
+            Project param = new Project();
+            param.setPrjId(prjId);
+            param.setSecMailYn(secMailYn);
             if (secMailYn.equals("N")) {
-                project.setSecMailDesc(secMailDesc);
+            	param.setSecMailDesc(secMailDesc);
             } else {
-                project.setSecMailDesc("Enable");
+            	param.setSecMailDesc("Enable");
             }
             
             // 프로젝트 업데이트
-            projectService.updateProjectMaster(project);
+            projectService.updateProjectMaster(param);
 
             afterProject = projectService.getProjectBasicInfo(prjId);
             String diffComment = CommonFunction.getDiffItemComment(beforeProject, afterProject, true);
