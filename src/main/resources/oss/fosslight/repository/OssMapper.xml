@@ -4603,7 +4603,7 @@
 	</select>
 	
 	<select id="getPrjIdsToSendCoReviewerEmails" resultType="string">
-		SELECT OAS.PRJ_ID
+		SELECT DISTINCT OAS.PRJ_ID
 		FROM OSS_ANALYSIS_STATUS OAS
 		WHERE IFNULL(OAS.SEND_MAIL_FLAG, 'N') = 'N'
 		AND EXISTS (
