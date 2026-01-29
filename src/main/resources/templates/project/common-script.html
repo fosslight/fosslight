@@ -3489,7 +3489,7 @@ var com_fn = {
 				
 				if (tabs.length == 0) {
 					loadingIden.hide();
-					alertify.alert([[#{msg.common.select.tab}]]);
+					alertify.alert([[#{msg.common.select.tab}]], function(){});
 					return;
 				} else {
 					var fileSeq = data.fileSeq;
