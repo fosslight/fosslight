@@ -57,6 +57,7 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
@@ -71,6 +72,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Autowired private OssService ossService;
 	@Autowired VulnerabilityService vulnerabilityService;
 	@Autowired CommentService commentService;
+	@Autowired private T2UserService t2UserService;
 
 	// Mapper
 	@Autowired private PartnerMapper partnerMapper;
@@ -148,6 +150,57 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				
 				result.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
 				result.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
+			}
+			
+			List<String> reqPerUserIds = projectMapper.selectRequestProjectPermissionList("3rd_" + partnerMaster.getPartnerId(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+			if (CollectionUtils.isNotEmpty(reqPerUserIds)) {
+				result.setReqPerUserIds(reqPerUserIds);
+				boolean isExist = false;
+				if (result.getCreator().equals(loginUserName())) {
+					isExist = true;
+				}
+				if (CollectionUtils.isNotEmpty(watcher)) {
+					int cnt = watcher.stream().filter(e -> e.getParUserId().equals(loginUserName())).collect(Collectors.toList()).size();
+					if (cnt > 0) {
+						isExist = true;
+					}
+				}
+				if (isExist) {
+					String reqPerUserNms = "";
+					for (String userId : reqPerUserIds) {
+						T2Users user = new T2Users();
+						user.setUserId(userId);
+						user = t2UserService.getUser(user);
+						if (!isEmpty(user.getUserName())) {
+							if (!isEmpty(reqPerUserNms)) {
+								reqPerUserNms += ", ";
+							}
+							reqPerUserNms += user.getUserName();
+						}
+					}
+					if (!isEmpty(reqPerUserNms)) {
+						result.setReqPerUserNms(reqPerUserNms);
+					}
+				}
+			}
+			
+			List<String> rejectUserIds = projectMapper.selectRequestProjectPermissionList("3rd_" + partnerMaster.getPartnerId(), "REJ");
+			if (CollectionUtils.isNotEmpty(rejectUserIds)) {
+				String rejUserName = "";
+				for (String userId : rejectUserIds) {
+					if (userId.equalsIgnoreCase(loginUserName())) {
+						T2Users user = new T2Users();
+						user.setUserId(userId);
+						user = t2UserService.getUser(user);
+						if (!isEmpty(user.getUserName())) {
+							rejUserName = userId + "|" + user.getUserName();
+							break;
+						}
+					}
+				}
+				if (!isEmpty(rejUserName)) {
+					result.setRejPerUserNm(rejUserName);
+				}
 			}
 		}
 		
@@ -323,7 +376,20 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			if (partnerMaster.getWatchers()!= null) {
 				String[] arr;
 				
-				for (String watcher : partnerMaster.getWatchers()) {
+				List<String> watchers = new ArrayList<>();
+				List<String> emailWatcher = new ArrayList<>();
+				
+				for (String wat : partnerMaster.getWatchers()) {
+					if (wat.endsWith("Email")) {
+						emailWatcher.add(wat);
+					} else {
+						watchers.add(wat);
+					}
+				}
+				watchers.addAll(emailWatcher);
+				
+				for (String watcher : watchers) {
+					boolean skipInsert = false;
 					Map<String, String> m = new HashMap<String, String>();
 					arr = watcher.split("\\/");
 
@@ -345,15 +411,19 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 						partnerMaster.setParUserId("");
 						partnerMaster.setParEmail(arr[0]);
 
-						m.put("email", partnerMaster.getParEmail());
-						
-						emailList.add(m);
+						if (partnerMapper.existsWatcherByEmail(partnerMaster) > 0) {
+							skipInsert = true;
+						} else {
+							m.put("email", partnerMaster.getParEmail());
+							emailList.add(m);
+						}
 					}
-
-					List<PartnerMaster> watcherList = partnerMapper.selectWatchersCheck(partnerMaster);
 					
-					if (watcherList.size() == 0){
-						partnerMapper.registPartnerWatcher(partnerMaster);
+					if (!skipInsert) {
+						List<PartnerMaster> watcherList = partnerMapper.selectWatchersCheck(partnerMaster);
+						if (CollectionUtils.isEmpty(watcherList)){
+							partnerMapper.registPartnerWatcher(partnerMaster);
+						}
 					}
 				}
 			}
@@ -428,15 +498,11 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			}
 			
 			downloadLocationUrl = bean.getDownloadLocation();
-			if (!StringUtil.isEmpty(downloadLocationUrl) && downloadLocationUrl.endsWith("/")) {
-				bean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
-			} else if (StringUtil.isEmpty(downloadLocationUrl)) {
+			if (StringUtil.isEmpty(downloadLocationUrl)) {
 				bean.setDownloadLocation("");
 			}
 			homepageUrl = bean.getHomepage();
-			if (!StringUtil.isEmpty(homepageUrl) && homepageUrl.endsWith("/")) {
-				bean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
-			} else if (StringUtil.isEmpty(homepageUrl)) {
+			if (StringUtil.isEmpty(homepageUrl)) {
 				bean.setHomepage("");
 			}
 			
@@ -1699,5 +1765,30 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			bean.setReferenceId(partnerId);
 		}
 		partnerMapper.updateVulnerabilityDataForPartner(bean);
+	}
+
+	public void sendMailInactivePartner() {
+
+		// 6개월 전 modified date를 가진 프로젝트 조회
+		List<PartnerMaster> inactivePartners = partnerMapper.selectPartnersModifiedBeforeMonths(6);
+
+		if (inactivePartners != null && !inactivePartners.isEmpty()) {
+			log.info("Found " + inactivePartners.size() + " inactive 3rd (not modified for 6 months)");
+
+			for (PartnerMaster partner : inactivePartners) {
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION);
+					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION));
+					mailBean.setComment(_tempComment);
+					mailBean.setParamPartnerId(partner.getPartnerId());
+					CoMailManager.getInstance().sendMail(mailBean);
+
+				} catch (Exception e) {
+					log.error("Error sending inactive notification email for 3rd: " + partner.getPartnerId(), e);
+				}
+			}
+		} else {
+			log.info("No inactive 3rd found (not modified for 6 months)");
+		}
 	}
 }

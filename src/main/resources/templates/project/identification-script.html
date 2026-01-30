@@ -27,12 +27,26 @@ $(document).ready(function () {
 	bom_evt.init();
 //	if (batFlag) bat_evt.init();
 	fn.displayProjectInfo();
+	if ([[${hasLoadedItems}]]) {
+		com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
+	} else {
+		com_fn.identificationUploadFile([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
+		callAutoCompleteFnc("autoComProjectNmConf");
+		
+		$('#_threeSearch1list').jqGrid(com_fn.setParamParty1());
+		$('#_searchProjectList1').jqGrid(com_fn.setParamProject1([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]));
+		$('#_searchProjectList2').jqGrid(com_fn.setParamProject2());
+	}
 	
 	$("[id^=tabMenu]").on("click", function() {
 		var tabId = $(this).attr("id");
 		tabId = tabId.replace("tabMenu", "");
 		$("[name=gridArea]").hide();
 
+//     	var applicable = $("#applicable" + tabId).is(':checked');
+		$("#gridArea"+tabId).show();
+		var btnClass = "." + tabId.toLowerCase() + "Btn";
+		$(btnClass).show();
 		$('#save').attr('onclick', "com_fn.save('"+tabId+"')");
 		
 		if ("Bom" == tabId) {
@@ -44,13 +58,10 @@ $(document).ready(function () {
 			$('#reset').show();
 		}
 		
-        var applicable = $("#applicable" + tabId).is(':checked');
-		$("#gridArea"+tabId).show();
-		
-		if (applicable) {
-			var btnClass = "." + tabId.toLowerCase() + "Btn";
-			$(btnClass).hide();
-		}
+// 		if (applicable) {
+// 			var btnClass = "." + tabId.toLowerCase() + "Btn";
+// 			$(btnClass).hide();
+// 		}
 		
 		switch (tabId) {
 			case "Party" : 
@@ -176,11 +187,7 @@ var fn = {
 			var oscProgress = "<span class=\"ml-2\"> | </span>";
 			if ("" != identificationStatus) {
 				if ("DROP" == projectStatus) {
-					if ("CONF" == identificationStatus) {
-						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2 customShadow">Identification</span>';
-					} else {
-						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2 customShadow">Identification</span>';
-					}
+					oscProgress += "<span class=\"badge badge-gray size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 				} else if ("FREV" == projectStatus) {
 					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 				} else {
@@ -196,7 +203,7 @@ var fn = {
 				}
 			} else {
 				if ("DROP" == projectStatus) {
-					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow">Identification</span>';
+					oscProgress += "<span class=\"badge badge-gray size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 				} else {
 					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 				}
@@ -206,14 +213,11 @@ var fn = {
 				oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
 				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
 			} else {
-				oscProgress += '<span class="text-blue-gray text-bold text-md px-1 ml-2">&gt;</span>';
 				if ("DROP" == projectStatus) {
-					if ("CONF" == verificationStatus) {
-						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2">Packaging</span>';
-					} else {
-						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
-					}
+					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+					oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2" style=\"cursor:pointer;\" onclick=\"fn.mvVerification()\">Packaging</span>';
 				} else {
+					oscProgress += '<span class="text-blue-gray text-bold text-md px-1 ml-2">&gt;</span>';
 					if ("" == verificationStatus) {
 						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
 							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';

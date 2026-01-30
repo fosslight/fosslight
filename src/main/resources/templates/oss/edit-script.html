@@ -321,45 +321,13 @@
 						break;
 					case 'includeCpes':
 						if (v != null) {
-							v.forEach(function(includeCpe, index, obj){
-								if (index == 0){
-									$('.multiTxtIncludeCpe').empty();
-								}
-								let includeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
-								includeCpeHtml 			+= 		'<div class="form-group mb-0">';
-	                            if(isReadOnly == 'true' || isReadOnly) {
-	                            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/ disabled>';
-	                            } else {
-	                            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/>';
-	                            	includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-	                            }
-	                            includeCpeHtml 			+=		'</div>';
-	                            includeCpeHtml 			+= 	'</div>';
-								
-								$(".multiTxtIncludeCpe").append(includeCpeHtml);
-							});
+							fn.addIncludeCpe(v);
 						}
 						
 						break;
 					case 'excludeCpes':
 						if (v != null) {
-							v.forEach(function(excludeCpe, index, obj){
-								if (index == 0){
-									$('.multiTxtExcludeCpe').empty();
-								}
-								let excludeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
-								excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
-	                            if(isReadOnly == 'true' || isReadOnly) {
-	                            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/ disabled>';
-	                            } else {
-	                            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/>';
-	                            	excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-	                            }
-	                            excludeCpeHtml 			+=		'</div>';
-	                            excludeCpeHtml 			+= 	'</div>';
-								
-								$(".multiTxtExcludeCpe").append(excludeCpeHtml);
-							});
+							fn.addExcludeCpe(v);
 						}
 						
 						break;
@@ -443,9 +411,9 @@
 			$('#downloadLocationAdd').on('click', function(){
 				var isDuplicated = false;
 				var downloadLocation = $("#input_downloadLocations").val();
-				if (downloadLocation.endsWith("/")) {
-					downloadLocation = downloadLocation.slice(0, -1);
-				}
+// 				if (downloadLocation.endsWith("/")) {
+// 					downloadLocation = downloadLocation.slice(0, -1);
+// 				}
 				$("input[name='downloadLocations']").each(function (i) {
 					let dl = $("input[name='downloadLocations']").eq(i).val();
 					if ($.trim(dl) == $.trim(downloadLocation)) {
@@ -1838,7 +1806,8 @@
 		var rows = getOssGridRows('#_licenseChoice');
 		
 		$('input[name=licenseDiv]').val(licenseDiv);
-				
+		
+		var duplicatedFlag = false;
 		var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
 		var newRows = [];
 		var checkLicenses = [];
@@ -1847,6 +1816,11 @@
 			var licenseName = rowData.licenseName;
 			if( licenseName.indexOf('<div') > -1){
 				rowData['licenseName'] = '';
+			}
+			if ($.inArray(rowData.licenseNameEx, checkLicenses) !== -1) {
+				duplicatedFlag = true;
+				var colName = $("#_licenseChoice #"+dataId).parents("table").attr("id") + "_licenseNameEx";
+				$("#_licenseChoice #"+dataId+" td[aria-describedby=\""+colName+"\"]").append('<div class=\"_licenseChoice_'+dataId+' retxt\">Duplicate declared license</div>');
 			}
 			checkLicenses.push(rowData.licenseNameEx);
 			newRows.push(rowData);
@@ -1902,7 +1876,8 @@
 			return false;
 		}
 
-		var duplicatedLicenseFlag = true;
+		var duplicatedFlag2 = false;
+		var duplicatedFlag3 = false;
  		if (checkLicenses.length > 0) {
  			$.each(checkLicenses, function(index, element){
  				$("[name='detectedLicenses']").each(function(idx, cur){
@@ -1915,9 +1890,36 @@
  	 			});
  			});
  		}
-	
- 		if (!duplicatedLicenseFlag) {
+ 		
+ 		if ($("[name='detectedLicenses']").length > 0) {
+ 			var seen = [];
+ 			$("[name='detectedLicenses']").each(function(idx, cur){
+ 				var detectedLicense = $(cur).val();
+ 				if ($.inArray(detectedLicense, seen) !== -1) {
+ 					duplicatedFlag2 = true;
+ 					$('input[name=detectedLicenses]:eq('+idx+')').parent().next("span.retxt").html("Duplicate detected license").show();
+ 				}
+ 				seen.push(detectedLicense);
+ 			});
+ 		}
+ 		
+ 		// check for duplicate declared licenses
+ 		if (duplicatedFlag) {
+ 			$("div.retxt").show();
+ 			alertify.error("There is a duplicate in Declared License", 0);
+ 		}
+ 		
+ 		// check for duplicate detected licenses
+ 		if (duplicatedFlag2) {
+ 			alertify.error("There is a duplicate in Detected License", 0);
+ 		}
+ 		
+ 		// check for duplicate between declared and detected licenses
+ 		if (duplicatedFlag3) {
  			alertify.error("License included in Declared", 0);
+ 		}
+		
+ 		if (duplicatedFlag || duplicatedFlag2 || duplicatedFlag3) {
  			return false;
  		}
 		
@@ -2060,8 +2062,7 @@
 						}
 						var colName = $("#"+gridStr+" #"+rowId).parents("table").attr("id")+"_"+seqSuffix[0];
 						// 그리드 메세지 그리기
-						$("#"+gridStr+" #"+rowId+" td[aria-describedby=\""+colName+"\"]")
-						.append('<div class=\"'+gridStr+"_"+rowId+' retxt"\">'+ value +'</div>');						
+						$("#"+gridStr+" #"+rowId+" td[aria-describedby=\""+colName+"\"]").append('<div class=\"'+gridStr+"_"+rowId+' retxt"\">'+ value +'</div>');						
 					}
 					$("div.retxt").show();
 				} else {
@@ -2138,6 +2139,36 @@
 				
 // 				renameFlag = 'N';
 // 				$('input[name=renameFlag]').val(renameFlag);
+			} else if ("hasExists" == json.validMsg) {
+				var existItems = "";
+				if (typeof json.resultData.addSummaryDescription !== "undefined") {
+					$("#summaryDescription").val("");
+					existItems += "Summary Description,";
+					$("#summaryDescription").val(json.resultData.addSummaryDescription);
+				}
+				if (typeof json.resultData.addImportantNotes !== "undefined") {
+					$("#importantNotes").val("");
+					existItems += "Important Notes,";
+					$("#importantNotes").val(json.resultData.addImportantNotes);
+				}
+				if (typeof json.resultData.addIncludeCpe !== "undefined") {
+					$(".multiTxtIncludeCpe").empty();
+					existItems += "Include CPE,";
+					let arr = json.resultData.addIncludeCpe.split(",");
+					fn.addIncludeCpe(arr);
+				}
+				if (typeof json.resultData.addExcludeCpe !== "undefined") {
+					$(".multiTxtExcludeCpe").empty();
+					existItems += "Exclude CPE,";
+					let arr = json.resultData.addExcludeCpe.split(",");
+					fn.addExcludeCpe(arr);
+				}
+				if ("" != existItems) {
+					existItems = existItems.substring(0, existItems.length-1);
+					var msg = [[#{msg.oss.information.exists}]];
+					msg = msg.replaceAll("items", existItems);
+					alertify.alert(msg, function(){});
+				}
 			} else if(json.validMsg == "notChange"){
 				alertify.alert([[#{msg.oss.name.nickname.sametime.notchange}]], function(){});
 			} else if(json.resultData) {
@@ -2828,10 +2859,10 @@
 			var value = $(target).val().trim();
 			$(target).val(value);
 			
-			if (value.charAt(value.length-1) == "/"){
-				value = value.slice(0, -1); // 마지막 문자열 제거
-				$(target).val(value);
-			}
+// 			if (value.charAt(value.length-1) == "/"){
+// 				value = value.slice(0, -1); // 마지막 문자열 제거
+// 				$(target).val(value);
+// 			}
 		
 			var pattern = /\s/g;
 			if (value.match(pattern)) {
@@ -2887,10 +2918,10 @@
 				var value = $(cur).val().trim();
 				$(cur).val(value);
 				
-				if (value.charAt(value.length-1) == "/"){
-					value = value.slice(0, -1); // 마지막 문자열 제거
-					$(target).val(value);
-				}
+// 				if (value.charAt(value.length-1) == "/"){
+// 					value = value.slice(0, -1); // 마지막 문자열 제거
+// 					$(target).val(value);
+// 				}
 				
 				if (value.match(pattern)) {
 					patternCnt++;
@@ -3595,6 +3626,44 @@
             _popup.close();
             _popup = window.open(url, "vulnListMorePopup", "width=950, height=600, toolbar=no, location=no, left=100, top=100");
         }
+    },
+    addIncludeCpe : function(includeCpes) {
+    	includeCpes.forEach(function(includeCpe, index, obj){
+			if (index == 0){
+				$('.multiTxtIncludeCpe').empty();
+			}
+			let includeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+			includeCpeHtml 			+= 		'<div class="form-group mb-0">';
+            if(isReadOnly == 'true' || isReadOnly) {
+            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/ disabled>';
+            } else {
+            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/>';
+            	includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+            }
+            includeCpeHtml 			+=		'</div>';
+            includeCpeHtml 			+= 	'</div>';
+			
+			$(".multiTxtIncludeCpe").append(includeCpeHtml);
+		});
+    },
+    addExcludeCpe : function(excludeCpes) {
+    	excludeCpes.forEach(function(excludeCpe, index, obj){
+			if (index == 0){
+				$('.multiTxtExcludeCpe').empty();
+			}
+			let excludeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+			excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
+            if(isReadOnly == 'true' || isReadOnly) {
+            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/ disabled>';
+            } else {
+            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/>';
+            	excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+            }
+            excludeCpeHtml 			+=		'</div>';
+            excludeCpeHtml 			+= 	'</div>';
+			
+			$(".multiTxtExcludeCpe").append(excludeCpeHtml);
+		});
     }
 }
 </script>

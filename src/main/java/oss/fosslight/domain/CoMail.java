@@ -149,6 +149,10 @@ public class CoMail extends ComBean {
 	
 	private String paramReferenceDiv;
 	
+	private String reviewer;
+	
+	private boolean includeAttachment = false;
+	
 	/**
 	 * Gets the snd seq.
 	 *
@@ -979,5 +983,21 @@ public class CoMail extends ComBean {
 
 	public void setParamMap(Map<String, Object> paramMap) {
 		this.paramMap = paramMap;
+	}
+
+	public String getReviewer() {
+		return reviewer;
+	}
+
+	public void setReviewer(String reviewer) {
+		this.reviewer = reviewer;
+	}
+
+	public boolean isIncludeAttachment() {
+		return includeAttachment;
+	}
+
+	public void setIncludeAttachment(boolean includeAttachment) {
+		this.includeAttachment = includeAttachment;
 	}
  } 

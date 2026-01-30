@@ -6,6 +6,7 @@
 package oss.fosslight.domain;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -36,6 +37,7 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.jsoup.Jsoup;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -572,7 +574,6 @@ public class CoMailManager extends CoTopComponent {
 						|| CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_INVATED.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())
-						|| CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED.equals(bean.getMsgType())
 						) {
 					if (!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()))) {
 						String subTitle = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()));
@@ -751,6 +752,18 @@ public class CoMailManager extends CoTopComponent {
 				}
     		}
 
+    		if (CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType()) || CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())) {
+    			String _s = "";
+				if (!isEmpty(bean.getParamPrjId())) {
+					_s = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId();
+				} else if (!isEmpty(bean.getParamPartnerId())) {
+					_s = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + bean.getParamPartnerId();
+				}
+				if (!isEmpty(_s)) {
+					convertDataMap.put("permissionUrl", _s);
+				}
+    		}
+    		
 			if (CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT.equals(bean.getMsgType())) {
 				var flhSelfCheckUrl = avoidNull(bean.getParamExpansion1())
 						+ "/self-check/"
@@ -763,7 +776,7 @@ public class CoMailManager extends CoTopComponent {
     		if (isEmpty(msgContents)) {
     			throw new Exception("Can not convert mail contents Email Type : " + bean.getMsgType());
     		}
-    		
+
     		bean.setEmlMessage(msgContents);
     		// title
     		title = title.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
@@ -798,10 +811,21 @@ public class CoMailManager extends CoTopComponent {
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED:
 			case CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED :
+			case CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION:
+			case CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION:
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
     			break;
+			case CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION:
+				bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
+				
+				ccList = new ArrayList<>();
+				ccList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId()));
+				if (!CollectionUtils.isEmpty(ccList)) {
+    				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+    			}
+				break;
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
     		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
@@ -859,6 +883,10 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT:
+    		case CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION:
+    		case CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION:
+			case CoConstDef.CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION :
+			case CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION :
     			
     			// to : project creator + cc : watcher + reviewer
     			prjInfo = mailManagerMapper.getProjectInfo(bean.getParamPrjId());
@@ -988,6 +1016,7 @@ public class CoMailManager extends CoTopComponent {
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION.equals(bean.getMsgType())
     						){
     					if (!bean.isToIdsCheckDivision()) {
     						toList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId())); // creator를 포함하고 있음
@@ -1017,9 +1046,13 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
     						) {
 						toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함
-    				}
+    				} else if (CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION.equals(bean.getMsgType())){
+						toList.addAll(mailManagerMapper.setSelfCheckWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함
+					}
     				// Creator only
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED.equals(bean.getMsgType())) {
     					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getCreator()})));
@@ -1044,7 +1077,8 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())
-    						) {
+							|| CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED.equals(bean.getMsgType())
+					) {
     					ccList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId()));
     					if (CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_ADD.equals(bean.getMsgType())
     							|| CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_CHANGED.equals(bean.getMsgType())){
@@ -1124,12 +1158,17 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT:
-    			// to :  creator + cc : watcher + reviewer
+			case CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION :
+			case CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION:
+    		case CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION:
+				// to :  creator + cc : watcher + reviewer
     			partnerInfo = mailManagerMapper.getPartnerInfo(bean.getParamPartnerId());
     			if (CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PARTER_DELETED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_MODIFIED_COMMENT.equals(bean.getMsgType())
-    					|| CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT.equals(bean.getMsgType())) {
+    					|| CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION.equals(bean.getMsgType())
+				) {
 					toList = new ArrayList<>();
     				ccList = new ArrayList<>();
     				// 로그인 사용자가 Admin이면 to : project creator cc: reviewer, watcher
@@ -1234,6 +1273,8 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_CANCELED_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
     						) {
     					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getCreator()})));
     					toList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId()));
@@ -1307,6 +1348,15 @@ public class CoMailManager extends CoTopComponent {
     			bean.setToIds(new String[]{bean.getParamEmail()});
 				bean.setCcIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			break;
+    		case CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION:
+    			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
+    			
+    			ccList = new ArrayList<>();
+    			ccList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId()));
+				if (!CollectionUtils.isEmpty(ccList)) {
+    				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+    			}
+    			break;
     		default:
     			// 호출하는 쪽에서 설정된 경우
     			if (bean.getToIds() != null && bean.getToIds().length > 0) {
@@ -1329,7 +1379,15 @@ public class CoMailManager extends CoTopComponent {
     		
     		if ((Boolean) convertDataMap.get("isModify")) {
     			if (CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType())
-						||  CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())) {
+						||  CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION.equals(bean.getMsgType())) {
     				convertDataMap.put("isModify", false);
     			} else if ((CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType()) 
 						|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
@@ -1744,7 +1802,7 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			if (title.indexOf("${ReviewerTo}") == -1 && title.indexOf("${Reviewer}") > -1) {
-				title = StringUtil.replace(title, "${Reviewer}", _s3);
+				title = StringUtil.replace(title, "${Reviewer}", avoidNull(_s3, bean.getReviewer()));
 			}
 			
 			if (title.indexOf("${LastDistributor}") > -1) {
@@ -1757,6 +1815,34 @@ public class CoMailManager extends CoTopComponent {
 			
 			if (title.indexOf("${Project ID}") > -1) {
 				title = StringUtil.replace(title, "${Project ID}", avoidNull(bean.getParamPrjId()));
+			}
+		}
+
+		if(title.indexOf("${SelfCheck Project Name") > -1) {
+			String _s = "";
+			Project project = null;
+			if (!isEmpty(bean.getParamPrjId())) {
+				project = mailManagerMapper.getSelfCheckProjectInfoById(bean.getParamPrjId());
+			}
+			if (project != null) {
+				if (title.indexOf("${SelfCheck Project Name}") > -1) {
+					if (title.indexOf("${SelfCheck Project ID}") < 0) {
+						_s += "(" + bean.getParamPrjId() +")";
+					}
+					_s += project.getPrjName();
+					if (!isEmpty(project.getPrjVersion())) {
+						_s += " (" + project.getPrjVersion() +")";
+					}
+
+					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/selfcheck/shareUrl/" + bean.getParamPrjId();
+					_s = "<a href='"+url+"' target='_blank'>" + _s + "</a>";
+				}
+			}
+			if(title.indexOf("${SelfCheck Project Name") > -1) {
+				title = StringUtil.replace(title, "${SelfCheck Project Name}", _s);
+			}
+			if (title.indexOf("${SelfCheck Project ID}") > -1) {
+				title = StringUtil.replace(title, "${SelfCheck Project ID}", avoidNull(bean.getParamPrjId()));
 			}
 		}
 		
@@ -1809,7 +1895,7 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			if (title.indexOf("${Reviewer}") > -1 && title.indexOf("${ReviewerTo}") == -1) {
-				title = StringUtil.replace(title, "${Reviewer}", _s3);
+				title = StringUtil.replace(title, "${Reviewer}", avoidNull(_s3, bean.getReviewer()));
 			}
 			
 			if (title.indexOf("${3rd Party ID}") > -1) {
@@ -3796,7 +3882,9 @@ public class CoMailManager extends CoTopComponent {
 		String sql = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_NAME, key);
 		List<Map<String, Object>> dataList = new ArrayList<>();
 		// sql param 생성
-		sql = sql.replace("?", createInQuery(params));
+		if (!isEmpty(sql) && sql.contains("?")) {
+			sql = sql.replace("?", createInQuery(params));
+		}
 		try (
 			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
 			PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -3982,12 +4070,43 @@ public class CoMailManager extends CoTopComponent {
 					}
 					
 					String url = CommonFunction.emptyCheckProperty("fl.scan.service.url", "");
-					if (!isEmpty(url)) {
+					if (!isEmpty(url) && ossMapper.ossAnalysisListCnt(prjId, CoConstDef.FLAG_YES, null) > 0) {
 						url += "/api/project/" + prjId + "/logs";
 						ResponseEntity<byte[]> response = new RestTemplate().exchange(url, HttpMethod.GET, null, byte[].class);
 						if (response.getStatusCode() == HttpStatus.OK) {
 							DataSource dataSource = new ByteArrayDataSource(response.getBody(), "application/json");
 							helper.addAttachment("auto_analysis_result_" + prjId + ".json", dataSource);
+						}
+					}
+					
+					if (coMail.isIncludeAttachment() && !prjId.startsWith("3rd_")) {
+						String reviewReportPath = CommonFunction.emptyCheckProperty("reviewReport.path", "");
+						if (!isEmpty(reviewReportPath)) {
+							String targetDirPath = reviewReportPath + "/" + prjId;
+							File dir = new File(targetDirPath);
+							if (dir.exists() && dir.isDirectory()) {
+								File[] pdfFiles = dir.listFiles(new FilenameFilter() {
+							        @Override
+							        public boolean accept(File dir, String name) {
+							            return name.toLowerCase().endsWith(".pdf");
+							        }
+							    });
+								
+								if (pdfFiles != null && pdfFiles.length > 0) {
+							        for (File pdfFile : pdfFiles) {
+							            FileSystemResource fileResource = new FileSystemResource(pdfFile);
+							            try {
+							                helper.addAttachment(pdfFile.getName(), fileResource);
+							            } catch (Exception e) {
+							                log.error(e.getMessage(), e);
+							            }
+							        }
+							    } else {
+							    	log.info("[PRJ-{}] There is no review report file", prjId);
+							    }
+							}
+						} else {
+							log.info("[PRJ-{}] There is no review report directory", prjId);
 						}
 					}
 					

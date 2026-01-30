@@ -121,6 +121,7 @@ public class OssComponents extends ComBean implements Serializable {
 	
 	private String packageUrl;
 	private String restriction;
+	private String refLoadedVal;
 	
 	public String getPublDate() {
 		return publDate;
@@ -738,5 +739,13 @@ public class OssComponents extends ComBean implements Serializable {
 
 	public void setRestriction(String restriction) {
 		this.restriction = restriction;
+	}
+
+	public String getRefLoadedVal() {
+		return refLoadedVal;
+	}
+
+	public void setRefLoadedVal(String refLoadedVal) {
+		this.refLoadedVal = refLoadedVal;
 	}
 }

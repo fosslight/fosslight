@@ -449,7 +449,7 @@
                 }
             },
             ossNameLinkFormat: function (cellvalue, options, rowObject) {
-            	var display = "";
+            	var display = "<div class=\"d-flex align-items-center\">";
             	var url = "/oss/edit/" + rowObject['ossId'];
                 var ossNickname = rowObject['ossNickname'];
 				
@@ -467,15 +467,15 @@
                             }
                             ossNickname = str;
                         }
-                        display += "<a class=\"d-inline-block\" style=\"cursor: pointer;\" data-toggle=\"tooltip\" data-html=\"true\" data-placement=\"right\" title=\"" + ossNickname + "\">[Nick]</a>"
-                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block ml-1\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                        display += "<a class=\"text-nowrap\" style=\"cursor: pointer;\" data-toggle=\"tooltip\" data-html=\"true\" data-placement=\"right\" title=\"" + ossNickname + "\">[Nick]</a>"
+                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink text-truncate ml-1\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
                     } else {
-                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink text-truncate\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
                     }
                 } else {
-                	display = "<a onclick=\"openDetailPage('" + rowObject['ossId'] + "')\" class='urlLink d-inline-block' style=\"cursor: pointer;\" target='_blank'>" + cellvalue + "</a>";
+                	display = "<a onclick=\"openDetailPage('" + rowObject['ossId'] + "')\" class='urlLink text-truncate' style=\"cursor: pointer;\" target='_blank'>" + cellvalue + "</a>";
                 }
-            	 
+            	display += "</div>";
                 return display;
             },
             displayLicenseRestriction : function (cellvalue, options, rowObject) {
@@ -760,8 +760,7 @@
                         $('tr td[isgroup="true"]', grid).parent().css('background-color', '#E1F6FA');
 
                         //3. Group sub display icon period in the following lists.
-                        $('tr td[isgroup="true"]', grid).parent().find('td:first')
-                            .prepend($('<span class="ui-icon ui-icon-carat-1-sw"></span>').css('display', 'inline-block'));
+                        $('tr td[isgroup="true"]', grid).parent().find('td:first').prepend($('<span class="ui-icon ui-icon-carat-1-sw"></span>').css('display', 'inline-block'));
 
                         //4. Group sub display check box
                         var isAdmin = [[${@CommonFunction.isAdmin()}]];
@@ -903,28 +902,46 @@
                         if (autoComplete.ossTags.length == 0) {
                         	commonAjax.getOssTags().success(function (data, status, headers, config) {
                                 if (data != null) {
+                                	var entityPattern = /&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});/i;
                                     data.forEach(function (obj) {
-                                        if (obj != null) {
-                                            autoComplete.ossTags.push(obj.ossName);
+                                    	if (obj != null) {
+                                        	var rawValue = obj.ossName;
+                                            var txt = document.createElement("textarea");
+                                            var loopSafety = 0;
+                                            
+                                            while (entityPattern.test(rawValue) && loopSafety < 10) {
+                                            	var before = rawValue;
+                                            	
+                                            	txt.innerHTML = rawValue;
+                                            	rawValue = txt.value;
+                                            	
+                                            	if (before === rawValue) {
+                                            		break;
+                                            	}
+                                            	
+                                            	loopSafety++;
+                                            }
+                                            
+                                            autoComplete.ossTags.push(rawValue);
                                         }
-                                    })
+                                    });
                                 }
                             });
-                            
-                            $('input[name="ossName"]').autocomplete({
-                            	source : autoComplete.ossTags,
-                            	select : function (event, ui) {
-                            		$(this).val(ui.item.value);
-                            	},
-                            	focus : function(event, ui) {return false;},
-                            	minLength : 1,
-                            	autoFocus : false,
-                            	disable : false,
-                            	close : function(event) {
-                            		$(".search-field").val("");
-                            	}
-                            });
                         }
+                        
+                        $('input[name="ossName"]').autocomplete({
+                        	source : autoComplete.ossTags,
+                        	select : function (event, ui) {
+                        		$(this).val(ui.item.value);
+                        	},
+                        	focus : function(event, ui) {return false;},
+                        	minLength : 1,
+                        	autoFocus : false,
+                        	disable : false,
+                        	close : function(event) {
+                        		$(".search-field").val("");
+                        	}
+                        });
                     }
                 });
 

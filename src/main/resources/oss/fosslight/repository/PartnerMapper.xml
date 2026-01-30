@@ -1393,7 +1393,12 @@
 	
 	
 	<select id="existsWatcherByEmail" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
-		SELECT COUNT(1) FROM PARTNER_WATCHER WHERE EMAIL = #{parEmail} AND PARTNER_ID = #{partnerId}
+		SELECT COUNT(1) 
+		FROM PARTNER_WATCHER PW
+		LEFT JOIN T2_USERS USR
+		ON PW.USER_ID = USR.USER_ID
+		WHERE (PW.EMAIL = #{parEmail} AND PW.PARTNER_ID = #{partnerId})
+		OR (IFNULL(USR.EMAIL, '') = #{parEmail} AND PW.PARTNER_ID = #{partnerId})
 	</select>
 	
 	<select id="existsWatcherByUser" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
@@ -3082,4 +3087,24 @@
 		SET CVE_ID = #{cveId}, CVSS_SCORE_MAX = #{cvssScore}
 		WHERE PARTNER_ID = #{referenceId}
 	</update>
+
+	<select id="selectPartnersModifiedBeforeMonths" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT
+			PARTNER_ID,
+			PARTNER_NAME,
+			SOFTWARE_NAME,
+			SOFTWARE_VERSION,
+			CREATOR,
+			MODIFIER,
+			MODIFIED_DATE,
+			CREATED_DATE,
+			REVIEWER,
+			DIVISION
+		FROM PARTNER_MASTER
+		WHERE USE_YN = 'Y'
+		  AND STATUS = 'PROG'
+		  AND MODIFIED_DATE IS NOT NULL
+		  AND MODIFIED_DATE <![CDATA[<=]]> DATE_SUB(NOW(), INTERVAL #{months} MONTH)
+		ORDER BY MODIFIED_DATE ASC
+	</select>
 </mapper>

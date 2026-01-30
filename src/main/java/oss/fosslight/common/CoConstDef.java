@@ -549,7 +549,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DROPPED = "812"; // Project drop
 	public static final String CD_MAIL_TYPE_PROJECT_REOPENED = "36"; // Project reopen
 	public static final String CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT = "38"; // Project RequestToOpen Comment 추가  2018-07-23 choye 추가
-
+    public static final String CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION = "101";
+	
 	/** Project Request Review(Identification) */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW = "40";
 	/** Project Identification confirm */
@@ -638,6 +639,9 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PARTER_DELETED = "77";
 	public static final String CD_MAIL_TYPE_PARTER_WATCHER_INVATED = "78";
 	public static final String CD_MAIL_TYPE_PARTER_WATCHER_REGISTED = "79";
+
+	public static final String CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION = "844";
+	public static final String CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION ="845";
 	/** Binary Analysis 완료시*/
 	public static final String CD_MAIL_TYPE_BAT_COMPLETE = "80";
 	/** Binary Analysis 실패시*/
@@ -690,12 +694,22 @@ public class CoConstDef {
 	public static final String CD_MAIL_COMPONENT_TEMPLATE = "110";
 	public static final String CD_MAIL_DEFAULT_CONTENTS = "111";
 
+	/** REQUEST PERMISSION */
+	public static final String CD_MAIL_PROJECT_REQUEST_PERMISSION = "850";
+	public static final String CD_MAIL_PROJECT_REJECT_PERMISSION = "851";
+	public static final String CD_MAIL_PARTNER_REQUEST_PERMISSION = "852";
+	public static final String CD_MAIL_PARTNER_REJECT_PERMISSION = "853";
+	public static final String CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION = "854";
+	public static final String CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION = "855";
+	public static final String CD_MAIL_PROJECT_APPROVE_PERMISSION = "856";
+	public static final String CD_MAIL_PARTNER_APPROVE_PERMISSION = "857";
+	
 	// 이벤트 코드 : TODO MAIL-SERVICE
 	public static final String	EVENT_CODE_LICENSE = "300";
 	public static final String	EVENT_CODE_OSS = "301";
 	public static final String	EVENT_CODE_OSS_LICENSE = "302";
 	public static final String	EVENT_CODE_PROJECT = "303";
-	public static final String	EVENT_CODE_PROJECT_MODEL = "304";
+	public static final String	EVENT_CODE_USER = "304";
 	public static final String	EVENT_CODE_PROJECT_WATCHER = "305";
 	public static final String 	EVENT_CODE_PROJECT_STATUS = "306";
 	public static final String	EVENT_CODE_PARTNER = "Partner";

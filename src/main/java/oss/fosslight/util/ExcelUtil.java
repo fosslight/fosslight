@@ -30,8 +30,11 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1127,6 +1130,9 @@ public class ExcelUtil extends CoTopComponent {
 			List<String> duplicateCheckList = new ArrayList<>();
 			List<String> errRow = new ArrayList<>();
 			
+			DataFormatter formatter = new DataFormatter();
+			FormulaEvaluator evaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+			
 			for (int rowIdx = DefaultHeaderRowIndex+1; rowIdx < sheet.getPhysicalNumberOfRows(); rowIdx++) {
 			    try {
     				// final list의 ref Data를 찾을 경우, No Cell이 없는 시트는 무시
@@ -1178,7 +1184,16 @@ public class ExcelUtil extends CoTopComponent {
     				} else {
     					// basic info
     					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", ""));
-    					bean.setOssVersion(ossVersionCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossVersionCol))).trim().replaceAll("\t", ""));
+    					if (ossVersionCol < 0) {
+    						bean.setOssVersion("");
+    					} else {
+    						Cell cell = row.getCell(ossVersionCol);
+    						if (cell != null) {
+        						bean.setOssVersion(avoidNull(formatter.formatCellValue(cell, evaluator)).trim().replaceAll("\t", ""));
+    						} else {
+    							bean.setOssVersion("");
+    						}
+    					}
     					
     					if (downloadLocationCol < 0) {
     						bean.setDownloadLocation("");

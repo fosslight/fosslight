@@ -1313,6 +1313,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 mailBean.setParamPrjId(project.getPrjId());
                 mailBean.setCompareDataBefore(beforeProject);
                 mailBean.setCompareDataAfter(afterProject);
+                mailBean.setLoginUserName(userInfo.getUserId());
+
 
                 if (!isEmpty(diffComment)) {
                     CommentsHistory commHisBean = new CommentsHistory();
@@ -1379,15 +1381,17 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             // Security enable 설정
-            project.setSecMailYn(secMailYn);
+            Project param = new Project();
+            param.setPrjId(prjId);
+            param.setSecMailYn(secMailYn);
             if (secMailYn.equals("N")) {
-                project.setSecMailDesc(secMailDesc);
+            	param.setSecMailDesc(secMailDesc);
             } else {
-                project.setSecMailDesc("Enable");
+            	param.setSecMailDesc("Enable");
             }
             
             // 프로젝트 업데이트
-            projectService.updateProjectMaster(project);
+            projectService.updateProjectMaster(param);
 
             afterProject = projectService.getProjectBasicInfo(prjId);
             String diffComment = CommonFunction.getDiffItemComment(beforeProject, afterProject, true);
@@ -1397,6 +1401,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 mailBean.setParamPrjId(project.getPrjId());
                 mailBean.setCompareDataBefore(beforeProject);
                 mailBean.setCompareDataAfter(afterProject);
+                mailBean.setLoginUserName(userInfo.getUserId());
 
                 if (!isEmpty(diffComment)) {
                     CommentsHistory commHisBean = new CommentsHistory();
@@ -1571,10 +1576,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Project project = new Project();
         project.setPrjId(prjId);
         Project projectInfo = projectService.getProjectDetail(project);
-
-        if (Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) ||
-                Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS)) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
+        
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && projectInfo.getStatusPermission() == 0) {
+        	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete project.");
+        } else if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && projectInfo.getStatusPermission() > 0
+        		&& (Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) || Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS))) {
+        	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
         }
 
         try {

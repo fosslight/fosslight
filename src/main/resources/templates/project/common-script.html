@@ -13,6 +13,13 @@ var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
 var ossNames = [];
 var licenseNames = [];
 
+var uploadGridData = [];
+var searchedData = {};
+var partyLoadSuccess = true;
+var depLoadSuccess = true;
+var srcLoadSuccess = true;
+var binLoadSuccess = true;
+
 //==========================================================================================
 //COMMON
 //==========================================================================================
@@ -20,6 +27,33 @@ var licenseNames = [];
 var com_evt = {
 	// init
 	init: function(){
+		$(window).on("resize", function(){
+	    	resizeUploadAreaJqGrid();
+	    });
+		
+		$(document).on('expanded.lte.cardwidget collapsed.lte.cardwidget', function () {
+	        setTimeout(function(){
+	        	resizeUploadAreaJqGrid();
+	        }, 200);
+	    });
+
+		$(document).on('click', '.ajs-close', function () {
+			var dialogId = $(this).closest('.alertify').attr('id');
+			if (typeof dialogId !== "undefined") {
+				if (dialogId.indexOf("selectSearch") > -1 || dialogId.indexOf("addUpload") > -1) {
+			    	searchedData = {};
+			    }
+			}
+		});
+		
+		$(document).on('change', '.sheetRowCheckBox', function() {
+			if ($(this).is(':checked')) {
+				$(this).closest('tr').find("input[type='radio']").prop("disabled", false);
+		   	} else {
+		   		$(this).closest('tr').find("input[type='radio']").prop("disabled", true);
+			}
+		});
+		
 		// ossNames auto complete
 		fn_grid_com.griOssNames().success(function(data, status, headers, config){
 			if(data != null && ossNames == ""){
@@ -392,7 +426,12 @@ var com_evt = {
 		fn_comment.getCommentList(commentsParam);
 	}
 }
-	
+
+function resizeUploadAreaJqGrid() {
+    var newWidth = $(".identificationAddArea").width();
+    $("#identificationAddList").jqGrid("setGridWidth", newWidth, true);
+}
+
 //공통 함수
 var com_fn = {
 	checkGridComplete : function (isAndroid) {
@@ -511,83 +550,90 @@ var com_fn = {
 		var chkStatus = status||"";
 		var permission = [[${project.permission}]] == 1;
 		
-		if (role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
-			switch(chkStatus){
-				case "":
-					btn_div.hide();
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "PROG":
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "REQ":
-					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();btn_Analysis.hide();
-					
-					break;
-				case "REV":
-					btn_reject.removeClass("btn-lg-red");
-                    btn_reject.addClass("btn-outline-lg-red");
-					btn_confirm.show();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "CONF":
-					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
-					btn_Analysis_Result.hide();
-					btn_check.hide();
-					
-					break;
-			}
-		} else if([[${project.viewOnlyFlag}]] == 'Y'){
-			btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();cbx_iden.prop("disabled", false);
-		} else { // 일반 사용자 일 경우
-			switch(status){
-				case "":
-					btn_div.hide();
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					if (permission) {
-						btn_Reset.show();btn_Merge.show();btn_Save.show();
-					} else {
-						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
-					}
-					
-					break;
-				case "PROG":
-					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					if (permission) {
-						btn_Reset.show();btn_Merge.show();btn_Save.show();
-					} else {
-						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
-					}
-					btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					
-					break;
-				case "REQ":
-					btn_reject.addClass("btn-lg-red");
-					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
+		if ("Y" == [[${project.dropYn}]]) {
+			btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
+			btn_Analysis_Result.hide();
+			btn_check.hide();
+		} else {
+			if (role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
+				switch(chkStatus){
+					case "":
+						btn_div.hide();
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "PROG":
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "REQ":
+						btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();btn_Analysis.hide();
+						
+						break;
+					case "REV":
+						btn_reject.removeClass("btn-lg-red");
+	                    btn_reject.addClass("btn-outline-lg-red");
+						btn_confirm.show();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "CONF":
+						btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
+						btn_Analysis_Result.hide();
+						btn_check.hide();
+						
+						break;
+				}
+			} else if([[${project.viewOnlyFlag}]] == 'Y'){
+				btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
+				btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();cbx_iden.prop("disabled", false);
+			} else { // 일반 사용자 일 경우
+				switch(status){
+					case "":
+						btn_div.hide();
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						if (permission) {
+							btn_Reset.show();btn_Merge.show();btn_Save.show();
+						} else {
+							btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+						}
+						
+						break;
+					case "PROG":
+						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
+						if (permission) {
+							btn_Reset.show();btn_Merge.show();btn_Save.show();
+						} else {
+							btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+						}
+						btn_check.show();btn_bulkRegist.show();fileUploader.show();
+						
+						break;
+					case "REQ":
+						btn_reject.addClass("btn-lg-red");
+						btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
 
-					break;
-				case "REV":
-					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
+						break;
+					case "REV":
+						btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
 
-					break;
-				case "CONF":
-					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();btn_bulkRegist.hide();fileUploader.hide();
-					btn_Analysis.hide();btn_Analysis_Result.hide();
-					btn_check.hide();
+						break;
+					case "CONF":
+						btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();btn_bulkRegist.hide();fileUploader.hide();
+						btn_Analysis.hide();btn_Analysis_Result.hide();
+						btn_check.hide();
 
-					break;
+						break;
+				}
 			}
 		}
 	},
@@ -2383,7 +2429,7 @@ var com_fn = {
 		} else if ("BinAndroid" == tab) {
 			binAndroid_fn.save();
 		} else if ("Bom" == tab) {
-			bom_fn.beforeSave();
+			bom_fn.beforeSave(false);
 		}
 	},
 	reset : function (tab) {
@@ -2391,14 +2437,11 @@ var com_fn = {
 			bom_fn.reset();
 		} else {
 			var componentId = "";
-			var msg = "";
+			var msg = [[#{msg.common.delete.records}]];
 			
 			if ("Party" == tab) {
-				msg = [[#{msg.common.delete.records}]];
 				componentId = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}]];
 			} else {
-				msg = [[#{msg.common.delete.recordsAndFiles}]];
-				
 				if ("Dep" == tab) {
 					componentId = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]];
 				} else if ("Src" == tab) {
@@ -2420,6 +2463,7 @@ var com_fn = {
 		}
 	},
 	resetAll : function (tab, initDiv) {
+		var referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]];
 		if ("Party" == tab) {
 			party_evt.reset();
 		} else if ("Dep" == tab) {
@@ -2430,11 +2474,11 @@ var com_fn = {
 			bin_fn.reset();
 		} else if ("Bat" == tab) {
 			bat_fn.reset();
-		} else if ("BinAndroid" == tab) {
-			binAndroid_fn.reset();
 		} else if ("Bom" == tab) {
 			bom_fn.reset();
 		}
+		
+		com_fn.getIdentificationAddList(referenceDiv);
 	},
 	nicknameAlertifyTemplate : function (target) {
 		alertify.dialog(target, function() {
@@ -2465,7 +2509,1352 @@ var com_fn = {
 		var fileName = "FOSSLight-Identification-Sample.xlsx";
 
 		location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
-	}
+	},
+	changeSearchOption : function (obj) {
+		var value = $(obj).val();
+		if ("prj" == value) {
+			$("#partnerInputArea").hide();
+			$("#projectInputArea").show();
+			$("#prjName").prop('disabled', false);
+			$("#3rdSearchText").prop('disabled', true);
+		} else {
+			$("#projectInputArea").hide();
+			$("#partnerInputArea").show();
+			$("#prjName").prop('disabled', true);
+			$("#3rdSearchText").prop('disabled', false);
+			callAutoCompleteFnc("autoComConfParty");
+		}
+	},
+	projectSearch : function () {
+		var postData = $('#commonSearchForm').serializeObject();
+		
+		$('#_searchProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
+		$('.searchProject1').show();
+		$('.searchProject2').hide();
+	},
+	setParamProject1 : function(referenceDiv) {
+		return {
+			url: '/project/identificationProject/' + referenceDiv,
+			datatype: 'json',
+			jsonReader:{
+				repeatitems: false,
+				id: 'prjId',
+			},
+			colNames: ['Project Id','Project Name','Project Version','Distribution Type', 'Creator','Created Date', 'Comment'],
+			colModel: [
+				{name: 'prjId', index: 'prjId', width: 42, align: 'center'},
+				{name: 'prjName', index: 'prjName', width: 240, align: 'left'},
+				{name: 'prjVersion', index: 'prjVersion', width: 200, align: 'left'},
+				{name: 'distributionType', index: 'distributionType', width: 110, align: 'left'},
+				{name: 'creator', index: 'creator', width: 110, align: 'center'},
+				{name: 'createdDate', index: 'createdDate', width: 110, align: 'center',  formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}},
+				{name: 'comment', index: 'comment', width: 139, align: 'left', formatter: fn_grid_com.displayComment, unformat: fn_grid_com.unFormatter}
+			],
+			onSelectRow: function(id) {
+				com_fn.identificationProjectSearch(id, referenceDiv);
+//				$('.searchProject2').show();
+			},
+			autoencode: true,
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){
+			},
+			rowNum: 20,
+			rowList: [20, 40, 60],
+			pager: '#searchProjectPager1',
+			sortname: 'prjId',
+			sortorder: 'asc',
+			loadonce: false,
+			height: 'auto',
+			mtype: 'GET',
+			loadComplete: function(data){
+				$('.commentDiv').find('p').css('margin','0px 0px');
+			},
+			gridComplete: function() {
+				$('#_searchProjectList1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "360px"});
+				
+				if ([[${hasLoadedItems}]]) {
+					$("#_searchProjectList1").jqGrid("setGridWidth", 0, true);
+			        $("#_searchProjectList1").jqGrid("setGridWidth", 760, true);
+				} else {
+					$("#_searchProjectList1").jqGrid("setGridWidth", 0, true);
+			        $("#_searchProjectList1").jqGrid("setGridWidth", $(".searchProject1").width()-15, true);
+				}
+				updateGridRowCount('_searchProjectList1', 'searchProjectPager1');
+			}
+		}
+	},
+	setParamProject2 : function() {
+		return {
+			datatype: 'local',
+			colNames: ['ID_KEY','ID','ReferenceId','Source Name or Path','OSS Name','OSS Version','License', 'Vulnerability','Exclude'],
+			colModel: [
+			
+				{name: 'componentId', index: 'componentId', width: 40, align: 'center', key:true, hidden:true},
+				{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
+				{name: 'referenceId', index: 'referenceId', width: 40, align: 'center', hidden:true},
+				{name: 'filePath', index: 'filePath', width: 150, align: 'left', template: searchStringOptions},
+				{name: 'ossName', index: 'ossName', width: 300, align: 'left', template: searchStringOptions},
+				{name: 'ossVersion', index: 'ossVersion', width: 150, align: 'center', template: searchStringOptions},
+				{name: 'licenseName', index: 'licenseName', width: 218, align: 'left', formatter: fn_grid_com.displayLicense, template: searchStringOptions},
+				{name: 'cvssScore', index: 'cvssScore', width: 98, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions, sortable : true, sorttype:'float'},
+				{name: 'excludeYn', index: 'excludeYn', width: 40, align: 'center', hidden:true}
+			],
+			onSelectRow: function(id){},
+			autoencode: true,
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){},
+			rowNum: 10000,
+			rowTotal: -1,
+			//scroll: 1,
+ 			sortname: 'componentIdx',
+			loadonce: true,
+			height: '500',
+			mtype: 'GET',
+			loadComplete: function(data){},
+			gridComplete:function (){
+				var target = $("#_searchProjectList2");
+				var data = target.jqGrid("getRowData");
+
+				for (var i=0; i<data.length; i++){
+					if(data[i ].excludeYn=="Y"){
+						target.jqGrid('setRowData', data[i].componentId, false, { background:'gray'});
+					}
+				}
+				
+				$('#_searchProjectList2').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
+				if ([[${hasLoadedItems}]]) {
+					$("#_searchProjectList2").jqGrid("setGridWidth", 0, true);
+			        $("#_searchProjectList2").jqGrid("setGridWidth", 760, true);
+				} else {
+					$("#_searchProjectList2").jqGrid("setGridWidth", 0, true);
+			        $("#_searchProjectList2").jqGrid("setGridWidth", $(".searchProject1").width()-15, true);
+				}
+			}
+		}
+	},
+	identificationProjectSearch : function (id, referenceDiv) {
+		const data = {
+	        category: "project/fragments",
+	      	templateName: "edit",
+	       	fragmentName: "searchSheetFragments"
+	  	};
+
+	    postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+	      	loading.hide();
+	      	
+	      	var tempBody = $('<div>').html(res);
+	      	if (typeof alertify.projectSearchAlert === "undefined") {
+	      		alertifyUploadDialog("projectSearchAlert", "500", "dialog_selectSearch_" + [[${project.prjId}]]);
+	      	}
+	      	
+	      	$("#_searchProjectList2").jqGrid('clearGridData');
+			var postData = $("#_searchProjectList2").jqGrid('getGridParam', 'postData');
+			postData.referenceId = id;
+			
+	        $.ajax({
+	        	url : '/project/identificationProjectSearch/' + referenceDiv,
+	            type : 'GET',
+	            dataType : 'json',
+	            data : postData,
+	            cache : false,
+	            async : false,
+	            success : function(data) {
+	            	var isExcluded = data.isExcluded;
+	            	var searchData = [];
+	            	var thirdInfo = [];
+	            	var thirdData = [];
+	            	
+	            	if (typeof data.rows !== "undefined") {
+	            		// check the selectable sheets
+	            		searchData = data.rows;
+	            	}
+	            	if (typeof data.thirdInfo !== "undefined") {
+	            		thirdInfo = data.thirdInfo;
+	            	}
+	            	if (typeof data.thirdData !== "undefined") {
+	            		thirdData = data.thirdData;
+	            	}
+	            	
+	            	var thirdCheck = false;
+        			var depCheck = false;
+        			var srcCheck = false;
+        			var binCheck = false
+	            	
+	            	if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]] == referenceDiv) {
+	            		var	depData = [];
+	            		var srcData = [];
+	            		var binData = [];
+	            		
+	            		let depIdx = 100000;
+	            		let srcIdx = 100000;
+	            		let binIdx = 100000;
+	            		
+            			for (var i in searchData) {
+            				searchData[i]["comments"] = "(From Prj " + id + ")";
+            				if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]] == searchData[i].referenceDiv) {
+            					depCheck = true;
+            					searchData[i]["componentId"] = "";
+            					searchData[i]["gridId"] = "jqg" + depIdx;
+            					searchData[i]["prjId"] = [[${project.prjId}]];
+            					searchData[i]["refLoadedVal"] = id;
+            					depData.push(searchData[i]);
+            					depIdx++;
+            				} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]] == searchData[i].referenceDiv) {
+            					srcCheck = true;
+            					searchData[i]["componentId"] = "";
+            					searchData[i]["gridId"] = "jqg" + srcIdx;
+            					searchData[i]["prjId"] = [[${project.prjId}]];
+            					searchData[i]["refLoadedVal"] = id;
+            					srcData.push(searchData[i]);
+            					srcIdx++;
+            				} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]] == searchData[i].referenceDiv) {
+            					binCheck = true;
+            					searchData[i]["componentId"] = "";
+            					searchData[i]["gridId"] = "jqg" + binIdx;
+            					searchData[i]["prjId"] = [[${project.prjId}]];
+            					searchData[i]["refLoadedVal"] = id;
+            					binData.push(searchData[i]);
+            					binIdx++;
+            				}
+            			}
+            			
+            			if (thirdInfo.length > 0) {
+            				searchedData["thirdInfo"] = thirdInfo;
+            			}
+            			if (thirdData.length > 0) {
+            				thirdCheck = true;
+            				searchedData["thirdData"] = thirdData;
+            			}
+						if (depData.length > 0) {
+							searchedData["dep"] = depData;
+            			}
+						if (srcData.length > 0) {
+							searchedData["src"] = srcData;
+						}
+						if (binData.length > 0) {
+							searchedData["bin"] = binData;
+						}
+            			tempBody.find('#selectSearchApply').attr('onclick', 'com_fn.getSearchData(' + id + ',' + referenceDiv + ',' + isExcluded + ')');
+            		} else {
+            			
+            		}
+	            	
+	            	alertify.projectSearchAlert().setContent(tempBody.html()).show();
+	    			$(alertify.projectSearchAlert()).find(".ajs-content").css("padding", "0");
+	    			
+	    			var prjInfo = data.project;
+	    			var prjName = "#" + prjInfo.prjId + " " + prjInfo.prjName;
+	    			if ("" != prjInfo.prjVersion) {
+	    				prjName += " (" + prjInfo.prjVersion + ")";
+	    			}
+	    			$("#prjNameVersion").html(prjName);
+	    			
+	    			if (thirdCheck) {
+        				$("#3rdCheck").prop('checked', true);
+        			} else {
+        				$("#3rdCheck").prop('disabled', true);
+        			}
+					if (depCheck) {
+						$("#depCheck").prop('checked', true);
+        			} else {
+        				$("#depCheck").prop('disabled', true);
+        			}
+					if (srcCheck) {
+						$("#srcCheck").prop('checked', true);
+					} else {
+						$("#srcCheck").prop('disabled', true);
+					}
+					if (binCheck) {
+						$("#binCheck").prop('checked', true);
+					} else {
+						$("#binCheck").prop('disabled', true);
+					}
+	            },
+	            error : function(xhr, ajaxOptions, thrownError){
+	                alertify.error([[#{msg.common.valid2}]], 0);
+	            }
+	        });
+	    });
+	},
+	getSearchData : function (referenceId, referenceDiv, isExcluded) {
+		var selectTabs = [];
+		$('input:checkbox[name="searchCheck"]').each(function(){
+			if ($(this).is(':checked')){
+				selectTabs.push($(this).val());
+			}
+		});
+		
+		var loadedTab = uploadGridData.filter(function(a){
+			if (a.item.indexOf("-") > -1) {
+				let itemStr = a.item.split("-")[1];
+				if (itemStr == referenceId) {
+					return a;
+				}
+			}
+		});
+		
+		var selectedTabs = [];
+		if (loadedTab.length > 0) {
+			loadedTab = loadedTab[0].loadedTab;
+			loadedTab = loadedTab.split(",");
+			for (var i in loadedTab) {
+				let tabNm = loadedTab[i].split("(")[0];
+				if ("3rdParty" == tabNm) {
+					selectedTabs.push([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}]]);
+				} else if ("DEP" == tabNm) {
+					selectedTabs.push([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]]);
+				} else if ("SRC" == tabNm) {
+					selectedTabs.push([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]]);
+				} else if ("BIN" == tabNm) {
+					selectedTabs.push([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]]);
+				}
+			}
+		}
+		
+		if (selectTabs.length == 0) {
+			alertify.alert([[#{msg.common.select.tab}]], function(){});
+			return;
+		} else {
+			loadingIden.show();
+			
+			var selectedFlag = false;
+			var deduplicatedTabs = [];
+			var duplicatedTabs = [];
+			
+			if (selectedTabs.length > 0) {
+				selectedFlag = true;
+				for (var i in selectTabs) {
+					let selectTab = selectTabs[i];
+					let isDuplicate = false;
+					for (var j in selectedTabs) {
+						if (selectTab === selectedTabs[j]) {
+							isDuplicate = true;
+							break;
+						}
+					}
+					if (!isDuplicate) {
+						deduplicatedTabs.push(selectTab);
+					} else {
+						duplicatedTabs.push(selectTab);
+					}
+				}
+			}
+			
+			var alertMsg = "";
+			if (duplicatedTabs.length > 0) {
+				let tabsNm = "";
+				for (var i in duplicatedTabs) {
+					if ("" != tabsNm) {
+						tabsNm += ",";
+					}
+					if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}]] == duplicatedTabs[i]) {
+						tabsNm += "3rdParty";
+					} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]] == duplicatedTabs[i]) {
+						tabsNm += "DEP";
+					} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]] == duplicatedTabs[i]) {
+						tabsNm += "SRC";
+					} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]] == duplicatedTabs[i]) {
+						tabsNm += "BIN";
+					}
+				}
+				alertMsg = "There are already loaded tabs(" + tabsNm + ").";
+			} else {
+				alertMsg = "Would you like to save the selected tab?";
+			}
+			
+			if (deduplicatedTabs.length > 0) {
+				selectTabs = deduplicatedTabs;
+				if (duplicatedTabs.length > 0) {
+					alertMsg += "<br/>Only unloaded tabs will be saved. Would you like to save them?";
+				}
+			} else {
+				if (selectedFlag) {
+					loadingIden.hide();
+					alertify.alert(alertMsg, function() {});
+					searchedData = {};
+					return;
+				}
+			}
+			
+			if (isExcluded) {
+				loadingIden.hide();
+				
+				alertify.alert([[#{msg.common.exists.excludeYn}]], function() {
+					loadingIden.show();
+					com_fn.saveDataAfterSearch(selectTabs, searchedData);
+				});
+			} else {
+				com_fn.saveDataAfterSearch(selectTabs, searchedData);
+			}
+		}
+	},
+	saveDataAfterSearch : function (tabs, data) {
+		for (var i in tabs) {
+			if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}]] == tabs[i]) {
+	 			if (typeof data.thirdData !== "undefined") {
+	 				partyLoadSuccess = false;
+	 				party_evt.saveMakeData(data.thirdData);
+	 			}
+	 		} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]] == tabs[i]) {
+	 			if (typeof data.dep !== "undefined") {
+	 				depLoadSuccess = false;
+	 				com_fn.exitRow("depList");
+	 				fn_grid_com.totalGridSaveMode('depList');
+	 				dep_fn.saveMakeData(false, data.dep);
+	 			}
+	 		} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]] == tabs[i]) {
+	 			if (typeof data.src !== "undefined") {
+	 				srcLoadSuccess = false;
+	 				com_fn.exitRow("srcList");
+	 				fn_grid_com.totalGridSaveMode('srcList');
+	 				src_fn.saveMakeData(false, data.src);
+	 			}
+	 		} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]] == tabs[i]) {
+	 			if (typeof data.bin !== "undefined") {
+	 				binLoadSuccess = false;
+	 				com_fn.exitRow("binList");
+	 				fn_grid_com.totalGridSaveMode('binList');
+	 				bin_fn.saveMakeData(false, data.bin);
+	 			}
+	 		}
+		}
+	},
+	partnerSearch : function () {
+		var searchText = $("#uploadSearchText").val();
+		$("#commonSearchForm input[name='partnerName']").val(searchText);
+		
+		var postData = $('#commonSearchForm').serializeObject();
+		$('#_threeSearch1list').jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+		$('.threeSearch1Area').show();
+		$('.threeSearch2Area').hide();
+	},
+	setParamParty1 : function(){
+		return {
+			url: "/project/getPartnerList",
+			datatype: 'json',
+			jsonReader:{
+				repeatitems: false,
+				id: 'partnerId',
+				root:function(obj){return obj.rows;},
+				page:function(obj){return obj.page;},
+				total:function(obj){return obj.total;},
+				records:function(obj){return obj.records;}
+			},
+			colNames: ['ID','3rd party Name','Software Name','Software Version', 'Delivery Form','Description'],
+			colModel: [
+				{name: 'partnerId', index: 'partnerId', width: 42, align: 'center', key:true},
+				{name: 'partnerName', index: 'partnerName', width: 240, align: 'left'},
+				{name: 'softwareName', index: 'softwareName', width: 200, align: 'left'},
+				{name: 'softwareVersion', index: 'softwareVersion', width: 110, align: 'left'},
+				{name: 'deliveryForm', index: 'deliveryForm', width: 110, align: 'center'},
+				{name: 'description', index: 'description', width: 249, align: 'left'},
+			],
+			onSelectRow: function(id){
+				var param = {referenceId : id};
+				com_fn.customSetParamParty2(param);
+			},
+			autoencode: true,
+			rowNum: 20,
+			rowList: [20, 40, 60],
+			pager: '#threeSearchPager1',
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){
+			},
+			sortname: 'partnerId',
+			sortorder: 'desc',
+			loadonce: false,
+			height: 'auto',
+			mtype: 'GET',
+			loadComplete: function(data) {
+				if (data != null) {
+					data = data.rows;
+					for (var i=0; i<data.length; i++) {
+						if (data[i].deliveryForm) {
+							if (data[i].deliveryForm == 'SRC') {
+								$("#_threeSearch1list").jqGrid("setCell", data[i].partnerId, "deliveryForm",'source form');
+							} else if (data[i].deliveryForm == 'BIN') {
+								$("#_threeSearch1list").jqGrid("setCell", data[i].partnerId, "deliveryForm",'binary form');
+							}
+						}
+					}					
+				}
+			},
+			gridComplete : function() {
+				$('#_threeSearch1list').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "360px"});
+				if ([[${hasLoadedItems}]]) {
+					$("#_threeSearch1list").jqGrid("setGridWidth", 0, true);
+			        $("#_threeSearch1list").jqGrid("setGridWidth", 760, true);
+				} else {
+					$("#_threeSearch1list").jqGrid("setGridWidth", 0, true);
+			        $("#_threeSearch1list").jqGrid("setGridWidth", $(".threeSearch1Area").width()-15, true);
+				}
+				updateGridRowCount('_threeSearch1list', 'threeSearchPager1');
+			}
+		}
+	},
+	customSetParamParty2 : function(param){
+		$.ajax({
+			url : "/project/3rdOss",
+			dataType : 'json',
+			type : 'GET',
+			cache : false,
+			data : param,
+			contentType : 'application/json',
+			success : function(data){
+				$("#_threeSearch2list").jqGrid('GridUnload');
+				if (typeof data.rows !== "undefined") {
+					com_fn.customLoadGridParty2(data.rows);
+				}
+				$('.threeSearch2Area').show();
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	customLoadGridParty2 : function(rows) {
+		var list2 = $('#_threeSearch2list');
+		list2.jqGrid({
+			datatype: 'local',
+			data : rows,
+			colNames: ['ID_KEY','ID','ReferenceId','OSSID','OSS Name','OSS Version','Download Location', 'Homepage','License', 'Copyright Text', 'Path'],
+			colModel: [
+				{name: 'componentId', index: 'componentId', width: 50, align: 'center', key:true, hidden:true},
+				{name: 'componentIdx', index: 'componentIdx', width: 50, align: 'center'},
+				{name: 'referenceId', index: 'referenceId', width: 50, align: 'center', hidden:true},
+				{name: 'ossId', index: 'ossId', width: 50, align: 'center', hidden:true},
+				{name: 'ossName', index: 'ossName', width: 220, align: 'left'},
+				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center'},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 80, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter},
+				{name: 'homepage', index: 'homepage', width: 80, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
+				{name: 'licenseName', index: 'licenseName', width: 130, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'copyrightText', index: 'copyrightText', width: 108, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'filePath', index: 'filePath', width: 113, align: 'left'},
+			],
+			autoencode: true,
+			rowNum: 20,
+			rowList: [20, 100, 200],
+			pager: '#pager2',
+			onSelectRow: function(id){
+			},
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){
+			},
+			sortname: 'componentId',
+			sortorder: 'desc',
+			loadonce: false,
+			height: 'auto',
+			mtype: 'GET',
+			loadComplete: function(data){
+				$('#_threeSearch2list').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
+			},
+			gridComplete : function() {
+				if ([[${hasLoadedItems}]]) {
+					$("#_threeSearch2list").jqGrid("setGridWidth", 0, true);
+			        $("#_threeSearch2list").jqGrid("setGridWidth", 760, true);
+				} else {
+					$("#_threeSearch2list").jqGrid("setGridWidth", 0, true);
+			        $("#_threeSearch2list").jqGrid("setGridWidth", $(".threeSearch1Area").width()-15, true);
+				}
+				updateGridRowCount('_threeSearch2list', 'threeSearchPager2');
+			}
+		});
+	},
+	partnerLoadToList : function () {
+		var data = $("#_threeSearch2list").jqGrid("getRowData");
+		var selrow = $('#_threeSearch1list').jqGrid('getGridParam', "selrow");
+		var listData = $('#_threeSearch1list').jqGrid('getRowData',selrow);
+		var addListData = $("#identificationAddList").jqGrid("getRowData");
+		
+ 		if (addListData.length > 0) {
+ 			for (var i=0; i<addListData.length; i++) {
+ 				var itemId = addListData[i].item;
+ 				if (itemId.startsWith("3rd")) {
+ 					itemId = itemId.split("-")[1];
+ 					if (listData.partnerId == itemId) {
+ 	 			    	alertify.alert([[#{msg.id.duplicate}]], function(){});
+ 	 			    	return;
+ 	 			    }
+ 				}
+ 			}
+ 		}
+		
+ 		var reference = "";
+		if (data.length > 0) {
+ 			reference = data[0].referenceId;
+ 		}
+		if ("" == reference) {
+			reference = selrow;
+		}
+		
+		var mainData = $('#list3').jqGrid('getGridParam','data');
+		
+		var finalData = {
+			prjId : [[${project.prjId}]],
+			referenceId : reference,
+			thirdPartyData : JSON.stringify(data),
+			mainData : JSON.stringify(mainData)
+		}
+		
+		$.ajax({
+			url : "/project/save3rdOss",
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : JSON.stringify(finalData),
+			contentType : 'application/json',
+			success : function(data) {
+				if (data) {
+					bom_fn.beforeSave(true);
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	changeSelectOption : function () {
+		var value = $('input[name=identificationSelectOption]:checked').val();
+		if (1 == value) {
+			$("#idenProjectSearch").hide();
+			$("#idenPartnerSearch").hide();
+			$("#idenUploadSearch").show();
+		} else if (2 == value) {
+			$("#idenUploadSearch").hide();
+			$("#idenPartnerSearch").hide();
+			$("#idenProjectSearch").show();
+		} else {
+			$("#idenUploadSearch").hide();
+			$("#idenProjectSearch").hide();
+			$("#idenPartnerSearch").show();
+		}
+	},
+	getIdentificationAddList : function (referenceDiv) {
+		// 3rd, dep, src, bin > add list
+		$.ajax({
+			url : "/project/getIdentificationAddList",
+			type : 'POST',
+			data : JSON.stringify({"prjId" : [[${project.prjId}]], "referenceDiv" : referenceDiv}),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success : function(data) {
+				$("#identificationAddList").jqGrid('GridUnload');
+				com_fn.setIdentificationJqGrid(data, referenceDiv);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	displayLoadedItem : function (cellvalue, options, rowObject) {
+		var display = "";
+		if ("FILE" == rowObject.item) {
+			display = "<a class=\"urlLink\" title=\"" + rowObject.regDt + " (" + rowObject.regId + ")\" href=\"/download/" + rowObject.fileSeq + "/" + rowObject.logiNm + "\">" + cellvalue + "</a>";
+		} else {
+			var protocol = window.location.protocol;
+			var host =  window.location.host;
+			var url = protocol + "//" + host;
+			var id = rowObject.item.split("-")[1];
+			if (rowObject.item.indexOf("prj") > -1) {
+				url += "/project/shareUrl/" + id;
+			} else {
+				url += "/partner/shareUrl/" + id;
+			}
+			display = "<a class=\"urlLink\" href=\"" + url + "\" target=\"_blank\">" + cellvalue + "</a>";
+		}
+		return display;
+	},
+	setIdentificationJqGrid : function (data, referenceDiv) {
+		loadingIden.show();
+		
+		const refDiv = referenceDiv;
+		var identificationAddList = $("#identificationAddList");
+		uploadGridData = data.rows;
+		var counts = data.counts;
+		
+		var colModelArr = [];
+		var colModelObj = {name: 'id', index: 'id', hidden: true, key: true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'item', index: 'item', width: 40, editable: false, align: 'center'};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'loadedItem', index: 'loadedItem', width: 100, editable: false, align: 'center', search: false, formatter: com_fn.displayLoadedItem};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'loadedTab', index: 'loadedTab', editable: false, align: 'center', search: false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'fileSeq', index: 'fileSeq', hidden: true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'logiNm', index: 'logiNm', hidden: true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'regId', index: 'regId', hidden: true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'regDt', index: 'regDt', hidden: true};
+		colModelArr.push(colModelObj);
+		
+		identificationAddList.jqGrid({
+			datatype: 'local',
+			data : uploadGridData,
+			colNames: ['ID', 'Item', 'Loaded Item', 'Loaded Tab(Count)', 'File Seq', 'File LogiNm', 'Reg Id', 'Reg Dt'],
+			colModel: colModelArr,
+			autoencode: true,
+			editurl:'clientArray',
+ 			autowidth: true,
+			height: 'auto',
+			gridview: true,
+		   	pager: '#identificationAddPager',
+			rowNum: 200,
+			recordpos:'right',
+		    toppager:true,
+			loadonce:true,
+			cellEdit : true,
+			cellsubmit : 'clientArray',
+			ignoreCase: true,
+			multiselect: true,
+			multiselectWidth: 35,
+		    onSortCol: function (index, columnIndex, sortOrder) {
+		    	isSort = true;
+		    },
+		    beforeSelectRow: function(rowid, e) {
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+
+			    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       iCol = $.jgrid.getCellIndex($td[0]);
+			       cm = p.colModel[iCol];
+			       
+			       if (cm != null && cm.name === "cb") {
+			           // multiselect checkbox is clicked
+			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+			       }
+			    }
+			    return false;
+			},
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				
+			},
+		    loadComplete: function(data) {
+		    	if (data.records > 0) {
+					var multRowIds = []; 
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+
+					for (var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						// checkbox click event
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+					
+					// 한번에 처리
+					$("#identificationAddList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
+				}
+		    	
+		    	var pageButtonArea = $('#entireList_toppager_left');
+				if ($("#identificationAddList_toppager_left").find('button').length == 0) {
+					var permission = [[${project.statusPermission}]] == 1;
+                	var identificationStatus = [[${project.identificationStatus}]];
+                	var dropYn = [[${project.dropYn}]];
+                	
+                	var appendBtn = "";
+                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"add\" onclick=\"com_fn.addUploadFunc('identificationAddList', "+permission+", '"+refDiv+"')\">";
+                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
+                		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                	} else {
+                		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
+                    		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		}
+                	}
+            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete\" onclick=\"com_fn.delUploadFunc('identificationAddList', 'main', "+permission+", '"+refDiv+"')\">";
+            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
+                		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
+                    		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		}
+                	}
+            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"reset\" onclick=\"com_fn.resetUploadFunc('identificationAddList', 'main', "+permission+", '"+refDiv+"')\">";
+            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
+                		appendBtn += "<i class=\"fas fa-undo-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
+                    		appendBtn += "<i class=\"fas fa-undo-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-undo-alt\"></i></button>";
+                		}
+                	}
+                    $("#identificationAddList_toppager_left").append(appendBtn);
+                }
+		    }, 
+		    gridComplete: function() {
+		    	com_fn.updateIdentificationLoadedListCount("identificationAddPager", counts);
+		    }
+		});
+	},
+	updateIdentificationLoadedListCount : function (pagerId, data) {
+		var totalCnt = 0;
+		var total = "";
+		var components = "";
+		
+		for (const key in data) {
+			if ("Project" == key || "FILE" == key) {
+				var name = key;
+				totalCnt += data[key];
+				if ("" != total) {
+					total += " ";
+				}
+				if ("Project" == key) {
+					name = "Project/3rd party";
+				}
+				total += name + "(" + data[key] + ")";
+			} else {
+				if ("" != components) {
+					components += " ";
+				}
+				components += key + "(" + data[key] + ")";
+			}
+		}
+		
+		var message = '<div dir="ltr" class="text-right-overflow">Total(' + totalCnt + '): ' + total + '<br>OSS Components: ' + components + '</div>';
+	    $('#' + pagerId).children().last().find('#' + pagerId+ '_right').html(message);
+	},
+	addUploadFunc : function (target, permission, referenceDiv) {
+		const data = {
+        	category: "project/fragments",
+           	templateName: "edit",
+            fragmentName: "uploadFragments"
+      	};
+
+        postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+        	loading.hide();
+        	if (typeof alertify.uploadIdentification === "undefined") {
+        		alertifyUploadDialog("uploadIdentification", "900", "dialog_addUpload_" + [[${project.prjId}]]);
+        	}
+        	alertify.uploadIdentification().setContent(res).show();
+			$(alertify.uploadIdentification()).find(".ajs-content").css("padding", "0");
+			
+			com_fn.identificationUploadFile(referenceDiv);
+			callAutoCompleteFnc("autoComProjectNmConf");
+			
+			$('#_threeSearch1list').jqGrid(com_fn.setParamParty1());
+			$('#_searchProjectList1').jqGrid(com_fn.setParamProject1(referenceDiv));
+			$('#_searchProjectList2').jqGrid(com_fn.setParamProject2());
+       	});
+	},
+	delUploadFunc : function (target, permission, permission, referenceDiv) {
+		var chk = $("#" + target).jqGrid("getGridParam", "selarrrow").length;
+		if (chk == 1) {
+			var selData = $("#" + target).jqGrid("getGridParam", "selarrrow");
+			var delData;
+			
+			for (var i in selData) {
+				var delData = $("#" + target).jqGrid("getRowData", selData[i]);
+				loadedTab = delData.loadedTab;
+			}
+			
+			if (loadedTab.indexOf(",") > -1) {
+				const data = {
+					category: "project/fragments",
+					templateName: "edit",
+					fragmentName: "deleteUploadFragments"
+				};
+				postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+					var tempBody = $('<div>').html(res);
+					
+					if (typeof alertify.deleteUploadAlert === "undefined") {
+						alertifyDeleteDialog("deleteUploadAlert", "400", "dialog_deleteUpload_" + [[${project.prjId}]]);
+			        }
+					
+					var loadedTabs = loadedTab.split(",");
+					for (var i in loadedTabs) {
+						let tabNm = loadedTabs[i].split("(")[0];
+						if ("3rdParty" == tabNm) {
+							$(tempBody).find("#3rdCheck").prop("disabled", false);
+						} else if ("DEP" == tabNm) {
+							$(tempBody).find("#depCheck").prop("disabled", false);
+						} else if ("SRC" == tabNm) {
+							$(tempBody).find("#srcCheck").prop("disabled", false);
+						} else if ("BIN" == tabNm) {
+							$(tempBody).find("#binCheck").prop("disabled", false);
+						}
+					}
+					tempBody.find('#deleteUploadApply').attr('onclick', 'com_fn.selectDeleteUpload(' + JSON.stringify(delData) + ',' + referenceDiv + ')');
+					alertify.deleteUploadAlert().setContent(tempBody.html()).show();
+	    			$(alertify.deleteUploadAlert()).find(".ajs-content").css("padding", "0");
+				});
+			} else {
+				alertify.confirm([[#{msg.common.confirm.delete}]], function(){
+					loadingIden.show();
+					setTimeout(function() {
+						var fileSeq = delData.fileSeq;
+						var data = {"prjId" : [[${project.prjId}]], "referenceId" : "", "fileSeq" : ""};
+						if ("" == fileSeq) {
+							var item = delData.item;
+							data["referenceId"] = item;
+						} else {
+							data["fileSeq"] = fileSeq;
+						}
+						var tabs = [];
+						var loadedTabStr = loadedTab.split("(")[0];
+						
+						switch(loadedTabStr.toUpperCase()){
+							case "DEP":		loadedTabStr = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]];	break;
+							case "SRC":		loadedTabStr = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]];	break;
+							case "BIN":		loadedTabStr = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]];	break;
+							case "ANDROID":	loadedTabStr = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_ANDROID')}]];	break;
+						}
+						
+						tabs.push(loadedTabStr);
+						data["referenceDiv"] = tabs;
+						com_fn.deleteUploadData(data, referenceDiv);
+					}, 100);
+				});
+			}
+		} else if (chk > 1) {
+			loadingIden.hide();
+			alertify.alert("Please select only one row to delete.", function(){});
+			return;
+		} else {
+			loadingIden.hide();
+			alertify.alert("Please select only one row to delete.", function(){});
+			return;
+		}
+	},
+	resetUploadFunc : function (target, permission, permission, referenceDiv) {
+		var rowIds = $("#" + target).jqGrid('getDataIDs');
+		var selectedRowIds = $("#" + target).jqGrid("getGridParam", "selarrrow");
+		var items = [];
+		
+		if (selectedRowIds.length > 0) {
+			items = selectedRowIds;
+		} else {
+	 		for (var i in rowIds) {
+	 			if (selectedRowIds.indexOf(rowIds[i]) === -1) {
+	 				$("#" + target).jqGrid("setSelection", rowIds[i], true);
+	 			}
+	 		}
+	 		items = rowIds;
+		}
+		
+		alertify.confirm("Do you want to reset all records and uploaded files related to the selected row?<br/>All data will be permanently deleted.", function(){
+			loadingIden.show();
+			
+			setTimeout(function() {
+				$.ajax({
+					url : '/project/delIdentificationUpload',
+					type : 'POST',
+					data : JSON.stringify({"prjId" : [[${project.prjId}]], "items" : items, "reset" : "Y"}),
+					dataType : 'json',
+					cache : false,
+					async : false,
+					contentType : 'application/json',
+					success: function(data) {
+						loadingIden.hide();
+						
+						if (data.isValid) {
+							bom_fn.beforeSave(true);
+						} else {
+							alertify.error([[#{msg.common.valid}]], 0);
+						}
+					},
+					error: function(data){
+						loadingIden.hide();
+						alertify.error([[#{msg.common.valid}]], 0);
+					}
+				});
+			}, 100);
+		});
+	},
+	selectDeleteUpload : function (data, referenceDiv) {
+		alertify.alert([[#{msg.common.confirm.delete}]], function(){
+			loadingIden.show();
+			
+			setTimeout(function() {
+				var tabs = [];
+				$('input:checkbox[name="deleteCheck"]').each(function(){
+					if ($(this).is(':checked')) {
+						tabs.push($(this).val());
+					}
+				});
+				
+				if (tabs.length == 0) {
+					loadingIden.hide();
+					alertify.alert([[#{msg.common.select.tab}]], function(){});
+					return;
+				} else {
+					var fileSeq = data.fileSeq;
+					var delData = {"prjId" : [[${project.prjId}]], "referenceId" : "", "fileSeq" : ""};
+					if ("" == fileSeq) {
+						var item = data.item;
+						delData["referenceId"] = item;
+					} else {
+						delData["fileSeq"] = fileSeq;
+					}
+					delData["referenceDiv"] = tabs;
+					com_fn.deleteUploadData(delData, referenceDiv);
+				}
+			}, 100);
+		});
+	},
+	deleteUploadData : function (delData, referenceDiv) {
+		$.ajax({
+			url : '/project/delIdentificationUpload',
+			type : 'POST',
+			data : JSON.stringify(delData),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function(data) {
+				loadingIden.hide();
+				
+				if (data.isValid) {
+					bom_fn.beforeSave(true);
+				} else {
+					alertify.error([[#{msg.common.valid}]], 0);
+				}
+			},
+			error: function(data){
+				loadingIden.hide();
+				alertify.error([[#{msg.common.valid}]], 0);
+			}
+		});
+	},
+	identificationUploadFile : function (referenceDiv) {
+    	const data = {
+		   	category: "project/fragments",
+		    templateName: "edit",
+		    fragmentName: "selectSheetFragments"
+		};
+		postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+			var tempBody = $('<div>').html(res);
+			
+			if (typeof alertify.uploadSheets === "undefined") {
+	        	alertifyUploadDialog("uploadSheets", "700", "dialog_selectSheet_" + [[${project.prjId}]]);
+	        }
+			
+			var accept1 = '';
+			var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+			for (var i in fileAccept) {
+				if ('12' == fileAccept[i].cdDtlNo) {
+					accept1 = fileAccept[i].cdDtlExp;
+				}
+			}
+			
+			//파일업로드
+			$('#identificationCsvFile').uploadFile({
+				url:'/project/csvFile',
+				multiple:false,
+				dragDrop:true,
+				fileName:'myfile',
+				allowedTypes:accept1,
+				sequential:true,
+				sequentialCount:1,
+				formData:{"registFileId" : $('#identificationCsvFileId').val()},
+				onSubmit : function(files) {
+					loadingIden.show();
+				},
+				onSuccess:function(files,data,xhr,pd) {
+					loadingIden.hide();
+					var result = jQuery.parseJSON(data);
+					
+					if (result[1] == null) {
+						if (result[0] == "TAB_GUBN_ERROR") {
+							alertify.error([[#{msg.common.upload.failed.separator}]], 0);
+						} else {
+							alertify.error([[#{msg.common.valid}]], 0);
+						}
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					} else {
+						if (result[0] == "FILE_SIZE_LIMIT_OVER") {
+							alertify.alert(result[1], function(){
+								$('.ajax-file-upload-statusbar').fadeOut('slow');
+								$('.ajax-file-upload-statusbar').remove();
+							});
+						} else if(result[2] == "CSV_FILE") {
+							var sheetNums = ["0"];
+							com_fn.getOtherSheetData(referenceDiv, result[0][0].registSeq, sheetNums);
+							
+							$('#identificationCsvFileId').val(result[0][0].registFileId);
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						} else if (result[2] == "EXCEL_FILE") {
+							var checkSheetNms = [];
+							var checkTabNms = [];
+							// bom 또는 android 일 경우
+							if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]] == referenceDiv) {
+								$("#identification_android").hide();
+								$("#identification_bom").show();
+								checkSheetNms = ["3RD PARTY", "DEP", "SRC", "BIN", "SBOM"];
+								checkTabNms = ["DEP", "SRC", "BIN"];
+							} else {
+								$("#identification_bom").hide();
+								$("#identification_android").show();
+								checkSheetNames.push("BIN");
+							}
+							
+							tempBody.find("#selectSheetBody").empty();
+							if (result[1].length != 0) {
+								var appendHtml = "";
+								for (var i = 0; i < result[1].length; i++) {
+									var sheetTr = "<tr>";
+									var checkFlag = false;
+ 									var sheetName = result[1][i].name.toUpperCase().trim();
+									
+ 									for (var j = 0; j < checkSheetNms.length; j++) {
+ 										if (sheetName.toUpperCase().indexOf(checkSheetNms[j]) > -1) {
+											checkFlag = true;
+											break;
+										}
+									}
+ 									
+  									if (checkFlag) {
+  										checkFlag = false;
+ 										sheetTr += '<td><input type="checkbox" class="sheetRowCheckBox mr-2" name="sheetCheck">' + sheetName + '</td>';
+ 										for (var j = 0; j < checkTabNms.length; j++) {
+ 											if (sheetName.indexOf(checkTabNms[j]) > -1) {
+ 												checkFlag = true;
+												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
+ 											} else {
+ 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
+ 											}
+										}
+ 										sheetTr += '</tr>';
+ 										if (checkFlag) {
+ 											sheetTr = sheetTr.replace('name="sheetCheck"', 'name="sheetCheck" checked');
+ 	 									} else {
+ 	 										sheetTr = sheetTr.replaceAll('class="form-check-input"', 'class="form-check-input" disabled');
+ 	 									}
+ 										appendHtml += sheetTr;
+									}
+								}
+								
+								if ("" != appendHtml) {
+									tempBody.find("#selectSheetBody").append(appendHtml);
+									tempBody.find('#selectSheetApply').attr('onclick', 'com_fn.getSheetData(' + referenceDiv + ', ' + result[0][0].registSeq + ')');
+									
+									alertify.uploadSheets().setContent(tempBody.html()).show();
+									$(alertify.uploadSheets()).find(".ajs-content").css("padding", "0");
+									$('#identificationCsvFileId').val(result[0][0].registFileId);
+								} else {
+									var msg = "<b>" + result[0][0].originalFilename + "</b> has no sheets available for upload."
+									alertify.alert(msg, function() {});
+								}
+							} else {
+								var msg = result[0][0].originalFilename + " has no sheets available for upload."
+								alertify.alert(msg, function() {});
+							}
+							
+	 						$('.ajax-file-upload-statusbar').fadeOut('slow');
+	 						$('.ajax-file-upload-statusbar').remove();
+						} else if (result[2] == "SPDX_SPREADSHEET_FILE") {
+							var sheetNums = ["1", "4"];
+							com_fn.getOtherSheetData(referenceDiv, result[0][0].registSeq, sheetNums);
+
+							$('#identificationCsvFileId').val(result[0][0].registFileId);
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						} else {
+							alertify.error([[#{msg.common.valid}]], 0);
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						}
+					}
+				}
+			});
+		});
+    },
+    getSheetData : function (referenceDiv, seq) {
+		var sheetNum = [];
+		
+		const $radio = $('input[name^="sheetNameSelect"]');
+		$radio.each(function(){
+			if ($(this).is(':checked') && $(this).closest('tr').find("input[type='checkbox']").is(":checked")) {
+				sheetNum.push($(this).val());
+			}
+		});
+		
+		if (sheetNum.length == 0) {
+			alertify.alert([[#{msg.common.check.sheet}]], function(){});
+			
+			return;
+		} else {
+			loadingIden.show();
+			
+			var readType = referenceDiv;
+			var finalData = {"readType" : "" + readType, "prjId" : [[${project.prjId}]], "sheetNums" : sheetNum , "fileSeq" : "" + seq};
+			var object = {fileSeq : seq};
+			
+			if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]] == referenceDiv) {
+				fn_grid_com.totalGridSaveMode('depList');
+				cleanErrMsg("depList");
+				var depMainData = $("#depList").jqGrid('getGridParam','data');
+				
+				fn_grid_com.totalGridSaveMode('srcList');
+				cleanErrMsg("srcList");
+				var srcMainData = $("#srcList").jqGrid('getGridParam','data');
+				
+				fn_grid_com.totalGridSaveMode('binList');
+				cleanErrMsg("binList");
+				var binMainData = $("#binList").jqGrid('getGridParam','data');
+				
+				finalData["depMainData"] = JSON.stringify(depMainData);
+				finalData["srcMainData"] = JSON.stringify(srcMainData);
+				finalData["binMainData"] = JSON.stringify(binMainData);
+			} else {
+				fn_grid_com.totalGridSaveMode('binAndroidList');
+				cleanErrMsg("binAndroidList");
+				
+				var target = $("#binAndroidList");
+				var binandroidMainData = target.jqGrid('getGridParam','data');
+				
+				finalData["binandroidMainData"] = JSON.stringify(binandroidMainData);
+			}
+			
+			setTimeout(function() {
+				com_fn.exeLoadReportData(finalData, referenceDiv);
+			}, 100);
+		}
+    },
+    getOtherSheetData : function (referenceDiv, seq, sheetNums) {
+    	loadingIden.show();
+    	
+    	var sheetNum = sheetNums;
+    	var readType = referenceDiv;
+    	var finalData = {"readType":"" + readType,"prjId" : [[${project.prjId}]], "sheetNums" : sheetNum , "fileSeq" : ""+seq};
+    	
+    	if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]] == referenceDiv) {
+    		fn_grid_com.totalGridSaveMode('depList');
+			cleanErrMsg("depList");
+			fn_grid_com.totalGridSaveMode('srcList');
+			cleanErrMsg("srcList");
+			fn_grid_com.totalGridSaveMode('binList');
+			cleanErrMsg("binList");
+    		
+    		var depMainData = $("#depList").jqGrid('getGridParam','data');
+    		depMainData.forEach (function (el, index) {
+    			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
+    				el.packageUrl = "";
+    			}
+    		});
+    		var srcMainData = $("#srcList").jqGrid('getGridParam','data');
+    		srcMainData.forEach (function (el, index) {
+    			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
+    				el.packageUrl = "";
+    			}
+    		});
+    		var binMainData = $("#binList").jqGrid('getGridParam','data');
+    		binMainData.forEach (function (el, index) {
+    			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
+    				el.packageUrl = "";
+    			}
+    		});
+    		
+    		finalData["depMainData"] = JSON.stringify(depMainData);
+			finalData["srcMainData"] = JSON.stringify(srcMainData);
+			finalData["binMainData"] = JSON.stringify(binMainData);
+    	} else {
+    		fn_grid_com.totalGridSaveMode('binAndroidList');
+			cleanErrMsg("binAndroidList");
+			
+			var target = $("#binAndroidList");
+			var binandroidMainData = target.jqGrid('getGridParam','data');
+			
+			finalData["binandroidMainData"] = JSON.stringify(binandroidMainData);
+    	}
+		
+    	setTimeout(function() {
+			com_fn.exeLoadReportData(finalData, referenceDiv);
+		}, 100);
+    },
+    exeLoadReportData : function (finalData, referenceDiv) {
+    	$.ajax({
+			url : '/project/getIdentificationSheetData',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function(data) {
+				loadingIden.hide();
+				
+				if ("false" == data.isValid) {
+					if (data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+					}
+				} else {
+					if (typeof data.resultData.identificationStatus !== "undefined") {
+						curIdenStatus = data.resultData.identificationStatus;
+					}
+					if (typeof data.resultData.isExistsExcludeYn !== "undefined") {
+						if (!alertify.hasExcludeYnAlert) {
+							alertify.dialog('hasExcludeYnAlert', function() {
+								var settings;
+								
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons.pop();
+										setup.focus.element = 0;
+										
+										return setup;
+									},
+									settings: {
+										oncontinue: null
+									},
+									callback: function(closeEvent) {
+										alertify.confirm().callback.call(this, closeEvent);
+									}
+								};
+							}, false, 'confirm');
+						}
+						alertify.hasExcludeYnAlert([[#{msg.common.exists.excludeYn}]], function(){
+							bom_fn.beforeSave(true);
+							com_fn.closeSelectSheet();
+						});
+					} else {
+						bom_fn.beforeSave(true);
+						com_fn.closeSelectSheet();
+					}
+				}
+			},
+			error: function(data) {
+				loadingIden.hide();
+				$('.identificationFileArea').children().remove();
+				alertify.error([[#{msg.common.valid}]], 0);
+			}
+		});
+    },
+    closeSelectSheet : function () {
+    	$("#dialog_selectSheet_" + [[${project.prjId}]]).find(".ajs-close").trigger("click");
+    },
+    closeSelectSearch : function () {
+    	searchedData = {};
+    	$("#dialog_selectSearch_" + [[${project.prjId}]]).find(".ajs-close").trigger("click");
+    },
+    closeDeleteUpload : function () {
+    	$("#dialog_deleteUpload_" + [[${project.prjId}]]).find(".ajs-close").trigger("click");
+    }
 }
 
 	var fn_comment = {
@@ -2607,6 +3996,8 @@ var com_fn = {
 	 			$(".contents-area").addClass("col-12");
 	 			$(".comment-area").hide();
 			}
+			
+			resizeUploadAreaJqGrid();
 		},
 		showCommentHistory : function () {
 			fn_comment.activateCommentArea();

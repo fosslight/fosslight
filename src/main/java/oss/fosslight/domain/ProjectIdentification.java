@@ -361,6 +361,11 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private String exportRowStr;
 	
+	private String refLoadedVal;
+	
+	private String originalDownloadLocation;
+	private int urlSearchSeq;
+	
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
@@ -2205,5 +2210,29 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setExportRowStr(String exportRowStr) {
 		this.exportRowStr = exportRowStr;
+	}
+
+	public String getRefLoadedVal() {
+		return refLoadedVal;
+	}
+
+	public void setRefLoadedVal(String refLoadedVal) {
+		this.refLoadedVal = refLoadedVal;
+	}
+
+	public String getOriginalDownloadLocation() {
+		return originalDownloadLocation;
+	}
+
+	public void setOriginalDownloadLocation(String originalDownloadLocation) {
+		this.originalDownloadLocation = originalDownloadLocation;
+	}
+
+	public int getUrlSearchSeq() {
+		return urlSearchSeq;
+	}
+
+	public void setUrlSearchSeq(int urlSearchSeq) {
+		this.urlSearchSeq = urlSearchSeq;
 	}
 }

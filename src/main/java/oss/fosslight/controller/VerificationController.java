@@ -107,12 +107,14 @@ public class VerificationController extends CoTopComponent {
 		
 		List<OssComponents> list = null;
 		try {
-			if(!projectMaster.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION)) {
+			if (!projectMaster.getDistributionType().equals(CoConstDef.CD_DTL_NOTICE_TYPE_CONTRIBUTION)) {
 				list = verificationService.getVerifyOssList(projectMaster);
-				if (list != null) list = verificationService.setMergeGridData(list);
+				if (CollectionUtils.isNotEmpty(list)) {
+					list = verificationService.setMergeGridData(list);
+				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
@@ -465,21 +467,38 @@ public class VerificationController extends CoTopComponent {
 			
 			// README 파일 내용 DB 에 저장
 			if (CollectionUtils.isNotEmpty(result)) {
+				String verifyChkList = "";
+				String exceptFileContent = "";
 				String readmeFileName = "";
+				String verifyBinary = "";
+				
 				for (Map<String, Object> resultMap : result) {
-					if (resultMap.containsKey("readmeFileName")) {
+					if (isEmpty(verifyChkList) && resultMap.containsKey("verifyChkList")) {
+						verifyChkList = String.valueOf(resultMap.get("verifyChkList"));
+					}
+					if (isEmpty(exceptFileContent) && resultMap.containsKey("exceptFileContent")) {
+						exceptFileContent = String.valueOf(resultMap.get("exceptFileContent"));
+					}
+					if (isEmpty(readmeFileName) && resultMap.containsKey("readmeFileName")) {
 						readmeFileName = String.valueOf(resultMap.get("readmeFileName"));
-						break;
+					}
+					if(isEmpty(verifyBinary) && resultMap.containsKey("verifyBinary")) {
+						verifyBinary = String.valueOf(resultMap.get("verifyBinary"));
 					}
 				}
 				
 				Project param = new Project();
 				param.setPrjId(prjId);
+				param.setExceptFileContent(exceptFileContent);
+				param.setVerifyFileContent(verifyChkList);
+				param.setBinaryFileYn(verifyBinary);
+				
+				projectService.registVerifyContents(param);
+				
 				if (!isEmpty(readmeFileName)) {
 					param.setReadmeFileName(readmeFileName);
 					param.setReadmeYn(CoConstDef.FLAG_YES);
 				} else {
-					param.setReadmeFileName(null);
 					param.setReadmeYn(CoConstDef.FLAG_NO);
 				}
 				projectService.registReadmeContent(param);
@@ -542,7 +561,7 @@ public class VerificationController extends CoTopComponent {
 	}
 	
 	@PostMapping(value=VERIFICATION.SAVE_PATH,  produces = {
-			MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", 
+			MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8",
 			MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
 	public @ResponseBody ResponseEntity<Object> savePath(@RequestBody Map<Object, Object> map, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception{
 		log.info("URI: "+ "/project/verification/savePath");

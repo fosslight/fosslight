@@ -8,300 +8,372 @@
 <th:block th:replace="project/src-script :: srcScript"></th:block>
 <th:block th:replace="project/bin-script :: binScript"></th:block>
 <th:block th:replace="project/bom-script :: bomScript"></th:block>
+<!-- <th:block th:if="${batFlag}" th:replace="project/bat-script :: batScript"></th:block> -->
 <th:block th:replace="project/identification-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
-<div class="wrapper">
-    <div class="custom-layout multi-grid-page">
-        <section class="content-header">
-            <div class="container-fluid grid-sm">
-                <div class="row">
-                	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
-                	<div class="float-right align-items-center mt-2" style="margin-left: auto;">
-                        <div class="float-right">
-                        	<th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
-                               	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
-                               	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
-                               	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
-                               	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
-                        	</th:block>
-                        	<button th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV') and project.statusRequestYn == 'N'}"
-                        			type="button" class="btn btn-default disabled btn-sm width-6rem px-1" id="btnRejectNotice" th:text="Reject" th:title="|If you need modify, please leave a comment on FOSSLight team.|"></button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
-                       	</div>
-                        <span th:if="${@CommonFunction.isAdmin() and project.binBinaryFileId != null}" class="icheck-danger center-atom mr-1 ignoreBinaryDbCheckbox projdecBtn" style="font-size: .85rem">
-                        	<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
-                            <label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
-                        </span>
-                   	</div>
-                </div>
-            </div>
-        </section>
-        <section class="content">
-            <div class="container-fluid">
-            	<div class="row">
-            	<div class="contents-area col-lg-9">
-            	<div class="topper-content">
-                <div class="card card-secondary card-tabs grid-sm">
-                    <div id="card_header" class="card-header d-flex p-0 pt-1">
-                        <div class="d-flex align-items-center">
-                            <ul class="nav nav-tabs" id="menu-tab" role="tablist">
-                                <li class="nav-item">
-                                    <a aria-controls="menu-third-party" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-third-party" id="tabMenuParty" role="tab" th:text="'3rd party'"></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a aria-controls="menu-dep" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-dep" id="tabMenuDep" role="tab" th:text="DEP"></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a aria-controls="menu-src" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-src" id="tabMenuSrc" role="tab" th:text="SRC"></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a aria-controls="menu-bin" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-bin" id="tabMenuBin" role="tab" th:text="BIN"></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a aria-controls="menu-bom" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-bom" id="tabMenuBom" role="tab" th:text="SBOM"></a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="d-flex-align" style="margin-left: auto;">
-                           	<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="px-2 pointer idenReset" id="reset" title="reset" th:onclick="|com_fn.reset('Bom')|">
-                            	<i class="fas fa-undo-alt customIcon2"></i>
-							</span>
-							<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="ml-2 mr-2 px-2 pointer idenSave" id="save" th:onclick="|com_fn.save('Bom')|" title="save">
-								<i class="fas fa-save customIcon2"></i>
-							</span>
-                           	 <span class="btn btn-tool ml-1 mr-2 pointer" id="expandBtn" data-card-widget="collapse" title="Collapse">
-                            	<i class="fas fa-minus"></i>
-                           	</span>
-                       	</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content" id="identification-tabContent">
-                            <!-- 3rd party -->
-                            <div class="tab-pane fade" id="menu-third-party" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-                            	<th:block th:if="${editMode == 'Y'}">
-                            		<th:block th:replace="project/fragments/edit :: partyFragments"></th:block>
-                            	</th:block>
-                            	<th:block th:unless="${editMode == 'Y'}">
-                            		<th:block th:replace="project/fragments/view :: partyFragments"></th:block>
-                            	</th:block>
+	<div class="wrapper">
+        <div class="custom-layout multi-grid-page">
+            <section class="content-header">
+                <div class="container-fluid grid-sm">
+                    <div class="row">
+                        <div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
+                        <div class="float-right align-items-center mt-2" style="margin-left: auto;">
+                        	<div class="helpLink f-left dropdown float-right px-1">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="|How to use FossLight Hub|"></a>
+                                    <a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|" th:text="'Role of Creator & Reviewer'"></a>
+                                </div>
                             </div>
-                           	<!-- /.3rd party -->
-
-                            <!-- dep -->
-                           	<div class="tab-pane fade" id="menu-dep" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-                              	<th:block th:if="${editMode == 'Y'}">
-                                	<th:block th:replace="project/fragments/edit :: depFragments"></th:block>
-                              	</th:block>
-                             	<th:block th:unless="${editMode == 'Y'}">
-                               		<th:block th:replace="project/fragments/view :: depFragments"></th:block>
-                              	</th:block>
-                       		</div>
-                         	<!-- /. dep -->
-                            
-                            <!-- src -->
-                           	<div class="tab-pane fade" id="menu-src" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-                               	<th:block th:if="${editMode == 'Y'}">
-                                	<th:block th:replace="project/fragments/edit :: srcFragments"></th:block>
-                               	</th:block>
-                              	<th:block th:unless="${editMode == 'Y'}">
-                                	<th:block th:replace="project/fragments/view :: srcFragments"></th:block>
-                            	</th:block>
-                           	</div>
-                         	<!-- /.src -->
-                       		
-                        	<!-- bin -->
-                          	<div class="tab-pane fade" id="menu-bin" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-                             	<th:block th:if="${editMode == 'Y'}">
-                               		<th:block th:replace="project/fragments/edit :: binFragments"></th:block>
-                               	</th:block>
-                              	<th:block th:unless="${editMode == 'Y'}">
-                                	<th:block th:replace="project/fragments/view :: binFragments"></th:block>
-                              	</th:block>
-                          	</div>
-                          	<!-- /.bin -->
-                         	
-                          	<!-- bom -->
-                          	<div class="tab-pane fade" id="menu-bom" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-                              	<th:block th:if="${editMode == 'Y'}">
-                                	<th:block th:replace="project/fragments/edit :: bomFragments"></th:block>
-                              	</th:block>
-                               	<th:block th:unless="${editMode == 'Y'}">
-                                	<th:block th:replace="project/fragments/view :: bomFragments"></th:block>
-                              	</th:block>
-                           	</div>
-                         	<!-- /.bom -->
+                            <div class="float-right">
+                                <button th:if="${@CommonFunction.isAdmin() and @environment.getProperty('ai.server.url') != null}" type="button" class="btn btn-outline-lg-red btn-sm width-10rem px-1" id="ai"><i class="fas fa-user-astronaut pt-1"></i> AI(Experimental)</button>
+                                <button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.dropYn != 'Y'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" id="autoReview">CoReviewer</button>
+                            	<button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.dropYn != 'Y'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" style="display: none;" id="autoReviewStop">Stop CoReviewer</button>
+                        		<th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
+                                	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm" th:onclick="|com_fn.confirm()|"></button>
+                                	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                        		</th:block>
+                        		<button th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}"
+                        				type="button" class="btn btn-default disabled btn-sm width-6rem px-1" th:text="Reject" th:onclick="|com_fn.rejectNotice()|" th:title="|This project has been deployed. If you need to modify, please leave a comment to the reviewer.|"></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+                            </div>
+                            <span th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}" class="icheck-danger center-atom mr-1 ignoreBinaryDbCheckbox projdecBtn" id="ignoreBinaryDbArea" style="font-size: .85rem; display: none;">
+                            	<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
+                               	<label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
+                         	</span>
                         </div>
                     </div>
                 </div>
-                </div>
-				<div class="bottom-component mb-5">
-                <div class="row pl-2 grid-area" id="gridAreaParty" name="gridArea" style="width: 100%; display: none;">
-                    <!-- buttons -->
-                    <div class="col-md-12 mb-3 pl-2">
-                        <div class="row">
-                            
-                        </div>
-                    </div>
-                    <!-- grids -->
-                    <div class="col-md-12 jqGridSet partyBtn">
-                        <table id="list3"><tr><td></td></tr></table>
-                        <div id="pager3"></div>
-                    </div>
-                </div>
-                <div class="row pl-2 grid-area" id="gridAreaDep" name="gridArea" style="width: 100%; display: none;">
-                    <!-- buttons -->
-                    <div class="col-md-12 mb-3 pl-2">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="row float-left pl-2 depBtn">
-                                	<button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" class="btn btn-sm btn-outline-dark dropdown-toggle idenCheckBtn" type="button" data-toggle="dropdown">
-                                        <span class="dropdown-icon"></span>Pre-Review
-                                   	</button>
-                                   	<div class="dropdown-menu" role="menu">
-                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Open Source'"></span>
-                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'License'"></span>
-                                   	</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row float-right">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- grids -->
-                    <div class="col-md-12 jqGridSet depBtn">
-                        <table id="depList"><tr><td></td></tr></table>
-                        <div id="depPager"></div>
-                    </div>
-                </div>
-                <div class="row pl-2 grid-area" id="gridAreaSrc" name="gridArea" style="width: 100%; display: none;">
-                    <!-- buttons -->
-                    <div class="col-md-12 mb-3 pl-2">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="row float-left pl-2 srcBtn">
-                                    <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" class="btn btn-outline-dark btn-sm dropdown-toggle idenCheckBtn" type="button" data-toggle="dropdown">
-                                        <span class="dropdown-icon"></span>Pre-Review
-                                  	</button>
-                                    <div class="dropdown-menu" role="menu">
-                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Open Source'"></span>
-                                   		<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'License'"></span>
-                                   	</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row float-right">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- grids -->
-                    <div class="col-md-12 jqGridSet srcBtn">
-                        <table id="srcList"><tr><td></td></tr></table>
-                        <div id="srcPager"></div>
-                    </div>
-                </div>
-                <div class="row pl-2 grid-area" id="gridAreaBin" name="gridArea" style="width: 100%; display: none;">
-                    <!-- buttons -->
-                    <div class="col-md-12 mb-3 pl-2">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="row float-left pl-2 binBtn">
-                                    <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" class="btn btn-outline-dark btn-sm dropdown-toggle idenCheckBtn" type="button" data-toggle="dropdown">
-                                   		<span class="dropdown-icon"></span>Pre-Review
-                                  	</button>
-                                   	<div class="dropdown-menu" role="menu">
-                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('BIN')|" th:text="'Open Source'"></span>
-                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|" th:text="'License'"></span>
-                                  	</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row float-right">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- grids -->
-                    <div class="col-md-12 jqGridSet binBtn">
-                        <table id="binList"><tr><td></td></tr></table>
-                        <div id="binPager"></div>
-                    </div>
-                </div>
-                <div class="row pl-2 grid-area" id="gridAreaBom" name="gridArea" style="width: 100%;display: none;">
-                    <!-- buttons -->
-                    <div class="col-md-12 mb-3 pl-2">
-                        <div class="row">
-                            <input id="mergeYn" type="hidden"/>
-                            <div class="col-md-6">
-                                <div class="row float-left pl-2">
-                                	<th:block th:if="${autoAnalysisFlag}">
-                                		<button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y' and autoAnalysisFlag}"
-                                        		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenAnalysis" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
-                                   		<button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y' and autoAnalysisFlag}" style="display: none;"
-                                        		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
-                                	</th:block>
-                                   	<button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y'}"
-                                        	type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenBulkRegist" th:text="'OSS Bulk Registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
-                              	</div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row float-right">
-                                   	<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenSave" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- grids -->
-                    <div class="col-md-12 jqGridSet">
-                        <table id="bomList"><tr><td></td></tr></table>
-                        <div id="bomPager"></div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            	<div class="col-lg-3 comment-area">
-                	<div class="card card-lg-red" style="position:sticky;top:10px;">
-                     	<div class="card-header">
-                           	<h3 class="card-title" th:text="Comment"></h3>
-                           	<div class="card-tools">
-                           		<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
-                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
-                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
-                           	</div>
-                      	</div>
-                      	<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
-                           	<div clas="row">
-                               	<div clas="col-md-12" id="commentList">
-                               		<div class="card-body">
-										<div class="row">
-											<div class="col-md-12">
-												<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
-											</div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                	<div class="row">
+            			<div class="contents-area col-lg-9">
+		            		<div class="topper-content">
+		            			<div class="card card-secondary">
+									<div class="card-header">
+										<h3 class="card-title">Upload</h3>
+										<div class="card-tools">
+											<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+												<i class="fas fa-minus"></i>
+											</button>
 										</div>
 									</div>
-                               	</div>
-                         	</div>
-                  		</div>
-                    </div>
-           		</div>
-			</div>
-            </div>
-            
-            <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
-            <th:block th:replace="fragments/common-fragments :: loadingIdenFragment"></th:block>
-        </section>
+									<div class="card-body">
+										<input type="hidden" id="identificationCsvFileId" th:value="${project.identificationCsvFileId}">
+										<th:block th:if="${hasLoadedItems}">
+											<div class="bottom-component grid-area">
+												<div class="row">
+													<div class="jqGridSet identificationAddArea">
+														<table id="identificationAddList">
+															<tr>
+																<td></td>
+															</tr>
+														</table>
+														<div id="identificationAddPager"></div>
+													</div>
+												</div>
+											</div>
+										</th:block>
+										<th:block th:unless="${hasLoadedItems}">
+											<th:block th:if="${@CommonFunction.isAdmin()}">
+												<th:block th:if="${project.identificationStatus != 'REQ' and project.identificationStatus != 'CONF'}" th:replace="project/fragments/edit :: uploadFragments"></th:block>
+											</th:block>
+											<th:block th:unless="${@CommonFunction.isAdmin()}">
+												<th:block th:if="${project.identificationStatus != 'REQ' and project.identificationStatus != 'REV' and project.identificationStatus != 'CONF'}" th:replace="project/fragments/edit :: uploadFragments"></th:block>
+											</th:block>
+										</th:block>
+									</div>
+								</div>
+							</div>
+							<div class="topper-content">
+								<div class="card card-secondary card-tabs grid-sm">
+		                        	<div id="card_header" class="card-header d-flex p-0 pt-1">
+				                        <div class="d-flex align-items-center">
+				                        	<ul class="nav nav-tabs" id="menu-tab" role="tablist">
+				                                <li class="nav-item">
+				                                    <a class="nav-link" id="tabMenuParty" data-toggle="pill" href="#menu-third-party" role="tab" aria-controls="menu-third-party" aria-selected="false" th:text="'3rd party'"></a>
+				                                </li>
+				                                <li class="nav-item">
+				                                    <a class="nav-link" id="tabMenuDep" data-toggle="pill" href="#menu-dep" role="tab" aria-controls="menu-dep" aria-selected="false" th:text="DEP"></a>
+				                                </li>
+				                                <li class="nav-item">
+				                                    <a class="nav-link" id="tabMenuSrc" data-toggle="pill" href="#menu-src" role="tab" aria-controls="menu-src" aria-selected="false" th:text="SRC"></a>
+				                                </li>
+				                                <li class="nav-item">
+				                                    <a class="nav-link" id="tabMenuBin" data-toggle="pill" href="#menu-bin" role="tab" aria-controls="menu-bin" aria-selected="false" th:text="BIN"></a>
+				                                </li>
+				                                <li class="nav-item">
+				                                    <a class="nav-link" id="tabMenuBom" data-toggle="pill" href="#menu-bom" role="tab" aria-controls="menu-bom" aria-selected="false" th:text="SBOM"></a>
+				                                </li>
+				<!--                           	<li th:if="${batFlag}" class="nav-item">
+				                                    <a class="nav-link" id="tabMenuBat" data-toggle="pill" href="#menu-bat" role="tab" aria-controls="menu-bat" aria-selected="false" th:text="BAT"></a>
+				                                </li> -->
+				                            </ul>
+				                        </div>
+			                            <div class="d-flex-align" style="margin-left: auto;">
+			                                <span th:if="${project.statusPermission > 0 and project.identificationStatus == 'PROG' and project.dropYn != 'Y'}" class="ml-2 mr-2 px-2 pointer" id="coReviewerBtn" th:onclick="|fn.onCheckIdentification()|" title="coReviewer">
+			                            		<i class="fas fa-clipboard-check customIcon2"></i>
+			                           		</span>
+			                            	<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="px-2 pointer idenReset" id="reset" title="reset" th:onclick="|com_fn.reset('Bom')|">
+			                            		<i class="fas fa-undo-alt customIcon2"></i>
+											</span>
+											<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="ml-2 mr-2 px-2 pointer idenSave" id="save" th:onclick="|com_fn.save('Bom')|" title="save">
+												<i class="fas fa-save customIcon2"></i>
+											</span>
+			                           	 	<span class="btn btn-tool ml-1 mr-2 pointer" id="expandBtn" data-card-widget="collapse" title="Collapse">
+			                            		<i class="fas fa-minus"></i>
+			                           		</span>
+			                            </div>
+		                        	</div>
+			                        <div class="card-body">
+			                            <div class="tab-content" id="identification-tabContent">
+			                            	<!-- 3rd party -->
+			                            	<div class="tab-pane fade" id="menu-third-party" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+			                            		<th:block th:if="${editMode == 'Y'}">
+			                            			<th:block th:replace="project/fragments/edit :: partyFragments"></th:block>
+			                            		</th:block>
+			                            		<th:block th:unless="${editMode == 'Y'}">
+			                            			<th:block th:replace="project/fragments/view :: partyFragments"></th:block>
+			                            		</th:block>
+			                            	</div>
+			                            	 <!-- /.3rd party -->
+			
+			                            	<!-- dep -->
+			                                <div class="tab-pane fade" id="menu-dep" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+			                                	<th:block th:if="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/edit :: depFragments"></th:block>
+			                                	</th:block>
+			                                	<th:block th:unless="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/view :: depFragments"></th:block>
+			                                	</th:block>
+			                                </div>
+			                                <!-- /. dep -->
+			                                
+			                                <!-- src -->
+			                                <div class="tab-pane fade" id="menu-src" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+			                                	<th:block th:if="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/edit :: srcFragments"></th:block>
+			                                	</th:block>
+			                                	<th:block th:unless="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/view :: srcFragments"></th:block>
+			                                	</th:block>
+			                                </div>
+			                                <!-- /.src -->
+			                                
+			                                <!-- bin -->
+			                                <div class="tab-pane fade" id="menu-bin" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+			                                	<th:block th:if="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/edit :: binFragments"></th:block>
+			                                	</th:block>
+			                                	<th:block th:unless="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/view :: binFragments"></th:block>
+			                                	</th:block>
+			                                </div>
+			                                <!-- /.bin -->
+			                                
+			                                <!-- bom -->
+			                                <div class="tab-pane fade" id="menu-bom" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+			                                    <th:block th:if="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/edit :: bomFragments"></th:block>
+			                                	</th:block>
+			                                	<th:block th:unless="${editMode == 'Y'}">
+ 			                                		<th:block th:replace="project/fragments/view :: bomFragments"></th:block>
+			                                	</th:block>
+			                                </div>
+			                                <!-- /.bom -->
+			                                
+			                                <!-- bat -->
+			                                <div class="tab-pane fade" id="menu-bat" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+			                                	<th:block th:if="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/edit :: batFragments"></th:block>
+			                                	</th:block>
+			                                	<th:block th:unless="${editMode == 'Y'}">
+			                                		<th:block th:replace="project/fragments/view :: batFragments"></th:block>
+			                                	</th:block>
+			                                </div>
+			                                <!-- /.bat -->
+			                            </div>
+			                        </div>
+		                    	</div>
+							</div>
+							<div class="bottom-component mb-5">
+								 <div class="row pl-2 grid-area" name="gridArea" id="gridAreaParty" style="width: 100%;">
+		                        <!-- buttons -->
+		                        <div class="col-md-12 mb-3 pl-2">
+		                            <div class="row">
+		                                <div class="col-md-6"></div>
+		                                <div class="col-md-6"></div>
+		                            </div>
+		                        </div>
+		                        <!-- grids -->
+		                        <div class="col-md-12 jqGridSet partyBtn">
+		                            <table id="list3"><tr><td></td></tr></table>
+		                            <div id="pager3"></div>
+		                        </div>
+		                    </div>
+		                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaDep" style="width: 100%; display: none;">
+		                        <!-- buttons -->
+		                        <div class="col-md-12 mb-3 pl-2">
+		                            <div class="row">
+		                                <div class="col-md-6">
+		                                    <div class="row float-left pl-2 depBtn">
+		                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" class="btn btn-sm btn-outline-dark dropdown-toggle idenCheckBtn" type="button" data-toggle="dropdown">
+		                                        	<span class="dropdown-icon"></span>Pre-Review
+		                                       	</button>
+		                                    	<div class="dropdown-menu" role="menu">
+		                                       		<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Open Source'"></span>
+		                                         	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'License'"></span>
+		                                       	</div>
+		                                    </div>
+		                                </div>
+		                                <div class="col-md-6">
+		                                    <div class="row float-right"></div>
+		                                </div>
+		                            </div>
+		                        </div>
+		                        <!-- grids -->
+		                        <div class="col-md-12 jqGridSet depBtn">
+		                            <table id="depList"><tr><td></td></tr></table>
+		                            <div id="depPager"></div>
+		                        </div>
+		                    </div>
+		                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaSrc" style="width: 100%; display: none;">
+		                        <!-- buttons -->
+		                        <div class="col-md-12 mb-3 pl-2">
+		                            <div class="row">
+		                                <div class="col-md-6">
+		                                    <div class="row float-left pl-2 srcBtn">
+		                                    	<button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" 
+		                                    			class="btn btn-outline-dark btn-sm dropdown-toggle idenCheckBtn"
+		                                    			type="button" data-toggle="dropdown">
+		                                        	<span class="dropdown-icon"></span>Pre-Review
+		                                       	</button>
+		                                    	<div class="dropdown-menu" role="menu">
+		                                       		<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Open Source'"></span>
+		                                         	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'License'"></span>
+		                                       	</div>
+		                                    </div>
+		                                </div>
+		                                <div class="col-md-6">
+		                                    <div class="row float-right"></div>
+		                                </div>
+		                            </div>
+		                        </div>
+		                        <!-- grids -->
+		                    	<div class="col-md-12 jqGridSet srcBtn">
+		                        	<table id="srcList"><tr><td></td></tr></table>
+		                        	<div id="srcPager"></div>
+		                    	</div>
+		                    </div>
+		                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaBin" style="width: 100%; display: none;">
+		                        <!-- buttons -->
+		                        <div class="col-md-12 mb-3 pl-2">
+		                            <div class="row">
+		                                <div class="col-md-6">
+		                                    <div class="row float-left pl-2 binBtn">
+		                                    	<button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" 
+		                                    			class="btn btn-outline-dark btn-sm dropdown-toggle idenCheckBtn"
+		                                    			type="button" data-toggle="dropdown">
+		                                        	<span class="dropdown-icon"></span>Pre-Review
+		                                       	</button>
+		                                    	<div class="dropdown-menu" role="menu">
+		                                       		<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('BIN')|" th:text="'Open Source'"></span>
+		                                         	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|" th:text="'License'"></span>
+		                                       	</div>
+		                                    </div>
+		                                </div>
+		                                <div class="col-md-6">
+		                                    <div class="row float-right"></div>
+		                                </div>
+		                            </div>
+		                        </div>
+		                        <!-- grids -->
+		                        <div class="col-md-12 jqGridSet binBtn">
+		                            <table id="binList"><tr><td></td></tr></table>
+		                            <div id="binPager"></div>
+		                        </div>
+		                    </div>
+		                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaBom" style="width: 100%; display: none;">
+		                        <!-- buttons -->
+		                        <div class="col-md-12 mb-3 pl-2">
+		                            <div class="row">
+		                            	<input type="hidden" id="mergeYn" />
+		                                <div class="col-md-6">
+		                                    <div class="row float-left pl-2">
+		                                        <button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y' and autoAnalysisFlag}"
+		                                        		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenAnalysis" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
+		                                        <button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y' and autoAnalysisFlag}" style="display: none;"
+		                                        		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
+		                                        <button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y'}"
+		                                        		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenBulkRegist" th:text="'OSS Bulk Registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
+		                                    </div>
+		                                </div>
+		                                <div class="col-md-6">
+		                                    <div class="row float-right">
+		                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenSave" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
+		                                    </div>
+		                                </div>
+		                            </div>
+		                        </div>
+		                        <!-- grids -->
+		                        <div class="col-md-12 jqGridSet">
+		                            <table id="bomList"><tr><td></td></tr></table>
+		                            <div id="bomPager"></div>
+		                        </div>
+		                    </div>
+                    
+		                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaBat" style="width: 100%;display: none;">
+		                    	<div class="col-md-12 jqGridSet batBtn">
+		                            <table class="jqGrid" id="batList"><tr><td></td></tr></table>
+		                            <div id="batPager"></div>
+		                        </div>
+		                    </div>
+                		</div>
+                	</div>
+	                <div class="col-lg-3 comment-area">
+	                	<div class="card card-lg-red" style="position:sticky;top:10px;">
+	                     	<div class="card-header">
+	                           	<h3 class="card-title" th:text="Comment"></h3>
+	                           	<div class="card-tools">
+	                           		<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+	                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+	                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
+	                           	</div>
+	                      	</div>
+	                      	<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+	                           	<div clas="row">
+	                               	<div clas="col-md-12" id="commentList">
+	                               		<div class="card-body">
+											<div class="row">
+												<div class="col-md-12">
+													<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+												</div>
+											</div>
+										</div>
+	                               	</div>
+	                         	</div>
+	                  		</div>
+	                    </div>
+	               	</div>
+                </div>
+                </div>
+                
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+                <th:block th:replace="fragments/common-fragments :: loadingIdenFragment"></th:block>
+            </section>
+        </div>
     </div>
-</div>
-
-	<th:block th:replace="project/view/sheetSelectView"></th:block>
-
+    
+    <th:block th:replace="project/view/sheetSelectView"></th:block>
+	
 	<form id="bulkEditForm" method="post" th:action="@{/oss/ossBulkEditPopup}" th:target="bulkEditViewProjectPopup">
-	    <input name="rowId" type="hidden" value=""/>
-	    <input name="target" type="hidden" value=""/>
+		<input type="hidden" name="rowId" value=""/>
+		<input type="hidden" name="target" value=""/>
 	</form>
-
+	
 	<form id="dependencyTreeForm" method="post" th:action="@{/project/dependencyTreePopup}" th:target="dependencyTreePopup">
 		<input type="hidden" name="rows" value=""/>
 	</form>

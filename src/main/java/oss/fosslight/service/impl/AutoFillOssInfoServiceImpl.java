@@ -34,7 +34,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutException;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.DependencyType;
@@ -465,16 +469,16 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 		try {
 			res = requestClearlyDefinedLicense("https://api.clearlydefined.io/");
-		} catch(HttpServerErrorException e) {
+		} catch (HttpServerErrorException e) {
+			res = null;
 			String message = "ClearlyDefined ";
 			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
 				message += getMessage("api.server.connect.limit");
-				throw new HttpServerErrorException(e.getStatusCode(), message);
 			}
 			if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
 				message += getMessage("api.server.connect.fail");
-				throw new HttpServerErrorException(e.getStatusCode(), message);
 			}
+			log.error(message, e);
 		}
 		
 		if (res != null) {
@@ -554,20 +558,23 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> requestClearlyDefinedLicense(String location) {
-		WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(
-        		HttpClient.create()
-                	.responseTimeout(Duration.ofSeconds(10))   // read timeout
-                	.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // connect timeout
-				)).build();
+		HttpClient httpClient = HttpClient.create()
+								    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+								    .responseTimeout(Duration.ofSeconds(30))
+								    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(30)).addHandlerLast(new WriteTimeoutHandler(30)));
+		
+		WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
 
 		String responseString = webClient.get()
-    				.uri(location)
-    				.retrieve()
-    				.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new HttpServerErrorException(response.statusCode())))
-    				.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new HttpServerErrorException(response.statusCode())))
-    				.bodyToMono(String.class)
-    				.retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
-    				.block();
+							        .uri(location)
+							        .exchangeToMono(response -> {
+							            if (response.statusCode().isError()) {
+							                return response.createException().flatMap(Mono::error);
+							            }
+							            return response.bodyToMono(String.class);
+							        })
+							        .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)).filter(ex -> ex instanceof ReadTimeoutException))
+							        .block();
 		
 //		String responseString = webClient.get().uri(location).exchange()
 //			    				.flatMap(response -> {
@@ -674,8 +681,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						projectMapper.updateBom(oc);
 					}
 					
-					if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())
-							|| CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
+					if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) || CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(targetName.toUpperCase())) {
 						if (updateCnt >= 1) {
 							commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
 							String changeOssLicenseInfo = !isEmpty(paramBean.getOssName()) ? paramBean.getOssName() : "N/A";
@@ -685,7 +691,57 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							if (!isEmpty(paramBean.getDownloadLocation())) {
 								changeOssLicenseInfo = "<a href='" + paramBean.getDownloadLocation() + "' class='urlLink2' target='_blank'>" + changeOssLicenseInfo + "</a>";
 							}
-							changeOssLicenseInfo += "|" + avoidNull(paramBean.getLicenseName(), "N/A") + "|" + paramBean.getCheckLicense();
+							
+							boolean isHighlight = false;
+							String beforeLicenseType = "";
+							String afterLicenseType = "";
+							String beforeLicense = avoidNull(paramBean.getLicenseName(), "N/A");
+							String afterLicense = paramBean.getCheckLicense();
+							List<String> licenseTypeList = new ArrayList<>();
+							
+							// license type 이 다른 경우 or 이전 license 중 등록되지 않은 license 가 있는 경우
+							for (String license : beforeLicense.split(",")) {
+								if (!license.equals("N/A")) {
+									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
+										licenseTypeList.add(CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase()).getLicenseType());
+									}
+								}
+							}
+							
+							// 이전 license 중 등록되지 않은 license 가 있는 경우
+							if (CollectionUtils.isNotEmpty(licenseTypeList)) {
+								beforeLicenseType = getLicensePermissive(licenseTypeList);
+								if (beforeLicense.split(",").length != licenseTypeList.size()) {
+									isHighlight = true;
+								}
+							} else {
+								isHighlight = true;
+							}
+							
+							if (!isEmpty(afterLicense)) {
+								licenseTypeList.clear();
+								for (String license : afterLicense.split(",")) {
+									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
+										licenseTypeList.add(CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase()).getLicenseType());
+									}
+								}
+							}
+							
+							if (CollectionUtils.isNotEmpty(licenseTypeList)) {
+								afterLicenseType = getLicensePermissive(licenseTypeList);
+							}
+							
+							// license type 이 다른 경우
+							if (!isEmpty(beforeLicenseType) && !isEmpty(afterLicenseType) && !beforeLicenseType.equalsIgnoreCase(afterLicenseType)) {
+								isHighlight = true;
+							}
+							
+							if (isHighlight) {
+								beforeLicense = "<span style=\"background-color:yellow\">" + beforeLicense + "</span>";
+								afterLicense = "<span style=\"background-color:yellow\">" + afterLicense + "</span>";
+							}
+							
+							changeOssLicenseInfo += "|" + beforeLicense + "|" + afterLicense;
 							changeOssLicenseInfoList.add(changeOssLicenseInfo);
 
 							if (isEmpty(commentId)) {
@@ -788,5 +844,46 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		}
 
 		return map;
+	}
+
+	private String getLicensePermissive(List<String> licenseTypeList) {
+		String rtnVal = "";
+		
+		for (String licenseType : licenseTypeList) {
+			switch (licenseType) {
+				case CoConstDef.CD_LICENSE_TYPE_NA:
+					rtnVal = CoConstDef.CD_LICENSE_TYPE_NA;
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF:
+					if (!CoConstDef.CD_LICENSE_TYPE_NA.equals(rtnVal)) {
+						rtnVal = CoConstDef.CD_LICENSE_TYPE_PF;
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_CP:
+					if (!CoConstDef.CD_LICENSE_TYPE_NA.equals(rtnVal) && !CoConstDef.CD_LICENSE_TYPE_PF.equals(rtnVal)) {
+						rtnVal = CoConstDef.CD_LICENSE_TYPE_CP;
+					}
+				
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_WCP:
+					if (!CoConstDef.CD_LICENSE_TYPE_NA.equals(rtnVal) && !CoConstDef.CD_LICENSE_TYPE_PF.equals(rtnVal) && !CoConstDef.CD_LICENSE_TYPE_CP.equals(rtnVal)) {
+						rtnVal = CoConstDef.CD_LICENSE_TYPE_WCP;
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PMS:
+					if (isEmpty(rtnVal)) {
+						rtnVal = CoConstDef.CD_LICENSE_TYPE_PMS;
+					}
+					
+					break;
+				default:
+					break;
+			}
+		}
+		
+		return rtnVal;
 	}
 }

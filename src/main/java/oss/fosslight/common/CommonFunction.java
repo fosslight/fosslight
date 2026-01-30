@@ -10,12 +10,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -1274,8 +1275,12 @@ public class CommonFunction extends CoTopComponent {
 			}
 			
 			gridBean.setOssVersion(bean.getOssVersion());
-			if (!isEmpty(bean.getDownloadLocation())) gridBean.setDownloadLocation(bean.getDownloadLocation().replaceAll("<[^>]*>", ""));
-			if (!isEmpty(bean.getHomepage())) gridBean.setHomepage(bean.getHomepage().replaceAll("<[^>]*>", ""));
+			if (!isEmpty(bean.getDownloadLocation())) {
+				gridBean.setDownloadLocation(bean.getDownloadLocation().replaceAll("<[^>]*>", ""));
+			}
+			if (!isEmpty(bean.getHomepage())) {
+				gridBean.setHomepage(bean.getHomepage().replaceAll("<[^>]*>", ""));
+			}
 			gridBean.setFilePath(bean.getFilePath());
 			gridBean.setExcludeYn(bean.getExcludeYn());
 			gridBean.setBinaryName(bean.getBinaryName());
@@ -1310,7 +1315,9 @@ public class CommonFunction extends CoTopComponent {
 				gridBean.setTlsh(bean.getTlsh());
 			}
 			
-			if (!isEmpty(bean.getPackageUrl())) gridBean.setPackageUrl(bean.getPackageUrl());
+			if (!isEmpty(bean.getPackageUrl())) {
+				gridBean.setPackageUrl(bean.getPackageUrl());
+			}
 			
 			// license 
 			int licenseIdx = 1;
@@ -1425,128 +1432,79 @@ public class CommonFunction extends CoTopComponent {
 		}
 		
 		if (reportData != null) {
+			boolean isExistsExcludeYn = false;
 			Map<String, Object> convertObj = convertToProjectIdentificationList(reportData, fileSeq);
 			List<ProjectIdentification> _list = (List<ProjectIdentification>) convertObj.get("resultList");
 			
 			if (_list != null) {
 				Map<String, ProjectIdentification> sortMap = new TreeMap<String, ProjectIdentification>();
 				
-				for (ProjectIdentification gridBean : _list) { // 중복제거 및 정렬
-					String key = "";
-					if ("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase()) || "PARTNER".equals(readType.toUpperCase())) {
-						if (!isEmpty(gridBean.getFilePath()) && isEmpty(gridBean.getBinaryName())) {
-							gridBean.setBinaryName(gridBean.getFilePath());
-						}
-						
-						key = gridBean.getBinaryName() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" 
-								+ gridBean.getDownloadLocation() + "-" + gridBean.getHomepage() + "-" + gridBean.getCopyrightText() + "-" + gridBean.getExcludeYn();
-					} else {
-						if (isEmpty(gridBean.getFilePath()) && !isEmpty(gridBean.getBinaryName())) {
-							gridBean.setFilePath(gridBean.getBinaryName());
-						}
-						
-						key = gridBean.getFilePath() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" 
-								+ gridBean.getDownloadLocation() + "-" + gridBean.getHomepage() + "-" + gridBean.getCopyrightText() + "-" + gridBean.getExcludeYn();
+				for (ProjectIdentification gridBean : _list) {
+					if (CoConstDef.FLAG_YES.equals(avoidNull(gridBean.getExcludeYn()))) {
+						isExistsExcludeYn = true;
+						continue;
 					}
 					
-					if (!sortMap.keySet().contains(key)) {
-						List<ProjectIdentification> resultLicenseList = new ArrayList<ProjectIdentification>();
-						List<String> duplicateLicense = new ArrayList<String>();
-						
-						if (gridBean.getComponentLicenseList() != null) {
-							for (ProjectIdentification licenseList : gridBean.getComponentLicenseList()) {
-								if (licenseList.getLicenseName().contains(",")){
-									ProjectIdentification copyLicenseList = null;
-									String[] licenses = licenseList.getLicenseName().split(",");
-									for (String li : licenses) {
-										if (!duplicateLicense.contains(StringUtil.trim(li).toUpperCase())) {
-											try {
-												copyLicenseList = licenseList.copy();
-												
-												copyLicenseList.setLicenseName(StringUtil.trim(li));
-												resultLicenseList.add(copyLicenseList);
-												duplicateLicense.add(licenseList.getLicenseName());
-											} catch (CloneNotSupportedException e) {
-												log.error(e.getMessage());
-											}
+					String key = gridBean.getGridId();
+					List<ProjectIdentification> resultLicenseList = new ArrayList<ProjectIdentification>();
+					List<String> duplicateLicense = new ArrayList<String>();
+					
+					if (gridBean.getComponentLicenseList() != null) {
+						for (ProjectIdentification licenseList : gridBean.getComponentLicenseList()) {
+							if (licenseList.getLicenseName().contains(",")){
+								ProjectIdentification copyLicenseList = null;
+								String[] licenses = licenseList.getLicenseName().split(",");
+								for (String li : licenses) {
+									if (!duplicateLicense.contains(StringUtil.trim(li).toUpperCase())) {
+										try {
+											copyLicenseList = licenseList.copy();
+											
+											copyLicenseList.setLicenseName(StringUtil.trim(li));
+											resultLicenseList.add(copyLicenseList);
+											duplicateLicense.add(licenseList.getLicenseName());
+										} catch (CloneNotSupportedException e) {
+											log.error(e.getMessage());
 										}
 									}
-								}else {
-									if (!duplicateLicense.contains(licenseList.getLicenseName()) && CoConstDef.FLAG_NO.equals(avoidNull(licenseList.getExcludeYn(), CoConstDef.FLAG_NO))) {
-										resultLicenseList.add(licenseList);
-										duplicateLicense.add(StringUtil.trim(licenseList.getLicenseName()).toUpperCase());
-									}
+								}
+							} else {
+								if (!duplicateLicense.contains(licenseList.getLicenseName()) && CoConstDef.FLAG_NO.equals(avoidNull(licenseList.getExcludeYn(), CoConstDef.FLAG_NO))) {
+									resultLicenseList.add(licenseList);
+									duplicateLicense.add(StringUtil.trim(licenseList.getLicenseName()).toUpperCase());
 								}
 							}
 						}
-						
-						gridBean.setComponentLicenseList(resultLicenseList);
-						sortMap.put(key, gridBean);
 					}
+					
+					gridBean.setComponentLicenseList(resultLicenseList);
+					sortMap.put(key, gridBean);
 				}
 				
-				String key = "";
-				String key3 = "";
 				for (ProjectIdentification gridBean : sortMap.values()) {
-					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO.get(gridBean.getLicenseName());
-					String ossName = isEmpty(gridBean.getOssName()) ? "-" : gridBean.getOssName();
-					String key2 = "";
-					String key4 = ossName + "-" + (licenseMaster != null ? licenseMaster.getLicenseType() : "");
-					String gridId = "";
-					
-					if ("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase()) || "PARTNER".equals(readType.toUpperCase())) {
-						key2 = gridBean.getBinaryName() + "-" + ossName + "-" + gridBean.getOssVersion() + "-" + gridBean.getExcludeYn();
-					}else {
-						key2 = gridBean.getFilePath() + "-" + ossName + "-" + gridBean.getOssVersion() + "-" + gridBean.getExcludeYn();
-					}
-					
-					if (!"-".equals(ossName) 
-							&& key.equals(key2)
-							&& !"--NA".equals(key3)
-							&& !"--NA".equals(key4)) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
-						ProjectIdentification result = mainGridList.get(mainGridList.size()-1);
-						
-						if (!result.getLicenseName().contains(StringUtil.trim(gridBean.getLicenseName()))) {
-							String resultLicenseName = StringUtil.trim(result.getLicenseName());
-							String licenseNameList = StringUtil.trim(gridBean.getLicenseName());
-							if (licenseNameList.contains(",")) {
-								for (String licensename : licenseNameList.split(",")) {
-									if (!resultLicenseName.contains(licensename) && !isEmpty(licensename)) {
-										resultLicenseName += "," + licensename;
-									}
-								}
-							}else {
-								resultLicenseName += isEmpty(licenseNameList) ? "" : ("," + licenseNameList);
-							}
-							
-							result.setLicenseName(resultLicenseName);
-							
-							mainGridList.set(mainGridList.size()-1, result);
-							gridId = result.getGridId();
-						}
-					}else {
-						mainGridList.add(gridBean);
-						key = key2;
-						key3 = key4;
-					}
-					
+					mainGridList.add(gridBean);
+					String gridId = gridBean.getGridId();
+
 					if (gridBean.getComponentLicenseList() != null) {
 						if (isEmpty(gridId)) {
 							subMap.put(gridBean.getGridId(), gridBean.getComponentLicenseList());
-						}else {
-							List<ProjectIdentification> result = (List<ProjectIdentification>) subMap.get(gridId);
-							for (ProjectIdentification subData : gridBean.getComponentLicenseList()) {
-								for (ProjectIdentification resultData : result) {
-									if (!resultData.getLicenseName().equals(resultData.getLicenseName())) {
-										result.add(subData);
-										break;
+						} else {
+							if (subMap.containsKey(gridId)) {
+								List<ProjectIdentification> result = (List<ProjectIdentification>) subMap.get(gridId);
+								for (ProjectIdentification subData : gridBean.getComponentLicenseList()) {
+									for (ProjectIdentification resultData : result) {
+										if (!resultData.getLicenseName().equals(resultData.getLicenseName())) {
+											result.add(subData);
+											break;
+										}
 									}
 								}
-							}
-							if (result.size() > 0) {
-								subMap.replace(gridId, result);
-							}else {
-								subMap.replace(gridId, gridBean.getComponentLicenseList());
+								if (result.size() > 0) {
+									subMap.replace(gridId, result);
+								} else {
+									subMap.replace(gridId, gridBean.getComponentLicenseList());
+								}
+							} else {
+								subMap.put(gridId, gridBean.getComponentLicenseList());
 							}
 						}
 					}
@@ -1556,6 +1514,9 @@ public class CommonFunction extends CoTopComponent {
 			// version 정보가 자동으로 변경된 Data 체크
 			if (convertObj.containsKey("versionChangeList")) {
 				resultMap.put("versionChangedList",convertObj.get("versionChangeList"));
+			}
+			if (isExistsExcludeYn) {
+				resultMap.put("isExistsExcludeYn", isExistsExcludeYn);
 			}
 		}
 		resultMap.put("subData", subMap);
@@ -2390,7 +2351,7 @@ public class CommonFunction extends CoTopComponent {
 		binaryEmList = doc.select("div.file-list");
 		
 		for (Element em : binaryEmList) {
-			String _fileStr = (em.html()).replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("\r\n", "\n").replaceAll("<span>", "").replaceAll("</span>", "");
+			String _fileStr = (em.html()).replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("\r\n", "\n").replaceAll("<span>", "").replaceAll("</span>", "").replaceAll(" ", "\n");
 			
 			for (String s : _fileStr.split("\n", -1)) {
 				if (isEmpty(s)) {
@@ -4122,8 +4083,7 @@ public class CommonFunction extends CoTopComponent {
 		return null;
 	}
 
-	public static List<OssComponentsLicense> findOssLicenseIdAndName(String ossId,
-			List<OssComponentsLicense> ossComponentsLicenseList) {
+	public static List<OssComponentsLicense> findOssLicenseIdAndName(String ossId, List<OssComponentsLicense> ossComponentsLicenseList) {
 		// 먼저 license Id는 찾을수 있으면 모두 설정한다.
 		if (ossComponentsLicenseList != null) {
 			for (OssComponentsLicense licenseBean : ossComponentsLicenseList) {
@@ -4779,7 +4739,9 @@ public class CommonFunction extends CoTopComponent {
 			}
 		}
 		
-		changeAnalysisResultList = changeAnalysisResultList.stream().filter(distinctByKey(e -> (e.getTitle() + "|" + e.getOssName() + "|" + e.getOssVersion()).toUpperCase())).collect(Collectors.toList());
+		changeAnalysisResultList = changeAnalysisResultList.stream()
+						          .collect(Collectors.groupingBy(vo -> avoidNull(vo.getGroupId()) + "|" + avoidNull(vo.getTitle()) + "|" + avoidNull(vo.getOssName()) + "|" + avoidNull(vo.getOssVersion()), LinkedHashMap::new, Collectors.toList()))
+						          .values().stream().flatMap(List::stream).collect(Collectors.toList());
 		
 		getAnalysisValidation(map, changeAnalysisResultList);
 		map.replace("rows", changeAnalysisResultList);
@@ -4920,6 +4882,70 @@ public class CommonFunction extends CoTopComponent {
 		}
 	}
 	
+	public static File convertZIPToHtml(File zipFile) {
+		List<File> htmlFiles = new ArrayList<>();
+        List<File> xmlFiles = new ArrayList<>();
+        File outPath = zipFile;
+        
+        File[] files = zipFile.listFiles();
+        if (files == null) {
+        	return null;
+        }
+        
+        for (File file : files) {
+            if (!file.isFile()) {
+            	continue;
+            }
+
+            String fileName = file.getName().toLowerCase();
+
+            if (fileName.endsWith(".html")) {
+                htmlFiles.add(file);
+            } else if (fileName.endsWith(".xml")) {
+                xmlFiles.add(file);
+            }
+        }
+        
+        UUID randomUUID = UUID.randomUUID();
+		File outFile = new File(outPath + "/" + randomUUID + ".html");
+		
+		boolean convertFlag = LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, outFile);
+		if (convertFlag) {
+			if (!CollectionUtils.isEmpty(htmlFiles)) {
+				try {
+					Document mergedDoc = Document.createShell("");
+					Element mergedBody = mergedDoc.body();
+					
+					for (File htmlFile : htmlFiles) {
+						String html = readHtml(htmlFile);
+						Document doc = Jsoup.parse(html);
+						mergedBody.appendChild(doc.body().clone());
+					}
+					
+					String html = readHtml(outFile);
+					Document doc = Jsoup.parse(html);
+					
+					mergedBody.appendChild(doc.body().clone());
+					String mergedHtml = mergedDoc.outerHtml();
+					
+					outFile = new File(outPath + "/" + randomUUID + ".html");
+					try (FileOutputStream fos = new FileOutputStream(outFile)) {
+				        fos.write(mergedHtml.getBytes(StandardCharsets.UTF_8));
+				    }
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+			return outFile;
+		} else {
+			return null;
+		}
+	}
+	
+	private static String readHtml(File file) throws IOException {
+	    return new String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+	}
+	
 	public static String mergeNickname(OssAnalysis bean, String newestNickName) {
 		String mergeNickname = newestNickName;
 		
@@ -4993,6 +5019,10 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 	public static String getNoticeFileName(String prjId, String prjName, String prjVersion, String fileName, String dateStr, String fileType) {
+		return getNoticeFileName(prjId, prjName, prjVersion, fileName, dateStr, fileType, false);
+	}
+	
+	public static String getNoticeFileName(String prjId, String prjName, String prjVersion, String fileName, String dateStr, String fileType, boolean isSpdx) {
 		if (isEmpty(fileName)) {
 			fileName = "OSSNotice-";
 			fileName += prjId + "_" + prjName;
@@ -5009,12 +5039,14 @@ public class CommonFunction extends CoTopComponent {
 		
 		fileName += "_" + dateStr;
 		
-		if (isEmpty(fileType) || fileType == "html"){
-			fileName += ".html";
-		}else if (fileType == "text"){
-			fileName += ".txt";
-		} else {
-			fileName += fileType;
+		if (!isSpdx) {
+			if (isEmpty(fileType) || fileType == "html"){
+				fileName += ".html";
+			} else if (fileType == "text"){
+				fileName += ".txt";
+			} else {
+				fileName += fileType;
+			}
 		}
 		
 		return fileName;

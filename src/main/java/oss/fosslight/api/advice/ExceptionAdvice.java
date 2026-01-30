@@ -91,6 +91,12 @@ public class ExceptionAdvice {
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
     }
     
+    @ExceptionHandler(CUserAuthFailedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected CommonResult userAuthFailed(HttpServletRequest request, CUserAuthFailedException e) {
+        return responseService.getFailResult(CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE, e.getMessage());
+    }
+    
     private String getMessage(String code) {
         return getMessage(code, null);
     }

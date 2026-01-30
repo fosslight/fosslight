@@ -800,7 +800,7 @@ var binAndroid_fn = {
 	// load report data
 	exeLoadReportData : function(finalData) {
 		$.ajax({
-			url : 'lge/project/getSheetData',
+			url : '/project/getSheetData',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',

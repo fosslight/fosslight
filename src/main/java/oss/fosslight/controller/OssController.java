@@ -410,11 +410,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.SAVE_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		Map<String, Object> resMap = new HashMap<String, Object>();
 		
 		try {
@@ -429,11 +425,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value={OSS.DEL_AJAX})
-	public @ResponseBody ResponseEntity<Object> delAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		String resCd="00";
 		HashMap<String, Object> resMap = new HashMap<>();
 		// mail 발송을 위해 삭제전 data 취득
@@ -577,11 +569,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.VALIDATION)
-	public @ResponseBody ResponseEntity<Object> validation(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> validation(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		/*Json String -> Json Object*/
 		String jsonString = ossMaster.getOssLicensesJson();
 		Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();
@@ -641,40 +629,18 @@ public class OssController extends CoTopComponent{
 					if (_mergeNicknames.length > 0) {
 						Map<String, List<String>> diffMap = new HashMap<>();
 						diffMap.put("addNickArr", Arrays.asList(_mergeNicknames));
-						return makeJsonResponseHeader(false, null, diffMap);
+						return makeJsonResponseHeader(false, "hasDelNick", diffMap);
 					}
 					
-					if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getAnalysisDetailYn()))) {
+					if (checkOssInfo != null) {
 						boolean isSame = false;
 						Map<String, Object> diffMap = new HashMap<>();
 						
-						if (!isEmpty(checkOssInfo.getSummaryDescription())) {
-							String summaryDescription = checkOssInfo.getSummaryDescription();
-							isSame = false;
-							if (!isEmpty(ossMaster.getSummaryDescription())) {
-								if (ossMaster.getSummaryDescription().equalsIgnoreCase(checkOssInfo.getSummaryDescription())) {
-									isSame = true;
-								} else {
-									summaryDescription += ossMaster.getSummaryDescription();
-								}
-							}
-							if (!isSame) {
-								diffMap.put("addSummaryDescription", summaryDescription);
-							}
+						if (isEmpty(ossMaster.getSummaryDescription()) && !isEmpty(checkOssInfo.getSummaryDescription())) {
+							diffMap.put("addSummaryDescription", checkOssInfo.getSummaryDescription());
 						}
-						if (!isEmpty(checkOssInfo.getImportantNotes())) {
-							String importantNotes = checkOssInfo.getImportantNotes();
-							isSame = false;
-							if (!isEmpty(ossMaster.getImportantNotes())) {
-								if (ossMaster.getImportantNotes().equalsIgnoreCase(checkOssInfo.getImportantNotes())) {
-									isSame = true;
-								} else {
-									importantNotes += ossMaster.getImportantNotes();
-								}
-							}
-							if (!isSame) {
-								diffMap.put("addImportantNotes", importantNotes);
-							}
+						if (isEmpty(ossMaster.getImportantNotes()) && !isEmpty(checkOssInfo.getImportantNotes())) {
+							diffMap.put("addImportantNotes", checkOssInfo.getImportantNotes());
 						}
 						if (!isEmpty(checkOssInfo.getIncludeCpe())) {
 							isSame = false;
@@ -1427,11 +1393,7 @@ public class OssController extends CoTopComponent{
 					result += ",";
 				}
 				
-				if (url.endsWith("/")) {
-					result += url.substring(0, url.length()-1);
-				}else {
-					result += url;
-				}
+				result += url;
 				
 				if (isFirst) {
 					ossMaster.setDownloadLocation(result);
@@ -1442,13 +1404,6 @@ public class OssController extends CoTopComponent{
 			}
 			
 			ossMaster.setDownloadLocations(result.split(","));
-		}
-		
-		if (!isEmpty(ossMaster.getHomepage())) {
-			if (ossMaster.getHomepage().endsWith("/")) {
-				String homepage = ossMaster.getHomepage();
-				ossMaster.setHomepage(homepage.substring(0, homepage.length()-1));
-			}
 		}
 		
 		// editor를 이용하지 않고, textarea로 등록된 코멘트의 경우 br 태그로 변경
@@ -1464,7 +1419,9 @@ public class OssController extends CoTopComponent{
 			return makeJsonResponseHeader(false);
 		}
 		
-		CoCodeManager.getInstance().refreshOssInfo();
+		if (!isEmpty(resultOssId)) {
+			CoCodeManager.getInstance().refreshOssInfoByOssId(resultOssId);
+		}
 		
 		History h = ossService.work(ossMaster);
 		h.sethAction(CoConstDef.ACTION_CODE_INSERT);
@@ -1602,12 +1559,7 @@ public class OssController extends CoTopComponent{
 
 	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_OSS_CHECK_LICENSE)
-	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(
-			@RequestBody Map<String, Object> param
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model
-			, @PathVariable String targetName){
+	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(@RequestBody Map<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String targetName){
 		String json = (String) param.get("list");
 		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> paramBeanList = new ArrayList<>();
@@ -2141,12 +2093,7 @@ public class OssController extends CoTopComponent{
 				if (!isEmpty(result)) {
 					result += ",";
 				}
-				
-				if (url.endsWith("/")) {
-					result += url.substring(0, url.length()-1);
-				} else {
-					result += url;
-				}
+				result += url;
 			}
 			
 			resultData.setDownloadLocations(result.split(","));
@@ -2156,12 +2103,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if (!isEmpty(analysisBean.getHomepage())) {
-			if (analysisBean.getHomepage().endsWith("/")) {
-				String homepage = analysisBean.getHomepage();
-				resultData.setHomepage(homepage.substring(0, homepage.length()-1));
-			} else {
-				resultData.setHomepage(analysisBean.getHomepage());
-			}
+			resultData.setHomepage(analysisBean.getHomepage());
 		} else {
 			resultData.setHomepage("");
 		}
@@ -2210,7 +2152,9 @@ public class OssController extends CoTopComponent{
 			return makeJsonResponseHeader(false, "Fail");
 		}
 		
-		CoCodeManager.getInstance().refreshOssInfo(); // 등록된 oss info 갱신
+		if (!isEmpty(resultOssId)) {
+			CoCodeManager.getInstance().refreshOssInfoByOssId(resultOssId); // 등록된 oss info 갱신
+		}
 		
 		History h = ossService.work(resultData);
 		h.sethAction(CoConstDef.ACTION_CODE_INSERT);

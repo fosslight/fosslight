@@ -273,7 +273,9 @@ var src_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(resetFlag){
+	saveMakeData : function(resetFlag, addLoadData) {
+		var excludeNicknameAlert = false;
+		
 		cleanErrMsg("srcList");
 		var target = $("#srcList");
 		var prjId = [[${project.prjId}]];
@@ -304,7 +306,6 @@ var src_fn = {
 		
 		var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
 		var mainData = target.jqGrid('getGridParam','data');
-		var srcAddListData = $("#_srcAddList").jqGrid("getRowData");
 		mainData.forEach (function (el, index) {
 			if (typeof el.packageUrl !== "undefined" && "" != el.packageUrl) {
 				el.packageUrl = "";
@@ -312,18 +313,38 @@ var src_fn = {
 		});
 		
 		// 최종 데이터
-		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
-				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData), "srcAddListData" : JSON.stringify(srcAddListData)};
+		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq), "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData)};
+		
+		var srcAddDataList = [];
+		if (addLoadData != null) {
+			excludeNicknameAlert = true;
+			let referenceId = "";
+			addLoadData.forEach (function (el, index) {
+				if ("" == referenceId) {
+					referenceId = el.referenceId;
+				}
+				mainData.push(el);
+			});
+			finalData["mainData"] = JSON.stringify(mainData);
+			
+			var srcAddDataObj = {};
+			srcAddDataObj["prjId"] = [[${project.prjId}]];
+			srcAddDataObj["referenceId"] = referenceId;
+			srcAddDataObj["referenceDiv"] = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]];
+			srcAddDataObj["componentCount"] = addLoadData.length;
+			srcAddDataList.push(srcAddDataObj);
+		}
+		finalData["srcAddListData"] = JSON.stringify(srcAddDataList);
 		
 		if (resetFlag) {
 			src_fn.resetExeSave(finalData);
 		} else {
 			// 닉네임 체크
-			src_fn.nickNameValid(mainData, finalData);
+			src_fn.nickNameValid(mainData, finalData, excludeNicknameAlert);
 		}
 	},
 	// 저장
-	exeSave : function(finalData, refreshComment){
+	exeSave : function(finalData, refreshComment, reloadTab) {
 		$.ajax({
 			url : '/project/saveSrc',
 			type : 'POST',
@@ -358,20 +379,27 @@ var src_fn = {
 					}
 				} else {
 					if("10" == data.resCd) {
-						src_fn.getSrcGridData();
-						$("#mergeYn").val("N");
-						src_evt.csvDelFileSeq = [];
-						src_evt.csvFileSeq = [];
-						com_fn.saveFlagObject["SRC"] = true;
-						com_fn.changeMode("view", false);
-						alertify.success([[#{msg.common.success}]]);
+						srcLoadSuccess = true;
+						if (reloadTab) {
+							if (partyLoadSuccess && depLoadSuccess && srcLoadSuccess && binLoadSuccess) {
+								bom_fn.beforeSave(true);
+							}
+						} else {
+							src_fn.getSrcGridData();
+							$("#mergeYn").val("N");
+							src_evt.csvDelFileSeq = [];
+							src_evt.csvFileSeq = [];
+							com_fn.saveFlagObject["SRC"] = true;
+							com_fn.changeMode("view", false);
+							alertify.success([[#{msg.common.success}]]);
 
-						curIdenStatus = data.resultData||"";
-						if(curIdenStatus == "PROG"){
-							com_fn.btnCtl(userRole, curIdenStatus);
+							curIdenStatus = data.resultData||"";
+							if(curIdenStatus == "PROG"){
+								com_fn.btnCtl(userRole, curIdenStatus);
+							}
+							
+							if (refreshComment) fn_comment.getCommentList(commentsParam);
 						}
-						
-						if (refreshComment) fn_comment.getCommentList(commentsParam);
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
@@ -611,26 +639,30 @@ var src_fn = {
 		}
 	},	
 	// 닉네임 팝업 띄우기
-	makeNickNamePopup : function(obj, finalData) {
-		if (obj.validMsg && obj.validMsg.length != 0) {
-			if (typeof alertify.nicknameValidDialog === "undefined") {
-				com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
-        	}
-			alertify.nicknameValidDialog()
-			.set('onok', function(e) {
-				if (e) {
-					src_fn.exeSave(finalData, true);
-				} else {
-					return false;
-				}
-			})
-			.setContent(obj.validMsg).show();
+	makeNickNamePopup : function(obj, finalData, excludeNicknameAlert) {
+		if (excludeNicknameAlert) {
+			src_fn.exeSave(finalData, false, true);
 		} else {
-			src_fn.exeSave(finalData, false);
+			if (obj.validMsg && obj.validMsg.length != 0) {
+				if (typeof alertify.nicknameValidDialog === "undefined") {
+					com_fn.nicknameAlertifyTemplate('nicknameValidDialog');
+	        	}
+				alertify.nicknameValidDialog()
+				.set('onok', function(e) {
+					if (e) {
+						src_fn.exeSave(finalData, true, false);
+					} else {
+						return false;
+					}
+				})
+				.setContent(obj.validMsg).show();
+			} else {
+				src_fn.exeSave(finalData, false, false);
+			}
 		}
 	},
 	// 닉네임 체크
-	nickNameValid : function(mainData, finalData){
+	nickNameValid : function(mainData, finalData, excludeNicknameAlert) {
 		var prjId = [[${project.prjId}]];
 		var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
 
@@ -642,7 +674,7 @@ var src_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(data){
-				src_fn.makeNickNamePopup(data, finalData);
+				src_fn.makeNickNamePopup(data, finalData, excludeNicknameAlert);
 			},
 			error: function(data){
 				alertify.error([[#{msg.common.valid2}]], 0);
@@ -855,6 +887,10 @@ var src_fn = {
 							alertify.error([[#{msg.common.valid}]], 0);
 						}
 					} else {
+						if (typeof data.resultData.isExistsExcludeYn !== "undefined") {
+							alertify.confirm([[#{msg.common.exists.excludeYn}]], function(){});
+						}
+						
 						if(data.externalData) { // validData 표시
 							srcValidMsgData = data.externalData;
 						}
@@ -1231,23 +1267,7 @@ var src_grid = {
 							dataInit: function (e) { 
 								$(e).on("change", function() {
 									var rowid = (e.id).split('_')[0];
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-	
-										$("#"+rowid+"_downloadLocation").val(value);
-									}
-	
 									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
-								}).on("blur", function() {
-									var value = e.value;
-									
-									if(value.charAt(value.length-1) == "/"){
-										value = value.slice(0, -1); // 마지막 문자열 제거
-	
-										$("#"+e.id).val(value);
-									}
 								});
 							}
 						}
@@ -1259,23 +1279,7 @@ var src_grid = {
 								function (e) { 
 									$(e).on("change", function() {
 										var rowid = (e.id).split('_')[0];
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-	
-											$("#"+rowid+"_homepage").val(value);
-										}
-										
 										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
-									}).on("blur", function() {
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-	
-											$("#"+e.id).val(value);
-										}
 									});
 								}
 						}
@@ -1406,10 +1410,11 @@ var src_grid = {
 				if ($("#srcList_toppager_left").find('button').length == 0) {
 					var permission = [[${project.statusPermission}]] == 1;
                 	var identificationStatus = [[${project.identificationStatus}]];
+                	var dropYn = [[${project.dropYn}]];
 					
                 	var appendBtn = "";
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('SRC', 'srcList', "+permission+", '"+identificationStatus+"')\">";
-                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -1419,7 +1424,7 @@ var src_grid = {
                 		}
                 	}
             		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('SRC', 'srcList', 'main', "+permission+", '"+identificationStatus+"')\">";
-            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
@@ -1429,7 +1434,7 @@ var src_grid = {
                 		}
                 	}
             		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('SRC', "+permission+", '"+identificationStatus+"')\">";
-            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
+            		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus || "Y" == dropYn) {
                 		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 	} else {
                 		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {

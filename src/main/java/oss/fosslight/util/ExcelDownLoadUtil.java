@@ -371,7 +371,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		makeSheet(modelSheet, rows, 2);
 	}
 
-	private static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo) {
+	public static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo) {
 		reportIdentificationSheet(type, sheet, listMap, projectInfo, false);
 	}
 
@@ -385,7 +385,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @param isSelfCheck
 	 */
 	@SuppressWarnings("unchecked")
-	private static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo, boolean isSelfCheck) {
+	public static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo, boolean isSelfCheck) {
 		List<ProjectIdentification> list = null;
 		if (listMap != null && (listMap.containsKey("mainData") || listMap.containsKey("rows") )) {
 			list = (List<ProjectIdentification>) listMap.get(listMap.containsKey("mainData") ? "mainData" : "rows");
@@ -601,7 +601,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			boolean isMainRow = true;
 			
 			// main 정보
-			sb.append(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : " ");
+			sb.append(isMainRow ? (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx()) : " ");
 			sb.append(SEP).append(!isEmpty(bean.getOssName()) ? bean.getOssName() : " "); // OSS Name
 			sb.append(SEP).append(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : " "); // OSS Version
 			sb.append(SEP).append(!isEmpty(bean.getLicenseName()) ? bean.getLicenseName() : " "); // LICENSE
@@ -1822,7 +1822,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		List<String[]> rows = null;
 		
 		try {
-			inFile= new FileInputStream(new File(downloadpath+ (CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? "/SKS_ModelList.xlsx" : "/ModelList.xlsx") ));
+			inFile= new FileInputStream(new File(downloadpath + "/ModelList.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			String mainModelCode = CoConstDef.CD_MODEL_TYPE;
 			
