@@ -6,6 +6,26 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.5.0](https://github.com/fosslight/fosslight/releases/tag/v2.5.0) (2026-01-30)
+
+### New
+
+* Project
+  - Added a feature to upload or load all tab data at once, without uploading or loading each tab individually.[More..](https://fosslight.org/hub-guide-en/tutorial/1_project/2_Identification/1_3rd_DEP_SRC_BIN_Tab.html)
+
+* Common
+  - Added a feature to request permissions for Project and 3rd Party. [More..](https://fosslight.org/hub-guide-en/tips/1_common/8_edit_permission/)
+    Added a feature to send notification emails for Projects, 3rd Parties, and Self-checks that have not been updated in the last six months. [More..](https://fosslight.org/hub-guide-en/tips/1_common/9_update_notice/)
+
+### Changed
+
+* Project
+  - Packaging : OSS Version is not displayed by default when generating an OSS Notice.
+
+* Security
+  - When click Export, all sheets in the Excel file are filled.
+
+
 ## [2.4.0](https://github.com/fosslight/fosslight/releases/tag/v2.4.0) (2025-12-16)
 
 ### New

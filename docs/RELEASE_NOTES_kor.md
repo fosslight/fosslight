@@ -6,6 +6,25 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [2.5.0](https://github.com/fosslight/fosslight/releases/tag/v2.5.0) (2026-01-30)
+
+### New
+
+* Project
+  - 탭별로 개별 업로드나 로드하지 않고, 한 번에 모든 탭의 데이터를 업로드하거나 로드할 수 있는 기능이 추가되었습니다. [More..](https://fosslight.org/hub-guide/tutorial/1_project/2_Identification/1_3rd_DEP_SRC_BIN_Tab.html)
+
+* Common
+  - Project, 3rd Party에 권한을 요청하는 기능이 추가되었습니다. [More..](https://fosslight.org/hub-guide/tips/1_common/8_edit_permission/)
+  - 최근 6개월 동안 업데이트된 내역이 없는 Project, 3rd Party, Self-check에 대해서 알림 메일을 발송하는 기능이 추가되었습니다. [More..](https://fosslight.org/hub-guide/tips/1_common/9_update_notice/)
+
+### Changed
+
+* Project
+  - Packaging : OSS Notice 생성 시, 기본값으로 OSS Version이 표시되지 않도록 변경되었습니다.
+
+* Security
+  - Export시 모든 sheet가 채워지도록 변경되었습니다.
+
 ## [2.4.0](https://github.com/fosslight/fosslight/releases/tag/v2.4.0) (2025-12-16)
 
 ### New
