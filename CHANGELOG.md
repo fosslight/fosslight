@@ -1,5 +1,26 @@
 # Changelog
 
+## v2.5.0 (30/01/2026)
+## 🚀 Features
+- Project
+  - Added a feature to upload or load all tab data at once, without uploading or loading each tab individually. @FOSSLight-dev  (#1120)
+-  Common
+  - Added a feature to request permissions for Project and 3rd Party. @FOSSLight-dev (#1119)
+   - Added a feature to send notification emails for Projects, 3rd Parties, and Self-checks that have not been updated in the last six months. @Min-Kyungsun (#1118)
+
+## 🐛 Hotfixes
+- Bug fix inactivate packaging > source tab @FOSSLight-dev (#1122)
+
+
+## 🔧 Maintenance
+- Packaging : OSS Version is not displayed by default when generating an OSS Notice. @Min-Kyungsun (#1117 )
+- Improve the speed of identification request and confirm @FOSSLight-dev (#1122)
+- Security > export, all sheets are exported @FOSSLight-dev (#1122)
+- Modify @Transactional and @CacheEvict applied to private methods @Lightieey (#995)
+
+- **Full Changelog**: https://github.com/fosslight/fosslight/compare/v2.4.0...v2.5.0
+---
+
 ## v2.4.0 (15/12/2025)
 ## What's Changed
 * Fix bug in migration scripts by @syleeeee in https://github.com/fosslight/fosslight/pull/1107
@@ -957,19 +978,3 @@
 - Check OSS Name/License > refine the download location. @FOSSLight-dev (#508)
 - Check OSS Name, License > Change the way you find links @FOSSLight-dev (#506)
 - Add a default comment to the Packaging confirm mail @soimkim (#505)
-
----
-
-## v1.3.6 (06/05/2022)
-## 🐛 Hotfixes
-
-- Fix the bug if the download location is null @soimkim (#500)
-- Fix the page not showing in OSS Bulk @soimkim (#498)
-- After deleting the uploaded file in Self-check, change the error that occurs when saving. @FOSSLight-dev  (#496)
-- Fix bug where suffix is added twice in version @soimkim (#494)
-
-## 🔧 Maintenance
-
-- Change Status Message for Row Registration Failed in OSS Bulk @soimkim (#503)
-- When copying OSS and Project, try setting the name and version. @soimkim (#492)
-- Fix the bug where the warning message is not displayed for the deactivated OSS @FOSSLight-dev (#490)
