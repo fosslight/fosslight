@@ -7,7 +7,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
        ('103', '101', 'Notice Inactive Project', '', '200', 101, 'Y'),
        ('103', '844', 'Notice Inactive 3rd Party', '', '205', 844, 'Y'),
        ('103', '845', 'Notice Inactive self-check', '', '213', 845, 'Y'),
-       ('110', '91', 'selfcheckInfo.html', '', '845', 25, 'Y')
+       ('110', '91', 'selfcheckInfo.html', '', '845', 25, 'Y'),
        ('104', '217', 'selfcheck_basic_info', '', 'SELECT PRJ_NAME, PRJ_VERSION, DIVISION, CREATOR FROM PRE_PROJECT_MASTER WHERE PRJ_ID = ?', 20, 'Y'),
        ('111', '101', 'Notice inactive Project', '', '<p>현재 해당 프로젝트는 최근 6개월 동안 업데이트 내역이 없습니다. 프로젝트의 지속적인 관리와 효율적인 자원 활용을 위해 아래와 같이 조치를 요청드립니다.</p><br><strong>프로젝트 업데이트</strong> :  현재 단계를 수행하거나 혹은 다음 단계로 진행 부탁드리겠습니다.<br> <strong>프로젝트 삭제</strong> :  더 이상 진행 계획이 없을 경우, 삭제를 해주시길 바랍니다. </br></br> <p>This project has not been updated in the past six months. To ensure continuous management and efficient use of resources, please take one of the following actions.</p> <br> <strong>Project Update</strong> :  Please proceed with the current phase or move on to the next stage.<br><strong>Project Deletion</strong> : If there are no further plans to continue, please delete the project.', 101, 'Y'),
        ('111', '844', 'Notice inactive 3rd Party', '', '<p>현재 해당 3rd Party는 최근 6개월 동안 업데이트 내역이 없습니다. 3rd Party의 지속적인 관리와 효율적인 자원 활용을 위해 아래와 같이 조치를 요청드립니다.</p><br> <strong>3rd Party 업데이트</strong> : 현재 단계를 수행하거나 혹은 다음 단계로 진행 부탁드리겠습니다.<br> <strong>3rd Party 삭제</strong> : 더 이상 진행 계획이 없을 경우, 삭제를 해주시길 바랍니다.</br></br> <p>This 3rd Party has not been updated in the past six months. To ensure continuous management and efficient use of resources, please take one of the following actions:</p><br> <strong>3rd Party Update</strong> : Please proceed with the current phase or move on to the next stage.<br>  <strong>3rd Party Deletion</strong> : If there are no further plans to continue, please delete the 3rd Party.', 844, 'Y'),
@@ -37,18 +37,18 @@ DROP TABLE IF EXISTS `PROJECT_FILELIST`;
 CREATE TABLE `PROJECT_FILELIST` (
 	`UPL_FILE_SEQ` INT(11) NOT NULL AUTO_INCREMENT,
 	`REFERENCE_ID` INT(11) NOT NULL,
-	`REFERENCE_DIV` VARCHAR(6) NOT NULL COLLATE 'utf8mb4',
+	`REFERENCE_DIV` VARCHAR(6) NOT NULL,
 	`FILE_SEQ` INT(11) NOT NULL,
 	`FILE_ID` INT(11) NOT NULL,
 	`COMPONENT_COUNT` INT(11) NULL DEFAULT '0',
 	`REG_DT` DATETIME NULL DEFAULT current_timestamp(),
-	PRIMARY KEY (`REFERENCE_ID`, `REFERENCE_DIV`, `FILE_SEQ`) USING BTREE,
+	PRIMARY KEY (`UPL_FILE_SEQ`, `REFERENCE_ID`, `REFERENCE_DIV`, `FILE_SEQ`) USING BTREE,
 	INDEX `FILE_SEQ` (`FILE_SEQ`) USING BTREE,
 	INDEX `FILE_ID` (`FILE_ID`) USING BTREE
-) ENGINE=InnoDB CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Project Information탭 우측 상단의 "Repoen" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Reopen" button on Project Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '35';
-UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Project Informatoin탭 우측 상단의 "Repopen" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \''Drop\'', so you don\''t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Reopen" button on Project information Tab.</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '812';
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Project Informatoin탭 우측 상단의 "Repopen" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to "Drop", so you don\'t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Reopen" button on Project information Tab.</p>' WHERE CD_NO = '111' AND CD_DTL_NO = '812';
 
 INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES ('304', 'User', 'User Entity', 'N');
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
