@@ -1834,7 +1834,7 @@ public class CoMailManager extends CoTopComponent {
 						_s += " (" + project.getPrjVersion() +")";
 					}
 
-					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/selfcheck/shareUrl/" + bean.getParamPrjId();
+					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/selfCheck/shareUrl/" + bean.getParamPrjId();
 					_s = "<a href='"+url+"' target='_blank'>" + _s + "</a>";
 				}
 			}
