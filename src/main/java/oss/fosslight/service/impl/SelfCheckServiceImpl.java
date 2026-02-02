@@ -2782,4 +2782,32 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			log.info("No inactive selfcheck found (not modified for 6 months)");
 		}
 	}
+
+	@Override
+	public List<String> checkUserPermissions(String[] prjIds) {
+		List<String> notPermissionList = new ArrayList<>();
+		List<String> userIdList = null;
+		
+		Project param = new Project();
+		for (int i=0; i<prjIds.length; i++) {
+			userIdList = new ArrayList<>();
+			Project bean = getProjectBasicInfo(prjIds[i]);
+			userIdList.add(bean.getCreator());
+			
+			param.setPrjId(prjIds[i]);
+			List<Project> watcherList = selfCheckMapper.selectWatchersList(param);
+			if (watcherList != null) {
+				for (Project watcher : watcherList) {
+					if (!isEmpty(watcher.getPrjUserId()) && !userIdList.contains(watcher.getPrjUserId())) {
+						userIdList.add(watcher.getPrjUserId());
+					}
+				}
+			}
+			
+			notPermissionList = userIdList;
+		}
+		
+		Collections.sort(notPermissionList);
+		return notPermissionList;
+	}
 }
