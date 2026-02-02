@@ -16,7 +16,7 @@
                    	</tr>
            		</thead>
            		<tbody>
-           			<tr th:if="${target =='depList' or target == 'srcList' or menu == 'selfCheck' or target == 'list'}">
+           			<tr th:if="${target =='depList' or target == 'srcList' or menu == 'selfCheck'}">
            				<th th:if="${target =='depList'}" th:text="'Manifest file'" style="vertical-align: middle; font-size: .9rem;"></th>
            				<th th:if="${menu != 'selfCheck' and target == 'srcList'}" th:text="'Source Name or Path'" style="vertical-align: middle; font-size: .9rem;"></th>
            				<th th:unless="${target == 'depList' or (menu != 'selfCheck' and target == 'srcList')}" th:text="'Binary Name or Source Path'" style="vertical-align: middle; font-size: .9rem;"></th>
@@ -34,8 +34,13 @@
            					</div>
            				</td>
            			</tr>
-           			<tr th:if="${target == 'binList'}">
-           				<th th:text="'Binary Name'" style="vertical-align: middle; font-size: .9rem;"></th>
+           			<tr th:if="${target == 'binList' or target == 'list'}">
+           				<th:block th:if="${target == 'binList'}">
+           					<th th:text="'Binary Name'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				</th:block>
+           				<th:block th:if="${target == 'list'}">
+           					<th th:text="'Binary Name or Source Path'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				</th:block>
            				<td>
            					<div class="row">
            						<div class="col-md-10">
