@@ -132,56 +132,31 @@
 			                            <div class="tab-content" id="identification-tabContent">
 			                            	<!-- 3rd party -->
 			                            	<div class="tab-pane fade" id="menu-third-party" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-			                            		<th:block th:if="${editMode == 'Y'}">
-			                            			<th:block th:replace="project/fragments/edit :: partyFragments"></th:block>
-			                            		</th:block>
-			                            		<th:block th:unless="${editMode == 'Y'}">
-			                            			<th:block th:replace="project/fragments/view :: partyFragments"></th:block>
-			                            		</th:block>
+			                            		<th:block th:replace="project/fragments/view :: partyFragments"></th:block>
 			                            	</div>
 			                            	 <!-- /.3rd party -->
 			
 			                            	<!-- dep -->
 			                                <div class="tab-pane fade" id="menu-dep" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-			                                	<th:block th:if="${editMode == 'Y'}">
-			                                		<th:block th:replace="project/fragments/edit :: depFragments"></th:block>
-			                                	</th:block>
-			                                	<th:block th:unless="${editMode == 'Y'}">
-			                                		<th:block th:replace="project/fragments/view :: depFragments"></th:block>
-			                                	</th:block>
+			                                	<th:block th:replace="project/fragments/view :: depFragments"></th:block>
 			                                </div>
 			                                <!-- /. dep -->
 			                                
 			                                <!-- src -->
 			                                <div class="tab-pane fade" id="menu-src" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-			                                	<th:block th:if="${editMode == 'Y'}">
-			                                		<th:block th:replace="project/fragments/edit :: srcFragments"></th:block>
-			                                	</th:block>
-			                                	<th:block th:unless="${editMode == 'Y'}">
-			                                		<th:block th:replace="project/fragments/view :: srcFragments"></th:block>
-			                                	</th:block>
+			                                	<th:block th:replace="project/fragments/view :: srcFragments"></th:block>
 			                                </div>
 			                                <!-- /.src -->
 			                                
 			                                <!-- bin -->
 			                                <div class="tab-pane fade" id="menu-bin" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-			                                	<th:block th:if="${editMode == 'Y'}">
-			                                		<th:block th:replace="project/fragments/edit :: binFragments"></th:block>
-			                                	</th:block>
-			                                	<th:block th:unless="${editMode == 'Y'}">
-			                                		<th:block th:replace="project/fragments/view :: binFragments"></th:block>
-			                                	</th:block>
+			                                	<th:block th:replace="project/fragments/view :: binFragments"></th:block>
 			                                </div>
 			                                <!-- /.bin -->
 			                                
 			                                <!-- bom -->
 			                                <div class="tab-pane fade" id="menu-bom" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-			                                    <th:block th:if="${editMode == 'Y'}">
-			                                		<th:block th:replace="project/fragments/edit :: bomFragments"></th:block>
-			                                	</th:block>
-			                                	<th:block th:unless="${editMode == 'Y'}">
- 			                                		<th:block th:replace="project/fragments/view :: bomFragments"></th:block>
-			                                	</th:block>
+			                                    <th:block th:replace="project/fragments/view :: bomFragments"></th:block>
 			                                </div>
 			                                <!-- /.bom -->
 			                                

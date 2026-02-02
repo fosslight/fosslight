@@ -13,7 +13,14 @@ var src_evt = {
 	init: function(){
 		src_fn.getSrcGridData();
 		
-		$('#_srcAddList').jqGrid(src_fn.setParamProject3());
+//		$('#_srcAddList').jqGrid(src_fn.setParamProject3());
+		
+		if (typeof $(".srcCsvFileSeq").val() !== "undefined") {
+			$("#srcFragmentsDiv").show();
+			$(".existFileSrc").show();
+		} else {
+			$(".existFileSrc").hide();
+		}
 		
 		var srcList = $("#srcList");
 		//Not aplicable

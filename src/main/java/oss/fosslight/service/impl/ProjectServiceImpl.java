@@ -4181,9 +4181,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
 				T2CoProjectValidator pv = new T2CoProjectValidator();
-				if (!CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())) {
-					map.replace("rows", setMergeGridData((List<ProjectIdentification>) map.get("rows")));
-				}
+				map.replace("rows", setMergeGridData((List<ProjectIdentification>) map.get("rows")));
 				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
 				pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
 				rows = (List<ProjectIdentification>) map.get("rows");
@@ -9467,11 +9465,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					}
 					String loadedTab = "";
 					if (existCnt > 0) {
-						loadedTab = "3rdParty(" + bean.getComponentCount() + ")";
-						partyCnt += Integer.parseInt(bean.getComponentCount());
-					} else {
 						loadedTab = "3rdParty(" + existCnt + ")";
 						partyCnt += existCnt;
+					} else {
+						loadedTab = "3rdParty(" + bean.getComponentCount() + ")";
+						partyCnt += Integer.parseInt(avoidNull(bean.getComponentCount(), "0"));
 					}
 					
 					Map<String, Object> map = new LinkedHashMap<>();
@@ -9491,43 +9489,46 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				if (CollectionUtils.isNotEmpty(list)) {
 					for (Project bean : list) {
 						int existCnt = projectMapper.checkAddProject(project.getPrjId(), bean.getReferenceId(), referenceDiv);
-						if (existCnt > 0) {
-							if (prjAddMap.containsKey(bean.getReferenceId())) {
-								Map<String, Object> existsMap = prjAddMap.get(bean.getReferenceId());
-								String loadedTab = (String) existsMap.get("loadedTab");
-								if (loadedTab.indexOf(refDivNameMap.get(referenceDiv)) == -1) {
-									loadedTab += "," + refDivNameMap.get(referenceDiv) + "(" + bean.getComponentCount() + ")";
-									existsMap.put("loadedTab", loadedTab);
-								}
-								prjAddMap.put(bean.getReferenceId(), existsMap);
-							} else {
-								String prjName = bean.getPrjName();
-								if (!isEmpty(bean.getPrjVersion())) {
-									prjName += "(" + bean.getPrjVersion() + ")";
-								}
-								String loadedTab = refDivNameMap.get(referenceDiv);
-								loadedTab += "(" + avoidNull(bean.getComponentCount(), "0") + ")";
-								
-								Map<String, Object> map = new LinkedHashMap<>();
-								map.put("id", "prj-" + bean.getReferenceId());
-								map.put("item", "prj-" + bean.getReferenceId());
-								map.put("loadedItem", prjName);
-								map.put("loadedTab", loadedTab);
-								prjAddMap.put(bean.getReferenceId(), map);
+						String componentCount = String.valueOf(existCnt);
+						if (existCnt == 0) {
+							componentCount = bean.getComponentCount();
+						}
+						
+						if (prjAddMap.containsKey(bean.getReferenceId())) {
+							Map<String, Object> existsMap = prjAddMap.get(bean.getReferenceId());
+							String loadedTab = (String) existsMap.get("loadedTab");
+							if (loadedTab.indexOf(refDivNameMap.get(referenceDiv)) == -1) {
+								loadedTab += "," + refDivNameMap.get(referenceDiv) + "(" + componentCount + ")";
+								existsMap.put("loadedTab", loadedTab);
 							}
+							prjAddMap.put(bean.getReferenceId(), existsMap);
+						} else {
+							String prjName = bean.getPrjName();
+							if (!isEmpty(bean.getPrjVersion())) {
+								prjName += "(" + bean.getPrjVersion() + ")";
+							}
+							String loadedTab = refDivNameMap.get(referenceDiv);
+							loadedTab += "(" + componentCount + ")";
 							
-							switch (referenceDiv) {
-								case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER : partyCnt += Integer.parseInt(bean.getComponentCount());
-									break;
-								case CoConstDef.CD_DTL_COMPONENT_ID_DEP : depCnt += Integer.parseInt(bean.getComponentCount());
-									break;
-								case CoConstDef.CD_DTL_COMPONENT_ID_SRC : srcCnt += Integer.parseInt(bean.getComponentCount());
-									break;
-								case CoConstDef.CD_DTL_COMPONENT_ID_BIN : binCnt += Integer.parseInt(bean.getComponentCount());
-									break;
-								default :
-									break;
-							}
+							Map<String, Object> map = new LinkedHashMap<>();
+							map.put("id", "prj-" + bean.getReferenceId());
+							map.put("item", "prj-" + bean.getReferenceId());
+							map.put("loadedItem", prjName);
+							map.put("loadedTab", loadedTab);
+							prjAddMap.put(bean.getReferenceId(), map);
+						}
+						
+						switch (referenceDiv) {
+							case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER : partyCnt += Integer.parseInt(componentCount);
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_DEP : depCnt += Integer.parseInt(componentCount);
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_SRC : srcCnt += Integer.parseInt(componentCount);
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_BIN : binCnt += Integer.parseInt(componentCount);
+								break;
+							default :
+								break;
 						}
 					}
 				}
@@ -9726,7 +9727,10 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			if (CollectionUtils.isNotEmpty(projectAddList)) {
 				for (Project bean : projectAddList) {
 					projectMapper.deleteProjectAddList(prjId, bean.getReferenceId(), bean.getReferenceDiv());
-					projectMapper.deleteLoadedOssComponents(prjId, bean.getReferenceDiv(), bean.getReferenceId());
+					int result = projectMapper.deleteLoadedOssComponents(prjId, bean.getReferenceDiv(), bean.getReferenceId());
+					if (result == 0) {
+						projectMapper.removeLoadedOssComponents(prjId, bean.getReferenceDiv(), bean.getReferenceId());
+					}
 				}
 			}
 			
@@ -9738,7 +9742,10 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			if (CollectionUtils.isNotEmpty(partnerAddList)) {
 				for (PartnerMaster bean : partnerAddList) {
 					projectMapper.deleteProjectPartnerAddList(prjId, bean.getPartnerId());
-					projectMapper.deleteLoadedOssComponents(prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, bean.getPartnerId());
+					int result = projectMapper.deleteLoadedOssComponents(prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, bean.getPartnerId());
+					if (result == 0) {
+						projectMapper.removeLoadedOssComponents(prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, bean.getPartnerId());
+					}
 				}
 			}
 		} else {
@@ -9752,12 +9759,18 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				List<String> referenceDivs = (List<String>) param.get("referenceDiv");
 				for (String referenceDiv : referenceDivs) {
 					projectMapper.deleteProjectAddList(prjId, referenceId, referenceDiv);
-					projectMapper.deleteLoadedOssComponents(prjId, referenceDiv, referenceId);
+					int result = projectMapper.deleteLoadedOssComponents(prjId, referenceDiv, referenceId);
+					if (result == 0) {
+						projectMapper.removeLoadedOssComponents(prjId, referenceDiv, referenceId);
+					}
 				}
 			} else {
 				// delete loaded partner
 				projectMapper.deleteProjectPartnerAddList(prjId, referenceId);
-				projectMapper.deleteLoadedOssComponents(prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, referenceId);
+				int result = projectMapper.deleteLoadedOssComponents(prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, referenceId);
+				if (result == 0) {
+					projectMapper.removeLoadedOssComponents(prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, referenceId);
+				}
 			}
 		}
 	}

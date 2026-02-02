@@ -453,7 +453,9 @@ public interface ProjectMapper {
 
 	void deleteProjectPartnerAddList(@Param("prjId") String prjId, @Param("referenceId") String referenceId);
 
-	void deleteLoadedOssComponents(@Param("prjId") String prjId, @Param("referenceDiv") String referenceDiv, @Param("refLoadedVal") String refLoadedVal);
+	int deleteLoadedOssComponents(@Param("prjId") String prjId, @Param("referenceDiv") String referenceDiv, @Param("refLoadedVal") String refLoadedVal);
+	
+	int removeLoadedOssComponents(@Param("prjId") String prjId, @Param("referenceDiv") String referenceDiv, @Param("refLoadedVal") String refLoadedVal);
 
 	int selectProjectFileList(@Param("prjId") String prjId, @Param("fileId") String fileId);
 

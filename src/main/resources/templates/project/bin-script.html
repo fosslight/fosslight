@@ -17,8 +17,14 @@ var bin_evt = {
 	init: function(){
 		bin_fn.getBinGridData();
 		
-		if ("N" != $("input[name='identificationSubStatusBin']").val()) {
-			$('#_binAddList').jqGrid(bin_fn.setParamProject3());
+// 		if ("N" != $("input[name='identificationSubStatusBin']").val()) {
+// 			$('#_binAddList').jqGrid(bin_fn.setParamProject3());
+// 		}
+		
+		if (typeof $(".binCsvFileSeq").val() !== "undefined" || typeof $(".binBinaryFileSeq").val() !== "undefined") {
+			$(".existFileBin").show();
+		} else {
+			$(".existFileBin").hide();
 		}
 		
 		var binList = $("#binList");

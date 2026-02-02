@@ -1730,6 +1730,11 @@
 			T1.FILE_ID = #{csvFileId}
 		AND
 			T1.DEL_YN = 'N'
+		AND NOT EXISTS (
+			SELECT 1
+			FROM OSS_COMPONENTS
+			WHERE REF_LOADED_VAL = #{csvFileId}
+		)
 	</select>
 
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
@@ -7916,6 +7921,22 @@
 		WHERE REFERENCE_ID = #{prjId}
 		AND REFERENCE_DIV = #{referenceDiv}
 		AND REF_LOADED_VAL = #{refLoadedVal}
+	</delete>
+
+	<delete id="removeLoadedOssComponents" parameterType="string">
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			DELETE FROM OSS_COMPONENTS
+			WHERE REFERENCE_ID = #{prjId}
+			AND REFERENCE_DIV = #{referenceDiv}
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('10', referenceDiv)">
+					AND REF_PARTNER_ID = #{refLoadedVal}
+				</when>
+				<otherwise>
+					AND REF_PRJ_ID = #{refLoadedVal}
+				</otherwise>
+			</choose>
+		</if>
 	</delete>
 
 	<select id="selectProjectsModifiedBeforeMonths" resultType="oss.fosslight.domain.Project">
