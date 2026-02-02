@@ -241,7 +241,7 @@ public class SelfCheckController extends CoTopComponent {
 		if ("search".equals(req.getParameter("act"))){
 			// 검색 조건 저장
 			putSessionObject(SESSION_KEY_SEARCH, project);
-		}else if (getSessionObject(SESSION_KEY_SEARCH) != null){
+		} else if (getSessionObject(SESSION_KEY_SEARCH) != null){
 			project = (Project) getSessionObject(SESSION_KEY_SEARCH);
 		}
 
@@ -252,7 +252,7 @@ public class SelfCheckController extends CoTopComponent {
 		
 		boolean isPermission = false;
 		for (Project prj : list) {
-			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {prj.getPrjId()}, "selfCheck");
+			List<String> permissionCheckList = selfCheckService.checkUserPermissions(new String[] {prj.getPrjId()});
 			if (CollectionUtils.isNotEmpty(permissionCheckList)) {
 				for (String userId : permissionCheckList) {
 					if (userId.equalsIgnoreCase(loginUserName())) {
