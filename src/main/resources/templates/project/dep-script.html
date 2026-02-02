@@ -14,8 +14,15 @@ var dep_evt = {
 	init: function(){
 		dep_fn.getDepGridData();
 		
-		if ("N" != $("input[name='identificationSubStatusDep']").val()) {
-			$('#_depAddList').jqGrid(dep_fn.setParamProject3());
+// 		if ("N" != $("input[name='identificationSubStatusDep']").val()) {
+// 			$('#_depAddList').jqGrid(dep_fn.setParamProject3());
+// 		}
+		
+		if (typeof $(".depCsvFileSeq").val() !== "undefined") {
+			$("#depFragmentsDiv").show();
+			$(".existFileDep").show();
+		} else {
+			$("#depFragmentsDiv").hide();
 		}
 		
 		var depList = $("#depList");
