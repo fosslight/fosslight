@@ -4140,14 +4140,17 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType()) ||
-					CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType()) || CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(coMail.getMsgType())) {
 				String type = "";
 				String id = "";
 				ProjectIdentification prjBean = new ProjectIdentification();
 				Project prjDetail = new Project();
-				prjDetail.setPrjId(coMail.getParamPrjId());
-				prjDetail = projectService.getProjectDetail(prjDetail);
+				if (coMail.getParamPrjInfo() != null) {
+					prjDetail = coMail.getParamPrjInfo();
+				} else {
+					prjDetail.setPrjId(coMail.getParamPrjId());
+					prjDetail = projectService.getProjectDetail(prjDetail);
+				}
 				Boolean isAttached = true;
 				String refDiv = "";
 
