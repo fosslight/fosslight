@@ -1029,6 +1029,8 @@ public class PartnerController extends CoTopComponent{
 		try {
 			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
 			mailBean.setParamPartnerId(partnerMaster.getPartnerId());
+			mailBean.setParamPartnerInfo(partnerInfo);
+			
 			if (!isEmpty(partnerMaster.getUserComment())) {
 				mailBean.setComment(partnerMaster.getUserComment());
 			}
@@ -1075,6 +1077,7 @@ public class PartnerController extends CoTopComponent{
 		
 		for (String partnerId : partnerMaster.getPartnerIds()) {
 			param.setPartnerId(partnerId);
+			PartnerMaster partnerInfo = partnerService.getPartnerMasterOne(param);
 			
 			try{
 				History h = partnerService.work(param);
@@ -1087,6 +1090,8 @@ public class PartnerController extends CoTopComponent{
 			try {
 				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
 				mailBean.setParamPartnerId(param.getPartnerId());
+				mailBean.setParamPartnerInfo(partnerInfo);
+				
 				if (!isEmpty(param.getUserComment())) {
 					mailBean.setComment(param.getUserComment());
 				}

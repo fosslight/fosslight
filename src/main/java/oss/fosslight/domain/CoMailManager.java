@@ -4191,9 +4191,13 @@ public class CoMailManager extends CoTopComponent {
 					}
 				}
 
-				if(isAttached) {
+				if (isAttached) {
 					String downloadId = "";
-					downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, id, CommonFunction.emptyCheckProperty("export.template.path", "/template"));
+					if (CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED.equals(coMail.getMsgType())) {
+						downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, id, CommonFunction.emptyCheckProperty("export.template.path", "/template"), null, prjDetail);
+					} else {
+						downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, id, CommonFunction.emptyCheckProperty("export.template.path", "/template"), null, coMail.getParamPartnerInfo());
+					}
 					if (!isEmpty(downloadId)) {
 						T2File fileInfo = fileService.selectFileInfo(downloadId);
 						String filePath = fileInfo.getLogiPath();
