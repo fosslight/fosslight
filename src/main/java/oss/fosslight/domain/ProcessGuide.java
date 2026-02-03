@@ -16,6 +16,7 @@ public class ProcessGuide extends ComBean implements Serializable {
 	private String contents;
 	private String replaceContents;
 	private String url;
+	private String koUrl;
 	private String useYn;
 	
 	public String getId() {
@@ -54,6 +55,10 @@ public class ProcessGuide extends ComBean implements Serializable {
 	public void setUseYn(String useYn) {
 		this.useYn = useYn;
 	}
-
-	
+	public String getKoUrl() {
+		return koUrl;
+	}
+	public void setKoUrl(String koUrl) {
+		this.koUrl = koUrl;
+	}
 }

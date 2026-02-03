@@ -11,12 +11,18 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card card-outline card-dark submit-form">
-                            <div class="card-header d-flex">
-                                <div class="card-title">User Info</div>
-                                <div class="d-flex-align" style="margin-left: auto;">
-                                    <span class="d-flex-align ml-1 px-2" style="cursor: pointer;" id="change" th:onclick="|fn.changePassword()|" titie="Save">
-                                        <i class="fas fa-save customIcon4"></i>
-                                    </span>
+                            <div class="card-header d-flex align-items-center">
+                                <div class="card-title mb-0">User Info</div>
+                                <div class="d-flex align-items-center" style="margin-left: auto;">
+                                    <span class="d-flex-align px-2" style="cursor: pointer;" id="change" th:onclick="|fn.changePassword()|" title="Save">
+							            <i class="fas fa-save customIcon4"></i>
+							        </span>
+							        <div class="ml-3 position-relative">
+							            <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+							            <div class="dropdown-menu dropdown-menu-right mt-0">
+							                <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('User_Settings_Main')|" th:text="|How to use FossLight Hub|"></a>
+							            </div>
+							        </div>
                                 </div>
                             </div>
                             <div class="card-body">

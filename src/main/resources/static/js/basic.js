@@ -3028,8 +3028,16 @@ function openHelpGuideLink(id) {
 		data: {"id":id},
 		async:false,
 		success : function(data){
-			if(data.processGuide) {
+			if (data.processGuide) {
+				var urlParams = new URLSearchParams(window.parent.location.search);
+				var currentLang = urlParams.get('lang');
+				
 				var url = data.processGuide.url;
+				if (currentLang && currentLang.toLowerCase().indexOf('kr') !== -1) {
+                    if (data.processGuide.koUrl) {
+                        url = data.processGuide.koUrl;
+                    }
+                }
 				window.open(url, '_blank');
 			}
 		}

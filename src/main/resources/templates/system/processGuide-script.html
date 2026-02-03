@@ -115,12 +115,13 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				}
-				, colNames: ['ID', 'Page Target','Contents', 'URL', 'useYn']
+				, colNames: ['ID', 'Page Target','Contents', 'URL', 'KO_URL', 'useYn']
 				, colModel: [
                     {name: 'id', index: 'id', width: 150, align: 'left', editable:false},
 					{name: 'pageTarget', index: 'pageTarget', width: 70, align: 'left', editable:false},
                     {name: 'contents', index: 'contents',  width: 350, editable:true, hidden:false},
                     {name: 'url', index: 'url', width: 250, editable:true, editrules : {required: false}},
+                    {name: 'koUrl', index: 'koUrl', width: 250, editable:true, editrules : {required: false}},
 					{name: 'useYn', index: 'useYn', width: 50, align: 'center', editable:true, edittype:"checkbox", editoptions: {value: "Y:N:N"}}
 				]
 				, emptyrecords: "Nothing to display"
