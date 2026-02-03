@@ -699,7 +699,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							String afterLicense = paramBean.getCheckLicense();
 							List<String> licenseTypeList = new ArrayList<>();
 							
-							// license type 이 다른 경우 or 이전 license 중 등록되지 않은 license 가 있는 경우
+							// license type 이 다른 경우
 							for (String license : beforeLicense.split(",")) {
 								if (!license.equals("N/A")) {
 									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
@@ -708,12 +708,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 								}
 							}
 							
-							// 이전 license 중 등록되지 않은 license 가 있는 경우
 							if (CollectionUtils.isNotEmpty(licenseTypeList)) {
 								beforeLicenseType = getLicensePermissive(licenseTypeList);
-								if (beforeLicense.split(",").length != licenseTypeList.size()) {
-									isHighlight = true;
-								}
 							} else {
 								isHighlight = true;
 							}
@@ -731,7 +727,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 								afterLicenseType = getLicensePermissive(licenseTypeList);
 							}
 							
-							// license type 이 다른 경우
 							if (!isEmpty(beforeLicenseType) && !isEmpty(afterLicenseType) && !beforeLicenseType.equalsIgnoreCase(afterLicenseType)) {
 								isHighlight = true;
 							}
