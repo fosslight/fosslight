@@ -155,8 +155,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 	private static String msgGridId;
 	
-	@SuppressWarnings("unchecked")
 	private static String getReportExcelPost (String prjId, String type) throws IOException, InvalidFormatException {
+		return getReportExcelPost(prjId, type, null);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static String getReportExcelPost (String prjId, String type, Object Object) throws IOException, InvalidFormatException {
 		Workbook wb = null;
 		Sheet sheet1 = null;
 		FileInputStream inFile=null;
@@ -168,8 +172,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			//cover
 			// Android Model의 Report에만 vulnerability score를 추가 표시하기 위해 type이 null인 경우 Android model 여부를 사전에 확인할 필요가 있음
 			Project projectInfo = new Project();
-			projectInfo.setPrjId(prjId);
-			projectInfo = projectService.getProjectDetail(projectInfo);
+			if (Object != null) {
+				projectInfo = (Project) Object;
+			} else {
+				projectInfo.setPrjId(prjId);
+				projectInfo = projectService.getProjectDetail(projectInfo);
+			}
 			
 			if (isEmpty(type) && CoConstDef.FLAG_YES.equals(projectInfo.getAndroidFlag())) {
 				type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
@@ -2075,9 +2083,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	public static String getExcelDownloadId(String type, String dataStr, String filepath) throws Exception {
 		return getExcelDownloadId(type, dataStr, filepath, null);
 	}
+	
+	public static String getExcelDownloadId(String type, String dataStr, String filepath, String extParam) throws Exception {
+		return getExcelDownloadId(type, dataStr, filepath, extParam, null);
+	}
 
 	@SuppressWarnings({ "unchecked" })
-	public static String getExcelDownloadId(String type, String dataStr, String filepath, String extParam) throws Exception {
+	public static String getExcelDownloadId(String type, String dataStr, String filepath, String extParam, Object object) throws Exception {
 		downloadpath = filepath;
 		String downloadId = null;
 		
@@ -2128,7 +2140,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				break;
 			case "report" :		//project report
 			case "bom" :		//project bom
-				downloadId = getReportExcelPost(dataStr, null);
+				downloadId = getReportExcelPost(dataStr, null, object);
 				
 				break;
 			case "dep" :		//DEP List
@@ -2148,7 +2160,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				break;
 			case "binAndroidBom" :	//bin android bom List
-				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM, object);
 				
 				break;
 			case "partner" :		//identification > 3rd List
@@ -2198,7 +2210,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				break;
 			case "partnerBomList" :
 			case "partnerBomList_demo" :
-				downloadId = getPartnerChecklistReportExcelPost(dataStr, null);
+				downloadId = getPartnerChecklistReportExcelPost(dataStr, null, object);
 				
 				break;
 			case "spdx" :
@@ -4534,6 +4546,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @throws IOException
 	 */
 	private static String getPartnerChecklistReportExcelPost(String prjId, String type) throws InvalidFormatException, IOException {
+		return getPartnerChecklistReportExcelPost(prjId, type, null);
+	}
+	
+	private static String getPartnerChecklistReportExcelPost(String prjId, String type, Object object) throws InvalidFormatException, IOException {
 		FileInputStream inFile=null;
 		Workbook wb = null;
 		
@@ -4548,8 +4564,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			//cover
 			PartnerMaster partnerInfo = new PartnerMaster();
-			partnerInfo.setPartnerId(prjId);
-			partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+			if (object != null) {
+				partnerInfo = (PartnerMaster) object;
+			} else {
+				partnerInfo.setPartnerId(prjId);
+				partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
+			}
 			
 			ProjectIdentification ossListParam = new ProjectIdentification();
 			ossListParam.setReferenceId(prjId);

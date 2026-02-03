@@ -1801,6 +1801,7 @@ public class ProjectController extends CoTopComponent {
 		try {
 			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED);
 			mailBean.setParamPrjId(project.getPrjId());
+			mailBean.setParamPrjInfo(projectInfo);
 			
 			if (!isEmpty(project.getUserComment())) {
 				mailBean.setComment(project.getUserComment());
@@ -1866,6 +1867,7 @@ public class ProjectController extends CoTopComponent {
 			try {
 				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED);
 				mailBean.setParamPrjId(param.getPrjId());
+				mailBean.setParamPrjInfo(projectInfo);
 				
 				if (!isEmpty(param.getUserComment())) {
 					mailBean.setComment(param.getUserComment());

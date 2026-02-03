@@ -103,6 +103,9 @@ public class CoMail extends ComBean {
 	/** The param prj info. */
 	private Project paramPrjInfo;
 	
+	/** The param partner info. */
+	private PartnerMaster paramPartnerInfo;
+	
 	/** The param license info. */
 	private LicenseMaster paramLicenseInfo;
 	
@@ -1009,5 +1012,13 @@ public class CoMail extends ComBean {
 
 	public void setAttachmentFileName(String attachmentFileName) {
 		this.attachmentFileName = attachmentFileName;
+	}
+
+	public PartnerMaster getParamPartnerInfo() {
+		return paramPartnerInfo;
+	}
+
+	public void setParamPartnerInfo(PartnerMaster paramPartnerInfo) {
+		this.paramPartnerInfo = paramPartnerInfo;
 	}
  } 
