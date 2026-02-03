@@ -11,16 +11,22 @@
                 	<div class="row">
                         <div class="d-flex align-items-center mt-2 ml-2" id="displayPartnerInfo"></div>
                         <div class="float-right align-items-center mt-2 mr-3" style="margin-left: auto;">
-                        <div class="float-right">
-                        	<th:block th:if="${detail?.viewOnlyFlag != 'Y'}">
-                        		<th:block th:if="${detail?.loginUserRole != 'ROLE_VIEWER'}">
-                        			<button th:if="${detail.status == 'CONF'}" type="button" class="btn btn-lg-red btn-sm width-10rem px-1" id="createProject" th:text="'Create Project for OSS Notice'"></button>
-                        		</th:block>
-                        		<th:block th:if="${detail?.partnerId != null or detail?.permission > 0}">
-                        			<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
-                        		</th:block>
-                        	</th:block>
-                        </div>
+                        	<div class="float-right btn-group px-1">
+                        		<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+                        		<div class="dropdown-menu mt-0" role="menu">
+                        			<a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Party_List_Main')|">How to use FossLight Hub</a>
+                        		</div>
+                        	</div>
+	                        <div class="float-right">
+	                        	<th:block th:if="${detail?.viewOnlyFlag != 'Y'}">
+	                        		<th:block th:if="${detail?.loginUserRole != 'ROLE_VIEWER'}">
+	                        			<button th:if="${detail.status == 'CONF'}" type="button" class="btn btn-lg-red btn-sm width-10rem px-1" id="createProject" th:text="'Create Project for OSS Notice'"></button>
+	                        		</th:block>
+	                        		<th:block th:if="${detail?.partnerId != null or detail?.permission > 0}">
+	                        			<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+	                        		</th:block>
+	                        	</th:block>
+	                        </div>
                         </div>
                 	</div>
                 </div>
