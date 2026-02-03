@@ -550,7 +550,10 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_REOPENED = "36"; // Project reopen
 	public static final String CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT = "38"; // Project RequestToOpen Comment 추가  2018-07-23 choye 추가
     public static final String CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION = "101";
-	
+    
+    public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE = "140";
+    public static final String CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE = "141";
+    
 	/** Project Request Review(Identification) */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW = "40";
 	/** Project Identification confirm */

@@ -1305,6 +1305,11 @@ public class ProjectController extends CoTopComponent {
 					diffDivisionComment = CommonFunction.getDiffItemComment(beforeBean, afterBean);
 				}
 				
+				boolean hasChanged = false;
+				if (CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED.equals(mailType)) {
+					hasChanged = CommonFunction.hasProjectChanged(beforeBean, afterBean);
+				}
+				
 				CoMail mailBean = new CoMail(mailType);
 				mailBean.setParamPrjId(project.getPrjId());
 				mailBean.setCompareDataBefore(beforeBean);
@@ -1316,23 +1321,27 @@ public class ProjectController extends CoTopComponent {
 //				}
 				mailBean.setComment(userComment);
 				
-				CoMailManager.getInstance().sendMail(mailBean);
-				
 				if (CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED.equals(mailType)){
-					String diffItemComment = CommonFunction.getDiffItemComment(beforeBean, afterBean, true);
-					
-					try {
-						if (!isEmpty(diffItemComment) || !isEmpty(diffDivisionComment)) {
-							diffItemComment += diffDivisionComment;
-							CommentsHistory commHisBean = new CommentsHistory();
-							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
-							commHisBean.setReferenceId(project.getPrjId());
-							commHisBean.setContents(diffItemComment);
-							commHisBean.setStatus("Changed");
-							commentService.registComment(commHisBean);
+					if (hasChanged) {
+						String diffItemComment = CommonFunction.getDiffItemComment(beforeBean, afterBean, true);
+						
+						try {
+							if (!isEmpty(diffItemComment) || !isEmpty(diffDivisionComment)) {
+								diffItemComment += diffDivisionComment;
+								CommentsHistory commHisBean = new CommentsHistory();
+								commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+								commHisBean.setReferenceId(project.getPrjId());
+								commHisBean.setContents(diffItemComment);
+								commHisBean.setStatus("Changed");
+								commentService.registComment(commHisBean);
+							}
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
 						}
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
+						
+						CoMailManager.getInstance().sendMail(mailBean);
+					} else {
+						log.info("No significant data changed in Project. Skip email. (PrjId: {})", project.getPrjId());
 					}
 				} else if (CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(mailType)){
 					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + beforeBean.getPrjId();
@@ -1351,6 +1360,8 @@ public class ProjectController extends CoTopComponent {
 					commHisBean.setContents(initMessage);
 					commHisBean.setStatus("Copied");
 					commentService.registComment(commHisBean);
+					
+					CoMailManager.getInstance().sendMail(mailBean);
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

@@ -153,6 +153,8 @@ public class CoMail extends ComBean {
 	
 	private boolean includeAttachment = false;
 	
+	private String attachmentFileName;
+	
 	/**
 	 * Gets the snd seq.
 	 *
@@ -999,5 +1001,13 @@ public class CoMail extends ComBean {
 
 	public void setIncludeAttachment(boolean includeAttachment) {
 		this.includeAttachment = includeAttachment;
+	}
+
+	public String getAttachmentFileName() {
+		return attachmentFileName;
+	}
+
+	public void setAttachmentFileName(String attachmentFileName) {
+		this.attachmentFileName = attachmentFileName;
 	}
  } 

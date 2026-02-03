@@ -887,6 +887,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_INACTIVE_NOTIFICATION :
 			case CoConstDef.CD_MAIL_TYPE_SELFCHECK_INACTIVE_NOTIFICATION :
+			case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE :
     			
     			// to : project creator + cc : watcher + reviewer
     			prjInfo = mailManagerMapper.getProjectInfo(bean.getParamPrjId());
@@ -930,7 +931,8 @@ public class CoMailManager extends CoTopComponent {
     			else if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT.equals(bean.getMsgType()) 
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT.equals(bean.getMsgType())
-    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT.equals(bean.getMsgType())) {
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT.equals(bean.getMsgType())
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE.equals(bean.getMsgType())) {
     				// comment send의 경우, 일단 자신은 cc로 보낸다.
     				toList = new ArrayList<>();
     				ccList = new ArrayList<>();
@@ -1161,6 +1163,7 @@ public class CoMailManager extends CoTopComponent {
 			case CoConstDef.CD_MAIL_TYPE_PARTNER_INACTIVE_NOTIFICATION :
 			case CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION:
     		case CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION:
+    		case CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE :
 				// to :  creator + cc : watcher + reviewer
     			partnerInfo = mailManagerMapper.getPartnerInfo(bean.getParamPartnerId());
     			if (CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT.equals(bean.getMsgType())
@@ -1196,7 +1199,8 @@ public class CoMailManager extends CoTopComponent {
         			}
         			
     			}
-    			else if (CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT.equals(bean.getMsgType())) {
+    			else if (CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE.equals(bean.getMsgType())) {
     				// comment send의 경우, 일단 자신은 cc로 보낸다.
 					toList = new ArrayList<>();
     				ccList = new ArrayList<>();
@@ -1816,6 +1820,8 @@ public class CoMailManager extends CoTopComponent {
 			if (title.indexOf("${Project ID}") > -1) {
 				title = StringUtil.replace(title, "${Project ID}", avoidNull(bean.getParamPrjId()));
 			}
+		} else if (title.indexOf("${Project ID}") > -1) {
+			title = StringUtil.replace(title, "${Project ID}", avoidNull(bean.getParamPrjId()));
 		}
 
 		if(title.indexOf("${SelfCheck Project Name") > -1) {
@@ -1901,6 +1907,8 @@ public class CoMailManager extends CoTopComponent {
 			if (title.indexOf("${3rd Party ID}") > -1) {
 				title = StringUtil.replace(title, "${3rd Party ID}", avoidNull(bean.getParamPartnerId()));
 			}
+		}  else if (title.indexOf("${3rd Party ID}") > -1) {
+			title = StringUtil.replace(title, "${3rd Party ID}", avoidNull(bean.getParamPartnerId()));
 		}
 		
 		if (title.indexOf("${Binary Name}") > -1) {
@@ -4201,6 +4209,28 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
+			if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE.equals(coMail.getMsgType()) 
+					|| CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE.equals(coMail.getMsgType())) {
+				String downloadPath = CommonFunction.emptyCheckProperty("export.template.path", "");
+				if (!isEmpty(downloadPath)) {
+					String targetFilePath = downloadPath + "/download/" + coMail.getAttachmentFileName();
+					File file = new File(targetFilePath);
+					if (file.exists()) {
+						 FileSystemResource fileResource = new FileSystemResource(file);
+				         try {
+				        	 helper.addAttachment(file.getName(), fileResource);
+				         } catch (Exception e) {
+				        	 log.error(e.getMessage(), e);
+				         }
+					}
+				} else {
+					if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE.equals(coMail.getMsgType())) {
+						log.info("[PRJ-{}] there is no bom compare report file", coMail.getParamPrjId());
+					} else {
+						log.info("[3RD-{}] there is no bom compare report file", coMail.getParamPartnerId());
+					}
+				}
+			}
 
 			// Email Send
 			mailSender.send(message);

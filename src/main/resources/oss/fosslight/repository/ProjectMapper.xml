@@ -8077,4 +8077,32 @@
 					, #{excludeYn}
 			)
 	</insert>
+	
+	<delete id="deleteOssComponentsSnapshot" parameterType="oss.fosslight.domain.ProjectIdentification">
+		DELETE FROM OSS_COMPONENTS_SNAPSHOT WHERE REFERENCE_ID = #{referenceId} AND REFERENCE_DIV = #{referenceDiv}
+	</delete>
+	
+	<insert id="insertOssComponentsSnapshot" parameterType="java.util.List">
+	    INSERT INTO OSS_COMPONENTS_SNAPSHOT (
+	        REFERENCE_ID,
+	        REFERENCE_DIV,
+	        OSS_NAME,
+	        OSS_VERSION,
+	        LICENSE_NAME
+	    )
+	    VALUES
+	    <foreach collection="list" item="item" separator=",">
+	        (
+	            #{item.referenceId},
+	            #{item.referenceDiv},
+	            #{item.ossName},
+	            #{item.ossVersion},
+	            #{item.licenseName}
+	        )
+	    </foreach>
+	</insert>
+	
+	<select id="selectOssComponentsSnapshot" parameterType="oss.fosslight.domain.ProjectIdentification">
+		SELECT * FROM OSS_COMPONENTS_SNAPSHOT WHERE REFERENCE_ID = #{referenceId} AND REFERENCE_DIV = #{referenceDiv}
+	</select>
 </mapper>

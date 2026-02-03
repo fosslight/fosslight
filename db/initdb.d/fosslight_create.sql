@@ -4811,6 +4811,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('102', '130', '[FOSSLight][OSS-${OSS ID}] ${User} modified comment on : "${OSS Name}"', '', '', 130, 'Y'),
 	('102', '131', '[FOSSLight][OSS-${OSS ID}] ${User} commented : "${OSS Name}"', '', '', 131, 'Y'),
 	('102', '132', '[FOSSLight][OSS-${OSS ID}] ${User} deleted comment on : "${OSS Name}"', '', '', 132, 'Y'),
+	('102', '140', '[FOSSLight][PRJ-${Project ID}] SBOM Compare', '', '', 140, 'Y'),
+	('102', '141', '[FOSSLight][3rd-${3rd Party ID}] SBOM Compare', '', '', 141, 'Y'),
 	('102', '14', '[FOSSLight][OSS-${OSS ID}] ${User} "${OSS Before Name}" renamed to "${OSS Name}"', '', '', 14, 'Y'),
 	('102', '18', '[FOSSLight][OSS-${OSS ID}] ${User} "${OSS Before Name}" renamed to "${OSS Name}"', '', '', 18, 'Y'),
 	('102', '19', '[FOSSLight][OSS-${OSS ID}] ${User} deleted : "${OSS Name}"', '', 'OSS has been removed by ${User Info}', 19, 'Y'),
@@ -4920,6 +4922,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('103', '130', 'oss comment 수정', '', '100', 130, 'Y'),
 	('103', '131', 'oss 에 comment 가 등록된 경우', '', '100', 131, 'Y'),
 	('103', '132', 'oss comment 삭제', '', '100', 132, 'Y'),
+	('103', '140', 'SBOM Compare', '', '200', 140, 'Y'),
+	('103', '141', 'SBOM Compare For Partner', '', '205', 141, 'Y'),
 	('103', '14', 'OSS 변경정보(OSS Name이 변경된 경우)', '', '', 14, 'Y'),
 	('103', '18', 'OSS 이관(삭제)', '', '', 18, 'Y'),
 	('103', '19', 'OSS 삭제', '', '100', 19, 'Y'),
@@ -5036,7 +5040,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('110', '20', 'licenseInfo.html', '', '20,29,231', 3, 'Y'),
 	('110', '21', 'licenseModify.html', '', '21,22,23', 4, 'Y'),
 	('110', '30', 'projectInfo.html', '', '30,40,41,50,51,60,90,61,62,33,66,67,68,38,92,99,100,670,671', 5, 'Y'),
-	('110', '31', 'commentWithProjectInfo.html', '', '42,43,44,46,52,53,54,45,55,31,56,65,34,35,36,101,812', 6, 'Y'),
+	('110', '31', 'commentWithProjectInfo.html', '', '31,34,35,36,42,43,44,45,46,52,53,54,55,56,65,101,140,812,820', 6, 'Y'),
 	('110', '32', 'projectModify.html', '', '32,37', 10, 'Y'),
 	('110', '33', 'watcherInvated.html', '', '63,64', 11, 'Y'),
 	('110', '34', 'partnerInfoWatcherInvated.html', '', '78,79', 12, 'Y'),
@@ -5044,7 +5048,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('110', '36', 'modifiedCommentInfo.html', '', '130,132,230,233,340,341,430,431,530,531,650,651,740,741,742,743', 14, 'Y'),
 	('110', '37', 'userTokenInfo.html', '', '800,801', 15, 'Y'),
 	('110', '38', 'packagingFileUploadInfo.html', '', '810,811', 16, 'Y'),
-	('110', '40', 'partnerInfo.html', '', '70,71,72,73,74,75,76,77,701,710,844', 7, 'Y'),
+	('110', '40', 'partnerInfo.html', '', '70,71,72,73,74,75,76,77,141,701,710,844', 7, 'Y'),
 	('110', '41', 'partnerModify.html', '', '700', 19, 'Y'),
 	('110', '50', 'binaryAnalysisInfo.html', '', '80,81', 8, 'Y'),
 	('110', '60', 'vulnerabilityInfo.html', '', '91,93', 9, 'Y'),
@@ -5643,6 +5647,20 @@ CREATE TABLE `PROJECT_FILELIST` (
 	PRIMARY KEY (`UPL_FILE_SEQ`, `REFERENCE_ID`, `REFERENCE_DIV`, `FILE_SEQ`) USING BTREE,
 	INDEX `FILE_SEQ` (`FILE_SEQ`) USING BTREE,
 	INDEX `FILE_ID` (`FILE_ID`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `OSS_COMPONENTS_SNAPSHOT`;
+CREATE TABLE `OSS_COMPONENTS_SNAPSHOT` (
+	`REFERENCE_ID` INT(11) NOT NULL,
+	`REFERENCE_DIV` VARCHAR(6) NOT NULL,
+	`OSS_NAME` VARCHAR(200) NULL DEFAULT NULL,
+	`OSS_VERSION` VARCHAR(100) NULL DEFAULT NULL,
+	`LICENSE_NAME` VARCHAR(600) NULL DEFAULT NULL,
+	INDEX `REFERENCE_ID` (`REFERENCE_ID`) USING BTREE,
+	INDEX `OSS_NAME` (`OSS_NAME`) USING BTREE,
+	INDEX `OSS_VERSION` (`OSS_VERSION`) USING BTREE,
+	INDEX `LICENSE_NAME` (`LICENSE_NAME`) USING BTREE,
+	INDEX `REFERENCE_DIV` (`REFERENCE_DIV`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE USER IF NOT EXISTS 'fosslight'@'%' IDENTIFIED BY 'fosslight';

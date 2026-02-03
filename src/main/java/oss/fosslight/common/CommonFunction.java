@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -6415,6 +6416,39 @@ public class CommonFunction extends CoTopComponent {
 	    text = text.trim();
 	    text = Normalizer.normalize(text, Normalizer.Form.NFC);
 	    return text;
+	}
+
+	public static boolean hasProjectChanged(Project before, Project after) {
+		if (before == null || after == null) {
+	        return true;
+	    }
+
+	    boolean isChanged = !Objects.equals(before.getPrjName(), after.getPrjName())
+				        || !Objects.equals(before.getPrjVersion(), after.getPrjVersion())
+				        || !Objects.equals(before.getPublicYn(), after.getPublicYn())
+				        || !Objects.equals(before.getOsType(), after.getOsType())
+				        || !Objects.equals(before.getDistributionType(), after.getDistributionType())
+				        || !Objects.equals(before.getNetworkServerType(), after.getNetworkServerType())
+				        || !Objects.equals(before.getDistributeTarget(), after.getDistributeTarget())
+				        || !Objects.equals(before.getNoticeType(), after.getNoticeType())
+				        || !Objects.equals(before.getPriority(), after.getPriority())
+				        || !Objects.equals(before.getSecMailDesc(), after.getSecMailDesc())
+				        || !Objects.equals(before.getSecPersonNm(), after.getSecPersonNm())
+				        || !Objects.equals(before.getComment(), after.getComment())
+				        || !Objects.equals(before.getReviewer(), after.getReviewer())
+				        || !Objects.equals(before.getDivision(), after.getDivision())
+				        || !Objects.equals(before.getCreator(), after.getCreator());
+
+	    if (isChanged) {
+	    	return true;
+	    }
+	    if (!Objects.equals(before.getModelListInfo(), after.getModelListInfo())) {
+	    	return true;
+	    }
+	    if (!Objects.equals(before.getWatcherListInfo(), after.getWatcherListInfo())) {
+	    	return true;
+	    }
+	    return false;
 	}
 }
 

@@ -5505,8 +5505,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 	}
+	private static String makeBomCompareExcelFileId(String beforePrjId, Workbook wb, String target, String exp) throws IOException {
+		return makeBomCompareExcelFileId(beforePrjId, null, wb, target, exp);
+	}
 	private static String makeBomCompareExcelFileId(String beforePrjId, String afterPrjId, Workbook wb, String target, String exp) throws IOException {
-		String fileName = CommonFunction.replaceSlashToUnderline(target) + "_" + beforePrjId + "_" + afterPrjId + "_" + CommonFunction.getCurrentDateTime();
+		String fileName = "";
+		if (!isEmpty(afterPrjId)) {
+			fileName = CommonFunction.replaceSlashToUnderline(target) + "_" + beforePrjId + "_" + afterPrjId + "_" + CommonFunction.getCurrentDateTime();
+		} else {
+			fileName = CommonFunction.replaceSlashToUnderline(target) + "_" + beforePrjId + "_" + CommonFunction.getCurrentDateTime();
+		}
+		
 		String logiFileName = fileName + "." + exp;
 		String excelFilePath = writepath + "/download/";
 		
@@ -5520,7 +5529,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			wb.write(outFile);
 			
 			// db 등록
-			return fileService.registFileDownload(excelFilePath, fileName + "."+exp, logiFileName);
+			if (!isEmpty(afterPrjId)) {
+				return fileService.registFileDownload(excelFilePath, fileName + "."+exp, logiFileName);
+			} else {
+				return logiFileName;
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -5960,6 +5973,49 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	
 		return bom;
+	}
+	
+	public static String getExcelDownloadFileName(ProjectIdentification bean, List<Map<String, String>> bomCompareListExcel) throws IOException {
+		if (isEmpty(downloadpath)) {
+			downloadpath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+		}
+		
+		Workbook wb = null;
+		Sheet sheet = null;
+		FileInputStream inFile=null;
+		
+		try {
+			inFile= new FileInputStream(new File(downloadpath + "/SBOM_Compare.xlsx"));
+			wb = new XSSFWorkbook(inFile);
+			sheet = wb.getSheetAt(0); 
+			wb.setSheetName(0, "SBOM_Compare_" + bean.getReferenceId());
+		  
+			List<String[]> rows = new ArrayList<String[]>();
+		  
+			for (int i = 0; i < bomCompareListExcel.size(); i++){ 
+				String[] rowParam = {
+						bomCompareListExcel.get(i).get("status"),
+						bomCompareListExcel.get(i).get("beforeossname"),
+						bomCompareListExcel.get(i).get("beforelicense"),
+						bomCompareListExcel.get(i).get("afterossname"),
+						bomCompareListExcel.get(i).get("afterlicense")
+				};
+				rows.add(rowParam);
+			}
+			
+			makeBomCompareSheet(sheet, rows, null, null, null, null, null, null); 
+		} catch (Exception e) {
+			log.error(e.getMessage(), e); 
+		} finally {
+			
+			
+			if (inFile != null) { 
+				try {inFile.close();} 
+				catch (Exception e2) {} 
+			}
+		}
+		
+		return makeBomCompareExcelFileId(bean.getReferenceId(), wb, "SBOM_Compare", "xlsx");
 	}
 }
 
