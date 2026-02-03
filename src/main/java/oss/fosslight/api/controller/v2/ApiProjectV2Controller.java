@@ -8,6 +8,8 @@ package oss.fosslight.api.controller.v2;
 import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -1577,9 +1579,30 @@ public class ApiProjectV2Controller extends CoTopComponent {
         project.setPrjId(prjId);
         Project projectInfo = projectService.getProjectDetail(project);
         
-        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && projectInfo.getStatusPermission() == 0) {
+        boolean hasPermission = false;
+        List<String> permissionCheckUserList = new ArrayList<>();
+        if (!isEmpty(projectInfo.getCreator())) {
+        	permissionCheckUserList.add(projectInfo.getCreator());
+        }
+        if (CollectionUtils.isNotEmpty(projectInfo.getWatcherList())) {
+        	for (Project watcher : projectInfo.getWatcherList()) {
+        		if (!permissionCheckUserList.contains(watcher.getPrjUserId())) {
+        			permissionCheckUserList.add(watcher.getPrjUserId());
+        		}
+        	}
+        }
+        if (CollectionUtils.isNotEmpty(permissionCheckUserList)) {
+        	for (String checkUserId : permissionCheckUserList) {
+        		if (checkUserId.equalsIgnoreCase(userInfo.getUserId())) {
+        			hasPermission = true;
+        			break;
+        		}
+        	}
+        }
+        
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && !hasPermission) {
         	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete project.");
-        } else if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && projectInfo.getStatusPermission() > 0
+        } else if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && hasPermission
         		&& (Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) || Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS))) {
         	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
         }
@@ -1599,6 +1622,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             mailBean.setLoginUserName(userInfo.getUserId());
             mailBean.setLoginUserRole(userInfo.getAuthority());
             mailBean.setParamPrjId(project.getPrjId());
+            mailBean.setParamPrjInfo(projectInfo);
 
             if (!isEmpty(project.getUserComment())) {
                 mailBean.setComment(project.getUserComment());
