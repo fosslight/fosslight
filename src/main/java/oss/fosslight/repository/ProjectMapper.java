@@ -476,4 +476,10 @@ public interface ProjectMapper {
 	void insertProjectIdentificationCopy(ProjectIdentification bean);
 
 	void insertOssComponentsLicenseCopy2(OssComponents bean);
+
+	void deleteOssComponentsSnapshot(ProjectIdentification bean);
+	
+	void insertOssComponentsSnapshot(List<ProjectIdentification> list);
+	
+	List<ProjectIdentification> selectOssComponentsSnapshot(ProjectIdentification bean);
 }

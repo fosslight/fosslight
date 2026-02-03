@@ -90,6 +90,7 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VerificationService;
 import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.util.DateUtil;
+import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
@@ -9803,5 +9804,39 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
     public void updateRequestProjectPermission(String prjId, String userId, String status, String rejPerUserNm) {
     	projectMapper.updateRequestProjectPermission(prjId, userId, status, rejPerUserNm);
     }
+
+	@Override
+	public void sbomComparisonService(ProjectIdentification bean, List<ProjectIdentification> bomList) {
+		try {
+			List<ProjectIdentification> rejectedBomList = projectMapper.selectOssComponentsSnapshot(bean);
+			if (CollectionUtils.isNotEmpty(rejectedBomList)) {
+				List<ProjectIdentification> list = new ArrayList<>();
+				if (CollectionUtils.isNotEmpty(bomList)) {
+					list = bomList.stream().collect(Collectors.collectingAndThen(Collectors.toMap(p -> Arrays.asList(p.getOssName(), p.getOssVersion(), p.getLicenseName()), p -> p, (existing, replacement) -> existing), dataMap -> new ArrayList<>(dataMap.values())));
+				}
+				List<Map<String, String>> bomCompareListExcel = getBomCompare(rejectedBomList, list, "excel");
+				String fileName = ExcelDownLoadUtil.getExcelDownloadFileName(bean, bomCompareListExcel);
+				if (!isEmpty(fileName)) {
+					try {
+						CoMail mailBean = new CoMail(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(bean.getReferenceDiv()) ? CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE : CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE);
+						if (!CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(bean.getReferenceDiv())) {
+							mailBean.setParamPrjId(bean.getReferenceId());
+						} else {
+							mailBean.setParamPartnerId(bean.getReferenceId());
+						}
+						mailBean.setAttachmentFileName(fileName);
+						mailBean.setReceiveFlag("R");
+						CoMailManager.getInstance().sendMail(mailBean);
+					} catch (Exception e) {
+						log.error("Error sending bom compare email for project: " + bean.getReferenceId());
+					}
+				} else {
+					log.error("Failed to create bom compare file for project: " + bean.getReferenceId());
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+	}
 }
  

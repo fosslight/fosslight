@@ -7,6 +7,7 @@ package oss.fosslight.service.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -1789,6 +1790,23 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			}
 		} else {
 			log.info("No inactive 3rd found (not modified for 6 months)");
+		}
+	}
+
+	@Override
+	public void saveRejectSnapshot(ProjectIdentification identification, List<ProjectIdentification> bomList) {
+		if (CollectionUtils.isNotEmpty(bomList)) {
+			List<ProjectIdentification> groupBomList = bomList.stream().collect(Collectors.collectingAndThen(Collectors.toMap(p -> Arrays.asList(p.getOssName(), p.getOssVersion(), p.getLicenseName()), p -> p, (existing, replacement) -> existing), dataMap -> new ArrayList<>(dataMap.values())));
+			projectMapper.deleteOssComponentsSnapshot(identification);
+			
+			int batchSize = 1000; 
+	        int totalSize = groupBomList.size();
+
+	        for (int i = 0; i < totalSize; i += batchSize) {
+	            int end = Math.min(i + batchSize, totalSize);
+	            List<ProjectIdentification> batchList = groupBomList.subList(i, end);
+	            projectMapper.insertOssComponentsSnapshot(batchList);
+	        }
 		}
 	}
 }

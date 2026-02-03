@@ -87,4 +87,6 @@ public interface PartnerService extends HistoryConfig{
 	public void updateSecurityDataForPartner(String partnerId);
 
 	public void sendMailInactivePartner();
+
+	public void saveRejectSnapshot(ProjectIdentification identification, List<ProjectIdentification> bomList);
 }

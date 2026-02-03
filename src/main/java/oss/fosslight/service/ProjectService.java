@@ -264,4 +264,6 @@ public interface ProjectService extends HistoryConfig{
 	public void deleteIdentificationUploadSearchData(HashMap<String, Object> param);
 	
   	public void sendMailInactiveProject();
+
+	public void sbomComparisonService(ProjectIdentification bean, List<ProjectIdentification> bomList);
 }

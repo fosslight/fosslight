@@ -92,6 +92,28 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 		('211', 'REQ', 'Request', NULL, '', 2, 'Y'),
 		('211', 'REV', 'Review', NULL, '', 3, 'Y'),
 		('211', 'CONF', 'Confirm', NULL, '', 4, 'Y');
+		
+DROP TABLE IF EXISTS `OSS_COMPONENTS_SNAPSHOT`;
+CREATE TABLE `OSS_COMPONENTS_SNAPSHOT` (
+	`REFERENCE_ID` INT(11) NOT NULL,
+	`REFERENCE_DIV` VARCHAR(6) NOT NULL,
+	`OSS_NAME` VARCHAR(200) NULL DEFAULT NULL,
+	`OSS_VERSION` VARCHAR(100) NULL DEFAULT NULL,
+	`LICENSE_NAME` VARCHAR(600) NULL DEFAULT NULL,
+	INDEX `REFERENCE_ID` (`REFERENCE_ID`) USING BTREE,
+	INDEX `OSS_NAME` (`OSS_NAME`) USING BTREE,
+	INDEX `OSS_VERSION` (`OSS_VERSION`) USING BTREE,
+	INDEX `LICENSE_NAME` (`LICENSE_NAME`) USING BTREE,
+	INDEX `REFERENCE_DIV` (`REFERENCE_DIV`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+       ('102', '140', '[FOSSLight][PRJ-${Project ID}] SBOM Compare', '', '', 140, 'Y'),
+       ('102', '141', '[FOSSLight][3rd-${3rd Party ID}] SBOM Compare', '', '', 141, 'Y'),
+       ('103', '140', 'SBOM Compare', '', '200', 140, 'Y'),
+       ('103', '141', 'SBOM Compare For Partner', '', '205', 141, 'Y'),
+       ('110', '31', 'commentWithProjectInfo.html', '', '31,34,35,36,42,43,44,45,46,52,53,54,55,56,65,101,140,812,820', 6, 'Y'),
+       ('110', '40', 'partnerInfo.html', '', '70,71,72,73,74,75,76,77,141,701,710,844', 7, 'Y');
 -- //@UNDO
 -- SQL to undo the change goes here.
 

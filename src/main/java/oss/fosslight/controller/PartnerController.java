@@ -1447,18 +1447,42 @@ public class PartnerController extends CoTopComponent{
 			partnerService.changeStatus(partnerMaster, false);
 			
 			try {
+				boolean isRejected = false;
+				
 				if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(partnerMaster.getStatus())) {
 					mailbean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REQ_REVIEW);
 				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS.equals(partnerMaster.getStatus())) {
 					if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(orgInfo.getStatus())) {
 						// confirm -> reject
+						isRejected = true;
 						mailbean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_CANCELED_CONF);
 					} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(orgInfo.getStatus())) {
 						// review -> reject
+						isRejected = true;
 						mailbean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REJECT);
 					} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(orgInfo.getStatus())) {
 						// self reject
+						isRejected = true;
 						mailbean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT);
+					}
+				}
+				
+				if (isRejected || CoConstDef.CD_DTL_PROJECT_STATUS_REVIEW.equals(partnerMaster.getStatus().toUpperCase())) {
+					ProjectIdentification param = new ProjectIdentification();
+					param.setReferenceId(partnerMaster.getPartnerId());
+					param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+					param.setMerge(CoConstDef.FLAG_NO);
+					
+					List<ProjectIdentification> bomList = null;
+					Map<String, Object> map = projectService.getIdentificationGridList(param, true);
+					if (map != null && map.containsKey("rows")) {
+						bomList = (List<ProjectIdentification>) map.get("rows");
+					}
+					
+					if (isRejected) {
+						partnerService.saveRejectSnapshot(param, bomList);
+					} else if (CoConstDef.CD_DTL_PROJECT_STATUS_REVIEW.equals(partnerMaster.getStatus().toUpperCase())) {
+						projectService.sbomComparisonService(param, bomList);
 					}
 				}
 				
