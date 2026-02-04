@@ -364,6 +364,8 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String restriction;
 	
+	private String restrictionStr;
+	
 	private String[] arrRestriction;
 	
 	private String[] existArrRestriction;
@@ -2450,5 +2452,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setAnalysisDetailYn(String analysisDetailYn) {
 		this.analysisDetailYn = analysisDetailYn;
+	}
+
+	public String getRestrictionStr() {
+		return restrictionStr;
+	}
+
+	public void setRestrictionStr(String restrictionStr) {
+		this.restrictionStr = restrictionStr;
 	}
 }
