@@ -54,6 +54,54 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="grid-area p-2" id="ossListDiv" style="display: none">
+                    <div class="jqGridSet" style="overflow: hidden">
+                        <table id="ossList">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <div id="ossPager"></div>
+                    </div>
+                </div>
+                
+                <div class="card m-2" id="ossInformationArea" style="display: none">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="post clearfix" id="ossRestrictionsGroup" style="display: none">
+                                            <div class="user-block">
+                                                <span class="username text-primary" style="font-size: .85rem">
+                                                    Restrictions
+                                                </span>
+                                            </div>
+                                            <p class="ml-3" id="ossRestrictionsInfo" style="font-size: .85rem"></p>
+                                        </div>
+                                        <div class="post" id="summaryDescriptionGroup" style="display: none">
+                                            <div class="user-block">
+                                                <span class="username text-primary" style="font-size: .85rem">
+                                                    Summary Description
+                                                </span>
+                                            </div>
+                                            <p class="ml-3" id="summaryDescriptionInfo" style="font-size: .85rem"></p>
+                                        </div>
+                                        <div class="post clearfix" id="importantNotesGroup" style="display: none">
+                                            <div class="user-block">
+                                                <span class="username text-primary" style="font-size: .85rem">
+                                                    Inportant Notes
+                                                </span>
+                                            </div>
+                                            <p class="ml-3" id="importantNotesInfo" style="font-size: .85rem"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
             </div>
         </div>
@@ -167,16 +215,25 @@
                     window.open("about:blank", "_self").close();
                 });
             } else {
+            	var data = {
+            		ossName : [[${licenseInfo.ossName}]],
+            		ossVersion : [[${licenseInfo.ossVersion}]],
+            		licenseName : [[${licenseInfo.licenseName}]]
+            	}
+            	
                 $.ajax({
                     url: "/selfCheck/getLicenseData",
                     dataType: 'json',
                     cache: false,
-                    data: {licenseName: [[${licenseInfo.licenseName}]]},
+                    data: data,
                     contentType: 'application/json',
                     success: function (data) {
+                    	var licenseList = data.licenseList;
+                    	var ossList = data.ossList;
+                    	
                         $('#list').jqGrid({
                             datatype: 'local',
-                            data: data.licenseList,
+                            data: licenseList,
                             jsonReader: {
                                 repeatitems: false,
                                 id: 'licenseId',
@@ -309,10 +366,96 @@
                                         }
                                     }
                                 }
-
-                                loading.hide();
                             }
                         });
+                        
+                        if (ossList.length > 0) {
+                        	$("#ossListDiv").show();
+                        	
+                        	$('#ossList').jqGrid({
+                                datatype: 'local',
+                                data: ossList,
+                                jsonReader: {
+                                    repeatitems: false,
+                                    id: 'ossId',
+                                },
+                                colNames: ['ID', 'OSS Name', 'OSS Version', 'License', 'Download Location', 'Homepage', 'Restriction', 'Summary Description', 'Important Notes'],
+                                colModel: [
+                                    {name: 'ossId', index: 'ossId', key: true, hidden: true},
+                                    {name: 'ossName', index: 'ossName', width: 180, align: 'left'},
+                                    {name: 'ossVersion', index: 'ossVersion', width: 180, align: 'left'},
+                                    {name: 'licenseName', index: 'licenseName', width: 180, align: 'left'},
+                                    {name: 'downloadLocation', index: 'downloadLocation', width: 180, align: 'left', formatter: 'link'},
+                                    {name: 'homepage', index: 'homepage', width: 180, align: 'left', formatter: 'link'},
+                                    {name: 'restrictionStr', index: 'restrictionStr', width: 50, hidden: true, formatter: pop_fn.displayLicenseRestriction},
+                                    {name: 'summaryDescription', index: 'summaryDescription', width: 50, hidden: true},
+                                    {name: 'importantNotes', index: 'importantNotes', width: 50, hidden: true}
+                                ],
+                                onSelectRow: function (id) {
+                                	var rowRestriction = $('#ossList').jqGrid('getCell', id, 'restrictionStr');
+                                    var rowSummaryDescription = $('#ossList').jqGrid('getCell', id, 'summaryDescription');
+                                    var rowImportantNotes = $('#ossList').jqGrid('getCell', id, 'importantNotes');
+
+                                    if (rowRestriction) {
+                                    	var restrictionInfo = rowRestriction;
+                                    	if (rowRestriction.indexOf("title=") > -1 && rowRestriction.indexOf("style=") > -1) {
+                                    		restrictionInfo = rowRestriction.substring(rowRestriction.indexOf("title")+7, rowRestriction.indexOf("style")-2);
+                                    	}
+                                        $("#ossRestrictionsInfo").html(restrictionInfo);
+                                        $("#ossInformationArea").show();
+                                        $("#ossRestrictionsGroup").show();
+                                    } else {
+                                        $("#ossRestrictionsGroup").hide();
+                                    }
+
+                                    if (rowSummaryDescription) {
+                                    	$("#summaryDescriptionInfo").html(rowSummaryDescription.replace(/\n/g, '<br>'));
+                                        $("#informationArea").show();
+                                        $("#summaryDescriptionGroup").show();
+                                    } else {
+                                    	$("#summaryDescriptionGroup").hide();
+                                    }
+                                    
+                                    if (rowImportantNotes) {
+                                    	$("#importantNotesInfo").html(rowImportantNotes.replace(/\n/g, '<br>'));
+                                        $("#informationArea").show();
+                                        $("#importantNotesGroup").show();
+                                    } else {
+                                    	$("#importantNotesGroup").hide();
+                                    }
+                                },
+                                autowidth: true,
+                                gridview: true,
+                                viewrecords: true,
+                                loadonce: true,
+                                height: 'auto',
+                                rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_MAX')}]],
+                                sortname: 'licenseId',
+                                sortorder: 'desc',
+                                loadComplete: function (data) {
+                                	if (data.records > 0) {
+                                        var rowIdx = 0
+                                            , rows = this.rows
+                                            , rowsCount = rows.length
+                                            , row, rowid, rowData, className;
+
+                                        for (var _idx = 0; _idx < rowsCount; _idx++) {
+                                            row = rows[_idx];
+                                            className = row.className;
+
+                                            if (className.indexOf('jqgrow') !== -1) {
+                                                rowid = row.id;
+                                                $('#ossList').jqGrid("setSelection", rowid);
+
+                                                break;
+                                            }
+                                        }
+                                    }
+                                	
+                                    loading.hide();
+                                }
+                            });
+                        }
                     },
                     error: function () {
                         alertify.error([[#{msg.common.valid2}]], 0);

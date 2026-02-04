@@ -44,6 +44,7 @@ import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.common.Url.SELF_CHECK;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
@@ -355,13 +356,14 @@ public class SelfCheckController extends CoTopComponent {
 	}
 	
 	@GetMapping(value=SELF_CHECK.LICENSE_POPUP, produces = "text/html; charset=utf-8")
-	public String viewLicensePopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute LicenseMaster bean, Model model){
-		model.addAttribute("licenseInfo", bean);
+	public String viewLicensePopup(HttpServletRequest req, HttpServletResponse res, @RequestParam Map<String, Object> map, Model model) {
+		model.addAttribute("licenseInfo", map);
 		
 		List<LicenseMaster> resultList = new ArrayList<LicenseMaster>();
 		
-		if (!isEmpty(bean.getLicenseName())) {
-			for (String s : bean.getLicenseName().split(",")) {
+		String licenseName = String.valueOf(map.getOrDefault("licenseName", ""));
+		if (!isEmpty(licenseName)) {
+			for (String s : licenseName.split(",")) {
 				if (isEmpty(s)) {
 					continue;
 				}
@@ -681,13 +683,17 @@ public class SelfCheckController extends CoTopComponent {
 	
 	
 	@GetMapping(value=SELF_CHECK.LICENSE_DATA)
-	public @ResponseBody ResponseEntity<Object> getLicenseData(HttpServletRequest req
-			, HttpServletResponse res, @ModelAttribute LicenseMaster bean, Model model){
-		Map<String, List<LicenseMaster>> resultMap = new HashMap<>();
+	public @ResponseBody ResponseEntity<Object> getLicenseData(HttpServletRequest req, HttpServletResponse res, @RequestParam Map<String, Object> paramMap, Model model) {
+		Map<String, Object> resultMap = new HashMap<>();
 		List<LicenseMaster> resultList = new ArrayList<LicenseMaster>();
+		List<OssMaster> resultOssList = new ArrayList<OssMaster>();
 		
-		if (!isEmpty(bean.getLicenseName())) {
-			for (String s : bean.getLicenseName().split(",")) {
+		String ossName = String.valueOf(paramMap.getOrDefault("ossName", ""));
+		String ossVersion = String.valueOf(paramMap.getOrDefault("ossVersion", ""));
+		String licenseName = String.valueOf(paramMap.getOrDefault("licenseName", ""));
+		
+		if (!isEmpty(licenseName)) {
+			for (String s : licenseName.split(",")) {
 				if (isEmpty(s)) {
 					continue;
 				}
@@ -724,15 +730,48 @@ public class SelfCheckController extends CoTopComponent {
 		}
 		resultMap.put("licenseList", resultList);
 		
+		if (!isEmpty(ossName)) {
+			String key = (ossName + "_" + avoidNull(ossVersion)).toUpperCase();
+			if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
+				OssMaster bean = CoCodeManager.OSS_INFO_UPPER.get(key);
+				if (!isEmpty(bean.getRestriction())) {
+					String restrictionString = CommonFunction.setLicenseRestrictionListById(null, bean.getRestriction());
+					String restrictionStr = "";
+					for (String restriction : bean.getRestriction().split(",")) {
+						if (isEmpty(restriction)) {
+							continue;
+						}
+						if (!isEmpty(restrictionStr)) {
+							restrictionStr += ", ";
+						}
+						restrictionStr += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restriction);
+						if (!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction))) {
+							restrictionStr += " (" + CoCodeManager.getCodeExpString(CoConstDef.CD_LICENSE_RESTRICTION, restriction) + ")";
+						}
+						if (!isEmpty(restrictionStr)) {
+							if (!isEmpty(restrictionString)) {
+								restrictionStr += "|" + restrictionString.split("[|]")[1];
+							}
+							bean.setRestrictionStr(restrictionStr);
+						}
+					}
+					if (CollectionUtils.isNotEmpty(bean.getOssLicenses())) {
+						String ossLicenseName = CommonFunction.makeLicenseExpression(bean.getOssLicenses());
+						if (!isEmpty(ossLicenseName)) {
+							bean.setLicenseName(ossLicenseName);
+						}
+					}
+					resultOssList.add(bean);
+				}
+			}
+		}
+		resultMap.put("ossList", resultOssList);
+		
 		return makeJsonResponseHeader(resultMap);
 	}
 
 	@PostMapping(value=SELF_CHECK.MAKE_YAML)
-	public @ResponseBody ResponseEntity<Object> makeYaml(
-			@RequestBody Project project
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> makeYaml(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String yamlFileId = "";
 		
 		try {
