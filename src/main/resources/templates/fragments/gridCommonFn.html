@@ -1735,7 +1735,17 @@
                 var target = $("#" + gridNm);
                 target.jqGrid('saveRow', rowid);
 
+                var ossName = target.jqGrid('getCell', rowid, 'ossName');
+                var ossVersion = target.jqGrid('getCell', rowid, 'ossVersion');
                 var licenseName = target.jqGrid('getCell', rowid, 'licenseName');
+                
+                if (ossName.indexOf("<div class=") > -1) {
+                	ossName = ossName.substring(0, ossName.indexOf("<div class="));
+                }
+                if (ossVersion.indexOf("<div class=") > -1) {
+                	ossVersion = ossVersion.substring(0, ossVersion.indexOf("<div class="));
+                }
+                
                 let ossLicenseText = target.jqGrid('getCell', rowid, 'ossLicenseText');
                 if (ossLicenseText) {
                 	licenseName = ossLicenseText;
@@ -1756,7 +1766,7 @@
                 target.jqGrid('editRow', rowid);
 
                 if (_popup == null || _popup.closed) {
-                    _popup = window.open('/selfCheck/licensepopup?licenseName=' + licenseName, "licenseViewPopup_" + licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+                    _popup = window.open('/selfCheck/licensepopup?ossName=' + ossName + '&ossVersion=' + ossVersion + '&licenseName=' + licenseName, "licenseViewPopup_" + licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
                     if (!_popup || _popup.closed || typeof _popup.closed == 'undefined') {
                         alertify.alert([[#{msg.common.window.allowpopup}]], function () {
@@ -1764,7 +1774,7 @@
                     }
                 } else {
                     _popup.close();
-                    _popup = window.open('/selfCheck/licensepopup?licenseName=' + licenseName, "licenseViewPopup_" + licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+                    _popup = window.open('/selfCheck/licensepopup?ossName=' + ossName + '&ossVersion=' + ossVersion + '&licenseName=' + licenseName, "licenseViewPopup_" + licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
                 }
 
             }
