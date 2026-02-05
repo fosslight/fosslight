@@ -2403,26 +2403,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<PartnerMaster> thirdPartyUpdateList = new ArrayList<>();
 		List<PartnerMaster> thirdPartyInsertList = new ArrayList<>();
 		List<String> thirdPartyDeleteList = new ArrayList<>();
-		Map<String, PartnerMaster> deleteCheckMap = new HashMap<>();
+		Set<String> safeIds = new HashSet<>();
 		
 		for (PartnerMaster bean : thirdPartyList) {
-			// 기존에 등록되어 있는 경우는 update
-			if (thirdPartyMap.containsKey(avoidNull(bean.getPartnerId()))) {
-				thirdPartyUpdateList.add(bean);
-			} else {
-				thirdPartyInsertList.add(bean);
-				deleteCheckMap.put(bean.getPartnerId(), bean);
-			}
+		    String partnerId = avoidNull(bean.getPartnerId(), "").trim();
+		    if (!isEmpty(partnerId)) {
+		    	if (thirdPartyMap.containsKey(partnerId)) {
+			        thirdPartyUpdateList.add(bean);
+			    } else {
+			        thirdPartyInsertList.add(bean);
+			    }
+			    safeIds.add(partnerId);
+		    }
 		}
-		
-		for (PartnerMaster bean : thirdPartyUpdateList) {
-			deleteCheckMap.put(bean.getPartnerId(), bean);
-		}
-		
-		for (String s : thirdPartyMap.keySet()) {
-			if (!deleteCheckMap.containsKey(s)) {
-				thirdPartyDeleteList.add(s);
-			}
+
+		for (String existPartnerId : thirdPartyMap.keySet()) {
+		    String key = avoidNull(existPartnerId, "").trim();
+		    if (!isEmpty(key) && !safeIds.contains(key)) {
+		        thirdPartyDeleteList.add(existPartnerId);
+		    }
 		}
 		
 		registOssComponentsThird(prjId, prjBasicInfo, updateList, deleteList, insertOssComponentList, insertOssComponentLicenseList, thirdPartyInsertList, thirdPartyDeleteList);
