@@ -2686,7 +2686,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	            inputNames.add(bean.getOssName());
 	        }
 	        if (!isEmpty(bean.getDownloadLocation())) {
-	        	inputUrls.add(bean.getDownloadLocation());
+	        	String downloadLocationUrl = bean.getDownloadLocation();
+	        	if (downloadLocationUrl.endsWith("/")) {
+	        		downloadLocationUrl = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
+	        	}
+	        	inputUrls.add(downloadLocationUrl);
 	        }
 		}
 		
@@ -2757,7 +2761,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			} else {
 				String checkName = "";
 				if (names == null) {
-					names = urlToNameMap2.get(bean.getDownloadLocation());
+					String downloadLocationUrl = bean.getDownloadLocation();
+					if (downloadLocationUrl.endsWith("/")) {
+						downloadLocationUrl = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
+					}
+					names = urlToNameMap2.get(downloadLocationUrl);
 				}
 				
 				if (names != null) {
