@@ -695,13 +695,13 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							boolean isHighlight = false;
 							String beforeLicenseType = "";
 							String afterLicenseType = "";
-							String beforeLicense = avoidNull(paramBean.getLicenseName(), "N/A");
+							String beforeLicense = avoidNull(paramBean.getLicenseName(), "");
 							String afterLicense = paramBean.getCheckLicense();
 							List<String> licenseTypeList = new ArrayList<>();
 							
 							// license type 이 다른 경우
 							for (String license : beforeLicense.split(",")) {
-								if (!license.equals("N/A")) {
+								if (!isEmpty(license)) {
 									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
 										licenseTypeList.add(CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase()).getLicenseType());
 									}
@@ -710,8 +710,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							
 							if (CollectionUtils.isNotEmpty(licenseTypeList)) {
 								beforeLicenseType = getLicensePermissive(licenseTypeList);
-							} else {
-								isHighlight = true;
 							}
 							
 							if (!isEmpty(afterLicense)) {
@@ -727,13 +725,26 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 								afterLicenseType = getLicensePermissive(licenseTypeList);
 							}
 							
-							if (!isEmpty(beforeLicenseType) && !isEmpty(afterLicenseType) && !beforeLicenseType.equalsIgnoreCase(afterLicenseType)) {
+							if (!isEmpty(beforeLicenseType) && !isEmpty(afterLicenseType)) {
 								isHighlight = true;
 							}
 							
 							if (isHighlight) {
-								beforeLicense = "<span style=\"background-color:yellow\">" + beforeLicense + "</span>";
-								afterLicense = "<span style=\"background-color:yellow\">" + afterLicense + "</span>";
+								boolean isEquals = false;
+								String beforeLicenseStr = "";
+								for (String license : beforeLicense.split(",")) {
+									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase()) && !license.equalsIgnoreCase(afterLicense)) {
+										beforeLicenseStr += "<span style=\"background-color:yellow\">" + license + "</span>";
+									} else {
+										isEquals = true;
+										beforeLicenseStr += license;
+									}
+									beforeLicenseStr += ",";
+								}
+								beforeLicense = beforeLicenseStr.substring(0, beforeLicenseStr.length()-1);
+								if (!isEquals) {
+									afterLicense = "<span style=\"background-color:yellow\">" + afterLicense + "</span>";
+								}
 							}
 							
 							changeOssLicenseInfo += "|" + beforeLicense + "|" + afterLicense;
