@@ -208,7 +208,7 @@
         }
 
         $(document).ready(function () {
-            const idx = [[${licenseInfo.licenseName}]];
+            const idx = [[${licenseInfo['licenseName']}]];
 
             if ([[${isValid}]] != true) {
                 alertify.alert([[#{msg.selfcheck.info.unconfirmed.license}]], function () {
@@ -216,9 +216,9 @@
                 });
             } else {
             	var data = {
-            		ossName : [[${licenseInfo.ossName}]],
-            		ossVersion : [[${licenseInfo.ossVersion}]],
-            		licenseName : [[${licenseInfo.licenseName}]]
+            		ossName : [[${licenseInfo['ossName']}]],
+            		ossVersion : [[${licenseInfo['ossVersion']}]],
+            		licenseName : [[${licenseInfo['licenseName']}]]
             	}
             	
                 $.ajax({
