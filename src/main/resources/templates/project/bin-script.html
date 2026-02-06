@@ -22,6 +22,7 @@ var bin_evt = {
 // 		}
 		
 		if (typeof $(".binCsvFileSeq").val() !== "undefined" || typeof $(".binBinaryFileSeq").val() !== "undefined") {
+			$("#binFragmentsDiv").show();
 			$(".existFileBin").show();
 		} else {
 			$(".existFileBin").hide();
