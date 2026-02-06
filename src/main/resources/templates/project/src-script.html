@@ -72,7 +72,7 @@ var src_fn = {
 		// 메인, 서브 그리드 세이브 모드
 		fn_grid_com.totalGridSaveMode('srcList');
 		// 닉네임 체크
-		src_fn.saveMakeData(true);
+		src_fn.saveMakeData(true, null);
 	},
 	projectSearch : function () {
 		var searchSelect = $("select[name='srcProjectSelect'] option:selected").val();
@@ -418,6 +418,8 @@ var src_fn = {
 		});
 	},
 	resetExeSave : function(finalData) {
+		finalData["resetFlag"] = "Y";
+		
 		$.ajax({
 			url : '/project/saveSrc',
 			type : 'POST',

@@ -38,7 +38,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public String getDivision(Project project);
 
-	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponents, List<PartnerMaster> thirdPartyList);
+	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponents, List<PartnerMaster> thirdPartyList, boolean shouldReset);
 	
 	public List<Map<String, String>> getProjectNameList(Project project);
 	
