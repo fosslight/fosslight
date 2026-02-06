@@ -1407,15 +1407,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			List<String> purls = new ArrayList<>();
 			
 			for (String url : downloadLocations){
-				if (!isEmpty(url)){ // 공백의 downloadLocation은 save하지 않음.
+				if (!isEmpty(url)) {
+					String downloadLocationUrl = url;
+					if (downloadLocationUrl.endsWith("/") && !checkUrlConnection(downloadLocationUrl)) {
+						downloadLocationUrl = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
+					}
+					
 					master.setOssCommonId(ossMaster.getOssCommonId());
-					master.setDownloadLocation(url);
+					master.setDownloadLocation(downloadLocationUrl);
 					master.setOssDlIdx(++idx);
 					
 					String purlString = "";
 					if (purlMap != null) {
-						if (purlMap.containsKey(url)) {
-							purlString = purlMap.get(url);
+						if (purlMap.containsKey(downloadLocationUrl)) {
+							purlString = purlMap.get(downloadLocationUrl);
 						} else {
 							purlString = generatePurlByDownloadLocation(master);
 						}
@@ -1432,13 +1437,35 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMapper.insertOssDownloadLocation(master);
 				}
 			}
-			
 			if (!purls.isEmpty()) {
 				ossMaster.setPurl(String.join(",", purls));
 			}
 		}
 	}
 	
+	private boolean checkUrlConnection(String downloadLocationUrl) {
+		if (!downloadLocationUrl.toLowerCase().startsWith("http")) {
+			return true;
+		}
+		String urlStr = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
+		try {
+	        URL url = new URL(urlStr);
+	        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	        connection.setRequestMethod("HEAD");
+	        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+	        connection.setConnectTimeout(2000);
+	        connection.setReadTimeout(2000);
+	        
+	        int responseCode = connection.getResponseCode();
+	        if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+	            return false;
+	        }
+	        return (responseCode == HttpURLConnection.HTTP_OK);
+	    } catch (Exception e) {
+	        return false;
+	    }
+	}
+
 	@Override
 	public Map<String, Object> ossMergeCheckList(OssMaster ossMaster) {
 		Map<String, Object> map = new HashMap<String, Object>();
