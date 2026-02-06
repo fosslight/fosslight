@@ -3774,58 +3774,49 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
         
         // 컴포넌트 삭제
         ProjectIdentification identification = new ProjectIdentification();
+        ProjectIdentification paramBean = new ProjectIdentification();
+        
+        paramBean.setReferenceId(prjId);
         identification.setReferenceId(prjId);
         if (!isAndroid) {
-            if (!isPartner) {
-                identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-            } else {
-                identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
-            }
+            identification.setReferenceDiv(isPartner ? CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM : CoConstDef.CD_DTL_COMPONENT_ID_BOM);
         } else {
             identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
         }
         identification.setMerge(CoConstDef.FLAG_NO);
+        paramBean.setReferenceDiv(identification.getReferenceDiv());
+        
+        List<OssComponents> componentId = projectMapper.selectComponentId(identification);
+        List<ProjectIdentification> bomComponentsList = new ArrayList<>();
         
         // 기존 bom data get
-        List<ProjectIdentification> bomList = null;
-        if (!isAndroid && !isPartner) {
-            bomList = projectMapper.selectBomList(identification);
-        } else {
-            bomList = projectMapper.selectOtherBomList(identification);
+        List<ProjectIdentification> bomList = (!isAndroid && !isPartner) ? projectMapper.selectBomList(identification) : projectMapper.selectOtherBomList(identification);
+        List<String> adminCheckComponentIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(bomList)) {
+            for (ProjectIdentification pi : bomList) {
+                if (CoConstDef.FLAG_YES.equals(pi.getAdminCheckYn())) {
+                    adminCheckComponentIds.add(pi.getRefComponentId());
+                }
+            }
         }
         
-        List<String> adminCheckComponentIds = new ArrayList<>();
         List<String> removeAdminCheckComponentIds = new ArrayList<>();
         for (ProjectIdentification bomGridData : checkGridBomList) {
             for (String refComponentId : bomGridData.getRefComponentId().split(",")) {
                 removeAdminCheckComponentIds.add(refComponentId.trim());
             }
         }
-        
-        if (CollectionUtils.isNotEmpty(bomList)) {
-            for (ProjectIdentification pi : bomList) {
-                if (pi.getAdminCheckYn().equals(CoConstDef.FLAG_YES)) {
-                    adminCheckComponentIds.add(pi.getRefComponentId());
-                }
-            }
-        }
-        
         if (!removeAdminCheckComponentIds.isEmpty()) {
             adminCheckComponentIds.removeAll(removeAdminCheckComponentIds);
         }
-        List<OssComponents> componentId = projectMapper.selectComponentId(identification);
-        
-        // 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
-        if (componentId.size() > 0){
-            projectMapper.resetOssComponentsAndLicense(identification.getReferenceId(), identification.getReferenceDiv());
+        if (!removeAdminCheckComponentIds.isEmpty()) {
+            adminCheckComponentIds.removeAll(removeAdminCheckComponentIds);
         }
         
-        identification.setMerge(merge);
-        identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
-        identification.setSaveBomFlag(CoConstDef.FLAG_YES); // file path 를 groupping 하지 않고, 개별로 data 등록
-        Map<String, Object> mergeListMap = getIdentificationGridList(identification);
-        List<ProjectIdentification> bomComponentsList = new ArrayList<>();
-        
+        paramBean.setMerge(merge);
+        paramBean.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+        paramBean.setSaveBomFlag(CoConstDef.FLAG_YES);
+        Map<String, Object> mergeListMap = getIdentificationGridList(paramBean);
         if (mergeListMap != null && mergeListMap.get("rows") != null) {
             Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
             Set<String> uniqueKeys = new HashSet<>();
@@ -3842,134 +3833,141 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                 }
             }
             
-            List<ProjectIdentification> registBomList = (List<ProjectIdentification>) mergeListMap.get("rows");
-            for (ProjectIdentification bean : registBomList) {
-                uniqueKeys.add((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
-            }
-            
-            uniqueKeys.parallelStream().forEach(key -> {
-                OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-                OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-                if (om != null && !isEmpty(om.getCvssScore())) {
-                    vulnerabilityInfoMap.put(key, om);
+            List<ProjectIdentification> registBomList = (mergeListMap != null) ? (List<ProjectIdentification>) mergeListMap.get("rows") : null;
+            if (CollectionUtils.isNotEmpty(registBomList)) {
+            	for (ProjectIdentification bean : registBomList) {
+                    uniqueKeys.add((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
                 }
-            });
-            
-            for (ProjectIdentification bean : registBomList) {
-                bean.setRefDiv(bean.getReferenceDiv());
-                if (!isAndroid) {
-                    if (!isPartner) {
-                        bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-                    } else {
-                        bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+                
+                uniqueKeys.parallelStream().forEach(key -> {
+                    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+                    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+                    if (om != null && !isEmpty(om.getCvssScore())) {
+                        vulnerabilityInfoMap.put(key, om);
                     }
-                } else {
-                    bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
-                }
-                bean.setRefComponentId(bean.getComponentId());
-                if (adminCheckComponentIds.contains(bean.getRefComponentId())) {
-                    bean.setAdminCheckYn(CoConstDef.FLAG_YES);
-                } else {
-                    bean.setAdminCheckYn(CoConstDef.FLAG_NO);
-                }
-                bean.setPreObligationType(bean.getObligationType());
+                });
                 
-                String copyCheckKey = bean.getRefComponentId();
-                if (isCopyConfirm) {
-                    copyCheckKey = (bean.getRefDiv() + "_" + bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName()).toUpperCase();
-                }
-                
-                // 그리드 데이터 넣기
-                for (ProjectIdentification gridData : projectIdentification) {
-                    String copyCheckKey2 = gridData.getRefComponentId();
+                for (ProjectIdentification bean : registBomList) {
+                    bean.setRefDiv(bean.getReferenceDiv());
+                    if (!isAndroid) {
+                        if (!isPartner) {
+                            bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+                        } else {
+                            bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+                        }
+                    } else {
+                        bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+                    }
+                    bean.setRefComponentId(bean.getComponentId());
+                    if (adminCheckComponentIds.contains(bean.getRefComponentId())) {
+                        bean.setAdminCheckYn(CoConstDef.FLAG_YES);
+                    } else {
+                        bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+                    }
+                    bean.setPreObligationType(bean.getObligationType());
+                    
+                    String copyCheckKey = bean.getRefComponentId();
                     if (isCopyConfirm) {
-                        copyCheckKey2 = (gridData.getRefDiv() + "_" + gridData.getOssName() + "_" + gridData.getOssVersion() + "_" + gridData.getLicenseName()).toUpperCase();
+                        copyCheckKey = (bean.getRefDiv() + "_" + bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName()).toUpperCase();
                     }
                     
-                    // merge 결과 (src/bat/3rd) 일시
-                    if (copyCheckKey2.contains(copyCheckKey)){
-                        bean.setMergePreDiv(gridData.getMergePreDiv());
-                        
-                        // BOM에 초기표시된 obligation을 초기 값으로 설정
-                        // needs check의 경우만 화면에서 입력받는다.
-                        if (CoConstDef.FLAG_YES.equals(gridData.getAdminCheckYn())) {
-                            bean.setAdminCheckYn(gridData.getAdminCheckYn());
-                            
-                            if (isCopyConfirm) {
-                                bean.setPreObligationType(gridData.getPreObligationType());
-                                bean.setObligationType(gridData.getObligationType());
-                            } else {
-                                if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_YES.equals(gridData.getSource())) {
-                                    bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
-                                } else if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
-                                    bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-                                } else if (CoConstDef.FLAG_YES.equals(gridData.getNotify())) {
-                                    bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-                                } else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
-                                    bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
-                                }
-                            }
-                            
-                            bean.setDownloadLocation(gridData.getDownloadLocation());
-                            bean.setHomepage(gridData.getHomepage());
-                            bean.setCopyrightText(gridData.getCopyrightText());
+                    // 그리드 데이터 넣기
+                    for (ProjectIdentification gridData : projectIdentification) {
+                        String copyCheckKey2 = gridData.getRefComponentId();
+                        if (isCopyConfirm) {
+                            copyCheckKey2 = (gridData.getRefDiv() + "_" + gridData.getOssName() + "_" + gridData.getOssVersion() + "_" + gridData.getLicenseName()).toUpperCase();
                         }
                         
-                        break;
+                        // merge 결과 (src/bat/3rd) 일시
+                        if (copyCheckKey2.contains(copyCheckKey)){
+                            bean.setMergePreDiv(gridData.getMergePreDiv());
+                            
+                            // BOM에 초기표시된 obligation을 초기 값으로 설정
+                            // needs check의 경우만 화면에서 입력받는다.
+                            if (CoConstDef.FLAG_YES.equals(gridData.getAdminCheckYn())) {
+                                bean.setAdminCheckYn(gridData.getAdminCheckYn());
+                                
+                                if (isCopyConfirm) {
+                                    bean.setPreObligationType(gridData.getPreObligationType());
+                                    bean.setObligationType(gridData.getObligationType());
+                                } else {
+                                    if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_YES.equals(gridData.getSource())) {
+                                        bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
+                                    } else if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
+                                        bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
+                                    } else if (CoConstDef.FLAG_YES.equals(gridData.getNotify())) {
+                                        bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
+                                    } else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
+                                        bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
+                                    }
+                                }
+                                
+                                bean.setDownloadLocation(gridData.getDownloadLocation());
+                                bean.setHomepage(gridData.getHomepage());
+                                bean.setCopyrightText(gridData.getCopyrightText());
+                            }
+                            
+                            break;
+                        }
                     }
-                }
-                
-                bean = CommonFunction.findOssIdAndName(bean);
-                
-                String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-                boolean setCveInfoFlag = false;
-                if (vulnerabilityInfoMap.containsKey(key)) {
-                    OssMaster om = vulnerabilityInfoMap.get(key);
-                    if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
-                        String cveId = om.getCveId();
-                        String cvssScore = om.getCvssScore();
-                        if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-                            if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
-                                includeVulnInfoOldBomList.add(bean);
+                    
+                    bean = CommonFunction.findOssIdAndName(bean);
+                    
+                    String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+                    boolean setCveInfoFlag = false;
+                    if (vulnerabilityInfoMap.containsKey(key)) {
+                        OssMaster om = vulnerabilityInfoMap.get(key);
+                        if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
+                            String cveId = om.getCveId();
+                            String cvssScore = om.getCvssScore();
+                            if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+                                if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
+                                    includeVulnInfoOldBomList.add(bean);
+                                }
+                            } else {
+                                setCveInfoFlag = true;
                             }
                         } else {
                             setCveInfoFlag = true;
                         }
-                    } else {
-                        setCveInfoFlag = true;
                     }
-                }
-                
-                if (setCveInfoFlag) {
-                    if (vulnerabilityInfoMap.containsKey(key)) {
-                        OssMaster om = vulnerabilityInfoMap.get(key);
-                        String cveId = om.getCveId();
-                        String cvssScore = om.getCvssScore();
-                        if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-                            if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
-                                includeVulnInfoNewBomList.add(bean);
+                    
+                    if (setCveInfoFlag) {
+                        if (vulnerabilityInfoMap.containsKey(key)) {
+                            OssMaster om = vulnerabilityInfoMap.get(key);
+                            String cveId = om.getCveId();
+                            String cvssScore = om.getCvssScore();
+                            if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+                                if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
+                                    includeVulnInfoNewBomList.add(bean);
+                                }
                             }
                         }
                     }
+                    
+                    if(!isEmpty(bean.getCopyrightText())) {
+                        String[] copyrights = bean.getCopyrightText().split("\\|");
+                        String copyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
+                        bean.setCopyrightText(copyrightText);
+                    }
+                    
+                    // 컴포넌트 마스터 인서트
+                    // projectMapper.registBomComponents(bean);
+                    List<OssComponentsLicense> licenseList = CommonFunction.findOssLicenseIdAndName(bean.getOssId(), bean.getOssComponentsLicenseList());
+                    bean.setOssComponentsLicenseList(licenseList);
+                    bomComponentsList.add(bean);
+                    
+//                  for (OssComponentsLicense licenseBean : licenseList) {
+//                      licenseBean.setComponentId(bean.getComponentId());
+//                      projectMapper.registComponentLicense(licenseBean);
+//                  }
                 }
-                
-                if(!isEmpty(bean.getCopyrightText())) {
-                    String[] copyrights = bean.getCopyrightText().split("\\|");
-                    String copyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
-                    bean.setCopyrightText(copyrightText);
-                }
-                
-                // 컴포넌트 마스터 인서트
-                // projectMapper.registBomComponents(bean);
-                List<OssComponentsLicense> licenseList = CommonFunction.findOssLicenseIdAndName(bean.getOssId(), bean.getOssComponentsLicenseList());
-                bean.setOssComponentsLicenseList(licenseList);
-                bomComponentsList.add(bean);
-                
-//              for (OssComponentsLicense licenseBean : licenseList) {
-//                  licenseBean.setComponentId(bean.getComponentId());
-//                  projectMapper.registComponentLicense(licenseBean);
-//              }
             }
+        }
+        
+        // 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
+        if (CollectionUtils.isNotEmpty(componentId)) {
+            projectMapper.resetOssComponentsAndLicense(identification.getReferenceId(), identification.getReferenceDiv());
         }
         
         if (!CollectionUtils.isEmpty(bomComponentsList)) {
