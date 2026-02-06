@@ -4213,10 +4213,9 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE.equals(coMail.getMsgType()) 
-					|| CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE.equals(coMail.getMsgType())) {
+			if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE.equals(coMail.getMsgType()) || CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE.equals(coMail.getMsgType())) {
 				String downloadPath = CommonFunction.emptyCheckProperty("export.template.path", "");
-				if (!isEmpty(downloadPath)) {
+				if (!isEmpty(downloadPath) && !isEmpty(coMail.getAttachmentFileName())) {
 					String targetFilePath = downloadPath + "/download/" + coMail.getAttachmentFileName();
 					File file = new File(targetFilePath);
 					if (file.exists()) {

@@ -4313,6 +4313,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				userComment = avoidNull(userComment) + "<br />" + _tempComment;
 			}
 			verificationService.getReviewReportPdfFile(prjInfo.getPrjId());
+			replaceOssComponentsSnapshots(param, rows, false);
 		} else if (!isEmpty(project.getCompleteYn())) {
 			// project complete 시
 			updateProjectMaster(project);
@@ -4348,6 +4349,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(project.getVerificationStatus()) 
 					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getVerificationStatus());
 			boolean isIdentificationReject = false;
+			boolean shouldSaveReReview = false;
 			Project beforeInfo = getProjectDetail(project);
 			
 			// Identification
@@ -4369,6 +4371,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT;
 				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(beforeInfo.getIdentificationStatus())) {
 					// reject by review
+					shouldSaveReReview = true;
 					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT;
 				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(beforeInfo.getIdentificationStatus())) {
 					// confirm to review
@@ -4392,17 +4395,40 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			
+			Project prjParamBean = new Project();
+			prjParamBean.setPrjId(project.getPrjId());
+			Project prjBean = getProjectDetail(prjParamBean);
+			
+			// confirm 시 다시 DB Data를 가져와서 체크한다.
+			ProjectIdentification param = new ProjectIdentification();
+			param.setReferenceId(project.getPrjId());
+			param.setMerge(CoConstDef.FLAG_NO);
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			
+			boolean hasIdentificationReview = false;
+			if (!isEmpty(project.getIdentificationStatus()) && CoConstDef.CD_DTL_PROJECT_STATUS_REVIEW.equalsIgnoreCase(project.getIdentificationStatus())) {
+				hasIdentificationReview = true;
+			}
+			
+			Map<String, Object> map = null;
+			List<ProjectIdentification> bomList = null;
+			if (shouldSaveReReview || hasIdentificationReview) {
+				map = getIdentificationGridList(param);
+				if (map != null && map.containsKey("rows")) {
+					bomList = (List<ProjectIdentification>) map.get("rows");
+				} else {
+					bomList = new ArrayList<>();
+				}
+				if (shouldSaveReReview) {
+					replaceOssComponentsSnapshots(param, bomList, true);
+				}
+			}
+			
 			// 사용자가 reject하는 경우는 validation check 수행하지 않음
 			if (!ignoreValidation) {
-				// Identification Reqeust review인 경우, 필수 항목 체크 추가
-				Map<String, Object> map = null;
-				// confirm 시 다시 DB Data를 가져와서 체크한다.
-				ProjectIdentification param = new ProjectIdentification();
-				param.setReferenceId(project.getPrjId());
-				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				param.setMerge(CoConstDef.FLAG_NO);
-				map = getIdentificationGridList(param);
-				
+				if (MapUtils.isEmpty(map)) {
+					map = getIdentificationGridList(param);
+				}
 				if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
 					T2CoProjectValidator pv = new T2CoProjectValidator();
 					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
@@ -4489,6 +4515,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				verificationService.updateProjectAllowDownloadBitFlag(project);
+			}
+			
+			if (hasIdentificationReview) {
+				if (commentService.checkStatusCommentsHistory(param.getReferenceId(), "prj", CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS)) > 0) {
+					sbomComparisonService(param, bomList);
+				}
 			}
 		}
 		
@@ -9816,28 +9848,54 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					list = bomList.stream().collect(Collectors.collectingAndThen(Collectors.toMap(p -> Arrays.asList(p.getOssName(), p.getOssVersion(), p.getLicenseName()), p -> p, (existing, replacement) -> existing), dataMap -> new ArrayList<>(dataMap.values())));
 				}
 				List<Map<String, String>> bomCompareListExcel = getBomCompare(rejectedBomList, list, "excel");
+				boolean hasSameStatus = bomCompareListExcel.stream().anyMatch(map -> "same".equalsIgnoreCase(String.valueOf(map.get("status"))));
 				String fileName = ExcelDownLoadUtil.getExcelDownloadFileName(bean, bomCompareListExcel);
-				if (!isEmpty(fileName)) {
-					try {
-						CoMail mailBean = new CoMail(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(bean.getReferenceDiv()) ? CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE : CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE);
-						if (!CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(bean.getReferenceDiv())) {
-							mailBean.setParamPrjId(bean.getReferenceId());
-						} else {
-							mailBean.setParamPartnerId(bean.getReferenceId());
-						}
-						mailBean.setAttachmentFileName(fileName);
-						mailBean.setReceiveFlag("R");
-						CoMailManager.getInstance().sendMail(mailBean);
-					} catch (Exception e) {
-						log.error("Error sending bom compare email for project: " + bean.getReferenceId());
-					}
+				String comments = "SBOM Compare";
+				
+				if (hasSameStatus) {
+					comments += " - SAME"; 
 				} else {
-					log.error("Failed to create bom compare file for project: " + bean.getReferenceId());
+					Map<String, Long> statusCounts = bomCompareListExcel.stream().filter(map -> map.get("status") != null).collect(Collectors.groupingBy(map -> map.get("status"), Collectors.counting()));
+					long addCount = statusCounts.getOrDefault("add", 0L);
+					long deleteCount = statusCounts.getOrDefault("delete", 0L);
+					long changeCount = statusCounts.getOrDefault("change", 0L);
+					comments += " - ADD : " + String.valueOf(addCount) + ", DELETE : " + String.valueOf(deleteCount) + " , UPDATE : " + String.valueOf(changeCount);
+				}
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(bean.getReferenceDiv()) ? CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE : CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE);
+					if (!CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(bean.getReferenceDiv())) {
+						mailBean.setParamPrjId(bean.getReferenceId());
+					} else {
+						mailBean.setParamPartnerId(bean.getReferenceId());
+					}
+					if (!hasSameStatus) {
+						mailBean.setAttachmentFileName(fileName);
+					}
+					mailBean.setComment(comments);
+					mailBean.setReceiveFlag("R");
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error("Error sending bom compare email for project: " + bean.getReferenceId());
 				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public void replaceOssComponentsSnapshots(ProjectIdentification bean, List<ProjectIdentification> bomList, boolean shouldMerge) {
+		List<ProjectIdentification> groupBomList = bomList.stream().collect(Collectors.collectingAndThen(Collectors.toMap(p -> Arrays.asList(p.getOssName(), p.getOssVersion(), p.getLicenseName()), p -> p, (existing, replacement) -> existing), dataMap -> new ArrayList<>(dataMap.values())));
+		projectMapper.deleteOssComponentsSnapshot(bean);
+		
+		int batchSize = 1000; 
+        int totalSize = groupBomList.size();
+
+        for (int i = 0; i < totalSize; i += batchSize) {
+            int end = Math.min(i + batchSize, totalSize);
+            List<ProjectIdentification> batchList = groupBomList.subList(i, end);
+            projectMapper.insertOssComponentsSnapshot(batchList);
+        }
 	}
 }
  

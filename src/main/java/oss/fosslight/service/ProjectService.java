@@ -266,4 +266,6 @@ public interface ProjectService extends HistoryConfig{
   	public void sendMailInactiveProject();
 
 	public void sbomComparisonService(ProjectIdentification bean, List<ProjectIdentification> bomList);
+
+	public void replaceOssComponentsSnapshots(ProjectIdentification bean, List<ProjectIdentification> bomList, boolean shouldMerge);
 }
