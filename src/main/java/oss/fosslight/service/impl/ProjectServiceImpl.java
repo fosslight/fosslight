@@ -4313,7 +4313,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				userComment = avoidNull(userComment) + "<br />" + _tempComment;
 			}
 			verificationService.getReviewReportPdfFile(prjInfo.getPrjId());
-			replaceOssComponentsSnapshots(param, rows, false);
 		} else if (!isEmpty(project.getCompleteYn())) {
 			// project complete 시
 			updateProjectMaster(project);
