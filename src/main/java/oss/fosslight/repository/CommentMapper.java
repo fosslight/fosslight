@@ -8,6 +8,7 @@ package oss.fosslight.repository;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.CommentsHistory;
 
@@ -40,4 +41,6 @@ public interface CommentMapper {
 	public List<CommentsHistory> getMoreCommentListHis(CommentsHistory bean);
 
 	public int getCommentListHisCnt(CommentsHistory bean);
+
+	public int checkStatusCommentsHistory(@Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv, @Param("status") String status);
 }

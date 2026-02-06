@@ -34,4 +34,6 @@ public interface CommentService{
 	public int getCommentListHisCnt(CommentsHistory bean);
 	
 	public Map<String, Object> getCommnetInfo(String commId);
+
+	public int checkStatusCommentsHistory(String referenceId, String referenceDiv, String status);
 }

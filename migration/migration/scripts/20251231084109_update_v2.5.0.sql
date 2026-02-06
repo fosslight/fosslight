@@ -114,6 +114,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
        ('103', '141', 'SBOM Compare For Partner', '', '205', 141, 'Y'),
        ('110', '31', 'commentWithProjectInfo.html', '', '31,34,35,36,42,43,44,45,46,52,53,54,55,56,65,101,140,812,820', 6, 'Y'),
        ('110', '40', 'partnerInfo.html', '', '70,71,72,73,74,75,76,77,141,701,710,844', 7, 'Y');
+       
+ALTER TABLE `COMMENTS_HISTORY` ADD INDEX `STATUS`(`STATUS`);
 -- //@UNDO
 -- SQL to undo the change goes here.
 

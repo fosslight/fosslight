@@ -337,4 +337,13 @@
 		</if>
 	</select>
 	
+	<select id="checkStatusCommentsHistory" parameterType="string" resultType="int">
+		SELECT CASE WHEN COUNT(1) >= 1 THEN 1 ELSE 0 END CNT
+		FROM COMMENTS_HISTORY
+		WHERE REFERENCE_ID = #{referenceId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+			AND REFERENCE_DIV IN ('19', '10', '12', '14')
+		</if>
+		AND STATUS = #{status}
+	</select>
 </mapper>

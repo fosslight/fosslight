@@ -364,4 +364,9 @@ public class CommentServiceImpl implements CommentService {
 		return map; 
 	}
 
+	@Override
+	public int checkStatusCommentsHistory(String referenceId, String referenceDiv, String status) {
+		return commentMapper.checkStatusCommentsHistory(referenceId, referenceDiv, status);
+	}
+
 }
