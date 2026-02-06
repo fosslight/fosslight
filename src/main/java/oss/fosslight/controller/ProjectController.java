@@ -1967,7 +1967,8 @@ public class ProjectController extends CoTopComponent {
 		String identificationSubStatusPartner = (String) map.getOrDefault("identificationSubStatusPartner", "");
 		String mainGrid = (String) map.get("mainData");
 		String thirdPartyGrid = (String) map.get("thirdPartyData");
-		String resetFlag = (String) map.get("resetFlag");
+		String resetFlag = map.containsKey("resetFlag") ? (String) map.get("resetFlag") : CoConstDef.FLAG_NO;
+		boolean shouldReset = CoConstDef.FLAG_YES.equals(resetFlag) ? true : false;
 		
 		// 메인그리드
 		Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
@@ -1981,7 +1982,7 @@ public class ProjectController extends CoTopComponent {
 		Project project = new Project();
 		
 		// 서브그리드
-		projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
+		projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList, shouldReset);
 		
 		if (CoConstDef.FLAG_NO.equals(avoidNull(identificationSubStatusPartner))) {
 			project.setPrjId(prjId);
@@ -2046,8 +2047,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_BIN)
-	public @ResponseBody ResponseEntity<Object> saveBin(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveBin(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		try {
 			// default validation
 			boolean isValid = true;
@@ -2062,6 +2062,7 @@ public class ProjectController extends CoTopComponent {
 			String identificationSubStatusBin = (String) map.get("identificationSubStatusBin");
 			String mainDataString = (String) map.get("mainData");
 			String binAddListDataString = (String) map.get("binAddListData");
+			String resetFlag = map.containsKey("resetFlag") ? (String) map.get("resetFlag") : CoConstDef.FLAG_NO;
 			
 			Type collectionType = new TypeToken<List<T2File>>() {}.getType();
 			List<T2File> delFile = new ArrayList<T2File>(); delFile = (List<T2File>) fromJson(delFileString, collectionType);
@@ -2299,9 +2300,13 @@ public class ProjectController extends CoTopComponent {
 			
 			Project project = new Project();
 			project.setPrjId(prjId);
-//			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
-			projectService.existsAddList(binAddList);
-			projectService.insertAddList(binAddList);
+			if (CoConstDef.FLAG_YES.equals(resetFlag)) {
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+				projectService.existsAddList(project);
+			} else {
+				projectService.existsAddList(binAddList);
+				projectService.insertAddList(binAddList);
+			}
 			
 			// session 삭제
 			deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
@@ -2332,8 +2337,7 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.SAVE_DEP)
-	public @ResponseBody ResponseEntity<Object> saveDep(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveDep(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		// default validation
 		boolean isValid = true;
 		// last response map
@@ -2347,6 +2351,7 @@ public class ProjectController extends CoTopComponent {
 		String identificationSubStatusDep = (String) map.get("identificationSubStatusDep");
 		String mainDataString = (String) map.get("mainData");
 		String depAddListDataString = (String) map.get("depAddListData");
+		String resetFlag = map.containsKey("resetFlag") ? (String) map.get("resetFlag") : CoConstDef.FLAG_NO;
 
 		Type collectionType = new TypeToken<List<T2File>>() {}.getType();
 		List<T2File> delFile = new ArrayList<T2File>();
@@ -2481,9 +2486,13 @@ public class ProjectController extends CoTopComponent {
 
 		Project project = new Project();
 		project.setPrjId(prjId);
-//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-		projectService.existsAddList(depAddList);
-		projectService.insertAddList(depAddList);
+		if (CoConstDef.FLAG_YES.equals(resetFlag)) {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+			projectService.existsAddList(project);
+		} else {
+			projectService.existsAddList(depAddList);
+			projectService.insertAddList(depAddList);
+		}
 
 		// 정상처리된 경우 세션 삭제
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
@@ -2523,6 +2532,7 @@ public class ProjectController extends CoTopComponent {
 		String identificationSubStatusSrc = (String) map.get("identificationSubStatusSrc");
 		String mainDataString = (String) map.get("mainData");
 		String srcAddListDataString = (String) map.get("srcAddListData");
+		String resetFlag = map.containsKey("resetFlag") ? (String) map.get("resetFlag") : CoConstDef.FLAG_NO;
 		
 		Type collectionType = new TypeToken<List<T2File>>() {}.getType();
 		List<T2File> delFile = new ArrayList<T2File>();
@@ -2677,9 +2687,13 @@ public class ProjectController extends CoTopComponent {
 		
 		Project project = new Project();
 		project.setPrjId(prjId);
-//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
-		projectService.existsAddList(srcAddList);
-		projectService.insertAddList(srcAddList);
+		if (CoConstDef.FLAG_YES.equals(resetFlag)) {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+			projectService.existsAddList(project);
+		} else {
+			projectService.existsAddList(srcAddList);
+			projectService.insertAddList(srcAddList);
+		}
 		
 		// 정상처리된 경우 세션 삭제
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
@@ -5767,7 +5781,7 @@ public class ProjectController extends CoTopComponent {
 			}
 			
 			// save 3rd oss
-			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
+			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList, false);
 			
 			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
 				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);

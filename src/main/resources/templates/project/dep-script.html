@@ -354,6 +354,8 @@ var dep_fn = {
 		});
 	},
 	resetExeSave : function(finalData){
+		finalData["resetFlag"] = "Y";
+		
 		$.ajax({
 			url : '/project/saveDep',
 			type : 'POST',

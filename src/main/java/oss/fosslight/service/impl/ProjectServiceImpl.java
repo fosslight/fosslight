@@ -2284,7 +2284,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponentsList, List<PartnerMaster> thirdPartyList) {
+	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponentsList, List<PartnerMaster> thirdPartyList, boolean shouldReset) {
 		// 프로젝트 정보를 취득
 		Project prjBasicInfo = projectMapper.selectProjectMaster(prjId);
 		
@@ -2419,8 +2419,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 		for (String existPartnerId : thirdPartyMap.keySet()) {
 		    String key = avoidNull(existPartnerId, "").trim();
-		    if (!isEmpty(key) && !safeIds.contains(key)) {
-		        thirdPartyDeleteList.add(existPartnerId);
+		    if (shouldReset) {
+		    	thirdPartyDeleteList.add(existPartnerId);
+		    } else {
+		    	if (!isEmpty(key) && !safeIds.contains(key)) {
+			        thirdPartyDeleteList.add(existPartnerId);
+			    }
 		    }
 		}
 		
@@ -4309,6 +4313,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				userComment = avoidNull(userComment) + "<br />" + _tempComment;
 			}
 			verificationService.getReviewReportPdfFile(prjInfo.getPrjId());
+			replaceOssComponentsSnapshots(param, rows, false);
 		} else if (!isEmpty(project.getCompleteYn())) {
 			// project complete 시
 			updateProjectMaster(project);
@@ -4363,12 +4368,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(beforeInfo.getIdentificationStatus())) {
 					// self reject
 					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT;
-				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW
-						.equals(beforeInfo.getIdentificationStatus())) {
+				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(beforeInfo.getIdentificationStatus())) {
 					// reject by review
 					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT;
-				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM
-						.equals(beforeInfo.getIdentificationStatus())) {
+				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(beforeInfo.getIdentificationStatus())) {
 					// confirm to review
 					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF;
 				}

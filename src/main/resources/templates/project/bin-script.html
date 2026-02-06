@@ -270,6 +270,8 @@ var bin_fn = {
 		});
 	},
 	resetExeSave : function(finalData){
+		finalData["resetFlag"] = "Y";
+		
 		$.ajax({
 			url : '/project/saveBin',
 			type : 'POST',
