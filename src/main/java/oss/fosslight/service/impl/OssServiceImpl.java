@@ -2734,6 +2734,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<ProjectIdentification> osoriTargets = Collections.synchronizedList(new ArrayList<>());
 		
 		for (ProjectIdentification bean : list) {
+			if (isEmpty(bean.getDownloadLocation())) {
+				continue;
+			}
+			
 			Set<String> names = urlToNameMap.get(bean.getDownloadLocation());
 			if (!isEmpty(bean.getOssName()) && urlToNameMap.containsKey(bean.getDownloadLocation())) {
 				if (names.contains(bean.getOssName())) {
