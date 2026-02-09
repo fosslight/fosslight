@@ -730,20 +730,33 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							}
 							
 							if (isHighlight) {
-								boolean isEquals = false;
-								String beforeLicenseStr = "";
-								for (String license : beforeLicense.split(",")) {
-									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase()) && !license.equalsIgnoreCase(afterLicense)) {
-										beforeLicenseStr += "<span style=\"background-color:yellow\">" + license + "</span>";
-									} else {
-										isEquals = true;
-										beforeLicenseStr += license;
+								if (!beforeLicense.contains(",")) {
+									if (!beforeLicenseType.equals(afterLicenseType)) {
+										beforeLicense = "<span style=\"background-color:yellow\">" + beforeLicense + "</span>";
+										afterLicense = "<span style=\"background-color:yellow\">" + afterLicense + "</span>";
 									}
-									beforeLicenseStr += ",";
-								}
-								beforeLicense = beforeLicenseStr.substring(0, beforeLicenseStr.length()-1);
-								if (!isEquals) {
-									afterLicense = "<span style=\"background-color:yellow\">" + afterLicense + "</span>";
+								} else {
+									String beforeLicenseStr = "";
+									boolean isEquals = false;
+									
+									for (String license : beforeLicense.split(",")) {
+										if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
+											if (CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase()).getLicenseType().equals(afterLicenseType)) {
+												isEquals = true;
+												beforeLicenseStr += license;
+											} else {
+												beforeLicenseStr += "<span style=\"background-color:yellow\">" + license + "</span>";
+											}
+										} else {
+											beforeLicenseStr += license;
+										}
+										beforeLicenseStr += ",";
+									}
+									if (!isEquals) {
+										afterLicense = "<span style=\"background-color:yellow\">" + afterLicense + "</span>";
+									}
+									
+									beforeLicense = beforeLicenseStr.substring(0, beforeLicenseStr.length()-1);
 								}
 							}
 							
