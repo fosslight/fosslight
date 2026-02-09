@@ -1383,24 +1383,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void registOssDownloadLocation(OssMaster ossMaster) {
 		if (ossMapper.existsOssDownloadLocation(ossMaster) > 0){
 			ossMapper.deleteOssDownloadLocation(ossMaster);
 		}
 		
-		String purlJsonString = ossMaster.getPurlJson();
-		Map<String, String> purlMap = null;
-		if (!isEmpty(purlJsonString)) {
-			Type collectionType = new TypeToken<Map<String, String>>() {}.getType();
-			purlMap = (Map<String, String>) fromJson(purlJsonString, collectionType);
-		}
-		
 		int idx = 0;
-		
 		String[] downloadLocations = ossMaster.getDownloadLocations();
-		
 		OssMaster master = new OssMaster();
 		
 		if (downloadLocations != null){
@@ -1417,20 +1407,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					master.setDownloadLocation(downloadLocationUrl);
 					master.setOssDlIdx(++idx);
 					
-					String purlString = "";
-					if (purlMap != null) {
-						if (purlMap.containsKey(downloadLocationUrl)) {
-							purlString = purlMap.get(downloadLocationUrl);
-						} else {
-							purlString = generatePurlByDownloadLocation(master);
-						}
-					} else {
-						purlString = generatePurlByDownloadLocation(master);
-					}
-					
-					if (isEmpty(purlString)) {
-						purlString = generatePurlByDownloadLocation(master);
-					}
+					String purlString = generatePurlByDownloadLocation(master);
 					
 					purls.add(purlString);
 					master.setPurl(purlString);
@@ -1450,6 +1427,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		String urlStr = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
 		HttpURLConnection connection = null;
+		int responseCode = 0;
 		
 		try {
 	        URL url = new URL(urlStr);
@@ -1460,8 +1438,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	        connection.setConnectTimeout(2000);
 	        connection.setReadTimeout(2000);
 	        
-	        int responseCode = connection.getResponseCode();
-	        return (responseCode >= 200 && responseCode < 400);
+	        responseCode = connection.getResponseCode();
 	    } catch (Exception e) {
 	        return false;
 	    } finally {
@@ -1469,6 +1446,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	            connection.disconnect();
 	        }
 	    }
+		return (responseCode >= 200 && responseCode < 404);
 	}
 
 	@Override
@@ -5216,6 +5194,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				seq++;
 			}
+			if (urlSearchSeq == 12) {
+				downloadLocation = mavenUrlFormatter(downloadLocation);
+				urlSearchSeq = 11;
+			}
 			if (downloadLocation.contains(";")) {
 				downloadLocation = downloadLocation.split("[;]")[0];
 			}
@@ -5340,14 +5322,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 									case 1:
 									case 2:
 									case 3:
-										purlString += "/" + splitDownloadLocation[2];
+										purlString += "/" + splitDownloadLocation[3];
 										break;
 									case 4:
 									case 5:
 									case 6:
 									case 7:
 									case 8:
-										purlString += "/" + splitDownloadLocation[1];
+										purlString += "/" + splitDownloadLocation[2];
 										break;
 								}
 							}
@@ -5360,6 +5342,26 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return purlString;
 	}
 	
+	private String mavenUrlFormatter(String downloadLocation) {
+        String path = downloadLocation.split("maven2/")[1];
+        String[] parts = path.split("/");
+        
+        int artifactIndex = parts.length - 3;
+        
+        StringBuilder groupIdBuilder = new StringBuilder();
+        for (int i = 0; i < artifactIndex; i++) {
+            if (i > 0) {
+            	groupIdBuilder.append(".");
+            }
+            groupIdBuilder.append(parts[i]);
+        }
+        
+        String groupId = groupIdBuilder.toString();
+        String artifactId = parts[artifactIndex];
+        
+        return "mvnrepository.com/artifact/" + groupId + "/" + artifactId;
+	}
+
 	private Pattern generatePatternPurl(int urlSearchSeq, String downloadlocationUrl) {
 		Pattern p = null;
 		switch(urlSearchSeq) {
