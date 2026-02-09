@@ -945,8 +945,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value = OSS.OSS_LIST_BY_NAME)
-	public @ResponseBody ResponseEntity<Object> getOssIdCheck(
-			@ModelAttribute OssMaster bean, Model model) {
+	public @ResponseBody ResponseEntity<Object> getOssIdCheck(@ModelAttribute OssMaster bean, Model model) {
 		Map<String, List<OssMaster>> resultMap = new HashMap<>();
 		resultMap.put("ossList", ossService.getOssListByName(bean));
 		
@@ -1471,8 +1470,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value = OSS.CHECK_EXISTS_OSS_BY_NAME)
-	public @ResponseBody ResponseEntity<Object> checkExistsOssByname(
-			@ModelAttribute OssMaster bean, Model model) {
+	public @ResponseBody ResponseEntity<Object> checkExistsOssByname(@ModelAttribute OssMaster bean, Model model) {
 		return makeJsonResponseHeader(ossService.checkExistsOssByname(bean) > 0, "unconfirmed oss");
 	}
 
