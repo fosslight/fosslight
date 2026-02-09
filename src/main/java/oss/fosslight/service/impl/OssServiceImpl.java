@@ -5336,14 +5336,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							purlString += namespace + subPath;
 						} else {
 							if (addFlag) {
-								if (urlSearchSeq == 1) {
-									if (splitDownloadLocation.length > 3) {
-										purlString += "/" + splitDownloadLocation[3];
-									}
-								} else {
-									if (splitDownloadLocation.length > 2) {
+								switch(urlSearchSeq) {
+									case 1:
+									case 2:
+									case 3:
 										purlString += "/" + splitDownloadLocation[2];
-									}
+										break;
+									case 4:
+									case 5:
+									case 6:
+									case 7:
+									case 8:
+										purlString += "/" + splitDownloadLocation[1];
+										break;
 								}
 							}
 						}
