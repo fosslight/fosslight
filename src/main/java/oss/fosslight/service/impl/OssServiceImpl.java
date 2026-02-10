@@ -1672,6 +1672,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				currentBean.setImportantNotes(CommonFunction.lineReplaceToBR(ossBean.getImportantNotes()));
 				
 				String detectedLicense = avoidNull(ossBean.getDetectedLicense());
+				if (!isEmpty(detectedLicense)) {
+					ossBean.setDetectedLicenseName(detectedLicense);
+				}
 				List<String> detectedLicenseList = Arrays.asList(detectedLicense.split(","));
 				String resultDectedLicense = "";
 				String resultLicenseText = "";
