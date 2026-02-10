@@ -1126,6 +1126,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			checkOssLicenseAndObligation(ossMaster);
 			
+			String homepage = ossMaster.getHomepage();
+			if (!isEmpty(homepage) && homepage.endsWith("/") && checkUrlConnection(homepage)) {
+				homepage = homepage.substring(0, homepage.length()-1);
+				ossMaster.setHomepage(homepage);
+			}
+			
 			ossMapper.insertCommonOssMaster(ossMaster);
 			ossMapper.insertOssMaster(ossMaster);
 			ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete 처리
