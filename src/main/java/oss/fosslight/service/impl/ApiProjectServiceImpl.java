@@ -92,10 +92,14 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			for (Map<String, Object> map : list) {
 				String prjId = (String) map.get("prjId").toString();
 				String status = (String) map.get("status");
+				String statusRequestYn = String.valueOf(map.getOrDefault("statusRequestYn", ""));
 				String distributionStatus = (String) map.get("distributionStatus");
-				distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(distributionStatus) 
-										? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : distributionStatus;
+				distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(distributionStatus) ? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : distributionStatus;
 				String nvdMaxScore = apiProjectMapper.findIdentificationMaxNvdInfo(prjId);
+				String verificationStatus = String.valueOf(map.get("verificationStatus"));
+				if (isEmpty(verificationStatus) && (!CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE.equals(status.toUpperCase()) && !CoConstDef.FLAG_YES.equals(statusRequestYn))) {
+					verificationStatus = "Progress";
+				}
 				
 				map.put("DISTRIBUTION_TYPE", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, (String) map.get("distributionType")));
 				map.put("NETWORK_SERVICE", (String) map.get("networkService"));
@@ -104,7 +108,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("PRIORITY", CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, (String) map.get("priority")));
 				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
 				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
-				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
+				map.put("VERIFICATION_STATUS", verificationStatus);
 				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
 				map.put("EDITORS", map.get("editors") == null ? "" : map.get("editors").toString());
