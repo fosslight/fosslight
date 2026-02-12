@@ -15,9 +15,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
@@ -611,6 +613,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 
 	// Json Format: Yaml Format + Vulnerability
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getBomExportJson(String prjId) {
 		// Get Yaml Format
@@ -630,6 +633,26 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
 		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
 
+		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+		Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
+		Set<String> uniqueKeys = new HashSet<>();
+		for (ProjectIdentification ll : list) {
+		    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
+		        continue;
+		    }
+
+		    String ossVersion = avoidNull(ll.getOssVersion());
+		    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
+		}
+		
+		uniqueKeys.parallelStream().forEach(key -> {
+		    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+		    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+		    if (om != null && !isEmpty(om.getCvssScore())) {
+		        vulnerabilityInfoMap.put(key, om);
+		    }
+		});
+		
 		LinkedHashMap<String, List<Map<String, Object>>> resultYamlFormat = YamlUtil.checkYamlFormat(projectService.setMergeGridData(list), type);
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -638,12 +661,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		for (String resultYamlFormatKey: resultYamlFormat.keySet()){
 			List<Map<String, Object>> yamlFormatList = resultYamlFormat.get(resultYamlFormatKey);
 			for (Map<String, Object> yamlFormatMap: yamlFormatList) {
-				String version = (String) yamlFormatMap.get("version");
-				List<Map<String, Object>> maxScoreNvdInfoList = apiVulnerabilityService.selectMaxScoreNvdInfo(resultYamlFormatKey, version);
-
-				if (!maxScoreNvdInfoList.isEmpty()) {
-					Map<String, Object> maxScoreNvdInfoMap = apiVulnerabilityService.selectMaxScoreNvdInfo(resultYamlFormatKey, version).get(0);
-					yamlFormatMap.put("Vulnerability", maxScoreNvdInfoMap.get("cvssScore"));
+				if (isEmpty(resultYamlFormatKey) || "-".equals(resultYamlFormatKey)) {
+			        continue;
+			    }
+				String key = (resultYamlFormatKey + "_" + avoidNull(String.valueOf(yamlFormatMap.get("version")))).toUpperCase();
+				if (vulnerabilityInfoMap.containsKey(key)) {
+					OssMaster om = vulnerabilityInfoMap.get(key);
+					yamlFormatMap.put("Vulnerability", om.getCvssScore());
 				}
 			}
 			resultMap.put(resultYamlFormatKey, yamlFormatList);
@@ -652,6 +676,35 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return resultMap;
 	}
 	
+	private OssMaster buildOssMasterFromKey(String key, Map<String, OssMaster> ossInfoMap) {
+		if (ossInfoMap.containsKey(key)) {
+			return ossInfoMap.get(key);
+		} else {
+			String[] parts = key.split("_", 2);
+		    String ossName = parts[0];
+		    String ossVersion = (parts.length > 1) ? parts[1] : "";
+		    String namePrefix = (ossName + "_").toUpperCase();
+		    
+		    OssMaster ossMaster = null;
+	        for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
+	            if (entry.getKey().startsWith(namePrefix)) {
+	                ossMaster = entry.getValue();
+	                ossMaster.setOssVersionAliases(null);
+	                break;
+	            }
+	        }
+		    
+	        if (ossMaster != null) {
+	        	return ossMaster;
+	        } else {
+	        	ossMaster = new OssMaster();
+	        	ossMaster.setOssName(ossName);
+			    ossMaster.setOssVersion(ossVersion);
+			    return ossMaster;
+	        }
+		}
+	}
+
 	@Override
 	public Map<String, Object> getBomCompare(List<Map<String, Object>> beforeBomList, List<Map<String, Object>> afterBomList){
 		Map<String, Object> resultMap = new HashMap<String, Object>();
