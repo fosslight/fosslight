@@ -108,8 +108,8 @@ CREATE TABLE `OSS_COMPONENTS_SNAPSHOT` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
-       ('102', '140', '[FOSSLight][PRJ-${Project ID}] SBOM Compare', '', '', 140, 'Y'),
-       ('102', '141', '[FOSSLight][3rd-${3rd Party ID}] SBOM Compare', '', '', 141, 'Y'),
+       ('102', '140', '[FOSSLight][PRJ-${Project ID}] Started re-review', '', '', 140, 'Y'),
+       ('102', '141', '[FOSSLight][3rd-${3rd Party ID}] Started re-review', '', '', 141, 'Y'),
        ('103', '140', 'SBOM Compare', '', '200', 140, 'Y'),
        ('103', '141', 'SBOM Compare For Partner', '', '205', 141, 'Y'),
        ('110', '31', 'commentWithProjectInfo.html', '', '31,34,35,36,42,43,44,45,46,52,53,54,55,56,65,101,140,812,820', 6, 'Y'),
