@@ -4395,7 +4395,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			Project prjParamBean = new Project();
 			prjParamBean.setPrjId(project.getPrjId());
-			Project prjBean = getProjectDetail(prjParamBean);
 			
 			// confirm 시 다시 DB Data를 가져와서 체크한다.
 			ProjectIdentification param = new ProjectIdentification();
@@ -4513,6 +4512,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				verificationService.updateProjectAllowDownloadBitFlag(project);
+			}
+			
+			if (isIdentificationReject) {
+				deleteStatisticsMostUsedInfo(project);
 			}
 			
 			if (hasIdentificationReview) {
