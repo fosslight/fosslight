@@ -358,22 +358,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (!isEmpty(location.getPurl())) {
 					sb.append(location.getDownloadLocation() + "|" + location.getPurl()).append(",");
 				} else {
-					String purl = getPurlByDownloadLocation(location);
-					if (!isEmpty(purl)) {
-						sb.append(location.getDownloadLocation() + "|" + purl).append(",");
-					} else {
-						sb.append(location.getDownloadLocation());
-					}
+					sb.append(location.getDownloadLocation());
 				}
 			}
 		} else {
 			if (!isEmpty(ossMaster.getDownloadLocation())) {
-				String purl = getPurlByDownloadLocation(ossMaster);
-				if (!isEmpty(purl)) {
-					sb.append(ossMaster.getDownloadLocation() + "|" + purl).append(",");
-				} else {
-					sb.append(ossMaster.getDownloadLocation());
-				}
+				sb.append(ossMaster.getDownloadLocation());
 			}
 		}
 		
