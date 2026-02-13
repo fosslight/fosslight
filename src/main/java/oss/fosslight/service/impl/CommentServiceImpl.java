@@ -33,8 +33,12 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public List<CommentsHistory> getCommentListHis(CommentsHistory bean) {
 		List<CommentsHistory> commentsHistoryList = commentMapper.getCommentListHis(bean);
+		String user = bean.getUser();
 		
 		for (CommentsHistory commentsHistory : commentsHistoryList) {
+			if (!StringUtils.isEmpty(user)) {
+				commentsHistory.setUser(user);
+			}
 			if (!StringUtils.isEmpty(bean.getRecentFlag())) {
 				commentsHistory.setRecentFlag(bean.getRecentFlag());
 			}

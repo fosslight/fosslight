@@ -185,4 +185,20 @@ public class StatisticsController extends CoTopComponent{
 		
 		return "statistics/view/statisticsPopup";
 	}
+	
+	@GetMapping(value=STATISTICS.USER_DIVISION_CHART)
+	public @ResponseBody ResponseEntity<Object> userDivisionChart(HttpServletRequest req, HttpServletResponse res, Model model) {
+		String startDate = req.getParameter("startDate");
+		String endDate = req.getParameter("endDate");
+		String divisionNo = req.getParameter("divisionCode");
+		String type = req.getParameter("categoryType");
+		
+		Statistics stat = new Statistics();
+		stat.setStartDate(startDate);
+		stat.setEndDate(endDate);
+		stat.setCategoryType(type);
+		stat.setDivisionNo(divisionNo);
+		
+		return makeJsonResponseHeader(statisticsService.getUserDivisionChartData(stat));
+	}
 }

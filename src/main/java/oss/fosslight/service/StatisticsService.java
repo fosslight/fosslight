@@ -22,4 +22,6 @@ public interface StatisticsService extends HistoryConfig{
 	public Map<String, Object> getTrdPartyRelatedChartData(Statistics statistics);
 	
 	public Map<String, Object> getUserRelatedChartData(Statistics statistics);
+
+	public Map<String, Object> getUserDivisionChartData(Statistics statistics);
 }

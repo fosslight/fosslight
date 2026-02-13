@@ -27,6 +27,8 @@ public class CommentsHistory extends ComBean implements Serializable{
 	/** The reference div. */
 	private String referenceDiv;
 	
+	private String referenceDivFlag;
+	
 	/** The contents. */
 	private String contents;
 	
@@ -419,6 +421,14 @@ public class CommentsHistory extends ComBean implements Serializable{
 
 	public void setParameter(String parameter) {
 		this.parameter = parameter;
+	}
+
+	public String getReferenceDivFlag() {
+		return referenceDivFlag;
+	}
+
+	public void setReferenceDivFlag(String referenceDivFlag) {
+		this.referenceDivFlag = referenceDivFlag;
 	}
 	
 }

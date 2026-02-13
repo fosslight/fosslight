@@ -819,6 +819,7 @@ public final class Url {
 		public static final String UPDATED_CHART = PATH + "/updatedChart";
 		public static final String TRDPARTY_RELATED_CHART = PATH + "/trdPartyRelatedChart";
 		public static final String USER_RELATED_CHART = PATH + "/userRelatedChart";
+		public static final String USER_DIVISION_CHART = PATH + "/userDivisionChart";
 		
 		public static final String STATISTICS_POPUP = PATH + "/statisticspopup";
 		public static final String STATISTICS_POPUP_JSP = TILES_ROOT + PATH + "/statisticspopup";
