@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.DASHBOARD;
@@ -30,11 +31,14 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.Project;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.DashboardService;
+import oss.fosslight.service.T2UserService;
 
 @Controller
 public class DashboardController extends CoTopComponent{
 	@Autowired DashboardService dashboardService;
+	@Autowired private T2UserService t2UserService;
 	
 	@GetMapping(value=DASHBOARD.LIST)
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
@@ -42,15 +46,18 @@ public class DashboardController extends CoTopComponent{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 		
+		T2Users userInfo = t2UserService.getLoginUserInfo();
+		if (userInfo != null && !isEmpty(userInfo.getDivision())) {
+			String codeNm = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, userInfo.getDivision());
+			model.addAttribute("divisionCode", userInfo.getDivision());
+			model.addAttribute("division", codeNm);
+		}
+		
 		return "dashboard/list";
 	}
 	
 	@GetMapping(value=DASHBOARD.JOBSLIST)
-	public @ResponseBody ResponseEntity<Object> jobsListAjax(
-			Project project
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> jobsListAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model){
 		project.setCurPage(1);
 		project.setPageListSize(1);
 		
@@ -64,11 +71,7 @@ public class DashboardController extends CoTopComponent{
     }
 	
 	@GetMapping(value=DASHBOARD.OSSLIST)
-    public @ResponseBody ResponseEntity<Object> ossListAjax(
-            OssMaster ossMaster
-            , HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
+    public @ResponseBody ResponseEntity<Object> ossListAjax(OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
         int page = Integer.parseInt(req.getParameter("page"));
         int rows = Integer.parseInt(req.getParameter("rows"));
         ossMaster.setCurPage(page);
@@ -78,11 +81,7 @@ public class DashboardController extends CoTopComponent{
     }
 	
 	@GetMapping(value=DASHBOARD.LICENSELIST)
-    public @ResponseBody ResponseEntity<Object> licenseListAjax(
-            LicenseMaster licenseMaster
-            , HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
+    public @ResponseBody ResponseEntity<Object> licenseListAjax(LicenseMaster licenseMaster, HttpServletRequest req, HttpServletResponse res, Model model){
         int page = Integer.parseInt(req.getParameter("page"));
         int rows = Integer.parseInt(req.getParameter("rows"));
         licenseMaster.setCurPage(page);
@@ -93,11 +92,7 @@ public class DashboardController extends CoTopComponent{
     }
 	
 	@PostMapping(value=DASHBOARD.READCONFIRM_ALL)
-	public @ResponseBody ResponseEntity<Object> readConfirmAll(
-			@ModelAttribute CommentsHistory commentsHistory
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> readConfirmAll(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model){
 		String resCd="00";
 		HashMap<String,Object> resMap = new HashMap<>(); 
 		
@@ -110,10 +105,7 @@ public class DashboardController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=DASHBOARD.PROGPROJECTCNT)
-    public @ResponseBody ResponseEntity<Object> progProjectCnt(
-            HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
+    public @ResponseBody ResponseEntity<Object> progProjectCnt(HttpServletRequest req, HttpServletResponse res, Model model){
 		return makeJsonResponseHeader(dashboardService.getProgProjectCnt());
     }
 	
@@ -124,11 +116,7 @@ public class DashboardController extends CoTopComponent{
     }
 	
 	@PostMapping(value=DASHBOARD.DISCOVEREDEMLMESSAGE)
-    public @ResponseBody ResponseEntity<Object> discoveredEmlMessage(
-    		@RequestBody HashMap<String, Object> param
-    		, HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
+    public @ResponseBody ResponseEntity<Object> discoveredEmlMessage(@RequestBody HashMap<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model){
 		return makeJsonResponseHeader(dashboardService.getDiscoveredEmlMessage(param));
     }
 	

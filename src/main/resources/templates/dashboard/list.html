@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <th:block th:replace="dashboard/list-header :: headerFragment"></th:block>
 <th:block th:replace="dashboard/list-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini" style="height: 100%;">
@@ -12,7 +12,7 @@
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header">
-								<h3 class="card-title" th:text="'Job List'"></h3>
+								<h3 class="card-title" th:text="'My Job List'"></h3>
 								<div class="card-tools">
 									<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
 								</div>
@@ -78,7 +78,7 @@
 									<div class="col-lg-4">
 										<div class="card card-lg-red">
 											<div class="card-header">
-												<h3 class="card-title" th:text="Comment"></h3>
+												<h3 id="commentHeader" class="card-title" th:text="Comment"></h3>
 											</div>
 											<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;max-height:30.8rem; overflow-y: auto;">
 												<div clas="row">
@@ -101,6 +101,91 @@
 					</div>
 				</div>
 			</div>
+                
+                <div class="row" th:if="${division != null}">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header d-flex align-items-center justify-content-between">
+							    <h3 class="card-title mb-0">
+							    	<th:block th:if="${#strings.isEmpty(division)}">
+								        <span class="badge" style="background-color: #fdecea; color: #d9534f; padding: 4px 8px; border-radius: 4px; cursor: pointer;" th:onclick="chart_fn.mvUserSetting()">
+								            <i class="fas fa-exclamation-circle"></i> Division Setup Required
+								        </span>
+								    </th:block>
+								    <th:block th:unless="${#strings.isEmpty(division)}">
+								        <span th:text="${division}"></span>
+								    </th:block>
+								    <span class="ml-1" th:text="Statistics"></span>
+							    </h3>
+							    <div class="card-tools ml-auto d-flex align-items-center">
+							        <div class="form-group mb-0 mr-2">
+							            <div class="input-group input-group-sm" style="width: 350px;">
+							                <div class="input-group-prepend">
+							                    <span class="input-group-text">
+							                        <i class="far fa-calendar-alt"></i>
+							                    </span>
+							                </div>
+							                <input type="text" class="form-control" id="searchDate" th:value="${#calendars.format(#calendars.createNow(), '01/01/yyyy') + ' - ' + #calendars.format(#calendars.createNow(), '12/31/yyyy')}"/>
+							                <input name="schStartDate" id="startDate" type="hidden" th:value="${#calendars.format(#calendars.createNow(), 'yyyy0101')}" />
+							                <input name="schEndDate" id="endDate" type="hidden" th:value="${#calendars.format(#calendars.createNow(), 'yyyy1231')}" />
+							                <div class="input-group-append">
+							                    <button id="schDivisionStatistics" type="submit" class="btn btn-default">
+							                        <i class="fa fa-search"></i>
+							                    </button>
+							                </div>
+							            </div>
+							        </div>
+							        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+							            <i class="fas fa-minus"></i>
+							        </button>
+							    </div>
+							</div>
+							<div class="card-body">
+								<div class="row">
+									<div class="col-md-12">
+										<canvas id="userDivisionStatisticsChart" style="min-height: 350px; height: 350px; max-height: 350px; min-width: 98%; max-width: 100%;"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="card">
+											<div class="card-header d-flex justify-content-center">
+												<h3 class="card-title mb-0 font-weight-bold">
+													<th:block th:if="${#strings.isEmpty(division)}">
+												        <span class="badge" style="background-color: #fdecea; color: #d9534f; padding: 4px 8px; border-radius: 4px; cursor: pointer;" th:onclick="chart_fn.mvUserSetting()">
+												            <i class="fas fa-exclamation-circle"></i> Division Setup Required
+												        </span>
+												    </th:block>
+												    <th:block th:unless="${#strings.isEmpty(division)}">
+												        <span th:text="${division}"></span>
+												    </th:block>
+												    <span class="ml-1" th:text="'Delayed Project'"></span>
+												</h3>
+											</div>
+											<div class="card-body">
+												<table class="table table-bordered table-hover dataTable dtr-inline" id="delayedPrjListTable">
+													<thead>
+														<tr>
+															<th class="text-center" th:text="'Project Id'"></th>
+															<th class="text-center" th:text="'Project Name'"></th>
+															<th class="text-center" th:text="'Creator'"></th>
+															<th class="text-center" th:text="'Status'"></th>
+															<th class="text-center" th:text="'Step'"></th>
+															<th class="text-center" th:text="'Last Updated'"></th>
+															<th class="text-center" th:text="'Delayed'"></th>
+														</tr>
+													</thead>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
                 
                 <div class="row">
                 	<div class="col-md-12">

@@ -456,4 +456,32 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	    }
 	    return noneSum;
 	}
+
+	@Override
+	public Map<String, Object> getUserDivisionChartData(Statistics statistics) {
+		Map<String, Object> result = new HashMap<>();
+		Statistics chartData = new Statistics();
+		chartData.setColorArray(colorArray);
+		
+		List<Statistics> titleList = statisticsMapper.getChartTitle(statistics);
+		List<String> titleArray = new ArrayList<>();
+		
+		for (Statistics title : titleList) {
+			titleArray.add(title.getTitleNm());
+		}
+		
+		statistics.setTitleArray(titleArray);
+		
+		List<Statistics> list = statisticsMapper.getUserDivisionChartData(statistics);
+		if (CollectionUtils.isNotEmpty(list)) {
+			result.put("chartData", list);
+		}
+		
+		List<Map<String, Object>> delayedProjectList = statisticsMapper.getDelayedProjectList(statistics);
+		if (CollectionUtils.isNotEmpty(delayedProjectList)) {
+			result.put("delayedPrjList", delayedProjectList);
+		}
+		
+		return result;
+	}
 }

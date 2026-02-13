@@ -45,7 +45,7 @@
                     </table>
                 </div>
             </th:block>
-            <th:block th:if="${#lists.isEmpty(commentList)}">
+            <th:block th:unless="${!#lists.isEmpty(commentList)}">
                 <div class="col-md-12 mt-3">
                     <strong class="text-lg-gray">No comments were registered.</strong>
                 </div>

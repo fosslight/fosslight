@@ -6,6 +6,7 @@
 package oss.fosslight.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -32,4 +33,8 @@ public interface StatisticsMapper {
 	List<Statistics> getUserRelatedChartData(Statistics statistics);
 
 	List<Statistics> getMostUsedChartData(Statistics statistics);
+
+	List<Statistics> getUserDivisionChartData(Statistics statistics);
+
+	List<Map<String, Object>> getDelayedProjectList(Statistics statistics);
 }
