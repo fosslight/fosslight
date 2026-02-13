@@ -3589,14 +3589,20 @@ var com_fn = {
 							$('#identificationCsvFileId').val(result[0][0].registFileId);
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();
-						} else if (result[2] == "EXCEL_FILE") {
+						} else if (result[2] == "EXCEL_FILE" || result[2] == "SPDX_SPREADSHEET_FILE") {
+							var isExcel = (result[2] == "EXCEL_FILE") ? true : false;
+							
 							var checkSheetNms = [];
 							var checkTabNms = [];
 							// bom 또는 android 일 경우
 							if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]] == referenceDiv) {
 								$("#identification_android").hide();
 								$("#identification_bom").show();
-								checkSheetNms = ["3RD PARTY", "DEP", "SRC", "BIN", "SBOM"];
+								if (isExcel) {
+									checkSheetNms = ["3RD PARTY", "DEP", "SRC", "BIN", "SBOM"];
+								} else {
+									checkSheetNms = ["PACKAGE", "PER FILE"];
+								}
 								checkTabNms = ["DEP", "SRC", "BIN"];
 							} else {
 								$("#identification_bom").hide();
@@ -3623,19 +3629,31 @@ var com_fn = {
   										checkFlag = false;
  										sheetTr += '<td><input type="checkbox" class="sheetRowCheckBox mr-2" name="sheetCheck">' + sheetName + '</td>';
  										for (var j = 0; j < checkTabNms.length; j++) {
- 											if (sheetName.indexOf(checkTabNms[j]) > -1) {
- 												checkFlag = true;
-												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
+ 											if (isExcel) {
+ 												if (sheetName.indexOf(checkTabNms[j]) > -1) {
+ 	 												checkFlag = true;
+ 													sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
+ 	 											} else {
+ 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
+ 	 											}
  											} else {
- 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
+ 												if ("SRC" == checkTabNms[j]) {
+ 													sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
+ 												} else {
+ 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
+ 												}
  											}
 										}
  										sheetTr += '</tr>';
- 										if (checkFlag) {
+ 										if (isExcel) {
+ 											if (checkFlag) {
+ 	 											sheetTr = sheetTr.replace('name="sheetCheck"', 'name="sheetCheck" checked');
+ 	 	 									} else {
+ 	 	 										sheetTr = sheetTr.replaceAll('class="form-check-input"', 'class="form-check-input" disabled');
+ 	 	 									}
+ 										} else {
  											sheetTr = sheetTr.replace('name="sheetCheck"', 'name="sheetCheck" checked');
- 	 									} else {
- 	 										sheetTr = sheetTr.replaceAll('class="form-check-input"', 'class="form-check-input" disabled');
- 	 									}
+ 										}
  										appendHtml += sheetTr;
 									}
 								}
@@ -3658,13 +3676,6 @@ var com_fn = {
 							
 	 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 	 						$('.ajax-file-upload-statusbar').remove();
-						} else if (result[2] == "SPDX_SPREADSHEET_FILE") {
-							var sheetNums = ["1", "4"];
-							com_fn.getOtherSheetData(referenceDiv, result[0][0].registSeq, sheetNums);
-
-							$('#identificationCsvFileId').val(result[0][0].registFileId);
-							$('.ajax-file-upload-statusbar').fadeOut('slow');
-							$('.ajax-file-upload-statusbar').remove();
 						} else {
 							alertify.error([[#{msg.common.valid}]], 0);
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
