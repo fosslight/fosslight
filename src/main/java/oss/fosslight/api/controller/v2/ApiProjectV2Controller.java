@@ -464,12 +464,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
     }
 
-    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(
-            String authorization,
-            String prjId,
-            String saveFlag,
-            String format){
-
+    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(String authorization, String prjId, String saveFlag, String format) {
         log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
         // 사용자 인증
@@ -527,11 +522,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
     }
 
-    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(
-            String authorization,
-            String prjId,
-            String saveFlag){
-
+    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(String authorization, String prjId,String saveFlag){
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -577,11 +568,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
     }
 
-    private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(
-            String authorization,
-            String beforePrjId,
-            String afterPrjId) {
-
+    private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(String authorization, String beforePrjId, String afterPrjId) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
@@ -749,8 +736,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid oss report file format.");
             }
             if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) {
-                return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+                return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             }
 
             Map<String, Object> paramMap = new HashMap<>();
@@ -762,10 +748,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             try {
                 boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
                 if (!checkDistributionTypeFlag) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE,
-                                    CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE)
-                                    + " Check Project Distribution Type");
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE) + " Check Project Distribution Type");
                 }
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
@@ -808,22 +791,17 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             Map<String, Object> result = null;
             if (sheetNamesEmptyFlag) {
-                result = apiProjectService.getSheetData(bean, prjId, tabName.toUpperCase(),
-                        sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
-                resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(),
-                        userInfo.getUserId(), comment, tabName, tabName, sheetNamesEmptyFlag,
-                        false, 0);
+                result = apiProjectService.getSheetData(bean, prjId, tabName.toUpperCase(), sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
+                resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, tabName, tabName, sheetNamesEmptyFlag, false, 0);
             } else {
                 int sheetLength = sheetNames.split(",").length;
                 int sheetIdx = 0;
                 for (String sheetNm : sheetNames.split(",")) {
-                    if (isEmpty(sheetNm.trim())) continue;
-                    result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(),
-                            sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY,
-                            true);
-                    resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(),
-                            userInfo.getUserId(), comment, tabName, sheetNm.trim(), sheetNamesEmptyFlag,
-                            sheetLength > 1 ? true : false, sheetIdx);
+                    if (isEmpty(sheetNm.trim())) {
+                    	continue;
+                    }
+                    result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(), sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY, true);
+                    resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, tabName, sheetNm.trim(), sheetNamesEmptyFlag, sheetLength > 1 ? true : false, sheetIdx);
                     sheetIdx++;
                     if (!resultMap.isEmpty()) {
                         break;
@@ -854,17 +832,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } else {
                 if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(
-                                    CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
                 } else if (resultMap.containsKey("validError")) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(
-                                    CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
                 } else {
-                    return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                            CoCodeManager.getCodeString(
-                                    CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+                    return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
                 }
             }
         } catch (Exception e) {
