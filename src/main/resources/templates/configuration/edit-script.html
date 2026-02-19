@@ -12,9 +12,6 @@
         'use strict';
         data.init();
         evt.init();
-
-        $(".select2").select2();
-        $('#division').select2({placeholder: "Division", allowClear: true});
     });
 
     let commentTemp = '';
@@ -43,6 +40,8 @@
                         $('#userInfoArea select[name="division"] option:last').change();
                     }
                 }
+            } else {
+            	$("#division").val(null).trigger('change');
             }
 
             userDivision = $('#userInfoArea select[name="division"]');
@@ -65,11 +64,9 @@
     let evt = {
         init : function(){
             /* set select2 */
-            $("#division, #defaultSearch").select2({
-                placeholder: "",
-                allowClear: true,
-            });
-
+           	$("select[name='defaultLocale']").select2({placeholder: "", allowClear: true});
+           	$('#division').select2({placeholder: "Division", allowClear: true, width: '100%'});
+            
             $("#saveDefaultLocaleButton").on('click',function(){
                 alertify.confirm([[#{msg.common.confirm.save2}]], function (e) {
                     if (e) {
@@ -216,14 +213,17 @@
             alertify.error([[#{msg.common.valid2}]], 0);
         },
         changePassword : function(){
+        	$('#division').removeClass("is-invalid");
+        	
             var params = {};
             var password = $("#password").val();
             var userName = $('input[name="userName"]').val();
             var division = $("#division").val();
             
             if (division == null){
-                alertify.alert([[#{msg.configuration.notice.devision}]], function(){});
-                return false;
+            	$('#division').addClass('is-invalid');
+            	alertify.alert("Check the required items", function(){});
+            	return false;
             }
             
             alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
