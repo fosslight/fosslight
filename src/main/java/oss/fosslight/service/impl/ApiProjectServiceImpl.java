@@ -3298,17 +3298,17 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			rtnMap.put("errorMessage", errorMsg);
 		}
 		
-		T2CoProjectValidator pv = new T2CoProjectValidator();
-		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
-		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
-		pv.setAppendix("mainList", ossComponents); // sub grid
-		pv.setAppendix("subList", ossComponentsLicense);
-		T2CoValidationResult vr = pv.validate(new HashMap<>());
-		
-		if (!vr.isValid()) {
-			rtnMap.put("validError", "validError");
-			return rtnMap;
-		} else {
+//		T2CoProjectValidator pv = new T2CoProjectValidator();
+//		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+//		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+//		pv.setAppendix("mainList", ossComponents); // sub grid
+//		pv.setAppendix("subList", ossComponentsLicense);
+//		T2CoValidationResult vr = pv.validate(new HashMap<>());
+//		
+//		if (!vr.isValid()) {
+//			rtnMap.put("validError", "validError");
+//			return rtnMap;
+//		} else {
 			List<ProjectIdentification> ossComponentList = new ArrayList<>();
 			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 			
@@ -3374,7 +3374,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				log.error(e.getMessage(), e);
 			}
 			
-		} 
+//		} 
 		
 		return rtnMap;
 	}
