@@ -100,7 +100,7 @@
 										<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>
 										<td style="padding:5px;" th:utext="${oss_basic_info?.copyright}"></td>
 									</tr>
-									<th:block th:if="${oss_basic_info != null and (#strings.contains(oss_basic_info?.ossType, 'M') or #strings.contains(oss_basic_info?.ossType, 'D'))}">
+									<th:block th:if="${oss_basic_info != null}">
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
 											<td>

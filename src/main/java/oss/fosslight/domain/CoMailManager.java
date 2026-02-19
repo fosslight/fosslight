@@ -2071,9 +2071,9 @@ public class CoMailManager extends CoTopComponent {
 			
 			after.setLicenseName(appendChangeStyleMultiLine(before.getLicenseName(), after.getLicenseName()));
 			isModified = checkEquals(before.getLicenseName(), after.getLicenseName(), isModified);
-			if (CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_DIV, "M").equals(after.getLicenseDiv())){ // multi license일때 만
-				List<OssLicense> beforeLicenses = before.getOssLicenses();
-				List<OssLicense> afterLicenses = after.getOssLicenses();
+			if (!CollectionUtils.isEmpty(before.getOssLicenses()) || !CollectionUtils.isEmpty(after.getOssLicenses())) {
+				List<OssLicense> beforeLicenses = !CollectionUtils.isEmpty(before.getOssLicenses()) ? before.getOssLicenses() : new ArrayList<>();
+				List<OssLicense> afterLicenses = !CollectionUtils.isEmpty(after.getOssLicenses()) ? after.getOssLicenses() : new ArrayList<>();
 				int len = beforeLicenses.size() > afterLicenses.size() ? beforeLicenses.size() : afterLicenses.size();
 
 				for (int i = 0 ; i < len ; i++){
@@ -2091,7 +2091,7 @@ public class CoMailManager extends CoTopComponent {
 						
 						afterLicenses.set(i, afterLicense);
 						
-					}else if (!isBefore && isAfter) { // 신규 등록시
+					} else if (!isBefore && isAfter) { // 신규 등록시
 						OssLicense afterLicense = afterLicenses.get(i);
 						
 						afterLicense.setOssLicenseComb(appendChangeStyle("", afterLicense.getOssLicenseComb()));
@@ -2100,7 +2100,7 @@ public class CoMailManager extends CoTopComponent {
 						isModified = checkEquals("", afterLicense.getOssCopyright(), isModified);
 						
 						afterLicenses.set(i, afterLicense);
-					}else if (isBefore && !isAfter){ // 삭제시
+					} else if (isBefore && !isAfter){ // 삭제시
 						OssLicense beforeLicense = beforeLicenses.get(i);
 						OssLicense afterLicense = new OssLicense(); 
 						
