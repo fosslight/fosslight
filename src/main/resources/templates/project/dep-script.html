@@ -175,7 +175,7 @@ var dep_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(resetFlag, addLoadData) {
+	saveMakeData : function(resetFlag, addLoadData, targetPrjId) {
 		var excludeNicknameAlert = false;
 		
 		cleanErrMsg("depList");
@@ -229,6 +229,15 @@ var dep_fn = {
 			depAddDataObj["referenceDiv"] = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]];
 			depAddDataObj["componentCount"] = addLoadData.length;
 			depAddDataList.push(depAddDataObj);
+		} else {
+			if (typeof targetPrjId !== "undefined") {
+				var depAddDataObj = {};
+				depAddDataObj["prjId"] = [[${project.prjId}]];
+				depAddDataObj["referenceId"] = targetPrjId;
+				depAddDataObj["referenceDiv"] = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]];
+				depAddDataObj["componentCount"] = 0;
+				depAddDataList.push(depAddDataObj);
+			}
 		}
 		finalData["depAddListData"] = JSON.stringify(depAddDataList);
 		
