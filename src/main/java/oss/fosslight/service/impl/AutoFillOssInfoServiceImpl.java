@@ -731,7 +731,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							
 							if (isHighlight) {
 								if (!beforeLicense.contains(",")) {
-									if (!beforeLicenseType.equals(afterLicenseType)) {
+									if (!beforeLicenseType.equalsIgnoreCase(afterLicenseType)) {
 										beforeLicense = "<span style=\"background-color:yellow\">" + beforeLicense + "</span>";
 										afterLicense = "<span style=\"background-color:yellow\">" + afterLicense + "</span>";
 									}
@@ -741,11 +741,16 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 									
 									for (String license : beforeLicense.split(",")) {
 										if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
-											if (CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase()).getLicenseType().equals(afterLicenseType)) {
+											String individualLicenseType = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase()).getLicenseType();
+											if (individualLicenseType.equalsIgnoreCase(afterLicenseType)) {
 												isEquals = true;
 												beforeLicenseStr += license;
 											} else {
-												beforeLicenseStr += "<span style=\"background-color:yellow\">" + license + "</span>";
+												if (highlightValidator(individualLicenseType, afterLicenseType)) {
+													beforeLicenseStr += "<span style=\"background-color:yellow\">" + license + "</span>";
+												} else {
+													beforeLicenseStr += license;
+												}
 											}
 										} else {
 											beforeLicenseStr += license;
@@ -863,6 +868,43 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		}
 
 		return map;
+	}
+
+	private boolean highlightValidator(String individualLicenseType, String afterLicenseType) {
+		int individualLicenseTypeNum = 0;
+		int afterLicenseTypeNum = 0;
+		
+		String[] licenseTypes = new String[] {individualLicenseType, afterLicenseType};
+		int idx = 0;
+		for (String licenseType : licenseTypes) {
+			int licenseTypeNum = 0;
+			
+			switch (licenseType) {
+				case CoConstDef.CD_LICENSE_TYPE_NA: licenseTypeNum = 5;
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF: licenseTypeNum = 4;
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_CP: licenseTypeNum = 3;
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_WCP: licenseTypeNum = 2;
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PMS: licenseTypeNum = 1;
+					break;
+			}
+			
+			if (idx == 0) {
+				individualLicenseTypeNum = licenseTypeNum;
+			} else {
+				afterLicenseTypeNum = licenseTypeNum;
+			}
+			idx++;
+		}
+		
+		if (individualLicenseTypeNum > afterLicenseTypeNum) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private String getLicensePermissive(List<String> licenseTypeList) {
