@@ -237,33 +237,35 @@ public class CoCodeManager extends CoTopComponent {
 		}
 	}
 	
-	public void refreshOssInfoByOssId(String ossId) {
-		loadOssInfoByOssId(ossId);
+	public void refreshOssInfoByOssId(OssMaster beforeBean, String ossId) {
+		loadOssInfoByOssId(beforeBean, ossId);
 	}
 	
-	private void loadOssInfoByOssId(String ossId) {
+	private void loadOssInfoByOssId(OssMaster beforeBean, String ossId) {
 		try {
+			if (beforeBean != null) {
+				String ossInfoByIdKey = beforeBean.getOssId();
+				String ossInfoUpperKey = (beforeBean.getOssName() + "_" + avoidNull(beforeBean.getOssVersion())).toUpperCase();
+				
+				if (OSS_INFO_BY_ID.containsKey(ossInfoByIdKey)) {
+					OSS_INFO_BY_ID.remove(ossInfoByIdKey);
+				}
+				if (OSS_INFO_UPPER.containsKey(ossInfoUpperKey)) {
+					OSS_INFO_UPPER.remove(ossInfoUpperKey);
+				}
+				
+				OSS_INFO_UPPER_NAMES.entrySet().removeIf(entry -> entry.getValue().equalsIgnoreCase(beforeBean.getOssName()));
+			}
+			
 			List<OssMaster> list = ossMapper.getOssInfoByOssId(ossId);
 			if (list != null) {
 				List<OssMaster> nickNameList = ossMapper.getOssInfoWithNickByOssId(ossId);
-				OssMaster beforeOssInfo = OSS_INFO_BY_ID.get(ossId);
-				String ossInfoKey2 = "";
-				if (beforeOssInfo != null) {
-					ossInfoKey2 = (beforeOssInfo.getOssName() + "_" + avoidNull(beforeOssInfo.getOssVersion())).toUpperCase();
-				}
-				
 				Map<String, OssMaster> _ossMap = new HashMap<>();
 				Map<String, String> _ossNamesMap = new HashMap<>();
-				boolean isDel = false;
 				
 				for (OssMaster bean : list) {
 					OssMaster targetBean = null;
 					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-					if (!isDel && !isEmpty(ossInfoKey2) && beforeOssInfo != null && (!bean.getOssName().equalsIgnoreCase(beforeOssInfo.getOssName()) || !key.equals(ossInfoKey2))) {
-						isDel = true;
-						OSS_INFO_UPPER.remove(ossInfoKey2);
-						OSS_INFO_UPPER_NAMES.entrySet().removeIf(entry -> entry.getValue() == beforeOssInfo.getOssName());
-					}
 					
 					if (_ossMap.containsKey(key)) {
 						targetBean = _ossMap.get(key);

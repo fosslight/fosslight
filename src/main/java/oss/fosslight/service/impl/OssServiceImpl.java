@@ -3120,6 +3120,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return map;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
 //	@CacheEvict(value="autocompleteCache", allEntries=true)
@@ -3227,7 +3228,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 //					updateVulnInfoByOssMaster(ossMaster, true);
 //				}
 				
-				CoCodeManager.getInstance().refreshOssInfoByOssId(result);
+				CoCodeManager.getInstance().refreshOssInfoByOssId(beforeBean, result);
 				action = CoConstDef.ACTION_CODE_UPDATE;
 				afterBean = getOssInfo(ossId, true);
 
@@ -3268,7 +3269,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				// update vulnerability info
 //				updateVulnInfoByOssMaster(ossMaster, false);
 				
-				CoCodeManager.getInstance().refreshOssInfoByOssId(ossId);
+				CoCodeManager.getInstance().refreshOssInfoByOssId(beforeBean, ossId);
 				action = CoConstDef.ACTION_CODE_INSERT;
 			}
 
@@ -4845,13 +4846,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
 			mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
 		} else if (isNew) {
-			mailType = isNewVersion
-					? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION
-					: CoConstDef.CD_MAIL_TYPE_OSS_REGIST;
+			mailType = isNewVersion ? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION : CoConstDef.CD_MAIL_TYPE_OSS_REGIST;
 		} else {
-			mailType = isChangedName
-					? CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME
-					: CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
+			mailType = isChangedName ? CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME : CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
 
 			if (isDeactivateFlag) {
 				mailType = CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED;
