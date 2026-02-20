@@ -280,7 +280,7 @@ var src_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(resetFlag, addLoadData) {
+	saveMakeData : function(resetFlag, addLoadData, targetPrjId) {
 		var excludeNicknameAlert = false;
 		
 		cleanErrMsg("srcList");
@@ -340,6 +340,15 @@ var src_fn = {
 			srcAddDataObj["referenceDiv"] = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]];
 			srcAddDataObj["componentCount"] = addLoadData.length;
 			srcAddDataList.push(srcAddDataObj);
+		} else {
+			if (typeof targetPrjId !== "undefined") {
+				var srcAddDataObj = {};
+				srcAddDataObj["prjId"] = [[${project.prjId}]];
+				srcAddDataObj["referenceId"] = targetPrjId;
+				srcAddDataObj["referenceDiv"] = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]];
+				srcAddDataObj["componentCount"] = 0;
+				srcAddDataList.push(srcAddDataObj);
+			}
 		}
 		finalData["srcAddListData"] = JSON.stringify(srcAddDataList);
 		

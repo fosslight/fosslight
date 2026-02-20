@@ -2753,23 +2753,15 @@ var com_fn = {
 	    			
 	    			if (thirdCheck) {
         				$("#3rdCheck").prop('checked', true);
-        			} else {
-        				$("#3rdCheck").prop('disabled', true);
         			}
 					if (depCheck) {
 						$("#depCheck").prop('checked', true);
-        			} else {
-        				$("#depCheck").prop('disabled', true);
         			}
 					if (srcCheck) {
 						$("#srcCheck").prop('checked', true);
-					} else {
-						$("#srcCheck").prop('disabled', true);
 					}
 					if (binCheck) {
 						$("#binCheck").prop('checked', true);
-					} else {
-						$("#binCheck").prop('disabled', true);
 					}
 	            },
 	            error : function(xhr, ajaxOptions, thrownError){
@@ -2883,14 +2875,14 @@ var com_fn = {
 				
 				alertify.alert([[#{msg.common.exists.excludeYn}]], function() {
 					loadingIden.show();
-					com_fn.saveDataAfterSearch(selectTabs, searchedData);
+					com_fn.saveDataAfterSearch(referenceId, selectTabs, searchedData);
 				});
 			} else {
-				com_fn.saveDataAfterSearch(selectTabs, searchedData);
+				com_fn.saveDataAfterSearch(referenceId, selectTabs, searchedData);
 			}
 		}
 	},
-	saveDataAfterSearch : function (tabs, data) {
+	saveDataAfterSearch : function (targetPrjId, tabs, data) {
 		for (var i in tabs) {
 			if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}]] == tabs[i]) {
 	 			if (typeof data.thirdData !== "undefined") {
@@ -2898,25 +2890,31 @@ var com_fn = {
 	 				party_evt.saveMakeData(data);
 	 			}
 	 		} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]] == tabs[i]) {
+	 			depLoadSuccess = false;
+ 				com_fn.exitRow("depList");
+ 				fn_grid_com.totalGridSaveMode('depList');
 	 			if (typeof data.dep !== "undefined") {
-	 				depLoadSuccess = false;
-	 				com_fn.exitRow("depList");
-	 				fn_grid_com.totalGridSaveMode('depList');
 	 				dep_fn.saveMakeData(false, data.dep);
+	 			} else {
+	 				dep_fn.saveMakeData(false, null, targetPrjId);
 	 			}
 	 		} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]] == tabs[i]) {
+	 			srcLoadSuccess = false;
+ 				com_fn.exitRow("srcList");
+ 				fn_grid_com.totalGridSaveMode('srcList');
 	 			if (typeof data.src !== "undefined") {
-	 				srcLoadSuccess = false;
-	 				com_fn.exitRow("srcList");
-	 				fn_grid_com.totalGridSaveMode('srcList');
 	 				src_fn.saveMakeData(false, data.src);
+	 			} else {
+	 				src_fn.saveMakeData(false, null, targetPrjId);
 	 			}
 	 		} else if ([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]] == tabs[i]) {
+	 			binLoadSuccess = false;
+ 				com_fn.exitRow("binList");
+ 				fn_grid_com.totalGridSaveMode('binList');
 	 			if (typeof data.bin !== "undefined") {
-	 				binLoadSuccess = false;
-	 				com_fn.exitRow("binList");
-	 				fn_grid_com.totalGridSaveMode('binList');
 	 				bin_fn.saveMakeData(false, data.bin);
+	 			} else {
+	 				bin_fn.saveMakeData(false, null, targetPrjId);
 	 			}
 	 		}
 		}
