@@ -417,6 +417,8 @@ var com_evt = {
 			}
 		});
 
+		com_fn.initSearchEvents();
+		
 		com_fn.saveFlagObject["DEP"] = false;
 		com_fn.saveFlagObject["SRC"] = false;
 		com_fn.saveFlagObject["BIN"] = false;
@@ -2526,7 +2528,7 @@ var com_fn = {
 		}
 	},
 	projectSearch : function () {
-		var postData = $('#commonSearchForm').serializeObject();
+		var postData = $('#projectSearchArea').serializeObject();
 		
 		$('#_searchProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
 		$('.searchProject1').show();
@@ -2921,9 +2923,9 @@ var com_fn = {
 	},
 	partnerSearch : function () {
 		var searchText = $("#uploadSearchText").val();
-		$("#commonSearchForm input[name='partnerName']").val(searchText);
+		$("#partnerSearchForm input[name='partnerName']").val(searchText);
 		
-		var postData = $('#commonSearchForm').serializeObject();
+		var postData = $('#partnerSearchForm').serializeObject();
 		$('#_threeSearch1list').jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
 		$('.threeSearch1Area').show();
 		$('.threeSearch2Area').hide();
@@ -3343,10 +3345,13 @@ var com_fn = {
 			
 			com_fn.identificationUploadFile(referenceDiv);
 			callAutoCompleteFnc("autoComProjectNmConf");
+			callAutoCompleteFnc("autoComConfParty");
 			
 			$('#_threeSearch1list').jqGrid(com_fn.setParamParty1());
 			$('#_searchProjectList1').jqGrid(com_fn.setParamProject1(referenceDiv));
 			$('#_searchProjectList2').jqGrid(com_fn.setParamProject2());
+			
+			com_fn.initSearchEvents();
        	});
 	},
 	delUploadFunc : function (target, permission, permission, referenceDiv) {
@@ -3863,6 +3868,27 @@ var com_fn = {
     },
     closeDeleteUpload : function () {
     	$("#dialog_deleteUpload_" + [[${project.prjId}]]).find(".ajs-close").trigger("click");
+    },
+    initSearchEvents : function () {
+    	$('#prjIdName').on('keydown', function(e) {
+    		var isActive = $(this).is(':visible') && !$(this).prop('disabled');
+	        if (isActive && e.keyCode === 13) {
+	            e.preventDefault();
+	            if ("" !== $(this).val().trim()) {
+	            	com_fn.projectSearch();
+	            }
+	        }
+	    });
+		
+		$('#uploadSearchText').on('keydown', function(e) {
+			var isActive = $(this).is(':visible') && !$(this).prop('disabled');
+	        if (isActive && e.keyCode === 13) {
+	            e.preventDefault();
+	            if ("" !== $(this).val().trim()) {
+	            	com_fn.partnerSearch();
+	            }
+	        }
+	    });
     }
 }
 
