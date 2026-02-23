@@ -742,6 +742,8 @@ public class ApiProjectController extends CoTopComponent {
 							// 정상처리된 경우 세션 삭제
 							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
 							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+							
+							resultMap.put("success", true);
 							return responseService.getSingleResult(resultMap);
 						} else {
 							if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
@@ -877,6 +879,8 @@ public class ApiProjectController extends CoTopComponent {
 							// 정상처리된 경우 세션 삭제
 							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
 							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+							
+							resultMap.put("success", true);
 							return responseService.getSingleResult(resultMap);
 						} else {
 							if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
@@ -960,14 +964,11 @@ public class ApiProjectController extends CoTopComponent {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
 					} else if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
-						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
-								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
 					} else {
-						
 						boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) bin -> bin Android 
 						if (!checkDistributionTypeFlag) {
-							return responseService.getFailResult(CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE
-									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
 						}
 						
 						if (!isEmpty(oldFileId)) {
@@ -1048,8 +1049,7 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
-							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE
-									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
 						}
 						
 						if (!isEmpty(errorMsg)) {
@@ -1071,6 +1071,9 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						project.setBinCsvFileId(ossReportBean.getRegistFileId()); // set file id
+						if (!resultMap.containsKey("errorMessage")) {
+							resultMap.put("success", true);
+						}
 					}
 				}
 				
@@ -1116,27 +1119,23 @@ public class ApiProjectController extends CoTopComponent {
 						
 						project.setBinBinaryFileId(binaryFileId);
 					} else {
-						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE
-								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
 					}
 				}
 				
-				if (ossReportBean == null 
-						&& binartTxtBean == null) {
-					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE
-							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
+				if (ossReportBean == null && binartTxtBean == null) {
+					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
 				} else {
-					T2CoProjectValidator pv = new T2CoProjectValidator();
-					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BIN);
-					pv.setValidLevel(pv.VALID_LEVEL_BASIC);
-					pv.setAppendix("mainList", ossComponents); // sub grid
-					pv.setAppendix("subList", ossComponentsLicense);
-					T2CoValidationResult vr = pv.validate(new HashMap<>());
-					
-					if (!vr.isValid()) {
-						return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE
-								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
-					} else {
+//					T2CoProjectValidator pv = new T2CoProjectValidator();
+//					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BIN);
+//					pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+//					pv.setAppendix("mainList", ossComponents); // sub grid
+//					pv.setAppendix("subList", ossComponentsLicense);
+//					T2CoValidationResult vr = pv.validate(new HashMap<>());
+//					
+//					if (!vr.isValid()) {
+//						return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+//					} else {
 						List<ProjectIdentification> ossComponentList = new ArrayList<>();
 						List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 						
@@ -1259,9 +1258,8 @@ public class ApiProjectController extends CoTopComponent {
 						
 						// session 삭제
 						deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
-						deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN,
-								prjId));
-					}
+						deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+//					}
 				}
 			} else {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
