@@ -678,7 +678,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
+    @SuppressWarnings("unchecked")
+	@ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT})
     public ResponseEntity<Map<String, Object>> ossReportAll(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -829,6 +830,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
                         break;
                 }
+                
+                resultMap.put("success", true);
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } else {
                 if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
