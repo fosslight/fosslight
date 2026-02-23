@@ -180,6 +180,8 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_LICENSE_DELETED_COMMENT.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BOM_COMPARE.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE.equals(bean.getMsgType())
 					) {
 				convertDataMap.put("contentsTitle", StringUtil.replace(makeMailSubject((isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()), bean, true), "[FOSSLight]", ""));
 			} else {
@@ -1821,7 +1823,8 @@ public class CoMailManager extends CoTopComponent {
 				title = StringUtil.replace(title, "${Project ID}", avoidNull(bean.getParamPrjId()));
 			}
 		} else if (title.indexOf("${Project ID}") > -1) {
-			title = StringUtil.replace(title, "${Project ID}", avoidNull(bean.getParamPrjId()));
+			String _s = "<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId() + "' target='_blank'>" + bean.getParamPrjId() + "</a>";
+			title = StringUtil.replace(title, "${Project ID}", avoidNull(_s));
 		}
 
 		if(title.indexOf("${SelfCheck Project Name") > -1) {
@@ -1908,7 +1911,8 @@ public class CoMailManager extends CoTopComponent {
 				title = StringUtil.replace(title, "${3rd Party ID}", avoidNull(bean.getParamPartnerId()));
 			}
 		}  else if (title.indexOf("${3rd Party ID}") > -1) {
-			title = StringUtil.replace(title, "${3rd Party ID}", avoidNull(bean.getParamPartnerId()));
+			String _s = "<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + bean.getParamPartnerId() + "' target='_blank'>" + bean.getParamPartnerId() + "</a>";
+			title = StringUtil.replace(title, "${3rd Party ID}", avoidNull(_s));
 		}
 		
 		if (title.indexOf("${Binary Name}") > -1) {
