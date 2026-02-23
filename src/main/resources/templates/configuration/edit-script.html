@@ -17,7 +17,7 @@
     let commentTemp = '';
     let data = {
         init : function(){
-            if(!defaultTab) {
+            if (!defaultTab) {
                 $("[name='defaultTab']:eq(0)").attr("checked", true); // 첫번째 항목을 선택하도록 변경
             } else {
                 $.each(defaultTab.split(","), function(idx, val){
@@ -25,20 +25,19 @@
                 });
             }
             $('#configurationForm_01 select[name="defaultLocale"]').trigger('change');
-            $('#userInfoArea select[name="division"]').trigger('change');
+            $('select[name="division"]').trigger('change');
 
-            let userDivision = $('#userInfoArea select[name="division"]');
-            if([[${sessUserInfo?.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
-                for(var i=0;i<userDivision.children().length;i++){
-                    if(userDivision.children()[i].value == [[${sessUserInfo.division}]]) {
+            let userDivision = $('select[name="division"]');
+            if ([[${sessUserInfo?.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+            	var isMatch = false;
+                for (var i=0;i<userDivision.children().length;i++) {
+                    if (userDivision.children()[i].value == [[${sessUserInfo.division}]]) {
+                    	isMatch = true;
                         break;
                     }
-                    if(userDivision.children().length - 1 == i ) {
-                        let divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), sessUserInfo?.division)}]];
-                        userDivision.append("<option value='" + [[${sessUserInfo.division}]] + "' >" + divisionName+ "</option>");
-                        $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
-                        $('#userInfoArea select[name="division"] option:last').change();
-                    }
+                }
+                if (!isMatch) {
+                	$("#division").val(null).trigger('change');
                 }
             } else {
             	$("#division").val(null).trigger('change');
@@ -220,7 +219,7 @@
             var userName = $('input[name="userName"]').val();
             var division = $("#division").val();
             
-            if (division == null){
+            if (division == null || "" == division) {
             	$('#division').addClass('is-invalid');
             	alertify.alert("Check the required items", function(){});
             	return false;
