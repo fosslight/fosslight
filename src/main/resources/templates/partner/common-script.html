@@ -427,18 +427,18 @@
 				alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 			} else {
 				var gridList = $("#list");
-		        var targetGird = "list";
+		        var targetGrid = "list";
 
 		        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
 		        var rowCheckedArr = [];
 		        for(var i=0; i<selarrrow.length; i++){
-					if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+					if($("input:checkbox[id='jqg_" + targetGrid + "_" + selarrrow[i] + "']").is(":checked")){
 						rowCheckedArr.push(selarrrow[i]);
 					}
 		        }
 
 		        if(rowCheckedArr.length > 0){
-		        	com_fn.exitCell(_mainLastsel, targetGird);
+		        	com_fn.exitCell(_mainLastsel, targetGrid);
 		            
 		            var _popup = null;
 
@@ -446,7 +446,7 @@
 		                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
 		                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
-						$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+						$("#partnerBulkEditForm > input[name=target]").val(targetGrid);
 						$("#partnerBulkEditForm").submit();
 		                
 		                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
@@ -457,7 +457,7 @@
 		                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
 		                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
-						$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+						$("#partnerBulkEditForm > input[name=target]").val(targetGrid);
 						$("#partnerBulkEditForm").submit();
 		            }
 		        } else {

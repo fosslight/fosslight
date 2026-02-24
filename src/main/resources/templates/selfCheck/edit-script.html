@@ -1195,18 +1195,18 @@ var fn = {
 		}
 		
     	var gridList = $("#srcList");
-        var targetGird = "srcList";
+        var targetGrid = "srcList";
 
         var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
         var rowCheckedArr = [];
         for(var i=0; i<selarrrow.length; i++){
-			if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+			if($("input:checkbox[id='jqg_" + targetGrid + "_" + selarrrow[i] + "']").is(":checked")){
 				rowCheckedArr.push(selarrrow[i]);
 			}
         }
 
         if(rowCheckedArr.length > 0){
-        	src_fn.exitCell(_mainLastsel, targetGird);
+        	src_fn.exitCell(_mainLastsel, targetGrid);
             
             var _popup = null;
             
@@ -1214,7 +1214,7 @@ var fn = {
                 _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#selfBulkEditForm > input[name=rowId]").val(rowCheckedArr);
-				$("#selfBulkEditForm > input[name=target]").val(targetGird);
+				$("#selfBulkEditForm > input[name=target]").val(targetGrid);
 				$("#selfBulkEditForm > input[name=menu]").val("selfCheck");
 				$("#selfBulkEditForm").submit();
                 
@@ -1226,7 +1226,7 @@ var fn = {
                 _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#selfBulkEditForm > input[name=rowId]").val(rowCheckedArr);
-				$("#selfBulkEditForm > input[name=target]").val(targetGird);
+				$("#selfBulkEditForm > input[name=target]").val(targetGrid);
 				$("#selfBulkEditForm > input[name=menu]").val("selfCheck");
 				$("#selfBulkEditForm").submit();
             }
