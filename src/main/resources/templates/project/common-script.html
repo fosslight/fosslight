@@ -1746,27 +1746,27 @@ var com_fn = {
 		}
     	
         var gridList;
-        var targetGird = "";
+        var targetGrid = "";
         
         switch(tab){
             case 'SRC' : 
-                gridList = $("#srcList"); targetGird = "srcList";
+                gridList = $("#srcList"); targetGrid = "srcList";
                 break;
             case 'DEP' : 
-                gridList = $("#depList"); targetGird = "depList";
+                gridList = $("#depList"); targetGrid = "depList";
                 break;
             case 'BIN' : 
-                gridList = $("#binList"); targetGird = "binList";
+                gridList = $("#binList"); targetGrid = "binList";
                 break;
             case 'BINANDROID' : 
-                gridList = $("#binAndroidList"); targetGird = "binAndroidList";
+                gridList = $("#binAndroidList"); targetGrid = "binAndroidList";
                 break;
         }
 
         var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
         var rowCheckedArr = [];
         for(var i=0; i<selarrrow.length; i++){
-			if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+			if($("input:checkbox[id='jqg_" + targetGrid + "_" + selarrrow[i] + "']").is(":checked")){
 				rowCheckedArr.push(selarrrow[i]);
 			}
         }
@@ -1779,7 +1779,7 @@ var com_fn = {
             	_popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
             	$("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
-				$("#bulkEditForm > input[name=target]").val(targetGird);
+				$("#bulkEditForm > input[name=target]").val(targetGrid);
 				$("#bulkEditForm").submit();
 
                 if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
@@ -1790,7 +1790,7 @@ var com_fn = {
                 _popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
-				$("#bulkEditForm > input[name=target]").val(targetGird);
+				$("#bulkEditForm > input[name=target]").val(targetGrid);
 				$("#bulkEditForm").submit();
             }
         } else {
