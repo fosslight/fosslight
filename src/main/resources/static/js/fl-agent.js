@@ -17,7 +17,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
   container.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px;">
       <div style="width: 16px; height: 16px; border: 2px solid #007bff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-      <span style="color: #007bff; font-size: 11px;">가이드 검색 중...</span>
+      <span style="color: #007bff; font-size: 11px;">Searching for guide...</span>
     </div>
     <style>
       @keyframes spin {
@@ -53,12 +53,12 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
       // Display guide without internal scroll
       container.innerHTML = '<div style="font-size: 11px; color: #333; line-height: 1.6; white-space: pre-wrap; overflow: visible;">' + escapeHtml(data.guide) + '</div>';
     } else {
-      container.innerHTML = '<div style="color: #666; font-size: 11px;">가이드를 찾을 수 없습니다.</div>';
+      container.innerHTML = '<div style="color: #666; font-size: 11px;">Guide not found.</div>';
     }
   })
   .catch(error => {
     console.error('[fetchSbomGuide] Error:', error);
-    container.innerHTML = '<div style="color: #dc3545; font-size: 11px;">가이드 검색 중 오류가 발생했습니다: ' + escapeHtml(error.message) + '</div>';
+    container.innerHTML = '<div style="color: #dc3545; font-size: 11px;">Error occurred while searching for guide: ' + escapeHtml(error.message) + '</div>';
   });
 };
 
@@ -413,7 +413,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
       // show loading
       const guideContainer = document.getElementById('flAgentGuideContent');
       if(guideContainer){
-        guideContainer.innerHTML = '<div class="fl-agent-guide-card">로딩 중...</div>';
+        guideContainer.innerHTML = '<div class="fl-agent-guide-card">Loading...</div>';
       }
       fetch('/api/agent/guide', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) })
         .then(async r => {
@@ -424,7 +424,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
           renderGuideResponse(data);
         }).catch(err => {
           console.error('guide req err', err);
-          if(guideContainer) guideContainer.innerHTML = '<div class="fl-agent-guide-card">가이드를 불러오지 못했습니다.</div>';
+          if(guideContainer) guideContainer.innerHTML = '<div class="fl-agent-guide-card">Failed to load guide.</div>';
         });
     }
 
@@ -437,7 +437,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         return;
       }
       // Common expected shape: { field, title, guide }
-      const title = data.title || data.field || '가이드';
+      const title = data.title || data.field || 'Guide';
       const guideText = data.guide || data.message || JSON.stringify(data);
       let html = '<div class="fl-agent-guide-card">';
       html += '<h3>'+escapeHtml(title)+'</h3>';
@@ -481,12 +481,12 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
       if (!container) return;
 
       if (!warningItems || warningItems.length === 0) {
-        container.innerHTML = '<div class="fl-agent-guide-card"><h3>📊 SBOM 분석</h3><p>분석할 Warning이 없습니다.</p></div>';
+        container.innerHTML = '<div class="fl-agent-guide-card"><h3>📊 SBOM Analysis</h3><p>No warnings to analyze.</p></div>';
         return;
       }
 
       let html = '<div class="fl-agent-guide-card"><h3>📊 SBOM 분석 결과</h3>';
-      html += '<p style="font-size: 13px; color: #333; margin-bottom: 15px;">총 ' + warningItems.length + '개의 항목에서 Warning이 발견되었습니다.</p>';
+      html += '<p style="font-size: 13px; color: #333; margin-bottom: 15px;">Warnings found in ' + warningItems.length + ' items.</p>';
       
       html += '<div style="max-height: calc(100vh - 250px); overflow-y: auto; padding-right: 5px;">';
       
@@ -500,7 +500,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee;">';
         html += '<div style="flex: 1;">';
         html += '<div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px;">' + escapeHtml(item.ossName) + '</div>';
-        html += '<div style="font-size: 12px; color: #666;">버전: ' + escapeHtml(item.ossVersion) + '</div>';
+        html += '<div style="font-size: 12px; color: #666;">Version: ' + escapeHtml(item.ossVersion) + '</div>';
         html += '</div>';
         if (item.licenseName) {
           html += '<div style="background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 11px; color: #333;">' + escapeHtml(item.licenseName) + '</div>';
@@ -524,9 +524,9 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         
         // Action Guide (placeholder for RAG)
         html += '<div style="background: #f8f9fa; border-radius: 6px; padding: 12px;">';
-        html += '<div style="font-size: 12px; font-weight: 600; color: #333; margin-bottom: 8px;">💡 조치 가이드:</div>';
+        html += '<div style="font-size: 12px; font-weight: 600; color: #333; margin-bottom: 8px;">💡 Action Guide:</div>';
         html += '<div style="font-size: 11px; color: #666; line-height: 1.5;">';
-        html += '<button onclick="fetchSbomGuide(\'' + escapeHtml(item.ossName) + '\', \'' + escapeHtml(item.ossVersion) + '\', \'' + escapeHtml(item.messages[0] ? item.messages[0].message : '') + '\', this)" style="background: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">가이드 검색</button>';
+        html += '<button onclick="fetchSbomGuide(\'' + escapeHtml(item.ossName) + '\', \'' + escapeHtml(item.ossVersion) + '\', \'' + escapeHtml(item.messages[0] ? item.messages[0].message : '') + '\', this)" style="background: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">Search Guide</button>';
         html += '</div>';
         html += '</div>';
         
@@ -554,18 +554,18 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
       const licenseContainer = document.getElementById('flAgentLicenseContainer');
       if (licenseContainer) {
         let html = '<div class="fl-agent-guide-card">';
-        html += '<h3>📄 라이선스 번역</h3>';
+        html += '<h3>📄 License Translation</h3>';
         if (licenseName) {
-          html += '<div style="margin-bottom: 12px;"><strong>라이선스 이름:</strong> ' + escapeHtml(licenseName) + '</div>';
+          html += '<div style="margin-bottom: 12px;"><strong>License Name:</strong> ' + escapeHtml(licenseName) + '</div>';
         }
         if (licenseText) {
-          html += '<div style="margin-bottom: 12px;"><strong>라이선스 텍스트:</strong></div>';
+          html += '<div style="margin-bottom: 12px;"><strong>License Text:</strong></div>';
           html += '<div style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 11px; line-height: 1.5; max-height: 300px; overflow-y: auto;">';
           html += escapeHtml(licenseText);
           html += '</div>';
         }
         html += '<div style="margin-top: 12px; color: #666; font-size: 11px;">';
-        html += '라이선스 번역 기능이 준비 중입니다.';
+        html += 'License translation feature is under preparation.';
         html += '</div>';
         html += '</div>';
         licenseContainer.innerHTML = html;

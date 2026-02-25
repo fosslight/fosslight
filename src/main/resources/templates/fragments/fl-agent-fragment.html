@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="flAgentFragment">
-    <!-- FOSSLight Hub Agent 오른쪽 사이드바 (공통 프래그먼트) -->
+    <!-- FOSSLight Hub Agent right sidebar (common fragment) -->
     <div class="fl-agent-sidebar-overlay" id="flAgentSidebarOverlay"></div>
     <div class="fl-agent-sidebar" id="flAgentSidebar">
         <div class="fl-agent-sidebar-header">
             <div class="fl-agent-sidebar-title">
                 <span class="icon">🤖</span>
-                <span>FOSSLight Agent 가이드</span>
+                <span>FOSSLight Agent Guide</span>
             </div>
-            <button type="button" class="fl-agent-sidebar-close" id="flAgentSidebarClose" title="닫기">×</button>
+            <button type="button" class="fl-agent-sidebar-close" id="flAgentSidebarClose" title="Close">×</button>
         </div>
         <div class="fl-agent-sidebar-body">
             <div class="fl-agent-mode-toggle">
-                <button type="button" class="fl-agent-mode-btn active" id="flAgentGuideModeBtn">📋 가이드 모드</button>
-                <button type="button" class="fl-agent-mode-btn" id="flAgentChatModeBtn">💬 질문하기</button>
-                <button type="button" class="fl-agent-mode-btn" id="flAgentSbomAnalysisBtn" style="display: none;">📊 SBOM분석</button>
-                <button type="button" class="fl-agent-mode-btn" id="flAgentLicenseModeBtn">🌐 라이선스 번역</button>
+                <button type="button" class="fl-agent-mode-btn active" id="flAgentGuideModeBtn">📋 Guide Mode</button>
+                <button type="button" class="fl-agent-mode-btn" id="flAgentChatModeBtn">💬 Ask Questions</button>
+                <button type="button" class="fl-agent-mode-btn" id="flAgentSbomAnalysisBtn" style="display: none;">📊 SBOM Analysis</button>
+                <button type="button" class="fl-agent-mode-btn" id="flAgentLicenseModeBtn">🌐 License Translation</button>
             </div>
 
             <div id="flAgentGuideContent" class="fl-agent-guide-content">
                 <div class="fl-agent-guide-card">
-                    <h3>👋 FOSSLight Agent 가이드</h3>
-                    <p>라이선스 정보를 입력하면 실시간으로 가이드를 제공합니다. 각 필드에 포커스를 맞추면 상세한 도움말을 확인할 수 있습니다.</p>
+                    <h3>👋 FOSSLight Agent Guide</h3>
+                    <p>Provides real-time guidance when entering license information. Focus on each field to see detailed help.</p>
                 </div>
                 <div class="fl-agent-tips-list">
-                    <h4>사용 방법</h4>
+                    <h4>How to Use</h4>
                     <ul>
-                        <li>입력 필드를 클릭하면 자동으로 가이드가 나타납니다</li>
-                        <li>타이핑하면 실시간으로 검증이 진행됩니다</li>
-                        <li>제안사항을 참고하여 올바른 형식으로 입력하세요</li>
+                        <li>Click on input fields to automatically show the guide</li>
+                        <li>Real-time validation while typing</li>
+                        <li>Follow suggestions to enter in the correct format</li>
                     </ul>
                 </div>
             </div>
@@ -37,44 +37,44 @@
             <div id="flAgentChatContainer" class="fl-agent-chat-container">
                 <div id="flAgentChatMessages" class="fl-agent-chat-messages">
                     <div class="fl-agent-chat-message assistant">
-                        <div class="fl-agent-chat-bubble">안녕하세요! 👋 FOSSLight Hub에 대해 궁금하신 점을 물어보세요. 라이선스, 오픈소스, 컴플라이언스 등 무엇이든 도와드리겠습니다.</div>
+                        <div class="fl-agent-chat-bubble">Hello! 👋 Ask anything about FOSSLight Hub. We can help with licenses, open source, compliance, and more.</div>
                         <span class="fl-agent-chat-timestamp">FOSSLight AI</span>
                     </div>
                 </div>
                 <div class="fl-agent-chat-input-container">
                     <div class="fl-agent-chat-input-wrapper">
-                        <textarea id="flAgentChatInput" class="fl-agent-chat-input" placeholder="궁금하신 점을 입력해주세요... (Shift+Enter: 줄바꿈)" rows="1"></textarea>
-                        <button type="button" id="flAgentChatSend" class="fl-agent-chat-send-btn">전송</button>
+                        <textarea id="flAgentChatInput" class="fl-agent-chat-input" placeholder="Enter your question... (Shift+Enter: line break)" rows="1"></textarea>
+                        <button type="button" id="flAgentChatSend" class="fl-agent-chat-send-btn">Send</button>
                     </div>
                 </div>
             </div>
 
             <div id="flAgentSbomAnalysisContainer" class="fl-agent-chat-container" style="display: none;">
                 <div class="fl-agent-guide-card">
-                    <h3>📊 SBOM 분석</h3>
-                    <p>SBOM(Software Bill of Materials) 분석 기능을 제공합니다.</p>
+                    <h3>📊 SBOM Analysis</h3>
+                    <p>Provides SBOM (Software Bill of Materials) analysis functionality.</p>
                 </div>
                 <div class="fl-agent-tips-list">
-                    <h4>사용 방법</h4>
+                    <h4>How to Use</h4>
                     <ul>
-                        <li>SBOM 탭에서 분석할 항목을 선택하세요</li>
-                        <li>분석 결과를 확인하고 다운로드할 수 있습니다</li>
-                        <li>라이선스 및 취약점 정보를 확인하세요</li>
+                        <li>Select items to analyze from the SBOM tab</li>
+                        <li>View and download analysis results</li>
+                        <li>Check license and vulnerability information</li>
                     </ul>
                 </div>
             </div>
 
             <div id="flAgentLicenseContainer" class="fl-agent-chat-container">
                 <div class="fl-agent-license-info-card">
-                    <h3>🌐 라이선스 번역 및 요약</h3>
-                    <p style="font-size: 13px; color: rgba(255,255,255,0.9); margin-top: 8px;">라이선스 원문을 한글로 번역하고 주요 내용을 요약해드립니다.</p>
+                    <h3>🌐 License Translation and Summary</h3>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.9); margin-top: 8px;">Translates license text to Korean and summarizes key points.</p>
                 </div>
                 <div class="fl-agent-license-input-section">
-                    <label for="flAgentLicenseNameInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">라이선스 이름</label>
-                    <input type="text" id="flAgentLicenseNameInput" class="fl-agent-license-name-input" placeholder="예: MIT License, Apache-2.0" readonly style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; font-size: 14px; background: #f7fafc;" />
-                    <label for="flAgentLicenseTextInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">라이선스 원문</label>
-                    <textarea id="flAgentLicenseTextInput" class="fl-agent-license-text-input" placeholder="라이선스 원문이 여기에 표시됩니다..." rows="8" readonly style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; line-height: 1.6; resize: vertical; font-family: 'Courier New', monospace; background: #f7fafc;"></textarea>
-                    <button type="button" id="flAgentTranslateBtn" class="fl-agent-translate-btn" disabled style="width: 100%; margin-top: 12px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"><span id="flAgentTranslateBtnText">🌐 번역 및 요약하기</span></button>
+                    <label for="flAgentLicenseNameInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">License Name</label>
+                    <input type="text" id="flAgentLicenseNameInput" class="fl-agent-license-name-input" placeholder="e.g., MIT License, Apache-2.0" readonly style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; font-size: 14px; background: #f7fafc;" />
+                    <label for="flAgentLicenseTextInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; font-size: 14px;">License Text</label>
+                    <textarea id="flAgentLicenseTextInput" class="fl-agent-license-text-input" placeholder="License text will be displayed here..." rows="8" readonly style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; line-height: 1.6; resize: vertical; font-family: 'Courier New', monospace; background: #f7fafc;"></textarea>
+                    <button type="button" id="flAgentTranslateBtn" class="fl-agent-translate-btn" disabled style="width: 100%; margin-top: 12px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"><span id="flAgentTranslateBtnText">🌐 Translate and Summarize</span></button>
                 </div>
                 <div id="flAgentLicenseResult" class="fl-agent-license-result" style="display: none; margin-top: 20px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
             </div>
