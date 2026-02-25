@@ -43,3 +43,4 @@ out/
 /mail/mailstate/
 
 /service/docx/license/*
+src/main/resources/application.properties
