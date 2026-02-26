@@ -434,6 +434,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
     }
 
     // attach focus listeners to inputs and textareas (delegated)
+    // Only works for elements inside .fl-agent-scope or [data-fl-agent-enabled] containers
     document.addEventListener('focusin', function(e){
       const el = e.target;
       if(!el) return;
@@ -441,6 +442,10 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         // Skip if the focused element is inside the agent sidebar
         const agentSidebar = el.closest('#flAgentSidebar');
         if(agentSidebar) return;
+        
+        // Only proceed if the element is inside an opt-in container
+        const scopeContainer = el.closest('.fl-agent-scope') || el.closest('[data-fl-agent-enabled]');
+        if(!scopeContainer) return;
         
         const name = el.getAttribute('name') || el.id || el.getAttribute('data-field') || el.placeholder || 'field';
         // open sidebar automatically in guide mode
