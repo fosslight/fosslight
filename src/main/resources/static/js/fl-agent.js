@@ -172,7 +172,9 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
     // mode buttons
     function setMode(mode){
       console.log('[fl-agent] setMode called with mode:', mode);
-      document.querySelectorAll('.fl-agent-mode-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.fl-agent-mode-btn').forEach((b) => {
+        b.classList.remove('active');
+      });
       const guideBtn = document.getElementById('flAgentGuideModeBtn');
       const chatBtn = document.getElementById('flAgentChatModeBtn');
       const sbomAnalysisBtn = document.getElementById('flAgentSbomAnalysisBtn');
