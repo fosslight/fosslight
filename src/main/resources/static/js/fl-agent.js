@@ -168,13 +168,13 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
     function openSidebar(){
       if(!sidebar || !toggle || !overlay) return;
   console.log('[fl-agent] openSidebar called');
-  sidebar.classList.add('open');
+  sidebar.classList.remove('closed');
   toggle.classList.add('open');
   overlay.style.display = 'block';
     }
     function closeSidebar(){
       if(!sidebar || !toggle || !overlay) return;
-      sidebar.classList.remove('open');
+      sidebar.classList.add('closed');
       toggle.classList.remove('open');
       overlay.style.display = 'none';
     }
