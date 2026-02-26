@@ -222,7 +222,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
             console.log('[fl-agent] iframe:', iframe);
             if(iframe && iframe.contentWindow) {
               console.log('[fl-agent] Sending postMessage to iframe');
-              iframe.contentWindow.postMessage({type: 'sbomAnalysisRequest'}, '*');
+              iframe.contentWindow.postMessage({type: 'sbomAnalysisRequest'}, window.location.origin);
             } else {
               console.error('[fl-agent] iframe or iframe.contentWindow not found');
             }
