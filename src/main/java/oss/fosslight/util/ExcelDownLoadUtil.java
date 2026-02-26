@@ -5825,30 +5825,39 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			LicenseChoice licenseChoice = new LicenseChoice();
 			List<License> licenseList = new ArrayList<>();
-			
-			OssMaster _ossBean = null;
 			if (ossName.equals("-")) {
-				String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
-				licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, true).replaceAll("\\(", "-").replaceAll("\\)", "");
-				
-				if (licenseStr.contains(",")) {
-					for (String license : licenseStr.split(",")) {
+				if (CollectionUtils.isNotEmpty(bean.getOssComponentsLicense())) {
+					for (OssComponentsLicense ossComponentsLicense : bean.getOssComponentsLicense()) {
+						String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(ossComponentsLicense.getLicenseName());
+						licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, true).replaceAll("\\(", "-").replaceAll("\\)", "");
+						
 						License li = new License();
-						li.setName(license.trim());
+						li.setName(licenseStr.trim());
 						licenseList.add(li);
 					}
 				} else {
-					License li = new License();
-					li.setName(licenseStr.trim());
-					licenseList.add(li);
+					String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
+					licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, true).replaceAll("\\(", "-").replaceAll("\\)", "");
+					
+					if (licenseStr.contains(",")) {
+						for (String license : licenseStr.split(",")) {
+							License li = new License();
+							li.setName(license.trim());
+							licenseList.add(li);
+						}
+					} else {
+						License li = new License();
+						li.setName(licenseStr.trim());
+						licenseList.add(li);
+					}
 				}
 			} else {
-				_ossBean = CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
-				if (_ossBean != null) {
-					for (OssLicense ossLicense : _ossBean.getOssLicenses()) {
+				if (CollectionUtils.isNotEmpty(bean.getOssComponentsLicense())) {
+					for (OssComponentsLicense ossComponentsLicense : bean.getOssComponentsLicense()) {
+						String license = ossComponentsLicense.getLicenseName();
 						License li = new License();
-						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(ossLicense.getLicenseName()).toUpperCase())) {
-							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(ossLicense.getLicenseName()).toUpperCase());
+						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license).toUpperCase())) {
+							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(license).toUpperCase());
 							if (!isEmpty(liMaster.getShortIdentifier())) {
 								li.setId(liMaster.getShortIdentifier());
 							} else {
@@ -5859,7 +5868,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 								}
 							}
 						} else {
-							li.setName(ossLicense.getLicenseName());
+							li.setName(license.trim());
 						}
 						
 						licenseList.add(li);
