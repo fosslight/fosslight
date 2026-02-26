@@ -1565,8 +1565,9 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 }
 
 .fl-agent-sidebar-overlay.show {
-    opacity: 0;
-    visibility: hidden;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .fl-agent-sidebar-toggle {
