@@ -144,24 +144,6 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
       checkUrlChange();
     });
 
-  // Fallback: if fragment never appears, inject a minimal sidebar into the DOM after 500ms
-  setTimeout(function() {
-    if (!document.getElementById('flAgentSidebar')) {
-      console.log('fl-agent: fragment not found, injecting fallback sidebar');
-      var el = document.createElement('div');
-      el.id = 'flAgentSidebar';
-      el.innerHTML = '\n      <div id="flAgentSidebarToggle" class="fl-agent-toggle">Agent</div>\n      <div class="fl-agent-content">\n        <div class="fl-agent-header">Agent</div>\n        <div class="fl-agent-body">\n          <p>Agent UI initialized (fallback).</p>\n        </div>\n      </div>\n    ';
-      document.body.appendChild(el);
-      // Apply basic styles if missing
-      if (!document.getElementById('fl-agent-fallback-style')) {
-        var s = document.createElement('style');
-        s.id = 'fl-agent-fallback-style';
-        s.innerHTML = '#flAgentSidebar{position:fixed;right:0;top:60px;width:320px;z-index:9999;} .fl-agent-toggle{position:fixed;right:320px;top:60px;cursor:pointer;}';
-        document.head.appendChild(s);
-      }
-      attachAgentHandlers();
-    }
-  }, 500);
     const toggle = document.getElementById('flAgentSidebarToggle');
     const closeBtn = document.getElementById('flAgentSidebarClose');
 
