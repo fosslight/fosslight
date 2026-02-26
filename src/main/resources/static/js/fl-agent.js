@@ -28,7 +28,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
   
   // Send request to Agent server for RAG search
   console.log('[fetchSbomGuide] Starting request for:', ossName, ossVersion, message);
-  fetch('http://localhost:7862/api/sbom-guide', {
+  fetch('/api/agent/sbom-guide', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
