@@ -1417,13 +1417,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		    String namePrefix = (ossName + "_").toUpperCase();
 		    
 		    OssMaster ossMaster = null;
-	        for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
-	            if (entry.getKey().startsWith(namePrefix)) {
-	                ossMaster = entry.getValue();
-	                ossMaster.setOssVersionAliases(null);
-	                break;
-	            }
-	        }
+		    if (isEmpty(ossVersion)) {
+		    	for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
+		            if (entry.getKey().startsWith(namePrefix)) {
+		                ossMaster = entry.getValue();
+		                ossMaster.setOssVersionAliases(null);
+		                break;
+		            }
+		        }
+		    }
 		    
 	        if (ossMaster != null) {
 	        	return ossMaster;
@@ -2611,8 +2613,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	@Transactional
-	public void registSrcOss(List<ProjectIdentification> ossComponent,
-			List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
+	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
 		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
 		if (ossComponent.size()==0){
 			Project projectSubStatus = new Project();
@@ -2642,6 +2643,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			projectSubStatus.setReferenceDiv(refDiv);
 			projectMapper.updateProjectMaster(projectSubStatus);
+		} else {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+				project.setIdentificationSubStatusDep(CoConstDef.FLAG_YES);
+			} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+				project.setIdentificationSubStatusSrc(CoConstDef.FLAG_YES);
+			} else if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(refDiv)) {
+				project.setIdentificationSubStatusBin(CoConstDef.FLAG_YES);
+			} else {
+				project.setIdentificationSubStatusAndroid(CoConstDef.FLAG_YES);
+			}
 		}
 		
 		ossComponent = convertOssNickName(ossComponent);
@@ -7514,7 +7525,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		if (!isEmpty(project.getOssVersion())) {
 			identification.setOssVersion(project.getOssVersion());
 		}
-		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
 		
 		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
 		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
@@ -7522,13 +7532,28 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		} else {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 		}
-		if (!isVulnPopup) {
-			list = projectMapper.selectSecurityListForProject(identification);
-		}
+		
 		identification.setStandardScore(Float.valueOf("0.1"));
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
 		if (fullList != null && !fullList.isEmpty()) {
+			if (!isVulnPopup) {
+				list = fullList.stream()
+		                .filter(oss -> {
+		                    String scoreStr = oss.getCvssScore();
+		                    if (scoreStr == null || scoreStr.isEmpty()) {
+		                        return false;
+		                    }
+		                    try {
+		                        double score = Double.parseDouble(scoreStr);
+		                        return score >= Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE));
+		                    } catch (NumberFormatException e) {
+		                        return false;
+		                    }
+		                })
+		                .collect(Collectors.toList());
+			}
+			
 			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
 			if (securityDatalist != null && !securityDatalist.isEmpty()) {
 				for (OssComponents oss : securityDatalist) {
