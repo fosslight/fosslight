@@ -481,7 +481,25 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
     });
 
     // Listen for SBOM analysis results from iframe
+    // Trusted origins list - only accept messages from these origins
+    // Update this list when embedding in different domains
+    const TRUSTED_ORIGINS = [window.location.origin];
+    
     window.addEventListener('message', function(event) {
+      // Validate message origin
+      if (!TRUSTED_ORIGINS.includes(event.origin)) {
+        console.warn('[fl-agent] Message from untrusted origin:', event.origin);
+        return;
+      }
+      
+      // Validate message source is from active iframe
+      const activeFrame = document.querySelector('.tab-pane.active iframe');
+      if (!activeFrame || event.source !== activeFrame.contentWindow) {
+        console.warn('[fl-agent] Message from unexpected source');
+        return;
+      }
+      
+      // Process valid message
       if (event.data && event.data.type === 'sbomAnalysisResult') {
         renderSbomAnalysisResult(event.data.data);
       }
