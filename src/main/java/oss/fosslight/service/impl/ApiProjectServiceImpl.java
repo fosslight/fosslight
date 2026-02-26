@@ -110,7 +110,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("PRIORITY", CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, (String) map.get("priority")));
 				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
 				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
-				map.put("VERIFICATION_STATUS", verificationStatus);
+				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
 				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
 				map.put("EDITORS", map.get("editors") == null ? "" : map.get("editors").toString());
