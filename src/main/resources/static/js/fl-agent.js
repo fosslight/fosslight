@@ -389,7 +389,18 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         const ov = document.getElementById('flAgentSidebarOverlay');
         if (sb && to && ov) {
           console.log('[fl-agent] detected fragment insertion via MutationObserver');
-          // initialize variables used by this scope
+          // Update stale closure variables with fresh element references
+          sidebar = sb;
+          toggle = to;
+          overlay = ov;
+          // Re-attach event listeners to fresh elements
+          if(toggle){
+            toggle.addEventListener('click', function(e){
+              if(sidebar && !sidebar.classList.contains('closed')) closeSidebar(); else openSidebar();
+            });
+          }
+          if(closeBtn) closeBtn.addEventListener('click', closeSidebar);
+          if(overlay) overlay.addEventListener('click', closeSidebar);
           try{ openSidebar(); } catch(e){ console.error('fl-agent open err (observer)', e); }
           obs.disconnect();
         }
