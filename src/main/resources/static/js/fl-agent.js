@@ -209,6 +209,17 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
     document.addEventListener('click', function(e){
       if(e.target && e.target.id==='flAgentGuideModeBtn') setMode('guide');
       if(e.target && e.target.id==='flAgentChatModeBtn') setMode('chat');
+      
+      // Handle SBOM guide button clicks (event delegation)
+      const sbomGuideBtn = e.target.closest('.fl-sbom-guide-btn');
+      if(sbomGuideBtn) {
+        fetchSbomGuide(
+          sbomGuideBtn.dataset.ossName,
+          sbomGuideBtn.dataset.ossVersion,
+          sbomGuideBtn.dataset.message,
+          sbomGuideBtn
+        );
+      }
       if(e.target && e.target.id==='flAgentSbomAnalysisBtn') {
         console.log('[fl-agent] SBOM Analysis button clicked');
         setMode('sbomAnalysis');
@@ -513,7 +524,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         html += '<div style="background: #f8f9fa; border-radius: 6px; padding: 12px;">';
         html += '<div style="font-size: 12px; font-weight: 600; color: #333; margin-bottom: 8px;">💡 Action Guide:</div>';
         html += '<div style="font-size: 11px; color: #666; line-height: 1.5;">';
-        html += '<button onclick="fetchSbomGuide(\'' + escapeHtml(item.ossName) + '\', \'' + escapeHtml(item.ossVersion) + '\', \'' + escapeHtml(item.messages[0] ? item.messages[0].message : '') + '\', this)" style="background: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">Search Guide</button>';
+        html += '<button class="fl-sbom-guide-btn" data-oss-name="' + escapeHtml(item.ossName) + '" data-oss-version="' + escapeHtml(item.ossVersion) + '" data-message="' + escapeHtml(item.messages[0] ? item.messages[0].message : '') + '" style="background: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">Search Guide</button>';
         html += '</div>';
         html += '</div>';
         
