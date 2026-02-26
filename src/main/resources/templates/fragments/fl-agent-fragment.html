@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <th:block th:fragment="flAgentFragment">
-    <!-- FOSSLight Hub Agent right sidebar (common fragment) -->
-    <div class="fl-agent-sidebar-overlay" id="flAgentSidebarOverlay"></div>
+    <!-- FOSSLight Hub Agent right sidebar (common fragment) - Admin Only -->
+    <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <div class="fl-agent-sidebar-overlay" id="flAgentSidebarOverlay"></div>
     <div class="fl-agent-sidebar" id="flAgentSidebar">
         <div class="fl-agent-sidebar-header">
             <div class="fl-agent-sidebar-title">
@@ -84,5 +85,6 @@
     <button type="button" class="fl-agent-sidebar-toggle" id="flAgentSidebarToggle" title="FOSSLight Hub Agent">
         <span class="fl-agent-toggle-icon">▶</span>
     </button>
+    </div>
 </th:block>
 </html>
