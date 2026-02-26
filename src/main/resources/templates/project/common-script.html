@@ -3462,11 +3462,10 @@ var com_fn = {
 					async : false,
 					contentType : 'application/json',
 					success: function(data) {
-						loadingIden.hide();
-						
 						if (data.isValid) {
 							bom_fn.beforeSave(true);
 						} else {
+							loadingIden.hide();
 							alertify.error([[#{msg.common.valid}]], 0);
 						}
 					},
@@ -3843,12 +3842,24 @@ var com_fn = {
 							}, false, 'confirm');
 						}
 						alertify.hasExcludeYnAlert([[#{msg.common.exists.excludeYn}]], function(){
-							bom_fn.beforeSave(true);
 							com_fn.closeSelectSheet();
+							if (typeof alertify.uploadIdentification !== "undefined") {
+								var dlg = alertify.dialog('uploadIdentification');
+							    if (dlg) {
+							        dlg.close();
+							    }
+							}
+							bom_fn.beforeSave(true);
 						});
 					} else {
-						bom_fn.beforeSave(true);
 						com_fn.closeSelectSheet();
+						if (typeof alertify.uploadIdentification !== "undefined") {
+							var dlg = alertify.dialog('uploadIdentification');
+						    if (dlg) {
+						        dlg.close();
+						    }
+						}
+						bom_fn.beforeSave(true);
 					}
 				}
 			},
