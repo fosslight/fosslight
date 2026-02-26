@@ -163,7 +163,7 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
 
     if(toggle){
       toggle.addEventListener('click', function(e){
-        if(sidebar && sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+        if(sidebar && !sidebar.classList.contains('closed')) closeSidebar(); else openSidebar();
       });
     }
     if(closeBtn) closeBtn.addEventListener('click', closeSidebar);
