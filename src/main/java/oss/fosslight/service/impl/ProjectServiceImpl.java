@@ -4005,10 +4005,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
         List<ProjectIdentification> duplicatedOldVulnInfoList = null;
         
         if (!includeVulnInfoNewBomList.isEmpty()) {
-            duplicatedNewVulnInfoList = includeVulnInfoNewBomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
+            duplicatedNewVulnInfoList = includeVulnInfoNewBomList.stream()
+            								.filter(p -> !isEmpty(p.getOssName()) && !p.getOssName().trim().equals("-"))
+            								.filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
         }
         if (!includeVulnInfoOldBomList.isEmpty()) {
-            duplicatedOldVulnInfoList = includeVulnInfoOldBomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
+            duplicatedOldVulnInfoList = includeVulnInfoOldBomList.stream()
+            								.filter(p -> !isEmpty(p.getOssName()) && !p.getOssName().trim().equals("-"))
+            								.filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
         }
         if (duplicatedNewVulnInfoList != null && duplicatedOldVulnInfoList != null) {
             List<ProjectIdentification> filteredAddVulnDataList = includeVulnInfoNewBomList
