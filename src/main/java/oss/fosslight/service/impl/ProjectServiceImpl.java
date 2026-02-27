@@ -9523,7 +9523,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			if (CollectionUtils.isNotEmpty(partnerList)) {
 				for (PartnerMaster bean : partnerList) {
 					int existCnt = projectMapper.checkAddProject(project.getPrjId(), bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-					String softwareName = bean.getSoftwareName();
+					String softwareName = bean.getPartnerName() + " - " + bean.getSoftwareName();
 					if (!isEmpty(bean.getSoftwareVersion())) {
 						softwareName += "(" + bean.getSoftwareVersion() + ")";
 					}
