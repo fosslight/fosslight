@@ -305,13 +305,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void checkIfVulnerabilityResolutionIsFixed(Project bean) {
 		String fixedCvssScore = "";
 		String notFixedCvssScore = "";
 		int fixedCheckCnt = 0;
-		List<OssComponents> securityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
+		Map<String, Object> result = getSecurityGridList(bean, true);
+		List<OssComponents> securityList = (List<OssComponents>) result.get("fullDiscoveredList");
 		
-		if (securityList != null && !securityList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(securityList)) {
 			int emptyVersionCnt = securityList.stream().filter(e -> isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
 			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
 			
@@ -8713,14 +8715,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		// check project notice
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project = getProjectDetail(project);
 		project.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD)));
-		
-		if (CoConstDef.FLAG_NO.equals(project.getAndroidFlag())) {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		} else {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-		}
 		
 		// set vulnerability resolution
 		checkIfVulnerabilityResolutionIsFixed(project);
