@@ -322,21 +322,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					fixedCheckCnt++;
 					continue;
 				} else {
-					if (!isEmpty(notFixedCvssScore)) {
+					if (!isEmpty(notFixedCvssScore) && !isEmpty(oc.getCvssScore())) {
 						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(notFixedCvssScore)) > 0) {
 							notFixedCvssScore = oc.getCvssScore();
 						}
 					} else {
-						notFixedCvssScore = oc.getCvssScore();
+						if (!isEmpty(oc.getCvssScore())) {
+							notFixedCvssScore = oc.getCvssScore();
+						}
 					}
 				}
 				
 				if (!oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
-					if (isEmpty(fixedCvssScore)) {
+					if (isEmpty(fixedCvssScore) && !isEmpty(oc.getCvssScore())) {
 						fixedCvssScore = oc.getCvssScore();
 					} else {
-						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(fixedCvssScore)) > 0) {
-							fixedCvssScore = oc.getCvssScore();
+						if (!isEmpty(fixedCvssScore) && !isEmpty(oc.getCvssScore())) {
+							if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(fixedCvssScore)) > 0) {
+								fixedCvssScore = oc.getCvssScore();
+							}
 						}
 					}
 				}
