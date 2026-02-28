@@ -7495,7 +7495,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	}
 	
 	@Override
-	public Map<String, Object> getSecurityGridList(Project project, boolean isVulnPopup) {
+	public Map<String, Object> getSecurityGridList(Project project, boolean isResolveDataEnabled) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		List<OssComponents> totalList = new ArrayList<>();
 		List<OssComponents> fullDiscoveredList = new ArrayList<>();
@@ -7543,7 +7543,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
 		if (fullList != null && !fullList.isEmpty()) {
-			if (!isVulnPopup) {
+			if (!isResolveDataEnabled) {
 				list = fullList.stream()
 		                .filter(oss -> {
 		                    String scoreStr = oss.getCvssScore();
@@ -7657,10 +7657,10 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
 					oc.setOssName(pi.getOssName());
 					oc.setOssVersion(pi.getOssVersion());
+					oc.setCvssScore(pi.getCvssScore());
 					
 					if (!activateFlag) {
 						oc.setCveId(pi.getCveId());
-						oc.setCvssScore(pi.getCvssScore());
 						oc.setPublDate(pi.getPublDate());
 					}
 					
@@ -7809,7 +7809,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						}
 					}
 					
-					if (!activateFlag && !isVulnPopup) {
+					if (!activateFlag && !isResolveDataEnabled) {
 						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
 					}
 					fullDiscoveredList.add(oc);
@@ -7820,7 +7820,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			checkVulnScore.clear();
 			
-			if (!isVulnPopup && CollectionUtils.isNotEmpty(list)) {
+			if (!isResolveDataEnabled && CollectionUtils.isNotEmpty(list)) {
 				gridIdx = 1;
 				caseWithoutVersionKey.clear();
 				deduplicatedkey.clear();
@@ -8024,7 +8024,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			versionsForCpeNames.clear();
 		}
 		
-		if (!isVulnPopup) {
+		if (!isResolveDataEnabled) {
 			if (CollectionUtils.isNotEmpty(checkOssNameList)) {
 				checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
 				String warningMsg = getMessage("msg.project.security.check.version");
