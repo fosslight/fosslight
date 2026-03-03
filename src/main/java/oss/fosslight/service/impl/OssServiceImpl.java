@@ -1193,32 +1193,32 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			 * 2. 라이센스 닉네임 재등록
 			 */
 			if (ossNicknames != null) {
-				Set<String> uniqueNicknames = new LinkedHashSet<>();
-				for (String s : ossNicknames) {
-					if (!isEmpty(s)) {
-				        uniqueNicknames.add(s.trim());
-				    }
-				}
+				Collection<String> filteredNicknames = Arrays.stream(ossNicknames)
+														    .filter(s -> !isEmpty(s))
+														    .map(String::trim)
+														    .collect(Collectors.toMap(
+														        String::toLowerCase,
+														        s -> s,
+														        (existing, replacement) -> {
+														            return (replacement.equals(replacement.toLowerCase())) ? replacement : existing;
+														        }
+														    )).values();
 				if (CoConstDef.FLAG_YES.equals(ossMaster.getAddNicknameYn())) {
 					List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
-					
-					for (String nickName : uniqueNicknames){
+					for (String nickName : filteredNicknames){
 						if (!isEmpty(nickName)) {
 							boolean isExactDuplicate = ossNicknameList.stream().anyMatch(o -> nickName.equals(o.getOssNickname()));
 							if (!isExactDuplicate) {
 								OssMaster ossBean = new OssMaster();
-//								ossBean.setOssName(ossMaster.getOssName());
 								ossBean.setOssCommonId(ossMaster.getOssCommonId());
 								ossBean.setOssNickname(nickName);
-								
 								ossMapper.insertOssNickname(ossBean);
 							}
 						}
 					}
 				} else {
 					ossMapper.deleteOssNickname(ossMaster);
-					
-					for (String nickName : uniqueNicknames){
+					for (String nickName : filteredNicknames){
 						if (!isEmpty(nickName)) {
 							ossMaster.setOssNickname(nickName);
 							ossMapper.insertOssNickname(ossMaster);
