@@ -8158,8 +8158,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		for (OssComponents oc : ossComponents) {
 			oc.setReferenceId(prjId);
-			String ossVersion = oc.getOssVersion();
-			if (ossVersion.equals("-")) {
+			String ossVersion = avoidNull(oc.getOssVersion());
+			if (!isEmpty(ossVersion) && ossVersion.equals("-")) {
 				ossVersion = "";
 			}
 			String key = (oc.getOssName() + "_" + ossVersion + "_" + oc.getCveId()).toUpperCase();
