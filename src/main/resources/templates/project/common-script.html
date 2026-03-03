@@ -3113,10 +3113,12 @@ var com_fn = {
 				if (data) {
 					bom_fn.beforeSave(true);
 				} else {
+					loadingIden.hide();
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			},
 			error : function(){
+				loadingIden.hide();
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
