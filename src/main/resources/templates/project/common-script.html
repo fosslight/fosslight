@@ -3065,6 +3065,8 @@ var com_fn = {
 		});
 	},
 	partnerLoadToList : function () {
+		loadingIden.show();
+		
 		var data = $("#_threeSearch2list").jqGrid("getRowData");
 		var selrow = $('#_threeSearch1list').jqGrid('getGridParam', "selrow");
 		var listData = $('#_threeSearch1list').jqGrid('getRowData',selrow);
@@ -3518,11 +3520,10 @@ var com_fn = {
 			async : false,
 			contentType : 'application/json',
 			success: function(data) {
-				loadingIden.hide();
-				
 				if (data.isValid) {
 					bom_fn.beforeSave(true);
 				} else {
+					loadingIden.hide();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 			},
