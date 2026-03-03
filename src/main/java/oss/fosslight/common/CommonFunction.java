@@ -47,6 +47,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -1249,12 +1250,12 @@ public class CommonFunction extends CoTopComponent {
 
 		ProjectIdentification gridBean;
 		ProjectIdentification gridLicenseBean;
-		long timeSeed = System.currentTimeMillis() % 1000000;
+		int rNum = ThreadLocalRandom.current().nextInt(100000, 1000000);
 		int keyCnt = 1;
 		
 		for (OssComponents bean : reportData) {
 			gridBean = new ProjectIdentification();
-			gridBean.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + fileSeq + "f" + timeSeed + keyCnt++);
+			gridBean.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + fileSeq + "f" + rNum + keyCnt++);
 			gridBean.setComponentId(bean.getComponentId());
 			gridBean.setReferenceId(bean.getReferenceId());
 			gridBean.setReferenceDiv(bean.getReferenceDiv());
