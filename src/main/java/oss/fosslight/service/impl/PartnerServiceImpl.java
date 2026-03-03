@@ -21,6 +21,7 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -71,7 +72,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Autowired private ProjectService projectService;
 	@Autowired private FileService fileService;
 	@Autowired private OssService ossService;
-	@Autowired VulnerabilityService vulnerabilityService;
+	@Autowired @Lazy VulnerabilityService vulnerabilityService;
 	@Autowired CommentService commentService;
 	@Autowired private T2UserService t2UserService;
 

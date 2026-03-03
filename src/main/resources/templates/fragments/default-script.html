@@ -18,6 +18,6 @@
 	<script src="//cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/js/adminlte.min.js"></script>
 	<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script>
 	<script th:src="@{/js/basic.js}"></script>
-	<script th:if="${@CommonFunction.isAdmin()}" th:src="@{/js/fl-agent.js}"></script>
+	<script th:if="${@CommonFunction.isAdmin() and @environment.getProperty('fosslight.agent.url') != null}" th:src="@{/js/fl-agent.js}"></script>
 </th:block>
 </html>

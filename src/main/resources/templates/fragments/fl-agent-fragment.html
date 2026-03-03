@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <th:block th:fragment="flAgentFragment">
-    <!-- FOSSLight Hub Agent right sidebar (common fragment) - Admin Only -->
-    <div sec:authorize="hasRole('ROLE_ADMIN')">
+    <!-- FOSSLight Hub Agent right sidebar (common fragment) - Admin Only & Agent Server Configured -->
+    <div sec:authorize="hasRole('ROLE_ADMIN')" th:if="${@environment.getProperty('fosslight.agent.url') != null}">
         <div class="fl-agent-sidebar-overlay" id="flAgentSidebarOverlay"></div>
     <div class="fl-agent-sidebar" id="flAgentSidebar">
         <div class="fl-agent-sidebar-header">
