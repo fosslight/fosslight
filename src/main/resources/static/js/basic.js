@@ -4147,69 +4147,69 @@ function optimizeGridSizeAdjustmentPage() {
         } 
     }
     
-    // 2. Adjust the width of inner gird if it exists -> size of the inner grid is x 0.6 that of the tab-pane (verification.html)
-     let innerJqgirdSetElement = $(".tab-pane.active .card-body");
-     if (innerJqgirdSetElement.length > 0) {
-        let innerJqgirdSetWidth = innerJqgirdSetElement.width()*0.6;
+    // 2. Adjust the width of inner grid if it exists -> size of the inner grid is x 0.6 that of the tab-pane (verification.html)
+     let innerJqgridSetElement = $(".tab-pane.active .card-body");
+     if (innerJqgridSetElement.length > 0) {
+        let innerJqgridSetWidth = innerJqgridSetElement.width()*0.6;
 		
         let innerJqGridsIds = [];
-        innerJqgirdSetElement.find('table').each(function() {
+        innerJqgridSetElement.find('table').each(function() {
             innerJqGridsIds.push($(this).attr("id"));
         });
 
         if (innerJqGridsIds.length == 0) {
-            innerJqgirdSetElement.find('table').each(function() {
+            innerJqgridSetElement.find('table').each(function() {
                 innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
             });
         }
 
         if (innerJqGridsIds.length > 0) {
             innerJqGridsIds.forEach(function(ids) {
-                $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+                $("#" + ids).jqGrid('setGridWidth', innerJqgridSetWidth);
             });
         }
     }
     
-    innerJqgirdSetElement = $(".tab-pane.active .exception-grid-view");
-    if (innerJqgirdSetElement.length > 0) {
-        let innerJqgirdSetWidth = innerJqgirdSetElement.width()*0.7;
+    innerJqgridSetElement = $(".tab-pane.active .exception-grid-view");
+    if (innerJqgridSetElement.length > 0) {
+        let innerJqgridSetWidth = innerJqgridSetElement.width()*0.7;
 		
         let innerJqGridsIds = [];
-        innerJqgirdSetElement.find('table').each(function() {
+        innerJqgridSetElement.find('table').each(function() {
             innerJqGridsIds.push($(this).attr("id"));
         });
 
         if (innerJqGridsIds.length == 0) {
-            innerJqgirdSetElement.find('table').each(function() {
+            innerJqgridSetElement.find('table').each(function() {
                 innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
             });
         }
 
         if (innerJqGridsIds.length > 0) {
             innerJqGridsIds.forEach(function(ids) {
-				if (typeof ids !== "undefined") $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+				if (typeof ids !== "undefined") $("#" + ids).jqGrid('setGridWidth', innerJqgridSetWidth);
             });
         }
     }
     
-    innerJqgirdSetElement = $(".tab-pane.active .exception-grid-edit");
-    if (innerJqgirdSetElement.length > 0) {
-        let innerJqgirdSetWidth = innerJqgirdSetElement.width();
+    innerJqgridSetElement = $(".tab-pane.active .exception-grid-edit");
+    if (innerJqgridSetElement.length > 0) {
+        let innerJqgridSetWidth = innerJqgridSetElement.width();
 		
         let innerJqGridsIds = [];
-        innerJqgirdSetElement.find('table').each(function() {
+        innerJqgridSetElement.find('table').each(function() {
             innerJqGridsIds.push($(this).attr("id"));
         });
 
         if (innerJqGridsIds.length == 0) {
-            innerJqgirdSetElement.find('table').each(function() {
+            innerJqgridSetElement.find('table').each(function() {
                 innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
             });
         }
 
         if (innerJqGridsIds.length > 0) {
             innerJqGridsIds.forEach(function(ids) {
-				if (typeof ids !== "undefined") $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+				if (typeof ids !== "undefined") $("#" + ids).jqGrid('setGridWidth', innerJqgridSetWidth);
             });
         }
     }
@@ -4308,8 +4308,8 @@ function optimizeGridSizeAdjustmentMultiPage() {
    
     // 3. Adjust the width of small-sized grids like Search / Detail / loaded list when .topper-content exists.
     if (topperContent.length > 0) {
-        let innerJqgirdSetElement = $(".tab-pane.active .card-body");
-        let innerJqgirdSetWidth = innerJqgirdSetElement.width() - 22;
+        let innerJqgridSetElement = $(".tab-pane.active .card-body");
+        let innerJqgridSetWidth = innerJqgridSetElement.width() - 22;
         let activeNaviItemId = $(".nav-link.active").attr('aria-controls');
         let activeTabPaneElement = $("#" + activeNaviItemId);
 
@@ -4327,7 +4327,7 @@ function optimizeGridSizeAdjustmentMultiPage() {
 
         if (innerJqGridsIds.length > 0) {
             innerJqGridsIds.forEach(function(ids) {
-                $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+                $("#" + ids).jqGrid('setGridWidth', innerJqgridSetWidth);
             });
         }
     }

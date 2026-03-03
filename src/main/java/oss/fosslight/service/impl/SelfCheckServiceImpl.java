@@ -117,7 +117,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if (!StringUtil.isEmpty(ossId)) {
 				list = selfCheckMapper.selectUnlimitedOssComponentBomList(project);
 			} else {
-				Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 				list = selfCheckMapper.selectProjectList(project);
 				
 				if (list != null) {
@@ -134,7 +133,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							list = sortedList;
 						}
 					}
-					List<String> customNvdMaxScoreInfoList = new ArrayList<>();
 					// 코드변환처리
 					for (Project bean : list) {
 						// DISTRIBUTION Android Flag
@@ -157,32 +155,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							bean.setOsType(bean.getOsTypeEtc());
 						}else{
 							bean.setOsType(CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, bean.getOsType()));
-						}
-						
-						List<String> nvdMaxScoreInfoList = selfCheckMapper.findIdentificationMaxNvdInfo(bean.getPrjId());
-						List<String> nvdMaxScoreInfoList2 = selfCheckMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId());
-						
-						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
-							if (conversionCveInfo != null) {
-								customNvdMaxScoreInfoList.add(conversionCveInfo);
-							}
-						}
-						
-						if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
-							customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
-						}
-						
-						if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
-							if (conversionCveInfo != null) {
-								String[] conversionCveData = conversionCveInfo.split("\\@");
-								bean.setCvssScore(conversionCveData[3]);
-								bean.setCveId(conversionCveData[4]);
-								bean.setVulnYn(CoConstDef.FLAG_YES);
-							}
-							
-							customNvdMaxScoreInfoList.clear();
 						}
 					}
 				}
@@ -645,6 +617,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_SELF_COMPONENT_ID);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
 	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
@@ -891,57 +864,31 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		{
 			// vulnerability max score를 저장
-			double max_cvss_score = 0;
-			String max_vuln_ossName = null;
-			String max_vuln_ossVersion = null;
-			List<ProjectIdentification> _ossList = selfCheckMapper.selectIdentificationGridList(prj);
+			double maxCvssScore = 0.0;
+			ProjectIdentification identification = new ProjectIdentification();
+			identification.setReferenceId(prj.getReferenceId());
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			Map<String, Object> ossMap = getIdentificationGridList(identification);
+			List<ProjectIdentification> _ossList = ossMap.containsKey("mainData") ? (List<ProjectIdentification>) ossMap.get("mainData") : null;
 			
 			if (_ossList != null) {
-				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 				for (ProjectIdentification targetBean : _ossList) {
-					if (targetBean != null && !CoConstDef.FLAG_YES.equals(avoidNull(targetBean.getExcludeYn())) && !isEmpty(targetBean.getOssName()) && !targetBean.getOssName().equals("-")) {
-						String key = targetBean.getOssName() + "_" + targetBean.getOssVersion();
-						double _currentSccore = 0;
-						if (!vulnerabilityInfoMap.containsKey(key.toUpperCase()) && CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
-							OssMaster ossMaster = CoCodeManager.OSS_INFO_UPPER.get(key.toUpperCase());
-							if (isEmpty(ossMaster.getOssVersion())) {
-								ossMaster.setOssVersion("-");
-							}
-							OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
-							if (om != null && !isEmpty(om.getCvssScore())) {
-								_currentSccore = Double.parseDouble(om.getCvssScore());
-								if (!isEmpty(ossMaster.getCvssScore())) {
-									max_cvss_score = Double.parseDouble(ossMaster.getCvssScore());
-								}
-								vulnerabilityInfoMap.put(key.toUpperCase(), om);
-							}
-						}
-						if (Double.compare(_currentSccore, max_cvss_score) > 0) {
-							max_cvss_score = _currentSccore;
-							max_vuln_ossName = targetBean.getOssName();
-							max_vuln_ossVersion = targetBean.getOssVersion();
-						}
-					}
+				    String scoreStr = targetBean.getCvssScore();
+				    if (!isEmpty(scoreStr)) {
+				        double currentBeanScore = Double.parseDouble(scoreStr);
+				        if (currentBeanScore > maxCvssScore) {
+				            maxCvssScore = currentBeanScore;
+				        }
+				    }
 				}
-				vulnerabilityInfoMap.clear();
 			}
 			
-			Project vnlnUpdBean = new Project();
-			
-			if (!isEmpty(max_vuln_ossName)) {
-				vnlnUpdBean.setOssName(max_vuln_ossName);
-				vnlnUpdBean.setOssVersion(avoidNull(max_vuln_ossVersion));
-				if (max_vuln_ossName.contains(" ")) {
-					vnlnUpdBean.setOssNameTemp(max_vuln_ossName.replaceAll(" ", "_"));
-				}
-				vnlnUpdBean = selfCheckMapper.getMaxVulnByOssName(vnlnUpdBean);				
-			}
-			
-			vnlnUpdBean.setUpdVuln(CoConstDef.FLAG_YES);
-			vnlnUpdBean.setPrjId(project.getPrjId());
-			vnlnUpdBean.setModifier(vnlnUpdBean.getLoginUserName());
-			
-			selfCheckMapper.updateProjectMaster(vnlnUpdBean);
+			Project vulnUpdBean = new Project();
+			vulnUpdBean.setCvssScore(String.valueOf(maxCvssScore));
+			vulnUpdBean.setUpdVuln(CoConstDef.FLAG_YES);
+			vulnUpdBean.setPrjId(project.getPrjId());
+			vulnUpdBean.setModifier(vulnUpdBean.getLoginUserName());
+			selfCheckMapper.updateProjectMaster(vulnUpdBean);
 		}
 	}
 	

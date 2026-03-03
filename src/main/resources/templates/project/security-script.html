@@ -303,41 +303,41 @@ var sec_com_fn = {
 	},
 	bulkEdit : function(tab){
     	var gridList;
- 		var targetGird = "";
+ 		var targetGrid = "";
       
       	switch(tab){
           	case 'total' : 
-              	gridList = $("#totalList"); targetGird = "totalList";
+              	gridList = $("#totalList"); targetGrid = "totalList";
               	break;
           	case 'fixed' : 
-              	gridList = $("#fixedList"); targetGird = "fixedList";
+              	gridList = $("#fixedList"); targetGrid = "fixedList";
               	break;
           	case 'notFixed' : 
-              	gridList = $("#notFixedList"); targetGird = "notFixedList";
+              	gridList = $("#notFixedList"); targetGrid = "notFixedList";
               	break;
       	}
 
       	var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
       	var rowCheckedArr = [];
-      	var rowGirdIdArr = [];
+      	var rowGridIdArr = [];
       	var versionEmptyFlag = false;
       
       	for(var i=0; i<selarrrow.length; i++){
-      		if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+      		if($("input:checkbox[id='jqg_" + targetGrid + "_" + selarrrow[i] + "']").is(":checked")){
       			var rowData = gridList.jqGrid("getRowData", selarrrow[i]);
       			if ("" != rowData["ossVersion"]) {
       				rowCheckedArr.push(selarrrow[i]);
-      				rowGirdIdArr.push(rowData["gridId"]);
+      				rowGridIdArr.push(rowData["gridId"]);
       			}
 			}
  		}
 		
       	if (rowCheckedArr.length > 0) {
-          	fn_grid_com.totalGridSaveMode(targetGird);
+          	fn_grid_com.totalGridSaveMode(targetGrid);
           	
           	$("#secBulkEditForm > input[name=rowId]").val(rowCheckedArr);
-      		$("#secBulkEditForm > input[name=gridId]").val(rowGirdIdArr);
-			$("#secBulkEditForm > input[name=target]").val(targetGird);
+      		$("#secBulkEditForm > input[name=gridId]").val(rowGridIdArr);
+			$("#secBulkEditForm > input[name=target]").val(targetGrid);
 			
 			$.ajax({
 				url: "/project/secBulkEditPopup",
@@ -1072,7 +1072,7 @@ var total = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false};
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false, sortable : true, sorttype: 'float'};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false};
 		colModelArr.push(colModelObj);
@@ -1371,7 +1371,7 @@ var fullDiscovered = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false, template: searchStringOptions};
 			colModelArr.push(colModelObj);
-			colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false, template: searchStringOptions};
+			colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false, template: searchStringOptions, sortable : true, sorttype: 'float'};
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false, template: searchStringOptions};
 			colModelArr.push(colModelObj);

@@ -305,13 +305,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void checkIfVulnerabilityResolutionIsFixed(Project bean) {
 		String fixedCvssScore = "";
 		String notFixedCvssScore = "";
 		int fixedCheckCnt = 0;
-		List<OssComponents> securityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
+		Map<String, Object> result = getSecurityGridList(bean, true);
+		List<OssComponents> securityList = (List<OssComponents>) result.get("fullDiscoveredList");
 		
-		if (securityList != null && !securityList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(securityList)) {
 			int emptyVersionCnt = securityList.stream().filter(e -> isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
 			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
 			
@@ -320,21 +322,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					fixedCheckCnt++;
 					continue;
 				} else {
-					if (!isEmpty(notFixedCvssScore)) {
+					if (!isEmpty(notFixedCvssScore) && !isEmpty(oc.getCvssScore())) {
 						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(notFixedCvssScore)) > 0) {
 							notFixedCvssScore = oc.getCvssScore();
 						}
 					} else {
-						notFixedCvssScore = oc.getCvssScore();
+						if (!isEmpty(oc.getCvssScore())) {
+							notFixedCvssScore = oc.getCvssScore();
+						}
 					}
 				}
 				
 				if (!oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
-					if (isEmpty(fixedCvssScore)) {
+					if (isEmpty(fixedCvssScore) && !isEmpty(oc.getCvssScore())) {
 						fixedCvssScore = oc.getCvssScore();
 					} else {
-						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(fixedCvssScore)) > 0) {
-							fixedCvssScore = oc.getCvssScore();
+						if (!isEmpty(fixedCvssScore) && !isEmpty(oc.getCvssScore())) {
+							if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(fixedCvssScore)) > 0) {
+								fixedCvssScore = oc.getCvssScore();
+							}
 						}
 					}
 				}
@@ -1417,13 +1423,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		    String namePrefix = (ossName + "_").toUpperCase();
 		    
 		    OssMaster ossMaster = null;
-	        for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
-	            if (entry.getKey().startsWith(namePrefix)) {
-	                ossMaster = entry.getValue();
-	                ossMaster.setOssVersionAliases(null);
-	                break;
-	            }
-	        }
+		    if (isEmpty(ossVersion)) {
+		    	for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
+		            if (entry.getKey().startsWith(namePrefix)) {
+		                ossMaster = entry.getValue();
+		                ossMaster.setOssVersionAliases(null);
+		                break;
+		            }
+		        }
+		    }
 		    
 	        if (ossMaster != null) {
 	        	return ossMaster;
@@ -2611,8 +2619,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	@Transactional
-	public void registSrcOss(List<ProjectIdentification> ossComponent,
-			List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
+	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
 		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
 		if (ossComponent.size()==0){
 			Project projectSubStatus = new Project();
@@ -2642,6 +2649,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			projectSubStatus.setReferenceDiv(refDiv);
 			projectMapper.updateProjectMaster(projectSubStatus);
+		} else {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+				project.setIdentificationSubStatusDep(CoConstDef.FLAG_YES);
+			} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+				project.setIdentificationSubStatusSrc(CoConstDef.FLAG_YES);
+			} else if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(refDiv)) {
+				project.setIdentificationSubStatusBin(CoConstDef.FLAG_YES);
+			} else {
+				project.setIdentificationSubStatusAndroid(CoConstDef.FLAG_YES);
+			}
 		}
 		
 		ossComponent = convertOssNickName(ossComponent);
@@ -3994,10 +4011,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
         List<ProjectIdentification> duplicatedOldVulnInfoList = null;
         
         if (!includeVulnInfoNewBomList.isEmpty()) {
-            duplicatedNewVulnInfoList = includeVulnInfoNewBomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
+            duplicatedNewVulnInfoList = includeVulnInfoNewBomList.stream()
+            								.filter(p -> !isEmpty(p.getOssName()) && !p.getOssName().trim().equals("-"))
+            								.filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
         }
         if (!includeVulnInfoOldBomList.isEmpty()) {
-            duplicatedOldVulnInfoList = includeVulnInfoOldBomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
+            duplicatedOldVulnInfoList = includeVulnInfoOldBomList.stream()
+            								.filter(p -> !isEmpty(p.getOssName()) && !p.getOssName().trim().equals("-"))
+            								.filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
         }
         if (duplicatedNewVulnInfoList != null && duplicatedOldVulnInfoList != null) {
             List<ProjectIdentification> filteredAddVulnDataList = includeVulnInfoNewBomList
@@ -7478,7 +7499,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	}
 	
 	@Override
-	public Map<String, Object> getSecurityGridList(Project project, boolean isVulnPopup) {
+	public Map<String, Object> getSecurityGridList(Project project, boolean isResolveDataEnabled) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		List<OssComponents> totalList = new ArrayList<>();
 		List<OssComponents> fullDiscoveredList = new ArrayList<>();
@@ -7514,7 +7535,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		if (!isEmpty(project.getOssVersion())) {
 			identification.setOssVersion(project.getOssVersion());
 		}
-		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
 		
 		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
 		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
@@ -7522,13 +7542,28 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		} else {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 		}
-		if (!isVulnPopup) {
-			list = projectMapper.selectSecurityListForProject(identification);
-		}
+		
 		identification.setStandardScore(Float.valueOf("0.1"));
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
 		if (fullList != null && !fullList.isEmpty()) {
+			if (!isResolveDataEnabled) {
+				list = fullList.stream()
+		                .filter(oss -> {
+		                    String scoreStr = oss.getCvssScore();
+		                    if (scoreStr == null || scoreStr.isEmpty()) {
+		                        return false;
+		                    }
+		                    try {
+		                        double score = Double.parseDouble(scoreStr);
+		                        return score >= Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE));
+		                    } catch (NumberFormatException e) {
+		                        return false;
+		                    }
+		                })
+		                .collect(Collectors.toList());
+			}
+			
 			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
 			if (securityDatalist != null && !securityDatalist.isEmpty()) {
 				for (OssComponents oss : securityDatalist) {
@@ -7626,10 +7661,10 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
 					oc.setOssName(pi.getOssName());
 					oc.setOssVersion(pi.getOssVersion());
+					oc.setCvssScore(pi.getCvssScore());
 					
 					if (!activateFlag) {
 						oc.setCveId(pi.getCveId());
-						oc.setCvssScore(pi.getCvssScore());
 						oc.setPublDate(pi.getPublDate());
 					}
 					
@@ -7778,7 +7813,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						}
 					}
 					
-					if (!activateFlag && !isVulnPopup) {
+					if (!activateFlag && !isResolveDataEnabled) {
 						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
 					}
 					fullDiscoveredList.add(oc);
@@ -7789,7 +7824,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			checkVulnScore.clear();
 			
-			if (!isVulnPopup && CollectionUtils.isNotEmpty(list)) {
+			if (!isResolveDataEnabled && CollectionUtils.isNotEmpty(list)) {
 				gridIdx = 1;
 				caseWithoutVersionKey.clear();
 				deduplicatedkey.clear();
@@ -7993,7 +8028,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			versionsForCpeNames.clear();
 		}
 		
-		if (!isVulnPopup) {
+		if (!isResolveDataEnabled) {
 			if (CollectionUtils.isNotEmpty(checkOssNameList)) {
 				checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
 				String warningMsg = getMessage("msg.project.security.check.version");
@@ -8123,8 +8158,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		for (OssComponents oc : ossComponents) {
 			oc.setReferenceId(prjId);
-			String ossVersion = oc.getOssVersion();
-			if (ossVersion.equals("-")) {
+			String ossVersion = avoidNull(oc.getOssVersion());
+			if (!isEmpty(ossVersion) && ossVersion.equals("-")) {
 				ossVersion = "";
 			}
 			String key = (oc.getOssName() + "_" + ossVersion + "_" + oc.getCveId()).toUpperCase();
@@ -8684,14 +8719,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		// check project notice
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project = getProjectDetail(project);
 		project.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD)));
-		
-		if (CoConstDef.FLAG_NO.equals(project.getAndroidFlag())) {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		} else {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-		}
 		
 		// set vulnerability resolution
 		checkIfVulnerabilityResolutionIsFixed(project);
@@ -9494,7 +9522,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			if (CollectionUtils.isNotEmpty(partnerList)) {
 				for (PartnerMaster bean : partnerList) {
 					int existCnt = projectMapper.checkAddProject(project.getPrjId(), bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-					String softwareName = bean.getSoftwareName();
+					String softwareName = bean.getPartnerName() + " - " + bean.getSoftwareName();
 					if (!isEmpty(bean.getSoftwareVersion())) {
 						softwareName += "(" + bean.getSoftwareVersion() + ")";
 					}
