@@ -100,6 +100,14 @@
     			<when test="@oss.fosslight.util.StringUtil@equals('PRIORITY', sidx)">
     				ORDER BY PRIORITY
     			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sidx)">
+    				ORDER BY (
+				        CASE 
+				            WHEN IFNULL(CVSS_SCORE_MAX, '') = '' OR CVSS_SCORE_MAX = 'N/A' THEN -1
+				            ELSE CAST(CVSS_SCORE_MAX AS DECIMAL(10,1))
+				        END
+				    )
+    			</when>
     		</choose>
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
     			<choose>
