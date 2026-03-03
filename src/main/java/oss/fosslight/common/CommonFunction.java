@@ -1249,11 +1249,12 @@ public class CommonFunction extends CoTopComponent {
 
 		ProjectIdentification gridBean;
 		ProjectIdentification gridLicenseBean;
+		long timeSeed = System.currentTimeMillis() % 1000000;
 		int keyCnt = 1;
 		
 		for (OssComponents bean : reportData) {
 			gridBean = new ProjectIdentification();
-			gridBean.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX+fileSeq +"f"+keyCnt++);
+			gridBean.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + fileSeq + "f" + timeSeed + keyCnt++);
 			gridBean.setComponentId(bean.getComponentId());
 			gridBean.setReferenceId(bean.getReferenceId());
 			gridBean.setReferenceDiv(bean.getReferenceDiv());
