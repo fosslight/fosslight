@@ -479,8 +479,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             String type = "";
 
             if ("Y".equals(saveFlag)) {
-//                    apiProjectService.registBom(prjId, mergeSaveFlag);
                 projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
+                projectService.updateSecurityDataForProject(prjId);
             }
 
             Project project = new Project();
@@ -542,6 +542,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 resultMap = apiProjectService.getBomExportJson(prjId);
                 if ("Y".equals(saveFlag)) {
                     projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
+                    projectService.updateSecurityDataForProject(prjId);
                 }
             }
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
@@ -812,6 +813,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if(sbomSave.equals(CoConstDef.FLAG_YES)) {
                 projectService.registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
+                projectService.updateSecurityDataForProject(prjId);
             }
 
             if (resultMap.isEmpty()) {
