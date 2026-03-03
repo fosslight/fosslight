@@ -1072,7 +1072,7 @@ var total = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false};
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false, sortable : true, sorttype: 'float'};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false};
 		colModelArr.push(colModelObj);
@@ -1371,7 +1371,7 @@ var fullDiscovered = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false, template: searchStringOptions};
 			colModelArr.push(colModelObj);
-			colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false, template: searchStringOptions};
+			colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false, template: searchStringOptions, sortable : true, sorttype: 'float'};
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false, template: searchStringOptions};
 			colModelArr.push(colModelObj);
