@@ -65,10 +65,12 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
 (function(){
   'use strict';
 
-  // Check if current page is a license page
+  // Check if current page is a license detail page (not list page)
   function isLicensePage() {
-    const currentPath = window.location.pathname;
-    return currentPath.toLowerCase().includes('license');
+    const currentPath = window.location.pathname.toLowerCase();
+    // Show agent only on license detail pages (/license/edit), not on list page (/license/list)
+    return currentPath.includes('/license/') && 
+           (currentPath.includes('/edit') || currentPath.includes('/view'));
   }
 
   // Initialize after DOM is ready to ensure fragment elements exist (fix: scripts in head)
@@ -136,7 +138,15 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
           if (overlay) {
             overlay.style.display = 'none';
           }
+          if (toggle) {
+            toggle.style.display = 'none';
+          }
         } else {
+          console.log('[fl-agent] Navigated back to license page, restoring agent UI');
+          // Restore any inline hides applied on non-license routes
+          if (sidebar) sidebar.style.display = '';
+          if (overlay) overlay.style.display = '';
+          if (toggle) toggle.style.display = '';
           resetToGuideMode();
         }
       }
@@ -399,12 +409,14 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         const sb = document.getElementById('flAgentSidebar');
         const to = document.getElementById('flAgentSidebarToggle');
         const ov = document.getElementById('flAgentSidebarOverlay');
+        const cb = document.getElementById('flAgentSidebarClose');
         if (sb && to && ov) {
           console.log('[fl-agent] detected fragment insertion via MutationObserver');
           // Update stale closure variables with fresh element references
           sidebar = sb;
           toggle = to;
           overlay = ov;
+          closeBtn = cb;
           // Re-attach event listeners to fresh elements
           if(toggle){
             toggle.addEventListener('click', function(e){
