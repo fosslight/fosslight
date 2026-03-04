@@ -75,16 +75,22 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
   document.addEventListener('DOMContentLoaded', function(){
     console.log('[fl-agent] DOMContentLoaded - init');
     
+    // Resolve elements first so non-license routes can hide the fragment safely
+    let overlay = document.getElementById('flAgentSidebarOverlay');
+    let sidebar = document.getElementById('flAgentSidebar');
+    const toggleBtn = document.getElementById('flAgentSidebarToggle');
+    
     // Only initialize on license pages
     if (!isLicensePage()) {
-      console.log('[fl-agent] Not a license page, skipping agent initialization');
+      console.log('[fl-agent] Not a license page, hiding agent UI');
+      // Hide agent UI on non-license pages
+      if (sidebar) sidebar.style.display = 'none';
+      if (toggleBtn) toggleBtn.style.display = 'none';
+      if (overlay) overlay.style.display = 'none';
       return;
     }
     
     console.log('[fl-agent] License page detected, initializing agent');
-    
-    const overlay = document.getElementById('flAgentSidebarOverlay');
-    const sidebar = document.getElementById('flAgentSidebar');
     
     // Hide SBOM button on page load (default state)
     const sbomAnalysisBtn = document.getElementById('flAgentSbomAnalysisBtn');
@@ -144,21 +150,21 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
       checkUrlChange();
     });
 
-    const toggle = document.getElementById('flAgentSidebarToggle');
-    const closeBtn = document.getElementById('flAgentSidebarClose');
+    let toggle = document.getElementById('flAgentSidebarToggle');
+    let closeBtn = document.getElementById('flAgentSidebarClose');
 
     function openSidebar(){
       if(!sidebar || !toggle || !overlay) return;
   console.log('[fl-agent] openSidebar called');
   sidebar.classList.remove('closed');
   toggle.classList.add('open');
-  overlay.style.display = 'block';
+  overlay.classList.add('show');
     }
     function closeSidebar(){
       if(!sidebar || !toggle || !overlay) return;
       sidebar.classList.add('closed');
       toggle.classList.remove('open');
-      overlay.style.display = 'none';
+      overlay.classList.remove('show');
     }
 
     if(toggle){
@@ -235,7 +241,11 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
             console.log('[fl-agent] iframe:', iframe);
             if(iframe && iframe.contentWindow) {
               console.log('[fl-agent] Sending postMessage to iframe');
-              iframe.contentWindow.postMessage({type: 'sbomAnalysisRequest'}, window.location.origin);
+              // Send message in basic.js format: stringified JSON with action field
+              const message = JSON.stringify({
+                action: 'sbomAnalysisRequest'
+              });
+              iframe.contentWindow.postMessage(message, window.location.origin);
             } else {
               console.error('[fl-agent] iframe or iframe.contentWindow not found');
             }
@@ -499,9 +509,17 @@ window.fetchSbomGuide = function(ossName, ossVersion, message, buttonElement) {
         return;
       }
       
-      // Process valid message
-      if (event.data && event.data.type === 'sbomAnalysisResult') {
-        renderSbomAnalysisResult(event.data.data);
+      // Process valid message - expecting stringified JSON with action field
+      if (event.data && typeof event.data === 'string') {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.action === 'sbomAnalysisResult') {
+            console.log('[fl-agent] Received SBOM analysis result:', data.data);
+            renderSbomAnalysisResult(data.data);
+          }
+        } catch (err) {
+          console.warn('[fl-agent] Failed to parse message data:', err);
+        }
       }
     });
 
