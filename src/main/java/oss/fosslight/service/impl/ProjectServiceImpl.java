@@ -7507,7 +7507,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		List<String> deduplicatedkey = new ArrayList<>();
 		List<String> caseWithoutVersionKey = new ArrayList<>();
 		List<String> checkOssNameList = new ArrayList<>();
-		List<ProjectIdentification> list = null;
 		List<ProjectIdentification> fullList = null;
 		
 		List<String> checkVulnScore = new ArrayList<>();
@@ -7532,9 +7531,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		if (!isEmpty(project.getOssName())) {
 			identification.setOssName(project.getOssName());
 		}
-		if (!isEmpty(project.getOssVersion())) {
-			identification.setOssVersion(project.getOssVersion());
-		}
+		identification.setOssVersion(avoidNull(project.getOssVersion()));
 		
 		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
 		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
@@ -7543,31 +7540,18 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 		}
 		
-		identification.setStandardScore(Float.valueOf("0.1"));
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
 		if (fullList != null && !fullList.isEmpty()) {
-			if (!isResolveDataEnabled) {
-				list = fullList.stream()
-		                .filter(oss -> {
-		                    String scoreStr = oss.getCvssScore();
-		                    if (scoreStr == null || scoreStr.isEmpty()) {
-		                        return false;
-		                    }
-		                    try {
-		                        double score = Double.parseDouble(scoreStr);
-		                        return score >= Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE));
-		                    } catch (NumberFormatException e) {
-		                        return false;
-		                    }
-		                })
-		                .collect(Collectors.toList());
-			}
-			
 			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
 			if (securityDatalist != null && !securityDatalist.isEmpty()) {
 				for (OssComponents oss : securityDatalist) {
-					String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+					String key = "";
+					if (!isEmpty(oss.getOssVersion())) {
+						key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+					} else {
+						key = (oss.getOssName() + "_" + avoidNull(oss.getOssVersion()) + "_" + oss.getCvssScore()).toUpperCase();
+					}
 					securityGridMap.put(key, oss);
 				}
 			}
@@ -7645,7 +7629,10 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				if (!deduplicatedkey.contains(key)) {
 					deduplicatedkey.add(key);
 					
-					if (securityGridMap.containsKey(key)) {
+					if (activateFlag) {
+						String key3 = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion()) + "_" + pi.getCvssScore()).toUpperCase();
+						bean = (OssComponents) securityGridMap.get(key3);
+					} else if (securityGridMap.containsKey(key)) {
 						bean = (OssComponents) securityGridMap.get(key);
 					}
 					
@@ -7823,212 +7810,27 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				}
 			}
 			checkVulnScore.clear();
-			
-			if (!isResolveDataEnabled && CollectionUtils.isNotEmpty(list)) {
-				gridIdx = 1;
-				caseWithoutVersionKey.clear();
-				deduplicatedkey.clear();
-				
-				for (ProjectIdentification pi : list) {
-					activateFlag = false;
-					
-					if (isEmpty(pi.getOssVersion())) {
-						activateFlag = true;
-						String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
-						if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
-							caseWithoutVersionKey.add(keyWithoutVersion);
-						} else {
-							continue;
-						}
-					}
-					
-					String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
-					String key2 = (pi.getCveId() + "_" + pi.getOssName().replaceAll(" ", "_")).toUpperCase();
-					
-					if (!deduplicatedkey.contains(key)) {
-						deduplicatedkey.add(key);
-						
-						if (securityGridMap.containsKey(key)) {
-							bean = (OssComponents) securityGridMap.get(key);
-						}
-						
-						if (activateFlag) {
-							checkOssNameList.add(pi.getOssName());
-							vulnerabilityLink = CommonFunction.getProperty("server.domain");
-							vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
-						} else {
-							vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + pi.getCveId();
-						}
-						
-						oc = new OssComponents();
-						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
-						oc.setOssId(pi.getOssId());
-						oc.setOssName(pi.getOssName());
-						oc.setOssVersion(pi.getOssVersion());
-						
-						if (!activateFlag) {
-							oc.setCveId(pi.getCveId());
-							oc.setCvssScore(pi.getCvssScore());
-							oc.setPublDate(pi.getPublDate());
-						}
-						
-						oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-						oc.setVulnerabilityLink(vulnerabilityLink);
-						oc.setVulnerabilityResolution("Unresolved");
-						
-						if (bean != null) {
-							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-							oc.setSecurityComments(bean.getSecurityComments());
-						}
-						
-						if (!activateFlag) {
-							if (cpeInfoMap.containsKey(key2)) {
-								List<Map<String, Object>> matchCpeInfoList = cpeInfoMap.get(key2);
-								String criteria = "";
-								String verStartEndRange = "";
-								String checkUrl = "";
-								
-								boolean emptyFlag = false;
-								for (Map<String, Object> cpeInfo : matchCpeInfoList) {
-//									Map<String, Object> paramMap = new HashMap<>();
-//									paramMap = cpeInfo;
-//									if (!paramMap.containsKey("verStartInc")) {
-//										paramMap.put("verStartInc", "");
-//									}
-//									if (!paramMap.containsKey("verEndInc")) {
-//										paramMap.put("verEndInc", "");
-//									}
-//									if (!paramMap.containsKey("verStartExc")) {
-//										paramMap.put("verStartExc", "");
-//									}
-//									if (!paramMap.containsKey("verEndExc")) {
-//										paramMap.put("verEndExc", "");
-//									}
-//									if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
-//										continue;
-//									}
-									
-									if (cpeInfo.containsKey("criteria")) {
-										String cpeInfoCriteria = (String) cpeInfo.get("criteria");
-										String[] url = cpeInfoCriteria.split(":");
-										if (!emptyFlag) {
-											checkUrl = cpeInfoCriteria;
-										}
-										if (!criteria.contains(cpeInfoCriteria) && url[5].equals("*") || url[5].equals(oc.getOssVersion())) {
-											criteria += cpeInfoCriteria + ",";
-										}
-									}
-									if (cpeInfo.containsKey("verStartInc")) {
-										verStartEndRange += "From (including) : " + (String) cpeInfo.get("verStartInc")+"|";
-									}
-									if (cpeInfo.containsKey("verEndInc")) {
-										verStartEndRange += "Up to (including) : " + (String) cpeInfo.get("verEndInc")+"|";
-									}
-									if (cpeInfo.containsKey("verStartExc")) {
-										verStartEndRange += "From (excluding) : " + (String) cpeInfo.get("verStartExc")+"|";
-									}
-									if (cpeInfo.containsKey("verEndExc")) {
-										verStartEndRange += "Up to (excluding) : " + (String) cpeInfo.get("verEndExc")+"|";
-									}
-									
-									emptyFlag = true;
-								}
-								
-								if (!isEmpty(criteria)) {
-									criteria = criteria.substring(0, criteria.length()-1);
-									oc.setCpeName(criteria);
-								} else {
-									if (!isEmpty(checkUrl)) {
-										String[] url = checkUrl.split(":");
-										String changeUrl = "";
-										int i = 0;
-										for (String urlData : url) {
-											if (i == 5) {
-												changeUrl += "*:";
-											} else {
-												changeUrl += urlData + ":";
-											}
-											i++;
-										}
-										changeUrl = changeUrl.substring(0, changeUrl.length()-1);
-										oc.setCpeName(changeUrl);
-									}
-								}
-								
-								if (!isEmpty(verStartEndRange)) {
-									verStartEndRange = verStartEndRange.substring(0, verStartEndRange.length()-1);
-									if (!MapUtils.isEmpty(runningOnWithMap) && runningOnWithMap.containsKey(key2)) {
-										String runningOnWith = "";
-										String[] rows = runningOnWithMap.get(key2).split(",");
-										List<String> deduplicateKey = new ArrayList<>();
-										
-										for (String row : rows) {
-											String[] rowArr = row.split("[|]");
-											String rowStr = rowArr[0];
-											String matchCriteriaId = rowArr[1];
-											
-//											List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-//											if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-											if (versionsForCpeNames.containsKey(matchCriteriaId)) {
-												List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
-												if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-													deduplicateKey.add(rowStr);
-													runningOnWith += rowStr + ",";
-												}
-											}
-										}
-										
-										if (!isEmpty(runningOnWith)) {
-											runningOnWith = runningOnWith.substring(0, runningOnWith.length()-1);
-											verStartEndRange += "|Running on/with " + runningOnWith;
-										}
-									}
-									oc.setVerStartEndRange(verStartEndRange);
-								} else {
-									verStartEndRange = "N/A";
-									if (!MapUtils.isEmpty(runningOnWithMap) && runningOnWithMap.containsKey(key2)) {
-										String runningOnWith = "";
-										String[] rows = runningOnWithMap.get(key2).split(",");
-										List<String> deduplicateKey = new ArrayList<>();
-										
-										for (String row : rows) {
-											String[] rowArr = row.split("[|]");
-											String rowStr = rowArr[0];
-											String matchCriteriaId = rowArr[1];
-											
-//											List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-//											if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-											if (versionsForCpeNames.containsKey(matchCriteriaId)) {
-												List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
-												if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-													deduplicateKey.add(rowStr);
-													runningOnWith += rowStr + ",";
-												}
-											}
-										}
-										
-										if (!isEmpty(runningOnWith)) {
-											runningOnWith = runningOnWith.substring(0, runningOnWith.length()-1);
-											verStartEndRange += "|Running on/with " + runningOnWith;
-										}
-									}
-									oc.setVerStartEndRange(verStartEndRange);
-								}
-							}
-						}
-						
-						totalList.add(oc);
-						
-						bean = null;
-						gridIdx++;
-					}
-				}
-			}
-			
 			versionsForCpeNames.clear();
 		}
 		
 		if (!isResolveDataEnabled) {
+			if (CollectionUtils.isNotEmpty(fullDiscoveredList)) {
+				totalList = fullDiscoveredList.stream()
+								                .filter(oss -> {
+								                    String scoreStr = oss.getCvssScore();
+								                    if (scoreStr == null || scoreStr.isEmpty()) {
+								                        return false;
+								                    }
+								                    try {
+								                        double score = Double.parseDouble(scoreStr);
+								                        return score >= Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE));
+								                    } catch (NumberFormatException e) {
+								                        return false;
+								                    }
+								                })
+								                .collect(Collectors.toList());
+			}
+			
 			if (CollectionUtils.isNotEmpty(checkOssNameList)) {
 				checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
 				String warningMsg = getMessage("msg.project.security.check.version");
