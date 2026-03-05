@@ -6372,44 +6372,6 @@ public class CommonFunction extends CoTopComponent {
 		}
 	}
 
-	public static OssMaster getOssVulnerabilityInfo(OssMaster ossMaster) {
-		OssMaster bean = null;
-		if (!isEmpty(ossMaster.getIncludeCpe()) && CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag()))) {
-			List<String> includeCpeList = new ArrayList<>();
-			for (String includeCpe : ossMaster.getIncludeCpe().split(",")) {
-				String[] splitIncludeCpe = includeCpe.split(":");
-				if (splitIncludeCpe.length > 2 && splitIncludeCpe.length == 13) {
-					includeCpeList.add(splitIncludeCpe[3] + ":" + splitIncludeCpe[4]);
-				} else {
-					includeCpeList.add(includeCpe);
-				}
-			}
-			if (!includeCpeList.isEmpty()) {
-				ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
-			}
-		}
-		if (!isEmpty(ossMaster.getExcludeCpe())) {
-			List<String> excludeCpeList = new ArrayList<>();
-			for (String excludeCpe : ossMaster.getExcludeCpe().split(",")) {
-				String[] splitExcludeCpe = excludeCpe.split(":");
-				if (splitExcludeCpe.length > 2 && splitExcludeCpe.length == 13) {
-					excludeCpeList.add(splitExcludeCpe[3] + ":" + splitExcludeCpe[4]);
-				} else {
-					excludeCpeList.add(excludeCpe);
-				}
-			}
-			if (!excludeCpeList.isEmpty()) {
-				ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
-			}
-		}
-		if (!isEmpty(ossMaster.getOssVersionAlias())) {
-			String[] ossVersionAliases = Arrays.stream(ossMaster.getOssVersionAlias().split(",")).map(String::trim).toArray(String[]::new);
-			ossMaster.setOssVersionAliases(ossVersionAliases);
-		}
-		bean = ossService.getOssVulnerabilityInfo(ossMaster);
-		return bean;
-	}
-
 	public static String normalizeText(String text) {
 	    text = Jsoup.parse(text).text();
 	    text = text.replace("\r\n", "\n").replace("\r", "\n");

@@ -653,8 +653,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				uniqueKeys.parallelStream().forEach(key -> {
 				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    ossMaster.setPrjId(identification.getReferenceId());
-				    ossMaster.setReferenceDiv(identification.getReferenceDiv());
 				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 				    if (om != null && !isEmpty(om.getCvssScore())) {
 				        vulnerabilityInfoMap.put(key, om);
@@ -927,8 +925,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				uniqueKeys.parallelStream().forEach(key -> {
 				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    ossMaster.setPrjId(identification.getReferenceId());
-				    ossMaster.setReferenceDiv(identification.getReferenceDiv());
 				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 				    if (om != null && !isEmpty(om.getCvssScore())) {
 				        vulnerabilityInfoMap.put(key, om);
@@ -1065,8 +1061,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				uniqueKeys.parallelStream().forEach(key -> {
 				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    ossMaster.setPrjId(identification.getReferenceId());
-				    ossMaster.setReferenceDiv(identification.getReferenceDiv());
 				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 				    if (om != null && !isEmpty(om.getCvssScore())) {
 				        vulnerabilityInfoMap.put(key, om);
@@ -1430,15 +1424,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		    String namePrefix = (ossName + "_").toUpperCase();
 		    
 		    OssMaster ossMaster = null;
-		    if (isEmpty(ossVersion)) {
-		    	for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
-		            if (entry.getKey().startsWith(namePrefix)) {
-		                ossMaster = entry.getValue();
-		                ossMaster.setOssVersionAliases(null);
-		                break;
-		            }
-		        }
-		    }
+		    for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
+	            if (entry.getKey().startsWith(namePrefix)) {
+	                ossMaster = entry.getValue();
+	                ossMaster.setOssId(null);
+	                ossMaster.setOssVersion(ossVersion);
+	                ossMaster.setOssVersionAliases(null);
+	                break;
+	            }
+	        }
 		    
 	        if (ossMaster != null) {
 	        	return ossMaster;
@@ -3865,8 +3859,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                 
                 uniqueKeys.parallelStream().forEach(key -> {
                     OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-                    ossMaster.setPrjId(prjId);
-                    ossMaster.setReferenceDiv(identification.getReferenceDiv());
                     OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
                     if (om != null && !isEmpty(om.getCvssScore())) {
                         vulnerabilityInfoMap.put(key, om);

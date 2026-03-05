@@ -295,9 +295,4 @@ public interface SelfCheckMapper {
 	void updateComment(Project project);
 
 	List<Project> selectSelfChecksModifiedBeforeMonths(@Param("months") int months);
-
-	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
-
-	OssMaster getOssVulnerabilityInfoWithoutVersion(OssMaster ossMaster);
-
 }

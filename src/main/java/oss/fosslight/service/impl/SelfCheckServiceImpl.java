@@ -299,9 +299,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 						}
 						ossMaster.setOssVersion(bean.getOssVersion());
 					}
-					ossMaster.setPrjId(identification.getReferenceId());
-					ossMaster.setReferenceDiv(identification.getReferenceDiv());
-					OssMaster om = getOssVulnerabilityInfo(ossMaster);
+					OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 					if (om != null && !isEmpty(om.getCvssScore())) {
 						vulnerabilityInfoMap.put(key, om);
 					}
@@ -520,14 +518,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		return map;
 	}
 	
-	private OssMaster getOssVulnerabilityInfo(OssMaster ossMaster) {
-		if (!isEmpty(ossMaster.getOssVersion())) {
-			return selfCheckMapper.getOssVulnerabilityInfo(ossMaster);
-		} else {
-			return selfCheckMapper.getOssVulnerabilityInfoWithoutVersion(ossMaster);
-		}
-	}
-
 	@Transactional
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
