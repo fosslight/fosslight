@@ -426,70 +426,7 @@ function receiveMessage(event) {
 				createTab_condition(data.tabData[0], data.tabData[1])
 				
 				break;
-            case 'sbomAnalysisRequest':
-                // Handle SBOM analysis request from Agent
-                handleSbomAnalysisRequest();
-                
-                break;
         }
-    }
-}
-
-// Handle SBOM analysis request from Agent sidebar
-function handleSbomAnalysisRequest() {
-    console.log('[basic.js] handleSbomAnalysisRequest called');
-    
-    try {
-        // Find warning items in license table
-        var warningItems = [];
-        var grid = $('#list');
-        
-        if (grid && grid.jqGrid) {
-            var gridData = grid.jqGrid('getRowData');
-            
-            for (var i = 0; i < gridData.length; i++) {
-                var row = gridData[i];
-                
-                // Check if row has warnings (check for validation messages)
-                var hasWarning = false;
-                var messages = [];
-                
-                // Collect validation messages from various fields
-                if (row.validMsg && row.validMsg.trim() !== '') {
-                    hasWarning = true;
-                    messages.push({
-                        field: 'Validation',
-                        message: row.validMsg,
-                        color: 'red'
-                    });
-                }
-                
-                if (hasWarning) {
-                    warningItems.push({
-                        ossName: row.ossName || '',
-                        ossVersion: row.ossVersion || '',
-                        licenseName: row.licenseName || '',
-                        messages: messages
-                    });
-                }
-            }
-        }
-        
-        console.log('[basic.js] Found ' + warningItems.length + ' warning items');
-        
-        // Send response back to parent window
-        var response = {
-            action: 'sbomAnalysisResult',
-            data: warningItems
-        };
-        
-        if (window.parent && window.parent !== window) {
-            window.parent.postMessage(JSON.stringify(response), window.location.origin);
-            console.log('[basic.js] Sent SBOM analysis result to parent');
-        }
-        
-    } catch (error) {
-        console.error('[basic.js] Error in handleSbomAnalysisRequest:', error);
     }
 }
 
