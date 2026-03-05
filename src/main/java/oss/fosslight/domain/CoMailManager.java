@@ -420,6 +420,18 @@ public class CoMailManager extends CoTopComponent {
 						|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())) {
 					convertDataMap.put("versionDiffInfoList", bean.getParamList());
 				}
+
+    			// Division merge 완료 메일: from, to, ProjectList, projectCount, PartnerList, partnerCount
+    			if (CoConstDef.CD_MAIL_TYPE_COMMON_DIVISION_MERGE.equals(bean.getMsgType())) {
+    				convertDataMap.put("from", avoidNull(bean.getParamExpansion1()));
+    				convertDataMap.put("to", avoidNull(bean.getParamExpansion2()));
+    				List<Project> prjList = bean.getParamPrjList();
+    				convertDataMap.put("ProjectList", prjList != null ? prjList : new ArrayList<>());
+    				convertDataMap.put("projectCount", prjList != null ? prjList.size() : 0);
+    				List<PartnerMaster> partnerList = bean.getParamPartnerList();
+    				convertDataMap.put("PartnerList", partnerList != null ? partnerList : new ArrayList<>());
+    				convertDataMap.put("partnerCount", partnerList != null ? partnerList.size() : 0);
+    			}
     			
     			// 17.08.02 sw-yun 22번 메일은 더이상 사용하지 않고, 21번 메일에 포함
     			if (CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType()) || CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())) {
@@ -835,6 +847,11 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNC_RESULT:
 			case CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT:
     			bean.setToIds(selectAdminMailAddr());
+    			break;
+    		case CoConstDef.CD_MAIL_TYPE_COMMON_DIVISION_MERGE:
+    			if (bean.getToIds() == null || bean.getToIds().length == 0) {
+    				bean.setToIds(selectAdminMailAddr());
+    			}
     			break;
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
        		case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_REQ_REVIEW:

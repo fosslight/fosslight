@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style>
+		.marker{background-color: Yellow;}
+		.commentDiv table {border: 1px solid #ddd;}
+		.commentDiv table th {border: 1px solid #ddd;}
+		.commentDiv table td {border: 1px solid #ddd;}
+	</style>
+	<title>FOSSLight Hub</title>
+</head>
+<body>
+		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td width="60" style="background:#f9f9f9"></td>
+				<td>
+					<table cellspacing="0" cellpadding="0" border="0">
+						<tr>
+							<td colspan="3" height="25" style="background:#c00c3f">
+								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+							</td>
+						</tr>
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px;">
+								<div th:if="${contentsTitle != null && contentsTitle != ''}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+								<p th:if="${contentsSubTitle != null && contentsSubTitle != ''}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+								<p style="font-size:12px; margin:0 0 10px 0;">The division merge has been completed, and the division information has been updated as follows.</p>
+								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+										<th style="padding:5px;background:#f0f0f0;">Before Change</th>
+										<th style="padding:5px;background:#f0f0f0;">After Change</th>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
+										<td style="padding:5px;" th:utext="${from}"></td>
+										<td style="padding:5px;" th:utext="${to}"></td>
+									</tr>
+								</table>
+								<div th:if="${ProjectList != null and !ProjectList.isEmpty()}" style="margin-top:20px;">
+									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Project List</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;margin-top:10px;">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Project Id</th>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Project Name (Project Version)</th>
+										</tr>
+										<tr th:each="project : ${ProjectList}">
+											<td style="padding:5px;" th:utext="${project.prjId}"></td>
+											<td style="padding:5px;"><a th:href="|${domain}/project/shareUrl/${project.prjId}|" target="_blank" style="color:#c00c3f;text-decoration:underline;" th:utext="|${project.prjName} (${project.prjVersion})|"></a></td>
+										</tr>
+									</table>
+									<p style="font-size:12px; margin:10px 0 0 0;">Total <b th:utext="${projectCount}"></b> project(s)</p>
+								</div>
+								<div th:if="${PartnerList != null and !PartnerList.isEmpty()}" style="margin-top:20px;">
+									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">3rd Party List</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;margin-top:10px;">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">3rd Party Id</th>
+											<th align="left" style="padding:5px;background:#f0f0f0;">3rd Party Name (Software Name, Software Version)</th>
+										</tr>
+										<tr th:each="partner : ${PartnerList}">
+											<td style="padding:5px;" th:utext="${partner.partnerId}"></td>
+											<td style="padding:5px;"><a th:href="|${domain}/partner/shareUrl/${partner.partnerId}|" target="_blank" style="color:#c00c3f;text-decoration:underline;" th:utext="|${partner.partnerName} (${partner.softwareName}, ${partner.softwareVersion})|"></a></td>
+										</tr>
+									</table>
+									<p style="font-size:12px; margin:10px 0 0 0;">Total <b th:utext="${partnerCount}"></b> 3rd party(ies)</p>
+								</div>
+								<div style="margin:20px 0;border:1px dashed #666;"></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}" style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+						<tr>
+							<td colspan="3" height="1" style="background:#ddd"></td>
+						</tr>
+					</table>
+				</td>
+				<td width="60" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+		</table>
+</body>
+</html>

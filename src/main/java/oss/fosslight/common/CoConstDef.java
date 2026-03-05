@@ -706,6 +706,9 @@ public class CoConstDef {
 	public static final String CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION = "855";
 	public static final String CD_MAIL_PROJECT_APPROVE_PERMISSION = "856";
 	public static final String CD_MAIL_PARTNER_APPROVE_PERMISSION = "857";
+
+	/** Common */
+	public static final String CD_MAIL_TYPE_COMMON_DIVISION_MERGE = "858";
 	
 	// 이벤트 코드 : TODO MAIL-SERVICE
 	public static final String	EVENT_CODE_LICENSE = "300";
