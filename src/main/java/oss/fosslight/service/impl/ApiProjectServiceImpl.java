@@ -50,6 +50,7 @@ import oss.fosslight.service.ApiProjectService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
+import oss.fosslight.service.OssService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.ApiVulnerabilityService;
 import oss.fosslight.util.ExcelUtil;
@@ -70,6 +71,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@Autowired ApiFileMapper apiFileMapper;
 	@Autowired FileService fileService;
 	@Autowired ProjectService projectService;
+	@Autowired OssService ossService;
 	@Autowired CommentService commentService;
 	@Autowired ApiOssMapper apiOssMapper;
 	@Autowired ApiVulnerabilityService apiVulnerabilityService;
@@ -647,7 +649,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		uniqueKeys.parallelStream().forEach(key -> {
 		    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-		    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+		    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 		    if (om != null && !isEmpty(om.getCvssScore())) {
 		        vulnerabilityInfoMap.put(key, om);
 		    }
