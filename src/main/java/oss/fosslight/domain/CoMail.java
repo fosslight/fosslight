@@ -88,6 +88,9 @@ public class CoMail extends ComBean {
 	/** The param prj list. */
 	private List<Project> paramPrjList;
 	
+	/** The param partner list. */
+	private List<PartnerMaster> paramPartnerList;
+	
 	/** The receive flag. */
 	private String receiveFlag;
 	
@@ -700,6 +703,24 @@ public class CoMail extends ComBean {
 	 */
 	public void setParamPrjList(List<Project> paramPrjList) {
 		this.paramPrjList = paramPrjList;
+	}
+	
+	/**
+	 * Gets the param partner list.
+	 *
+	 * @return the param partner list
+	 */
+	public List<PartnerMaster> getParamPartnerList() {
+		return paramPartnerList;
+	}
+	
+	/**
+	 * Sets the param partner list.
+	 *
+	 * @param paramPartnerList the new param partner list
+	 */
+	public void setParamPartnerList(List<PartnerMaster> paramPartnerList) {
+		this.paramPartnerList = paramPartnerList;
 	}
 	
 	/**

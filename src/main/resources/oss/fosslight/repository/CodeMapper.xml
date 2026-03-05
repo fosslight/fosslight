@@ -165,14 +165,13 @@
 	<update id="updateCodeDetail" parameterType="oss.fosslight.domain.T2CodeDtl" >
 		UPDATE T2_CODE_DTL
 		SET
-			CD_DTL_NO = #{cdDtlNo},
 			CD_DTL_NM = #{cdDtlNm},
 			CD_DTL_EXP = #{cdDtlExp},
 			CD_SUB_NO = #{cdSubNo},
 			CD_ORDER = #{cdOrder},
 			USE_YN = #{useYn}
 		WHERE CD_NO = #{cdNo}
-		AND CD_DTL_NO = #{cdDtlNoOrign}
+		AND CD_DTL_NO = #{cdDtlNo}
 	</update>
 	
 	<delete id="deleteCodeDetail" parameterType="oss.fosslight.domain.T2CodeDtl" >

@@ -1113,6 +1113,9 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
+
+			public static final String FOSSLIGHT_API_COMMON_MERGE_DIVISION = "/common/merge/division";
+
 	}
 
 	public static final class API_LITE {
