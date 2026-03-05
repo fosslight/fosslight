@@ -106,6 +106,8 @@ public class OssComponents extends ComBean implements Serializable {
 	private String ossNickName;
 	
 	private String publDate;
+	private String modiDate;
+	private String vulnSummary;
 	private String vulnerabilityResolution;
 	private String vulnerabilityLink;
 	private String officialPatchLink;
@@ -123,6 +125,22 @@ public class OssComponents extends ComBean implements Serializable {
 	private String restriction;
 	private String refLoadedVal;
 	
+	public String getModiDate() {
+		return modiDate;
+	}
+
+	public void setModiDate(String modiDate) {
+		this.modiDate = modiDate;
+	}
+
+	public String getVulnSummary() {
+		return vulnSummary;
+	}
+
+	public void setVulnSummary(String vulnSummary) {
+		this.vulnSummary = vulnSummary;
+	}
+
 	public String getPublDate() {
 		return publDate;
 	}
