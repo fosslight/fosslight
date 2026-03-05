@@ -75,6 +75,7 @@ import oss.fosslight.domain.ProjectIdentificationTree;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
+import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -652,7 +653,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				uniqueKeys.parallelStream().forEach(key -> {
 				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+				    ossMaster.setPrjId(identification.getReferenceId());
+				    ossMaster.setReferenceDiv(identification.getReferenceDiv());
+				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 				    if (om != null && !isEmpty(om.getCvssScore())) {
 				        vulnerabilityInfoMap.put(key, om);
 				    }
@@ -924,7 +927,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				uniqueKeys.parallelStream().forEach(key -> {
 				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+				    ossMaster.setPrjId(identification.getReferenceId());
+				    ossMaster.setReferenceDiv(identification.getReferenceDiv());
+				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 				    if (om != null && !isEmpty(om.getCvssScore())) {
 				        vulnerabilityInfoMap.put(key, om);
 				    }
@@ -1060,7 +1065,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				uniqueKeys.parallelStream().forEach(key -> {
 				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+				    ossMaster.setPrjId(identification.getReferenceId());
+				    ossMaster.setReferenceDiv(identification.getReferenceDiv());
+				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 				    if (om != null && !isEmpty(om.getCvssScore())) {
 				        vulnerabilityInfoMap.put(key, om);
 				    }
@@ -3858,7 +3865,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                 
                 uniqueKeys.parallelStream().forEach(key -> {
                     OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-                    OssMaster om = CommonFunction.getOssVulnerabilityInfo(ossMaster);
+                    ossMaster.setPrjId(prjId);
+                    ossMaster.setReferenceDiv(identification.getReferenceDiv());
+                    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
                     if (om != null && !isEmpty(om.getCvssScore())) {
                         vulnerabilityInfoMap.put(key, om);
                     }
@@ -7507,7 +7516,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		List<String> deduplicatedkey = new ArrayList<>();
 		List<String> caseWithoutVersionKey = new ArrayList<>();
 		List<String> checkOssNameList = new ArrayList<>();
-		List<ProjectIdentification> fullList = null;
+		List<Vulnerability> fullList = null;
 		
 		List<String> checkVulnScore = new ArrayList<>();
 		Map<String, Object> vulnScore = new LinkedHashMap<>();
@@ -7611,7 +7620,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			
 			int gridIdx = 1;
-			for (ProjectIdentification pi : fullList) {
+			for (Vulnerability pi : fullList) {
 				activateFlag = false;
 				if (isEmpty(pi.getOssVersion())) {
 					activateFlag = true;
@@ -7655,6 +7664,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						oc.setPublDate(pi.getPublDate());
 					}
 					
+					oc.setModiDate(pi.getModiDate());
+					oc.setVulnSummary(pi.getVulnSummary());
 					oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 					oc.setVulnerabilityLink(vulnerabilityLink);
 					oc.setVulnerabilityResolution("Unresolved");

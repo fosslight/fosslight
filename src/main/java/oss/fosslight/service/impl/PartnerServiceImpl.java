@@ -46,6 +46,7 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
+import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
@@ -1506,7 +1507,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		String vulnerabilityLink = "";
 		int gridIdx = 1;
 		
-		List<ProjectIdentification> list = projectMapper.selectSecurityListForProject(identification);
+		List<Vulnerability> list = projectMapper.selectSecurityListForProject(identification);
 		Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
 		Map<String, String> patchLinkMap = new HashMap<>();
 		
@@ -1532,7 +1533,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			}
 		}
 		
-		for (ProjectIdentification pi : list) {
+		for (Vulnerability pi : list) {
 			activateFlag = false;
 			if (isEmpty(pi.getOssVersion())) {
 				activateFlag = true;

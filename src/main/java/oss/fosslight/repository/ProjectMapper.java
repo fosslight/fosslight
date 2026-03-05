@@ -22,6 +22,7 @@ import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
+import oss.fosslight.domain.Vulnerability;
 
 @Mapper
 public interface ProjectMapper {
@@ -397,7 +398,7 @@ public interface ProjectMapper {
 
 	Float getCvssScoreForNotFixed(String prjId);
 
-	List<ProjectIdentification> selectSecurityListForProject(ProjectIdentification identification);
+	List<Vulnerability> selectSecurityListForProject(ProjectIdentification identification);
 	
 	void updateProjectForSecurity(Project project);
 
