@@ -3046,7 +3046,7 @@
 			INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
 			LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG SUB2 ON T1.OSS_ID = SUB2.OSS_ID
 		WHERE T1.USE_YN = 'Y'
-		AND T1.OSS_ID = #{ossId}
+		AND T1.OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{ossId})
 	</select>
 	
 	<select id="getOssNickNameListByOssCommonId" parameterType="string" resultType="oss.fosslight.domain.OssMaster">
@@ -3081,28 +3081,12 @@
 	</select>
 	
 	<select id="getOssInfoWithNickByOssId" parameterType="string" resultType="oss.fosslight.domain.OssMaster">
-		SELECT T1.OSS_COMMON_ID
-			 , T1.OSS_ID
-			 , T4.OSS_NICKNAME AS OSS_NAME
-			 , T1.OSS_NAME AS OSS_NAME_TEMP
-			 , T1.OSS_VERSION
-			 , T1.DEACTIVATE_FLAG
-		  FROM 
-		  	(
-		  		SELECT OC.OSS_COMMON_ID
-		  				, OV.OSS_ID
-		  				, OC.OSS_NAME
-		  				, OV.OSS_VERSION
-		  				, OC.DEACTIVATE_FLAG
-		  				, OV.USE_YN
-		  		FROM OSS_COMMON OC
-  				LEFT JOIN OSS_VERSION OV
-  				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-		  	) T1
-		 INNER JOIN OSS_NICKNAME T4 ON T1.OSS_COMMON_ID = T4.OSS_COMMON_ID
-		 WHERE T1.USE_YN = 'Y'
-		 AND T1.OSS_ID = #{ossId}
-		 GROUP BY T1.OSS_NAME, T4.OSS_NICKNAME
+		SELECT T1.OSS_COMMON_ID, T4.OSS_NICKNAME
+		FROM OSS_COMMON T1
+		INNER JOIN OSS_NICKNAME T4 
+		ON T1.OSS_COMMON_ID = T4.OSS_COMMON_ID
+		WHERE T1.USE_YN = 'Y'
+		AND T1.OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{ossId})
 	</select>
 	
 	<select id="getOssAllNickNameList" resultType="oss.fosslight.domain.OssMaster">SELECT OSS_COMMON_ID, GROUP_CONCAT(OSS_NICKNAME) AS OSS_NICKNAME FROM OSS_NICKNAME GROUP BY OSS_COMMON_ID</select>

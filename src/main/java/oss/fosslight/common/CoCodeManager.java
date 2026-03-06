@@ -9,6 +9,8 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 import com.google.gson.reflect.TypeToken;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -258,111 +260,53 @@ public class CoCodeManager extends CoTopComponent {
 			}
 			
 			List<OssMaster> list = ossMapper.getOssInfoByOssId(ossId);
-			if (list != null) {
-				List<OssMaster> nickNameList = ossMapper.getOssInfoWithNickByOssId(ossId);
-				Map<String, OssMaster> _ossMap = new HashMap<>();
-				Map<String, String> _ossNamesMap = new HashMap<>();
-				
-				for (OssMaster bean : list) {
-					OssMaster targetBean = null;
-					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-					
-					if (_ossMap.containsKey(key)) {
-						targetBean = _ossMap.get(key);
-					} else {
-						targetBean = bean;
-					}
-					
-					OssMaster nickNames = ossMapper.getOssNickNameListByOssCommonId(bean.getOssCommonId());
-					if (nickNames != null && nickNames.getOssNickname() != null) {
-						targetBean.setOssNicknames(nickNames.getOssNickname().split(","));
-					}
-					
-					OssLicense subBean = new OssLicense();
-					subBean.setOssId(bean.getOssId());
-					subBean.setLicenseId(bean.getLicenseId());
-					subBean.setLicenseName(bean.getLicenseName());
-					subBean.setLicenseType(bean.getOssLicenseType());
-					subBean.setOssLicenseIdx(bean.getOssLicenseIdx());
-					subBean.setOssLicenseComb(bean.getOssLicenseComb());
-					subBean.setOssLicenseText(bean.getOssLicenseText());
-					subBean.setOssCopyright(bean.getOssCopyright());
-					
-					// oss의 license type을 license의 license type 적용 이후에 set
-					targetBean.setLicenseType(bean.getOssLicenseType());
-					
-					targetBean.addOssLicense(subBean);
-					
-					if (_ossMap.containsKey(key)) {
-						_ossMap.replace(key, targetBean);
-					} else {
-						_ossMap.put(key, targetBean);
-					}
-					
-					if (!_ossNamesMap.containsKey(bean.getOssName().toUpperCase())) {
-						_ossNamesMap.put(bean.getOssName().toUpperCase(), bean.getOssName());
-					}
-				}
-				
-				for (OssMaster bean : _ossMap.values()) {
-					OSS_INFO_BY_ID.put(bean.getOssId(), bean);
-				}
-				
-				if (nickNameList != null) {
-					for (OssMaster bean : nickNameList) {
-						String key = bean.getOssName() +"_"+ avoidNull(bean.getOssVersion());
-						String ossNickNameKey = bean.getOssName().toUpperCase();
+			List<OssMaster> nickNameList = ossMapper.getOssInfoWithNickByOssId(ossId);
+			
+			if (CollectionUtils.isNotEmpty(list)) {
+				String ossName = list.get(0).getOssName();
+				Map<String, String[]> nickMap = buildNickNameMap(ossName, nickNameList); 
 
-						if (!_ossNamesMap.containsKey(ossNickNameKey)) {
-							_ossNamesMap.put(ossNickNameKey, bean.getOssNameTemp());
-						}
-						
-						String sourceKey = (bean.getOssNameTemp() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-						OssMaster sourceBean = _ossMap.get(sourceKey);
-						if (sourceBean != null) {
-							bean.setLicenseDiv(sourceBean.getLicenseDiv());
-							bean.setDownloadLocation(sourceBean.getDownloadLocation());
-							bean.setDownloadLocationGroup(sourceBean.getDownloadLocationGroup());
-							bean.setHomepage(sourceBean.getHomepage());
-							bean.setSummaryDescription(sourceBean.getSummaryDescription());
-							bean.setAttribution(sourceBean.getAttribution());
-							bean.setCopyright(sourceBean.getCopyright());
-							bean.setCvssScore(sourceBean.getCvssScore());
-							bean.setCveId(sourceBean.getCveId());
-							bean.setVulnYn(sourceBean.getVulnYn());
-							bean.setVulnRecheck(sourceBean.getVulnRecheck());
-							bean.setVulnDate(sourceBean.getVulnDate());
-							bean.setLicenseType(sourceBean.getLicenseType());
-							bean.setOssLicenses(sourceBean.getOssLicenses());
-							bean.setOssType(sourceBean.getOssType());
-							bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
-							bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
-							bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
-							bean.setImportantNotes(sourceBean.getImportantNotes());
-							if (sourceBean.getDetectedLicenses() != null) {
-								bean.setDetectedLicenses(sourceBean.getDetectedLicenses());
-							}
+	            for (OssMaster bean : list) {
+	                String upperName = bean.getOssName().toUpperCase();
+	                String key = upperName + "_" + avoidNull(bean.getOssVersion());
 
-							_ossMap.put(key.toUpperCase(), bean);
-						}
-					}
-				}
-				
-				if (!_ossMap.isEmpty()) {
-					for (String key : _ossMap.keySet()) {
-						OSS_INFO_UPPER.put(key, _ossMap.get(key));
-					}
-				}
-				
-				if (!_ossNamesMap.isEmpty()) {
-					for (String key : _ossNamesMap.keySet()) {
-						OSS_INFO_UPPER_NAMES.put(key, _ossNamesMap.get(key));
-					}
-				}
+	                bean.setOssNicknames(nickMap.get(bean.getOssCommonId()));
+	                bean.addOssLicense(createLicenseFromBean(bean));
+	                bean.setLicenseType(bean.getOssLicenseType());
+
+	                OSS_INFO_BY_ID.put(bean.getOssId(), bean);
+	                OSS_INFO_UPPER.put(key, bean);
+	                OSS_INFO_UPPER_NAMES.put(upperName, bean.getOssName());
+	            }
 			}
 		} catch(Exception e) {
         	log.error(e.getMessage(), e);
 		}
+	}
+
+	private Map<String, String[]> buildNickNameMap(String ossName, List<OssMaster> nickNameList) {
+		Map<String, String[]> map = new HashMap<>();
+	    if (CollectionUtils.isNotEmpty(nickNameList)) {
+	        for (OssMaster n : nickNameList) {
+	            if (n.getOssNickname() != null) {
+	                map.put(n.getOssCommonId(), n.getOssNickname().split(","));
+	            }
+	        }
+	    }
+	    return map;
+	}
+	
+	private OssLicense createLicenseFromBean(OssMaster bean) {
+		OssLicense sub = new OssLicense();
+	    sub.setOssId(bean.getOssId());
+	    sub.setLicenseId(bean.getLicenseId());
+	    sub.setLicenseName(bean.getLicenseName());
+	    sub.setLicenseType(bean.getOssLicenseType());
+	    sub.setOssLicenseIdx(bean.getOssLicenseIdx());
+	    sub.setOssLicenseComb(bean.getOssLicenseComb());
+	    sub.setOssLicenseText(bean.getOssLicenseText());
+	    sub.setOssCopyright(bean.getOssCopyright());
+	    return sub;
 	}
 
 	/**
