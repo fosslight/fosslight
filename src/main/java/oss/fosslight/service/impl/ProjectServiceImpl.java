@@ -1423,21 +1423,23 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		    String ossVersion = (parts.length > 1) ? parts[1] : "";
 		    String namePrefix = (ossName + "_").toUpperCase();
 		    
-		    OssMaster ossMaster = null;
+		    boolean isMatch = false;
+		    OssMaster ossMaster = new OssMaster();
 		    for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
-	            if (entry.getKey().startsWith(namePrefix)) {
+		    	if (entry.getKey().startsWith(namePrefix)) {
 	                ossMaster = entry.getValue();
 	                ossMaster.setOssId(null);
 	                ossMaster.setOssVersion(ossVersion);
+	                ossMaster.setOssVersionAlias(null);
 	                ossMaster.setOssVersionAliases(null);
+	                isMatch = true;
 	                break;
 	            }
 	        }
 		    
-	        if (ossMaster != null) {
+	        if (isMatch) {
 	        	return ossMaster;
 	        } else {
-	        	ossMaster = new OssMaster();
 	        	ossMaster.setOssName(ossName);
 			    ossMaster.setOssVersion(ossVersion);
 			    return ossMaster;
