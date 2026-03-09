@@ -1198,7 +1198,7 @@ public class ExcelUtil extends CoTopComponent {
     					if (downloadLocationCol < 0) {
     						bean.setDownloadLocation("");
     					} else {
-    						String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\t", "");
+    						String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\\s", "");
     						if (downloadLocation.equals("NONE") || downloadLocation.equals("NOASSERTION")) {
     							bean.setDownloadLocation("");
         					} else {
@@ -1206,7 +1206,7 @@ public class ExcelUtil extends CoTopComponent {
         					}
     					}
     					
-    					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\t", ""));
+    					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\\s", ""));
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     
