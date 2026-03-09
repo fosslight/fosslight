@@ -248,15 +248,16 @@ public class CoCodeManager extends CoTopComponent {
 			if (beforeBean != null) {
 				String ossInfoByIdKey = beforeBean.getOssId();
 				String ossInfoUpperKey = (beforeBean.getOssName() + "_" + avoidNull(beforeBean.getOssVersion())).toUpperCase();
-				
-				if (OSS_INFO_BY_ID.containsKey(ossInfoByIdKey)) {
-					OSS_INFO_BY_ID.remove(ossInfoByIdKey);
+				if (ossInfoByIdKey.equals(ossId)) {
+					if (OSS_INFO_BY_ID.containsKey(ossInfoByIdKey)) {
+						OSS_INFO_BY_ID.remove(ossInfoByIdKey);
+					}
+					if (OSS_INFO_UPPER.containsKey(ossInfoUpperKey)) {
+						OSS_INFO_UPPER.remove(ossInfoUpperKey);
+					}
+					
+					OSS_INFO_UPPER_NAMES.entrySet().removeIf(entry -> entry.getValue().equalsIgnoreCase(beforeBean.getOssName()));
 				}
-				if (OSS_INFO_UPPER.containsKey(ossInfoUpperKey)) {
-					OSS_INFO_UPPER.remove(ossInfoUpperKey);
-				}
-				
-				OSS_INFO_UPPER_NAMES.entrySet().removeIf(entry -> entry.getValue().equalsIgnoreCase(beforeBean.getOssName()));
 			}
 			
 			List<OssMaster> list = ossMapper.getOssInfoByOssId(ossId);
@@ -267,6 +268,11 @@ public class CoCodeManager extends CoTopComponent {
 				Map<String, String[]> nickMap = buildNickNameMap(ossName, nickNameList); 
 
 	            for (OssMaster bean : list) {
+	            	if (bean == null || isEmpty(bean.getOssId())) {
+	                    log.warn("The OSS_ID of the retrieved data is null. Skip. (OSS_NAME: {})", bean != null ? bean.getOssName() : "Unknown");
+	                    continue; 
+	                }
+	            	
 	                String upperName = bean.getOssName().toUpperCase();
 	                String key = upperName + "_" + avoidNull(bean.getOssVersion());
 
