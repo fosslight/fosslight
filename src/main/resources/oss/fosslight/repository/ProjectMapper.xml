@@ -6207,6 +6207,7 @@
 			LEFT JOIN OSS_COMMON COMMON
 			ON OC.OSS_NAME = COMMON.OSS_NAME
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6260,6 +6261,7 @@
 			LEFT JOIN OSS_VERSION_ALIAS OVA
 			ON IFNULL(OC.OSS_ID, OV.OSS_ID) = OVA.OSS_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6310,6 +6312,7 @@
 			LEFT JOIN OSS_INCLUDE_CPE OIC
 			ON COMMON.OSS_COMMON_ID = OIC.OSS_COMMON_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6366,6 +6369,7 @@
 			LEFT JOIN OSS_VERSION_ALIAS OVA
 			ON IFNULL(OC.OSS_ID, OV.OSS_ID) = OVA.OSS_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6417,6 +6421,7 @@
 			LEFT JOIN OSS_NICKNAME NICK
 			ON COMMON.OSS_COMMON_ID = NICK.OSS_COMMON_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6473,6 +6478,7 @@
 			LEFT JOIN OSS_VERSION_ALIAS OVA
 			ON IFNULL(OC.OSS_ID, OV.OSS_ID) = OVA.OSS_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6522,6 +6528,7 @@
 			LEFT JOIN OSS_COMMON COMMON
 			ON OC.OSS_NAME = COMMON.OSS_NAME
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6574,6 +6581,7 @@
 			LEFT JOIN OSS_VERSION_ALIAS OVA
 			ON IFNULL(OC.OSS_ID, OV.OSS_ID) = OVA.OSS_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6623,6 +6631,7 @@
 			LEFT JOIN OSS_INCLUDE_CPE OIC
 			ON COMMON.OSS_COMMON_ID = OIC.OSS_COMMON_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6678,6 +6687,7 @@
 			LEFT JOIN OSS_VERSION_ALIAS OVA
 			ON IFNULL(OC.OSS_ID, OV.OSS_ID) = OVA.OSS_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6728,6 +6738,7 @@
 			LEFT JOIN OSS_NICKNAME NICK
 			ON COMMON.OSS_COMMON_ID = NICK.OSS_COMMON_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
@@ -6783,6 +6794,7 @@
 			LEFT JOIN OSS_VERSION_ALIAS OVA
 			ON IFNULL(OC.OSS_ID, OV.OSS_ID) = OVA.OSS_ID
 			WHERE OC.REFERENCE_ID = #{referenceId}
+			AND OC.OSS_NAME != '-'
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 					AND OC.REFERENCE_DIV IN ('10', '11', '15', '16')
