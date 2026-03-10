@@ -3891,11 +3891,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                 }
                 
                 uniqueKeys.parallelStream().forEach(key -> {
-                    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-                    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-                    if (om != null && !isEmpty(om.getCvssScore())) {
-                        vulnerabilityInfoMap.put(key, om);
-                    }
+                	if (!vulnerabilityInfoMap.containsKey(key)) {
+                		OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+                        OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
+                        if (om != null && !isEmpty(om.getCvssScore())) {
+                            vulnerabilityInfoMap.put(key, om);
+                        }
+                	}
                 });
                 
                 for (ProjectIdentification bean : registBomList) {
