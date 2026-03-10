@@ -3919,50 +3919,6 @@ public class ProjectController extends CoTopComponent {
 		try {
 			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
-				
-				List<String> exts = new ArrayList<>();
-				String csvExp = CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "12");
-				String spdxExp = CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "42");
-				String cdxExp = CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "43");
-				
-				if (!isEmpty(csvExp)) {
-					for (String exp : csvExp.split(",")) {
-						if (!isEmpty(exp) && !exts.contains(exp.trim())) {
-							exts.add(exp.trim());
-						}
-					}
-				}
-				if (!isEmpty(spdxExp)) {
-					for (String exp : spdxExp.split(",")) {
-						if (!isEmpty(exp) && !exts.contains(exp.trim())) {
-							exts.add(exp.trim());
-						}
-					}
-				}
-				if (!isEmpty(cdxExp)) {
-					for (String exp : cdxExp.split(",")) {
-						if (!isEmpty(exp) && !exts.contains(exp.trim())) {
-							exts.add(exp.trim());
-						}
-					}
-				}
-				
-				boolean checkExt = false;
-				if (!exts.isEmpty()) {
-					for (String ext : exts) {
-						if (ext.equalsIgnoreCase(fileExtension)) {
-							checkExt = true;
-							break;
-						}
-					}
-				}
-				if (!checkExt) {
-					resultList.add("UNSUPPORTED_FILE");
-					String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{String.join(",", exts)});
-					resultList.add(msg);
-					return toJson(resultList);
-				}
-				
 				if (fileId == null) {
 					list = fileService.uploadFile(req, file);
 				} else {
@@ -3970,15 +3926,6 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 
-			if (CollectionUtils.isNotEmpty(list)) {
-				UploadFile uploadFile = list.get(0);
-				if (!uploadFile.isUploadSucc() && !isEmpty(uploadFile.getComments())) {
-					resultList.add("FILE_CONVERSION_FAILED");
-					resultList.add("File format error : " + uploadFile.getComments());
-					return toJson(resultList);
-				}
-			}
-			
 			if (fileExtension.equals("csv")) {
 				resultList = CommonFunction.checkCsvFileLimit(list);
 			} else {
