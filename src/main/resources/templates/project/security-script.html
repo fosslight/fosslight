@@ -15,6 +15,7 @@ var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'securit
 var totalValidMsgData;
 var fullDiscoveredValidMsgData;
 var _scrtUploadFile;
+var vulnScoreTable;
 
 $(function () {
 	'use strict';
@@ -804,11 +805,16 @@ var overview = {
 			sortedObj[obj] = data[obj];
 		});
 		
+		for (let key in sortedObj) {
+			labels.push(key);
+			dataArr.push(data[key]);
+		};
+		
 		if (!init) {
-			for (let key in sortedObj) {
-				labels.push(key);
-				dataArr.push(data[key]);
-			};
+			for (let key in labels) {
+	 			var newOption = new Option(labels[key], labels[key].charAt(0), false, false);
+	 			$('#vulnScoreChartDivision').append(newOption);
+	 		}
 		}
 		
 		let color = new Array();
@@ -968,45 +974,124 @@ var overview = {
 		});
 	},
 	vulnScoreByOssVersionTable : function(data) {
-		for (let key in data) {
-			let tr = document.createElement("tr");
-			
-			let ossName = key.split("_")[0];
-			let ossVersion = key.split("_")[1];
-			
-			let vulnCount = data[key];
-			let vulnHtml = "";
-			for (let vulnKey in vulnCount) {
-				let vulnStr = vulnKey[0];
-				let cnt = vulnCount[vulnKey];
-				
-				vulnHtml += "<span style=\"cursor: pointer;\" onclick=\"overview.vulnDetailPopup('" + ossName + "', '" + ossVersion + "', '" + vulnStr + "', '" + cnt + "');\">";
-				if ("C" == vulnStr) {
-					vulnHtml += '<span class="badge badge-dark p-2">C</span>';
-				} else if ("H" == vulnStr) {
-					vulnHtml += '<span class="badge badge-danger p-2 ml-4">H</span>';
-				} else if ("M" == vulnStr) {
-					vulnHtml += '<span class="badge badge-orange p-2 ml-4">M</span>';
-				} else {
-					vulnHtml += '<span class="badge badge-yellow2 p-2 ml-4">L</span>';
-				}
-				vulnHtml += "<span class=\"ml-2\">" + cnt + "</span></span>";
-			}
-			
-			let ossNameTd = document.createElement("td");
-			ossNameTd.innerHTML = ossName;
-			let ossVersionTd = document.createElement("td");
-			ossVersionTd.innerHTML = ossVersion;
-			let vulnCountTd = document.createElement("td");
-			vulnCountTd.classList.add("text-center");
-			vulnCountTd.innerHTML = vulnHtml;
-			
-			tr.appendChild(ossNameTd);
-			tr.appendChild(ossVersionTd);
-			tr.appendChild(vulnCountTd);
-			
-			$("#vulnScoreTableBody").append(tr);
-		}
+		vulnScoreTable = $('#vulnScoreTable').DataTable({
+   			deferRender: true,
+   			searching : false,
+   			paging : true,
+    		info : true,
+    		autoWidth : true,
+    		responsive : true,
+    		lengthChange : true,
+    		order: [],
+    		ordering : true,
+    		destroy: true,
+            scrollCollapse: true,
+			scrollY: '450px',
+			dom: '<"top mb-1"f>rt<"d-flex justify-content-between align-items-center"ip>',
+    		columnDefs : [
+        		{
+        			targets : [0],
+        			className : "text-center",
+        			width: "30%"
+        		},
+        		{
+        			targets : [1],
+        			className : "text-center",
+        			width: "20%"
+        		},
+        		{
+        			targets : [2],
+        			render : function (data, type, row) {
+        				if (type === 'sort' || type === 'type') {
+                            return data.sort;
+                        }
+        				return data.display;
+        			},
+        			className : "text-center",
+        			width: "50%"
+        		}
+        	],
+        	drawCallback : function(settings) {
+                $(settings.nTableWrapper).find('.dataTables_scroll').addClass("mb-3");
+                
+                const $pagination = $(settings.nTableWrapper).find('.pagination');
+                $pagination.find('.page-link').css({'color': '#444', 'background-color': '#fff', 'border-color': '#dee2e6', 'outline': 'none', 'box-shadow': 'none'});
+                $pagination.find('.page-item.active .page-link').css({'color': '#fff', 'background-color': '#adb5bd', 'border-color': '#adb5bd'});
+                $pagination.find('.page-item:first-child .page-link, .page-item:last-child .page-link').css({'color': '#495057', 'background-color': '#e9ecef', 'border-color': '#dee2e6'});
+
+                $pagination.find('.page-link').on('focus', function() {
+                    $(this).css({
+                        'box-shadow': '0 0 0 0.2rem rgba(173, 181, 189, 0.25)',
+                        'border-color': '#adb5bd'
+                    });
+                }).on('blur', function() {
+                    $(this).css('box-shadow', 'none');
+                });
+
+                $pagination.find('.page-link').on('mouseenter', function() {
+                    if(!$(this).parent().hasClass('active')) {
+                        $(this).css('background-color', '#dee2e6');
+                    }
+                }).on('mouseleave', function() {
+                    const isPrevNext = $(this).parent().is(':first-child, :last-child');
+                    const isActive = $(this).parent().hasClass('active');
+                    if (isActive) $(this).css('background-color', '#adb5bd');
+                    else if (isPrevNext) $(this).css('background-color', '#e9ecef');
+                    else $(this).css('background-color', '#fff');
+                });
+        	}
+        });
+		
+		overview.renderVulnTable(data);
+	},
+	renderVulnTable(data) {
+		vulnScoreTable.clear();
+
+        let rowData = [];
+
+        for (let key in data) {
+            let parts = key.split("_");
+            let ossName = parts[0] || "";
+            let ossVersion = parts[1] || "";
+            
+            let totalCount = 0;
+            let vulnCount = data[key];
+            let vulnHtml = "";
+
+            for (let vulnKey in vulnCount) {
+                let vulnStr = vulnKey[0];
+                let cnt = vulnCount[vulnKey];
+                totalCount += cnt;
+                
+                let badgeClass = "";
+                let label = vulnStr;
+
+                if (vulnStr === "C") {
+                	badgeClass = "badge-dark";
+                } else if (vulnStr === "H") {
+                	badgeClass = "badge-danger ml-4";
+                } else if (vulnStr === "M") {
+                	badgeClass = "badge-orange ml-4";
+                } else { 
+                	badgeClass = "badge-yellow2 ml-4"; 
+                	label = "L";
+                }
+
+                vulnHtml += `
+                    <span style="cursor: pointer;" onclick="overview.vulnDetailPopup('${ossName}', '${ossVersion}', '${vulnStr}', '${cnt}');">
+                        <span class="badge ${badgeClass} p-2">${label}</span>
+                        <span class="ml-2">${cnt}</span>
+                    </span>`;
+            }
+
+            rowData.push([ossName, ossVersion, {"display": vulnHtml, "sort": totalCount}]);
+        }
+
+        vulnScoreTable.rows.add(rowData).draw();
+        
+        setTimeout(function() {
+        	vulnScoreTable.columns.adjust().draw();
+        }, 200);
 	},
 	vulnDetailPopup : function (ossName, ossVersion, flag, cnt) {
 		if (cnt > 0) {

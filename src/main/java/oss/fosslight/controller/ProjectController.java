@@ -1507,6 +1507,7 @@ public class ProjectController extends CoTopComponent {
 					project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 				}
 				projectService.copyOssComponentList(project, true);
+				projectService.copySecurityDataForProject(project, beforeBean);
 			}
 			
 			if (!confirmStatusCopy.equals("false")) {
@@ -3231,18 +3232,12 @@ public class ProjectController extends CoTopComponent {
 			@PathVariable String code) {
 		// session key 초기화
 		// referenceId에 해당하는 모든 report (분석결과서) 세션 정보를 초기화 한다.
-		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PARTNER,
-				identification.getReferenceId()));
-		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC,
-				identification.getReferenceId()));
-		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN,
-				identification.getReferenceId()));
-		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID,
-				identification.getReferenceId()));
-		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BAT,
-				identification.getReferenceId()));
-		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_BAT,
-				identification.getReferenceId()));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PARTNER, identification.getReferenceId()));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, identification.getReferenceId()));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, identification.getReferenceId()));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID, identification.getReferenceId()));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BAT, identification.getReferenceId()));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_BAT, identification.getReferenceId()));
 		
 		// 요청한 reference의 이전 정보도 삭제
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), identification.getReferenceDiv(),
@@ -3427,10 +3422,7 @@ public class ProjectController extends CoTopComponent {
 			List<List<ProjectIdentification>> androidSubData = CommonFunction.setOssComponentLicense(androidData);
 
 			if(androidSubData != null && !androidSubData.isEmpty()) {
-				androidSubData = CommonFunction.mergeGridAndSession(
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, prjId), androidData,
-						androidSubData,
-						CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID, prjId));
+				androidSubData = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, prjId), androidData, androidSubData, CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID, prjId));
 			}
 			errMsg = projectService.checkChangedIdentification(prjId, androidData, androidSubData, (String) map.get("applicableAndroid"));
 		} else {
@@ -3459,10 +3451,7 @@ public class ProjectController extends CoTopComponent {
 				}
 				srcSubData = CommonFunction.setOssComponentLicense(srcData);
 				if (CollectionUtils.isNotEmpty(srcSubData)) {
-					srcSubData = CommonFunction.mergeGridAndSession(
-							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
-							srcSubData,
-							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+					srcSubData = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData, srcSubData, CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
 				}
 			}
 			
@@ -3477,10 +3466,7 @@ public class ProjectController extends CoTopComponent {
 
 				depSubData = CommonFunction.setOssComponentLicense(depData);
 				if (CollectionUtils.isNotEmpty(depSubData)) {
-					depSubData = CommonFunction.mergeGridAndSession(
-							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData,
-							depSubData,
-							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+					depSubData = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId), depData, depSubData, CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
 				}
 			}
 
@@ -3495,10 +3481,7 @@ public class ProjectController extends CoTopComponent {
 				
 				binSubData = CommonFunction.setOssComponentLicense(binData);
 				if (CollectionUtils.isNotEmpty(binSubData)) {
-					binSubData = CommonFunction.mergeGridAndSession(
-							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
-							binSubData,
-							CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+					binSubData = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData, binSubData, CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
 				}
 			}
 
@@ -3617,7 +3600,6 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@PostMapping(value = PROJECT.ADD_WATCHER)
 	public @ResponseBody ResponseEntity<Object> addWatcher(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
-		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
 		try {
@@ -3667,9 +3649,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@PostMapping(value = PROJECT.ADD_WATCHERS)
-	public @ResponseBody ResponseEntity<Object> addWatchers(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
-		
+	public @ResponseBody ResponseEntity<Object> addWatchers(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
 		try {
@@ -3721,8 +3701,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@PostMapping(value = PROJECT.REMOVE_WATCHER)
-	public @ResponseBody ResponseEntity<Object> removeWatcher(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> removeWatcher(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		try {
 			if (!isEmpty(project.getPrjUserId()) || !isEmpty(project.getPrjEmail())) {
 				projectService.removeWatcher(project);
@@ -3746,8 +3725,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@PostMapping(value = PROJECT.REMOVE_WATCHERS)
-	public @ResponseBody ResponseEntity<Object> removeWatchers(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> removeWatchers(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
 		try {
@@ -3787,8 +3765,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@PostMapping(value = PROJECT.COPY_WATCHER)
-	public @ResponseBody ResponseEntity<Object> copyWatcher(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> copyWatcher(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		HashMap<String, Object> resMap = new HashMap<>();
 		
 		try {			
@@ -3942,6 +3919,50 @@ public class ProjectController extends CoTopComponent {
 		try {
 			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
+				
+				List<String> exts = new ArrayList<>();
+				String csvExp = CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "12");
+				String spdxExp = CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "42");
+				String cdxExp = CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "43");
+				
+				if (!isEmpty(csvExp)) {
+					for (String exp : csvExp.split(",")) {
+						if (!isEmpty(exp) && !exts.contains(exp.trim())) {
+							exts.add(exp.trim());
+						}
+					}
+				}
+				if (!isEmpty(spdxExp)) {
+					for (String exp : spdxExp.split(",")) {
+						if (!isEmpty(exp) && !exts.contains(exp.trim())) {
+							exts.add(exp.trim());
+						}
+					}
+				}
+				if (!isEmpty(cdxExp)) {
+					for (String exp : cdxExp.split(",")) {
+						if (!isEmpty(exp) && !exts.contains(exp.trim())) {
+							exts.add(exp.trim());
+						}
+					}
+				}
+				
+				boolean checkExt = false;
+				if (!exts.isEmpty()) {
+					for (String ext : exts) {
+						if (ext.equalsIgnoreCase(fileExtension)) {
+							checkExt = true;
+							break;
+						}
+					}
+				}
+				if (!checkExt) {
+					resultList.add("UNSUPPORTED_FILE");
+					String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{String.join(",", exts)});
+					resultList.add(msg);
+					return toJson(resultList);
+				}
+				
 				if (fileId == null) {
 					list = fileService.uploadFile(req, file);
 				} else {
@@ -3949,6 +3970,15 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 
+			if (CollectionUtils.isNotEmpty(list)) {
+				UploadFile uploadFile = list.get(0);
+				if (!uploadFile.isUploadSucc() && !isEmpty(uploadFile.getComments())) {
+					resultList.add("FILE_CONVERSION_FAILED");
+					resultList.add("File format error : " + uploadFile.getComments());
+					return toJson(resultList);
+				}
+			}
+			
 			if (fileExtension.equals("csv")) {
 				resultList = CommonFunction.checkCsvFileLimit(list);
 			} else {
