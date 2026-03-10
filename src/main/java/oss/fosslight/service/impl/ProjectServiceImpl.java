@@ -2110,7 +2110,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		for (ProjectIdentification ossBean : ossComponents) {
 			if (isBom) {
-				String key = (ossBean.getOssName() + "_" + avoidNull(ossBean.getOssVersion())).toUpperCase();
+				String key = ossBean.getOssName() + "_" + avoidNull(ossBean.getOssVersion());
 	    		if (!isEmpty(ossBean.getOssName()) && !ossBean.getOssName().equals("-")) {
 	    			uniqueKeys.add(key);
 	    		}
@@ -2127,7 +2127,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			String standardCvssScore = String.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
 			Map<String, OssMaster> ossInfo = CoCodeManager.OSS_INFO_UPPER;
 			uniqueKeys.parallelStream().forEach(key -> {
-				OssMaster ossMaster = buildOssMasterFromKey(key, ossInfo);
+				OssMaster ossMaster = buildOssMasterFromKey(key.toUpperCase(), ossInfo);
 	            OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
 	            if (om != null && !isEmpty(om.getCvssScore())) {
 	            	if (new BigDecimal(om.getCvssScore()).compareTo(new BigDecimal(standardCvssScore)) > -1) {
