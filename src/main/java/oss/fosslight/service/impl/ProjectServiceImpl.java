@@ -3838,9 +3838,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
         paramBean.setSaveBomFlag(CoConstDef.FLAG_YES);
         Map<String, Object> mergeListMap = getIdentificationGridList(paramBean);
         if (mergeListMap != null && mergeListMap.get("rows") != null) {
-            Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-            Set<String> uniqueKeys = new HashSet<>();
-            
             if (isCopyConfirm) {
                 ProjectIdentification param = new ProjectIdentification();
                 param.setReferenceId(copyPrjId);
@@ -3855,8 +3852,42 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             
             List<ProjectIdentification> registBomList = (mergeListMap != null) ? (List<ProjectIdentification>) mergeListMap.get("rows") : null;
             if (CollectionUtils.isNotEmpty(registBomList)) {
+            	Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
+            	if (CollectionUtils.isNotEmpty(bomList)) {
+            		Set<String> bomUniqueKeys = new HashSet<>();
+                	for (ProjectIdentification pi : bomList) {
+                		bomUniqueKeys.add((pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase());
+                    }
+                    
+                	bomUniqueKeys.parallelStream().forEach(key -> {
+                        OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
+                        OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
+                        if (om != null && !isEmpty(om.getCvssScore())) {
+                            vulnerabilityInfoMap.put(key, om);
+                        }
+                    });
+                    
+                    for (ProjectIdentification bean : bomList) {
+                    	String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+                    	if (vulnerabilityInfoMap.containsKey(key)) {
+                            OssMaster om = vulnerabilityInfoMap.get(key);
+                            String cveId = om.getCveId();
+                            String cvssScore = om.getCvssScore();
+                            if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+                                if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
+                                    includeVulnInfoOldBomList.add(bean);
+                                }
+                            }
+                        }
+                    }
+            	}
+            	
+            	Set<String> uniqueKeys = new HashSet<>();
             	for (ProjectIdentification bean : registBomList) {
-                    uniqueKeys.add((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
+            		String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+            		if (!vulnerabilityInfoMap.containsKey(key)) {
+            			uniqueKeys.add(key);
+            		}
                 }
                 
                 uniqueKeys.parallelStream().forEach(key -> {
@@ -3934,53 +3965,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                     bean = CommonFunction.findOssIdAndName(bean);
                     
                     String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-                    boolean setCveInfoFlag = false;
                     if (vulnerabilityInfoMap.containsKey(key)) {
                         OssMaster om = vulnerabilityInfoMap.get(key);
-                        if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
-                            String cveId = om.getCveId();
-                            String cvssScore = om.getCvssScore();
-                            if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-                                if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
-                                    includeVulnInfoOldBomList.add(bean);
-                                }
-                            } else {
-                                setCveInfoFlag = true;
-                            }
-                        } else {
-                            setCveInfoFlag = true;
-                        }
-                    }
-                    
-                    if (setCveInfoFlag) {
-                        if (vulnerabilityInfoMap.containsKey(key)) {
-                            OssMaster om = vulnerabilityInfoMap.get(key);
-                            String cveId = om.getCveId();
-                            String cvssScore = om.getCvssScore();
-                            if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-                                if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
-                                    includeVulnInfoNewBomList.add(bean);
-                                }
+                        String cveId = om.getCveId();
+                        String cvssScore = om.getCvssScore();
+                        if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+                            if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
+                                includeVulnInfoNewBomList.add(bean);
                             }
                         }
                     }
                     
-                    if(!isEmpty(bean.getCopyrightText())) {
+                    if (!isEmpty(bean.getCopyrightText())) {
                         String[] copyrights = bean.getCopyrightText().split("\\|");
                         String copyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
                         bean.setCopyrightText(copyrightText);
                     }
                     
                     // 컴포넌트 마스터 인서트
-                    // projectMapper.registBomComponents(bean);
                     List<OssComponentsLicense> licenseList = CommonFunction.findOssLicenseIdAndName(bean.getOssId(), bean.getOssComponentsLicenseList());
                     bean.setOssComponentsLicenseList(licenseList);
                     bomComponentsList.add(bean);
-                    
-//                  for (OssComponentsLicense licenseBean : licenseList) {
-//                      licenseBean.setComponentId(bean.getComponentId());
-//                      projectMapper.registComponentLicense(licenseBean);
-//                  }
                 }
             }
         }
