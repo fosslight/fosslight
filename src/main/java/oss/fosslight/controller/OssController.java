@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -672,7 +673,11 @@ public class OssController extends CoTopComponent{
 								diffMap.put("addExcludeCpe", excludeCpe);
 							}
 						}
-						return makeJsonResponseHeader(false, "hasExists", diffMap);
+						if (MapUtils.isNotEmpty(diffMap)) {
+							return makeJsonResponseHeader(false, "hasExists", diffMap);
+						} else {
+							return makeJsonResponseHeader();
+						}
 					}
 				}
 			} else {
@@ -1419,7 +1424,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if (!isEmpty(resultOssId)) {
-			CoCodeManager.getInstance().refreshOssInfoByOssId(null, resultOssId);
+			CoCodeManager.getInstance().refreshOssInfo();
 		}
 		
 		History h = ossService.work(ossMaster);
@@ -2151,7 +2156,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if (!isEmpty(resultOssId)) {
-			CoCodeManager.getInstance().refreshOssInfoByOssId(null, resultOssId); // 등록된 oss info 갱신
+			CoCodeManager.getInstance().refreshOssInfo(); // 등록된 oss info 갱신
 		}
 		
 		History h = ossService.work(resultData);
