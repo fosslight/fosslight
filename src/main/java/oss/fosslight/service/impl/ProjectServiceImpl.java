@@ -2105,13 +2105,39 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> ossComponentsIdList = new ArrayList<>();
 		int ossComponentIdx = 1;
 		
+		List<OssMaster> addedVulnInfoList = new ArrayList<>();
+		Set<String> uniqueKeys = new HashSet<>();
+		
 		for (ProjectIdentification ossBean : ossComponents) {
+			if (isBom) {
+				String key = (ossBean.getOssName() + "_" + avoidNull(ossBean.getOssVersion())).toUpperCase();
+	    		if (!isEmpty(ossBean.getOssName()) && !ossBean.getOssName().equals("-")) {
+	    			uniqueKeys.add(key);
+	    		}
+			}
 			ossBean.setReferenceId(prjId);
 			ossBean.setReportFileId(null);
 			ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
 			ossBean.setCopyrightText(ossBean.getCopyright());
 			ossComponentsIdList.add(ossBean.getComponentId());
 			insertOssComponentList.add(ossBean);
+		}
+		
+		if (isBom) {
+			String standardCvssScore = String.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
+			Map<String, OssMaster> ossInfo = CoCodeManager.OSS_INFO_UPPER;
+			uniqueKeys.parallelStream().forEach(key -> {
+				OssMaster ossMaster = buildOssMasterFromKey(key, ossInfo);
+	            OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
+	            if (om != null && !isEmpty(om.getCvssScore())) {
+	            	if (new BigDecimal(om.getCvssScore()).compareTo(new BigDecimal(standardCvssScore)) > -1) {
+	            		String[] parts = key.split("_", -1);
+	            		om.setOssName(parts[0]);
+	            		om.setOssVersion(parts[1]);
+	            		addedVulnInfoList.add(om);
+	            	}
+	            }
+	        });
 		}
 		
 		OssComponents param = new OssComponents();
@@ -2209,6 +2235,23 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				insertPartnerMapList.clear();
 			}
+		} else {
+			if (CollectionUtils.isNotEmpty(addedVulnInfoList)) {
+	            String securityComment = "<p><strong>Added vulnerabilities from Identification</strong>";
+	            for (OssMaster om : addedVulnInfoList) {
+	                securityComment += "<br />" + om.getOssName() + " (" + avoidNull(om.getOssVersion(), "N/A") + ")";
+	            }
+	            if (!isEmpty(securityComment)) {
+	                securityComment += "</p>";
+	                
+	                CommentsHistory commHisBean = new CommentsHistory();
+	                commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_SECURITY_HIS);
+	                commHisBean.setReferenceId(prjId);
+	                commHisBean.setContents(securityComment);
+	                
+	                commentService.registComment(commHisBean, false);
+	            }
+	        }
 		}
 	}
 	
