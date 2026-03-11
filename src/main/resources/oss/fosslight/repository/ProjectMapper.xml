@@ -6198,7 +6198,7 @@
 	
 	<select id="selectSecurityListForProject" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.Vulnerability">
 		SELECT TBL.*
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
 				, IFNULL((SELECT VULNERABILITY_RESOLUTION FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = #{referenceId} AND OSS_NAME = TBL.OSS_NAME AND OSS_VERSION = TBL.OSS_VERSION AND CVE_ID = TBL.CVE_ID AND CVSS_SCORE = TBL.CVSS_SCORE LIMIT 1), 'Unresolved') AS VULNERABILITY_RESOLUTION
 			</if>
 		FROM
