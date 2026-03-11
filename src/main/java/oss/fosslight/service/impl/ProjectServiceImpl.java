@@ -319,7 +319,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
 			
 			for (OssComponents oc : securityList) {
-				if (oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
+				if (avoidNull(oc.getVulnerabilityResolution()).equalsIgnoreCase("Fixed")) {
 					fixedCheckCnt++;
 					continue;
 				} else {
@@ -334,7 +334,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 				
-				if (!oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
+				if (!avoidNull(oc.getVulnerabilityResolution()).equalsIgnoreCase("Fixed")) {
 					if (isEmpty(fixedCvssScore) && !isEmpty(oc.getCvssScore())) {
 						fixedCvssScore = oc.getCvssScore();
 					} else {
