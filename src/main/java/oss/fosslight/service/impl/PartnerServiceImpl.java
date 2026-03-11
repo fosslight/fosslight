@@ -1507,6 +1507,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		String vulnerabilityLink = "";
 		int gridIdx = 1;
 		
+		identification.setSkipVulnerabilityResolution(CoConstDef.FLAG_YES);
 		List<Vulnerability> list = projectMapper.selectSecurityListForProject(identification);
 		Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
 		Map<String, String> patchLinkMap = new HashMap<>();

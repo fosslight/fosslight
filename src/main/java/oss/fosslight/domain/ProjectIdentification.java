@@ -304,6 +304,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	/** The vulnerability. */
 	private String vulnerability;
+	private String skipVulnerabilityResolution;
 	
 	private String comments;
 	private String incCommentsFlag;
@@ -2234,5 +2235,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setUrlSearchSeq(int urlSearchSeq) {
 		this.urlSearchSeq = urlSearchSeq;
+	}
+
+	public String getSkipVulnerabilityResolution() {
+		return skipVulnerabilityResolution;
+	}
+
+	public void setSkipVulnerabilityResolution(String skipVulnerabilityResolution) {
+		this.skipVulnerabilityResolution = skipVulnerabilityResolution;
 	}
 }

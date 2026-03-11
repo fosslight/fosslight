@@ -562,6 +562,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			identification.setReferenceId(identification.getRefBatId());
 		}
 
+		List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(identification);
+		Map<String, Vulnerability> securityDataMap = new HashMap<>();
+		if (CollectionUtils.isNotEmpty(securityDataList)) {
+			securityDataMap = securityDataList.stream()
+							        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+							        .collect(Collectors.toMap(
+							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
+							            v -> v,
+							            (existing, replacement) -> {
+							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+							                return score1 >= score2 ? existing : replacement;
+							            }
+							        ));
+		}
+		
 		// bom 일시
 		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(identification.getReferenceDiv())) {
 			Map<String, String> obligationTypeMergeMap = new HashMap<>();
@@ -638,25 +654,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					bomLicenses.add(ocl);
 					bomLicenseMap.put(key, bomLicenses);
-				});
-				
-				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-				Set<String> uniqueKeys = new HashSet<>();
-				for (ProjectIdentification ll : list) {
-				    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
-				        continue;
-				    }
-
-				    String ossVersion = avoidNull(ll.getOssVersion());
-				    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
-				}
-				
-				uniqueKeys.parallelStream().forEach(key -> {
-				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-				    if (om != null && !isEmpty(om.getCvssScore())) {
-				        vulnerabilityInfoMap.put(key, om);
-				    }
 				});
 				
 				for (ProjectIdentification ll : list) {
@@ -741,8 +738,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (ossInfoMap.containsKey(key)) {
 							ossRestriction = ossInfoMap.get(key).getRestriction();
 						}
-						if (vulnerabilityInfoMap.containsKey(key)) {
-							OssMaster om = vulnerabilityInfoMap.get(key);
+						if (securityDataMap.containsKey(key)) {
+							Vulnerability om = securityDataMap.get(key);
 							ll.setCveId(om.getCveId());
 							ll.setCvssScore(om.getCvssScore());
 							ll.setVulnYn(CoConstDef.FLAG_YES);
@@ -870,9 +867,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 				
-				uniqueKeys.clear();
-				vulnerabilityInfoMap.clear();
-				
 				// src oss중에서 bat와 merge할 수 있는 동일한 oss에 최신 version 외 라이선스까지 동일한 bat가 존재하는 경우
 				if (!srcSameLicenseMap.isEmpty()) {
 					List<ProjectIdentification> _tmp = new ArrayList<>();
@@ -912,26 +906,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.thenComparing(ProjectIdentification::getHomepage, Comparator.naturalOrder());
 				list.sort(compare);
 				
-				Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-				Set<String> uniqueKeys = new HashSet<>();
-				for (ProjectIdentification ll : list) {
-				    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
-				        continue;
-				    }
-
-				    String ossVersion = avoidNull(ll.getOssVersion());
-				    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
-				}
-				
-				uniqueKeys.parallelStream().forEach(key -> {
-				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-				    if (om != null && !isEmpty(om.getCvssScore())) {
-				        vulnerabilityInfoMap.put(key, om);
-				    }
-				});
-				
-				// convert max score
 				List<String> adminCheckList = new ArrayList<>();
 				Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
 				List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
@@ -948,7 +922,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					bomLicenseMap.put(key, bomLicenses);
 				});
 				
-				list.forEach(ll -> {
+				for (ProjectIdentification ll : list) {
 					String ossRestriction = "";
 					String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
 					
@@ -956,8 +930,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						ossRestriction = ossInfoMap.get(key).getRestriction();
 					}
 					
-					if (vulnerabilityInfoMap.containsKey(key)) {
-						OssMaster om = vulnerabilityInfoMap.get(key);
+					if (securityDataMap.containsKey(key)) {
+						Vulnerability om = securityDataMap.get(key);
 						ll.setCveId(om.getCveId());
 						ll.setCvssScore(om.getCvssScore());
 						ll.setVulnYn(CoConstDef.FLAG_YES);
@@ -1006,10 +980,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
 						adminCheckList.add(ll.getComponentId());
 					}
-				});
-				
-				uniqueKeys.clear();
-				vulnerabilityInfoMap.clear();
+				};
 				
 				map.put("rows", list);
 
@@ -1047,26 +1018,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			list = projectMapper.selectIdentificationGridList(identification);
 			list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 			
-			Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
 			if (list != null && !list.isEmpty()) {
-				Set<String> uniqueKeys = new HashSet<>();
-				for (ProjectIdentification ll : list) {
-				    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
-				        continue;
-				    }
-
-				    String ossVersion = avoidNull(ll.getOssVersion());
-				    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
-				}
-				
-				uniqueKeys.parallelStream().forEach(key -> {
-				    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-				    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-				    if (om != null && !isEmpty(om.getCvssScore())) {
-				        vulnerabilityInfoMap.put(key, om);
-				    }
-				});
-				
 				ProjectIdentification param = new ProjectIdentification();
 				OssMaster ossParam = new OssMaster();
 				Map<String, Object> ossInfoCheckMap = new HashMap<>();
@@ -1116,16 +1068,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					
 					String key2 = (project.getOssName() + "_" + avoidNull(project.getOssVersion())).toUpperCase();
-					if (vulnerabilityInfoMap.containsKey(key2)) {
-						OssMaster om = vulnerabilityInfoMap.get(key2);
+					if (securityDataMap.containsKey(key2)) {
+						Vulnerability om = securityDataMap.get(key2);
 						project.setCveId(om.getCveId());
 						project.setCvssScore(om.getCvssScore());
 						project.setVulnYn(CoConstDef.FLAG_YES);
 					}
 				}
-				
-				uniqueKeys.clear();
-				vulnerabilityInfoMap.clear();
 				
 				// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
 				Map<String, OssMaster> componentOssInfoMap = null;
@@ -2105,16 +2054,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> ossComponentsIdList = new ArrayList<>();
 		int ossComponentIdx = 1;
 		
-		List<OssMaster> addedVulnInfoList = new ArrayList<>();
-		Set<String> uniqueKeys = new HashSet<>();
+		Map<String, Vulnerability> securityDataMap = new HashMap<>();
 		
 		for (ProjectIdentification ossBean : ossComponents) {
-			if (isBom) {
-				String key = ossBean.getOssName() + "_" + avoidNull(ossBean.getOssVersion());
-	    		if (!isEmpty(ossBean.getOssName()) && !ossBean.getOssName().equals("-")) {
-	    			uniqueKeys.add(key);
-	    		}
-			}
 			ossBean.setReferenceId(prjId);
 			ossBean.setReportFileId(null);
 			ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
@@ -2124,20 +2066,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		if (isBom) {
-			String standardCvssScore = String.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
-			Map<String, OssMaster> ossInfo = CoCodeManager.OSS_INFO_UPPER;
-			uniqueKeys.parallelStream().forEach(key -> {
-				OssMaster ossMaster = buildOssMasterFromKey(key.toUpperCase(), ossInfo);
-	            OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-	            if (om != null && !isEmpty(om.getCvssScore())) {
-	            	if (new BigDecimal(om.getCvssScore()).compareTo(new BigDecimal(standardCvssScore)) > -1) {
-	            		String[] parts = key.split("_", -1);
-	            		om.setOssName(parts[0]);
-	            		om.setOssVersion(parts[1]);
-	            		addedVulnInfoList.add(om);
-	            	}
-	            }
-	        });
+			ProjectIdentification identification = new ProjectIdentification();
+			identification.setReferenceId(copyPrjId);
+			identification.setReferenceDiv(project.getReferenceDiv());
+			identification.setStandardScore(Float.valueOf(String.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD))));
+			
+			List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(identification);
+			if (CollectionUtils.isNotEmpty(securityDataList)) {
+				securityDataMap = securityDataList.stream()
+								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+								        .collect(Collectors.toMap(
+								            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
+								            v -> v,
+								            (existing, replacement) -> {
+								            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+								                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+								                return score1 >= score2 ? existing : replacement;
+								            }
+								        ));
+			}
 		}
 		
 		OssComponents param = new OssComponents();
@@ -2236,10 +2183,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				insertPartnerMapList.clear();
 			}
 		} else {
-			if (CollectionUtils.isNotEmpty(addedVulnInfoList)) {
+			if (MapUtils.isNotEmpty(securityDataMap)) {
 	            String securityComment = "<p><strong>Added vulnerabilities from Identification</strong>";
-	            for (OssMaster om : addedVulnInfoList) {
-	                securityComment += "<br />" + om.getOssName() + " (" + avoidNull(om.getOssVersion(), "N/A") + ")";
+	            for (String key : securityDataMap.keySet()) {
+	            	Vulnerability vuln = securityDataMap.get(key);
+	                securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
 	            }
 	            if (!isEmpty(securityComment)) {
 	                securityComment += "</p>";
@@ -3830,9 +3778,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@Transactional
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid, boolean isPartner) {
-        Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
-        List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
-        List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
         String standardCvssScore = String.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
         
         // 컴포넌트 삭제
@@ -3855,12 +3800,30 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
         // 기존 bom data get
         List<ProjectIdentification> bomList = (!isAndroid && !isPartner) ? projectMapper.selectBomList(identification) : projectMapper.selectOtherBomList(identification);
         List<String> adminCheckComponentIds = new ArrayList<>();
+        Map<String, Vulnerability> securityDataMap = new HashMap<>();
+        
         if (CollectionUtils.isNotEmpty(bomList)) {
             for (ProjectIdentification pi : bomList) {
                 if (CoConstDef.FLAG_YES.equals(pi.getAdminCheckYn())) {
                     adminCheckComponentIds.add(pi.getRefComponentId());
                 }
             }
+            
+            paramBean.setStandardScore(Float.valueOf(standardCvssScore));
+            List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(paramBean);
+    		if (CollectionUtils.isNotEmpty(securityDataList)) {
+				securityDataMap = securityDataList.stream()
+								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+								        .collect(Collectors.toMap(
+    							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
+    							            v -> v,
+    							            (existing, replacement) -> {
+    							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+    							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+    							                return score1 >= score2 ? existing : replacement;
+    							            }
+    							        ));
+    		}
         }
         
         List<String> removeAdminCheckComponentIds = new ArrayList<>();
@@ -3895,55 +3858,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             
             List<ProjectIdentification> registBomList = (mergeListMap != null) ? (List<ProjectIdentification>) mergeListMap.get("rows") : null;
             if (CollectionUtils.isNotEmpty(registBomList)) {
-            	Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-            	if (CollectionUtils.isNotEmpty(bomList)) {
-            		Set<String> bomUniqueKeys = new HashSet<>();
-                	for (ProjectIdentification pi : bomList) {
-                		bomUniqueKeys.add((pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase());
-                    }
-                    
-                	bomUniqueKeys.parallelStream().forEach(key -> {
-                        OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-                        OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-                        if (om != null && !isEmpty(om.getCvssScore())) {
-                            vulnerabilityInfoMap.put(key, om);
-                        }
-                    });
-                    
-                    for (ProjectIdentification bean : bomList) {
-                    	String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-                    	if (vulnerabilityInfoMap.containsKey(key)) {
-                            OssMaster om = vulnerabilityInfoMap.get(key);
-                            String cveId = om.getCveId();
-                            String cvssScore = om.getCvssScore();
-                            if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-                                if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
-                                    includeVulnInfoOldBomList.add(bean);
-                                }
-                            }
-                        }
-                    }
-            	}
-            	
-            	Set<String> uniqueKeys = new HashSet<>();
             	for (ProjectIdentification bean : registBomList) {
-            		String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-            		if (!vulnerabilityInfoMap.containsKey(key)) {
-            			uniqueKeys.add(key);
-            		}
-                }
-                
-                uniqueKeys.parallelStream().forEach(key -> {
-                	if (!vulnerabilityInfoMap.containsKey(key)) {
-                		OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-                        OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-                        if (om != null && !isEmpty(om.getCvssScore())) {
-                            vulnerabilityInfoMap.put(key, om);
-                        }
-                	}
-                });
-                
-                for (ProjectIdentification bean : registBomList) {
                     bean.setRefDiv(bean.getReferenceDiv());
                     if (!isAndroid) {
                         if (!isPartner) {
@@ -4009,18 +3924,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                     
                     bean = CommonFunction.findOssIdAndName(bean);
                     
-                    String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
-                    if (vulnerabilityInfoMap.containsKey(key)) {
-                        OssMaster om = vulnerabilityInfoMap.get(key);
-                        String cveId = om.getCveId();
-                        String cvssScore = om.getCvssScore();
-                        if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-                            if (new BigDecimal(cvssScore).compareTo(new BigDecimal(standardCvssScore)) > -1) {
-                                includeVulnInfoNewBomList.add(bean);
-                            }
-                        }
-                    }
-                    
                     if (!isEmpty(bean.getCopyrightText())) {
                         String[] copyrights = bean.getCopyrightText().split("\\|");
                         String copyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
@@ -4058,65 +3961,63 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             }
         }
         
-        // add or delete data containing vulnerability information among oss information
-        String securityComment = "";
-        List<ProjectIdentification> duplicatedNewVulnInfoList = null;
-        List<ProjectIdentification> duplicatedOldVulnInfoList = null;
+        Map<String, Vulnerability> targetSecurityDataMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(bomComponentsList)) {
+        	paramBean.setStandardScore(Float.valueOf(standardCvssScore));
+            List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(paramBean);
+    		if (CollectionUtils.isNotEmpty(securityDataList)) {
+				targetSecurityDataMap = securityDataList.stream()
+								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+								        .collect(Collectors.toMap(
+    							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
+    							            v -> v,
+    							            (existing, replacement) -> {
+    							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+    							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+    							                return score1 >= score2 ? existing : replacement;
+    							            }
+    							        ));
+    		}
+        }
         
-        if (!includeVulnInfoNewBomList.isEmpty()) {
-            duplicatedNewVulnInfoList = includeVulnInfoNewBomList.stream()
-            								.filter(p -> !isEmpty(p.getOssName()) && !p.getOssName().trim().equals("-"))
-            								.filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
-        }
-        if (!includeVulnInfoOldBomList.isEmpty()) {
-            duplicatedOldVulnInfoList = includeVulnInfoOldBomList.stream()
-            								.filter(p -> !isEmpty(p.getOssName()) && !p.getOssName().trim().equals("-"))
-            								.filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
-        }
-        if (duplicatedNewVulnInfoList != null && duplicatedOldVulnInfoList != null) {
-            List<ProjectIdentification> filteredAddVulnDataList = includeVulnInfoNewBomList
-                    .stream()
-                    .filter(bfList-> 
-                    includeVulnInfoOldBomList
-                                    .stream()
-                                    .filter(afList -> 
-                                            (bfList.getOssName() + "||" + bfList.getOssVersion()).equalsIgnoreCase(afList.getOssName() + "||" + afList.getOssVersion())
-                                            ).collect(Collectors.toList()).size() == 0
-                            ).collect(Collectors.toList());
-                            
-            List<ProjectIdentification> filteredDelVulnDataList = includeVulnInfoOldBomList
-                    .stream()
-                    .filter(bfList-> 
-                    includeVulnInfoNewBomList
-                                    .stream()
-                                    .filter(afList -> 
-                                            (bfList.getOssName() + "||" + bfList.getOssVersion()).equalsIgnoreCase(afList.getOssName() + "||" + afList.getOssVersion())
-                                            ).collect(Collectors.toList()).size() == 0
-                            ).collect(Collectors.toList());
-            
-            if (filteredAddVulnDataList != null && !filteredAddVulnDataList.isEmpty()) {
+        String securityComment = "";
+        if (MapUtils.isNotEmpty(securityDataMap) && MapUtils.isNotEmpty(targetSecurityDataMap)) {
+        	final Map<String, Vulnerability> existsSecurityDataMap = securityDataMap;
+        	final Map<String, Vulnerability> existsTargetSecurityDataMap = targetSecurityDataMap;
+        	
+        	Map<String, Vulnerability> uniqueSecurityMap = securityDataMap.entrySet().stream()
+															.filter(entry -> !existsTargetSecurityDataMap.containsKey(entry.getKey()))
+															.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        	
+        	Map<String, Vulnerability> uniqueTargetSecurityMap = targetSecurityDataMap.entrySet().stream()
+																    .filter(entry -> !existsSecurityDataMap.containsKey(entry.getKey()))
+																    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        	
+        	if (MapUtils.isNotEmpty(uniqueTargetSecurityMap)) {
                 securityComment += "<p><strong>Added vulnerabilities from Identification</strong>";
-                for (ProjectIdentification pi : filteredAddVulnDataList) {
-                    securityComment += "<br />" + pi.getOssName() + " (" + avoidNull(pi.getOssVersion(), "N/A") + ")";
+                for (Vulnerability vuln : uniqueTargetSecurityMap.values()) {
+                    securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
                 }
             }
             
-            if (filteredDelVulnDataList != null && !filteredDelVulnDataList.isEmpty()) {
-                if (!securityComment.isEmpty()) securityComment += "<br /><br />";
+        	if (MapUtils.isNotEmpty(uniqueSecurityMap)) {
+                if (!securityComment.isEmpty()) {
+                	securityComment += "<br /><br />";
+                }
                 securityComment += "<p><strong>Deleted vulnerabilities from Identification</strong>";
-                for (ProjectIdentification pi : filteredDelVulnDataList) {
-                    securityComment += "<br />" + pi.getOssName() + " (" + avoidNull(pi.getOssVersion(), "N/A") + ")";
+                for (Vulnerability vuln : uniqueSecurityMap.values()) {
+                    securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
                 }               
             }
-        } else if (duplicatedNewVulnInfoList != null) {
-            securityComment += "<p><strong>Added vulnerabilities from Identification</strong>";
-            for (ProjectIdentification pi : duplicatedNewVulnInfoList) {
-                securityComment += "<br />" + pi.getOssName() + " (" + avoidNull(pi.getOssVersion(), "N/A") + ")";
+        } else if (MapUtils.isNotEmpty(targetSecurityDataMap)) {
+        	securityComment += "<p><strong>Added vulnerabilities from Identification</strong>";
+            for (Vulnerability vuln : targetSecurityDataMap.values()) {
+                securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
             }
-        } else if (duplicatedOldVulnInfoList != null) {
-            securityComment += "<p><strong>Deleted vulnerabilities from Identification</strong>";
-            for (ProjectIdentification pi : duplicatedOldVulnInfoList) {
-                securityComment += "<br />" + pi.getOssName() + " (" + avoidNull(pi.getOssVersion(), "N/A") + ")";
+        } else if (MapUtils.isNotEmpty(securityDataMap)) {
+        	securityComment += "<p><strong>Deleted vulnerabilities from Identification</strong>";
+        	for (Vulnerability vuln : securityDataMap.values()) {
+                securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
             }
         }
         
@@ -7586,13 +7487,18 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		}
 		identification.setOssVersion(avoidNull(project.getOssVersion()));
 		
-		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
-		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		if (!isEmpty(project.getReferenceDiv())) {
+			identification.setReferenceDiv(project.getReferenceDiv());
 		} else {
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
+			if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} else {
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			}
 		}
 		
+		identification.setSkipVulnerabilityResolution(CoConstDef.FLAG_YES);
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
 		if (fullList != null && !fullList.isEmpty()) {

@@ -292,6 +292,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							}
 						}
 						if (ossMaster != null) {
+							ossMaster.setOssVersionAlias(null);
 							ossMaster.setOssVersionAliases(null);
 						} else {
 							ossMaster = new OssMaster();
