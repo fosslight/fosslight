@@ -370,9 +370,16 @@
                 var ossName = rowObject.ossName;
                 var ossVersion = rowObject.ossVersion;
                 var project = [[${project}]];
+                var referenceDiv = "";
+                if (typeof rowObject.referenceDiv !== "undefined") {
+                	referenceDiv = rowObject.referenceDiv;
+                }
                 
                 if (project != null) {
                 	_url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=Y&prjId=' + project.prjId + '&ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
+                	if ("" != referenceDiv) {
+                		_url += '&referenceDiv=' + referenceDiv;
+                	}
                 } else {
                 	_url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
                 }

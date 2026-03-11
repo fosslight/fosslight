@@ -635,25 +635,21 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
 		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
 
-		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
-		Map<String, OssMaster> vulnerabilityInfoMap = new HashMap<>();
-		Set<String> uniqueKeys = new HashSet<>();
-		for (ProjectIdentification ll : list) {
-		    if (isEmpty(ll.getOssName()) || "-".equals(ll.getOssName()) || CoConstDef.FLAG_YES.equals(avoidNull(ll.getExcludeYn()))) {
-		        continue;
-		    }
-
-		    String ossVersion = avoidNull(ll.getOssVersion());
-		    uniqueKeys.add((ll.getOssName() + "_" + ossVersion).toUpperCase());
+		List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(_param);
+		Map<String, Vulnerability> securityDataMap = new HashMap<>();
+		if (CollectionUtils.isNotEmpty(securityDataList)) {
+			securityDataMap = securityDataList.stream()
+							        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+							        .collect(Collectors.toMap(
+							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
+							            v -> v,
+							            (existing, replacement) -> {
+							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+							                return score1 >= score2 ? existing : replacement;
+							            }
+							        ));
 		}
-		
-		uniqueKeys.parallelStream().forEach(key -> {
-		    OssMaster ossMaster = buildOssMasterFromKey(key, ossInfoMap);
-		    OssMaster om = ossService.getOssVulnerabilityInfo(ossMaster);
-		    if (om != null && !isEmpty(om.getCvssScore())) {
-		        vulnerabilityInfoMap.put(key, om);
-		    }
-		});
 		
 		LinkedHashMap<String, List<Map<String, Object>>> resultYamlFormat = YamlUtil.checkYamlFormat(projectService.setMergeGridData(list), type);
 
@@ -667,9 +663,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			        continue;
 			    }
 				String key = (resultYamlFormatKey + "_" + avoidNull(String.valueOf(yamlFormatMap.get("version")))).toUpperCase();
-				if (vulnerabilityInfoMap.containsKey(key)) {
-					OssMaster om = vulnerabilityInfoMap.get(key);
-					yamlFormatMap.put("Vulnerability", om.getCvssScore());
+				if (securityDataMap.containsKey(key)) {
+					Vulnerability vuln = securityDataMap.get(key);
+					yamlFormatMap.put("Vulnerability", vuln.getCvssScore());
 				}
 			}
 			resultMap.put(resultYamlFormatKey, yamlFormatList);

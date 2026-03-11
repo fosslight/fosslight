@@ -997,10 +997,12 @@ var overview = {
         		{
         			targets : [1],
         			className : "text-center",
-        			width: "20%"
+        			width: "20%",
+        			orderable: false
         		},
         		{
         			targets : [2],
+        			defaultContent : "",
         			render : function (data, type, row) {
         				if (type === 'sort' || type === 'type') {
                             return data.sort;
