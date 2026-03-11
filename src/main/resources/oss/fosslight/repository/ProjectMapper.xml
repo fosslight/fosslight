@@ -6238,8 +6238,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6286,8 +6286,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6330,8 +6330,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6381,8 +6381,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6425,8 +6425,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6476,8 +6476,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6516,8 +6516,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6563,8 +6563,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6605,8 +6605,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			GROUP BY TBL.OSS_NAME, TBL.OSS_VERSION
 			
@@ -6656,8 +6656,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			
 			UNION
@@ -6698,8 +6698,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 			GROUP BY TBL.OSS_NAME, TBL.OSS_VERSION
 			
@@ -6749,8 +6749,8 @@
 			)
 			LEFT JOIN NVD_CVE_V3 CVE
 			ON NVD.CVE_ID = CVE.CVE_ID
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(standardScore)">
-				WHERE CVE.CVSS_SCORE = #{standardScore}
+			<if test="standardScore != null">
+				WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 			</if>
 		) TBL
 	</select>

@@ -3943,7 +3943,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             projectMapper.resetOssComponentsAndLicense(identification.getReferenceId(), identification.getReferenceDiv());
         }
         
-        if (!CollectionUtils.isEmpty(bomComponentsList)) {
+        boolean hasNewBomData = false;
+        if (CollectionUtils.isNotEmpty(bomComponentsList)) {
+        	hasNewBomData = true;
         	Project param = new Project();
         	param.setReferenceId(prjId);
         	param.setReferenceDiv(identification.getReferenceDiv());
@@ -3962,7 +3964,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
         }
         
         Map<String, Vulnerability> targetSecurityDataMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(bomComponentsList)) {
+        if (hasNewBomData) {
         	paramBean.setStandardScore(Float.valueOf(standardCvssScore));
             List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(paramBean);
     		if (CollectionUtils.isNotEmpty(securityDataList)) {
