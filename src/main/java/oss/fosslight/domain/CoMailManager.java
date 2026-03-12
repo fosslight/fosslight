@@ -4160,12 +4160,16 @@ public class CoMailManager extends CoTopComponent {
 			}
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED.equals(coMail.getMsgType())) {
-				String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
+				String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output") + "/" + coMail.getParamPrjId();
 				String banned = VERIFY_PATH_OUTPUT + "/" + coMail.getParamPrjId() + "/proprietaryCheckList.txt";
-				File file = new File(banned);
-				if(file.exists()) {
-					DataSource dataSource = new FileDataSource(banned);
-					helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+				String binary = VERIFY_PATH_OUTPUT + "/" + coMail.getParamPrjId() + "/binary.txt";
+				String[] files = {"/proprietaryCheckList.txt", "/binary.txt"};
+				for(String f : files) {
+					File file = new File(f);
+					if(file.exists()) {
+						DataSource dataSource = new FileDataSource(f);
+						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+					}
 				}
 			}
 
