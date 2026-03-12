@@ -1024,15 +1024,16 @@
         	},
         	displayVulnerability : function (cellvalue, options, rowObject) {
         		var display = "";
-
+        		var url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion;
+        		
                 if (parseInt(cellvalue) >= 9.0) {
-                    display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
+                    display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + url + "')\">CRITICAL</span>";
                 } else if (parseInt(cellvalue) >= 7.0) {
-                    display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
+                    display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + url + "')\">HIGH</span>";
                 } else if (parseInt(cellvalue) >= 4.0) {
-                    display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
+                    display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + url + "')\">MEDIUM</span>";
                 } else if (parseInt(cellvalue) > 0) {
-                    display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
+                    display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + url + "')\">LOW</span>";
                 } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
                     display = "<span style=\"font-size:0;\"></span>";
                 } else {
