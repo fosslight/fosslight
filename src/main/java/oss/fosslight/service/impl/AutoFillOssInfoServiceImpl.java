@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -29,8 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.channel.ChannelOption;
@@ -74,7 +73,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@Autowired ProjectMapper projectMapper;
 	@Autowired SelfCheckMapper selfCheckMapper;
 	@Autowired PartnerMapper partnerMapper;
-
+	
+	HttpClient httpClient = HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000).responseTimeout(Duration.ofSeconds(30))
+    	    					.doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS)).addHandlerLast(new WriteTimeoutHandler(30, TimeUnit.SECONDS)));
+	private final WebClient clearlyDefinedWebClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
+	
     @Override
 	public List<ProjectIdentification> checkOssLicenseData(List<ProjectIdentification> componentData, Map<String, String> validMap, Map<String, String> diffMap){
 		List<ProjectIdentification> resultData = new ArrayList<ProjectIdentification>();
@@ -114,7 +117,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return resultData;
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "unchecked" })
 	@Override
 	public Map<String, Object> checkOssLicense(List<ProjectIdentification> ossList){
 		Map<String, Object> resMap = new HashMap<>();
@@ -141,12 +144,20 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			isGitHubApiHealth = isGitHubApiHealth();
 		} catch (HttpServerErrorException e) {
 			errors.add(e.getStatusText());
+			isGitHubApiHealth = false;
+		} catch (Exception e) {
+		    log.error("isGitHubApiHealth error: {}", e.getMessage());
+		    isGitHubApiHealth = false;
 		}
 
 		try {
 			isClearlyDefinedApiHealth = isClearlyDefinedApiHealth();
 		} catch (HttpServerErrorException e) {
 			errors.add(e.getStatusText());
+			isClearlyDefinedApiHealth = false;
+		} catch (Exception e) {
+		    log.error("isClearlyDefinedApiHealth error: {}", e.getMessage());
+		    isClearlyDefinedApiHealth = false;
 		}
 
 		List<String> checkedLicenseList;
@@ -208,12 +219,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
 
 				// Search Priority 3. find by oss download location
-				prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss).stream()
-						.filter(CommonFunction.distinctByKeys(
-								ProjectIdentification::getOssName,
-								ProjectIdentification::getLicenseName
-						))
-						.collect(Collectors.toList());
+				prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss).stream().filter(CommonFunction.distinctByKeys(ProjectIdentification::getOssName, ProjectIdentification::getLicenseName)).collect(Collectors.toList());
 				checkedLicense3 = combineOssLicenses(prjOssLicenses, currentLicense);
 			}
 
@@ -443,49 +449,39 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return "Y".equalsIgnoreCase(CommonFunction.getProperty("external.service.useflag"));
 	}
 
-	private boolean isGitHubApiHealth() throws HttpServerErrorException {
+	private boolean isGitHubApiHealth() {
 		try {
 			requestGithubLicense("https://api.github.com/").block();
-		} catch(HttpServerErrorException e) {
+			return true;
+		} catch (Exception e) {
+			log.error("GitHub API Health Check Failed: {}", e.getMessage());
 			String message = "GitHub ";
-			if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-				message += getMessage("api.token.invalid");
-				throw new HttpServerErrorException(e.getStatusCode(), message);
-			}
-			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
-				message += getMessage("api.server.connect.limit");
-				throw new HttpServerErrorException(e.getStatusCode(), message);
-			}
-			if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-				message += getMessage("api.server.connect.fail");
-				throw new HttpServerErrorException(e.getStatusCode(), message);
-			}
+			
+			if (e instanceof HttpServerErrorException) {
+	            HttpServerErrorException se = (HttpServerErrorException) e;
+	            if (se.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+	            	log.error(message + getMessage("api.token.invalid"));
+				}
+				if (se.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+					log.error(message + getMessage("api.server.connect.limit"));
+				}
+				if (se.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+					log.error(message + getMessage("api.server.connect.fail"));
+				}
+	        }
+			return false;
 		}
-		return true;
 	}
 
 	private boolean isClearlyDefinedApiHealth() throws HttpServerErrorException {
 		Map<String, Object> res = new HashMap<>();
-
 		try {
 			res = requestClearlyDefinedLicense("https://api.clearlydefined.io/");
-		} catch (HttpServerErrorException e) {
-			res = null;
-			String message = "ClearlyDefined ";
-			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
-				message += getMessage("api.server.connect.limit");
-			}
-			if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-				message += getMessage("api.server.connect.fail");
-			}
-			log.error(message, e);
-		}
-		
-		if (res != null) {
-			return res.get("status").equals("OK");
-		} else {
-			return false;
-		}
+			return res != null && "OK".equalsIgnoreCase(String.valueOf(res.getOrDefault("status", "")));
+		} catch (Exception e) {
+	        log.error("An error occurred during isClearlyDefinedApiHealth: {}", e.getMessage());
+	        return false;
+	    }
 	}
 
 	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters, String currentLicense) {
@@ -529,22 +525,23 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@Override
 	public Mono<Object> requestGithubLicense(String location) {
 		String githubToken = CommonFunction.getProperty("external.service.github.token");
-
 		return webClient.get()
-			.uri(location)
-			.header("Authorization", "token " + githubToken)
-			.exchange()
-			.flatMap(response -> {
-				HttpStatus statusCode = response.statusCode();
-				if (statusCode.is4xxClientError()) {
-					return Mono.error(new HttpServerErrorException(statusCode));
-				}else if (statusCode.is5xxServerError()) {
-					return Mono.error(new HttpServerErrorException(statusCode));
-				}
-				return Mono.just(response);
-			})
-			.retry (1)
-			.flatMap(response -> response.bodyToMono(Object.class));
+				.uri(location)
+				.header("Authorization", "token " + githubToken)
+				.exchange()
+				.flatMap(response -> {
+					HttpStatus statusCode = response.statusCode();
+					if (statusCode.is4xxClientError()) {
+						return Mono.error(new HttpServerErrorException(statusCode));
+					} else if (statusCode.is5xxServerError()) {
+						return Mono.error(new HttpServerErrorException(statusCode));
+					}
+					return response.bodyToMono(Object.class);
+				})
+				.retry(1)
+				.onErrorResume(e -> {
+					return Mono.just(new HashMap<String, Object>());
+				});
 	}
 
 //	@Override
@@ -558,14 +555,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> requestClearlyDefinedLicense(String location) {
-		HttpClient httpClient = HttpClient.create()
-								    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-								    .responseTimeout(Duration.ofSeconds(30))
-								    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(30)).addHandlerLast(new WriteTimeoutHandler(30)));
-		
-		WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
-
-		String responseString = webClient.get()
+		String responseString = "";
+		try {
+			responseString = clearlyDefinedWebClient.get()
 							        .uri(location)
 							        .exchangeToMono(response -> {
 							            if (response.statusCode().isError()) {
@@ -575,36 +567,27 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							        })
 							        .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)).filter(ex -> ex instanceof ReadTimeoutException))
 							        .block();
+		} catch (Exception e) {
+			log.error("requestClearlyDefinedLicense error: {}", e.getMessage());
+			responseString = "";
+		}
 		
-//		String responseString = webClient.get().uri(location).exchange()
-//			    				.flatMap(response -> {
-//			    					HttpStatus statusCode = response.statusCode();
-//			    					if (statusCode.is4xxClientError()) {
-//			    						return Mono.error(new HttpServerErrorException(statusCode));
-//			    					} else if (statusCode.is5xxServerError()) {
-//			    						return Mono.error(new HttpServerErrorException(statusCode));
-//			    					}
-//			    					return Mono.just(response);
-//			    				})
-//			    				.block()
-//			    				.bodyToMono(String.class)
-//			    				.retry(5)
-//			    				.block();
-		
-		Map<String, Object> returnMap = null;
+		Map<String, Object> returnMap = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
         
+		if (isEmpty(responseString)) {
+	        return returnMap;
+	    }
+		
 		if (!isEmpty(responseString) && (responseString.startsWith("{") && !responseString.endsWith("}"))) {
 			responseString += "}";
 		}
 		
 		try {
 			returnMap = mapper.readValue(responseString, Map.class);
-		} catch (JsonMappingException e) {
-			log.error(e.getMessage(), e);
-		} catch (JsonProcessingException e) {
-			log.error(e.getMessage(), e);
-		}
+		} catch (Exception e) {
+	        log.error("requestClearlyDefinedLicense parsing error: {}", e.getMessage());
+	    }
 		
 		return returnMap;
 	}
