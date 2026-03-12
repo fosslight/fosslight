@@ -16,6 +16,7 @@ var totalValidMsgData;
 var fullDiscoveredValidMsgData;
 var _scrtUploadFile;
 var vulnScoreTable;
+var needsTableAdjust = false;
 
 $(function () {
 	'use strict';
@@ -32,6 +33,10 @@ $(function () {
 		if ("Total" == tabId) {
 			$('#save').show();
 		} else {
+			if ("Overview" == tabId && needsTableAdjust) {
+				needsTableAdjust = false;
+				$('#vulnScoreTable').DataTable().columns.adjust();
+			}
 			$("#save").hide();
 		}
 	});
@@ -81,7 +86,7 @@ $(function () {
 });
 
 var sec_data = {
-	getJqGrid : function () {
+	getJqGrid : function (target) {
 		var url = '/project/securityGrid/'+[[${project.prjId}]]+'/total';
 		$.ajax({
 			url : url,
@@ -97,7 +102,11 @@ var sec_data = {
 			},
 			complete : function() {
 				fn.displayProjectInfo();
-				$("#tabMenuOverview").trigger("click");
+				if ("overview" == target) {
+					$("#tabMenuOverview").trigger("click");
+				} else {
+					needsTableAdjust = true;
+				}
 			}
 		});
 	},
@@ -141,7 +150,7 @@ var sec_com_evt = {
 		commentsParam.height = $(window).height() - 120;
 		fn_comment.getCommentList(commentsParam);
 		$("#tabMenuOverview").trigger("click");
-		sec_data.getJqGrid();
+		sec_data.getJqGrid("overview");
 	}
 }
 
@@ -626,7 +635,7 @@ var com_fn = {
 				if ("true" == data.isValid){
 					alertify.success([[#{msg.common.success}]]);
 					saveFlag = true;
-					sec_com_evt.dataInit();
+					sec_data.getJqGrid(target);
 					reloadTabInframe('/project/list');
 				} else {
 					alertify.error([[#{msg.common.valid2}]], 0);
