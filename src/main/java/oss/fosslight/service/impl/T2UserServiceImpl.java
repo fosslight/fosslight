@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.JsonObject;
 
 import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.advice.CSigninFailedException;
 import oss.fosslight.api.advice.CUserAuthFailedException;
 import oss.fosslight.api.advice.CUserNotFoundException;
@@ -76,7 +77,7 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query;
  */
 @Service("userService")
 @Slf4j
-public class T2UserServiceImpl implements T2UserService {
+public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 	
 	@Autowired Environment env;
 	
@@ -933,7 +934,26 @@ public class T2UserServiceImpl implements T2UserService {
 			isAuthenticated = true;
 			bean.setUserId(userId);
 			
-			if (!existUserIdOrEmail(userId)){
+			T2Users user = userMapper.getUser(bean);
+			if (user != null) {
+				if (CoConstDef.FLAG_NO.equals(avoidNull(user.getUseYn()))) {
+					T2Users userVO = new T2Users();
+					userVO.setUserId(userId);
+					userVO.setUseYn(CoConstDef.FLAG_YES);
+					userMapper.updateUsers(userVO);
+					
+					List<Map<String, Object>> changedUserList = new ArrayList<>();
+					Map<String, Object> changedUserInfo = new HashMap<>();
+					changedUserInfo.put("afterUserName", user.getUserName());
+					changedUserInfo.put("beforeUseYn", user.getUseYn());
+					changedUserInfo.put("afterUseYn", CoConstDef.FLAG_YES);
+					changedUserList.add(changedUserInfo);
+					
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO);
+					mailBean.setParamList(changedUserList);
+					CoMailManager.getInstance().sendMail(mailBean);
+				}
+			} else {
 				T2Users vo = new T2Users();
 				vo.setUserId(userId);
 				vo.setCreatedDateCurrentTime();
