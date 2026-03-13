@@ -1095,10 +1095,35 @@ var overview = {
                     </span>`;
             }
 
-            rowData.push([ossName, ossVersion, {"display": vulnHtml, "sort": totalCount}]);
+            rowData.push({name: ossName, version: ossVersion, display: vulnHtml, total: totalCount});
         }
 
-        vulnScoreTable.rows.add(rowData).draw();
+        rowData.sort(function(a, b) {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) {
+            	return -1;
+            }
+            if (a.name.toLowerCase() > b.name.toLowerCase()) {
+            	return 1;
+            }
+
+            const vA = a.version.split('.').map(Number);
+            const vB = b.version.split('.').map(Number);
+            
+            for (let i = 0; i < Math.max(vA.length, vB.length); i++) {
+                let numA = vA[i] || 0;
+                let numB = vB[i] || 0;
+                if (numA < numB) {
+                	return -1;
+                }
+                if (numA > numB) {
+                	return 1;
+                }
+            }
+            return 0;
+        });
+        
+        const finalData = rowData.map(item => [item.name, item.version, {"display": item.display, "sort": item.total}]);
+        vulnScoreTable.rows.add(finalData).draw();
         
         setTimeout(function() {
         	vulnScoreTable.columns.adjust().draw();
