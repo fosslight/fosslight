@@ -1131,7 +1131,7 @@ var overview = {
 	},
 	vulnDetailPopup : function (ossName, ossVersion, flag, cnt) {
 		if (cnt > 0) {
-			var _url = '/vulnerability/vulnpopup?ossName=' + ossName + '&ossVersion=' + ossVersion + '&vulnType=' + '&range=' + flag;
+			var _url = '/vulnerability/vulnpopup?prjId=' + [[${project.prjId}]] + '&ossName=' + ossName + '&ossVersion=' + ossVersion + '&vulnType=' + '&range=' + flag;
 			openNVD2(ossName, _url);
 		} else {
 			alertify.alert("There are no vulnerabilities at this level.", function(){});
