@@ -130,24 +130,35 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public List<OssComponents> getVerifyOssList(Project projectMaster) {
 		List<OssComponents> componentList = verificationMapper.selectVerifyOssList(projectMaster);
-		if (!CollectionUtils.isEmpty(componentList) && CoConstDef.FLAG_YES.equals(avoidNull(projectMaster.getNetworkServerType()))) {
+		if (!CollectionUtils.isEmpty(componentList)) {
+			boolean hasNetworkServerType = false;
+			if (CoConstDef.FLAG_YES.equals(avoidNull(projectMaster.getNetworkServerType()))) {
+				hasNetworkServerType = true;
+			}
 			List<OssComponents> collateOssComponentList = null;
 			for (OssComponents ossComponent : componentList) {
-				String restrictionStr = ossComponent.getRestriction();
-				if (!isEmpty(restrictionStr)) {
-					String[] restrictions = restrictionStr.split(",");
-					for (String restriction : restrictions) {
-						if (CoConstDef.CD_LICENSE_NETWORK_RESTRICTION.equals(restriction.trim())) {
-							if (collateOssComponentList == null) {
-								collateOssComponentList = new ArrayList<>();
+				if (isEmpty(ossComponent.getFilePath())) {
+					ossComponent.setFilePath(ossComponent.getOssName() + "-" + avoidNull(ossComponent.getOssVersion()) + "/");
+				}
+				if (hasNetworkServerType) {
+					String restrictionStr = ossComponent.getRestriction();
+					if (!isEmpty(restrictionStr)) {
+						String[] restrictions = restrictionStr.split(",");
+						for (String restriction : restrictions) {
+							if (CoConstDef.CD_LICENSE_NETWORK_RESTRICTION.equals(restriction.trim())) {
+								if (collateOssComponentList == null) {
+									collateOssComponentList = new ArrayList<>();
+								}
+								collateOssComponentList.add(ossComponent);
+								break;
 							}
-							collateOssComponentList.add(ossComponent);
-							break;
 						}
 					}
 				}
 			}
-			componentList = collateOssComponentList;
+			if (hasNetworkServerType) {
+				componentList = collateOssComponentList;
+			}
 		}
 		
 		if (componentList != null && !componentList.isEmpty() && componentList.get(0) == null) {
