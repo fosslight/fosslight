@@ -1176,13 +1176,10 @@ var com_fn = {
     				finalData["binMainGrid"] = JSON.stringify(binMainGrid);
     				finalData["binSubGrid"] = "";
         		}
-        		
-        		checkFlag = com_fn.getCheckChangeData(finalData);
-        		if (checkFlag) {
-        			break;
-        		}
         	}
 			
+        	checkFlag = com_fn.getCheckChangeData(finalData);
+        	
         	if (!checkFlag) {
         		com_fn.exeProjectStatus(data, status);
         	}
