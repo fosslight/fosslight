@@ -3319,7 +3319,12 @@
 	</select>
 	
 	<select id="notExistsOssIncludeCpeListByOssCommonId" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
-		SELECT CPE23URI FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID != #{ossCommonId}
+		SELECT OIC.CPE23URI 
+		FROM OSS_INCLUDE_CPE OIC
+		INNER JOIN OSS_VERSION OV
+		ON OIC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		AND IFNULL(OV.IN_CPE_MATCH_FLAG, '') = 'Y'
+		WHERE OIC.OSS_COMMON_ID != #{ossCommonId}
 	</select>
 	
 	<select id="selectOssExcludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">

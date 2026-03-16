@@ -7763,7 +7763,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						}
 					}
 					
-					if (!activateFlag && !isResolveDataEnabled) {
+					if (!activateFlag && !isResolveDataEnabled && !("Fixed").equals(avoidNull(oc.getVulnerabilityResolution()))) {
 						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
 					}
 					fullDiscoveredList.add(oc);
