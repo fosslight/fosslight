@@ -117,7 +117,7 @@
 												</a>
 											</label>
 										</div>
-										<div class="col-9 d-flex d-flex-align ossUploader" th:style="${detail.partnerId == null ? 'display:flex' : 'display:none !important'}">
+										<div class="col-9 d-flex d-flex-align ossUploader" th:style="${detail.partnerId == null or (detail.partnerId != null and ossFile == null) ? 'display:flex' : 'display:none !important'}">
 											<div class="float-left" id="ossFile" style="max-width: 100%;"></div>
 										</div>
 										<div class="col-9 d-flex" th:style="${detail.partnerId != null ? 'display:flex' : 'display:none !important'}">
