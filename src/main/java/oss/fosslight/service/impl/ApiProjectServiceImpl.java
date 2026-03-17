@@ -94,15 +94,35 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			list = apiProjectMapper.selectProject(paramMap);
 			
 			for (Map<String, Object> map : list) {
-				String prjId = (String) map.get("prjId").toString();
 				String status = (String) map.get("status");
 				String statusRequestYn = String.valueOf(map.getOrDefault("statusRequestYn", ""));
-				String distributionStatus = (String) map.get("distributionStatus");
-				distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(distributionStatus) ? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : distributionStatus;
-				String nvdMaxScore = apiProjectMapper.findIdentificationMaxNvdInfo(prjId);
-				String verificationStatus = String.valueOf(map.get("verificationStatus"));
-				if (isEmpty(verificationStatus) && (!CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE.equals(status.toUpperCase()) && !CoConstDef.FLAG_YES.equals(statusRequestYn))) {
-					verificationStatus = "Progress";
+				String identificationStatus = String.valueOf(map.getOrDefault("identificationStatus", ""));
+				String verificationStatus = String.valueOf(map.getOrDefault("verificationStatus", ""));
+				String distributionStatus = String.valueOf(map.getOrDefault("distributionStatus", ""));
+				String nvdMaxScore = String.valueOf(map.getOrDefault("cvssScoreMax", "N/A"));
+				
+				if (isEmpty(identificationStatus)) {
+					identificationStatus = "Progress";
+				} else {
+					identificationStatus = CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, identificationStatus);
+				}
+				if (identificationStatus.equalsIgnoreCase("Confirm")) {
+					if (isEmpty(verificationStatus) && (!CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE.equals(status.toUpperCase()) && !CoConstDef.FLAG_YES.equals(statusRequestYn))) {
+						verificationStatus = "Progress";
+					} else {
+						verificationStatus = CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, verificationStatus);
+					}
+				} else {
+					verificationStatus = "";
+				}
+				if (verificationStatus.equalsIgnoreCase("Confirm")) {
+					if (isEmpty(distributionStatus)) {
+						distributionStatus = "Progress";
+					} else {
+						distributionStatus = CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus);
+					}
+				} else {
+					distributionStatus = "";
 				}
 				
 				map.put("DISTRIBUTION_TYPE", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, (String) map.get("distributionType")));
@@ -111,9 +131,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("NOTICE_PLATFORM", CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, (String) map.get("noticePlatform")));
 				map.put("PRIORITY", CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, (String) map.get("priority")));
 				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
-				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
-				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
-				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));					
+				map.put("IDENTIFICATION_STATUS", identificationStatus);
+				map.put("VERIFICATION_STATUS", verificationStatus);
+				map.put("DISTRIBUTION_STATUS", distributionStatus);					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
 				map.put("EDITORS", map.get("editors") == null ? "" : map.get("editors").toString());
 			}
@@ -137,12 +157,36 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			list = apiProjectMapper.selectProject_V1(paramMap);
 
 			for (Map<String, Object> map : list) {
-				String prjId = (String) map.get("prjId").toString();
 				String status = (String) map.get("status");
-				String distributionStatus = (String) map.get("distributionStatus");
-				distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(distributionStatus)
-						? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : distributionStatus;
-				String nvdMaxScore = apiProjectMapper.findIdentificationMaxNvdInfo(prjId);
+				String statusRequestYn = String.valueOf(map.getOrDefault("statusRequestYn", ""));
+				String identificationStatus = String.valueOf(map.getOrDefault("identificationStatus", ""));
+				String verificationStatus = String.valueOf(map.getOrDefault("verificationStatus", ""));
+				String distributionStatus = String.valueOf(map.getOrDefault("distributionStatus", ""));
+				String nvdMaxScore = String.valueOf(map.getOrDefault("cvssScoreMax", "N/A"));
+				
+				if (isEmpty(identificationStatus)) {
+					identificationStatus = "Progress";
+				} else {
+					identificationStatus = CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, identificationStatus);
+				}
+				if (identificationStatus.equalsIgnoreCase("Confirm")) {
+					if (isEmpty(verificationStatus) && (!CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE.equals(status.toUpperCase()) && !CoConstDef.FLAG_YES.equals(statusRequestYn))) {
+						verificationStatus = "Progress";
+					} else {
+						verificationStatus = CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, verificationStatus);
+					}
+				} else {
+					verificationStatus = "";
+				}
+				if (verificationStatus.equalsIgnoreCase("Confirm")) {
+					if (isEmpty(distributionStatus)) {
+						distributionStatus = "Progress";
+					} else {
+						distributionStatus = CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus);
+					}
+				} else {
+					distributionStatus = "";
+				}
 
 				map.put("DISTRIBUTION_TYPE", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, (String) map.get("distributionType")));
 				map.put("NETWORK_SERVICE", (String) map.get("networkService"));
@@ -150,9 +194,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("NOTICE_PLATFORM", CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, (String) map.get("noticePlatform")));
 				map.put("PRIORITY", CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, (String) map.get("priority")));
 				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
-				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
-				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
-				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));
+				map.put("IDENTIFICATION_STATUS", identificationStatus);
+				map.put("VERIFICATION_STATUS", verificationStatus);
+				map.put("DISTRIBUTION_STATUS", distributionStatus);
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
 //				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
 			}
@@ -674,35 +718,6 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return resultMap;
 	}
 	
-	private OssMaster buildOssMasterFromKey(String key, Map<String, OssMaster> ossInfoMap) {
-		if (ossInfoMap.containsKey(key)) {
-			return ossInfoMap.get(key);
-		} else {
-			String[] parts = key.split("_", 2);
-		    String ossName = parts[0];
-		    String ossVersion = (parts.length > 1) ? parts[1] : "";
-		    String namePrefix = (ossName + "_").toUpperCase();
-		    
-		    OssMaster ossMaster = null;
-	        for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
-	            if (entry.getKey().startsWith(namePrefix)) {
-	                ossMaster = entry.getValue();
-	                ossMaster.setOssVersionAliases(null);
-	                break;
-	            }
-	        }
-		    
-	        if (ossMaster != null) {
-	        	return ossMaster;
-	        } else {
-	        	ossMaster = new OssMaster();
-	        	ossMaster.setOssName(ossName);
-			    ossMaster.setOssVersion(ossVersion);
-			    return ossMaster;
-	        }
-		}
-	}
-
 	@Override
 	public Map<String, Object> getBomCompare(List<Map<String, Object>> beforeBomList, List<Map<String, Object>> afterBomList){
 		Map<String, Object> resultMap = new HashMap<String, Object>();
