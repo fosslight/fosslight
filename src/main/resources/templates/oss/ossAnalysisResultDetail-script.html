@@ -55,7 +55,9 @@ var Ctrl_fn = {
 		$("#detailCopyright"+seq).val(selectData.ossCopyright);
 		$("#detailDownloadLocation"+seq).val(selectData.downloadLocation);
 		$("#detailHomePage"+seq).val(selectData.homepage);
-		$("#detailSummaryDescription"+seq).val(selectData.summaryDescription);
+		if (typeof selectData.summaryDescription !== "undefined" && "" != selectData.summaryDescription) {
+			$("#detailSummaryDescription"+seq).val(formatToTextarea(selectData.summaryDescription));
+		}
 		$("#detailImportantNotes"+seq).val(selectData.importantNotes);
 		$("#detailcomment"+seq).val(selectData.comment);
 		
@@ -2057,6 +2059,13 @@ var grid_fn = {
 		return dataToSend;
 	}
 };
+
+function formatToTextarea(text) {
+    if (!text) {
+    	return "";
+    }
+    return text.replace(/<br\s*\/?>/gi, "\n");
+}
 </script>
 </th:block>
 </html>
