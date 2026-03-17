@@ -263,30 +263,54 @@ public class CoCodeManager extends CoTopComponent {
 			List<OssMaster> list = ossMapper.getOssInfoByOssId(ossId);
 			List<OssMaster> nickNameList = ossMapper.getOssInfoWithNickByOssId(ossId);
 			
-			if (CollectionUtils.isNotEmpty(list)) {
-				String ossName = list.get(0).getOssName();
-				Map<String, String[]> nickMap = buildNickNameMap(ossName, nickNameList); 
-
-	            for (OssMaster bean : list) {
-	            	if (bean == null || isEmpty(bean.getOssId())) {
-	                    log.warn("The OSS_ID of the retrieved data is null. Skip. (OSS_NAME: {})", bean != null ? bean.getOssName() : "Unknown");
-	                    continue; 
-	                }
-	            	
-	                String upperName = bean.getOssName().toUpperCase();
-	                String key = upperName + "_" + avoidNull(bean.getOssVersion());
-
-	                bean.setOssNicknames(nickMap.get(bean.getOssCommonId()));
-	                bean.addOssLicense(createLicenseFromBean(bean));
-	                bean.setLicenseType(bean.getOssLicenseType());
-
-	                OSS_INFO_BY_ID.put(bean.getOssId(), bean);
-	                OSS_INFO_UPPER.put(key, bean);
-	                OSS_INFO_UPPER_NAMES.put(upperName, bean.getOssName());
-	            }
+			if (CollectionUtils.isEmpty(list)) {
+				return;
 			}
-		} catch(Exception e) {
-        	log.error(e.getMessage(), e);
+			
+			OssMaster targetBean = null;
+	        Map<String, String[]> nickNameMap = new HashMap<>();
+
+	        if (nickNameList != null) {
+	            for (OssMaster bean : nickNameList) {
+	                if (bean.getOssNickname() != null) {
+	                    nickNameMap.put(bean.getOssCommonId(), bean.getOssNickname().split(","));
+	                }
+	            }
+	        }
+
+	        for (OssMaster bean : list) {
+	            if (targetBean == null) {
+	                targetBean = bean;
+	                if (nickNameMap.containsKey(targetBean.getOssCommonId())) {
+	                    targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssCommonId()));
+	                }
+	            }
+
+	            OssLicense subBean = new OssLicense();
+	            subBean.setOssId(bean.getOssId());
+	            subBean.setLicenseId(bean.getLicenseId());
+	            subBean.setLicenseName(bean.getLicenseName());
+	            subBean.setLicenseType(bean.getOssLicenseType());
+	            subBean.setOssLicenseIdx(bean.getOssLicenseIdx());
+	            subBean.setOssLicenseComb(bean.getOssLicenseComb());
+	            subBean.setOssLicenseText(bean.getOssLicenseText());
+	            subBean.setOssCopyright(bean.getOssCopyright());
+
+	            targetBean.addOssLicense(subBean);
+	        }
+
+	        if (targetBean != null) {
+	            targetBean.setLicenseType(list.get(0).getOssLicenseType());
+
+	            String upperName = targetBean.getOssName().toUpperCase();
+	            String key = (upperName + "_" + avoidNull(targetBean.getOssVersion())).toUpperCase();
+
+	            OSS_INFO_BY_ID.put(targetBean.getOssId(), targetBean);
+	            OSS_INFO_UPPER.put(key, targetBean);
+	            OSS_INFO_UPPER_NAMES.put(upperName, targetBean.getOssName());
+	        }
+		} catch (Exception e) {
+			log.error("loadOssInfoByOssId Error (ID: " + ossId + "): " + e.getMessage(), e);
 		}
 	}
 
