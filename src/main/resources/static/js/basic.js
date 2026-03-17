@@ -4368,8 +4368,10 @@ function commonAlertifyDialog(target) {
 			},
 			hooks: {
 				onshow: function() {
-					this.elements.dialog.style.maxWidth = 'none';
-					this.elements.dialog.style.width = '700px';
+					bindResponsiveAlertifyDialog(this, 700);
+				},
+				onclose: function() {
+					unbindResponsiveAlertifyDialog(this);
 				}
 			}
 		};
@@ -4394,8 +4396,10 @@ function alertifyWithoutButtons(target) {
 			},
 			hooks: {
 				onshow: function() {
-					this.elements.dialog.style.maxWidth = 'none';
-					this.elements.dialog.style.width = '700px';
+					bindResponsiveAlertifyDialog(this, 700);
+				},
+				onclose: function() {
+					unbindResponsiveAlertifyDialog(this);
 				}
 			}
 		};
@@ -4471,8 +4475,10 @@ function alertifyUploadDialog(target, width, id) {
 			},
 			hooks: {
 				onshow: function() {
-					this.elements.dialog.style.maxWidth = 'none';
-					this.elements.dialog.style.width = width + 'px';
+					bindResponsiveAlertifyDialog(this, width);
+				},
+				onclose: function() {
+					unbindResponsiveAlertifyDialog(this);
 				}
 			}
 		};
@@ -4504,12 +4510,95 @@ function alertifyDeleteDialog(target, width, id) {
 			},
 			hooks: {
 				onshow: function() {
-					this.elements.dialog.style.maxWidth = 'none';
-					this.elements.dialog.style.width = width + 'px';
+					bindResponsiveAlertifyDialog(this, width);
+				},
+				onclose: function() {
+					unbindResponsiveAlertifyDialog(this);
 				}
 			}
 		};
 	}, false, 'confirm');
+}
+
+function getResponsiveAlertifyDialogWidth(width) {
+	var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+	var requestedWidth = parseInt(width, 10);
+	var safeViewportWidth = Math.max(viewportWidth - 40, 320);
+
+	if (isNaN(requestedWidth)) {
+		return safeViewportWidth;
+	}
+
+	return Math.min(requestedWidth, safeViewportWidth);
+}
+
+function resizeResponsiveAlertifyDialog(dialogElement) {
+	var baseWidth = dialogElement.getAttribute('data-base-width');
+	if (baseWidth) {
+		var appliedWidth = getResponsiveAlertifyDialogWidth(baseWidth) + 'px';
+		dialogElement.style.maxWidth = 'none';
+		dialogElement.style.width = appliedWidth;
+		dialogElement.style.minWidth = appliedWidth;
+		dialogElement.style.setProperty('width', appliedWidth, 'important');
+	}
+}
+
+function resizeJqGridsInContainer(container) {
+	var $container = $(container);
+
+	$container.find(".ui-jqgrid-btable").each(function() {
+		var gridId = $(this).attr("id");
+		if (!gridId) {
+			return;
+		}
+
+		var $grid = $("#" + gridId);
+		var $gridSet = $grid.closest(".jqGridSet");
+		var targetWidth = 0;
+
+		if ($gridSet.length > 0 && $gridSet.is(":visible")) {
+			targetWidth = $gridSet.width();
+		}
+
+		if (!targetWidth) {
+			var $gridParent = $grid.closest(".ui-jqgrid");
+			if ($gridParent.length > 0) {
+				targetWidth = $gridParent.parent().width();
+			}
+		}
+
+		if (targetWidth && targetWidth > 0) {
+			$grid.jqGrid("setGridWidth", 0, true);
+			$grid.jqGrid("setGridWidth", targetWidth, true);
+		}
+	});
+}
+
+function initResponsiveAlertifyResizeHandler() {
+	if (window.__alertifyResponsiveResizeBound) {
+		return;
+	}
+
+	window.__alertifyResponsiveResizeBound = true;
+	$(window).on('resize.alertifyResponsive', function() {
+		window.requestAnimationFrame(function() {
+			$('.ajs-dialog[data-base-width]').each(function() {
+				resizeResponsiveAlertifyDialog(this);
+				resizeJqGridsInContainer(this);
+			});
+		});
+	});
+}
+
+function bindResponsiveAlertifyDialog(dialogInstance, width) {
+	initResponsiveAlertifyResizeHandler();
+	dialogInstance.elements.dialog.setAttribute('data-base-width', width);
+	resizeResponsiveAlertifyDialog(dialogInstance.elements.dialog);
+	resizeJqGridsInContainer(dialogInstance.elements.dialog);
+}
+
+function unbindResponsiveAlertifyDialog(dialogInstance) {
+	dialogInstance.elements.dialog.removeAttribute('data-base-width');
 }
 
 function displayProjectStage(displayInfo, pId, pNm, distributeTarget) {
