@@ -1837,11 +1837,12 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			if (title.indexOf("${Project ID}") > -1) {
-				title = StringUtil.replace(title, "${Project ID}", avoidNull(bean.getParamPrjId()));
+				String str = "<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId() + "' target='_blank'>PRJ-" + bean.getParamPrjId() + "</a>";
+				title = StringUtil.replace(title, "PRJ-${Project ID}", avoidNull(str));
 			}
 		} else if (title.indexOf("${Project ID}") > -1) {
-			String _s = "<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId() + "' target='_blank'>" + bean.getParamPrjId() + "</a>";
-			title = StringUtil.replace(title, "${Project ID}", avoidNull(_s));
+			String _s = "<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId() + "' target='_blank'>PRJ-" + bean.getParamPrjId() + "</a>";
+			title = StringUtil.replace(title, "PRJ-${Project ID}", avoidNull(_s));
 		}
 
 		if(title.indexOf("${SelfCheck Project Name") > -1) {
