@@ -681,6 +681,11 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	}
 	
 	@Override
+	public void changeStatus(PartnerMaster partnerMaster) {
+		changeStatus(partnerMaster, false);
+	}
+	
+	@Override
 	@CacheEvict(value="autocompletePartnerCache", allEntries=true)
 	public void changeStatus(PartnerMaster partnerMaster, boolean isCoReviewer) {
 		CoMail mailBean = null;
