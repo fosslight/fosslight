@@ -9017,7 +9017,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
                     PartnerMaster partnerMaster = new PartnerMaster();
                     partnerMaster.setPartnerId(prjId);
                     partnerMaster.setStatus("REV");
-                    partnerService.changeStatus(partnerMaster, true);
+                    partnerService.changeStatus(partnerMaster);
                     break;
             }
         }
