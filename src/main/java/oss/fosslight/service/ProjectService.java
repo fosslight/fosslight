@@ -251,7 +251,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void updateProjectNotification(Project project, Map<String, Object> param);
 
-	public Map<String, Object> requestProjectPermission(String prjId, String userId, String status);
+	public Map<String, Object> requestProjectPermission(String prjId, String comment, String userId, String status);
 
 	public void updateRequestProjectPermission(String prjId, String userId, String status, String rejPerUserNm);
 	

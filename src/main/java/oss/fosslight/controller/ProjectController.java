@@ -2981,8 +2981,12 @@ public class ProjectController extends CoTopComponent {
 		projectIdentification = (List<ProjectIdentification>) fromJson(gridString, collectionType);
 		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
 		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
-		projectService.registBom(prjId, merge, projectIdentification, checkGridBomList);
-		projectService.updateSecurityDataForProject(prjId);
+		try {
+			projectService.registBom(prjId, merge, projectIdentification, checkGridBomList);
+			projectService.updateSecurityDataForProject(prjId);
+		} catch (Exception e) {
+			log.info(e.getMessage(), e);
+		}
 		Map<String, String> resMap = new HashMap<>();
 		
 		try {
@@ -5632,13 +5636,13 @@ public class ProjectController extends CoTopComponent {
 	
 	@PostMapping(value = PROJECT.REQUEST_PERMISSION)
 	public @ResponseBody ResponseEntity<Object> requestPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
-		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), loginUserName(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), project.getComment(), loginUserName(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 		return makeJsonResponseHeader(true, null, map);
 	}
 	
 	@PostMapping(value = PROJECT.CANCEL_REQUEST_PERMISSION)
 	public @ResponseBody ResponseEntity<Object> cancelRequestPermission(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
-		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), loginUserName(), CoConstDef.ACTION_CODE_CANCELED);
+		Map<String, Object> map = projectService.requestProjectPermission(project.getPrjId(), project.getComment(), loginUserName(), CoConstDef.ACTION_CODE_CANCELED);
 		return makeJsonResponseHeader(true, null, map);
 	}
 	
@@ -5667,6 +5671,7 @@ public class ProjectController extends CoTopComponent {
 					reviewer = avoidNull(reviewer, "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
 					String en = "";
 					String ko = "";
+					String comment = avoidNull(project.getComment());
 					
 					if (project.getStatus().equalsIgnoreCase("APP")) {
 						// add watcher
@@ -5685,11 +5690,15 @@ public class ProjectController extends CoTopComponent {
 					}
 					en = en.replaceAll("Reviewer", reviewer);
 					ko = ko.replaceAll("Reviewer", reviewer);
+					if (!isEmpty(comment)) {
+						comment += "<br>";
+					}
+					comment += "<p>" + en + "<br>" + ko + "</p>";
 					
 					mailBean.setLoginUserName(userId);
 					mailBean.setParamPrjId(project.getPrjId());
 					mailBean.setReviewer(reviewer);
-					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+					mailBean.setComment(comment);
 					
 					CoMailManager.getInstance().sendMail(mailBean);
 				}

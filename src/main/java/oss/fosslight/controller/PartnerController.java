@@ -2123,13 +2123,13 @@ public class PartnerController extends CoTopComponent{
 	
 	@PostMapping(value = PARTNER.REQUEST_PERMISSION)
 	public @ResponseBody ResponseEntity<Object> requestPermission(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
-		Map<String, Object> map = projectService.requestProjectPermission("3rd_" + partnerMaster.getPartnerId(), loginUserName(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+		Map<String, Object> map = projectService.requestProjectPermission("3rd_" + partnerMaster.getPartnerId(), partnerMaster.getComment(), loginUserName(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 		return makeJsonResponseHeader(true, null, map);
 	}
 	
 	@PostMapping(value = PARTNER.CANCEL_REQUEST_PERMISSION)
 	public @ResponseBody ResponseEntity<Object> cancelRequestPermission(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
-		Map<String, Object> map = projectService.requestProjectPermission("3rd_" + partnerMaster.getPartnerId(), loginUserName(), CoConstDef.ACTION_CODE_CANCELED);
+		Map<String, Object> map = projectService.requestProjectPermission("3rd_" + partnerMaster.getPartnerId(), partnerMaster.getComment(), loginUserName(), CoConstDef.ACTION_CODE_CANCELED);
 		return makeJsonResponseHeader(true, null, map);
 	}
 	
@@ -2158,6 +2158,7 @@ public class PartnerController extends CoTopComponent{
 					reviewer = avoidNull(reviewer, "민경선/책임연구원/SW공학(연)Open Source TP(kyungsun.min)");
 					String en = "";
 					String ko = "";
+					String comment = avoidNull(partnerMaster.getComment());
 					
 					if (partnerMaster.getStatus().equalsIgnoreCase("APP")) {
 						// add watcher
@@ -2176,10 +2177,14 @@ public class PartnerController extends CoTopComponent{
 					}
 					en = en.replaceAll("Reviewer", reviewer);
 					ko = ko.replaceAll("Reviewer", reviewer);
+					if (!isEmpty(comment)) {
+						comment += "<br>";
+					}
+					comment += "<p>" + en + "<br>" + ko + "</p>";
 					
 					mailBean.setLoginUserName(userId);
 					mailBean.setParamPartnerId(partnerMaster.getPartnerId());
-					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+					mailBean.setComment(comment);
 					mailBean.setReviewer(reviewer);
 					CoMailManager.getInstance().sendMail(mailBean);
 				}

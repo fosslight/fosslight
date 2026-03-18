@@ -9210,7 +9210,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	}
 
 	@Override
-	public Map<String, Object> requestProjectPermission(String prjId, String userId, String status) {
+	public Map<String, Object> requestProjectPermission(String prjId, String comment, String userId, String status) {
 		Map<String, Object> rtnMap = new HashMap<>();
 
 		try {
@@ -9256,6 +9256,10 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					en = en.replace("User", user.getUserName());
 					ko = messageSource.getMessage("msg.common.approve.permission", null, Locale.KOREAN);
 					ko = ko.replace("User", user.getUserName());
+					if (!isEmpty(comment)) {
+						comment += "<br>";
+					}
+					comment += "<p>" + en + "<br>" + ko + "</p>";
 
 					mailType = !prjId.startsWith("3rd_") ? CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION : CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION;
 					CoMail mailBean = new CoMail(mailType);
@@ -9265,7 +9269,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					} else {
 						mailBean.setParamPartnerId(prjId.replaceFirst("3rd_", ""));
 					}
-					mailBean.setComment("<p>" + en + "<br>" + ko + "</p>");
+					mailBean.setComment(comment);
 					CoMailManager.getInstance().sendMail(mailBean);
 
 					rtnMap.put("isValid", true);

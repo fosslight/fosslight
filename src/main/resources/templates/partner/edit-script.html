@@ -68,6 +68,8 @@ $(document).ready(function () {
 					},
 					hooks: {
 						onshow: function() {
+							bindResponsiveAlertifyDialog(this, 700);
+							
 							const footer = this.elements.footer;
 							
 							const btnArea = document.createElement('span');
@@ -88,13 +90,21 @@ $(document).ready(function () {
 			                btnArea.appendChild(rejBtn);
 			                
 			                footer.appendChild(btnArea);
+						},
+						onclose: function() {
+							unbindResponsiveAlertifyDialog(this);
 						}
 					}
 				};
 			}, false, 'confirm');
 		}
 		
-		alertify.parPermissionDialog().setContent([[${@CommonFunction.getCustomMessage('msg.common.check.approve.permission', detail.reqPerUserNms)}]]).show();
+		var innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.check.approve.permission', detail.reqPerUserNms)}]];
+		innerHtml += "<br><br><textarea id=\"permissionConfirmEditor\"></textarea>";
+		
+		alertify.parPermissionDialog().set('onshow', function(e){
+			$("#permissionConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+		}).setContent(innerHtml).show();
 	}
 });
 
@@ -184,10 +194,15 @@ var evt = {
 
 var fn = {
 	approvePermission : function () {
+		var editorVal = $("#permissionConfirmEditor").summernote('code');
+		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		} else {
+			editorVal = "";
+		}
 		$.ajax({
 			url : "/partner/setProjectPermission",
 			type : 'POST',
-			data : JSON.stringify({"partnerId" : [[${detail.partnerId}]], "status" : "APP"}),
+			data : JSON.stringify({"partnerId" : [[${detail.partnerId}]], "status" : "APP", "comment" : editorVal}),
 			dataType : 'json',
 			cache : false,
 			async : false,
@@ -207,10 +222,15 @@ var fn = {
 		});
 	},
 	rejectPermission : function () {
+		var editorVal = $("#permissionConfirmEditor").summernote('code');
+		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		} else {
+			editorVal = "";
+		}
 		$.ajax({
 			url : "/partner/setProjectPermission",
 			type : 'POST',
-			data : JSON.stringify({"partnerId" : [[${detail.partnerId}]], "status" : "REJ"}),
+			data : JSON.stringify({"partnerId" : [[${detail.partnerId}]], "status" : "REJ", "comment" : editorVal}),
 			dataType : 'json',
 			cache : false,
 			async : false,
