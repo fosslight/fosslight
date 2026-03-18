@@ -152,12 +152,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=OSS.LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> listAjax(
-			OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
-		
+	public @ResponseBody ResponseEntity<Object> listAjax(OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		Map<String, Object> map = null;
 		
 		if ("Y".equals(req.getParameter("ignoreSearchFlag"))) {
@@ -207,11 +202,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=OSS.AUTOCOMPLETE_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(
-			OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) {
+	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
 		List<Map<String, String>> list = ossService.getOssNameList();
 		CustomXssFilter.nameFilter(list);
 		return makeJsonResponseHeader(list);
@@ -887,11 +878,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.URL_DUPLICATE_VALIDATION)
-	public @ResponseBody ResponseEntity<Object> urlDuplicateValidation(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> urlDuplicateValidation(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		// validator
 		T2CoOssValidator validator = new T2CoOssValidator();
 		validator.setAppendix("ossMaster", ossMaster);
@@ -907,13 +894,11 @@ public class OssController extends CoTopComponent{
 		
 		T2CoValidationResult vr = validator.validateObject(ossMaster);
 		
-		String purl = ossService.getPurlByDownloadLocation(ossMaster);
-		
 		if (!vr.isDiff()) {
-			return makeJsonResponseHeader(true, null, purl, null, vr.getDiffMessageMap());
+			return makeJsonResponseHeader(true, null, null, null, vr.getDiffMessageMap());
 		}
 		
-		return makeJsonResponseHeader(true, null, purl);
+		return makeJsonResponseHeader(true, null, null);
 	}
 	
 	@PostMapping(value=OSS.SAVE_SESSION_OSS_INFO)
@@ -1109,11 +1094,7 @@ public class OssController extends CoTopComponent{
 
 	@PostMapping(value = OSS.BULK_REG_AJAX)
 	public @ResponseBody
-	ResponseEntity<Object> saveAjaxJson(
-			@RequestBody List<OssMaster> ossMasters
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) {
+	ResponseEntity<Object> saveAjaxJson(@RequestBody List<OssMaster> ossMasters, HttpServletRequest req, HttpServletResponse res, Model model) {
 		List<Map<String, Object>> ossDataMapList = new ArrayList<>();
 		Map<String, Object> resMap = new HashMap<>();
 
@@ -1153,26 +1134,14 @@ public class OssController extends CoTopComponent{
 			OssMaster ossBean = ossService.getOssInfo(null, oss.getOssName(), true);
 			if (ossBean != null) {
 				List<String> downloadLocationList = new ArrayList<>();
-				List<String> purls = new ArrayList<>();
 				if (ossBean.getDownloadLocation() != null) {
-					OssMaster param = new OssMaster();
 					for (String location : ossBean.getDownloadLocation().split(",")) {
 						downloadLocationList.add(location);
-						param.setDownloadLocation(location);
-						String purl = ossService.getPurlByDownloadLocation(param);
-						if (!isEmpty(purl)) {
-							purls.add(purl);
-						}
 					}
 				}
 				if (downloadLocation != null) {
-					OssMaster param = new OssMaster();
 					for (String location : downloadLocation.split(",")) {
-						param.setDownloadLocation(location);
-						String purl = ossService.getPurlByDownloadLocation(param);
-						if (!purls.contains(purl)) {
-							downloadLocationList.add(location);
-						}
+						downloadLocationList.add(location);
 					}
 				}
 				if (!downloadLocationList.isEmpty()) {
@@ -1745,12 +1714,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.SAVE_OSS_ANALYSIS_LIST)
-	public @ResponseBody ResponseEntity<Object> saveOssAnalysisList(
-			@RequestBody OssMaster ossBean
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model
-			, @PathVariable String targetName){
+	public @ResponseBody ResponseEntity<Object> saveOssAnalysisList(@RequestBody OssMaster ossBean, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String targetName){
 		Map<String, Object> map = ossService.saveOssAnalysisList(ossBean, targetName.toUpperCase());
 		
 		return makeJsonResponseHeader((boolean) map.get("isValid"), (String) map.get("returnType"));
@@ -1765,22 +1729,14 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=OSS.AUTO_ANALYSIS_LIST)
-	public @ResponseBody ResponseEntity<Object> getAutoAnalysisList(
-			HttpServletRequest req, 
-			HttpServletResponse res,
-			@ModelAttribute OssMaster ossBean, 
-			Model model) {
+	public @ResponseBody ResponseEntity<Object> getAutoAnalysisList(HttpServletRequest req, HttpServletResponse res, @ModelAttribute OssMaster ossBean, Model model) {
 		Map<String, Object> result = ossService.getOssAnalysisList(ossBean);
 		
 		return makeJsonResponseHeader(result);
 	}
 	
 	@PostMapping(value=OSS.START_ANALYSIS)
-	public @ResponseBody ResponseEntity<Object> startAnalysis(
-			@RequestBody OssMaster ossBean
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> startAnalysis(@RequestBody OssMaster ossBean, HttpServletRequest req, HttpServletResponse res, Model model){
 		String downloadId = null;
 		Map<String, Object> result = null;
 		
@@ -1805,11 +1761,7 @@ public class OssController extends CoTopComponent{
 	
 	@SuppressWarnings("unchecked")
 	@GetMapping(value=OSS.ANALYSIS_RESULT_LIST)
-	public @ResponseBody ResponseEntity<Object> getAnalysisResultList(
-			HttpServletRequest req, 
-			HttpServletResponse res,
-			@ModelAttribute OssMaster ossMaster, 
-			Model model) {
+	public @ResponseBody ResponseEntity<Object> getAnalysisResultList(HttpServletRequest req, HttpServletResponse res, @ModelAttribute OssMaster ossMaster, Model model) {
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -1861,11 +1813,7 @@ public class OssController extends CoTopComponent{
 	
 	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SET_SESSION_ANALYSIS_RESULT_DATA)
-	public @ResponseBody ResponseEntity<Object> setSessionAnalysisResultData(
-			HttpServletRequest req, 
-			HttpServletResponse res, 
-			@RequestBody HashMap<String, Object> map, 
-			Model model){
+	public @ResponseBody ResponseEntity<Object> setSessionAnalysisResultData(HttpServletRequest req, HttpServletResponse res, @RequestBody HashMap<String, Object> map, Model model){
 		// oss list (oss name으로만)
 		String groupId = (String) map.get("groupId");
 		String dataString = (String) map.get("dataString");
@@ -1902,11 +1850,7 @@ public class OssController extends CoTopComponent{
 	
 	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SESSION_ANALYSIS_RESULT_DATA)
-	public @ResponseBody ResponseEntity<Object> getSessionAnalysisResultData(
-			HttpServletRequest req, 
-			HttpServletResponse res, 
-			@RequestBody OssAnalysis analysisBean, 
-			Model model){
+	public @ResponseBody ResponseEntity<Object> getSessionAnalysisResultData(HttpServletRequest req, HttpServletResponse res, @RequestBody OssAnalysis analysisBean, Model model){
 		Map<String, Object> result = new HashMap<String, Object>();
 		
 		String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, analysisBean.getGroupId());
@@ -1917,30 +1861,6 @@ public class OssController extends CoTopComponent{
 			for (OssAnalysis oa : detailData) {
 				if (ossService.checkOssTypeForAnalysisResult(oa)) {
 					oa.setOssType("V");
-				}
-				if (!isEmpty(oa.getDownloadLocation())) {
-					StringBuilder sb = new StringBuilder();
-					if (oa.getDownloadLocation().contains(",")) {
-						for (String downloadLocation : oa.getDownloadLocation().split("[,]")) {
-							bean.setDownloadLocation(downloadLocation);
-							String purl = ossService.getPurlByDownloadLocation(bean);
-							if (!isEmpty(purl)) {
-								sb.append(downloadLocation + "|" + purl).append(",");
-							} else {
-								sb.append(downloadLocation);
-							}
-						}
-					} else {
-						bean.setDownloadLocation(oa.getDownloadLocation());
-						String purl = ossService.getPurlByDownloadLocation(bean);
-						if (!isEmpty(purl)) {
-							sb.append(oa.getDownloadLocation() + "|" + purl);
-						} else {
-							sb.append(oa.getDownloadLocation());
-						}
-					}
-					
-					oa.setDownloadLocation(sb.toString());
 				}
 				
 				String key = (oa.getOssName() + "_" + avoidNull(oa.getOssVersion())).toUpperCase();
@@ -1974,11 +1894,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.UPDATE_ANALYSIS_COMPLETE)
-	public @ResponseBody ResponseEntity<Object> updateAnalysisComplete(
-			HttpServletRequest req, 
-			HttpServletResponse res, 
-			@RequestBody OssAnalysis analysisBean, 
-			Model model){
+	public @ResponseBody ResponseEntity<Object> updateAnalysisComplete(HttpServletRequest req, HttpServletResponse res, @RequestBody OssAnalysis analysisBean, Model model){
 		Map<String, Object> result = null;
 		
 		try {

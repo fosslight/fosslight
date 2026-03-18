@@ -487,10 +487,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					if (isEmpty(bean.getPurl())) {
 						StringBuilder sb = new StringBuilder();
 						OssMaster ossMaster = new OssMaster();
-						
+						ossMaster.setOssName(bean.getOssName());
 						for (String downloadLocation : bean.getDownloadLocations()) {
 							ossMaster.setDownloadLocation(downloadLocation);
-							String purl = generatePurlByDownloadLocation(bean);
+							String purl = generatePurlByDownloadLocation(ossMaster);
 							sb.append(purl).append(",");
 						}
 						
@@ -795,6 +795,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		OssMaster mergeParam  = new OssMaster();
 //		nickMergeParam.setOssName(chagedOssName);
 		mergeParam.setOssCommonId(chagedOssCommonId);
+		mergeParam.setOssName(chagedOssName);
 		mergeParam.setOssNickname(beforOssName);
 		ossMapper.mergeOssNickname2(mergeParam);
 		
@@ -1402,6 +1403,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					
 					master.setOssCommonId(ossMaster.getOssCommonId());
+					master.setOssName(ossMaster.getOssName());
 					master.setDownloadLocation(downloadLocationUrl);
 					master.setOssDlIdx(++idx);
 					
@@ -4437,6 +4439,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMapper.deleteOssNickname(ossMaster);
 		}
 		
+		ossMaster.setOssName(afterOssName);
+		registOssDownloadLocation(ossMaster);
+		
 		CoCodeManager.getInstance().refreshOssInfo();
 		
 		for (String ossId : beforeOssNameVersionOssIdList) {
@@ -5238,7 +5243,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			PackageURL purl = null;
 			if (urlSearchSeq == -1 || urlSearchSeq == 16) {
-				purlString = "link:" + downloadLocation;
+				purlString = convertToGeneric(ossMaster);
 			} else {
 				String[] splitDownloadLocation = downloadLocation.split("/");
 				boolean addFlag = false;
@@ -5312,7 +5317,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				if (errorFlag) {
-					purlString = "link:" + downloadLocation;
+					purlString = convertToGeneric(ossMaster);
 				} else {
 					if (purl != null) {
 						purlString = purl.toString();
@@ -5344,6 +5349,40 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return purlString;
 	}
 	
+	private String convertToGeneric(OssMaster ossMaster) {
+        String encodedName = encodeByRule(ossMaster.getOssName(), true);
+        String encodedUrl = encodeDownloadLocation(ossMaster.getDownloadLocation());
+        return String.format("pkg:generic/%s?download_url=%s", encodedName, encodedUrl);
+	}
+
+	private String encodeDownloadLocation(String url) {
+		if (isEmpty(url)) {
+			return "";
+		}
+
+		String protocol = "";
+	    String remainder = url.toLowerCase();
+
+	    int protocolIndex = remainder.indexOf("://");
+	    if (protocolIndex != -1) {
+	        protocol = remainder.substring(0, protocolIndex + 3);
+	        remainder = remainder.substring(protocolIndex + 3);
+	    }
+
+	    return protocol + Arrays.stream(remainder.split("/", -1)).map(segment -> encodeByRule(segment, false)).collect(Collectors.joining("/"));
+	}
+
+	private String encodeByRule(String inputStr, boolean isFullEncode) {
+		if (isEmpty(inputStr)) {
+            return "";
+        }
+		String result = inputStr.toLowerCase().replace(":", "%3A").replace("@", "%40").replace("?", "%3f").replace("=", "%3d").replace("&", "%26").replace("#", "%23").replace(" ", "%20");
+	    if (isFullEncode) {
+	        result = result.replace("/", "%2F");
+	    }
+	    return result;
+	}
+
 	private String mavenUrlFormatter(String downloadLocation) {
         String path = downloadLocation.split("maven2/")[1];
         String[] parts = path.split("/");
