@@ -34,6 +34,8 @@ public interface PartnerService extends HistoryConfig{
 
 	public List<T2Users> getUserList(T2Users t2Users);
 
+	public void changeStatus(PartnerMaster partnerMaster);
+	
 	public void changeStatus(PartnerMaster partnerMaster, boolean isCoReviewer);
 
 	public List<PartnerMaster> getPartnerSwNmList(PartnerMaster partnerMaster);
