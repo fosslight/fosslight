@@ -80,7 +80,6 @@ import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
-import oss.fosslight.service.CacheService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
@@ -89,7 +88,6 @@ import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VerificationService;
-import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.FileUtil;
@@ -2468,12 +2466,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				sqlSession.flushStatements();
 			}
 			
+			Map<String, Integer> countMap = new HashMap<>();
 			if (!CollectionUtils.isEmpty(insertOssComponentList)) {
 				prjBasicInfo.setReferenceId(prjId);
 				prjBasicInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 				int ossComponentIdx = mapper.selectOssComponentMaxIdx(prjBasicInfo);
 				
 				for (ProjectIdentification bean : insertOssComponentList) {
+					String partnerId = bean.getRefPartnerId(); 
+			        if (!isEmpty(partnerId)) {
+			            countMap.put(partnerId, countMap.getOrDefault(partnerId, 0) + 1);
+			        }
 					bean.setComponentIdx(String.valueOf(ossComponentIdx++));
 					mapper.insertSrcOssList(bean);
 					if (cnt++ == 1000) {
@@ -2503,6 +2506,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			for (PartnerMaster bean : thirdPartyInsertList) {
 				bean.setPrjId(prjId);
 				
+				int actualCount = countMap.getOrDefault(bean.getPartnerId(), 0);
+				int currentCount = 0;
+				try {
+				    if (!isEmpty(bean.getComponentCount())) {
+				        currentCount = Integer.parseInt(bean.getComponentCount());
+				    }
+				} catch (Exception e) {
+				    currentCount = 0; 
+				}
+			    
+			    if (actualCount > 0) {
+			        bean.setComponentCount(String.valueOf(actualCount));
+			    } else if (currentCount > 0) {
+			        bean.setComponentCount(String.valueOf(currentCount));
+			    } else {
+			        bean.setComponentCount("0");
+			    }
+			    
 				pMapper.insertPartnerMapList(bean);
 				if (cnt++ == 1000) {
 					sqlSession.flushStatements();
@@ -3717,22 +3738,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		ObjectMapper mapper = new ObjectMapper();
 		
 		List<ProjectIdentification> ossComponent = new ArrayList<>();
+		int componentCount = 0;
 		String convertListToJson = "";
-		try {
-			if (CollectionUtils.isNotEmpty(thirdPartyData)) {
+		
+		if (CollectionUtils.isNotEmpty(thirdPartyData)) {
+			componentCount = thirdPartyData.size();
+			try {
 				convertListToJson = mapper.writeValueAsString(thirdPartyData);
 				Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 				ossComponent = (List<ProjectIdentification>) fromJson(convertListToJson, collectionType);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
 			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 		}
 		
 		List<PartnerMaster> thirdPartyList = new ArrayList<>();
 		PartnerMaster partnerMaster = new PartnerMaster();
 		partnerMaster.setPrjId(prjId);
 		partnerMaster.setPartnerId(partnerId);
-		partnerMaster.setComponentCount(String.valueOf(ossComponent.size()));
+		partnerMaster.setComponentCount(String.valueOf(componentCount));
 		thirdPartyList.add(partnerMaster);
 		
 		List<List<ProjectIdentification>> ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, true);
@@ -5136,7 +5160,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (!isEmpty(referenceId) && isEmpty(oc.getRefPartnerId())) {
 				oc.setRefPartnerId(referenceId);
 			}
-			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())){
+			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())) {
 				param.addComponentIdList(oc.getComponentId());
 			}
 		}
