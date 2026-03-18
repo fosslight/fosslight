@@ -346,37 +346,54 @@
 			}
 		},
 		requestPermission : function() {
-			var msg = [[${@CommonFunction.getCustomMessage('msg.common.request.permission', 'partner')}]];
-			alertify.confirm(msg, function(e){
-				if (e) {
-					$.ajax({
-						url : "/partner/requestPermission",
-						type : 'POST',
-						data : JSON.stringify({"partnerId" : [[${detail.partnerId}]]}),
-						dataType : 'json',
-						cache : false,
-						async : false,
-						contentType : 'application/json',
-						success: function(data) {
-							if (typeof data.resultData !== "undefined") {
-								if (typeof data.resultData.msg !== "undefined") {
-									alertify.alert(data.resultData.msg, function(){});
-								} else {
-									if (data.resultData.isValid) {
-										alertify.success([[#{msg.common.success}]], 0);
-										$("#requestPermission").hide();
-										$("#cancelRequestPermission").show();
+			var innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.request.permission', 'partner')}]];
+			innerHtml += "<br><br><textarea id=\"permissionRequestEditor\"></textarea>";
+			
+			if (typeof alertify.parPermissionRequestDialog === 'undefined') {
+				commonAlertifyDialog('parPermissionRequestDialog');
+        	}
+			
+			alertify.parPermissionRequestDialog()
+				.set('onok', function(e) {
+					if (e) {
+						var editorVal = $("#permissionRequestEditor").summernote('code');
+						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+	       				} else {
+	       					editorVal = "";
+	       				}
+						$.ajax({
+							url : "/partner/requestPermission",
+							type : 'POST',
+							data : JSON.stringify({"partnerId" : [[${detail.partnerId}]], "comment" : editorVal}),
+							dataType : 'json',
+							cache : false,
+							async : false,
+							contentType : 'application/json',
+							success: function(data) {
+								if (typeof data.resultData !== "undefined") {
+									if (typeof data.resultData.msg !== "undefined") {
+										alertify.alert(data.resultData.msg, function(){});
 									} else {
-										alertify.error([[#{msg.common.valid2}]], 0);
+										if (data.resultData.isValid) {
+											alertify.success([[#{msg.common.success}]], 0);
+											$("#requestPermission").hide();
+											$("#cancelRequestPermission").show();
+										} else {
+											alertify.error([[#{msg.common.valid2}]], 0);
+										}
 									}
 								}
 							}
-						}
-					});
-				} else {
-					return false;
-				}
-			});
+						});
+					} else {
+						return false;
+					}
+				})
+				.set('onshow', function(e){
+					$("#permissionRequestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+				})
+				.setContent(innerHtml)
+				.show();
 		},
 		confirmRejectPermission : function (user) {
 			$.ajax({
