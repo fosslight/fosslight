@@ -1449,7 +1449,7 @@ public class PartnerController extends CoTopComponent{
 			_param2.setPartnerId(partnerMaster.getPartnerId());
 			PartnerMaster orgInfo = partnerService.getPartnerMasterOne(_param2);
 			
-			partnerService.changeStatus(partnerMaster, false);
+			partnerService.changeStatus(partnerMaster);
 			
 			try {
 				boolean isRejected = false;
