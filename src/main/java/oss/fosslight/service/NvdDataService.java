@@ -30,8 +30,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -691,6 +690,8 @@ public class NvdDataService {
 		if(totalCnt < API_MATCH_CHUNK_SIZE) {
 			totalCnt = API_MATCH_CHUNK_SIZE;
 		}
+		
+		boolean isAnyFailureOccurred = false;
 		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false)) {
 			NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
 
@@ -702,7 +703,6 @@ public class NvdDataService {
 			for(int limitIndex = 0; limitIndex <= totalCnt/API_MATCH_CHUNK_SIZE; limitIndex++) {
 				schlog.info("getNvdCpeMatchData in progress {}/{}", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
 				
-				
 				for (int i = 0; i < 5; i++) {
 					responseMap = getDataForRestApiConnection(NVD_REST_BASE_URL + NVD_REST_CPE_MATCH_URL, API_MATCH_CHUNK_SIZE, API_MATCH_CHUNK_SIZE * limitIndex, 1);
 					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
@@ -711,6 +711,12 @@ public class NvdDataService {
 					}
 				}
 
+				if (!httpsUrlConnectionFlag) {
+			        schlog.info("Failed to get data for index: {}/{}. Skipping to next chunk.", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
+			        isAnyFailureOccurred = true;
+			        continue;
+			    }
+				
 //				String searchUrl = MessageFormat.format(NVD_REST_CPE_MATCH_URL + "?resultsPerPage={0}&startIndex={1}", API_MATCH_CHUNK_SIZE, API_MATCH_CHUNK_SIZE*limitIndex);
 //				if (!initializeFlag) {
 //					searchUrl += "&lastModStartDate=" + lastModStartDate + "&lastModEndDate=" + lastModEndDate;
@@ -791,8 +797,6 @@ public class NvdDataService {
 							}
 						}
 					}
-				} else {
-					throw new RuntimeException("url connection attempts exceeded");
 				}
 			}
 
@@ -802,6 +806,10 @@ public class NvdDataService {
 			
 		schlog.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
 		if (httpsUrlConnectionFlag && totalResults > 0) {
+			if (isAnyFailureOccurred) {
+		        schlog.warn("Some chunks failed to download. Proceeding with partially collected data.");
+		    }
+			
 			if (initializeFlag) {
 				nvdDataMapper.truncateCpeMatch();
 				nvdDataMapper.truncateCpeMatchNames();
@@ -888,23 +896,17 @@ public class NvdDataService {
 		return rtnMap;
 	}
 
-	@SuppressWarnings({ "unchecked" })
 	private Map<String, Object> getFromJSONObjectToMap(BufferedReader br) {
-		Map<String, Object> map = null;
-		if (br != null) {
-			try {
-				JSONTokener tokener = new JSONTokener(br);
-			    JSONObject json = new JSONObject(tokener);
-	        	map = new ObjectMapper().readValue(json.toString(), Map.class);
-	        } catch (Exception e) {
-	        	log.error(e.getMessage(), e);
-	        	map = null;
-	        }
-		} else {
-			log.error("url connection response buffered reader null");
+		if (br == null) {
+			return null;
 		}
-
-		return map;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+	        return mapper.readValue(br, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+        	log.error("NVD JSON parsing error (Jackson): {}", e.getMessage());
+        	return null;
+        }
 	}
 
 	@Transactional
