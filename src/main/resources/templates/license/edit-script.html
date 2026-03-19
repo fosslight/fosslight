@@ -42,13 +42,15 @@
                 });
 
                 $("#licenseNicknames").on('click', function(){
-                    let licenseNicknameHtml = '	<div class="col-lg-4" style="margin-bottom: 0.5rem;">';
-                    licenseNicknameHtml += '		<div class="form-group mb-0" >';
-                    licenseNicknameHtml += '			<input class="form-control" type="text" name="licenseNicknames" value="' + $("#input_licenseNicknames").val() + '" />';
-                    licenseNicknameHtml += '			<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
-                    licenseNicknameHtml += '			<span class="retxt"></span>';
-                    licenseNicknameHtml += '		</div>';
-                    licenseNicknameHtml += '	</div>';
+                	var licenseNickVal = $("#input_licenseNicknames").val();
+                	let licenseNicknameHtml = `
+                	    <div class="col-lg-4" style="margin-bottom: 0.5rem;">
+                	        <div class="form-group mb-0">
+                	            <input class="form-control" type="text" name="licenseNicknames" value="${licenseNickVal.replace(/"/g, '&quot;')}" />
+                	            <button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>
+                	            <span class="retxt"></span>
+                	        </div>
+                	    </div>`;
 
                     $(".multiTxtSet").append(licenseNicknameHtml);
                     $("#input_licenseNicknames").val("");
