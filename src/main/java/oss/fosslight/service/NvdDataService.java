@@ -381,7 +381,7 @@ public class NvdDataService {
 						}
 					}
 				} else {
-					throw new RuntimeException("url connection attempts exceeded");
+					schlog.info("Failed to get data for index: {}/{}. Skipping to next chunk.", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
 				}
 			}
 
@@ -691,7 +691,6 @@ public class NvdDataService {
 			totalCnt = API_MATCH_CHUNK_SIZE;
 		}
 		
-		boolean isAnyFailureOccurred = false;
 		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false)) {
 			NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
 
@@ -710,12 +709,6 @@ public class NvdDataService {
 						break;
 					}
 				}
-
-				if (!httpsUrlConnectionFlag) {
-			        schlog.info("Failed to get data for index: {}/{}. Skipping to next chunk.", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
-			        isAnyFailureOccurred = true;
-			        continue;
-			    }
 				
 //				String searchUrl = MessageFormat.format(NVD_REST_CPE_MATCH_URL + "?resultsPerPage={0}&startIndex={1}", API_MATCH_CHUNK_SIZE, API_MATCH_CHUNK_SIZE*limitIndex);
 //				if (!initializeFlag) {
@@ -797,6 +790,8 @@ public class NvdDataService {
 							}
 						}
 					}
+				} else {
+					schlog.info("Failed to get data for index: {}/{}. Skipping to next chunk.", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
 				}
 			}
 
@@ -806,10 +801,6 @@ public class NvdDataService {
 			
 		schlog.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
 		if (httpsUrlConnectionFlag && totalResults > 0) {
-			if (isAnyFailureOccurred) {
-		        schlog.warn("Some chunks failed to download. Proceeding with partially collected data.");
-		    }
-			
 			if (initializeFlag) {
 				nvdDataMapper.truncateCpeMatch();
 				nvdDataMapper.truncateCpeMatchNames();
