@@ -31,8 +31,6 @@ public interface ApiProjectMapper {
 
 	int selectProjectTotalCount(Map<String, Object> paramMap);
 	
-	String findIdentificationMaxNvdInfo(String prjId);
-	
 	List<Map<String, Object>> selectModelList(String prjId);
 	
 	int getCreateProjectCnt(@Param("userId") String userId);

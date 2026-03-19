@@ -478,8 +478,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             T2File fileInfo = new T2File();
             String type = "";
 
-            if ("Y".equals(saveFlag)) {
-                projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
+            if (CoConstDef.FLAG_YES.equals(saveFlag)) {
+                apiProjectService.registBom(prjId, saveFlag, userInfo.getUserId());
                 projectService.updateSecurityDataForProject(prjId);
             }
 
@@ -524,6 +524,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(String authorization, String prjId,String saveFlag){
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(prjId);
+        }
+        
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         try {
@@ -540,8 +544,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (searchFlag) {
                 resultMap = apiProjectService.getBomExportJson(prjId);
-                if ("Y".equals(saveFlag)) {
-                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
+                if (CoConstDef.FLAG_YES.equals(saveFlag)) {
+                    apiProjectService.registBom(prjId, saveFlag, userInfo.getUserId());
                     projectService.updateSecurityDataForProject(prjId);
                 }
             }
@@ -699,7 +703,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             {
 
 
-            T2Users userInfo = userService.checkApiUserAuth(authorization);
+    	T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
@@ -811,8 +815,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
             }
 
-            if(sbomSave.equals(CoConstDef.FLAG_YES)) {
-                projectService.registBom(prjId, "Y", new ArrayList<>(), new ArrayList<>());
+            if (CoConstDef.FLAG_YES.equals(sbomSave)) {
+                apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
                 projectService.updateSecurityDataForProject(prjId);
             }
 

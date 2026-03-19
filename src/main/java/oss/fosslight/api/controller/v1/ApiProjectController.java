@@ -516,8 +516,8 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 			
 			if (searchFlag) {
-				if ("Y".equals(mergeSaveFlag)) {
-					projectService.registBom(prjId, mergeSaveFlag, new ArrayList<>(), new ArrayList<>());
+				if (CoConstDef.FLAG_YES.equals(mergeSaveFlag)) {
+					apiProjectService.registBom(prjId, mergeSaveFlag, userInfo.getUserId());
 					projectService.updateSecurityDataForProject(prjId);
 				}
 				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);

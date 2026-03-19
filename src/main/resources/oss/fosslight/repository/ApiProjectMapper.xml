@@ -498,25 +498,6 @@
 		 WHERE PRJ_ID = #{prjId}
 	</update>
 	
-	<select id="findIdentificationMaxNvdInfo" parameterType="String" resultType="String">
-		SELECT NVD.CVSS_SCORE AS CVSS_SCORE
-  		  FROM OSS_COMPONENTS OC
-  		  LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , 'Y' AS VULN_YN 
-  		  					 FROM NVD_DATA_SCORE_V3) NVD 
-  		  	ON NVD.PRODUCT = OC.OSS_NAME 
-  		   AND NVD.VERSION = IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) 
-  		 WHERE OC.REFERENCE_ID = #{prjId}
-  		   AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
-  		   AND OC.EXCLUDE_YN = 'N'
-		   AND OC.OSS_NAME IS NOT NULL
-		   AND OC.OSS_NAME != '-'
-  		 ORDER BY NVD.CVSS_SCORE *1 DESC, NVD.CVE_ID LIMIT 1
-	</select>
-	
 	<select id="selectModelList" parameterType="string" resultType="oss.fosslight.domain.CamelMap">
 		SELECT CONCAT(MAIN_CD.CD_DTL_NM, ' > ', SUB_CD.CD_DTL_NM) AS CATEGORY
 			 , A.MODEL_NAME

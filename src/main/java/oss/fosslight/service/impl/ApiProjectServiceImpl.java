@@ -12,22 +12,25 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
@@ -76,6 +79,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@Autowired ApiOssMapper apiOssMapper;
 	@Autowired ApiVulnerabilityService apiVulnerabilityService;
 	@Autowired HistoryService historyService;
+	
+	@Autowired private SqlSessionFactory sqlSessionFactory;
 	
 	HashMap<String, HashMap<String, Object>> OSS_INFO_UPPER = new HashMap<>();
 	HashMap<String, HashMap<String, Object>> OSS_INFO_BY_ID = new HashMap<>();
@@ -2028,329 +2033,247 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void registBom(String prjId, String merge) {
-		loadOssInfo();
-		loadLicenseInfo();
-		
-		// delete component
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("referenceId", prjId);
-		paramMap.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		paramMap.put("merge", merge);
-		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
-		paramMap.put("saveBomFlag", CoConstDef.FLAG_YES);
-		
-		
-		apiProjectMapper.resetOssComponentsAndLicense(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-//		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
-//		
-//		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
-//		if (componentId.size() > 0){
-//			for (int i = 0; i < componentId.size(); i++) {
-//				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
-//			}
-//			
-//			apiProjectMapper.deleteOssComponents(paramMap);
-//		}
-		
-		HashMap<String, Object> mergeListMap = getIdentificationGridList(paramMap);
-		
-		if (mergeListMap != null && mergeListMap.get("rows") != null) {
-			for (HashMap<String, Object> bean : (List<HashMap<String, Object>>) mergeListMap.get("rows")) {
-				
-				if ((bean.get("ossName") == null || "-".equals((String) bean.get("ossName")))) {
-					List<HashMap<String, Object>> ocll = (List<HashMap<String, Object>>) bean.get("ossComponentsLicenseList");
-					if (ocll.size() > 1) {
-						continue;
-					}
-				}
-				
-				bean.put("refDiv", bean.get("referenceDiv"));
-				bean.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				bean.put("refComponentId", bean.get("componentId"));
-				bean.put("adminCheckYn", CoConstDef.FLAG_NO);
-				bean.put("preObligationType", bean.get("obligationType"));
-				if (bean.containsKey("licenseName")) {
-					if (((String) bean.get("licenseName")).contains("Other")) {
-						String licenseNm = (String) bean.get("licenseName");
-					}
-				}
-				bean = findOssIdAndName(bean);
-				
-				String copyrightText = (String) bean.get("copyrightText");
-				if(!isEmpty(copyrightText)) {
-					String[] copyrights = copyrightText.split("\\|");
-					String customCopyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
-					bean.put("copyrightText", customCopyrightText);
-				}
-				
-				// 컴포넌트 마스터 인서트
-				apiProjectMapper.registBomComponents(bean);
-				
-				List<HashMap<String, Object>> licenseList = findOssLicenseIdAndName(bean);
-				
-				if (licenseList.size() > 0) {
-					for (HashMap<String, Object> licenseBean : licenseList) {
-						licenseBean.put("componentId", bean.get("componentId"));
-						
-						apiProjectMapper.registComponentLicense(licenseBean);
-					}
-				}
-			}
-		}
-			
-		// identification 대상이 없이 처음 저장하는 경우
-		Map<String, Object> _tempPrjInfo = new HashMap<>();
-		_tempPrjInfo.put("prjId", prjId);
-		_tempPrjInfo = apiProjectMapper.selectProjectMaster2(_tempPrjInfo);
-		
-		if (_tempPrjInfo.get("identificationStatus") == null && ((String) _tempPrjInfo.get("identificationStatus")).trim().length() == 0) {
-			_tempPrjInfo.put("identificationStatus", CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
-			
-			apiProjectMapper.updateIdentifcationProgress(_tempPrjInfo);
-		}
-	}
-
-	private void loadOssInfo() {
-		try {
-			List<HashMap<String, Object>> list = apiOssMapper.getOssInfoAll();
-			List<HashMap<String, Object>> listNick = apiOssMapper.getOssInfoAllWithNick();
-			List<HashMap<String, Object>> nickNameList = apiOssMapper.getOssAllNickNameList();
-			HashMap<String, String[]> nickNameMap = new HashMap<>();
-			HashMap<String, HashMap<String, Object>> _ossMap = new HashMap<>();
-			HashMap<String, String> _ossNamesMap = new HashMap<>();
-			
-			if (nickNameList != null) {
-				for (Map<String, Object> bean : nickNameList) {
-					if (bean.get("ossNickname") != null) {
-						nickNameMap.put((String) bean.get("ossName"), ((String) bean.get("ossNickname")).split(","));
-					}
-				}
-			}
-			
-			if (list != null) {
-				List<HashMap<String, Object>> licenseBeanList = new ArrayList<>();
-				
-				for (HashMap<String, Object> bean : list) {
-					
-					HashMap<String, Object> licenseBean = new HashMap<>();
-					HashMap<String, Object> targetBean = null;
-					String key = (String) bean.get("ossName") +"_"+ avoidNull((String) bean.get("ossVersion")); // oss name을 nick name으로 가져온다.
-					key = key.toUpperCase();
-					
-					if (_ossMap.containsKey(key)) {
-						targetBean = _ossMap.get(key);
-					} else {
-						targetBean = bean;
-						
-						if (nickNameMap.containsKey(targetBean.get("ossNameTemp"))) {
-							targetBean.put("ossNicknames", nickNameMap.get(targetBean.get("ossNameTemp")));
-						}
-					}
-					
-					HashMap<String, Object> subBean = new HashMap<>();
-					subBean.put("ossId", bean.get("ossId"));
-					subBean.put("licenseId", bean.get("licenseId"));
-					subBean.put("licenseName", bean.get("licenseName"));
-					subBean.put("licenseType", bean.get("ossLicenseType"));
-					subBean.put("ossLicenseIdx", bean.get("ossLicenseIdx"));
-					subBean.put("ossLicenseComb", bean.get("ossLicenseComb"));
-					subBean.put("ossLicenseText", bean.get("ossLicenseText"));
-					subBean.put("ossCopyright", bean.get("ossCopyright"));
-					
-					targetBean.put("licenseType", bean.get("ossLicenseType"));
-					
-					licenseBean.put(key, subBean);
-					licenseBeanList.add(licenseBean);			
-					
-					targetBean.put("ossLicenses", makeOssLicense(key, licenseBeanList));
-									
-					if (_ossMap.containsKey(key)) {
-						_ossMap.replace(key, targetBean);
-					} else {
-						_ossMap.put(key, targetBean);
-					}
-					
-					if (!_ossNamesMap.containsKey(((String) bean.get("ossName")).toUpperCase())) {
-						_ossNamesMap.put(((String) bean.get("ossName")).toUpperCase(), (String) bean.get("ossName"));
-					}
-				}
-			}
-			
-			HashMap<String, HashMap<String, Object>> _idMasterMap = new HashMap<>();
-			for (HashMap<String, Object> bean : _ossMap.values()) {
-				if (!_idMasterMap.containsKey(bean.get("ossId"))) {
-					_idMasterMap.put(Integer.toString((int) bean.get("ossId")), bean);
-				}
-			}
-			
-			OSS_INFO_BY_ID = _idMasterMap;
-			
-			if (listNick != null) {
-
-				for (HashMap<String, Object> bean : listNick) {
-					String key = (String) bean.get("ossName") +"_"+ avoidNull((String) bean.get("ossVersion")); // oss name을 nick name으로 가져온다.
-					String ossNickNameKey = ((String) bean.get("ossName")).toUpperCase();
-
-					if (!_ossNamesMap.containsKey(ossNickNameKey)) {
-						_ossNamesMap.put(ossNickNameKey, (String) bean.get("ossNameTemp"));
-					}
-					
-					String sourceKey = ((String) bean.get("ossNameTemp") + "_" + avoidNull((String) bean.get("ossVersion"))).toUpperCase();
-					HashMap<String, Object> sourceBean = _ossMap.get(sourceKey);
-					
-					bean.put("licenseDiv", sourceBean.get("licenseDiv"));
-					bean.put("downloadLocation", sourceBean.get("downloadLocation"));
-					bean.put("downloadLocationGroup", sourceBean.get("downloadLocationGroup"));
-					bean.put("homepage", sourceBean.get("homepage"));
-					bean.put("summaryDescription", sourceBean.get("summaryDescription"));
-					bean.put("attribution", sourceBean.get("attribution"));
-					bean.put("copyright", sourceBean.get("copyright"));
-					bean.put("cvssScore", sourceBean.get("cvssScore"));
-					bean.put("cveId", sourceBean.get("cveId"));
-					bean.put("vulnYn", sourceBean.get("vulnYn"));
-					bean.put("vulnRecheck", sourceBean.get("vulnRecheck"));
-					bean.put("vulnDate", sourceBean.get("vulnDate"));
-					bean.put("licenseType", sourceBean.get("licenseType"));
-					bean.put("ossLicenses", sourceBean.get("ossLicenses"));
-					bean.put("ossType", sourceBean.get("ossType"));
-					bean.put("multiLicenseFlag", sourceBean.get("multiLicenseFlag"));
-					bean.put("dualLicenseFlag", sourceBean.get("dualLicenseFlag"));
-					bean.put("versionDiffFlag", sourceBean.get("versionDiffFlag"));
-
-					_ossMap.put(key.toUpperCase(), bean);
-				}
-			
-			}
-			
-			if (!_ossMap.isEmpty()) {
-				OSS_INFO_UPPER = _ossMap;
-			}
-		} catch(Exception e) {
-        	log.error(e.getMessage(), e);
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private List<HashMap<String, Object>> makeOssLicense(String key, List<HashMap<String, Object>> licenseBeanList) {
-		List<HashMap<String, Object>> ossLicenses = new ArrayList<>();
-		
-		for (HashMap<String, Object> license : licenseBeanList) {
-			if (license.containsKey(key)) {
-				ossLicenses.add((HashMap<String, Object>) license.get(key));
+	public void registBom(String prjId, String merge, String userId) {
+		boolean isAndroidBom = false;
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("prjIdList", new String[] {prjId});
+		List<Map<String, Object>> list = apiProjectMapper.selectProject(paramMap);
+		if (CollectionUtils.isNotEmpty(list)) {
+			if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(String.valueOf(list.get(0).getOrDefault("notice", "")))) {
+				isAndroidBom = true;
 			}
 		}
 		
-		if (ossLicenses.size() > 1) {
-			Collections.sort(ossLicenses, new Comparator<HashMap<String, Object>>() {
-				@Override
-				public int compare(HashMap<String, Object> o1, HashMap<String, Object> o2) {
-					return Integer.toString((int) o1.get("ossLicenseIdx")).compareTo(Integer.toString((int) o2.get("ossLicenseIdx")));
-				}
-			});
-		}
-		
-		return ossLicenses;
-	}
-	
-	private void loadLicenseInfo() {
-		try {
-            List<HashMap<String, Object>> list = apiProjectMapper.getLicenseInfoInit();
-            List<HashMap<String, Object>> nickList = apiProjectMapper.getLicenseInfoInitNick();
-            
-            if (list == null) {
-                throw new RuntimeException("SYSTEM ERR GET CODE LICENSE MASTER INFO");
+		String standardCvssScore = String.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
+        
+        ProjectIdentification identification = new ProjectIdentification();
+        ProjectIdentification paramBean = new ProjectIdentification();
+        
+        paramBean.setReferenceId(prjId);
+        identification.setReferenceId(prjId);
+        if (!isAndroidBom) {
+            identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+        } else {
+            identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+        }
+        identification.setMerge(CoConstDef.FLAG_NO);
+        paramBean.setReferenceDiv(identification.getReferenceDiv());
+        
+        List<OssComponents> componentId = projectMapper.selectComponentId(identification);
+        List<ProjectIdentification> bomComponentsList = new ArrayList<>();
+        
+        List<ProjectIdentification> bomList = !isAndroidBom ? projectMapper.selectBomList(identification) : projectMapper.selectOtherBomList(identification);
+        List<String> adminCheckComponentIds = new ArrayList<>();
+        Map<String, Vulnerability> securityDataMap = new HashMap<>();
+        
+        if (CollectionUtils.isNotEmpty(bomList)) {
+            for (ProjectIdentification pi : bomList) {
+                if (CoConstDef.FLAG_YES.equals(pi.getAdminCheckYn())) {
+                    adminCheckComponentIds.add(pi.getRefComponentId());
+                }
             }
             
-            HashMap<String, HashMap<String, Object>> license_info_map = new HashMap<>();
-            HashMap<String, HashMap<String, Object>> license_info_upper_map = new HashMap<>();
-            HashMap<String, HashMap<String, Object>> license_info_by_id_map = new HashMap<>();
-            
-            for (HashMap<String, Object> vo : list) {
-            	if (vo.containsKey("licenseNicknameStr")) {
-            		List<String> licenseNicknameList = new ArrayList<String>();
-            		for (String nick : ((String) vo.get("licenseNicknameStr")).split("\\|")) {
-            			licenseNicknameList.add(nick);
-            		}
-            		vo.put("licenseNicknameList", licenseNicknameList);
-            	}
-            	
-            	if (vo.containsKey("restriction")) {
-            		if (!("").equals((String) vo.get("restriction"))) {
-                		vo.put("restrictionStr", licenseRestrictionList((String) vo.get("restriction")));
-            		}
-            	}
-            	
-            	license_info_map.put((String) vo.get("licenseName"),vo);
-            	license_info_upper_map.put(((String) vo.get("licenseName")).toUpperCase(),vo);
-            	
-            	//SHORT_IDENTIFIER
-            	if (vo.containsKey("shortIdentifier")) {
-            		if (!("").equals(vo.get("shortIdentifier"))) {
-            			if (!license_info_map.containsKey(vo.get("shortIdentifier"))) {
-                        	license_info_map.put((String) vo.get("shortIdentifier"), vo);
-                		}
-                		
-                		if (!license_info_upper_map.containsKey(((String) vo.get("shortIdentifier")).toUpperCase())) {
-                			license_info_upper_map.put(((String) vo.get("shortIdentifier")).toUpperCase(), vo);
-                		}
-            		}
-            	}
-            	
-            	license_info_by_id_map.put(Integer.toString((int) vo.get("licenseId")), vo);
+            paramBean.setStandardScore(Float.valueOf(standardCvssScore));
+            List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(paramBean);
+    		if (CollectionUtils.isNotEmpty(securityDataList)) {
+				securityDataMap = securityDataList.stream()
+								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+								        .collect(Collectors.toMap(
+    							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
+    							            v -> v,
+    							            (existing, replacement) -> {
+    							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+    							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+    							                return score1 >= score2 ? existing : replacement;
+    							            }
+    							        ));
+    		}
+        }
+        
+        paramBean.setMerge(merge);
+        paramBean.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+        paramBean.setSaveBomFlag(CoConstDef.FLAG_YES);
+        Map<String, Object> mergeListMap = projectService.getIdentificationGridList(paramBean);
+        
+        if (mergeListMap != null && mergeListMap.get("rows") != null) {
+            List<ProjectIdentification> registBomList = (mergeListMap != null) ? (List<ProjectIdentification>) mergeListMap.get("rows") : null;
+            if (CollectionUtils.isNotEmpty(registBomList)) {
+            	for (ProjectIdentification bean : registBomList) {
+                    bean.setRefDiv(bean.getReferenceDiv());
+                    if (!isAndroidBom) {
+                    	bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+                    } else {
+                        bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+                    }
+                    bean.setRefComponentId(bean.getComponentId());
+                    if (adminCheckComponentIds.contains(bean.getRefComponentId())) {
+                        bean.setAdminCheckYn(CoConstDef.FLAG_YES);
+                    } else {
+                        bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+                    }
+                    bean.setPreObligationType(bean.getObligationType());
+                    
+                    bean = CommonFunction.findOssIdAndName(bean);
+                    
+                    if (!isEmpty(bean.getCopyrightText())) {
+                        String[] copyrights = bean.getCopyrightText().split("\\|");
+                        String copyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
+                        bean.setCopyrightText(copyrightText);
+                    }
+                    
+                    List<OssComponentsLicense> licenseList = CommonFunction.findOssLicenseIdAndName(bean.getOssId(), bean.getOssComponentsLicenseList());
+                    bean.setOssComponentsLicenseList(licenseList);
+                    bomComponentsList.add(bean);
+                }
+            }
+        }
+        
+        if (CollectionUtils.isNotEmpty(componentId)) {
+            projectMapper.resetOssComponentsAndLicense(identification.getReferenceId(), identification.getReferenceDiv());
+        }
+        
+        boolean hasNewBomData = false;
+        if (CollectionUtils.isNotEmpty(bomComponentsList)) {
+        	hasNewBomData = true;
+        	Project param = new Project();
+        	param.setReferenceId(prjId);
+        	param.setReferenceDiv(identification.getReferenceDiv());
+            registBomComponents(bomComponentsList, param);
+        }
+        
+        {
+        	final Project _tempPrjInfo = projectMapper.selectProjectMaster2(prjId);
+            if (isEmpty(_tempPrjInfo.getIdentificationStatus())) {
+                _tempPrjInfo.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+                projectMapper.updateIdentifcationProgress(_tempPrjInfo);
+            }
+        }
+        
+        Map<String, Vulnerability> targetSecurityDataMap = new HashMap<>();
+        if (hasNewBomData) {
+        	paramBean.setStandardScore(Float.valueOf(standardCvssScore));
+            List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(paramBean);
+    		if (CollectionUtils.isNotEmpty(securityDataList)) {
+				targetSecurityDataMap = securityDataList.stream()
+								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+								        .collect(Collectors.toMap(
+    							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
+    							            v -> v,
+    							            (existing, replacement) -> {
+    							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+    							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+    							                return score1 >= score2 ? existing : replacement;
+    							            }
+    							        ));
+    		}
+        }
+        
+        String securityComment = "";
+        if (MapUtils.isNotEmpty(securityDataMap) && MapUtils.isNotEmpty(targetSecurityDataMap)) {
+        	final Map<String, Vulnerability> existsSecurityDataMap = securityDataMap;
+        	final Map<String, Vulnerability> existsTargetSecurityDataMap = targetSecurityDataMap;
+        	
+        	Map<String, Vulnerability> uniqueSecurityMap = securityDataMap.entrySet().stream()
+															.filter(entry -> !existsTargetSecurityDataMap.containsKey(entry.getKey()))
+															.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        	
+        	Map<String, Vulnerability> uniqueTargetSecurityMap = targetSecurityDataMap.entrySet().stream()
+																    .filter(entry -> !existsSecurityDataMap.containsKey(entry.getKey()))
+																    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        	
+        	if (MapUtils.isNotEmpty(uniqueTargetSecurityMap)) {
+                securityComment += "<p><strong>Added vulnerabilities from Identification</strong>";
+                for (Vulnerability vuln : uniqueTargetSecurityMap.values()) {
+                    securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
+                }
             }
             
-            for (HashMap<String, Object> vo : nickList) {
-            	
-            	HashMap<String, Object> sourceBean = license_info_by_id_map.get(Integer.toString((int) vo.get("licenseId")));
-            	
-            	if (vo.containsKey("licenseNicknameList")) {
-            		vo.put("licenseNicknameList", sourceBean.get("licenseNicknameList"));
-            	}
-            	
-            	if (vo.containsKey("restrictionStr")) {
-            		vo.put("restrictionStr", sourceBean.get("restrictionStr"));
-            	}
-            	            	
-            	license_info_map.put((String) vo.get("licenseName"),vo);
-            	license_info_upper_map.put(((String) vo.get("licenseName")).toUpperCase(),vo);
+        	if (MapUtils.isNotEmpty(uniqueSecurityMap)) {
+                if (!securityComment.isEmpty()) {
+                	securityComment += "<br /><br />";
+                }
+                securityComment += "<p><strong>Deleted vulnerabilities from Identification</strong>";
+                for (Vulnerability vuln : uniqueSecurityMap.values()) {
+                    securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
+                }               
             }
+        } else if (MapUtils.isNotEmpty(targetSecurityDataMap)) {
+        	securityComment += "<p><strong>Added vulnerabilities from Identification</strong>";
+            for (Vulnerability vuln : targetSecurityDataMap.values()) {
+                securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
+            }
+        } else if (MapUtils.isNotEmpty(securityDataMap)) {
+        	securityComment += "<p><strong>Deleted vulnerabilities from Identification</strong>";
+        	for (Vulnerability vuln : securityDataMap.values()) {
+                securityComment += "<br />" + vuln.getOssName() + " (" + avoidNull(vuln.getOssVersion(), "N/A") + ")";
+            }
+        }
+        
+        if (!isEmpty(securityComment)) {
+            securityComment += "</p>";
             
-            if (!license_info_map.isEmpty()) {
-            	LICENSE_INFO = license_info_map;
-            }
+            CommentsHistory commHisBean = new CommentsHistory();
+            commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_SECURITY_HIS);
+            commHisBean.setReferenceId(prjId);
+            commHisBean.setLoginUserName(userId);
+            commHisBean.setContents(securityComment);
             
-            if (!license_info_upper_map.isEmpty()) {
-            	LICENSE_INFO_UPPER = license_info_upper_map;
-            }
-            
-            if (!license_info_by_id_map.isEmpty()) {
-            	LICENSE_INFO_BY_ID = license_info_by_id_map;
-            }
-        } catch (Exception e) {
-        	log.error(e.getMessage(), e);
+            commentService.registComment(commHisBean, false);
         }
 	}
-	
-	private String licenseRestrictionList(String restrictionStr) {
-		String returnStr = "";
+
+	private void registBomComponents(List<ProjectIdentification> bomComponentsList, Project project) {
+		List<OssComponentsLicense> bomComponentsLicenseList = new ArrayList<>();
 		
-		if (!isEmpty(restrictionStr)) {
-			String restrictionArr[] = restrictionStr.split(",");
-			List<String> restrictionList = new ArrayList<>();
-			
-			for (int i = 0 ; i < restrictionArr.length ; i++){
-				restrictionList.add(restrictionArr[i]);
-			}
-			
-            for (String str : restrictionList){
-            	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
+		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+            int ossComponentIdx = mapper.selectOssComponentMaxIdx(project);
+            
+            int saveCnt = 0;
+            for (ProjectIdentification bean : bomComponentsList) {
+            	bean.setComponentIdx(Integer.toString(ossComponentIdx++));
+                mapper.registBomComponents(bean);
+                if (++saveCnt >= 5000) {
+                    sqlSession.flushStatements();
+                    saveCnt = 0;
+                }
             }
-		}
+            
+            if (saveCnt > 0) {
+                sqlSession.flushStatements();
+            }
+            
+            bomComponentsLicenseList.addAll(getInsertOssComponentLicenseList(bomComponentsList));
+            
+            saveCnt = 0;
+            for (OssComponentsLicense bean : bomComponentsLicenseList) {
+                mapper.registComponentLicense(bean);
+                if (++saveCnt >= 5000) {
+                    sqlSession.flushStatements();
+                    saveCnt = 0;
+                }
+            }
+            if (saveCnt > 0) {
+                sqlSession.flushStatements();
+            }
+            sqlSession.commit();
+        }
 		
-		return returnStr;
+		bomComponentsList.clear();
+		bomComponentsLicenseList.clear();
 	}
 	
+	private Collection<? extends OssComponentsLicense> getInsertOssComponentLicenseList(List<ProjectIdentification> ossComponentList) {
+		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
+		ossComponentList.stream()
+		.filter(regComponet -> !CollectionUtils.isEmpty(regComponet.getOssComponentsLicenseList()))
+		.forEach(regComponet -> regComponet.getOssComponentsLicenseList().forEach(_license -> {
+			_license.setComponentId(regComponet.getComponentId());
+			insertOssComponentLicenseList.add(_license);
+		}));
+		return insertOssComponentLicenseList;
+	}
+
 	private HashMap<String, Object> getIdentificationGridList(Map<String, Object> paramMap) {
 		return getIdentificationGridList(paramMap, false);
 	}
