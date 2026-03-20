@@ -2617,13 +2617,23 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
+	public void registDepOss(List<ProjectIdentification> ossComponent,	List<List<ProjectIdentification>> ossComponentLicense, Project project) {
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP, false);
+	}
+
+	@Override
+	public void registDepOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, boolean isUploadProcess) {
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP, isUploadProcess);
+	}
+	
+	@Override
 	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project) {
 		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
 	}
 	
 	@Override
-	public void registDepOss(List<ProjectIdentification> ossComponent,	List<List<ProjectIdentification>> ossComponentLicense, Project project) {
-		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, false);
 	}
 
 	@Override
@@ -2634,7 +2644,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	@Transactional
-	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
+	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv, boolean isUploadProcess) {
 		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
 		if (ossComponent.size()==0){
 			Project projectSubStatus = new Project();
@@ -2680,7 +2690,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
 		String refId = project.getReferenceId();
 		
-		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense);
+		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense, isUploadProcess);
 
 		// delete file
 		if (project.getCsvFile() != null && project.getCsvFile().size() > 0) {
@@ -2766,12 +2776,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@Transactional
 	public void registOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String refId, String refDiv) {
-		updateOssComponentList(new Project(), refDiv, refId, ossComponent, ossComponentLicense);
+		updateOssComponentList(new Project(), refDiv, refId, ossComponent, ossComponentLicense, false);
 	}
 
 	@Override
 	@Transactional
-	public void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense) {
+	public void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, boolean isUploadProcess) {
 		
 		if (isEmpty(refId)) {
 			refId = project.getPrjId();
@@ -2938,7 +2948,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             insertOssComponentLicenseList.clear();
         }
 		
-		if (MapUtils.isNotEmpty(refLoadedComponents)) {
+		if (!isUploadProcess && MapUtils.isNotEmpty(refLoadedComponents)) {
 			List<Project> refLoadedProjectList = projectMapper.selectProjectAddList(refId, refDiv);
 			project.setPrjId(refId);
 			List<Map<String, Object>> refLoadedFileList = projectMapper.selectFileList(project);
