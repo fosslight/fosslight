@@ -6004,21 +6004,21 @@ public class ProjectController extends CoTopComponent {
 							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(depOssComponents, ossComponentsLicense);
 							depOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
 							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-							projectService.registDepOss(depOssComponents, ossComponentsLicense, project);
+							projectService.registDepOss(depOssComponents, ossComponentsLicense, project, true);
 						}
 						if (isSrcLoaded) {
 							List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(srcOssComponents);
 							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(srcOssComponents, ossComponentsLicense);
 							srcOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
 							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-							projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project);
+							projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, true);
 						}
 						if (isBinLoaded) {
 							List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(binOssComponents);
 							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(binOssComponents, ossComponentsLicense);
 							binOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
 							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-							projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+							projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN, true);
 						}
 						if (uploadFile != null) {
 							projectService.setFileAddList(uploadFile, project, readType, depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);

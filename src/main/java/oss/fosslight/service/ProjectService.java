@@ -52,6 +52,8 @@ public interface ProjectService extends HistoryConfig{
 	
 	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv);
 	
+	public void registSrcOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv, boolean isUploadProcess);
+	
 	public void registOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String refId, String refDiv);
 	
 	public Map<String, List<String>> nickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
@@ -224,6 +226,8 @@ public interface ProjectService extends HistoryConfig{
 	public List<OssComponents> getDependenciesDataList(Project project);
 
 	public void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project);
+	
+	public void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project, boolean isUploadProcess);
 
 	public void registBinOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project);
 
@@ -237,7 +241,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void setLoadToList(Map<String, Object> map, String prjId);
 
-	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
+	public void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, boolean isUploadProcess);
 	
 	public Map<String, Object> changeProjectStatus(Project project);
 
