@@ -879,6 +879,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_DELETED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_SECURITY_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED_COMMENT:
@@ -948,6 +949,7 @@ public class CoMailManager extends CoTopComponent {
     				
     			}
     			else if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT.equals(bean.getMsgType()) 
+    					|| CoConstDef.CD_MAIL_TYPE_PROJECT_SECURITY_ADDED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT.equals(bean.getMsgType())

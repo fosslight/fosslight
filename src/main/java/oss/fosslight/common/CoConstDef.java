@@ -564,6 +564,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT = "43";
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT = "430";
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_DELETED_COMMENT = "431";
+	public static final String CD_MAIL_TYPE_PROJECT_SECURITY_ADDED_COMMENT = "432";
 	/** Project Identification reject (by review) */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT = "44";
 	/** Project Identification self reject */

@@ -4221,8 +4221,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@PostMapping(value =PROJECT.SEND_COMMENT)
-	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
 		switch (avoidNull(commentsHistory.getReferenceDiv())) {
 			case CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS:
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT);
@@ -4231,8 +4230,10 @@ public class ProjectController extends CoTopComponent {
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT);
 				break;
 			case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
-			case CoConstDef.CD_DTL_COMMENT_SECURITY_HIS:
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT);
+				break;
+			case CoConstDef.CD_DTL_COMMENT_SECURITY_HIS:
+				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_SECURITY_ADDED_COMMENT);
 				break;
 			case CoConstDef.CD_DTL_COMMENT_PROJECT_HIS:
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT);

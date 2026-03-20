@@ -124,6 +124,7 @@ public class CommentServiceImpl implements CommentService {
 		}
 		
 		if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT.equals(bean.getMailType()) 
+			|| CoConstDef.CD_MAIL_TYPE_PROJECT_SECURITY_ADDED_COMMENT.equals(bean.getMailType())
 			|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT.equals(bean.getMailType())
 			|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT.equals(bean.getMailType())
 			|| CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT.equals(bean.getMailType())
@@ -158,6 +159,8 @@ public class CommentServiceImpl implements CommentService {
 				mailBean.setStage("Packaging");
 			} else if (CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Distribution");
+			} else if (CoConstDef.CD_DTL_COMMENT_SECURITY_HIS.equals(bean.getReferenceDiv())) {
+				mailBean.setStage("Security");
 			}
 			
 			mailBean.setReceiveFlag(bean.getMailSendType());
