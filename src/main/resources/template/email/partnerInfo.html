@@ -76,9 +76,9 @@
 										<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
 										<td style="padding:5px;" th:utext="${partner_basic_info.division}"></td>
 									</tr>
-									<tr th:if="${partner_basic_info.reviewer}">
-										<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Reviewer'" th:align="'left'"></th>
-										<td th:style="'padding:5px;'" th:utext="${partner_basic_info.reviewer}"></td>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
+										<td style="padding:5px;" th:utext="${partner_basic_info?.reviewer}"></td>
 									</tr>
 								</table>
 
