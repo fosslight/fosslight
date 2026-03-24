@@ -65,12 +65,10 @@
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
 										<td style="padding:5px;" th:utext="${partner_basic_info.creator}"></td>
 									</tr>
-									<th:block th:if="${partner_basic_info.reviewer}">
-										<tr>
-											<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
-											<td style="padding:5px;" th:utext="${partner_basic_info.reviewer}"></td>
-										</tr>
-									</th:block>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
+										<td style="padding:5px;" th:utext="${partner_basic_info?.reviewer}"></td>
+									</tr>
 								</table>
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
 								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
