@@ -105,8 +105,8 @@ public class ApiCommonServiceImpl implements ApiCommonService {
 		}
 
 		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_COMMON_DIVISION_MERGE);
-		String fromDivisionName = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, from);
-		String toDivisionName = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, to);
+		String fromDivisionName = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, from) + "(" + from + ")";
+		String toDivisionName = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, to) + "(" + to + ")";
 		mailBean.setParamExpansion1(fromDivisionName != null ? fromDivisionName : from);
 		mailBean.setParamExpansion2(toDivisionName != null ? toDivisionName : to);
 		mailBean.setParamPrjList(projectList);
