@@ -1163,13 +1163,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 
 				// oss Homepage 체크
-				if (!errMap.containsKey("HOMEPAGE." + bean.getComponentId()) 
-						&& !diffMap.containsKey("HOMEPAGE." + bean.getComponentId()) 
-						&& !isEmpty(bean.getHomepage())) {
-					if (checkOssData(checkOSSMaster, bean.getHomepage(), "HOMEPAGE")) {
-						diffMap.put("HOMEPAGE." + bean.getComponentId(), "HOMEPAGE.DIFFERENT");
-					}
-				}
+//				if (!errMap.containsKey("HOMEPAGE." + bean.getComponentId()) 
+//						&& !diffMap.containsKey("HOMEPAGE." + bean.getComponentId()) 
+//						&& !isEmpty(bean.getHomepage())) {
+//					if (checkOssData(checkOSSMaster, bean.getHomepage(), "HOMEPAGE")) {
+//						diffMap.put("HOMEPAGE." + bean.getComponentId(), "HOMEPAGE.DIFFERENT");
+//					}
+//				}
 
 				if(!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !errMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !isEmpty(bean.getLicenseName())) {
 					String licenseText = CommonFunction.makeRecommendedLicenseString(checkOSSMaster, bean);
@@ -1178,11 +1178,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 				
-				if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getComponentId()) && !isEmpty(bean.getCopyrightText())) {
-					if (!checkOssData(ossInfoByName.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
-						infoMap.put("COPYRIGHT_TEXT." + bean.getComponentId(), "COPYRIGHT.DIFFERENT");
-					}
-				}
+//				if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getComponentId()) && !isEmpty(bean.getCopyrightText())) {
+//					if (!checkOssData(ossInfoByName.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
+//						infoMap.put("COPYRIGHT_TEXT." + bean.getComponentId(), "COPYRIGHT.DIFFERENT");
+//					}
+//				}
 			}
 		}
 	}
@@ -2509,11 +2509,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 
 				// oss Homepage 체크
-				if (!diffMap.containsKey("HOMEPAGE." + bean.getGridId()) && !isEmpty(bean.getHomepage())) {
-					if (checkOssData(ossInfo.get(checkKey), bean.getHomepage(), "HOMEPAGE")) {
-						diffMap.put("HOMEPAGE." + bean.getGridId(), "HOMEPAGE.DIFFERENT");
-					}
-				}
+//				if (!diffMap.containsKey("HOMEPAGE." + bean.getGridId()) && !isEmpty(bean.getHomepage())) {
+//					if (checkOssData(ossInfo.get(checkKey), bean.getHomepage(), "HOMEPAGE")) {
+//						diffMap.put("HOMEPAGE." + bean.getGridId(), "HOMEPAGE.DIFFERENT");
+//					}
+//				}
 
 				if (!diffMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !errMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !isEmpty(bean.getLicenseName())) {
 					String licenseText = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
@@ -2522,11 +2522,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 				
-				if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getGridId()) && !isEmpty(bean.getCopyrightText())) {
-					if (!checkOssData(ossInfo.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
-						infoMap.put("COPYRIGHT_TEXT." + bean.getGridId(), "COPYRIGHT.DIFFERENT");
-					}
-				}
+//				if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getGridId()) && !isEmpty(bean.getCopyrightText())) {
+//					if (!checkOssData(ossInfo.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
+//						infoMap.put("COPYRIGHT_TEXT." + bean.getGridId(), "COPYRIGHT.DIFFERENT");
+//					}
+//				}
 			}
 			
 			// exception 처리
