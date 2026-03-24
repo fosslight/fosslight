@@ -1114,6 +1114,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			// trim처리
 			ossMaster.setOssName(avoidNull(ossMaster.getOssName()).trim());
+			ossMaster.setOssVersion(avoidNull(ossMaster.getOssVersion()).trim());
 			
 			checkOssLicenseAndObligation(ossMaster);
 			
