@@ -7,6 +7,8 @@ package oss.fosslight.domain;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -4163,15 +4165,18 @@ public class CoMailManager extends CoTopComponent {
 			}
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED.equals(coMail.getMsgType())) {
-				String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output") + "/" + coMail.getParamPrjId();
-				String banned = VERIFY_PATH_OUTPUT + "/" + coMail.getParamPrjId() + "/proprietaryCheckList.txt";
-				String binary = VERIFY_PATH_OUTPUT + "/" + coMail.getParamPrjId() + "/binary.txt";
-				String[] files = {"/proprietaryCheckList.txt", "/binary.txt"};
-				for(String f : files) {
-					File file = new File(f);
-					if(file.exists()) {
-						DataSource dataSource = new FileDataSource(f);
-						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+				String verifyBasePath = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
+				Path outputDir = Path.of(verifyBasePath, coMail.getParamPrjId());
+
+				for (String fileName : new String[]{"proprietaryCheckList.txt", "binary.txt"}) {
+					Path filePath = outputDir.resolve(fileName);
+
+					if (Files.exists(filePath)) {
+						DataSource dataSource = new FileDataSource(filePath.toFile());
+						helper.addAttachment(
+								MimeUtility.encodeText(filePath.getFileName().toString(), "UTF-8", "B"),
+								dataSource
+						);
 					}
 				}
 			}
