@@ -235,4 +235,32 @@
     <update id="updateStatisticsMostUsed" parameterType="oss.fosslight.domain.T2CodeDtl">
     	UPDATE STATISTICS_MOSTUSED SET DIV_NO = #{cdDtlNoNew} WHERE DIV_NO = #{cdDtlNo} 
     </update>
+
+	<select id="selectActiveCodeDetailByName" resultType="oss.fosslight.domain.T2CodeDtl">
+		SELECT
+			CD_NO
+			,CD_SUB_NO
+			,CD_DTL_NO
+			,CD_DTL_NM
+			,CD_DTL_EXP
+			,CD_ORDER
+			,USE_YN
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+		  AND USE_YN = 'Y'
+		  AND LOWER(TRIM(CD_DTL_NM)) = LOWER(TRIM(#{cdDtlNm}))
+		LIMIT 1
+	</select>
+
+	<select id="selectMaxCdOrderByCdNo" resultType="java.lang.Integer">
+		SELECT IFNULL(MAX(CD_ORDER), 0)
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+	</select>
+
+	<select id="selectMaxCdDtlNoNumericByCdNo" resultType="java.lang.Integer">
+		SELECT IFNULL(MAX(CAST(CD_DTL_NO AS UNSIGNED)), 0)
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+	</select>
 </mapper>

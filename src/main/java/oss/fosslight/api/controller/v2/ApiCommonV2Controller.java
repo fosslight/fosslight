@@ -57,4 +57,58 @@ public class ApiCommonV2Controller extends CoTopComponent {
             return responseService.errorResponse(HttpStatus.FORBIDDEN);
         }
     }
+
+    @ApiOperation(value = "Add division", notes = "Add a user division (T2_CODE_DTL, CD_NO=200). Detail Name maps to CD_DTL_NM, Detail Description to CD_DTL_EXP.")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_ADD_DIVISION})
+    public ResponseEntity<Map<String, Object>> addDivision(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Detail name (CD_DTL_NM)", required = true) @RequestParam(required = true) String cdDtlNm,
+            @ApiParam(value = "Detail description (CD_DTL_EXP)", required = false) @RequestParam(required = false) String cdDtlExp) {
+
+        T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
+            return responseService.errorResponse(HttpStatus.FORBIDDEN);
+        }
+        if (isEmpty(cdDtlNm)) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
+        }
+        try {
+            Map<String, Object> result = apiCommonService.addDivision(cdDtlNm, cdDtlExp);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("division add error: detailName={}", cdDtlNm, e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "Update division", notes = "Update CD_DTL_NM and/or CD_DTL_EXP for a user division (T2_CODE_DTL, CD_NO=200) by CD_DTL_NO. Omit a field to leave it unchanged; at least one of cdDtlNm or cdDtlExp must be sent.")
+    @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_UPDATE_DIVISION})
+    public ResponseEntity<Map<String, Object>> updateDivision(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Detail code (CD_DTL_NO)", required = true) @RequestParam(required = true) String cdDtlNo,
+            @ApiParam(value = "Detail name (CD_DTL_NM)", required = false) @RequestParam(required = false) String cdDtlNm,
+            @ApiParam(value = "Detail description (CD_DTL_EXP)", required = false) @RequestParam(required = false) String cdDtlExp) {
+
+        T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
+            return responseService.errorResponse(HttpStatus.FORBIDDEN);
+        }
+        if (isEmpty(cdDtlNo)) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
+        }
+        if (cdDtlNm == null && cdDtlExp == null) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                    "At least one of cdDtlNm or cdDtlExp is required.");
+        }
+        try {
+            Map<String, Object> result = apiCommonService.updateDivision(cdDtlNo, cdDtlNm, cdDtlExp);
+            if (result == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND);
+            }
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("division update error: cdDtlNo={}", cdDtlNo, e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
