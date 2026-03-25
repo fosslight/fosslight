@@ -331,6 +331,14 @@ public class CoMailManager extends CoTopComponent {
         		if (isEmpty(bean.getCreationUserId())) {
         			bean.setCreationUserId(bean.getLoginUserName());
         		}
+        		if (CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION.equals(bean.getMsgType())
+        				|| CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION.equals(bean.getMsgType())
+        				|| CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION.equals(bean.getMsgType())
+        				|| CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION.equals(bean.getMsgType())) {
+        			if (!isEmpty(bean.getParamUserId())) {
+        				bean.setCreationUserId(bean.getParamUserId());
+        			}
+        		}
         		
         		if (!isEmpty(bean.getComment())) {
         			// FIXME
@@ -827,13 +835,12 @@ public class CoMailManager extends CoTopComponent {
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED:
 			case CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED :
-			case CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION:
-			case CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION:
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
     			break;
 			case CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION:
+			case CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION:
 				bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
 				
 				ccList = new ArrayList<>();
@@ -1107,8 +1114,12 @@ public class CoMailManager extends CoTopComponent {
     					ccList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId()));
     					if (CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_ADD.equals(bean.getMsgType())
     							|| CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_CHANGED.equals(bean.getMsgType())){
-    						ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));	
+    						ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));
     					}
+    				}
+    				else if (CoConstDef.CD_MAIL_PROJECT_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PROJECT_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())) {
+    					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));
     				}
     				// admin all
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED.equals(bean.getMsgType())) {
@@ -1338,6 +1349,11 @@ public class CoMailManager extends CoTopComponent {
         					ccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				}
+    				// Authorization requester
+    				else if (CoConstDef.CD_MAIL_PARTNER_REQUEST_PERMISSION.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_PARTNER_CANCEL_REQUEST_PERMISSION.equals(bean.getMsgType())) {
+    					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));
+    				}
     				
         			if (toList != null && !toList.isEmpty()) {
         				bean.setToIds(toList.toArray(new String[toList.size()]));
@@ -1376,6 +1392,7 @@ public class CoMailManager extends CoTopComponent {
 				bean.setCcIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			break;
     		case CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION:
+    		case CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION:
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			
     			ccList = new ArrayList<>();
@@ -4045,6 +4062,13 @@ public class CoMailManager extends CoTopComponent {
 				helper.setFrom(from);
 			}
 			else if (!isEmpty(userId) && !isEmpty(userName)) {
+				if (CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION.equals(coMail.getMsgType())
+						|| CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION.equals(coMail.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION.equals(coMail.getMsgType())
+						|| CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION.equals(coMail.getMsgType())) {
+					userId = coMail.getParamUserId();
+					userName = coMail.getReviewer();
+				}
 				if (userName.length() > 15 && userName.contains("/") && userName.split("/").length > 1) {
 					userName = userName.substring(0, userName.lastIndexOf("/"));
 				}
@@ -4173,10 +4197,7 @@ public class CoMailManager extends CoTopComponent {
 
 					if (Files.exists(filePath)) {
 						DataSource dataSource = new FileDataSource(filePath.toFile());
-						helper.addAttachment(
-								MimeUtility.encodeText(filePath.getFileName().toString(), "UTF-8", "B"),
-								dataSource
-						);
+						helper.addAttachment(MimeUtility.encodeText(filePath.getFileName().toString(), "UTF-8", "B"), dataSource);
 					}
 				}
 			}
