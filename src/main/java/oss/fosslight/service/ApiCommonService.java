@@ -6,6 +6,7 @@
 package oss.fosslight.service;
 
 import java.util.Map;
+import java.util.List;
 
 public interface ApiCommonService {
 	public void mergeDivision(String from, String to) throws Exception;
@@ -19,4 +20,6 @@ public interface ApiCommonService {
 	 * @return result map with success when updated; {@code null} when CD_DTL_NO does not exist
 	 */
 	Map<String, Object> updateDivision(String cdDtlNo, String cdDtlNm, String cdDtlExp) throws Exception;
+
+	List<Map<String, Object>> getDivisionList() throws Exception;
 }

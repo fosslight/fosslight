@@ -7,6 +7,7 @@ package oss.fosslight.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -81,4 +82,6 @@ public interface CodeMapper {
 	Integer selectMaxCdOrderByCdNo(@Param("cdNo") String cdNo);
 
 	Integer selectMaxCdDtlNoNumericByCdNo(@Param("cdNo") String cdNo);
+
+	List<Map<String, Object>> selectDivisionList(@Param("cdNo") String cdNo);
 }

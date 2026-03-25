@@ -179,4 +179,9 @@ public class ApiCommonServiceImpl implements ApiCommonService {
 		updated.put("cdDtlExp", row.getCdDtlExp());
 		return updated;
 	}
+
+	@Override
+	public List<Map<String, Object>> getDivisionList() throws Exception {
+		return codeMapper.selectDivisionList(CoConstDef.CD_USER_DIVISION);
+	}
 }
