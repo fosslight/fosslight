@@ -3326,8 +3326,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			String creator = "";
 			T2Users userInfo = new T2Users();
 			
+			Project projectInfo = null;
 			if (!thirdPartyCheckFlag) {
-				Project projectInfo = new Project();
+				projectInfo = new Project();
 				projectInfo.setPrjId(prjId);
 				projectInfo = projectService.getProjectDetail(projectInfo);
 				
@@ -3421,7 +3422,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
 
 				boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
-
+				if (projectInfo != null) {
+					if (!CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(avoidNull(projectInfo.getIdentificationStatus()))) {
+						hideOssVersionFlag = false;
+					}
+				}
+				
 				if (sourceList != null && !sourceList.isEmpty()) {
 					noticeList.addAll(sourceList);
 				}
