@@ -677,7 +677,7 @@
 			$.ajax({
 				url : "/project/setProjectPermission",
 				type : 'POST',
-				data : JSON.stringify({"prjId" : [[${project.prjId}]], "status" : "APP", "comment" : editorVal}),
+				data : JSON.stringify({"prjId" : [[${project.prjId}]], "status" : "APP", "comment" : editorVal, "reviewer" : [[${#authentication.name}]]}),
 				dataType : 'json',
 				cache : false,
 				async : false,
@@ -705,7 +705,7 @@
 			$.ajax({
 				url : "/project/setProjectPermission",
 				type : 'POST',
-				data : JSON.stringify({"prjId" : [[${project.prjId}]], "status" : "REJ", "comment" : editorVal}),
+				data : JSON.stringify({"prjId" : [[${project.prjId}]], "status" : "REJ", "comment" : editorVal, "reviewer" : [[${#authentication.name}]]}),
 				dataType : 'json',
 				cache : false,
 				async : false,
