@@ -1114,7 +1114,11 @@ public final class Url {
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
 
-			public static final String FOSSLIGHT_API_COMMON_MERGE_DIVISION = "/common/merge/division";
+			public static final String FOSSLIGHT_API_COMMON_MERGE_DIVISION = "/common/division/merge";
+
+			public static final String FOSSLIGHT_API_COMMON_ADD_DIVISION = "/common/division";
+
+			public static final String FOSSLIGHT_API_COMMON_UPDATE_DIVISION = "/common/division/update";
 
 	}
 

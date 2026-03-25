@@ -75,4 +75,10 @@ public interface CodeMapper {
 	public int updateCodeDtlNm(@Param("cdNo") String cdNo, @Param("cdDtlNo") String cdDtlNo, @Param("cdDtlNm") String cdDtlNm);
 
 	public void updateStatisticsMostUsed(T2CodeDtl codeDtl);
+
+	T2CodeDtl selectActiveCodeDetailByName(@Param("cdNo") String cdNo, @Param("cdDtlNm") String cdDtlNm);
+
+	Integer selectMaxCdOrderByCdNo(@Param("cdNo") String cdNo);
+
+	Integer selectMaxCdDtlNoNumericByCdNo(@Param("cdNo") String cdNo);
 }

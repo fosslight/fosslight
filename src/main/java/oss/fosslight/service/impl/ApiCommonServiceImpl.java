@@ -12,6 +12,7 @@ import java.util.Vector;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -112,5 +113,70 @@ public class ApiCommonServiceImpl implements ApiCommonService {
 		mailBean.setParamPrjList(projectList);
 		mailBean.setParamPartnerList(mailPartnerList);
 		CoMailManager.getInstance().sendMail(mailBean);
+	}
+
+	@Override
+	@Transactional
+	public Map<String, Object> addDivision(String detailName, String detailDescription) throws Exception {
+		String name = detailName == null ? "" : detailName.trim();
+		String desc = detailDescription == null ? "" : detailDescription.trim();
+
+		T2CodeDtl existing = codeMapper.selectActiveCodeDetailByName(CoConstDef.CD_USER_DIVISION, name);
+		if (existing != null) {
+			Map<String, Object> duplicate = new HashMap<>();
+			duplicate.put("success", false);
+			duplicate.put("cdDtlNo", existing.getCdDtlNo());
+			return duplicate;
+		}
+
+		int maxOrder = codeMapper.selectMaxCdOrderByCdNo(CoConstDef.CD_USER_DIVISION);
+		int nextOrder = maxOrder + 1;
+
+		int maxDtlNo = codeMapper.selectMaxCdDtlNoNumericByCdNo(CoConstDef.CD_USER_DIVISION);
+		String newDtlNo = String.valueOf(maxDtlNo + 1);
+
+		T2CodeDtl insert = new T2CodeDtl();
+		insert.setCdNo(CoConstDef.CD_USER_DIVISION);
+		insert.setCdDtlNo(newDtlNo);
+		insert.setCdSubNo("");
+		insert.setCdDtlNm(name);
+		insert.setCdDtlExp(desc);
+		insert.setCdOrder(String.valueOf(nextOrder));
+		insert.setUseYn(CoConstDef.FLAG_YES);
+
+		codeMapper.insertCodeDetail(insert);
+		CoCodeManager.getInstance().refreshCodes();
+
+		Map<String, Object> created = new HashMap<>();
+		created.put("success", true);
+		created.put("cdDtlNo", newDtlNo);
+		return created;
+	}
+
+	@Override
+	@Transactional
+	public Map<String, Object> updateDivision(String cdDtlNo, String cdDtlNm, String cdDtlExp) throws Exception {
+		String dtlNo = cdDtlNo == null ? "" : cdDtlNo.trim();
+
+		T2CodeDtl row = codeMapper.getCodeDetail(CoConstDef.CD_USER_DIVISION, dtlNo);
+		if (row == null) {
+			return null;
+		}
+
+		if (cdDtlNm != null) {
+			row.setCdDtlNm(cdDtlNm.trim());
+		}
+		if (cdDtlExp != null) {
+			row.setCdDtlExp(cdDtlExp.trim());
+		}
+		codeMapper.updateCodeDetail(row);
+		CoCodeManager.getInstance().refreshCodes();
+
+		Map<String, Object> updated = new HashMap<>();
+		updated.put("success", true);
+		updated.put("cdDtlNo", row.getCdDtlNo());
+		updated.put("cdDtlNm", row.getCdDtlNm());
+		updated.put("cdDtlExp", row.getCdDtlExp());
+		return updated;
 	}
 }
