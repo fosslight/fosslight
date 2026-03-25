@@ -2176,15 +2176,16 @@ public class PartnerController extends CoTopComponent{
 						en = messageSource.getMessage("msg.common.reject.permission", null, Locale.ENGLISH);
 						ko = messageSource.getMessage("msg.common.reject.permission", null, Locale.KOREAN);
 					}
-					en = en.replaceAll("Reviewer", reviewer);
-					ko = ko.replaceAll("Reviewer", reviewer);
+					en = en.replaceAll("User", user.getUserName()).replaceAll("Reviewer", reviewer);
+					ko = ko.replaceAll("User", user.getUserName()).replaceAll("Reviewer", reviewer);
 					if (!isEmpty(comment)) {
 						comment += "<br>";
 					}
 					comment += "<p>" + en + "<br>" + ko + "</p>";
 					
-					mailBean.setLoginUserName(loginUserName);
+					mailBean.setLoginUserName(userId);
 					mailBean.setParamPartnerId(partnerMaster.getPartnerId());
+					mailBean.setParamUserId(loginUserName);
 					mailBean.setComment(comment);
 					mailBean.setReviewer(reviewer);
 					CoMailManager.getInstance().sendMail(mailBean);
