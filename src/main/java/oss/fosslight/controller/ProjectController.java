@@ -5653,8 +5653,9 @@ public class ProjectController extends CoTopComponent {
 
 		if (isEmpty(project.getRejPerUserNm())) {
 			if (CollectionUtils.isNotEmpty(prjInfo.getReqPerUserIds())) {
+				String loginUserName = !isEmpty(project.getReviewer()) ? project.getReviewer() : loginUserName();
 				T2Users bean = new T2Users();
-				bean.setUserId(loginUserName());
+				bean.setUserId(loginUserName);
 				bean = userService.getUser(bean);
 				String reviewer = "";
 				if (bean != null) {
@@ -5696,7 +5697,7 @@ public class ProjectController extends CoTopComponent {
 					}
 					comment += "<p>" + en + "<br>" + ko + "</p>";
 					
-					mailBean.setLoginUserName(userId);
+					mailBean.setLoginUserName(loginUserName);
 					mailBean.setParamPrjId(project.getPrjId());
 					mailBean.setReviewer(reviewer);
 					mailBean.setComment(comment);

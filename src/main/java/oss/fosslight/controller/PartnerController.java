@@ -2139,8 +2139,9 @@ public class PartnerController extends CoTopComponent{
 		
 		if (isEmpty(partnerMaster.getRejPerUserNm())) {
 			if (CollectionUtils.isNotEmpty(parInfo.getReqPerUserIds())) {
+				String loginUserName = !isEmpty(partnerMaster.getReviewer()) ? partnerMaster.getReviewer() : loginUserName();
 				T2Users bean = new T2Users();
-				bean.setUserId(loginUserName());
+				bean.setUserId(loginUserName);
 				bean = userService.getUser(bean);
 				String reviewer = "";
 				if (bean != null) {
@@ -2182,7 +2183,7 @@ public class PartnerController extends CoTopComponent{
 					}
 					comment += "<p>" + en + "<br>" + ko + "</p>";
 					
-					mailBean.setLoginUserName(userId);
+					mailBean.setLoginUserName(loginUserName);
 					mailBean.setParamPartnerId(partnerMaster.getPartnerId());
 					mailBean.setComment(comment);
 					mailBean.setReviewer(reviewer);
