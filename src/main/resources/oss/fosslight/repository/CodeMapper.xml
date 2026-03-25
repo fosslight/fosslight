@@ -263,4 +263,14 @@
 		FROM T2_CODE_DTL
 		WHERE CD_NO = #{cdNo}
 	</select>
+
+	<select id="selectDivisionList" resultType="map">
+		SELECT
+			CD_DTL_NO AS cdDtlNo
+			,CD_DTL_EXP AS cdDtlExp
+			,USE_YN AS useYn
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+		ORDER BY CAST(CD_DTL_NO AS UNSIGNED), CD_DTL_NO
+	</select>
 </mapper>

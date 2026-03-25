@@ -22,6 +22,7 @@ import oss.fosslight.service.ApiCommonService;
 import oss.fosslight.service.T2UserService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Api(tags = {"10.Common"})
@@ -59,7 +60,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Add division", notes = "Add a user division (T2_CODE_DTL, CD_NO=200). Detail Name maps to CD_DTL_NM, Detail Description to CD_DTL_EXP.")
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_ADD_DIVISION})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
     public ResponseEntity<Map<String, Object>> addDivision(
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Detail name (CD_DTL_NM)", required = true) @RequestParam(required = true) String cdDtlNm,
@@ -108,6 +109,23 @@ public class ApiCommonV2Controller extends CoTopComponent {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("division update error: cdDtlNo={}", cdDtlNo, e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "Get division list", notes = "Get division list (T2_CODE_DTL, CD_NO=200)")
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
+    public ResponseEntity<Map<String, Object>> getDivisionList(
+            @ApiParam(hidden = true) @RequestHeader String authorization) {
+
+        userService.checkApiUserAuth(authorization);
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<Map<String, Object>> contents = apiCommonService.getDivisionList();
+            result.put("content", contents);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("division list search error", e);
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

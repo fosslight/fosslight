@@ -1116,10 +1116,9 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_COMMON_MERGE_DIVISION = "/common/division/merge";
 
-			public static final String FOSSLIGHT_API_COMMON_ADD_DIVISION = "/common/division";
+			public static final String FOSSLIGHT_API_COMMON_DIVISION = "/common/division";
 
 			public static final String FOSSLIGHT_API_COMMON_UPDATE_DIVISION = "/common/division/update";
-
 	}
 
 	public static final class API_LITE {
