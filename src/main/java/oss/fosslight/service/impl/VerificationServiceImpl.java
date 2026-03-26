@@ -2842,17 +2842,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(bean.getCopyrightText())) {
 				bean.setCopyrightText(bean.getCopyrightText().replaceAll(regex, "<br>"));
 			}
-
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
 			}
-			
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
-			
 			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) {
 				bean.setHomepage("http://" + bean.getHomepage());
+			}
+			if (isEmpty(bean.getPackageUrl())) {
+				bean.setPackageUrl(CommonFunction.configurePackageUrl(bean));
 			}
 			
 			noticeList.add(bean);
@@ -2880,17 +2880,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(bean.getCopyrightText())) {
 				bean.setCopyrightText(bean.getCopyrightText().replaceAll(regex, "<br>"));
 			}
-
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
 			}
-			
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
-			
 			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) {
 				bean.setHomepage("//" + bean.getHomepage());
+			}
+			if (isEmpty(bean.getPackageUrl())) {
+				bean.setPackageUrl(CommonFunction.configurePackageUrl(bean));
 			}
 			
 			srcList.add(bean);
