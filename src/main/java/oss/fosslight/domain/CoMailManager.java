@@ -608,8 +608,10 @@ public class CoMailManager extends CoTopComponent {
 						
 						if (subTitle.indexOf("${Project Name}") > -1) {
 							String _s = "";
+							String url = "";
 							if (!isEmpty(bean.getParamPrjId())) {
 								project = mailManagerMapper.getProjectInfoById(bean.getParamPrjId());
+								url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId();
 							}
 							
 							if (project != null) {
@@ -623,7 +625,9 @@ public class CoMailManager extends CoTopComponent {
 									}
 								}
 							}
-
+							if (!isEmpty(url)) {
+								_s = "<a href='" + url + "' target='_blank'>" + _s + "</a>";
+							}							
 							subTitle = StringUtil.replace(subTitle, "${Project Name}", _s);
 							if (subTitle.indexOf("${Project Name}") > -1) {
 								subTitle = StringUtil.replace(subTitle, "${Project Name}", _s);
@@ -640,8 +644,10 @@ public class CoMailManager extends CoTopComponent {
 						
 						if (subTitle.indexOf("${3rd Party Name}") > -1) {
 							String _s = "";
+							String url = "";
 							if (!isEmpty(bean.getParamPartnerId())) {
 								partner = mailManagerMapper.getPartnerInfo(bean.getParamPartnerId());
+								url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + bean.getParamPartnerId();
 							}
 							
 							if (partner != null) {
@@ -652,7 +658,9 @@ public class CoMailManager extends CoTopComponent {
 									_s += partner.getPartnerName();
 								}
 							}
-
+							if (!isEmpty(url)) {
+								_s = "<a href='" + url + "' target='_blank'>" + _s + "</a>";
+							}	
 							subTitle = StringUtil.replace(subTitle, "${3rd Party Name}", _s);
 							if (subTitle.indexOf("${3rd Party Name}") > -1) {
 								subTitle = StringUtil.replace(subTitle, "${3rd Party Name}", _s);
