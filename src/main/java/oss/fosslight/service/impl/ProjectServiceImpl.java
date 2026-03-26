@@ -6757,28 +6757,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// aflist loop -> bflist와 ossname & oss version이 완전 일치하는 대상은 제거함.
 		// 이후 delete / change / add 대상 추출함.
 		
-		List<ProjectIdentification> filteredBeforeBomList = beforeBomList
-				.stream()
-				.filter(bfList-> 
-						afterBomList
-								.stream()
-								.filter(afList -> 
-										(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim()))
-										.equalsIgnoreCase(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim()))
-										).collect(Collectors.toList()).size() == 0
-						).collect(Collectors.toList());
+		List<ProjectIdentification> filteredBeforeBomList = beforeBomList.stream()
+																		.filter(bf-> afterBomList.stream()
+																				.noneMatch(af -> {
+																						String bfKey = generateNormalizedKey(bf);
+																						String afKey = generateNormalizedKey(af);
+																			            return bfKey.equalsIgnoreCase(afKey);
+																				})
+																		).collect(Collectors.toList());
 //		filteredBeforeBomList = filteredBeforeBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
 		
-		List<ProjectIdentification> filteredAfterBomList = afterBomList
-				.stream()
-				.filter(afList-> 
-						beforeBomList
-								.stream()
-								.filter(bfList -> 
-										(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim()))
-										.equalsIgnoreCase(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim()))
-										).collect(Collectors.toList()).size() == 0
-						).collect(Collectors.toList());
+		List<ProjectIdentification> filteredAfterBomList = afterBomList.stream()
+																		.filter(af-> beforeBomList.stream()
+																				.noneMatch(bf -> {
+																					String afKey = generateNormalizedKey(af);
+																					String bfKey = generateNormalizedKey(bf);
+																		            return afKey.equalsIgnoreCase(bfKey);
+																			})
+																		).collect(Collectors.toList());
 //		filteredAfterBomList = filteredAfterBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
 		
 		// status > add
@@ -6969,6 +6965,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 
+	private String generateNormalizedKey(ProjectIdentification bean) {
+		String rawLicense = bean.getLicenseName() != null ? bean.getLicenseName() : "";
+	    String sortedLicense = getLicenseNameSort(rawLicense.trim());
+	    String cleanLicense = sortedLicense.replaceAll("\\s+", "");
+	    return bean.getOssName() + "||" + bean.getOssVersion() + "||" + cleanLicense;
+	}
+
 	private String getCompareKey(ProjectIdentification param) {
 		return (param.getOssName() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName()).toLowerCase();
 	}
@@ -6986,23 +6989,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	private String getLicenseNameSort(String licenseName) {
-		String sortedValue = "";
-		
-		String splitLicenseNm[] = licenseName.split(",");
+		if (isEmpty(licenseName)) {
+	        return "";
+	    }
+		String[] splitLicenseNm = Arrays.stream(licenseName.split(",")).map(String::trim).toArray(String[]::new);
 		Arrays.sort(splitLicenseNm);
-		
-		for (int i=0; i< splitLicenseNm.length; i++) {
-			sortedValue += splitLicenseNm[i];
-			if (i<splitLicenseNm.length-1) {
-				sortedValue += ", ";
-			}
-		}
-		
-		return sortedValue;
+		return String.join(", ", splitLicenseNm);
 	}
 	
 	private String ossCheck(String flag, String ossNameVersion, String ossLicenseName, String ossNameVersion2, String ossLicenseName2) {
-String splitOssNameVersion[] = ossNameVersion.split("/");
+		String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		int count = splitOssNameVersion.length;
 		
