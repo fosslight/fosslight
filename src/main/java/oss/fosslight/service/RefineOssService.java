@@ -2,6 +2,7 @@ package oss.fosslight.service;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -223,7 +225,7 @@ public class RefineOssService {
 							if(StringUtil.isEmpty(n.get(FIELD_PURL))) {
 								downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
 								try {
-									generatePurlByDownloadLocation(downloadLocation);
+									generatePurlByDownloadLocation(ossName, downloadLocation);
 								} catch (Exception e) {
 									log.error("failed to generate purl download location : {}, {}", downloadLocation, e.getMessage(), e);
 									refinedItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, e.getMessage()));
@@ -291,7 +293,7 @@ public class RefineOssService {
 							if (StringUtil.isEmpty(n.get(FIELD_PURL))) {
 								String downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
 								try {
-									String purl = generatePurlByDownloadLocation(downloadLocation);
+									String purl = generatePurlByDownloadLocation(ossName, downloadLocation);
 									if (!StringUtil.isEmpty(purl)) {
 										if (purl.contains("|")) {
 											needCheckItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl.split("[|]")[1]));
@@ -453,8 +455,8 @@ public class RefineOssService {
 							for (Map<String, String> map : ossDownloadLocationList) {
 								if (StringUtil.isEmpty(map.get(FIELD_PURL))) {
 									try {
-										String purl = generatePurlByDownloadLocation(map.get(FIELD_DOWNLOAD_LOCATION));
-										if (!StringUtil.isEmpty(purl) && purl.contains("|")) {
+										String purl = generatePurlByDownloadLocation(ossName, map.get(FIELD_DOWNLOAD_LOCATION));
+										if (!StringUtil.isEmpty(purl) && !purl.contains("|")) {
 											map.put(FIELD_PURL, purl);
 										}
 									} catch (Exception e) {
@@ -662,7 +664,7 @@ public class RefineOssService {
 	 * @return
 	 * @throws MalformedPackageURLException
 	 */
-	private String generatePurlByDownloadLocation(String downloadLocation) {
+	private String generatePurlByDownloadLocation(String ossName, String downloadLocation) {
 		final List<String> checkPurl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_DOWNLOADLOCAION_PURL);
 		String purlString = "";
 		int urlSearchSeq = -1;
@@ -671,18 +673,22 @@ public class RefineOssService {
 		if (!StringUtil.isEmpty(downloadLocation)) {
 			String subPath = "";
 			
+			if (downloadLocation.indexOf("://") > -1) {
+				downloadLocation = downloadLocation.substring(downloadLocation.indexOf("://")+3, downloadLocation.length());
+			}
+			if (downloadLocation.startsWith("www.")) {
+				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
+			}
 			for (String url : checkPurl) {
-				if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
+				if (urlSearchSeq == -1 && downloadLocation.startsWith(url)) {
 					urlSearchSeq = seq;
 					break;
 				}
 				seq++;
 			}
-			if (downloadLocation.contains("://")) {
-				downloadLocation = downloadLocation.split("://")[1];
-			}
-			if (downloadLocation.startsWith("www.")) {
-				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
+			if (urlSearchSeq == 12) {
+				downloadLocation = mavenUrlFormatter(downloadLocation);
+				urlSearchSeq = 11;
 			}
 			if (downloadLocation.contains(";")) {
 				downloadLocation = downloadLocation.split("[;]")[0];
@@ -696,35 +702,19 @@ public class RefineOssService {
 				}
 			}
 			
-			if (downloadLocation.contains(".git")) {
-				if (downloadLocation.endsWith(".git")) {
-					downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-				} else {
-					if (downloadLocation.contains("#")) {
-						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
-						if (downloadLocation.endsWith(".git")) {
-							downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-						}
-					}
-				}
+			if (downloadLocation.contains(".git") && downloadLocation.endsWith(".git")) {
+				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
 			}
 			
-			if (downloadLocation.contains("#")) {
-				if (urlSearchSeq == 9) {
+			if (urlSearchSeq == 16) {
+				if (downloadLocation.contains("#")) {
 					String[] splitDownloadLocation = downloadLocation.split("[#]");
 					subPath = splitDownloadLocation[1];
+					downloadLocation = splitDownloadLocation[0];
 				}
-				downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
-			}
-			
-			if (downloadLocation.contains("@")) {
-				if (urlSearchSeq == 9) {
+				if (downloadLocation.contains("@")) {
 					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
 				}
-			}
-			
-			if (downloadLocation.endsWith("/")) {
-				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
 			}
 			
 			if (urlSearchSeq > -1) {
@@ -737,50 +727,52 @@ public class RefineOssService {
 			}
 			
 			PackageURL purl = null;
-			if (urlSearchSeq == -1) {
-				if (downloadLocation.contains("+")) {
-					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
-				}
-				purlString = "link:" + downloadLocation;
-			} else if (urlSearchSeq == 10) {
-				if (downloadLocation.contains("+")) {
-					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
-				}
-				purlString = "link:" + downloadLocation;
+			if (urlSearchSeq == -1 || urlSearchSeq == 16) {
+				purlString = convertToGeneric(ossName, downloadLocation);
 			} else {
 				String[] splitDownloadLocation = downloadLocation.split("/");
 				boolean addFlag = false;
 				String namespace = "/";
-				boolean errorFlag = false;
 				
+				boolean errorFlag = false;
 				try {
 					switch(urlSearchSeq) {
 						case 0: // github
 							purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
 							break;
 						case 1: // npm
-							if (downloadLocation.contains("/package/@")) addFlag = true;
+						case 2: // npm
+						case 3: // npm
+							if (downloadLocation.contains("/package/@")) {
+								addFlag = true;
+							}
 							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[2], null, null, null);
 							break;
-						case 2: // npm
-							if (downloadLocation.contains("/@")) addFlag = true;
+						case 4: // npm
+						case 5: // npm
+						case 6: // npm
+						case 7: // npm
+						case 8: // npm
+							if (downloadLocation.contains("/@")) {
+								addFlag = true;
+							}
 							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[1], null, null, null);
 							break;
-						case 3: // pypi
-						case 4: // pypi
+						case 9: // pypi
+						case 10: // pypi
 							purl = new PackageURL(StandardTypes.PYPI, null, splitDownloadLocation[2].replaceAll("_", "-"), null, null, null);
 							break;
-						case 5: // maven
-						case 6: // maven
+						case 11: // maven
+						case 12: // maven
 							purl = new PackageURL(StandardTypes.MAVEN, splitDownloadLocation[2], splitDownloadLocation[3], null, null, null);
 							break;
-						case 7: // cocoapod
+						case 13: // cocoapod
 							purl = new PackageURL("cocoapods", null, splitDownloadLocation[2], null, null, null);
 							break;
-						case 8: // gem
+						case 14: // gem
 							purl = new PackageURL(StandardTypes.GEM, null, splitDownloadLocation[2], null, null, null);
 							break;
-						case 9: // go
+						case 15: // go
 							int idx = 0;
 							for (String data : splitDownloadLocation) {
 								if (idx > 1) {
@@ -792,29 +784,45 @@ public class RefineOssService {
 							purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1]);
 							
 							break;
-						case 11:
+						case 17:
 							purl = new PackageURL("pub", null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 18:
+							purl = new PackageURL(StandardTypes.CARGO, null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 19:
+							purl = new PackageURL(StandardTypes.NUGET, null, splitDownloadLocation[2], null, null, null);
 							break;
 						default:
 							break;
 					}
 				} catch (Exception e) {
 					errorFlag = true;
+					log.error("failed to generate purl download location : {}, link generate purl {}", downloadLocation, "link:" + downloadLocation);
 				}
 				
 				if (errorFlag) {
-					purlString = "error|link:" + downloadLocation;
+					purlString = convertToGeneric(ossName, downloadLocation);
 				} else {
 					if (purl != null) {
 						purlString = purl.toString();
-						if (urlSearchSeq == 9) {
+						if (urlSearchSeq == 15) {
 							purlString += namespace + subPath;
 						} else {
 							if (addFlag) {
-								if (urlSearchSeq == 1) {
-									if (splitDownloadLocation.length > 3) purlString += "/" + splitDownloadLocation[3];
-								} else {
-									if (splitDownloadLocation.length > 2) purlString += "/" + splitDownloadLocation[2];
+								switch(urlSearchSeq) {
+									case 1:
+									case 2:
+									case 3:
+										purlString += "/" + splitDownloadLocation[3];
+										break;
+									case 4:
+									case 5:
+									case 6:
+									case 7:
+									case 8:
+										purlString += "/" + splitDownloadLocation[2];
+										break;
 								}
 							}
 						}
@@ -824,6 +832,60 @@ public class RefineOssService {
 		}
 		
 		return purlString;
+	}
+	
+	private String mavenUrlFormatter(String downloadLocation) {
+		String path = downloadLocation.split("maven2/")[1];
+        String[] parts = path.split("/");
+        
+        int artifactIndex = parts.length - 3;
+        
+        StringBuilder groupIdBuilder = new StringBuilder();
+        for (int i = 0; i < artifactIndex; i++) {
+            if (i > 0) {
+            	groupIdBuilder.append(".");
+            }
+            groupIdBuilder.append(parts[i]);
+        }
+        
+        String groupId = groupIdBuilder.toString();
+        String artifactId = parts[artifactIndex];
+        
+        return "mvnrepository.com/artifact/" + groupId + "/" + artifactId;
+	}
+	
+	private String convertToGeneric(String ossName, String downloadLocation) {
+		String encodedName = encodeByRule(ossName, true);
+        String encodedUrl = encodeDownloadLocation(downloadLocation);
+        return String.format("pkg:generic/%s?download_url=%s", encodedName, encodedUrl);
+	}
+
+	private String encodeByRule(String inputStr, boolean isFullEncode) {
+		if (StringUtils.isEmpty(inputStr)) {
+            return "";
+        }
+		String result = inputStr.toLowerCase().replace(":", "%3A").replace("@", "%40").replace("?", "%3f").replace("=", "%3d").replace("&", "%26").replace("#", "%23").replace(" ", "%20");
+	    if (isFullEncode) {
+	        result = result.replace("/", "%2F");
+	    }
+	    return result;
+	}
+	
+	private String encodeDownloadLocation(String url) {
+		if (StringUtils.isEmpty(url)) {
+			return "";
+		}
+
+		String protocol = "";
+	    String remainder = url.toLowerCase();
+
+	    int protocolIndex = remainder.indexOf("://");
+	    if (protocolIndex != -1) {
+	        protocol = remainder.substring(0, protocolIndex + 3);
+	        remainder = remainder.substring(protocolIndex + 3);
+	    }
+
+	    return protocol + Arrays.stream(remainder.split("/", -1)).map(segment -> encodeByRule(segment, false)).collect(Collectors.joining("/"));
 	}
 	
 	/**
@@ -840,44 +902,58 @@ public class RefineOssService {
 
 				break;
 			case 1: // npm
+			case 2: // npm
+			case 3: // npm
 				if (downloadlocationUrl.contains("/package/@")) {
 					p = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+)/([^/]+))");
-				}else {
+				} else {
 					p = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+))");
 				}
-			case 2: // npm
+			case 4: // npm
 				if (downloadlocationUrl.contains("/@")) {
 					p = Pattern.compile("((http|https)://registry.npmjs.(org|com)/([^/]+)/([^/]+))");
-				}else {
+				} else {
 					p = Pattern.compile("((http|https)://registry.npmjs.(org|com)/([^/]+))");
 				}
 				break;
-			case 3: // pypi
+			case 5: // npm
+			case 6: // npm
+			case 7: // npm
+			case 8: // npm
+				p = Pattern.compile("((http|https)://npmjs.(org|com)/([^/]+))");
+				break;
+			case 9: // pypi
 				p = Pattern.compile("((http|https)://pypi.python.org/project/([^/]+))");
 				break;
-			case 4: // pypi
+			case 10: // pypi
 				p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
 				break;
-			case 5: // maven
+			case 11: // maven
 				p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
 				break;
-			case 6: // maven
+			case 12: // maven
 				p = Pattern.compile("((http|https)://repo.maven.apache.org/maven2/([^/]+)/([^/]+))");
 				break;
-			case 7: // cocoapod
+			case 13: // cocoapod
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
 				break;
-			case 8: // gem
+			case 14: // gem
 				p = Pattern.compile("((http|https)://rubygems.org/gems/([^/]+))");
 				break;
-			case 9: // go
+			case 15: // go
 				p = Pattern.compile("((http|https)://pkg.go.dev/([^@]+)@?v?([^/]+))");
 				break;
-			case 10:
-				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
+			case 16:
+				p = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
 				break;
-			case 11:
+			case 17:
 				p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+				break;
+			case 18:
+				p = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
+				break;
+			case 19:
+				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
