@@ -216,20 +216,22 @@ var src_fn = {
 						
 						_srcUploadFile = result[0][0];
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
+						_srcUploadFile = result[0][0];
 						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
 						$('#srcCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
-
-						src_fn.makeFileTag(result[0][0]);
-					}
-					else {
+					} else {
 						alertify.error([[#{msg.common.valid}]], 0);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 					}
 				}
+			},
+			onError: function(files, status, errMsg, pd) {
+				loadingIden.hide();
+				alertify.alert("An error occurred while uploading the file", function(){});
 			}
 		});
 	},
@@ -414,7 +416,11 @@ var src_fn = {
 								com_fn.btnCtl(userRole, curIdenStatus);
 							}
 							
-							if (refreshComment) fn_comment.getCommentList(commentsParam);
+							if (refreshComment) {
+								fn_comment.getCommentList(commentsParam);
+							}
+							
+							com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
 						}
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
@@ -477,6 +483,8 @@ var src_fn = {
 						if (fileSeqs.length > 0) {
 							com_fn.resetDeleteFiles(fileSeqs, 'src', 'csvFileArea');
 						}
+						
+						com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}

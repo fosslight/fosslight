@@ -2835,144 +2835,135 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// Delete project all components and license
 		projectMapper.resetOssComponentsAndLicense(refId, refDiv);
 		
-		// 컴포넌트 등록
-		if (CollectionUtils.isEmpty(ossComponent)) {
-			return;
-		}
-		
 		// loaded components
-		Map<String, Long> refLoadedComponents = ossComponent.stream()
-												.filter(e -> !isEmpty(e.getRefLoadedVal()))
-												.collect(Collectors.groupingBy(
-														ProjectIdentification::getRefLoadedVal,
-								                        Collectors.counting()
-												));
+		Map<String, Long> refLoadedComponents = ossComponent.stream().filter(e -> !isEmpty(e.getRefLoadedVal())).collect(Collectors.groupingBy(ProjectIdentification::getRefLoadedVal, Collectors.counting()));
 		
-		final Map<String, List<OssComponentsLicense>> componentMultiLicenseMap = makeComponentMultiLicenseMap(ossComponentLicense);
-		String componentId;
-		String downloadLocationUrl;
-		String homepageUrl;
-		final List<ProjectIdentification> insertOssComponentListWithComponentId = new ArrayList<>();
-		final List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
-		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
-		for(ProjectIdentification ossBean : ossComponent) {
-			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
-			ossBean = CommonFunction.findOssIdAndName(ossBean);
-			if (isEmpty(ossBean.getOssId())) {
-				ossBean.setOssId(null);
+		// 컴포넌트 등록
+		if (CollectionUtils.isNotEmpty(ossComponent)) {
+			final Map<String, List<OssComponentsLicense>> componentMultiLicenseMap = makeComponentMultiLicenseMap(ossComponentLicense);
+			String componentId;
+			String downloadLocationUrl;
+			String homepageUrl;
+			final List<ProjectIdentification> insertOssComponentListWithComponentId = new ArrayList<>();
+			final List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
+			final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
+			for(ProjectIdentification ossBean : ossComponent) {
+				// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
+				ossBean = CommonFunction.findOssIdAndName(ossBean);
+				if (isEmpty(ossBean.getOssId())) {
+					ossBean.setOssId(null);
+				}
+				downloadLocationUrl = ossBean.getDownloadLocation();
+				if (StringUtil.isEmpty(downloadLocationUrl)) {
+					ossBean.setDownloadLocation("");
+				}
+				homepageUrl = ossBean.getHomepage();
+				if (StringUtil.isEmpty(homepageUrl)) {
+					ossBean.setHomepage("");
+				}
+				if (avoidNull(ossBean.getTlsh()).equalsIgnoreCase("TNULL")) {
+					ossBean.setTlsh("0");
+				}
+				componentId = StringUtil.avoidNull(ossBean.getComponentId(), ossBean.getGridId());
+				
+				// set component licnese
+				if(componentMultiLicenseMap.containsKey(componentId)) {
+					ossBean.setOssComponentsLicenseList(componentMultiLicenseMap.get(componentId));
+				} else {
+					ossBean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
+				}
+				if (!isEmpty(ossBean.getCopyrightText())) {
+					ossBean.setCopyrightText(StringUtils.trimWhitespace(ossBean.getCopyrightText()));
+				}
+				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
+				if(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
+					ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(ossBean.getOssComponentsLicenseList()));
+					ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
+				}
+				
+				ossBean.setReferenceId(refId);
+				ossBean.setReferenceDiv(refDiv);
+				if (StringUtil.isEmpty(ossBean.getComponentIdx())) {
+					ossBean.setComponentIdx(Integer.toString(++ossComponentIdx));
+				}
+				
+				// 신규인 경우만 compoentId를 생성
+				// 업데이트되는 경우 기존 componentId를 그대로 사용한다.(화면에 표시되는 ID로 커뮤니케이션 이력 유지) 
+				if(!componentId.contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
+					insertOssComponentListWithComponentId.add(ossBean);
+				} else {
+					insertOssComponentList.add(ossBean);
+				}
 			}
-			downloadLocationUrl = ossBean.getDownloadLocation();
-			if (StringUtil.isEmpty(downloadLocationUrl)) {
-				ossBean.setDownloadLocation("");
-			}
-			homepageUrl = ossBean.getHomepage();
-			if (StringUtil.isEmpty(homepageUrl)) {
-				ossBean.setHomepage("");
-			}
-			if (avoidNull(ossBean.getTlsh()).equalsIgnoreCase("TNULL")) {
-				ossBean.setTlsh("0");
-			}
-			componentId = StringUtil.avoidNull(ossBean.getComponentId(), ossBean.getGridId());
 			
-			// set component licnese
-			if(componentMultiLicenseMap.containsKey(componentId)) {
-				ossBean.setOssComponentsLicenseList(componentMultiLicenseMap.get(componentId));
-			} else {
-				ossBean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
-			}
-			if (!isEmpty(ossBean.getCopyrightText())) {
-				ossBean.setCopyrightText(StringUtils.trimWhitespace(ossBean.getCopyrightText()));
-			}
-			// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
-			if(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
-				ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(ossBean.getOssComponentsLicenseList()));
-				ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
-			}
-			
-			ossBean.setReferenceId(refId);
-			ossBean.setReferenceDiv(refDiv);
-			if (StringUtil.isEmpty(ossBean.getComponentIdx())) {
-				ossBean.setComponentIdx(Integer.toString(++ossComponentIdx));
-			}
-			
-			// 신규인 경우만 compoentId를 생성
-			// 업데이트되는 경우 기존 componentId를 그대로 사용한다.(화면에 표시되는 ID로 커뮤니케이션 이력 유지) 
-			if(!componentId.contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
-				insertOssComponentListWithComponentId.add(ossBean);
-			} else {
-				insertOssComponentList.add(ossBean);
-			}
+			if (!insertOssComponentList.isEmpty() || !insertOssComponentListWithComponentId.isEmpty()) {
+	            try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+	                ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+	                int saveCnt = 0;
+	                for (ProjectIdentification bean : insertOssComponentListWithComponentId) {
+	                    mapper.insertSrcOssList(bean);
+	                    if(saveCnt++ == 1000) {
+	                        sqlSession.flushStatements();
+	                        saveCnt = 0;
+	                    }
+	                }
+	                for (ProjectIdentification bean : insertOssComponentList) {
+	                    mapper.insertSrcOssList(bean);
+	                    if(saveCnt++ == 1000) {
+	                        sqlSession.flushStatements();
+	                        saveCnt = 0;
+	                    }
+	                }
+	                
+	                if (saveCnt > 0) {
+	                    sqlSession.flushStatements();
+	                }
+	                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentListWithComponentId));
+	                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+	                
+	                saveCnt = 0;
+	                for (OssComponentsLicense bean : insertOssComponentLicenseList) {
+	                    mapper.registComponentLicense(bean);
+	                    if (saveCnt++ == 1000) {
+	                        sqlSession.flushStatements();
+	                        saveCnt = 0;
+	                    }
+	                }
+	                if (saveCnt > 0) {
+	                    sqlSession.flushStatements();
+	                }
+	                sqlSession.commit();
+	            }
+	            
+	            insertOssComponentListWithComponentId.clear();
+	            insertOssComponentList.clear();
+	            insertOssComponentLicenseList.clear();
+	        }
 		}
 		
-		if (!insertOssComponentList.isEmpty() || !insertOssComponentListWithComponentId.isEmpty()) {
-            try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-                ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
-                int saveCnt = 0;
-                for (ProjectIdentification bean : insertOssComponentListWithComponentId) {
-                    mapper.insertSrcOssList(bean);
-                    if(saveCnt++ == 1000) {
-                        sqlSession.flushStatements();
-                        saveCnt = 0;
-                    }
-                }
-                for (ProjectIdentification bean : insertOssComponentList) {
-                    mapper.insertSrcOssList(bean);
-                    if(saveCnt++ == 1000) {
-                        sqlSession.flushStatements();
-                        saveCnt = 0;
-                    }
-                }
-                
-                if (saveCnt > 0) {
-                    sqlSession.flushStatements();
-                }
-                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentListWithComponentId));
-                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
-                
-                saveCnt = 0;
-                for (OssComponentsLicense bean : insertOssComponentLicenseList) {
-                    mapper.registComponentLicense(bean);
-                    if (saveCnt++ == 1000) {
-                        sqlSession.flushStatements();
-                        saveCnt = 0;
-                    }
-                }
-                if (saveCnt > 0) {
-                    sqlSession.flushStatements();
-                }
-                sqlSession.commit();
-            }
-            
-            insertOssComponentListWithComponentId.clear();
-            insertOssComponentList.clear();
-            insertOssComponentLicenseList.clear();
-        }
-		
-		if (!isUploadProcess && MapUtils.isNotEmpty(refLoadedComponents)) {
+		if (!isUploadProcess) {
 			List<Project> refLoadedProjectList = projectMapper.selectProjectAddList(refId, refDiv);
 			project.setPrjId(refId);
 			List<Map<String, Object>> refLoadedFileList = projectMapper.selectFileList(project);
 			
 			if (CollectionUtils.isNotEmpty(refLoadedProjectList)) {
 				for (Project refLoadedProject : refLoadedProjectList) {
+					String count = CoConstDef.NUM_ZERO;
 					if (refLoadedComponents.containsKey(refLoadedProject.getReferenceId())) {
-						String count = String.valueOf(refLoadedComponents.get(refLoadedProject.getReferenceId()));
-						refLoadedProject.setComponentCount(count);
-						projectMapper.updateProjectAddList(refLoadedProject);
-					} else {
-						projectMapper.deleteProjectAddList(refId, refDiv, refLoadedProject.getReferenceId());
+						count = String.valueOf(refLoadedComponents.get(refLoadedProject.getReferenceId()));
 					}
+					refLoadedProject.setComponentCount(count);
+					projectMapper.updateProjectAddList(refLoadedProject);
 				}
 			}
 			if (CollectionUtils.isNotEmpty(refLoadedFileList)) {
 				for (Map<String, Object> refLoadedFile : refLoadedFileList) {
 					String fileSeq = String.valueOf(refLoadedFile.get("fileSeq"));
+					String componentCount = CoConstDef.NUM_ZERO;
 					if (refLoadedComponents.containsKey(fileSeq)) {
-						String componentCount = String.valueOf(refLoadedComponents.get(fileSeq));
-						projectMapper.updateProjectFileList(refId, refDiv, fileSeq, componentCount);
-					} else {
-						projectMapper.deleteProjectFileList(refId, refDiv, fileSeq);
+						componentCount = String.valueOf(refLoadedComponents.get(fileSeq));
 					}
+					projectMapper.updateProjectFileList(refId, refDiv, fileSeq, componentCount);
 				}
 			}
 		}
