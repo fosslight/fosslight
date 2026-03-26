@@ -123,6 +123,11 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 		('102', '432', '[FOSSLight][PRJ-${Project ID}] Security, ${User} commented : "${Project Name}"', '', '', 432, 'Y'),
 		('103', '432', 'Security add comment', '', '200', 432, 'Y');
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '31,34,35,36,42,43,44,45,46,52,53,54,55,56,65,101,140,432,812,820' WHERE CD_NO = '110' AND CD_DTL_NO = '31';
+
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Added ${Email} as a Editor of ${Project Name} <br><br>Please Register at FOSSLight to Watch ${Project Name}' WHERE CD_NO = '102' AND CD_DTL_NO = '63';
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Registered at FOSSLight.<br><br>Now, ${User} has "Editor"\'s Authority for ${Project Name}' WHERE CD_NO = '102' AND CD_DTL_NO = '64';
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Added ${Email} as a Editor of ${3rd Party Name} <br><br>Please Register at FOSSLight to Watch ${3rd Party Name}' WHERE CD_NO = '102' AND CD_DTL_NO = '78';
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Registered at FOSSLight.<br><br>Now, ${User} has "Editor"\'s Authority for ${3rd Party Name}' WHERE CD_NO = '102' AND CD_DTL_NO = '79';
 -- //@UNDO
 -- SQL to undo the change goes here.
 
