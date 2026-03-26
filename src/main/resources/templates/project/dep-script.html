@@ -413,7 +413,8 @@ var dep_fn = {
 							com_fn.resetDeleteFiles(fileSeqs, 'dep', 'depCsvFileArea');
 						}
 						
-						com_fn.changeMode("view", false);
+						fn_comment.getCommentList(commentsParam);
+						com_fn.getIdentificationAddList([[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BOM')}]]);
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
@@ -1093,19 +1094,22 @@ var dep_fn = {
 						
 						_depUploadFile = result[0][0];
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
+						_depUploadFile = result[0][0];
 						dep_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
 						$('#depCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
-
-						dep_fn.makeFileTag(result[0][0]);
 					} else {
 						alertify.error([[#{msg.common.valid}]], 0);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 					}
 				}
+			},
+			onError: function(files, status, errMsg, pd) {
+				loadingIden.hide();
+				alertify.alert("An error occurred while uploading the file", function(){});
 			}
 		});
     },
