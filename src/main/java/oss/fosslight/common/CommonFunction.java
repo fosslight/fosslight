@@ -6414,5 +6414,42 @@ public class CommonFunction extends CoTopComponent {
 	    }
 	    return false;
 	}
+	
+	public static String configurePackageUrl(OssComponents bean) {
+		String key = bean.getOssName() + "_" + avoidNull(bean.getOssVersion());
+		OssMaster om = CoCodeManager.OSS_INFO_UPPER.getOrDefault(key.toUpperCase(), null);
+		if (om != null) {
+			String purl = om.getPurl();
+			if (!isEmpty(purl)) {
+				List<String> purlList = Arrays.asList(purl.split(","));
+				String primaryPurlPriority = "";
+				String secondaryPurlPriority = "";
+				String tertiaryPurlPriority = "";
+				
+				for (String purlStr : purlList) {
+					if (!isEmpty(purlStr)) {
+						if (!purlStr.startsWith("pkg:github") && !purlStr.startsWith("pkg:generic")) {
+							primaryPurlPriority = purlStr.trim();
+							break;
+						}
+						if (purlStr.startsWith("pkg:github") && isEmpty(secondaryPurlPriority)) {
+							secondaryPurlPriority = purlStr.trim();
+						} else if (purlStr.startsWith("pkg:generic") && isEmpty(tertiaryPurlPriority)) {
+							tertiaryPurlPriority = purlStr.trim();
+						}
+					}
+				}
+				
+				if (!isEmpty(primaryPurlPriority)) {
+					return primaryPurlPriority;
+				} else if (!isEmpty(secondaryPurlPriority)) {
+					return secondaryPurlPriority;
+				} else if (!isEmpty(tertiaryPurlPriority)) {
+					return tertiaryPurlPriority;
+				}
+			}
+		}
+		return null;
+	}
 }
 

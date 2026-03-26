@@ -1344,13 +1344,14 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
-
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
 			}
-			
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
+			}
+			if (isEmpty(bean.getPackageUrl())) {
+				bean.setPackageUrl(CommonFunction.configurePackageUrl(bean));
 			}
 			
 			noticeList.add(bean);
@@ -1375,14 +1376,14 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
-			
-
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
 			}
-			
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
+			}
+			if (isEmpty(bean.getPackageUrl())) {
+				bean.setPackageUrl(CommonFunction.configurePackageUrl(bean));
 			}
 			
 			srcList.add(bean);
@@ -1407,13 +1408,14 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
-
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
 			}
-			
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
+			}
+			if (isEmpty(bean.getPackageUrl())) {
+				bean.setPackageUrl(CommonFunction.configurePackageUrl(bean));
 			}
 			
 			notObligationList.add(bean);
