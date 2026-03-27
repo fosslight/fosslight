@@ -107,9 +107,25 @@ public class ApiRequestServiceImpl extends CoTopComponent implements ApiRequestS
 		        url.setDownloadLocation(redirectlocationUrl);
 		        url = downloadlocationFormatter(url, bean.getUrlSearchSeq());
 
-		        String checkName;
+		        String checkName = "";
 		        if (url.getDownloadLocation().equals(bean.getDownloadLocation()) || url.getDownloadLocation().equals(bean.getDownloadLocation() + "/")) {
-		            checkName = generateCheckOSSName(bean.getUrlSearchSeq(), bean.getDownloadLocation(), p);
+		        	Set<String> names = urlToNameMap.get(bean.getDownloadLocation());
+		        	if (names != null) {
+		        		for (String name : names) {
+							if (bean.getOssName().equalsIgnoreCase(name)) {
+								continue;
+							}
+							if (!isEmpty(checkName)) {
+								checkName += "|";
+							}
+							checkName += name;
+						}
+		        		if (!isEmpty(checkName)) {
+		        			bean.setCheckOssList("Y");
+		        		}
+		        	} else {
+		        		checkName = generateCheckOSSName(bean.getUrlSearchSeq(), bean.getDownloadLocation(), p);
+		        	}
 		        } else {
 		            bean.setDownloadLocation(redirectlocationUrl);
 		            bean.setOssNickName(generateCheckOSSName(bean.getUrlSearchSeq(), redirectlocationUrl, p));
