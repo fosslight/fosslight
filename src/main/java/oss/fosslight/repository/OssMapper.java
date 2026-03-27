@@ -308,4 +308,10 @@ public interface OssMapper {
 	List<ProjectIdentification> selectBulkOssInfoByUrls(@Param("urls") List<String> urls);
 
 	void updateSendMailFlagForCoReviewerEmails();
+
+	List<OssMaster> checkExistsOssNicknameBulk(@Param("ossNicknames") List<String> ossNicknames);
+	
+	List<OssMaster> checkExistsOssDownloadLocationBulk(@Param("urls") List<String> urls);
+
+	List<OssMaster> checkExistsHomepageBulk(@Param("urls") List<String> urls);
 }

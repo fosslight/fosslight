@@ -12,15 +12,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.reflect.TypeToken;
 
 import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.OssAnalysis;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.service.OssService;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidator;
@@ -61,8 +64,40 @@ public class T2CoOssValidator extends T2CoValidator {
 			ossAnalysisValidate(ossAnalysis, map, errMap, diffMap, infoMap, false);
 		} else if (VALID_TYPE == VALID_OSSANALYSIS_LIST) {
 			if (analysisList != null) {
+				List<String> ossNicknames = new ArrayList<>();
+				Map<String, String> downloadLocations = new HashMap<>();
+				Map<String, String> homepages = new HashMap<>();
+				
 				for (OssAnalysis bean : analysisList) {
-					ossAnalysisValidate(bean, map, errMap, diffMap, infoMap, true);
+			        if (!isEmpty(bean.getOssNickname())) {
+			        	for (String nick : bean.getOssNickname().split(",")) {
+			        		if (!ossNicknames.contains(nick)) {
+			        			ossNicknames.add(nick);
+			        		}
+			        	}
+			        }
+			        if (!isEmpty(bean.getDownloadLocation())) {
+			        	preProcessUrl(bean.getOssName(), bean.getDownloadLocation(), downloadLocations);
+			        }
+			        if (!isEmpty(bean.getHomepage())) {
+			        	preProcessUrl(bean.getOssName(), bean.getHomepage(), homepages);
+			        }
+			    }
+			    
+			    Map<String, OssMaster> existingOssMap = null;
+			    Map<String, Map<String, String>> existingDownloadLocationMap = null;
+			    Map<String, Map<String, String>> existingHomepageMap = null;
+			    if (CollectionUtils.isNotEmpty(ossNicknames)) {
+			    	existingOssMap = ossService.checkExistsOssNicknameBulk(ossNicknames);
+			    }
+			    if (MapUtils.isNotEmpty(downloadLocations)) {
+			    	existingDownloadLocationMap = ossService.checkExistsUrlBulk(downloadLocations, true);
+			    }
+			    if (MapUtils.isNotEmpty(homepages)) {
+			    	existingHomepageMap = ossService.checkExistsUrlBulk(homepages, false);
+			    }
+				for (OssAnalysis bean : analysisList) {
+					ossAnalysisValidate(bean, map, errMap, diffMap, infoMap, true, existingOssMap, existingDownloadLocationMap, existingHomepageMap);
 				}
 			}
 		} else if (VALID_TYPE == VALID_DOWNLOADLOCATION){ // DOWNLOAD LOCATION URL을 중복으로 작성한 경우
@@ -336,6 +371,23 @@ public class T2CoOssValidator extends T2CoValidator {
 		}
 	}
 
+	private void preProcessUrl(String ossName, String urls, Map<String, String> urlMap) {
+		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+    	ProjectIdentification pi = new ProjectIdentification();
+    	for (String url : urls.split(",")) {
+    		pi.setOssName(ossName);
+    		pi.setDownloadLocation(url.trim());
+    		ossService.preProcessUrl(pi, null, checkOssNameUrl);
+    		if (!isEmpty(pi.getDownloadLocation())) {
+    			String downloadLocationUrl = pi.getDownloadLocation();
+	        	if (downloadLocationUrl.endsWith("/")) {
+	        		downloadLocationUrl = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
+	        	}
+	        	urlMap.put(url.trim(), downloadLocationUrl);
+    		}
+    	}
+	}
+
 	@SuppressWarnings("unchecked")
 	private void ossValidate(OssMaster ossBean, Map<String, String> map, Map<String, String> errMap,
 			Map<String, String> diffMap, Map<String, String> infoMap, boolean useGridSeq) {
@@ -602,12 +654,7 @@ public class T2CoOssValidator extends T2CoValidator {
 		}		
 	}
 
-	private void ossBulkValidate(OssMaster ossBean,
-								 Map<String, String> map,
-								 Map<String, String> errMap,
-								 Map<String, String> diffMap,
-								 Map<String, String> infoMap,
-								 boolean useGridSeq) {
+	private void ossBulkValidate(OssMaster ossBean, Map<String, String> map, Map<String, String> errMap, Map<String, String> diffMap, Map<String, String> infoMap, boolean useGridSeq) {
 		/** OSS_NAME */
 		String basicKey = "OSS_NAME";
 		String gridKey = StringUtil.convertToCamelCase(basicKey);
@@ -680,9 +727,13 @@ public class T2CoOssValidator extends T2CoValidator {
 		}
 	}
 
+	private void ossAnalysisValidate(OssAnalysis analysisBean, Map<String, String> map, Map<String, String> errMap, Map<String, String> diffMap, Map<String, String> infoMap, boolean useGridSeq) {
+		ossAnalysisValidate(analysisBean, map, errMap, diffMap, infoMap, useGridSeq, null, null, null);
+	}
+	
 	@SuppressWarnings("unchecked")
-	private void ossAnalysisValidate(OssAnalysis analysisBean, Map<String, String> map, Map<String, String> errMap,
-			Map<String, String> diffMap, Map<String, String> infoMap, boolean useGridSeq) {
+	private void ossAnalysisValidate(OssAnalysis analysisBean, Map<String, String> map, Map<String, String> errMap, Map<String, String> diffMap, Map<String, String> infoMap, boolean useGridSeq
+			, Map<String, OssMaster> existingOssMap, Map<String, Map<String, String>> existingDownloadLocationMap, Map<String, Map<String, String>> existingHomepageMap) {
 		if (analysisBean != null) {
 			// OSS Name
 			// 이미등록된 경우 체크
@@ -856,19 +907,33 @@ public class T2CoOssValidator extends T2CoValidator {
 						errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED");
 					} else {
 						// 다른 oss 에서 이미 사용하고 있는 경우
-						OssMaster param = new OssMaster();
-						param.setOssName(upperNick);
-						param.setOssNameTemp(upperOssName);
-						OssMaster result = ossService.checkExistsOssNickname(param);
-						
-						if (result != null) {
+						boolean isAlreadyExists = false;
+						if (MapUtils.isNotEmpty(existingOssMap)) {
+							if (existingOssMap.containsKey(upperOssName) && !isEmpty(existingOssMap.get(upperOssName).getOssId())) {
+								isAlreadyExists = true;
+							} else if (existingOssMap.containsKey(upperNick) && !isEmpty(existingOssMap.get(upperNick).getOssId())) {
+								OssMaster bean = existingOssMap.get(upperNick);
+								if (!bean.getOssNameTemp().equalsIgnoreCase(upperOssName)) {
+									isAlreadyExists = true;
+								}
+							}
+						} else {
+							OssMaster param = new OssMaster();
+							param.setOssName(upperNick);
+							param.setOssNameTemp(upperOssName);
+							OssMaster result = ossService.checkExistsOssNickname(param);
+							if (result != null) {
+								isAlreadyExists = true;
+							}
+						}
+
+						if (isAlreadyExists) {
 							if (sameMsg.contains(") exists.")) {
 								sameMsg = sameMsg.substring(0, sameMsg.indexOf(") exists.")).trim() + ",";
 								sameMsg += s.trim() + ") exists.";
 							} else {
 								sameMsg += "(" + s.trim() + ") exists.";
 							}
-							
 							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), sameMsg);
 						}
 					}
@@ -894,20 +959,35 @@ public class T2CoOssValidator extends T2CoValidator {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
 			} else if (!isEmpty(analysisBean.getDownloadLocation())){
 				for (String location : downloadLocation){
-					OssMaster param = new OssMaster();
+					boolean isAlreadyExists = false;
+					String sortOrder = "";
 					
-					// version up 인 경우, 해당 oss name을 제외하고 검증
-					if (!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
-						param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
+					if (existingDownloadLocationMap != null) {
+						if (existingDownloadLocationMap.containsKey(location.trim())) {
+							String ossName = existingDownloadLocationMap.get(location.trim()).get("ossName");
+							if (!ossName.equalsIgnoreCase(analysisBean.getOssName())) {
+								isAlreadyExists = true;
+								sortOrder = existingDownloadLocationMap.get(location.trim()).get("sortOrder");
+							}
+						}
+					} else {
+						OssMaster param = new OssMaster();
+						
+						// version up 인 경우, 해당 oss name을 제외하고 검증
+						if (!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
+							param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
+						}
+						
+						param.setDownloadLocation(location.trim());
+						Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
+						List<OssMaster> list = (List<OssMaster>) paramMap.get("downloadLocation");
+						if (CollectionUtils.isNotEmpty(list)) {
+							isAlreadyExists = true;
+							sortOrder = list.get(0).getSOrder();
+						}
 					}
 					
-					param.setDownloadLocation(location.trim());
-					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
-					List<OssMaster> list = (List<OssMaster>) paramMap.get("downloadLocation");
-					
-					if (list != null && !list.isEmpty()) {
-						String sortOrder = list.get(0).getSOrder();
-						
+					if (isAlreadyExists) {
 						if ("1".equals(sortOrder)) {
 							diffMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED");
 						} else {
@@ -931,20 +1011,35 @@ public class T2CoOssValidator extends T2CoValidator {
 			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
 			} else if (!isEmpty(analysisBean.getHomepage())) {
-				OssMaster param = new OssMaster();
+				boolean isAlreadyExists = false;
+				String sortOrder = "";
 				
-				// version up 인 경우, 해당 oss name을 제외하고 검증
-				if (!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
-					param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
+				if (existingHomepageMap != null) {
+					if (existingHomepageMap.containsKey(analysisBean.getHomepage())) {
+						String ossName = existingHomepageMap.get(analysisBean.getHomepage().trim()).get("ossName");
+						if (!ossName.equalsIgnoreCase(analysisBean.getOssName())) {
+							isAlreadyExists = true;
+							sortOrder = existingHomepageMap.get(analysisBean.getHomepage().trim()).get("sortOrder");
+						}
+					}
+				} else {
+					OssMaster param = new OssMaster();
+					
+					// version up 인 경우, 해당 oss name을 제외하고 검증
+					if (!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
+						param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
+					}
+					
+					param.setHomepage(homepage);
+					Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
+					List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
+					if (CollectionUtils.isNotEmpty(list)) {
+						isAlreadyExists = true;
+						sortOrder = list.get(0).getSOrder();
+					}
 				}
 				
-				param.setHomepage(homepage);
-				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
-				List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
-				
-				if (list != null && !list.isEmpty()) {
-					String sortOrder = list.get(0).getSOrder();
-					
+				if (isAlreadyExists) {
 					if ("1".equals(sortOrder)) {
 						diffMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED");
 					} else {

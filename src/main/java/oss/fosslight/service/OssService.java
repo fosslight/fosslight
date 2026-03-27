@@ -169,4 +169,10 @@ public interface OssService extends HistoryConfig{
 	void setExistedOssInfo(OssMaster ossMaster);
 
 	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
+	
+	void preProcessUrl(ProjectIdentification bean, List<String> packageManagerUrl, List<String> checkOssNameUrl);
+
+	Map<String, OssMaster> checkExistsOssNicknameBulk(List<String> ossNicknames);
+
+	Map<String, Map<String, String>> checkExistsUrlBulk(Map<String, String> urls, boolean isDownloadLocation);
 }
