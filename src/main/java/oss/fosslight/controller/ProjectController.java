@@ -5630,8 +5630,8 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value = PROJECT.REVIEW_REPORT)
 	public @ResponseBody ResponseEntity<Object> reviewReport(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) throws SchedulerException, IOException {
 		Map<String, String> resMap = new HashMap<>();
-		verificationService.getReviewReportPdfFile(project.getPrjId());
-		resMap.put("isValid", "true");
+		boolean isExists = verificationService.getReviewReportPdfFile(project.getPrjId());
+		resMap.put("isValid", String.valueOf(isExists));
 		return makeJsonResponseHeader(resMap);
 	}
 	
