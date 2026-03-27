@@ -223,7 +223,15 @@ var bom_fn = {
             contentType : 'application/json',
             success: function (data) {
                 loadingIden.hide();
-                location.href = '/project/verification/downloadReviewReport?prjId='+[[${project.prjId}]];
+                if (typeof data.isValid !== "undefined") {
+                	if ("true" == data.isValid) {
+                		location.href = '/project/verification/downloadReviewReport?prjId='+[[${project.prjId}]];
+                	} else {
+                		alertify.alert([[#{msg.project.check.review.report}]], function(){});
+                	}
+                } else {
+                	alertify.alert([[#{msg.project.check.review.report}]], function(){});
+                }
             },
             error: function(data){
                 alertify.error([[#{msg.common.valid2}]], 0);
