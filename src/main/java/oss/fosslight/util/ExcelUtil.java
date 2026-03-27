@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -815,6 +816,9 @@ public class ExcelUtil extends CoTopComponent {
 		int securityPatchLinkCol = -1;
 		// Security Comments 
 		int securityCommentsCol = -1;
+		// Checklist sheet headers
+		int checklistCol = -1;
+		int agreementCol = -1;
 
 		Map<String, String> errMsg = new HashMap<>();
 		
@@ -998,6 +1002,22 @@ public class ExcelUtil extends CoTopComponent {
 						commentCol = colIdx;
 						
 						break;
+					case "CHECKLIST":
+						if (checklistCol > -1) {
+							dupColList.add(value);
+						}
+
+						checklistCol = colIdx;
+
+						break;
+					case "AGREEMENT":
+						if (agreementCol > -1) {
+							dupColList.add(value);
+						}
+
+						agreementCol = colIdx;
+
+						break;
 					case "NICK NAME":
 						if (nickNameCol > -1) {
 							dupColList.add(value);
@@ -1102,23 +1122,106 @@ public class ExcelUtil extends CoTopComponent {
 			
 			// 필수 header 누락 시 Exception
 			List<String> colNames = new ArrayList<String>();
-			if (licenseCol < 0) {
-				colNames.add("LICENSE");
-			}
-			// Per file info sheet of SPDX Spreadsheet does not proceed
-			if (packageIdentifierCol < 0) {
-				if (ossNameCol < 0) {
-					colNames.add("OSS NAME");
+			boolean isChecklistSheet = "CHECKLIST".equalsIgnoreCase(avoidNull(sheet.getSheetName()).trim());
+			if (isChecklistSheet && readType.equals("checklist")) {
+				if (checklistCol < 0) {
+					colNames.add("CHECKLIST");
 				}
-
-				if (ossVersionCol < 0) {
-					colNames.add("OSS VERSION");
+				if (agreementCol < 0) {
+					colNames.add("AGREEMENT");
+				}
+				if (commentCol < 0) {
+					colNames.add("COMMENT");
+				}
+			} else {
+				if (licenseCol < 0) {
+					colNames.add("LICENSE");
+				}
+				// Per file info sheet of SPDX Spreadsheet does not proceed
+				if (packageIdentifierCol < 0) {
+					if (ossNameCol < 0) {
+						colNames.add("OSS NAME");
+					}
+	
+					if (ossVersionCol < 0) {
+						colNames.add("OSS VERSION");
+					}
 				}
 			}
 			if (!colNames.isEmpty() && !avoidNull(readType).equalsIgnoreCase("total")) {
 				String msg = colNames.toString();
 				msg = "No required fields were found. Sheet Name : [".concat(sheet.getSheetName()).concat("],  Filed Name : ").concat(msg);
 				errMsg.put("reqCol", msg);
+			}
+
+			if (readType.equals("checklist") && errMsg.isEmpty()) {
+				if(!isChecklistSheet) {
+					errMsg.put("errRow", getMessage("msg.partner.no.checklist"));
+					return errMsg;
+				}
+				boolean hasAgreementValue = false;
+				List<String> notOkRows = new ArrayList<>();
+				List<String> emptyRows = new ArrayList<>();
+				boolean ok = true;
+				
+				// Exclude the row right after header and start checking from the next row.
+				for (int rowIdx = DefaultHeaderRowIndex + 1; rowIdx < sheet.getPhysicalNumberOfRows(); rowIdx++) {
+					Row row = sheet.getRow(rowIdx);
+					if (row == null) {
+						continue;
+					}
+					
+					String checklistValue = avoidNull(getCellData(row.getCell(checklistCol))).trim();
+					String agreementValue = avoidNull(getCellData(row.getCell(agreementCol))).trim();
+					String commentValue = avoidNull(getCellData(row.getCell(commentCol))).trim();
+					
+					// Ignore empty lines in checklist sheet.
+					if (isEmpty(checklistValue) && isEmpty(agreementValue) && isEmpty(commentValue)) {
+						continue;
+					}
+
+					if(rowIdx == DefaultHeaderRowIndex + 1) {
+						if(agreementValue.equalsIgnoreCase("NOT-OK")) {
+							ok = false;
+						} else if (agreementValue.equalsIgnoreCase("OK")) {
+							ok = true;
+							break;
+						} else {
+							ok = false;
+							emptyRows.add(checklistValue);
+						}
+					} else {
+						// 0: NOT-OK, other : NOT-OK
+						if(!ok && !agreementValue.equalsIgnoreCase("OK")) {
+							if(isEmpty(agreementValue)) {
+								emptyRows.add(checklistValue);
+							} else {
+								notOkRows.add(checklistValue + " : " + agreementValue);
+							}
+						}
+					}
+				}
+
+				if(ok && errMsgList.size()==1 && errMsgList.get(0).equals("Exist")) {
+					errMsgList.clear();
+					errMsg.put("errRow", getMessage("msg.partner.agreement.exist"));
+					return errMsg;
+				}
+
+				if (!notOkRows.isEmpty()) {
+					errMsg.put("errRow", getMessage("msg.partner.agreement.notok")
+							+"<br/><br/> <h5>N/A :</h5>" + StringUtils.join(emptyRows, "<br/>")
+							+ "<br/><br/> <h5>Disagreement : </h5>" + StringUtils.join(notOkRows, "<br/>"));
+					return errMsg;
+				}
+
+				if(!ok && errMsgList.size()==1 && errMsgList.get(0).equals("Empty")) {
+					errMsgList.clear();
+					errMsg.put("errRow", getMessage("msg.partner.agreement.empty"));
+					return errMsg;
+				}
+				
+				return errMsg;
 			}
 			
 			String lastOssName = "";
@@ -1825,7 +1928,7 @@ public class ExcelUtil extends CoTopComponent {
 			for (Cell cell : row) {
 				String id = avoidNull(getCellData(cell)).trim().toUpperCase();
 				
-				if ("NO".equalsIgnoreCase(id) || "ID".equalsIgnoreCase(id) || "PACKAGE NAME".equalsIgnoreCase(id) || "FILE NAME".equalsIgnoreCase(id)) {
+				if ("NO".equalsIgnoreCase(id) || "ID".equalsIgnoreCase(id) || "PACKAGE NAME".equalsIgnoreCase(id) || "FILE NAME".equalsIgnoreCase(id) || "CHECKLIST".equalsIgnoreCase(id)) {
 					return row.getRowNum();
 				}
 				
@@ -2496,7 +2599,7 @@ public class ExcelUtil extends CoTopComponent {
 				deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANDROID_CHANGED_RESULTTEXT, resultFileSeq));
 				
 				errMsgList.add("오픈소슨 또는 라이선스 검출시 애러가 발생했습니다." + e.getMessage());
-				
+
 				return false;
 			}
 			
