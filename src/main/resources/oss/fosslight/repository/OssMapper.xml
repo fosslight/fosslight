@@ -3772,7 +3772,7 @@
 		  FROM OSS_ANALYSIS_MAP
 		 WHERE REFERENCE_ID = #{prjId}
 		 <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(startAnalysisFlag,'Y')">
-		   AND ANALYSIS_YN = #{startAnalysisFlag}
+		   	AND ANALYSIS_YN = #{startAnalysisFlag}
 		   	<if test="!@oss.fosslight.util.StringUtil@isEmpty(csvComponentIdList)">
 		   		AND COMPONENT_ID IN (
 		   		<foreach item="id" index="index" collection="csvComponentIdList" separator=",">
@@ -3780,6 +3780,7 @@
 				</foreach>
 				)
 			</if>
+			AND IFNULL(COMMENTS_FLAG, '') = 'F'
 		 ORDER BY COMPONENT_ID ASC
 			 <include refid="limitPage"/>
 		 </if>
@@ -4639,4 +4640,97 @@
 	<update id="updateSendMailFlagForCoReviewerEmails">
 		UPDATE OSS_ANALYSIS_STATUS SET SEND_MAIL_FLAG = 'Y' WHERE SEND_MAIL_FLAG = 'N'
 	</update>
+	
+	<select id="checkExistsOssNicknameBulk" resultType="oss.fosslight.domain.OssMaster">
+		SELECT OV.OSS_ID, OC.OSS_COMMON_ID, OC.OSS_NAME, OC.OSS_NAME AS OSS_NAME_TEMP, OV.OSS_VERSION
+        FROM (
+            SELECT *  
+            FROM OSS_COMMON
+            <if test="ossNicknames != null and ossNicknames.size() > 0">
+            	WHERE OSS_NAME IN
+            	<foreach item="item" collection="ossNicknames" open="(" separator="," close=")">
+	                #{item}
+	            </foreach>
+            </if>
+        ) OC
+        LEFT JOIN OSS_VERSION OV ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+        WHERE OV.USE_YN = 'Y'
+        
+        UNION ALL
+        
+        SELECT OV.OSS_ID, OC.OSS_COMMON_ID, NICK.OSS_NICKNAME AS OSS_NAME, OC.OSS_NAME AS OSS_NAME_TEMP, OV.OSS_VERSION
+        FROM (
+            SELECT *  
+            FROM OSS_NICKNAME
+            <if test="ossNicknames != null and ossNicknames.size() > 0">
+            	WHERE OSS_NICKNAME IN
+            	<foreach item="item" collection="ossNicknames" open="(" separator="," close=")">
+	                #{item}
+	            </foreach>
+            </if>
+        ) NICK
+        INNER JOIN OSS_COMMON OC ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+        LEFT JOIN OSS_VERSION OV ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+        WHERE OV.USE_YN = 'Y'
+	</select>
+	
+	<select id="checkExistsOssDownloadLocationBulk" resultType="oss.fosslight.domain.OssMaster">
+		SELECT A.OSS_NAME, MIN(A.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION, MIN(A.S_ORDER) AS S_ORDER 
+		FROM (
+			SELECT T1.OSS_NAME,
+					IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION,
+					<choose>
+                		<when test="urls != null and urls.size() > 0">
+                			CASE
+                			<foreach item="loc" collection="urls">
+		                        WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%', #{loc}) THEN 1
+		                        WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT(#{loc}, '%') THEN 2
+		                    </foreach>
+		                    	ELSE 3
+		                    END
+                		</when>
+                		<otherwise>3</otherwise>
+            		</choose> AS S_ORDER
+				FROM OSS_COMMON T1
+	  			LEFT JOIN OSS_DOWNLOADLOCATION T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
+			    WHERE T1.USE_YN = 'Y' 
+			   	AND (
+			   		<foreach item="loc" collection="urls" separator="OR">
+                        IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%', #{loc}, '%')
+                    </foreach>
+			   	)
+		) A
+		WHERE 1 = 1
+		GROUP BY A.OSS_NAME
+		ORDER BY A.S_ORDER
+    </select>
+    
+    <select id="checkExistsHomepageBulk" resultType="oss.fosslight.domain.OssMaster">
+		SELECT A.OSS_NAME, MIN(A.HOMEPAGE) AS HOMEPAGE, MIN(A.S_ORDER) AS S_ORDER 
+		FROM (
+			SELECT T1.OSS_NAME, T1.HOMEPAGE,
+					<choose>
+                		<when test="urls != null and urls.size() > 0">
+                			CASE
+                			<foreach item="loc" collection="urls">
+		                        WHEN T1.HOMEPAGE LIKE CONCAT('%', #{loc}) THEN 1
+		                        WHEN T1.HOMEPAGE LIKE CONCAT(#{loc}, '%') THEN 2
+		                    </foreach>
+		                    	ELSE 3
+		                    END
+                		</when>
+                		<otherwise>3</otherwise>
+            		</choose> AS S_ORDER
+				FROM OSS_COMMON T1
+			    WHERE T1.USE_YN = 'Y' 
+			   	AND (
+			   		<foreach item="loc" collection="urls" separator="OR">
+                        T1.HOMEPAGE LIKE CONCAT('%', #{loc}, '%')
+                    </foreach>
+			   	)
+		) A
+		WHERE 1 = 1
+		GROUP BY A.OSS_NAME
+		ORDER BY A.S_ORDER
+    </select>
 </mapper>

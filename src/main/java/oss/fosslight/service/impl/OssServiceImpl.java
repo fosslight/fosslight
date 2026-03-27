@@ -2845,7 +2845,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return sortedData;
 	}
 	
-	private void preProcessUrl(ProjectIdentification bean, List<String> packageManagerUrl, List<String> checkOssNameUrl) {
+	public void preProcessUrl(ProjectIdentification bean, List<String> packageManagerUrl, List<String> checkOssNameUrl) {
 		if (!isEmpty(bean.getHomepage())) {
 	        for (String url : packageManagerUrl) {
 	            if (bean.getHomepage().toLowerCase().contains(url.toLowerCase())) {
@@ -5532,5 +5532,53 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setOssVersionAliases(ossVersionAliases);
 		}
 		return ossMapper.getOssVulnerabilityInfo(ossMaster);
+	}
+
+	@Override
+	public Map<String, OssMaster> checkExistsOssNicknameBulk(List<String> ossNicknames) {
+		Map<String, OssMaster> rtnMap = new HashMap<>();
+		List<OssMaster> nicknameBulkList = ossMapper.checkExistsOssNicknameBulk(ossNicknames);
+		for (OssMaster bean : nicknameBulkList) {
+			rtnMap.put(bean.getOssName().toUpperCase(), bean);
+		}
+		return rtnMap;
+	}
+
+	@Override
+	public Map<String, Map<String, String>> checkExistsUrlBulk(Map<String, String> urls, boolean isDownloadLocation) {
+		Map<String, Map<String, String>> rtnMap = new HashMap<>();
+		List<String> processedUrls = new ArrayList<>(urls.values());
+	    if (processedUrls.isEmpty()) {
+	    	return rtnMap;
+	    }
+	    
+		List<OssMaster> urlsBulkList = null;
+		if (isDownloadLocation) {
+			urlsBulkList = ossMapper.checkExistsOssDownloadLocationBulk(processedUrls);
+		} else {
+			urlsBulkList = ossMapper.checkExistsHomepageBulk(processedUrls);
+		}
+		if (CollectionUtils.isNotEmpty(urlsBulkList)) {
+			for (OssMaster master : urlsBulkList) {
+				String dbUrl = "";
+				if (isDownloadLocation) {
+					dbUrl = master.getDownloadLocation();
+				} else {
+					dbUrl = master.getHomepage();
+				}
+		        for (Map.Entry<String, String> entry : urls.entrySet()) {
+		            String originUrl = entry.getKey();
+		            String processedUrl = entry.getValue();
+		            
+		            if (dbUrl.contains(processedUrl) || processedUrl.contains(dbUrl)) {
+		                Map<String, String> info = new HashMap<>();
+		                info.put("ossName", master.getOssName());
+		                info.put("sortOrder", master.getSOrder());
+		                rtnMap.put(originUrl, info);
+		            }
+		        }
+		    }
+		}
+		return rtnMap;
 	}
 }
