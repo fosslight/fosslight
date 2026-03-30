@@ -3972,11 +3972,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		        }
 
 		        String componentId = keyParts[1];
-
 		        boolean isOssNameError = upperKey.startsWith("OSSNAME") && (value.equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG")) || value.equals(ruleMap.get("OSS_NAME.DEACTIVATED.MSG")) || value.equals(ruleMap.get("OSS_NAME.REQUIRED.MSG")));
-		        boolean isOssVersionError = upperKey.startsWith("OSSVERSION") && value.equals(ruleMap.get("OSS_VERSION.UNCONFIRMED.MSG"));
 
-		        if ((isOssNameError || isOssVersionError) && componentMap.containsKey(componentId)) {
+		        if (isOssNameError&& componentMap.containsKey(componentId)) {
 		            resultData.addAll(componentMap.get(componentId));
 		        }
 			}
@@ -3987,7 +3985,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		    Set<String> addedComponentIds = resultData.stream().map(ProjectIdentification::getComponentId).collect(Collectors.toSet());
 
 		    String ossNameUnconfirmed = String.valueOf(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG"));
-		    String ossVersionUnconfirmed = String.valueOf(ruleMap.get("OSS_VERSION.UNCONFIRMED.MSG"));
 
 		    for (Map.Entry<String, String> entry : diffMap.entrySet()) {
 		        String key = entry.getKey();
@@ -4001,11 +3998,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		        }
 
 		        String componentId = keyParts[1];
-
 		        boolean isOssName = upperKey.startsWith("OSSNAME") && value.equals(ossNameUnconfirmed);
-		        boolean isOssVersion = upperKey.startsWith("OSSVERSION") && value.equals(ossVersionUnconfirmed);
 
-		        if ((isOssName || isOssVersion) && componentMap.containsKey(componentId)) {
+		        if (isOssName && componentMap.containsKey(componentId)) {
 		            resultData.addAll(componentMap.get(componentId));
 		            addedComponentIds.add(componentId);
 		        }
