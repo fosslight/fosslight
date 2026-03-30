@@ -115,12 +115,14 @@ var Ctrl_fn = {
 				downloadLocationHtml 		+=				'</div>';
 		    	downloadLocationHtml 		+=			'</div>';
 		    	downloadLocationHtml 		+=			'<div class="col-lg-12 purlArea">';
-		    	downloadLocationHtml 		+=				'<div class="form-group mb-0">';
-		    	downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#f5f4f3 !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
-		    	downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+downloadLocation+'">';
-		    	downloadLocationHtml 		+=				'</div>';
-		    	downloadLocationHtml 		+=				'<span class="urltxt"></span>';
-				downloadLocationHtml 		+=				'<span class="retxt"></span>';
+		    	if ("" != purl) {
+		    		downloadLocationHtml 		+=				'<div class="form-group mb-0">';
+			    	downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#f5f4f3 !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
+			    	downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+downloadLocation+'">';
+			    	downloadLocationHtml 		+=				'</div>';
+			    	downloadLocationHtml 		+=				'<span class="urltxt"></span>';
+					downloadLocationHtml 		+=				'<span class="retxt"></span>';
+		    	}
 		    	downloadLocationHtml 		+=			'</div>';
 		    	downloadLocationHtml 		+=		'</div>';
 				downloadLocationHtml 		+= 	'</div>';

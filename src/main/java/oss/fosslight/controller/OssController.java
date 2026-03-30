@@ -464,11 +464,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value={OSS.MULTI_DEL_AJAX})
-	public @ResponseBody ResponseEntity<Object> multiDelAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		String resCd="00";
 		HashMap<String, Object> resMap = new HashMap<>();
 		String[] delOssIds = ossMaster.getOssIds();
@@ -538,11 +534,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.DEL_OSS_VERSION_MERGE_AJAX)
-	public @ResponseBody ResponseEntity<Object> delOssWithVersionMeregeAjax(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> delOssWithVersionMeregeAjax(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		String resCd="00";
 		HashMap<String, Object> resMap = new HashMap<>();
 
@@ -775,15 +767,13 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value = OSS.CHECK_EXIST_OSS_CONF)
-	public @ResponseBody String checkExistOssConf(HttpServletRequest req, HttpServletResponse res,
-			Model model, @RequestParam(value="ossId", required=true)String ossId) {
+	public @ResponseBody String checkExistOssConf(HttpServletRequest req, HttpServletResponse res, Model model, @RequestParam(value="ossId", required=true)String ossId) {
 		return ossService.checkExistOssConf(ossId);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = OSS.CHECK_VD_DIFF)
-	public @ResponseBody ResponseEntity<Object> checkVdiff(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res,
-			Model model) {
+	public @ResponseBody ResponseEntity<Object> checkVdiff(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, Object> reqMap = new HashMap<>();
 		reqMap.put("ossId", (String) map.get("ossId"));
 		reqMap.put("ossName", (String) map.get("ossName"));
@@ -801,8 +791,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value = OSS.SAVE_COMMENT)
-	public @ResponseBody ResponseEntity<Object> saveComment(@ModelAttribute CommentsHistory commentsHistory,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveComment(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
 		T2CoValidationResult vResult = null;
 		
 		try {
@@ -828,8 +817,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value =OSS.SEND_COMMENT)
-	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
 		commentService.registComment(commentsHistory);
 		
 		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT);
@@ -843,11 +831,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.DELETE_COMMENT)
-	public @ResponseBody ResponseEntity<Object> deleteComment(
-			@ModelAttribute CommentsHistory commentsHistory
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> deleteComment(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model){
 		T2CoValidationResult vResult = null;
 		
 		try {
@@ -902,11 +886,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.SAVE_SESSION_OSS_INFO)
-	public @ResponseBody ResponseEntity<Object> saveSessionOssInfo(
-			@ModelAttribute OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveSessionOssInfo(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		OssMaster orgMaster = null;
 		
 		if (!isEmpty(ossMaster.getOssName())) {
@@ -1857,27 +1837,31 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
 		
 		if (detailData != null) {
-			OssMaster bean = new OssMaster();
 			for (OssAnalysis oa : detailData) {
 				if (ossService.checkOssTypeForAnalysisResult(oa)) {
 					oa.setOssType("V");
 				}
-				
 				String key = (oa.getOssName() + "_" + avoidNull(oa.getOssVersion())).toUpperCase();
 				if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
-					OssMaster param = new OssMaster();
-					param.setOssId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssId());
-					param.setOssCommonId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssCommonId());
-					param.setOssName(oa.getOssName());
-					param.setOssVersion(oa.getOssVersion());
-					if (oa.getTitle().contains("최신 등록 정보")) {
-						param.setOssVersionAliases(CoCodeManager.OSS_INFO_UPPER.get(key).getOssVersionAliases());
+					OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get(key);
+					if (ossInfo != null && oa.getTitle().contains("최신 등록 정보")) {
+						oa.setOssCommonId(ossInfo.getOssCommonId());
+						oa.setOssId(ossInfo.getOssId());
+						oa.setOssVersionAliases(ossInfo.getOssVersionAliases());
 					}
 				}
 				OssMaster ossBean = ossService.getOssInfo(null, oa.getOssName(), true);
 				if (ossBean != null && oa.getTitle().contains("최신 등록 정보")) {
 					oa.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
 					oa.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+					if (!isEmpty(oa.getDownloadLocation())) {
+						List<String> downloadLocationList = Arrays.asList(oa.getDownloadLocation().split(","));
+						if (ossBean.getDownloadLocations() != null) {
+							List<String> downloadLocations = Arrays.asList(ossBean.getDownloadLocations());
+							String mergeDownloadLocation = Stream.concat(downloadLocationList.stream(), downloadLocations.stream()).map(String::trim).filter(s -> !isEmpty(s)).distinct().collect(Collectors.joining(","));
+							oa.setDownloadLocation(mergeDownloadLocation);
+						}
+					}
 				}
 			}
 			
