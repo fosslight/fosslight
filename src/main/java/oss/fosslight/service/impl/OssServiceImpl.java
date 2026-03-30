@@ -3988,7 +3988,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 		    String ossNameUnconfirmed = String.valueOf(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG"));
 		    String ossVersionUnconfirmed = String.valueOf(ruleMap.get("OSS_VERSION.UNCONFIRMED.MSG"));
-		    String downloadLocationDifferent = String.valueOf(ruleMap.get("DOWNLOAD_LOCATION.DIFFERENT.MSG"));
 
 		    for (Map.Entry<String, String> entry : diffMap.entrySet()) {
 		        String key = entry.getKey();
@@ -4005,14 +4004,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 		        boolean isOssName = upperKey.startsWith("OSSNAME") && value.equals(ossNameUnconfirmed);
 		        boolean isOssVersion = upperKey.startsWith("OSSVERSION") && value.equals(ossVersionUnconfirmed);
-		        boolean isDownloadLocation = upperKey.startsWith("DOWNLOADLOCATION") && value.equals(downloadLocationDifferent);
 
 		        if ((isOssName || isOssVersion) && componentMap.containsKey(componentId)) {
-		            resultData.addAll(componentMap.get(componentId));
-		            addedComponentIds.add(componentId);
-		        }
-
-		        if (isDownloadLocation && !addedComponentIds.contains(componentId) && componentMap.containsKey(componentId)) {
 		            resultData.addAll(componentMap.get(componentId));
 		            addedComponentIds.add(componentId);
 		        }
