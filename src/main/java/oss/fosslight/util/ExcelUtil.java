@@ -1204,7 +1204,7 @@ public class ExcelUtil extends CoTopComponent {
 
 				if(ok && errMsgList.size()==1 && errMsgList.get(0).equals("Exist")) {
 					errMsgList.clear();
-					errMsg.put("errRow", getMessage("msg.partner.agreement.exist"));
+					errMsg.put("errRow", getMessage("msg.partner.exist.oss"));
 					return errMsg;
 				}
 
@@ -1217,7 +1217,7 @@ public class ExcelUtil extends CoTopComponent {
 
 				if(!ok && errMsgList.size()==1 && errMsgList.get(0).equals("Empty")) {
 					errMsgList.clear();
-					errMsg.put("errRow", getMessage("msg.partner.agreement.empty"));
+					errMsg.put("errRow", getMessage("msg.partner.empty.oss"));
 					return errMsg;
 				}
 				
