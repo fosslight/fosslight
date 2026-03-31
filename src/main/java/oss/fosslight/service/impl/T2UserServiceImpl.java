@@ -447,6 +447,11 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 	public List<T2Users> selectAllUsers() {
 		return userMapper.selectUserList();
 	}
+
+	@Override
+	public List<T2Users> getAllUsersBasic() {
+		return userMapper.selectAllUsersBasic();
+	}
 	
 	@Override
 	public List<T2Users> getAllUsersDivision() {

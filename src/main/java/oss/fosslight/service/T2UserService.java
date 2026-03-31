@@ -38,6 +38,8 @@ public interface T2UserService extends UserDetailsService {
 	public List<T2Users> getReviwer();
 
 	public List<T2Users> selectAllUsers();
+
+	public List<T2Users> getAllUsersBasic();
 	
 	public List<T2Users> getAllUsersDivision();
 

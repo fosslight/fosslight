@@ -49,6 +49,8 @@ public interface T2UserMapper {
 	public List<T2Users> selectAdminUser();
 	
 	public List<T2Users> selectAllUsersDivision();
+
+	public List<T2Users> selectAllUsersBasic();
 	
 	public List<T2Users> selectCheckEmail(String email);
 	

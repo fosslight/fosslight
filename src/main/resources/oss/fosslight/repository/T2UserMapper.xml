@@ -375,6 +375,17 @@
 <!-- 	WHERE A.USE_YN = 'Y' --> 
 	ORDER BY DIVISION, A.USER_NAME
 	</select>
+
+	<select id="selectAllUsersBasic" resultType="oss.fosslight.domain.T2Users">
+		SELECT
+			USER_ID,
+			USER_NAME,
+			EMAIL,
+			DIVISION,
+			USE_YN
+		FROM T2_USERS
+		ORDER BY DIVISION, USER_NAME
+	</select>
 	
 	<select id="selectCheckEmail" parameterType="String" resultType="oss.fosslight.domain.T2Users"> 
     /*email check*/
