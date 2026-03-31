@@ -21,6 +21,7 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.ApiCommonService;
 import oss.fosslight.service.T2UserService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,9 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiParam(value = "to", required = true) @RequestParam(required = true) String to) {
 
         T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
+            return responseService.errorResponse(HttpStatus.FORBIDDEN);
+        }
         Map<String, Object> result = new HashMap<>();
         if (userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             try {
@@ -126,6 +130,33 @@ public class ApiCommonV2Controller extends CoTopComponent {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("division list search error", e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "Get all users (basic)", notes = "Returns all rows from T2_USERS with user_id, user_name, email, division, use_yn")
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USERS})
+    public ResponseEntity<Map<String, Object>> getAllUsersBasic(
+            @ApiParam(hidden = true) @RequestHeader String authorization) {
+
+        userService.checkApiUserAuth(authorization);
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<T2Users> users = userService.getAllUsersBasic();
+            List<Map<String, Object>> contents = new ArrayList<>(users.size());
+            for (T2Users u : users) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("user_id", u.getUserId());
+                row.put("user_name", u.getUserName());
+                row.put("email", u.getEmail());
+                row.put("division", u.getDivision());
+                row.put("use_yn", u.getUseYn());
+                contents.add(row);
+            }
+            result.put("content", contents);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("users list search error", e);
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

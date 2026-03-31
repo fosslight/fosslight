@@ -1119,6 +1119,8 @@ public final class Url {
 			public static final String FOSSLIGHT_API_COMMON_DIVISION = "/common/division";
 
 			public static final String FOSSLIGHT_API_COMMON_UPDATE_DIVISION = "/common/division/update";
+
+			public static final String FOSSLIGHT_API_COMMON_USERS = "/common/users";
 	}
 
 	public static final class API_LITE {
