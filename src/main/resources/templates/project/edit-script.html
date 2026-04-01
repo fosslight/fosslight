@@ -2036,11 +2036,11 @@
 							}
 							
 							if (referenceDiv == identificationHisCode) {
-								data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N"};
+								data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N", "actionType" : "REOPEN"};
 							} else if (referenceDiv == packagingHisCode) {
-								data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N"};
+								data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N", "actionType" : "REOPEN"};
 							} else if (referenceDiv == distributionHisCode) {
-								data = {"referenceId" : [[${project.prjId}]], "contents" : userComment, "referenceDiv": referenceDiv, "commentsMode" : commentsMode, "delOsdd" : deleteOsdd};
+								data = {"referenceId" : [[${project.prjId}]], "contents" : userComment, "referenceDiv": referenceDiv, "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "actionType" : "REOPEN"};
 							}
 							if (data) fn.commentsSave(data);
 						} else {
