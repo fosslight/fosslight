@@ -791,6 +791,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private int prjAddIdx;
 	
+	private String actionType;
+	
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -4920,5 +4922,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setIdentificationCsvFileSeq(String identificationCsvFileSeq) {
 		this.identificationCsvFileSeq = identificationCsvFileSeq;
+	}
+
+	public String getActionType() {
+		return actionType;
+	}
+
+	public void setActionType(String actionType) {
+		this.actionType = actionType;
 	}
 }

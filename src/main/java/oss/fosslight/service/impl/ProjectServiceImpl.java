@@ -3669,7 +3669,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			param.setOssNames(ossCheckParam.toArray(new String[ossCheckParam.size()]));
 			ossNickNameList = projectMapper.checkOssNickName(param);
 			
-			if (ossNickNameList != null) {
+			if (CollectionUtils.isNotEmpty(ossNickNameList)) {
 				for (OssMaster bean : ossNickNameList) {
 					String _disp = bean.getOssNickname() + "|" + bean.getOssName();
 					if (!ossNickNameCheckResult.contains(_disp)) {
@@ -4350,6 +4350,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getVerificationStatus());
 			boolean isIdentificationReject = false;
 			boolean shouldSaveReReview = false;
+			boolean isReopen = !isEmpty(project.getActionType()) && ("REOPEN").equals(project.getActionType()) ? true : false; 
 			Project beforeInfo = getProjectDetail(project);
 			
 			// Identification
@@ -4411,7 +4412,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			Map<String, Object> map = null;
 			List<ProjectIdentification> bomList = null;
-			if (shouldSaveReReview || hasIdentificationReview) {
+			if (!isReopen && (shouldSaveReReview || hasIdentificationReview)) {
 				map = getIdentificationGridList(param);
 				if (map != null && map.containsKey("rows")) {
 					bomList = (List<ProjectIdentification>) map.get("rows");
@@ -4520,7 +4521,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				deleteStatisticsMostUsedInfo(project);
 			}
 			
-			if (hasIdentificationReview) {
+			if (!isReopen && hasIdentificationReview) {
 				if (commentService.checkStatusCommentsHistory(param.getReferenceId(), "prj", CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS)) > 0) {
 					sbomComparisonService(param, bomList);
 				}
