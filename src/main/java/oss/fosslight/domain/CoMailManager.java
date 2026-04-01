@@ -1820,10 +1820,11 @@ public class CoMailManager extends CoTopComponent {
 					_s2 = avoidNull(makeUserNameFormat(project.getCreator()));
 				}
 				
-				if (title.indexOf("${ReviewerTo}") == -1 
-						&& title.indexOf("${Reviewer}") > -1 
-						&& !isEmpty(project.getReviewer())) {
-					_s3 = avoidNull(makeUserNameFormat(project.getReviewer()));
+				if (!CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION.equals(bean.getMsgType()) && !CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION.equals(bean.getMsgType())
+						&& !CoConstDef.CD_MAIL_PARTNER_APPROVE_PERMISSION.equals(bean.getMsgType()) && !CoConstDef.CD_MAIL_PARTNER_REJECT_PERMISSION.equals(bean.getMsgType())) {
+					if (title.indexOf("${ReviewerTo}") == -1 && title.indexOf("${Reviewer}") > -1 && !isEmpty(project.getReviewer())) {
+						_s3 = avoidNull(makeUserNameFormat(project.getReviewer()));
+					}
 				}
 				
 				if (title.indexOf("${LastDistributor}") > -1) {
