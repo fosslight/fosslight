@@ -2638,7 +2638,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public void registBinOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project) {
-		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN, false);
 	}
 
 
