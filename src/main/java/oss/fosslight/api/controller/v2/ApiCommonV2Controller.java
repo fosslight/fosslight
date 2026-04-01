@@ -46,9 +46,6 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiParam(value = "to", required = true) @RequestParam(required = true) String to) {
 
         T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
-        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
-            return responseService.errorResponse(HttpStatus.FORBIDDEN);
-        }
         Map<String, Object> result = new HashMap<>();
         if (userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             try {
@@ -139,7 +136,10 @@ public class ApiCommonV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> getAllUsersBasic(
             @ApiParam(hidden = true) @RequestHeader String authorization) {
 
-        userService.checkApiUserAuth(authorization);
+        T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
+            return responseService.errorResponse(HttpStatus.FORBIDDEN);
+        }
         Map<String, Object> result = new HashMap<>();
         try {
             List<T2Users> users = userService.getAllUsersBasic();
