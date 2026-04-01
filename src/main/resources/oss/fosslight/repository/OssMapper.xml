@@ -3845,6 +3845,7 @@
 		    	, MODIFIER 			= #{creator}
 		    </otherwise>
 		</choose>
+		  , SEND_MAIL_FLAG			= 'N'
 	</insert>
 	
 	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
