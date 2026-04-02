@@ -1409,6 +1409,13 @@ public class CoMailManager extends CoTopComponent {
     				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
     			}
     			break;
+    		case CoConstDef.CD_MAIL_TOKEN_CREATE_TYPE:
+    		case CoConstDef.CD_MAIL_TOKEN_DELETE_TYPE:
+    			if (bean.getToIds() != null && bean.getToIds().length > 0) {
+    				bean.setToIds(selectMailAddrFromIds(bean.getToIds()));
+    			}
+    			bean.setCcIds(selectAdminMailAddr());
+    			break;
     		default:
     			// 호출하는 쪽에서 설정된 경우
     			if (bean.getToIds() != null && bean.getToIds().length > 0) {

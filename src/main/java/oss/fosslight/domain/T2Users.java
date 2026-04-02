@@ -70,6 +70,8 @@ public class T2Users extends ComBean implements Serializable{
 	private String expireFlag;
 	
 	private String modifiedFlag;
+	
+	private String purpose;
 
 	public String getModifiedFlag() {
 		return modifiedFlag;
@@ -379,5 +381,13 @@ public class T2Users extends ComBean implements Serializable{
 
 	public void setExpireDate(String expireDate) {
 		this.expireDate = expireDate;
+	}
+
+	public String getPurpose() {
+		return purpose;
+	}
+
+	public void setPurpose(String purpose) {
+		this.purpose = purpose;
 	}
 }

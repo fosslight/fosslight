@@ -335,12 +335,7 @@ public class UserController extends CoTopComponent {
 	}
 	
 	@PostMapping(value=USER.TOKEN_PROC)
-	public @ResponseBody ResponseEntity<Object> tokenProc(
-			@RequestBody HashMap<String, Object> map
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model
-			, @PathVariable String procType) throws Exception{
+	public @ResponseBody ResponseEntity<Object> tokenProc(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String procType) throws Exception{
 		String mainData = (String) map.get("mainData");
 		boolean isSuccess = false;
 		
@@ -373,8 +368,9 @@ public class UserController extends CoTopComponent {
 					CoMail mailBean = new CoMail(emailType);
 					mailBean.setParamUserId(userData.getUserId());
 					mailBean.setToIds(new String[] { userData.getUserId() });
-					mailBean.setCcIds(new String[] { loginUserName() });
-					
+					if (!isEmpty(userData.getPurpose())) {
+						mailBean.setComment(userData.getPurpose());
+					}
 					CoMailManager.getInstance().sendMail(mailBean);
 				}
 			} catch (Exception e) {
