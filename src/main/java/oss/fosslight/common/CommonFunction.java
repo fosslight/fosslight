@@ -1237,8 +1237,7 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 
-	public static Map<String, Object> mergeGridAndReport(List<ProjectIdentification> ossComponents,
-			List<List<ProjectIdentification>> ossComponentsLicense, List<ProjectIdentification> addComponents, String readType) {
+	public static Map<String, Object> mergeGridAndReport(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, List<ProjectIdentification> addComponents, String readType) {
 		return makeGridDataFromReport(ossComponents, ossComponentsLicense, addComponents, null, null, readType);
 	}
 	
@@ -1298,26 +1297,25 @@ public class CommonFunction extends CoTopComponent {
 			gridBean.setBatPercentage(bean.getBatPercentage());
 			gridBean.setBatScore(bean.getBatScore());
 			gridBean.setLicenseDiv((bean.getOssComponentsLicense() != null && bean.getOssComponentsLicense().size() > 1) ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE);
-			
 			gridBean.setCopyrightText(bean.getCopyrightText());
-			gridBean.setComments(bean.getComments());
 			
+			if (!isEmpty(avoidNull(bean.getComments(), ""))) {
+				gridBean.setComments(avoidNull(bean.getComments(), "").trim());
+			} else {
+				gridBean.setComments("");
+			}
 			if (!isEmpty(bean.getOssNickName())) {
 				gridBean.setOssNickName(bean.getOssNickName());
 			}
-			
 			if (!isEmpty(bean.getDependencies())) {
 				gridBean.setDependencies(bean.getDependencies());
 			}
-			
 			if (!isEmpty(bean.getCheckSum())) {
 				gridBean.setCheckSum(bean.getCheckSum());
 			}
-			
 			if (!isEmpty(bean.getTlsh())) {
 				gridBean.setTlsh(bean.getTlsh());
 			}
-			
 			if (!isEmpty(bean.getPackageUrl())) {
 				gridBean.setPackageUrl(bean.getPackageUrl());
 			}
@@ -1341,7 +1339,6 @@ public class CommonFunction extends CoTopComponent {
 					gridLicenseBean.setEditable(license.getEditable());
 					gridBean.addComponentLicenseList(gridLicenseBean);
 					
-
 					if (!isEmpty(license.getLicenseText())) {
 						licenseText += (!isEmpty(licenseText) ? "\r\n" : "") + license.getLicenseText();
 					}				
@@ -1354,9 +1351,7 @@ public class CommonFunction extends CoTopComponent {
 				} else {
 					gridBean.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(gridBean.getComponentLicenseList()));
 				}
-				
 			}
-			
 			resultList.add(gridBean);
 		}
 	
