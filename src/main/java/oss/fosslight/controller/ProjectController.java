@@ -4656,8 +4656,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@PostMapping(value = PROJECT.COMMENTS_SAVE)
-	public @ResponseBody ResponseEntity<Object> commentsSave(@ModelAttribute CommentsHistory commentsHistory,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> commentsSave(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String resCd = "";
 		String resMsg= "";
 		Project project = new Project();
@@ -5915,8 +5914,8 @@ public class ProjectController extends CoTopComponent {
 										if (CollectionUtils.isNotEmpty(reportData)) {
 											for (ProjectIdentification oc : reportData) {
 												String comments = oc.getComments();
-												if (!isEmpty(comments.trim())) {
-													comments = comments.trim() + "\n";
+												if (!isEmpty(comments)) {
+													comments = comments + "\n";
 												}
 												comments += "(From " + fileNm + ")";
 												oc.setComments(comments);
@@ -5941,8 +5940,8 @@ public class ProjectController extends CoTopComponent {
 										if (CollectionUtils.isNotEmpty(reportData)) {
 											for (ProjectIdentification oc : reportData) {
 												String comments = oc.getComments();
-												if (!isEmpty(comments.trim())) {
-													comments = comments.trim() + "\n";
+												if (!isEmpty(comments)) {
+													comments = comments + "\n";
 												}
 												comments += "(From " + fileNm + ")";
 												oc.setComments(comments);
@@ -5967,8 +5966,8 @@ public class ProjectController extends CoTopComponent {
 										if (CollectionUtils.isNotEmpty(reportData)) {
 											for (ProjectIdentification oc : reportData) {
 												String comments = oc.getComments();
-												if (!isEmpty(comments.trim())) {
-													comments = comments.trim() + "\n";
+												if (!isEmpty(comments)) {
+													comments = comments + "\n";
 												}
 												comments += "(From " + fileNm + ")";
 												oc.setComments(comments);
