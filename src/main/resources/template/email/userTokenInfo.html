@@ -29,6 +29,9 @@
                         <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:utext="${contentsTitle}"></div>
                         <th:block th:if="${mailType == '800'}">
 								FOSSLight Hub-Access Token was issued as follows.
+							<div th:if="${comment}">
+								<br>Reason : <span th:text="${comment}"></span>
+							</div>
 							<div th:if="${token}">
 								<br><span th:text="${token}"></span>
 							</div>

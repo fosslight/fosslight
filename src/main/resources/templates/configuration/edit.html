@@ -55,14 +55,16 @@
                                     </div>
                                 </th:block>
                                 <div class="row form-group">
-                                	<div class="col-12">
+                                	<div class="col-lg-12">
                                 		<label th:text="|Token|"></label>
-                                		<div class="input-group">
+                                		<button type="button" class="btn btn-sm btn-outline-danger ml-2 mb-1" th:onclick="|fn.procToken('CREATE')|">Create Token<i class="fas fa-key ml-1"></i></button>
+                                		<div class="input-group mb-1">
                                             <input class="form-control" type="text" id="token" th:value="${userInfo?.token}" readonly/>
                                             <div class="input-group-append">
                                             	<button class="btn btn-block btn-secondary btn-sm" type="button" th:onclick="|fn.copy()|" th:disabled="${userInfo?.token == null}"><i class="far fa-copy customIcon2 m-1"></i></button>
                                             </div>
                                         </div>
+                                        <span th:if="${userInfo?.expireDate != null}" id="expireDate" th:classappend="${userInfo.expireDate < #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')} ? 'text-danger ml-1' : 'text-primary ml-1'" th:text="'Expiration Date : ' + ${userInfo?.expireDate}"></span>
                                 	</div>
                                 </div>
                             </div>
@@ -148,6 +150,8 @@
                     </div>
                 </div>
             </div>
+            
+            <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
         </section>
     </div>
 </div>
