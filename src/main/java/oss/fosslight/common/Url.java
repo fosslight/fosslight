@@ -193,7 +193,7 @@ public final class Url {
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
-		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}";
+		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}/{skipMergeYn}";
 		
 		public static final String SAVE_SESSION_OSS_INFO = PATH + "/saveSessionOssInfo";
 		

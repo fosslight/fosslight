@@ -539,7 +539,11 @@ public class OssController extends CoTopComponent{
 		HashMap<String, Object> resMap = new HashMap<>();
 
 		try {
-			ossService.deleteOssWithVersionMerege(ossMaster);
+			if (CoConstDef.FLAG_NO.equals(avoidNull(ossMaster.getSkipMergeYn()))) {
+				ossService.deleteOssWithVersionMerege(ossMaster);
+			} else {
+				ossService.deleteOssWithVersionRegist(ossMaster);
+			}
 			resCd = "10";
 			
 			putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
@@ -855,7 +859,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=OSS.OSS_MERGE_CHECK_LIST, produces = "text/html; charset=utf-8")
-	public @ResponseBody ResponseEntity<Object> ossMergeCheckList(@PathVariable String ossId, @PathVariable String newOssId, OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+	public @ResponseBody ResponseEntity<Object> ossMergeCheckList(@PathVariable String ossId, @PathVariable String newOssId, @PathVariable String skipMergeYn, OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		Map<String, Object> map = ossService.ossMergeCheckList(ossMaster);
 		
 		return makeJsonResponseHeader(map);

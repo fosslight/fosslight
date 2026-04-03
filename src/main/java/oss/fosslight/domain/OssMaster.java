@@ -375,6 +375,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private String inCpeMatchFlag;
 	
 	private String range;
+	
+	private String skipMergeYn;
 		
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -2460,5 +2462,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setRestrictionStr(String restrictionStr) {
 		this.restrictionStr = restrictionStr;
+	}
+
+	public String getSkipMergeYn() {
+		return skipMergeYn;
+	}
+
+	public void setSkipMergeYn(String skipMergeYn) {
+		this.skipMergeYn = skipMergeYn;
 	}
 }

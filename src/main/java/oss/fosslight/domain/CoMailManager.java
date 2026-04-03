@@ -1662,8 +1662,10 @@ public class CoMailManager extends CoTopComponent {
 			if (CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())) {
 				isMailBodySubjectFlag = true;
 				ossInfo = (OssMaster) bean.getCompareDataAfter();
-			}
-			else if (!isEmpty(bean.getParamOssId())) {
+			} else if (CoConstDef.CD_MAIL_TYPE_OSS_DELETE.equals(bean.getMsgType()) && bean.getParamOssInfo() != null) {
+				isMailBodySubjectFlag = true;
+				ossInfo = (OssMaster) bean.getParamOssInfo();
+			} else if (!isEmpty(bean.getParamOssId())) {
 				ossInfo = mailManagerMapper.getOssInfoById(bean.getParamOssId());
 			}
 			

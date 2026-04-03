@@ -617,17 +617,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	@Transactional
 	public void deleteOssWithVersionMerege(OssMaster ossMaster) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-		String chagedOssName = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssName();
-		String chagedOssCommonId = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssCommonId();
-		String beforOssName = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName();
-		String beforOssCommonId = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssCommonId();
-
 		// 동일한 oss에서 이동하는 경우, nick name을 별도로 등록하지 않음
 		OssMaster beforeBean = getOssInfo(ossMaster.getOssId(), false);
 		
 		// 삭제대상 OSS 목록 취득
 		Map<String, Object> rowMap = ossMergeCheckList(ossMaster);
 		List<OssMaster> rowList = (List<OssMaster>) rowMap.get("rows");
+		
+		String chagedOssName = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssName();
+		String chagedOssCommonId = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssCommonId();
+		String beforOssName = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName();
+		String beforOssCommonId = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssCommonId();
 		
 		List<Map<String, OssMaster>> mailBeanList = new ArrayList<>();
 		
@@ -874,6 +874,65 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}	
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void deleteOssWithVersionRegist(OssMaster ossMaster) {
+		try {
+			String changedOssName = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssName();
+			OssMaster delOssInfo = getOssInfo(ossMaster.getOssId(), true);
+			OssMaster changedOssInfo = null;
+			
+			Map<String, Object> rowMap = ossMergeCheckList(ossMaster);
+			List<OssMaster> rowList = (List<OssMaster>) rowMap.get("rows");
+			
+			for (OssMaster bean : rowList) {
+				if (!isEmpty(bean.getMergeStr())) {
+					String ossVersion = bean.getOssVersion();
+					bean.setOssId(avoidNull(bean.getDelOssId(), bean.getOssId()));
+					deleteOssMaster(bean);
+					CoCodeManager.getInstance().refreshOssInfoByOssId(delOssInfo, delOssInfo.getOssId());
+					
+					if ("Added".equalsIgnoreCase(bean.getMergeStr())) {
+						changedOssInfo = getOssInfo(null, changedOssName, false);
+						if (changedOssInfo != null) {
+							changedOssInfo.setOssId(null);
+							changedOssInfo.setOssVersionAlias(null);
+							changedOssInfo.setOssVersion(ossVersion);
+							setExistedOssInfo(changedOssInfo);
+							registOssMaster(changedOssInfo);
+							CoCodeManager.getInstance().refreshOssInfoByOssId(null, changedOssInfo.getOssId());
+							
+							OssMaster mergeBean = new OssMaster();
+							mergeBean.setOssName(delOssInfo.getOssName());
+							mergeBean.setOssVersion(ossVersion);
+							mergeBean.setMergeOssId(changedOssInfo.getOssId());
+							mergeBean.setMergeOssName(changedOssName);
+							mergeBean.setMergeOssVersion(ossVersion);
+							mergeBean.setRegistMergeFlag("N");
+							ossNameMerge(mergeBean, changedOssName, delOssInfo.getOssName());
+						}
+					}
+				}
+			}
+			
+			if (delOssInfo != null) {
+				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_DELETE);
+				mailBean.setParamOssId(delOssInfo.getOssId());
+				mailBean.setParamOssInfo(delOssInfo);
+				CoMailManager.getInstance().sendMail(mailBean);
+			}
+			
+			if (changedOssInfo != null) {
+				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION);
+				mailBean.setParamOssId(changedOssInfo.getOssId());
+				mailBean.setParamOssInfo(changedOssInfo);
+				CoMailManager.getInstance().sendMail(mailBean);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
 	}
 	
@@ -1452,6 +1511,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public Map<String, Object> ossMergeCheckList(OssMaster ossMaster) {
+		boolean hasSkipMerge = CoConstDef.FLAG_YES.equals(ossMaster.getSkipMergeYn()) ? true : false;
+		String currentVersion = "";
+		if (hasSkipMerge) {
+			currentVersion = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssVersion();
+		}
 		Map<String, Object> map = new HashMap<String, Object>();
 		List<OssMaster> list1 = ossMapper.getBasicOssListByName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName());
 		List<OssMaster> list2 = ossMapper.getBasicOssListByName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssName());
@@ -1460,6 +1524,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		// 이관 대상 OSS 정보를 먼저 격납한다.
 		for (OssMaster bean : list2) {
+			if (hasSkipMerge && !CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssVersion().equals(currentVersion)) {
+				continue;
+			}
 			bean.setLicenseName(CommonFunction.makeLicenseExpression(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssLicenses()));
 			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, bean.getLicenseType()));
 			bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, bean.getObligationType()));
@@ -1469,6 +1536,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		// 삭제 대상 OSS Version이 이관 대상 OSS 에 존재하는지 확인 
 		for (OssMaster bean : list1) {
+			if (hasSkipMerge && !CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssVersion().equals(currentVersion)) {
+				continue;
+			}
 			bean.setLicenseName(CommonFunction.makeLicenseExpression(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssLicenses()));
 			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, bean.getLicenseType()));
 			bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, bean.getObligationType()));
