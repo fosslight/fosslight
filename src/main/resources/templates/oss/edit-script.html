@@ -4,6 +4,7 @@
 <script th:inline="javascript">
 	var lastsel;	
 	var tempNewOssId;
+	var skipMergeYn = "N";
 	var temp={
 		obligation:''
 	};
@@ -656,6 +657,7 @@
 					ossCommonId : [[${ossCommonId}]],
 					ossId : [[${ossId}]],
 					newOssId : tempNewOssId,
+					skipMergeYn : skipMergeYn,
 					comment : editorVal
 				};
 				
@@ -1959,7 +1961,7 @@
 					if (isDisabled) {
 						$("input[name='ossName']").prop("disabled", true);
 					}
-					$('.ossSelectPop').show();
+					handleDeleteMergeOption(ossId);
 				} else if (parseInt(data) == 0) {
 					deleteOssByOne();
 				} else {
@@ -1973,6 +1975,43 @@
 			}
 		});
 	};	
+	
+	function handleDeleteMergeOption(ossId) {
+		var ossName = [[${detail?.ossName}]];
+		var ossVersion = [[${detail?.ossVersion}]];
+		var message = [[${@CommonFunction.getCustomMessage('msg.oss.check.delete.merge', (detail?.ossName ?: '') + ' (' + (detail?.ossVersion ?: 'N/A') + ')')}]];
+		
+		const htmlContent = `
+			<div class="p-2">
+			    <div class="mb-3">
+			        <p>${message}</p>
+			    </div>
+			    <div>
+			        <span class="ml-4">
+			            <input class="form-check-input" type="radio" name="checkVersion" value="ALL" id="allVersion">
+			            <label class="form-check-label" for="allVersion">All version</label>
+			        </span>
+			        <span class="ml-5">
+			            <input class="form-check-input" type="radio" name="checkVersion" value="CURRENT" id="currentVersion" checked>
+			            <label class="form-check-label" for="currentVersion">Current version</label>
+			        </span>
+			    </div>
+			</div>
+    	`;
+		
+    	var dlg = alertify.confirm();
+        dlg.setContent(htmlContent);
+        dlg.set('onok', function(e) {
+        	if (e) {
+                const selectedValue = $('.ajs-content input[name="checkVersion"]:checked').val();
+                $('.ossSelectPop').show();
+                if ("CURRENT" == selectedValue) {
+                	skipMergeYn = 'Y';
+                }
+            } 
+        });
+        dlg.show();
+	}
 	
 	// OSS 삭제
 	function deleteOssByOne(){
@@ -2606,7 +2645,7 @@
 		$('.mergeOssCheckPop').show();
 
 		$('#_ossMergeCheckList').jqGrid({
-            url: '/oss/ossMergeCheckList/' + [[${ossId}]] + '/' + newOssId,
+            url: '/oss/ossMergeCheckList/' + [[${ossId}]] + '/' + newOssId + '/' + skipMergeYn,
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
