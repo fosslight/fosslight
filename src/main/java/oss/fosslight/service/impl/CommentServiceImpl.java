@@ -42,6 +42,11 @@ public class CommentServiceImpl implements CommentService {
 			if (!StringUtils.isEmpty(bean.getRecentFlag())) {
 				commentsHistory.setRecentFlag(bean.getRecentFlag());
 			}
+			String contents = commentsHistory.getContents();
+			if (!StringUtils.isEmpty(contents)) {
+			    contents = contents.replaceAll("<a(?![^>]*target=)", "<a target=\"_blank\"");
+			    commentsHistory.setContents(contents);
+			}
 			commentMapper.updateHistoryReadYn(commentsHistory);
 		}
 		
