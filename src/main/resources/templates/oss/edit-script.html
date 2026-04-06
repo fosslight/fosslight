@@ -2004,6 +2004,7 @@
         dlg.set('onok', function(e) {
         	if (e) {
                 const selectedValue = $('.ajs-content input[name="checkVersion"]:checked').val();
+                $("#blind_wrap").show();
                 $('.ossSelectPop').show();
                 if ("CURRENT" == selectedValue) {
                 	skipMergeYn = 'Y';
