@@ -899,9 +899,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						changedOssInfo = getOssInfo(null, changedOssName, false);
 						if (changedOssInfo != null) {
 							changedOssInfo.setOssId(null);
-							changedOssInfo.setOssVersionAlias(null);
 							changedOssInfo.setOssVersion(ossVersion);
 							setExistedOssInfo(changedOssInfo);
+							
+							changedOssInfo.setOssLicenses(delOssInfo.getOssLicenses());
+							changedOssInfo.setDetectedLicenses(delOssInfo.getDetectedLicenses());
+							changedOssInfo.setOssVersionAlias(delOssInfo.getOssVersionAlias());
+							changedOssInfo.setCopyright(delOssInfo.getCopyright());
+							
 							registOssMaster(changedOssInfo);
 							CoCodeManager.getInstance().refreshOssInfoByOssId(null, changedOssInfo.getOssId());
 							
