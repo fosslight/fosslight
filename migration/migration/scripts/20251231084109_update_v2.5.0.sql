@@ -128,6 +128,10 @@ UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Added ${Email} as a Editor of ${P
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Registered at FOSSLight.<br><br>Now, ${User} has "Editor"\'s Authority for ${Project Name}' WHERE CD_NO = '102' AND CD_DTL_NO = '64';
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Added ${Email} as a Editor of ${3rd Party Name} <br><br>Please Register at FOSSLight to Watch ${3rd Party Name}' WHERE CD_NO = '102' AND CD_DTL_NO = '78';
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Registered at FOSSLight.<br><br>Now, ${User} has "Editor"\'s Authority for ${3rd Party Name}' WHERE CD_NO = '102' AND CD_DTL_NO = '79';
+
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES 
+		('120', '42', 'Spdx File Extension', '', 'rdf,tag,json,yaml,spdx', 16, 'Y'),
+		('120', '43', 'CycloneDX File Extension', '', 'json,xml', 17, 'Y');
 -- //@UNDO
 -- SQL to undo the change goes here.
 
