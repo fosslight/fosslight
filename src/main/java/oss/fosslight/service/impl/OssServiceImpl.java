@@ -26,7 +26,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -908,18 +907,35 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							changedOssInfo.setCopyright(delOssInfo.getCopyright());
 							
 							registOssMaster(changedOssInfo);
-							CoCodeManager.getInstance().refreshOssInfoByOssId(null, changedOssInfo.getOssId());
 							
-							OssMaster mergeBean = new OssMaster();
-							mergeBean.setOssName(delOssInfo.getOssName());
-							mergeBean.setOssVersion(ossVersion);
-							mergeBean.setMergeOssId(changedOssInfo.getOssId());
-							mergeBean.setMergeOssName(changedOssName);
-							mergeBean.setMergeOssVersion(ossVersion);
-							mergeBean.setRegistMergeFlag("N");
-							ossNameMerge(mergeBean, changedOssName, delOssInfo.getOssName());
+							CommentsHistory historyBean = new CommentsHistory();
+							historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+							historyBean.setReferenceId(changedOssInfo.getOssId());
+							historyBean.setContents("OSS 일괄 이관 처리에 의해 OSS Name이 변경되었습니다. <br/>" + "Before OSS Name : " + delOssInfo.getOssName());
+							commentService.registComment(historyBean);
+							
+							CoCodeManager.getInstance().refreshOssInfoByOssId(null, changedOssInfo.getOssId());
 						}
+					} else {
+						CommentsHistory historyBean = new CommentsHistory();
+						historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+						historyBean.setReferenceId(delOssInfo.getOssId());
+						historyBean.setContents("OSS 일괄 이관 처리에 의해 " + changedOssInfo.getOssName() + " 으로 이관되었습니다.");
+						commentService.registComment(historyBean);
+						
+						historyBean.setReferenceId(changedOssInfo.getOssId());
+						historyBean.setContents("OSS 일괄 이관 처리에 의해 "+ delOssInfo.getOssName() +" 과 병합되었습니다.");
+						commentService.registComment(historyBean);
 					}
+					
+					OssMaster mergeBean = new OssMaster();
+					mergeBean.setOssName(delOssInfo.getOssName());
+					mergeBean.setOssVersion(ossVersion);
+					mergeBean.setMergeOssId(changedOssInfo.getOssId());
+					mergeBean.setMergeOssName(changedOssName);
+					mergeBean.setMergeOssVersion(ossVersion);
+					mergeBean.setRegistMergeFlag("N");
+					ossNameMerge(mergeBean, changedOssName, delOssInfo.getOssName());
 				}
 			}
 			
