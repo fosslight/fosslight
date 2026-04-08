@@ -17,9 +17,9 @@
                                 	<!-- <div class="card collapsed-card search-form"> -->
                                 	<div class="card-header" style="border-bottom: none;">
                                         <div class="row">
-											<div class="col-md-7 d-flex">
+											<div class="col-md-7 d-flex pr-0">
 												<div class="row" style="width: 100%;">
-													<div class="col-12">
+													<div class="col-lg-12 pr-0">
 														<div class="input-group">
 															<input class="save-value" name="defaultSearchType" type="hidden" th:value="SELF_CHECK"/>
 															<button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_SelfCheck', '/selfCheck/edit')|" th:text="|+ Add|"></button>
@@ -37,7 +37,7 @@
 													</div>
 												</div>
 											</div>
-											<div class="col-md-3 pl-3 d-flex justify-content-start">
+											<div class="col-md-3 pl-0 d-flex justify-content-start">
 												<div class="input-group-append d-flex align-items-center">
 													<button class="btn btn-ivory btn-sm btn-icon mr-1" th:onclick="|resetForm('projectSearch')|" data-toggle="tooltip" data-placement="bottom" type="button" th:title="|reset|">
 											            <i class="fa fa-undo"></i>
