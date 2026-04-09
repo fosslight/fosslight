@@ -177,4 +177,8 @@ public interface OssService extends HistoryConfig{
 	Map<String, OssMaster> checkExistsOssNicknameBulk(List<String> ossNicknames);
 
 	Map<String, Map<String, String>> checkExistsUrlBulk(Map<String, String> urls, boolean isDownloadLocation);
+
+	List<String> selectAnalysisListWithoutCoReviewer(String prjId);
+
+	void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag);
 }
