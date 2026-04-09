@@ -172,7 +172,7 @@ public interface OssService extends HistoryConfig{
 
 	OssMaster getOssVulnerabilityInfo(OssMaster ossMaster);
 	
-	void preProcessUrl(ProjectIdentification bean, List<String> packageManagerUrl, List<String> checkOssNameUrl);
+	void preProcessUrl(ProjectIdentification bean, List<String> packageManagerUrl, List<String> checkOssNameUrl, List<String> validMavenHosts);
 
 	Map<String, OssMaster> checkExistsOssNicknameBulk(List<String> ossNicknames);
 
