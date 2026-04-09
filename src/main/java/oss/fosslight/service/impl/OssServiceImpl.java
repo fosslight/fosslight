@@ -5797,4 +5797,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		return rtnMap;
 	}
+
+	@Override
+	public List<String> selectAnalysisListWithoutCoReviewer(String prjId) {
+		return ossMapper.selectAnalysisListWithoutCoReviewer(prjId);
+	}
+
+	@Override
+	public void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag) {
+		ossMapper.updateAnalysisComments(componentId, prjId, comments, commentsFlag);
+	}
 }

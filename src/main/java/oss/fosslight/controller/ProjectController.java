@@ -229,10 +229,8 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.AUTOCOMPLETE_DIVISION_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteDivisonAjax(Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> autoCompleteDivisonAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
-
 		return makeJsonResponseHeader(projectService.getProjectDivisionList(project));
 	}
 	/**
@@ -6064,5 +6062,11 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, null);
 		}
 		return makeJsonResponseHeader(true, null);
+	}
+	
+	@PostMapping(value = PROJECT.VALIDATE_ANALYSIS_PROGRESS)
+	public @ResponseBody ResponseEntity<Object> validateAnalysisProgress(@RequestBody Map<String, Object> map) {
+		Map<String, Object> rtnMap = projectService.validateAnalysisProgress(map);
+		return makeJsonResponseHeader(true, null, rtnMap);
 	}
 }
