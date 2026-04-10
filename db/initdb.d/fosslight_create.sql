@@ -5387,6 +5387,7 @@ CREATE TABLE IF NOT EXISTS `T2_FILE` (
   `UPD_ID` varchar(20) DEFAULT NULL COMMENT 'Updater',
   `UPD_DT` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Update date',
   `DEL_YN` char(1) DEFAULT 'N' COMMENT 'Usage flag (Y/N)',
+  `REF_FILE_SEQ` int(11) DEFAULT NULL,
   PRIMARY KEY (`FILE_SEQ`),
   KEY `FILE_SEQ_FILE_ID` (`FILE_SEQ`,`FILE_ID`),
   KEY `T2_FILE_FILE_ID` (`FILE_ID`)

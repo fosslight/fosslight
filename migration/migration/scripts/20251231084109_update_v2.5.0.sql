@@ -132,6 +132,8 @@ UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = '${User} Registered at FOSSLight.<br><br>N
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES 
 		('120', '42', 'Spdx File Extension', '', 'rdf,tag,json,yaml,spdx', 16, 'Y'),
 		('120', '43', 'CycloneDX File Extension', '', 'json,xml', 17, 'Y');
+		
+ALTER TABLE `T2_FILE` ADD `REF_FILE_SEQ` INT(11) DEFAULT NULL;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
