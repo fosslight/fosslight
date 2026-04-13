@@ -51,10 +51,10 @@
                         				</th:block>
                         			</th:block>
                         			<th:block th:if="${detail?.partnerId == null or detail.statusPermission > 0}">
-                        				<button th:if="${#authentication.authorities[0].authority != 'ROLE_USER' or (#authentication.authorities[0].authority == 'ROLE_USER' and detail.status != 'REQ' and detail.status != 'REV')}" 
-                        						class="btn btn-tool" id="partySave" data-toggle="tooltip" data-placement="left" titie="Save" th:onclick="|fn.save()|">
-                        					<i class="fas fa-save customIcon2"></i>
-                        				</button>
+                        				<button th:if="${#authentication.authorities[0].authority != 'ROLE_USER' or (#authentication.authorities[0].authority == 'ROLE_USER' and detail.status != 'REQ' and detail.status != 'REV')}"
+                        						class="btn btn-tool" id="partySave" th:onclick="|fn.save()|" data-toggle="tooltip" data-placement="right" title="Save">
+	                        				<i class="fas fa-save customIcon2"></i>
+	                        			</button>
                         			</th:block>
                             	</div>
                             </div>
