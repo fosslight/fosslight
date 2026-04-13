@@ -1303,6 +1303,7 @@
                 $("#hideOssVersion").click(function (e) {
                     var checked = $(this).prop("checked");
                     $("#hideOssVersionYn").val(checked ? "Y" : "N");
+                    fn.toggleNoticeFormatsByVersion(checked);
                 });
 
                 $("#uploadAdd_1").click(function (e) {
@@ -3416,11 +3417,6 @@
                     	$("#email").trigger("click").attr("checked", true);
                     }
 
-                    if(hideOssVersionYn == "Y") {
-                        $("#hideOssVersion").trigger("click").attr("checked", true);
-                        $("#hideOssVersionYn").val("Y");
-                    }
-                    
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     var btn_Save = $("#save");
                     
@@ -3478,6 +3474,11 @@
 
                                 break;
                         }
+                    }
+                    
+                    if ("Y" == hideOssVersionYn) {
+                        $("#hideOssVersion").trigger("click").attr("checked", true);
+                        $("#hideOssVersionYn").val("Y");
                     }
                 }, 1);
             },
@@ -3974,6 +3975,42 @@
     					alertify.error([[#{msg.common.valid2}]], 0);
     				}
     			});
+            },
+            toggleNoticeFormatsByVersion : function(checked) {
+            	var $select = $("#docType");
+                $select.find("option").each(function() {
+                    var val = $(this).val();
+                    
+                    if (val.toLowerCase().includes("spdx") || val.toLowerCase().includes("cdx")) {
+                        if (checked) {
+                            $(this).prop("selected", false);
+                            $(this).hide();
+                            $(this).prop("disabled", true);
+                        } else {
+                            $(this).show();
+                            $(this).prop("disabled", false);
+                        }
+                    }
+                });
+                if (checked && ($select.val().toLowerCase().includes("spdx") || $select.val().toLowerCase().includes("cdx"))) {
+                    $select.val($select.find("option:first").val());
+                }
+                
+                var $select2 = $("#noticeFileFormat");
+                $select2.find("option").each(function() {
+                    var val = $(this).val();
+                    if (val.toLowerCase().includes("spdx") || val.toLowerCase().includes("cdx")) {
+                        if (checked) {
+                            $(this).prop("selected", false);
+                            $(this).prop("disabled", true);
+                        } else {
+                            $(this).prop("disabled", false);
+                        }
+                    }
+                });
+
+                $select2.trigger("change.select2");
+                $select2.trigger("change");
             }
         }
 
