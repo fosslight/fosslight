@@ -9776,6 +9776,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public Map<String, Object> validateAnalysisProgress(Map<String, Object> param) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		String prjId = String.valueOf(param.getOrDefault("prjId", ""));
+		String processor = String.valueOf(param.getOrDefault("processor", ""));
 		
 		if (isEmpty(prjId) || isEmpty(flScanServiceUrl)) {
 	        return rtnMap;
@@ -9791,9 +9792,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	        String response = internalApiRestTemplate.getForObject(requestUrl, String.class);
 	        Map<String, Object> statusMap = mapper.readValue(response, new TypeReference<Map<String, Object>>() {});
 	        String apiStatus = String.valueOf(statusMap.getOrDefault("project_status", ""));
+	        String ossAnalysisStatus = avoidNull(ossService.getOssAnalysisStatus(prjId), "");
+	        rtnMap.put("ossAnalysisStatus", ossAnalysisStatus);
 	        rtnMap.put("coReviewerStatus", apiStatus);
 
-	        if (!"PROGRESS".equalsIgnoreCase(ossService.getOssAnalysisStatus(prjId)) || !"None".equalsIgnoreCase(apiStatus)) {
+	        if (!"PROGRESS".equalsIgnoreCase(ossAnalysisStatus) || !"None".equalsIgnoreCase(apiStatus)) {
 	            return rtnMap;
 	        }
 
@@ -9829,7 +9832,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	                if (!(val instanceof Map)) {
 	                	continue;
 	                }
-	                Map<String, Object> logEntry = (Map<String, Object>) val;log.info("logEntry : {}", logEntry);
+	                Map<String, Object> logEntry = (Map<String, Object>) val;
 	                String gridId = String.valueOf(logEntry.getOrDefault("grid_id", ""));
 	                String link = String.valueOf(logEntry.getOrDefault("link", ""));
 	                Map<String, Object> callback = (Map<String, Object>) logEntry.get("callback_result");
@@ -9840,6 +9843,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	                    if (ossComponentIdList.contains(gridId)) {
 	                    	callback.put("project_id", prjId);
 	                    	callback.put("link", link);
+	                    	callback.put("processor", processor);
 	                    	callback.put("toSend", true);
 	                        sendCallbackApi(callback);
 	                    }
