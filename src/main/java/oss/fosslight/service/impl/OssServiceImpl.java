@@ -26,7 +26,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -908,18 +907,35 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							changedOssInfo.setCopyright(delOssInfo.getCopyright());
 							
 							registOssMaster(changedOssInfo);
-							CoCodeManager.getInstance().refreshOssInfoByOssId(null, changedOssInfo.getOssId());
 							
-							OssMaster mergeBean = new OssMaster();
-							mergeBean.setOssName(delOssInfo.getOssName());
-							mergeBean.setOssVersion(ossVersion);
-							mergeBean.setMergeOssId(changedOssInfo.getOssId());
-							mergeBean.setMergeOssName(changedOssName);
-							mergeBean.setMergeOssVersion(ossVersion);
-							mergeBean.setRegistMergeFlag("N");
-							ossNameMerge(mergeBean, changedOssName, delOssInfo.getOssName());
+							CommentsHistory historyBean = new CommentsHistory();
+							historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+							historyBean.setReferenceId(changedOssInfo.getOssId());
+							historyBean.setContents("OSS 일괄 이관 처리에 의해 OSS Name이 변경되었습니다. <br/>" + "Before OSS Name : " + delOssInfo.getOssName());
+							commentService.registComment(historyBean);
+							
+							CoCodeManager.getInstance().refreshOssInfoByOssId(null, changedOssInfo.getOssId());
 						}
+					} else {
+						CommentsHistory historyBean = new CommentsHistory();
+						historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+						historyBean.setReferenceId(delOssInfo.getOssId());
+						historyBean.setContents("OSS 일괄 이관 처리에 의해 " + changedOssInfo.getOssName() + " 으로 이관되었습니다.");
+						commentService.registComment(historyBean);
+						
+						historyBean.setReferenceId(changedOssInfo.getOssId());
+						historyBean.setContents("OSS 일괄 이관 처리에 의해 "+ delOssInfo.getOssName() +" 과 병합되었습니다.");
+						commentService.registComment(historyBean);
 					}
+					
+					OssMaster mergeBean = new OssMaster();
+					mergeBean.setOssName(delOssInfo.getOssName());
+					mergeBean.setOssVersion(ossVersion);
+					mergeBean.setMergeOssId(changedOssInfo.getOssId());
+					mergeBean.setMergeOssName(changedOssName);
+					mergeBean.setMergeOssVersion(ossVersion);
+					mergeBean.setRegistMergeFlag("N");
+					ossNameMerge(mergeBean, changedOssName, delOssInfo.getOssName());
 				}
 			}
 			
@@ -2742,6 +2758,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list, boolean checkRedirect) {
 		List<ProjectIdentification> result = Collections.synchronizedList(new ArrayList<>());
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+		List<String> validMavenHosts = Arrays.asList("repo.maven.apache.org", "repo1.maven.org", "dl.google.com/android", "maven.google.com", "repo.spring.io");
 		List<String> packageManagerUrl = new ArrayList<>();
 		for(String code : CoCodeManager.getCodes(CoConstDef.CD_CHECK_OSS_NAME_URL)) {
 			if(avoidNull(CoCodeManager.getSubCodeNo(CoConstDef.CD_CHECK_OSS_NAME_URL, code)).equals("1")) {
@@ -2770,7 +2787,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		Set<String> inputUrls = new HashSet<>();
 		
 		for (ProjectIdentification bean : list) {
-			preProcessUrl(bean, packageManagerUrl, checkOssNameUrl);
+			preProcessUrl(bean, packageManagerUrl, checkOssNameUrl, validMavenHosts);
 	        if (!isEmpty(bean.getOssName())) {
 	            inputNames.add(bean.getOssName());
 	        }
@@ -2920,7 +2937,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return sortedData;
 	}
 	
-	public void preProcessUrl(ProjectIdentification bean, List<String> packageManagerUrl, List<String> checkOssNameUrl) {
+	public void preProcessUrl(ProjectIdentification bean, List<String> packageManagerUrl, List<String> checkOssNameUrl, List<String> validMavenHosts) {
 		if (!isEmpty(bean.getHomepage())) {
 	        for (String url : packageManagerUrl) {
 	            if (bean.getHomepage().toLowerCase().contains(url.toLowerCase())) {
@@ -2941,7 +2958,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	    }
 
 	    int urlSearchSeq = -1;
-	    String dlLower = bean.getDownloadLocation().toLowerCase();
+	    String downloadlocationUrl = bean.getDownloadLocation().trim();
+	    
+	    boolean isTransformable = false;
+	    if (validMavenHosts.stream().anyMatch(downloadlocationUrl::contains)) {
+	    	String checkDownloadLocation = downloadUrlFormatterForMaven(downloadlocationUrl);
+	    	if (!isEmpty(checkDownloadLocation) && !checkDownloadLocation.equalsIgnoreCase(downloadlocationUrl)) {
+		    	isTransformable = true;
+		    	downloadlocationUrl = checkDownloadLocation;
+	    	}
+	    }
+	    
+	    String dlLower = downloadlocationUrl.toLowerCase();
 	    int seq = 0;
 	    for (String url : checkOssNameUrl) {
 	        if (dlLower.contains(url.toLowerCase())) {
@@ -2950,8 +2978,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	        }
 	        seq++;
 	    }
-	    
-	    String downloadlocationUrl = bean.getDownloadLocation().trim();
 	    
 	    try {
 	        if (urlSearchSeq > -1) {
@@ -2962,8 +2988,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	                }
 	            }
 	            
-	            bean = downloadlocationFormatter(bean, urlSearchSeq);
-	            downloadlocationUrl = bean.getDownloadLocation();
+	            if (!isTransformable) {
+	            	bean = downloadlocationFormatter(bean, urlSearchSeq);
+		            downloadlocationUrl = bean.getDownloadLocation();
+	            }
 	            
 	            if (urlSearchSeq == 7 && downloadlocationUrl.contains("+")) {
 	                downloadlocationUrl = downloadlocationUrl.split("[+]")[0];
@@ -5296,7 +5324,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 			}
 			
-			if (urlSearchSeq > -1) {
+			if (urlSearchSeq > -1 && urlSearchSeq < 20) {
 				Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
 				Matcher m = p.matcher(downloadLocation);
 				
@@ -5371,6 +5399,80 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							break;
 						case 19:
 							purl = new PackageURL(StandardTypes.NUGET, null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 20:
+							try {
+								URI uri = new URI(ossMaster.getDownloadLocation());
+						        String repoUrl = uri.getScheme() + "://" + uri.getHost();
+						        String fragment = uri.getFragment();
+						        if (fragment == null || !fragment.contains(":")) {
+						        	errorFlag = true;
+						        }
+						        if (!errorFlag) {
+						        	String[] parts = fragment.split(":");
+						        	namespace = parts[0];
+							        String name = parts[1];
+							        purlString = String.format("pkg:maven/%s/%s?repository_url=%s", namespace, name, repoUrl);
+						        }
+							} catch (Exception e) {
+								log.error("PURL generation failed: {}", e.getMessage());
+						        errorFlag = true;
+							}
+							break;
+						case 21:
+							try {
+						        URL url = new URL(ossMaster.getDownloadLocation());
+						        String repoUrl = url.getProtocol() + "://" + url.getHost();
+						        if (splitDownloadLocation != null && splitDownloadLocation.length >= 4) {
+						            int artifactIdx = splitDownloadLocation.length - 3;
+						            String artifactId = splitDownloadLocation[artifactIdx];
+						            String groupId = java.util.Arrays.stream(splitDownloadLocation, 2, artifactIdx).filter(s -> !s.isEmpty()).collect(java.util.stream.Collectors.joining("."));
+						            purlString = String.format("pkg:maven/%s/%s?repository_url=%s", groupId, artifactId, repoUrl);
+						        } else {
+						            errorFlag = true;
+						        }
+						    } catch (Exception e) {
+						        log.error("PURL generation failed: {}", e.getMessage());
+						        errorFlag = true;
+						    }
+							break;
+						case 22:
+							try {
+								URI uri = new URI(ossMaster.getDownloadLocation());
+						        String path = uri.getPath();
+						        String[] segments = path.split("/");
+						        int len = segments.length;
+						        
+						        if (len < 5) {
+						        	errorFlag = true;
+						        }
+						        
+						        if (!errorFlag) {
+						        	String artifactId = segments[len - 3];
+							        StringBuilder groupIdBuilder = new StringBuilder();
+							        int startIdx = -1;
+							        for (int i = 0; i < len; i++) {
+							            if ("maven2".equals(segments[i])) {
+							                startIdx = i + 1;
+							                break;
+							            }
+							        }
+							        if (startIdx != -1) {
+							            for (int i = startIdx; i < len - 3; i++) {
+							                if (groupIdBuilder.length() > 0) {
+							                    groupIdBuilder.append(".");
+							                }
+							                groupIdBuilder.append(segments[i]);
+							            }
+							        }
+							        String groupId = groupIdBuilder.toString();
+							        String repoUrl = "https://maven.google.com";
+							        purlString = String.format("pkg:maven/%s/%s?repository_url=%s", groupId, artifactId, repoUrl);
+						        }
+							} catch (Exception e) {
+								log.error("PURL generation failed: {}", e.getMessage());
+						        errorFlag = true;
+							}
 							break;
 						default:
 							break;
@@ -5447,6 +5549,57 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	    return result;
 	}
 
+	private String downloadUrlFormatterForMaven(String downloadLocation) {
+		if (isEmpty(downloadLocation)) {
+			return "";
+		}
+
+		String protocol = "";
+	    if (downloadLocation.contains("://")) {
+	        protocol = downloadLocation.split("://")[0] + "://";
+	    }
+		
+	    if (downloadLocation.contains("#")) {
+	        String fragment = downloadLocation.split("#")[1];
+	        return protocol + "mvnrepository.com/artifact/" + fragment.replace(":", "/");
+	    }
+
+	    String[] startKeywords = {"maven2/", "milestone/", "android/", "web/"};
+	    String path = downloadLocation;
+
+	    for (String keyword : startKeywords) {
+	        if (path.contains(keyword)) {
+	            path = path.substring(path.indexOf(keyword) + keyword.length());
+	            break;
+	        }
+	    }
+
+	    if (path.equals(downloadLocation)) {
+	        path = path.substring(path.indexOf("/") + 1);
+	    }
+
+	    String[] parts = path.split("/");
+	    if (parts.length < 3) {
+	    	return downloadLocation;
+	    }
+
+	    String lastPart = parts[parts.length - 1];
+	    boolean isFile = lastPart.contains(".") && (lastPart.endsWith(".zip") || lastPart.endsWith(".jar") || lastPart.endsWith(".pom") || lastPart.endsWith(".xml"));
+
+	    int versionIndex = isFile ? parts.length - 2 : parts.length - 1;
+	    int artifactIdIndex = versionIndex - 1;
+
+	    StringBuilder groupId = new StringBuilder();
+	    for (int i = 0; i < artifactIdIndex; i++) {
+	        if (i > 0) {
+	        	groupId.append(".");
+	        }
+	        groupId.append(parts[i]);
+	    }
+	    String artifactId = parts[artifactIdIndex];
+	    return protocol + "mvnrepository.com/artifact/" + groupId.toString() + "/" + artifactId;
+	}
+	
 	private String mavenUrlFormatter(String downloadLocation) {
         String path = downloadLocation.split("maven2/")[1];
         String[] parts = path.split("/");
@@ -5643,5 +5796,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		    }
 		}
 		return rtnMap;
+	}
+
+	@Override
+	public List<String> selectAnalysisListWithoutCoReviewer(String prjId) {
+		return ossMapper.selectAnalysisListWithoutCoReviewer(prjId);
+	}
+
+	@Override
+	public void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag) {
+		ossMapper.updateAnalysisComments(componentId, prjId, comments, commentsFlag);
 	}
 }

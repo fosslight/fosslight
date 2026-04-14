@@ -233,6 +233,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
 				AND T1.DISTRIBUTION_TYPE = #{distributionType}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
+				AND T1.OS_TYPE = #{osType}
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeType)">
 				AND T2.NOTICE_TYPE = #{noticeType}
 			</if>
@@ -509,6 +512,9 @@
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
 				AND T1.DISTRIBUTION_TYPE = #{distributionType}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
+				AND T1.OS_TYPE = #{osType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{schStartDate}
@@ -2304,6 +2310,9 @@
 			</if>			
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
+				AND A.OS_TYPE = #{osType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
 				AND A.CREATED_DATE <![CDATA[>=]]> #{schStartDate}

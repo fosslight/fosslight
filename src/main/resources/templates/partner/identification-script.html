@@ -19,10 +19,10 @@ $(document).ready(function () {
 		$('#partySave').attr('onclick', "com_fn.save('"+tabId+"')");
 		
 		if ("PartyBom" == tabId) {
-			$('#partySave').attr('title', "merge and save");
+			$('#partySave').attr('data-original-title', "merge and save");
 			$('#partyReset').hide();
 		} else {
-			$('#partySave').attr('title', "");
+			$('#partySave').attr('data-original-title', "save");
 			$('#partyReset').show();
 		}
 		

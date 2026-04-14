@@ -82,52 +82,13 @@ var Ctrl_fn = {
 		
 		selectData.ossNickname.split(",").forEach(function(nickName){
 		    if ('' != nickName){
-		    	let nickHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
-				nickHtml 		+= 		'<div class="form-group mb-0">';
-				nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
-				nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
-				nickHtml 		+=		'</div>';
-				nickHtml 		+=		'<span class="retxt"></span>';
-				nickHtml 		+= 	'</div>';
-				
-				$('.detailNickName' + seq).append(nickHtml);	
+		    	Ctrl_fn.addOssNickname(nickName, seq, false);
 		    }
 		});
 		
 		selectData.downloadLocation.split(",").forEach(function(downloadLocation){
 		    if ('' != downloadLocation){
-		    	var download = "";
-				var purl = "";
-		    	
-				if (downloadLocation.indexOf("|") > -1) {
-					download = downloadLocation.split("|")[0];
-					purl = downloadLocation.split("|")[1];
-				} else {
-					download = downloadLocation;
-				}
-				
-		    	let downloadLocationHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
-		    	downloadLocationHtml 		+= 		'<div class="row">';
-		    	downloadLocationHtml 		+= 			'<div class="col-lg-12" style="margin-top: 5px;">';
-		    	downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
-				downloadLocationHtml 		+=					'<input class="form-control" name="downloadLocations" id="downloadLocations'+seq+'" type="text" value="'+download+'" onblur="Ctrl_fn.urlDuplication(this);">';
-				downloadLocationHtml 		+=					'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
-				downloadLocationHtml 		+=				'</div>';
-		    	downloadLocationHtml 		+=			'</div>';
-		    	downloadLocationHtml 		+=			'<div class="col-lg-12 purlArea">';
-		    	if ("" != purl) {
-		    		downloadLocationHtml 		+=				'<div class="form-group mb-0">';
-			    	downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#f5f4f3 !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
-			    	downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+downloadLocation+'">';
-			    	downloadLocationHtml 		+=				'</div>';
-			    	downloadLocationHtml 		+=				'<span class="urltxt"></span>';
-					downloadLocationHtml 		+=				'<span class="retxt"></span>';
-		    	}
-		    	downloadLocationHtml 		+=			'</div>';
-		    	downloadLocationHtml 		+=		'</div>';
-				downloadLocationHtml 		+= 	'</div>';
-				
-				$(".detailDownloadLocation" + seq).append(downloadLocationHtml);
+		    	Ctrl_fn.addDownloadLocation(downloadLocation, seq, false);
 				$("#input_downloadLocations" + seq).val("");
 		    }
 		});
@@ -148,11 +109,19 @@ var Ctrl_fn = {
 		});
 
 		if (typeof selectData.includeCpes !== "undefined") {
-			Ctrl_fn.addIncludeCpe(selectData.includeCpes, seq);
+			selectData.includeCpes.forEach(function(includeCpe) {
+				if ('' != includeCpe) {
+					Ctrl_fn.addIncludeCpe(includeCpe, seq, false);
+				}
+			});
 		}
 		
 		if (typeof selectData.excludeCpes !== "undefined") {
-			Ctrl_fn.addExcludeCpe(selectData.excludeCpes, seq);
+			selectData.excludeCpes.forEach(function(excludeCpe) {
+				if ('' != excludeCpe) {
+					Ctrl_fn.addExcludeCpe(excludeCpe, seq, false);
+				}
+			});
 		}
 		
 		if (typeof selectData.ossVersionAliases !== "undefined") {
@@ -281,33 +250,97 @@ var Ctrl_fn = {
 		
 		Ctrl_fn.setMessage(gridId, seq);
 	},
-	addIncludeCpe : function (list, seq) {
-		list.forEach(function(includeCpe){
-			if ('' != includeCpe) {
-				let includeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
-				includeCpeHtml 			+= 		'<div class="form-group mb-0">';
-				includeCpeHtml 			+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'">';
-				includeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
-				includeCpeHtml 			+=		'</div>';
-				includeCpeHtml 			+= 	'</div>';
-				
-				$(".multiTxtIncludeCpe" + seq).append(includeCpeHtml);
-			}
-		});
+	addOssNickname : function(nickName, seq, shouldMerge) {
+		const addClass = shouldMerge ? 'is-registered' : '';
+    	const nickHtml = `
+    	    <div class="col-lg-12 mt-1 pl-0 ${addClass}">
+    	        <div class="form-group mb-0">
+    	            <input class="form-control" name="ossNicknames" type="text" value="${nickName}"/>
+    	           	<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);">
+    	            	<i class="fas fa-times"></i>
+    	           	</button>
+    	        </div>
+    	        <span class="retxt"></span>
+    	    </div>
+    	`;
+		$('.detailNickName' + seq).append(nickHtml);
 	},
-	addExcludeCpe : function (list, seq) {
-		list.forEach(function(excludeCpe){
-			if ('' != excludeCpe) {
-				let excludeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
-				excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
-				excludeCpeHtml 			+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'">';
-				excludeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
-				excludeCpeHtml 			+=		'</div>';
-				excludeCpeHtml 			+= 	'</div>';
-				
-				$(".multiTxtExcludeCpe" + seq).append(excludeCpeHtml);
-			}
-		});
+	addDownloadLocation : function(downloadLocation, seq, shouldMerge) {
+		var download = "";
+		var purl = "";
+    	
+		if (downloadLocation.indexOf("|") > -1) {
+			download = downloadLocation.split("|")[0];
+			purl = downloadLocation.split("|")[1];
+		} else {
+			download = downloadLocation;
+		}
+		
+		const downloadLocationHtml = `
+    	    <div class="col-lg-12 mt-1 pl-0 ${shouldMerge ? 'is-registered' : ''}">
+    	        <div class="row">
+    	            <div class="col-lg-12" style="margin-top: 5px;">
+    	                <div class="form-group mb-0">
+    	                    <input class="form-control" name="downloadLocations" type="text" id="downloadLocations${seq}" value="${download}" onblur="Ctrl_fn.urlDuplication(this)">
+    	                  	<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.downloadRemoveTag(this);">
+    	                    	<i class="fas fa-times"></i>
+    	                  	</button>
+    	                </div>
+    	                ${purl ? '' : `
+    	                	<span class="retxt" style="display: ${shouldMerge ? 'block' : 'none'};">
+	    	                    ${shouldMerge ? 'Existing Information' : ''}
+	    	                </span>
+    	                `}
+    	            </div>
+    	            ${purl ? `
+	    	            <div class="col-lg-12 purlArea">
+	    	                <div class="form-group mb-0">
+	    	                    <input class="form-control" style="background-color:#f5f4f3 !important; border-width:0;" name="purl" type="text" value="${purl}" readonly>
+	    	                    <input class="form-control" type="hidden" name="refDownloadLocation" value="${download}">
+	    	                </div>
+	    	                <span class="urltxt"></span>
+	    	                <span class="retxt" style="display: ${shouldMerge ? 'block' : 'none'};">
+	    	                    ${shouldMerge ? 'Existing Information' : ''}
+	    	                </span>
+	    	            </div>
+    	            ` : ''}
+    	        </div>
+    	    </div>
+    	`;
+    	
+    	$(".detailDownloadLocation" + seq).append(downloadLocationHtml);
+	},
+	addIncludeCpe : function (includeCpe, seq, shouldMerge) {
+		const includeCpeHtml = `
+		    <div class="col-md-12 mt-1 ${shouldMerge ? 'is-registered' : ''}">
+		        <div class="form-group mb-0">
+		            <input class="form-control" name="includeCpes" type="text" value="${includeCpe}"/>
+		           	<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);">
+		            	<i class="fas fa-times"></i>
+		           	</button>
+		        </div>
+		        <span class="retxt" style="display: ${shouldMerge ? 'block' : 'none'}; color: #856404; font-size: 11px;">
+		            ${shouldMerge ? 'Existing Information' : ''}
+		        </span>
+		    </div>
+		`;
+		$(".multiTxtIncludeCpe" + seq).append(includeCpeHtml);
+	},
+	addExcludeCpe : function (excludeCpe, seq, shouldMerge) {
+		const excludeCpeHtml = `
+		    <div class="col-md-12 mt-1 ${shouldMerge ? 'is-registered' : ''}">
+		        <div class="form-group mb-0">
+		            <input class="form-control" name="excludeCpes" type="text" value="${excludeCpe}"/>
+		           	<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);">
+		            	<i class="fas fa-times"></i>
+		           	</button>
+		        </div>
+		        <span class="retxt" style="display: ${shouldMerge ? 'block' : 'none'}; color: #856404; font-size: 11px;">
+		            ${shouldMerge ? 'Existing Information' : ''}
+		        </span>
+		    </div>
+		`;
+		$(".multiTxtExcludeCpe" + seq).append(excludeCpeHtml);
 	},
 	nicknameAdd : function(seq) {
 		let nickHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
@@ -659,13 +692,17 @@ var Ctrl_fn = {
 							$(".multiTxtIncludeCpe" + seq).empty();
 							existItems += "Include CPE,";
 							let arr = json.resultData.addIncludeCpe.split(",");
-							Ctrl_fn.addIncludeCpe(arr, seq);
+							for (var i in arr) {
+								Ctrl_fn.addIncludeCpe(arr[i], seq, false);
+							}
 	    				}
 						if (typeof json.resultData.addExcludeCpe !== "undefined") {
 							$(".multiTxtExcludeCpe" + seq).empty();
 							existItems += "Exclude CPE,";
 							let arr = json.resultData.addExcludeCpe.split(",");
-							Ctrl_fn.addExcludeCpe(arr, seq);
+							for (var i in arr) {
+								Ctrl_fn.addExcludeCpe(arr[i], seq, false);
+							}
 	    				}
 						if ("" != existItems) {
 							existItems = existItems.substring(0, existItems.length-1);
@@ -1110,7 +1147,195 @@ var Ctrl_fn = {
                 alertify.error([[#{msg.common.valid2}]], 0);
             }
         });
-    }
+    },
+    fetchOssDetail : function(target) {
+		var seq = $(target).attr("id").replace(/[^\d]+/g, "");
+		var ossName = $(target).val();
+		if ("" != ossName) {
+			$.ajax({
+				url : '/oss/fetchOssDetail',
+				type : 'GET',
+				data : {"ossName" : ossName},
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success : function(data){
+					if (typeof data.fetchOssInfo !== "undefined") {
+						Ctrl_fn.mergeOssInfoByOssName(data.fetchOssInfo, seq);
+					}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	mergeOssInfoByOssName : function(data, seq) {
+		if (!data) {
+			return;
+		}
+		const formData = $('#ossForm' + seq).serializeObject();
+		Ctrl_fn.mergeAndAppend(data, formData, seq);
+		Ctrl_fn.setOrSuggestData(data, formData, seq);
+	},
+	mergeAndAppend : function (data, formData, seq) {
+		if (typeof data.ossNicknames !== "undefined") {
+			var existsOssNicknames = data.ossNicknames;
+			if (typeof formData.ossNicknames !== "undefined") {
+				var currentNicks = formData.ossNicknames;
+				if (!currentNicks) {
+				    currentNicks = [];
+				} else if (typeof currentNicks === 'string') {
+				    currentNicks = [currentNicks];
+				}
+				var mergeOssNicknames = $.grep(existsOssNicknames, function(nick) {
+					var trimmedNick = $.trim(nick);
+				    return $.inArray(trimmedNick, currentNicks) === -1;
+			    });
+				$.each(mergeOssNicknames, function(index, nick) {
+					Ctrl_fn.addOssNickname(nick, seq, true);
+				});
+			} else {
+				for (var i in existsOssNicknames) {
+					Ctrl_fn.addOssNickname(existsOssNicknames[i], seq, true);
+				}
+			}
+		}
+		if (typeof data.downloadLocation !== "undefined" && "" != data.downloadLocation) {
+			var existsDownloadLocations = data.downloadLocations || [];
+			var existsPurl = (data.purl || "").split(",");
+			
+			if (typeof formData.ossDownloadLocations !== "undefined") {
+				var downloadLocations = formData.ossDownloadLocations || [];
+				if (typeof downloadLocations === 'string') {
+					downloadLocations = downloadLocations.split(",").map(function(item) {return item.trim();});
+				}
+				
+				var mergedDownloadLocations = downloadLocations.concat(existsDownloadLocations);
+				for (var i = 0; i < mergedDownloadLocations.length; i++) {
+					var download = mergedDownloadLocations[i] || "";
+					var purl = "";
+				    if (i >= downloadLocations.length) {
+				    	var existingIdx = i - downloadLocations.length;
+				        purl = existsPurl[existingIdx] || "";
+				    }
+				    if (download === "" && purl === "") {
+				        continue;
+				    }
+				    Ctrl_fn.addDownloadLocation(download + "|" + purl, seq, true);
+				}
+			} else {
+				for (var i in existsDownloadLocations) {
+					var download = existsDownloadLocations[i] || "";
+					var purl = existsPurl[i] || "";
+					if ("" != purl) {
+						download += "|" + purl;
+					}
+					Ctrl_fn.addDownloadLocation(download, seq, true);
+				}
+			}
+		}
+		if (typeof data.includeCpe !== "undefined" && "" != data.includeCpe) {
+			var existsIncludeCpes = (data.includeCpe || "").split(",");
+			if (typeof formData.includeCpes !== "undefined") {
+				var curIncludeCpes = formData.includeCpes;
+				if (!curIncludeCpes) {
+					curIncludeCpes = [];
+				} else if (typeof curIncludeCpes === 'string') {
+					curIncludeCpes = [curIncludeCpes];
+				}
+				var mergeIncludeCpes = $.grep(existsIncludeCpes, function(cpe) {
+					var trimmedIncludeCpe = $.trim(cpe);
+				    return $.inArray(trimmedIncludeCpe, curIncludeCpes) === -1;
+			    });
+				for (var i in mergeIncludeCpes) {
+					Ctrl_fn.addIncludeCpe(mergeIncludeCpes[i], seq, true);
+				};
+			} else {
+				for (var i in existsIncludeCpes) {
+					Ctrl_fn.addIncludeCpe(existsIncludeCpes[i], seq, true);
+				}
+			}
+		}
+		if (typeof data.excludeCpe !== "undefined" && "" != data.excludeCpe) {
+			var existsExcludeCpes = (data.excludeCpe || "").split(",");
+			if (typeof formData.excludeCpes !== "undefined") {
+				var curExcludeCpes = formData.excludeCpes;
+				if (!curExcludeCpes) {
+					curExcludeCpes = [];
+				} else if (typeof curExcludeCpes === 'string') {
+					curExcludeCpes = [curExcludeCpes];
+				}
+				var mergeExcludeCpes = $.grep(existsExcludeCpes, function(cpe) {
+					var trimmedExcludeCpe = $.trim(cpe);
+				    return $.inArray(trimmedExcludeCpe, curExcludeCpes) === -1;
+			    });
+				for (var i in mergeExcludeCpes) {
+					Ctrl_fn.addExcludeCpe(mergeExcludeCpes[i], seq, true);
+				};
+			} else {
+				for (var i in existsExcludeCpes) {
+					Ctrl_fn.addExcludeCpe(existsExcludeCpes[i], seq, true);
+				}
+			}
+		}
+	},
+	setOrSuggestData : function (data, formData, seq) {
+		if (typeof data.summaryDescription !== "undefined" && "" != data.summaryDescription) {
+			if (typeof formData.summaryDescription !== "undefined" && "" != formData.summaryDescription) {
+				const summaryDescriptionMsgHtml = `
+					<span class="retxt is-registered" style="display: block; white-space: pre-line !important; word-break: break-all;">
+						${data.summaryDescription}
+				   	</span>
+				`;
+				$('#summaryDescription' + seq).after(summaryDescriptionMsgHtml);
+			} else {
+				$('#summaryDescription' + seq).val(data.summaryDescription);
+				const summaryDescriptionMsgHtml = `
+					<span class="retxt is-registered" style="display: block;">
+	                	Existing Information
+	            	</span>
+				`;
+				$('#summaryDescription' + seq).after(summaryDescriptionMsgHtml);
+			}
+		}
+		if (typeof data.importantNotes !== "undefined" && "" != data.importantNotes) {
+			if (typeof formData.importantNotes !== "undefined" && "" != formData.importantNotes) {
+				const importantNotesMsgHtml = `
+					<span class="retxt is-registered" style="display: block; white-space: pre-line !important; word-break: break-all;">
+						${data.importantNotes}
+				   	</span>
+				`;
+				$('#importantNotes' + seq).after(importantNotesMsgHtml);
+			} else {
+				$('#importantNotes' + seq).val(data.importantNotes);
+				const importantNotesMsgHtml = `
+					<span class="retxt is-registered" style="display: block;">
+	                	Existing Information
+	            	</span>
+				`;
+				$('#importantNotes' + seq).after(importantNotesMsgHtml);
+			}
+		}
+		if (typeof data.homepage !== "undefined" && "" != data.homepage) {
+			if (typeof formData.homepage !== "undefined" && "" != formData.homepage) {
+				const homepageMsgHtml = `
+					<span class="retxt is-registered" style="display: block;">
+						${data.importantNotes}
+				   	</span>
+				`;
+				$('#detailHomePage' + seq).after(homepageMsgHtml);
+			} else {
+				$('#detailHomePage' + seq).val(data.homepage);
+				const homepageMsgHtml = `
+					<span class="retxt is-registered" style="display: block;">
+	                	Existing Information
+	            	</span>
+				`;
+				$('#detailHomePage' + seq).after(homepageMsgHtml);
+			}
+		}
+	}
 };
 
 var evt = {

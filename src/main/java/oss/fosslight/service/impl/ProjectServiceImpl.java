@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.MapUtils;
@@ -44,13 +45,21 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -122,6 +131,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	private String PASSWORD;
 	
 	@Autowired private SqlSessionFactory sqlSessionFactory;
+	
+	@Value("${fl.scan.service.url:}") private String flScanServiceUrl;
+	private final RestTemplate internalApiRestTemplate;
+	
+	public ProjectServiceImpl(@Qualifier("internalApiRestTemplate") RestTemplate internalApiRestTemplate) {
+        this.internalApiRestTemplate = internalApiRestTemplate;
+    }
 	
 	@PostConstruct
 	public void setResourcePathPrefix(){
@@ -9764,6 +9780,129 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             List<ProjectIdentification> batchList = groupBomList.subList(i, end);
             projectMapper.insertOssComponentsSnapshot(batchList);
         }
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> validateAnalysisProgress(Map<String, Object> param) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		String prjId = String.valueOf(param.getOrDefault("prjId", ""));
+		String processor = String.valueOf(param.getOrDefault("processor", ""));
+		
+		if (isEmpty(prjId) || isEmpty(flScanServiceUrl)) {
+	        return rtnMap;
+	    }
+		
+		List<String> ossComponentIdList = null;
+		ObjectMapper mapper = new ObjectMapper();
+
+	    try {
+	    	ossComponentIdList = ossService.selectAnalysisListWithoutCoReviewer(prjId);
+	    	
+	        String requestUrl = flScanServiceUrl + "/api/project/" + prjId + "/status";
+	        String response = internalApiRestTemplate.getForObject(requestUrl, String.class);
+	        Map<String, Object> statusMap = mapper.readValue(response, new TypeReference<Map<String, Object>>() {});
+	        String apiStatus = String.valueOf(statusMap.getOrDefault("project_status", ""));
+	        String ossAnalysisStatus = avoidNull(ossService.getOssAnalysisStatus(prjId), "");
+	        rtnMap.put("ossAnalysisStatus", ossAnalysisStatus);
+	        rtnMap.put("coReviewerStatus", apiStatus);
+
+	        if (!"PROGRESS".equalsIgnoreCase(ossAnalysisStatus) || !"None".equalsIgnoreCase(apiStatus)) {
+	            return rtnMap;
+	        }
+
+			if (CollectionUtils.isEmpty(ossComponentIdList)) {
+		        log.info("No OSS components pending co-review for project: {}", prjId);
+		        return rtnMap;
+		    }
+	        
+	        String logUrl = flScanServiceUrl + "/api/project/" + prjId + "/logs";
+	        ResponseEntity<Resource> responseResource = internalApiRestTemplate.getForEntity(logUrl, Resource.class);
+	        
+	        if (!responseResource.getStatusCode().is2xxSuccessful() || responseResource.getBody() == null) {
+	            log.error("Failed to retrieve scanner logs. Status Code: {}", responseResource.getStatusCode());
+	            if (CollectionUtils.isNotEmpty(ossComponentIdList)) {
+	            	updateAllComponentsWithError(prjId, ossComponentIdList, "Scanner Log API Response Error (" + responseResource.getStatusCode() + ")");
+	            }
+	        }
+	        
+	        Map<String, Object> scannerMap;
+	        try {
+	            scannerMap = mapper.readValue(responseResource.getBody().getInputStream(), new TypeReference<Map<String, Object>>() {});
+	        } catch (Exception e) {
+	            log.error("FL Scanner JSON parsing error: {}", e.getMessage());
+	            updateAllComponentsWithError(prjId, ossComponentIdList, "Parsing Exception [JSON Error]");
+	            return rtnMap;
+	        }
+	        
+	        Map<String, Object> logsMap = (Map<String, Object>) scannerMap.get("logs");
+	        Set<String> apiGridIds = new HashSet<>();
+	        
+	        if (MapUtils.isNotEmpty(logsMap)) {
+	        	for (Object val : logsMap.values()) {
+	                if (!(val instanceof Map)) {
+	                	continue;
+	                }
+	                Map<String, Object> logEntry = (Map<String, Object>) val;
+	                String gridId = String.valueOf(logEntry.getOrDefault("grid_id", ""));
+	                String link = String.valueOf(logEntry.getOrDefault("link", ""));
+	                Map<String, Object> callback = (Map<String, Object>) logEntry.get("callback_result");
+	                
+	                if (!isEmpty(gridId) && MapUtils.isNotEmpty(callback)) {
+	                    apiGridIds.add(gridId);
+	                    
+	                    if (ossComponentIdList.contains(gridId)) {
+	                    	callback.put("project_id", prjId);
+	                    	callback.put("link", link);
+	                    	callback.put("processor", processor);
+	                    	callback.put("toSend", true);
+	                        sendCallbackApi(callback);
+	                    }
+	                }
+	            }
+	        }
+	        
+	        for (String dbId : ossComponentIdList) {
+	            if (!apiGridIds.contains(dbId)) {
+	                handleSingleComponentError(prjId, dbId, "ID Mismatch or Missing in Logs");
+	            }
+	        }
+	    } catch (Exception e) {
+	        log.error("Parsing Exception occurred. Updating all IDs in list: {}", e.getMessage());
+	        if (CollectionUtils.isNotEmpty(ossComponentIdList)) {
+	        	updateAllComponentsWithError(prjId, ossComponentIdList, "Parsing Error [Exception]");
+	        }
+	    }
+		
+		return rtnMap;
+	}
+
+	private void sendCallbackApi(Map<String, Object> callback) {
+		try {
+	        String port = CommonFunction.getProperty("server.port");
+	        String url = "http://127.0.0.1:" + port + "/api/v2/coReviewer/ossAnalysis/complete";
+	        
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+	        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(callback, headers);
+	        internalApiRestTemplate.postForEntity(url, entity, Map.class);
+	        
+	        log.info("Successfully sent callback for gridId: {}", callback.get("grid_id"));
+	    } catch (Exception e) {
+	        log.error("Callback API Post Error: {}", e.getMessage());
+	    }
+	}
+
+	private void updateAllComponentsWithError(String prjId, List<String> ossComponentIdList, String reason) {
+		for (String componentId : ossComponentIdList) {
+	        handleSingleComponentError(prjId, componentId, reason);
+	    }
+		log.info("Successfully updated error comments for {} component(s). Reason: {}", ossComponentIdList.size(), reason);
+	}
+
+	private void handleSingleComponentError(String prjId, String componentId, String reason) {
+		String errorComment = "<li><b>Parsing Error</b><br/>reason : [Failed] " + reason + "<br/><br/></li>";
+	    ossService.updateAnalysisComments(componentId, prjId, errorComment, "R");
 	}
 }
  
