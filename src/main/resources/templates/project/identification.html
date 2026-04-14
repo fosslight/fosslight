@@ -114,13 +114,13 @@
 				                            </ul>
 				                        </div>
 			                            <div class="d-flex-align" style="margin-left: auto;">
-			                                <span th:if="${project.statusPermission > 0 and project.identificationStatus == 'PROG' and project.dropYn != 'Y'}" class="ml-2 mr-2 px-2 pointer" data-toggle="tooltip" data-placement="right" id="coReviewerBtn" th:onclick="|fn.onCheckIdentification()|" title="coReviewer">
+			                                <span th:if="${project.statusPermission > 0 and project.identificationStatus == 'PROG' and project.dropYn != 'Y'}" class="ml-2 mr-2 px-2 pointer" id="coReviewerBtn" th:onclick="|fn.onCheckIdentification()|" title="coReviewer">
 			                            		<i class="fas fa-clipboard-check customIcon2"></i>
 			                           		</span>
-			                            	<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="px-2 pointer idenReset" data-toggle="tooltip" data-placement="right" id="reset" title="reset" th:onclick="|com_fn.reset('Bom')|">
+			                            	<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="px-2 pointer idenReset" id="reset" title="reset" th:onclick="|com_fn.reset('Bom')|">
 			                            		<i class="fas fa-undo-alt customIcon2"></i>
 											</span>
-											<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="ml-2 mr-2 px-2 pointer idenSave" data-toggle="tooltip" data-placement="right" id="save" th:onclick="|com_fn.save('Bom')|" title="save">
+											<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="ml-2 mr-2 px-2 pointer idenSave" id="save" th:onclick="|com_fn.save('Bom')|" title="save">
 												<i class="fas fa-save customIcon2"></i>
 											</span>
 			                           	 	<span class="btn btn-tool ml-1 mr-2 pointer" id="expandBtn" data-card-widget="collapse" title="Collapse">
