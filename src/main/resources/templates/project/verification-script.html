@@ -3417,6 +3417,11 @@
                     	$("#email").trigger("click").attr("checked", true);
                     }
 
+                    if ("Y" == hideOssVersionYn) {
+                        $("#hideOssVersion").trigger("click").attr("checked", true);
+                        $("#hideOssVersionYn").val("Y");
+                    }
+                    
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     var btn_Save = $("#save");
                     
@@ -3474,11 +3479,6 @@
 
                                 break;
                         }
-                    }
-                    
-                    if ("Y" == hideOssVersionYn) {
-                        $("#hideOssVersion").trigger("click").attr("checked", true);
-                        $("#hideOssVersionYn").val("Y");
                     }
                 }, 1);
             },
