@@ -664,10 +664,14 @@ public class T2CoOssValidator extends T2CoValidator {
 		if (!isEmpty(errCd)) {
 			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), errCd);
 		} else if (ossService.checkExistsOssNickname2(ossBean) != null) {
-			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""),
-					"OSS_NAME.DUPLICATEDNICK_SHORT");
+			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "OSS_NAME.DUPLICATEDNICK_SHORT");
 		} else if (ossService.checkExistsOssByname(ossBean) == 0) {
 			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "OSS_NAME.UNCONFIRMED");
+		} 
+
+		basicKey = "OSS_VERSION";
+		if (!CoCodeManager.OSS_INFO_UPPER.containsKey((ossBean.getOssName() + "_" + avoidNull(ossBean.getOssVersion())).toUpperCase())) {
+			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "OSS_VERSION.UNCONFIRMED");
 		}
 
 		/** OSS_NICKNAME */
