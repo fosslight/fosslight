@@ -1202,25 +1202,29 @@ public class ExcelUtil extends CoTopComponent {
 					}
 				}
 
+				errMsg.clear();
 				if(ok && errMsgList.size()==1 && errMsgList.get(0).equals("Exist")) {
-					errMsgList.clear();
 					errMsg.put("errRow", getMessage("msg.partner.exist.oss"));
 					return errMsg;
 				}
 
-				if (!notOkRows.isEmpty()) {
-					errMsg.put("errRow", getMessage("msg.partner.agreement.notok")
-							+"<br/><br/> <h5>N/A :</h5>" + StringUtils.join(emptyRows, "<br/>")
-							+ "<br/><br/> <h5>Disagreement : </h5>" + StringUtils.join(notOkRows, "<br/>"));
+				if (!notOkRows.isEmpty() || !emptyRows.isEmpty()) {
+					String msg = getMessage("msg.partner.agreement.notok");
+					if(!emptyRows.isEmpty()) {
+						msg += "<br/><br/> <h5>N/A :</h5>" + StringUtils.join(emptyRows, "<br/>");
+					}
+					if(!notOkRows.isEmpty()) {
+						msg +=  "<br/><br/> <h5>Disagreement : </h5>" + StringUtils.join(notOkRows, "<br/>");
+					}
+					errMsg.put("errRow", msg);
 					return errMsg;
 				}
 
 				if(!ok && errMsgList.size()==1 && errMsgList.get(0).equals("Empty")) {
-					errMsgList.clear();
 					errMsg.put("errRow", getMessage("msg.partner.empty.oss"));
 					return errMsg;
 				}
-				
+
 				return errMsg;
 			}
 			
