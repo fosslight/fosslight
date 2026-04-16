@@ -346,6 +346,11 @@
 		mvEditTab : function () {
 			createTabInFrame(partnerId+'_3rdParty', '/partner/edit/' + [[${detail.partnerId}]]);
 		},
+		mvIdentification : function() {
+			if ([[${detail.partnerId}]] != null) {
+				createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', '/partner/identification/' + [[${detail.partnerId}]]);
+			}
+		},
 		deleteLicense : function(target){
 			$(target).parent().remove();
 		},
