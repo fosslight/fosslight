@@ -207,6 +207,32 @@
                 selectedList.push("chkAllowDownloadNoticeHTML");
                 datas.noticeFileFormat = selectedList;
             });
+            
+            const $noticeFileFormat = $('#noticeFileFormat');
+            const $docType = $('#docType');
+            
+            $noticeFileFormat.on('select2:selecting', function(e) {
+            	if ($("#hideOssVersion").is(':checked')) {
+                    const selectedVal = e.params.args.data.id;
+                    if (/SPDX|CDX/i.test(selectedVal)) {
+                        e.preventDefault();
+                        alertify.alert([[#{msg.package.notice.file.format.unavailable}]], function(){});
+                    }
+                }
+            });
+
+            $docType.on('change', function(e) {
+                if ($("#hideOssVersion").is(':checked')) {
+                    const currentVal = $(this).val();
+                    if (/SPDX|CDX/i.test(currentVal)) {
+                    	e.preventDefault();
+                        alertify.alert([[#{msg.package.notice.file.format.unavailable}]], function(){
+                        	const firstVal = $docType.find('option:first').val();
+                            $docType.val(firstVal);
+                        });
+                    }
+                }
+            });
         });
 
         var datas = {
@@ -1280,9 +1306,6 @@
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     $("#editNoticeYn").val(checked ? "Y" : "N");
                     fn.changeNotice(checked);
-                    if ("Y" == $("#hideOssVersionYn").val()) {
-                    	fn.toggleNoticeFormatsByVersion(true);
-                    }
                 });
 
                 $("#companyName").click(function (e) {
@@ -1306,7 +1329,6 @@
                 $("#hideOssVersion").click(function (e) {
                     var checked = $(this).prop("checked");
                     $("#hideOssVersionYn").val(checked ? "Y" : "N");
-                    fn.toggleNoticeFormatsByVersion(checked);
                 });
 
                 $("#uploadAdd_1").click(function (e) {
@@ -3978,42 +4000,6 @@
     					alertify.error([[#{msg.common.valid2}]], 0);
     				}
     			});
-            },
-            toggleNoticeFormatsByVersion : function(checked) {
-            	var $select = $("#docType");
-                $select.find("option").each(function() {
-                    var val = $(this).val();
-                    
-                    if (val.toLowerCase().includes("spdx") || val.toLowerCase().includes("cdx")) {
-                        if (checked) {
-                            $(this).prop("selected", false);
-                            $(this).hide();
-                            $(this).prop("disabled", true);
-                        } else {
-                            $(this).show();
-                            $(this).prop("disabled", false);
-                        }
-                    }
-                });
-                if (checked && ($select.val().toLowerCase().includes("spdx") || $select.val().toLowerCase().includes("cdx"))) {
-                    $select.val($select.find("option:first").val());
-                }
-                
-                var $select2 = $("#noticeFileFormat");
-                $select2.find("option").each(function() {
-                    var val = $(this).val();
-                    if (val.toLowerCase().includes("spdx") || val.toLowerCase().includes("cdx")) {
-                        if (checked) {
-                            $(this).prop("selected", false);
-                            $(this).prop("disabled", true);
-                        } else {
-                            $(this).prop("disabled", false);
-                        }
-                    }
-                });
-
-                $select2.trigger("change.select2");
-                $select2.trigger("change");
             }
         }
 
