@@ -1280,6 +1280,9 @@
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     $("#editNoticeYn").val(checked ? "Y" : "N");
                     fn.changeNotice(checked);
+                    if ("Y" == $("#hideOssVersionYn").val()) {
+                    	fn.toggleNoticeFormatsByVersion(true);
+                    }
                 });
 
                 $("#companyName").click(function (e) {
