@@ -670,7 +670,8 @@ public class T2CoOssValidator extends T2CoValidator {
 		} 
 
 		basicKey = "OSS_VERSION";
-		if (!CoCodeManager.OSS_INFO_UPPER.containsKey((ossBean.getOssName() + "_" + avoidNull(ossBean.getOssVersion())).toUpperCase())) {
+		if (!hasError(errMap, "OSS_NAME", ossBean.getGridId(), useGridSeq)
+				&& !CoCodeManager.OSS_INFO_UPPER.containsKey((ossBean.getOssName() + "_" + avoidNull(ossBean.getOssVersion())).toUpperCase())) {
 			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "OSS_VERSION.UNCONFIRMED");
 		}
 
