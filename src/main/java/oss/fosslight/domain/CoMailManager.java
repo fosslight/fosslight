@@ -818,8 +818,9 @@ public class CoMailManager extends CoTopComponent {
     		PartnerMaster partnerInfo = null;
     		BinaryMaster batInfo = null;
     		List<String> watcherList = null;
-    		List<String> ccList = null;
     		List<String> toList = null;
+    		List<String> ccList = null;
+    		List<String> bccList = null;
     		switch (bean.getMsgType()) {
     		case CoConstDef.CD_MAIL_TYPE_OSS_REGIST:
     		case CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION:
@@ -845,7 +846,7 @@ public class CoMailManager extends CoTopComponent {
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED :
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
-    			bean.setCcIds(selectAdminMailAddr());
+    			bean.setBccIds(selectAdminMailAddr());
     			break;
 			case CoConstDef.CD_MAIL_PROJECT_APPROVE_PERMISSION:
 			case CoConstDef.CD_MAIL_PROJECT_REJECT_PERMISSION:
@@ -854,7 +855,7 @@ public class CoMailManager extends CoTopComponent {
 				ccList = new ArrayList<>();
 				ccList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId()));
 				if (!CollectionUtils.isEmpty(ccList)) {
-    				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+    				bean.setCcIds(ccList.toArray(new String[0]));
     			}
 				break;
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS:
@@ -863,11 +864,11 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNC_RESULT:
 			case CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT:
-    			bean.setToIds(selectAdminMailAddr());
+    			bean.setBccIds(selectAdminMailAddr());
     			break;
     		case CoConstDef.CD_MAIL_TYPE_COMMON_DIVISION_MERGE:
     			if (bean.getToIds() == null || bean.getToIds().length == 0) {
-    				bean.setToIds(selectAdminMailAddr());
+    				bean.setBccIds(selectAdminMailAddr());
     			}
     			break;
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
@@ -940,30 +941,33 @@ public class CoMailManager extends CoTopComponent {
     					) {
     				toList = new ArrayList<>();
     				ccList = new ArrayList<>();
+    				bccList = new ArrayList<>();
     				// 로그인 사용자가 Admin이면 to : project creator cc: reviewer, watcher
     				if (CommonFunction.isAdmin()) {
     					toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함하고 있음
         				if (!isEmpty(prjInfo.getReviewer())) {
-        					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
-        					ccList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				} else {
     					ccList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함하고 있음
         				if (!isEmpty(prjInfo.getReviewer())) {
-        					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				}
     				
         			if (toList != null && !toList.isEmpty()) {
-        				bean.setToIds(toList.toArray(new String[toList.size()]));
+        				bean.setToIds(toList.toArray(new String[0]));
         			}
         			if (ccList != null && !ccList.isEmpty()) {
-        				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+        				bean.setCcIds(ccList.toArray(new String[0]));
         			}
-    				
+    				if (!CollectionUtils.isEmpty(bccList)) {
+    					bean.setBccIds(bccList.toArray(new String[0]));
+    				}
     			}
     			else if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT.equals(bean.getMsgType()) 
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_SECURITY_ADDED_COMMENT.equals(bean.getMsgType())
@@ -974,7 +978,7 @@ public class CoMailManager extends CoTopComponent {
     				// comment send의 경우, 일단 자신은 cc로 보낸다.
     				toList = new ArrayList<>();
     				ccList = new ArrayList<>();
-    				
+    				bccList = new ArrayList<>();
     				if ("W".equals(bean.getReceiveFlag())) {
             			watcherList = mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId());
             			if (watcherList != null && !watcherList.isEmpty()) {
@@ -985,9 +989,9 @@ public class CoMailManager extends CoTopComponent {
             			}
     				} else if ("R".equals(bean.getReceiveFlag())) {
         				if (!isEmpty(prjInfo.getReviewer())) {
-    						toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				} else if ("C".equals(bean.getReceiveFlag())) {
 						toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getCreator()})));
@@ -1001,25 +1005,27 @@ public class CoMailManager extends CoTopComponent {
             				toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));
             			}
         				if (!isEmpty(prjInfo.getReviewer())) {
-        					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				
     				}
     				
         			if (toList != null && !toList.isEmpty()) {
-        				bean.setToIds(toList.toArray(new String[toList.size()]));
+        				bean.setToIds(toList.toArray(new String[0]));
         			}
         			if (ccList != null && !ccList.isEmpty()) {
-        				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+        				bean.setCcIds(ccList.toArray(new String[0]));
         			}
-    				
+    				if (!CollectionUtils.isEmpty(bccList)) {
+    					bean.setBccIds(bccList.toArray(new String[0]));
+    				}
     			} else {
     				
     				ccList = new ArrayList<>();
     				toList = new ArrayList<>();
-    				
+    				bccList = new ArrayList<>();
     				// to 설정 -------------------------------------
     				// Reviewer
     				if (CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_ADD.equals(bean.getMsgType())
@@ -1027,7 +1033,7 @@ public class CoMailManager extends CoTopComponent {
     					if (bean.getToIds() != null && bean.getToIds().length > 0) {
     						toList.addAll(Arrays.asList(selectMailAddrFromIds(bean.getToIds())));
     					} else if (!isEmpty(prjInfo.getReviewer())) {
-    						toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+    						bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
     					}
     				} else if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT.equals(bean.getMsgType())
@@ -1047,9 +1053,9 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT.equals(bean.getMsgType())
     						) {
         				if (!isEmpty(prjInfo.getReviewer())) {
-        					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				}
     				// Creator, watcher, Reviewer
@@ -1065,9 +1071,9 @@ public class CoMailManager extends CoTopComponent {
     					}
     					
         				if (!isEmpty(prjInfo.getReviewer())) {
-        					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				} 
     				// Creator, watcher
@@ -1131,7 +1137,7 @@ public class CoMailManager extends CoTopComponent {
     				}
     				// admin all
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED.equals(bean.getMsgType())) {
-    					ccList.addAll(Arrays.asList(selectAdminMailAddr()));
+    					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
     				}
     				// Reviewer
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF.equals(bean.getMsgType())
@@ -1152,9 +1158,9 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
     						) {
         				if (!isEmpty(prjInfo.getReviewer())) {
-        					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
-        					ccList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
         				
         				// Secuirty 파트 추가
@@ -1175,10 +1181,13 @@ public class CoMailManager extends CoTopComponent {
     				
     				
     				if (toList != null && !toList.isEmpty()) {
-    					bean.setToIds(toList.toArray(new String[toList.size()]));
+    					bean.setToIds(toList.toArray(new String[0]));
     				}
         			if (ccList != null && !ccList.isEmpty()) {
-        				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+        				bean.setCcIds(ccList.toArray(new String[0]));
+        			}
+        			if (!CollectionUtils.isEmpty(bccList)) {
+        				bean.setBccIds(bccList.toArray(new String[0]));
         			}
     			}
     			
@@ -1216,37 +1225,40 @@ public class CoMailManager extends CoTopComponent {
 				) {
 					toList = new ArrayList<>();
     				ccList = new ArrayList<>();
+    				bccList = new ArrayList<>();
     				// 로그인 사용자가 Admin이면 to : project creator cc: reviewer, watcher
     				if (CommonFunction.isAdmin()) {
     					toList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId())); // creator를 포함하고 있음
         				if (!isEmpty(partnerInfo.getReviewer())) {
-        					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
         				} else {
-        					ccList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				} else {
     					ccList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId())); // creator를 포함하고 있음
         				if (!isEmpty(partnerInfo.getReviewer())) {
-        					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				}
     				
         			if (toList != null && !toList.isEmpty()) {
-        				bean.setToIds(toList.toArray(new String[toList.size()]));
+        				bean.setToIds(toList.toArray(new String[0]));
         			}
         			if (ccList != null && !ccList.isEmpty()) {
-        				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+        				bean.setCcIds(ccList.toArray(new String[0]));
         			}
-        			
+        			if (!CollectionUtils.isEmpty(bccList)) {
+        				bean.setBccIds(bccList.toArray(new String[0]));
+        			}
     			}
     			else if (CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTNER_IDENTIFICATION_BOM_COMPARE.equals(bean.getMsgType())) {
     				// comment send의 경우, 일단 자신은 cc로 보낸다.
 					toList = new ArrayList<>();
     				ccList = new ArrayList<>();
-    				
+    				bccList = new ArrayList<>();
     				if ("W".equals(bean.getReceiveFlag())) {
             			watcherList = mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId());
             			if (watcherList != null && !watcherList.isEmpty()) {
@@ -1257,9 +1269,9 @@ public class CoMailManager extends CoTopComponent {
             			}
     				} else if ("R".equals(bean.getReceiveFlag())) {
         				if (!isEmpty(partnerInfo.getReviewer())) {
-    						toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				} else if ("C".equals(bean.getReceiveFlag())) {
 						toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getCreator()})));
@@ -1272,23 +1284,25 @@ public class CoMailManager extends CoTopComponent {
             				toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));
             			}
         				if (!isEmpty(partnerInfo.getReviewer())) {
-        					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				}
     				
         			if (toList != null && !toList.isEmpty()) {
-        				bean.setToIds(toList.toArray(new String[toList.size()]));
+        				bean.setToIds(toList.toArray(new String[0]));
         			}
         			if (ccList != null && !ccList.isEmpty()) {
-        				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+        				bean.setCcIds(ccList.toArray(new String[0]));
         			}
-    				
-    			
+    				if (!CollectionUtils.isEmpty(bccList)) {
+    					bean.setBccIds(bccList.toArray(new String[0]));
+    				}
     			} else {
         			ccList = new ArrayList<>();
         			toList = new ArrayList<>();
+        			bccList = new ArrayList<>();
         			// to list ------------------------------------------------------------
         			
         			// reviewer
@@ -1297,7 +1311,7 @@ public class CoMailManager extends CoTopComponent {
     					if (bean.getToIds() != null && bean.getToIds().length > 0) {
     						toList.addAll(Arrays.asList(selectMailAddrFromIds(bean.getToIds())));
     					} else if (!isEmpty(partnerInfo.getReviewer())) {
-    						toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
+    						bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
     					}
     				} 
     				// Reviewer
@@ -1309,9 +1323,9 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PARTNER_CREATED.equals(bean.getMsgType())
     						) {
         				if (!isEmpty(partnerInfo.getReviewer())) {
-        					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
         				} else {
-        					toList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				}
     				// creator, watcher
@@ -1352,9 +1366,9 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_REJECT.equals(bean.getMsgType())
     						) {
         				if (!isEmpty(partnerInfo.getReviewer())) {
-        					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
+        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
         				} else {
-        					ccList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				}
     				// Authorization requester
@@ -1364,10 +1378,13 @@ public class CoMailManager extends CoTopComponent {
     				}
     				
         			if (toList != null && !toList.isEmpty()) {
-        				bean.setToIds(toList.toArray(new String[toList.size()]));
+        				bean.setToIds(toList.toArray(new String[0]));
         			}
         			if (ccList != null && !ccList.isEmpty()) {
-        				bean.setCcIds(ccList.toArray(new String[ccList.size()]));
+        				bean.setCcIds(ccList.toArray(new String[0]));
+        			}
+        			if (!CollectionUtils.isEmpty(bccList)) {
+        				bean.setBccIds(bccList.toArray(new String[0]));
         			}
     			}
 
@@ -1376,8 +1393,8 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED:
     			batInfo = mailManagerMapper.getBinaryInfo(bean.getParamBatId());
 
-    			ccList = new ArrayList<>();
     			toList = new ArrayList<>();
+    			ccList = new ArrayList<>();
     			// to list ------------------------------------------------------------
     			// Creator only
 				toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{batInfo.getCreator()})));
@@ -1414,7 +1431,7 @@ public class CoMailManager extends CoTopComponent {
     			if (bean.getToIds() != null && bean.getToIds().length > 0) {
     				bean.setToIds(selectMailAddrFromIds(bean.getToIds()));
     			}
-    			bean.setCcIds(selectAdminMailAddr());
+    			bean.setBccIds(selectAdminMailAddr());
     			break;
     		default:
     			// 호출하는 쪽에서 설정된 경우
@@ -1461,6 +1478,7 @@ public class CoMailManager extends CoTopComponent {
     			try {
     				List<String> _toList = null;
     				List<String> _ccList = null;
+    				List<String> _bccList = null;
     				if (bean.getToIds() != null) {
     					_toList = Arrays.asList(bean.getToIds());
     				} else {
@@ -1471,11 +1489,18 @@ public class CoMailManager extends CoTopComponent {
     				} else {
     					_ccList = new ArrayList<>();
     				}
+    				if (bean.getBccIds() != null) {
+    					_bccList = Arrays.asList(bean.getBccIds());
+    				} else {
+    					_bccList = new ArrayList<>();
+    				}
     				
     				// 일단 자기자신에 중복된게 있으면 삭제
     				List<String> _toListFinal = new ArrayList<String>(new HashSet<String>(_toList));
     				List<String> _ccListFinal = new ArrayList<>();
     				List<String> _ccListTmp = new ArrayList<String>(new HashSet<String>(_ccList));
+    				List<String> _bccListFinal = new ArrayList<>();
+    				List<String> _bccListTmp = new ArrayList<String>(new HashSet<String>(_bccList));
     				
     				// tolist를 기준으로 cclist에서 삭제
     				for (String s : _ccListTmp) {
@@ -1484,9 +1509,16 @@ public class CoMailManager extends CoTopComponent {
     					}
     				}
     				
+    				for (String s : _bccListTmp) {
+    					if (!_toListFinal.contains(s)) {
+    						_bccListFinal.add(s);
+    					}
+    				}
+    				
     				// 다시 array로
-    				bean.setToIds(_toListFinal.toArray(new String[_toListFinal.size()]));
-    				bean.setCcIds(_ccListFinal.toArray(new String[_ccListFinal.size()]));
+    				bean.setToIds(_toListFinal.toArray(new String[0]));
+    				bean.setCcIds(_ccListFinal.toArray(new String[0]));
+    				bean.setBccIds(_bccListFinal.toArray(new String[0]));
     				
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
@@ -4099,10 +4131,12 @@ public class CoMailManager extends CoTopComponent {
             if (!isEmpty(DEFAULT_BCC)) {
             	String[] _bcc = coMail.getBccIds() == null ? new String[]{} : coMail.getBccIds();
             	List<String> _bccList = new ArrayList<>(Arrays.asList(_bcc));
-            	if (_bccList == null || _bccList.isEmpty()) {
+            	if (CollectionUtils.isEmpty(_bccList)) {
             		_bccList = new ArrayList<>();
             	}
-            	_bccList.add(DEFAULT_BCC);
+            	if (!_bccList.contains(DEFAULT_BCC)) {
+            		_bccList.add(DEFAULT_BCC);
+            	}
             	coMail.setBccIds(_bccList.toArray(new String[_bccList.size()]));
             }
             
