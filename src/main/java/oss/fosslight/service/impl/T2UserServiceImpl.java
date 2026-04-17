@@ -356,10 +356,12 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 			if (user.getDivision() != null && user.getDivision().trim().equals("")){
 				user.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 			}
-			if (CoConstDef.FLAG_NO.equals(user.getUseYn())) {
-				user.setExpireFlag(CoConstDef.FLAG_YES);
-			} else if (CoConstDef.FLAG_YES.equals(user.getUseYn())) {
-				user.setExpireDate(CoConstDef.CD_TOKEN_END_DATE);
+			if (isEmpty(user.getExpireDate())) {
+				if (CoConstDef.FLAG_NO.equals(user.getUseYn())) {
+					user.setExpireFlag(CoConstDef.FLAG_YES);
+				} else if (CoConstDef.FLAG_YES.equals(user.getUseYn())) {
+					user.setExpireDate(CoConstDef.CD_TOKEN_END_DATE);
+				}
 			}
 			
 			userMapper.updateUsers(user);
