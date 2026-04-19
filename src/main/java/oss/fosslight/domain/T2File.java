@@ -29,7 +29,6 @@ public class T2File extends ComBean implements Serializable {
 	private String reuseCnt;
 	private String actualFileNm;
 	private String regId;
-	private String refFileSeq;
 
 	public T2File(String fileSeq) {
 		super();
@@ -162,13 +161,5 @@ public class T2File extends ComBean implements Serializable {
 
 	public void setRegId(String regId) {
 		this.regId = regId;
-	}
-
-	public String getRefFileSeq() {
-		return refFileSeq;
-	}
-
-	public void setRefFileSeq(String refFileSeq) {
-		this.refFileSeq = refFileSeq;
 	}
 }

@@ -24,7 +24,6 @@ public class UploadFile extends ComBean implements Serializable{
 	private int wgetResult;
 	private String fileExt;
 	private String actualFilename;
-	private String comments;
 	
 	public String getFileExt() {
 		return fileExt;
@@ -68,6 +67,7 @@ public class UploadFile extends ComBean implements Serializable{
 	public void setInputName(String inputName) {
 		this.inputName = inputName;
 	}
+	
 	public int getIndexNum() {
 		return indexNum;
 	}
@@ -103,11 +103,5 @@ public class UploadFile extends ComBean implements Serializable{
 	}
 	public void setActualFilename(String actualFilename) {
 		this.actualFilename = actualFilename;
-	}
-	public String getComments() {
-		return comments;
-	}
-	public void setComments(String comments) {
-		this.comments = comments;
 	}
 }

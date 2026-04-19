@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.MapUtils;
@@ -44,13 +45,21 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -105,6 +114,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	private String PASSWORD;
 	
 	@Autowired private SqlSessionFactory sqlSessionFactory;
+	
+	@Value("${fl.scan.service.url:}") private String flScanServiceUrl;
+	private final RestTemplate internalApiRestTemplate;
+	
+	public ProjectServiceImpl(@Qualifier("internalApiRestTemplate") RestTemplate internalApiRestTemplate) {
+        this.internalApiRestTemplate = internalApiRestTemplate;
+    }
 	
 	@PostConstruct
 	public void setResourcePathPrefix(){
@@ -2204,20 +2220,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Transactional
 	public void deleteProjectRefFiles(Project projectInfo) {
 		// delete identification files
-		deleteFiles(projectInfo.getCsvFile(), null);
-		deleteFiles(projectInfo.getAndroidCsvFile(), null);
-		deleteFiles(projectInfo.getAndroidNoticeFile(), null);
-		deleteFiles(projectInfo.getAndroidResultFile(), null);
-		deleteFiles(projectInfo.getBinCsvFile(), null);
-		deleteFiles(projectInfo.getBinBinaryFile(), null);
+		deleteFiles(projectInfo.getCsvFile());
+		deleteFiles(projectInfo.getAndroidCsvFile());
+		deleteFiles(projectInfo.getAndroidNoticeFile());
+		deleteFiles(projectInfo.getAndroidResultFile());
+		deleteFiles(projectInfo.getBinCsvFile());
+		deleteFiles(projectInfo.getBinBinaryFile());
 	}
 	
-	private void deleteFiles(List<T2File> list, String flag) {
+	private void deleteFiles(List<T2File> list) {
 		if(list != null) {
 			for(T2File fileInfo : list) {
 				projectMapper.updateDeleteYNByFileSeq(fileInfo);
 				projectMapper.deleteFileBySeq(fileInfo);
-				fileService.deletePhysicalFile(fileInfo, flag);
+				fileService.deletePhysicalFile(fileInfo, null);
 			}
 		}
 	}
@@ -9564,10 +9580,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		Project project = new Project();
 		project.setPrjId(prjId);
-		List<Map<String, Object>> delFileList = new ArrayList<>();
+		List<Map<String, Object>> addFileList = new ArrayList<>();
 		
 		if (param.containsKey("reset")) {
-			delFileList = projectMapper.selectFileList(project);
+			addFileList = projectMapper.selectFileList(project);
 			
 			List<String> fileSeqList = new ArrayList<>();
 			List<String> itemList = (List<String>) param.get("items");
@@ -9577,7 +9593,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			if (CollectionUtils.isNotEmpty(fileSeqList)) {
-				delFileList = delFileList.stream().filter(e -> fileSeqList.stream().anyMatch(f -> f.equals(String.valueOf(e.get("fileSeq"))))).collect(Collectors.toList());
+				addFileList = addFileList.stream().filter(e -> fileSeqList.stream().anyMatch(f -> f.equals(String.valueOf(e.get("fileSeq"))))).collect(Collectors.toList());
 			}
 		} else {
 			String fileSeq = (String) param.get("fileSeq");
@@ -9588,40 +9604,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				Map<String, Object> map = new HashMap<>();
 				map.put("fileSeq", fileSeq);
 				map.put("referenceDiv", referenceDiv);
-				delFileList.add(map);
+				addFileList.add(map);
 			}
 		}
 		
-		for (Map<String, Object> delFileInfo : delFileList) {
-			String referenceDiv = String.valueOf(delFileInfo.get("referenceDiv"));
-			String fileSeq = String.valueOf(delFileInfo.get("fileSeq"));
-			String refFileSeq = projectMapper.selectRefFileSeq(fileSeq);
-			String fileSeqStr = fileSeq;
-			if (!isEmpty(refFileSeq)) {
-				fileSeqStr = refFileSeq;
-			}
-			projectMapper.deleteProjectFileList(prjId, referenceDiv, fileSeqStr);
-			projectMapper.deleteLoadedOssComponents(prjId, referenceDiv, fileSeqStr);
+		for (Map<String, Object> addFile : addFileList) {
+			String referenceDiv = String.valueOf(addFile.get("referenceDiv"));
+			String fileSeq = String.valueOf(addFile.get("fileSeq"));
+			projectMapper.deleteProjectFileList(prjId, referenceDiv, fileSeq);
+			projectMapper.deleteLoadedOssComponents(prjId, referenceDiv, fileSeq);
 			
 			// delete Physical File
-			T2File file = fileService.selectFileInfo(fileSeqStr);
+			T2File file = fileService.selectFileInfo(fileSeq);
 			if (file != null) {
 				int cnt = projectMapper.selectProjectFileList(prjId, file.getFileId());
-				List<T2File> delFile = new ArrayList<>();
 				if (cnt == 0) {
+					List<T2File> delFile = new ArrayList<>();
 					delFile.add(file);
+					deleteFiles(delFile);
 					
 					project.setPrjId(prjId);
 					project.setIdentificationCsvFileFlag(CoConstDef.FLAG_YES);
 					projectMapper.updateFileId2(project);
 				}
-				if (!isEmpty(refFileSeq)) {
-					T2File fileInfo = fileService.selectFileInfo(fileSeq);
-					if (fileInfo != null) {
-						delFile.add(fileInfo);
-					}
-				}
-				deleteFiles(delFile, CoConstDef.CD_CHECK_OSS_IDENTIFICATION);
 			}
 		}
 	}
@@ -9785,6 +9790,129 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             List<ProjectIdentification> batchList = groupBomList.subList(i, end);
             projectMapper.insertOssComponentsSnapshot(batchList);
         }
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> validateAnalysisProgress(Map<String, Object> param) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		String prjId = String.valueOf(param.getOrDefault("prjId", ""));
+		String processor = String.valueOf(param.getOrDefault("processor", ""));
+		
+		if (isEmpty(prjId) || isEmpty(flScanServiceUrl)) {
+	        return rtnMap;
+	    }
+		
+		List<String> ossComponentIdList = null;
+		ObjectMapper mapper = new ObjectMapper();
+
+	    try {
+	    	ossComponentIdList = ossService.selectAnalysisListWithoutCoReviewer(prjId);
+	    	
+	        String requestUrl = flScanServiceUrl + "/api/project/" + prjId + "/status";
+	        String response = internalApiRestTemplate.getForObject(requestUrl, String.class);
+	        Map<String, Object> statusMap = mapper.readValue(response, new TypeReference<Map<String, Object>>() {});
+	        String apiStatus = String.valueOf(statusMap.getOrDefault("project_status", ""));
+	        String ossAnalysisStatus = avoidNull(ossService.getOssAnalysisStatus(prjId), "");
+	        rtnMap.put("ossAnalysisStatus", ossAnalysisStatus);
+	        rtnMap.put("coReviewerStatus", apiStatus);
+
+	        if (!"PROGRESS".equalsIgnoreCase(ossAnalysisStatus) || !"None".equalsIgnoreCase(apiStatus)) {
+	            return rtnMap;
+	        }
+
+			if (CollectionUtils.isEmpty(ossComponentIdList)) {
+		        log.info("No OSS components pending co-review for project: {}", prjId);
+		        return rtnMap;
+		    }
+	        
+	        String logUrl = flScanServiceUrl + "/api/project/" + prjId + "/logs";
+	        ResponseEntity<Resource> responseResource = internalApiRestTemplate.getForEntity(logUrl, Resource.class);
+	        
+	        if (!responseResource.getStatusCode().is2xxSuccessful() || responseResource.getBody() == null) {
+	            log.error("Failed to retrieve scanner logs. Status Code: {}", responseResource.getStatusCode());
+	            if (CollectionUtils.isNotEmpty(ossComponentIdList)) {
+	            	updateAllComponentsWithError(prjId, ossComponentIdList, "Scanner Log API Response Error (" + responseResource.getStatusCode() + ")");
+	            }
+	        }
+	        
+	        Map<String, Object> scannerMap;
+	        try {
+	            scannerMap = mapper.readValue(responseResource.getBody().getInputStream(), new TypeReference<Map<String, Object>>() {});
+	        } catch (Exception e) {
+	            log.error("FL Scanner JSON parsing error: {}", e.getMessage());
+	            updateAllComponentsWithError(prjId, ossComponentIdList, "Parsing Exception [JSON Error]");
+	            return rtnMap;
+	        }
+	        
+	        Map<String, Object> logsMap = (Map<String, Object>) scannerMap.get("logs");
+	        Set<String> apiGridIds = new HashSet<>();
+	        
+	        if (MapUtils.isNotEmpty(logsMap)) {
+	        	for (Object val : logsMap.values()) {
+	                if (!(val instanceof Map)) {
+	                	continue;
+	                }
+	                Map<String, Object> logEntry = (Map<String, Object>) val;
+	                String gridId = String.valueOf(logEntry.getOrDefault("grid_id", ""));
+	                String link = String.valueOf(logEntry.getOrDefault("link", ""));
+	                Map<String, Object> callback = (Map<String, Object>) logEntry.get("callback_result");
+	                
+	                if (!isEmpty(gridId) && MapUtils.isNotEmpty(callback)) {
+	                    apiGridIds.add(gridId);
+	                    
+	                    if (ossComponentIdList.contains(gridId)) {
+	                    	callback.put("project_id", prjId);
+	                    	callback.put("link", link);
+	                    	callback.put("processor", processor);
+	                    	callback.put("toSend", true);
+	                        sendCallbackApi(callback);
+	                    }
+	                }
+	            }
+	        }
+	        
+	        for (String dbId : ossComponentIdList) {
+	            if (!apiGridIds.contains(dbId)) {
+	                handleSingleComponentError(prjId, dbId, "ID Mismatch or Missing in Logs");
+	            }
+	        }
+	    } catch (Exception e) {
+	        log.error("Parsing Exception occurred. Updating all IDs in list: {}", e.getMessage());
+	        if (CollectionUtils.isNotEmpty(ossComponentIdList)) {
+	        	updateAllComponentsWithError(prjId, ossComponentIdList, "Parsing Error [Exception]");
+	        }
+	    }
+		
+		return rtnMap;
+	}
+
+	private void sendCallbackApi(Map<String, Object> callback) {
+		try {
+	        String port = CommonFunction.getProperty("server.port");
+	        String url = "http://127.0.0.1:" + port + "/api/v2/coReviewer/ossAnalysis/complete";
+	        
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+	        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(callback, headers);
+	        internalApiRestTemplate.postForEntity(url, entity, Map.class);
+	        
+	        log.info("Successfully sent callback for gridId: {}", callback.get("grid_id"));
+	    } catch (Exception e) {
+	        log.error("Callback API Post Error: {}", e.getMessage());
+	    }
+	}
+
+	private void updateAllComponentsWithError(String prjId, List<String> ossComponentIdList, String reason) {
+		for (String componentId : ossComponentIdList) {
+	        handleSingleComponentError(prjId, componentId, reason);
+	    }
+		log.info("Successfully updated error comments for {} component(s). Reason: {}", ossComponentIdList.size(), reason);
+	}
+
+	private void handleSingleComponentError(String prjId, String componentId, String reason) {
+		String errorComment = "<li><b>Parsing Error</b><br/>reason : [Failed] " + reason + "<br/><br/></li>";
+	    ossService.updateAnalysisComments(componentId, prjId, errorComment, "R");
 	}
 }
  

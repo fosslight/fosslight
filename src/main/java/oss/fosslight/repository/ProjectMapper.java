@@ -481,6 +481,4 @@ public interface ProjectMapper {
 	void insertOssComponentsSnapshot(List<ProjectIdentification> list);
 	
 	List<ProjectIdentification> selectOssComponentsSnapshot(ProjectIdentification bean);
-	
-	String selectRefFileSeq(@Param("fileSeq") String fileSeq);
 }
