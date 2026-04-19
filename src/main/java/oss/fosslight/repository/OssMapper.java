@@ -314,8 +314,4 @@ public interface OssMapper {
 	List<OssMaster> checkExistsOssDownloadLocationBulk(@Param("urls") List<String> urls);
 
 	List<OssMaster> checkExistsHomepageBulk(@Param("urls") List<String> urls);
-
-	List<String> selectAnalysisListWithoutCoReviewer(@Param("prjId") String prjId);
-
-	void updateAnalysisComments(@Param("componentId") String componentId, @Param("prjId") String prjId, @Param("comments") String comments, @Param("commentsFlag") String commentsFlag);
 }

@@ -312,12 +312,10 @@
         	setTimeout(function() {
         	    const $input = $('.ajs-content #expireDate');
         	    if ($input.length) {
-        	    	const defaultExpireDate = moment().add(1, 'year');
         	    	$input.daterangepicker({
         	            singleDatePicker: true,
         	            autoApply: true,
         	            parentEl: '.ajs-content',
-        	            startDate: defaultExpireDate,
         	            minDate: moment(),
         	            locale: {
         	                format: 'YYYY-MM-DD'

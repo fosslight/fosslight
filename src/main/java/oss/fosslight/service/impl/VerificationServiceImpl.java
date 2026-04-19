@@ -509,44 +509,24 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						log.debug(filePath + "/" + _fName + " is delete failed.");
 					}
 				}
-			}
-			
-			if (!isEmpty(contents)) {
-				String metaTag = "<meta charset=\"UTF-8\">";
-				String lowerContents = contents.toLowerCase();
-				if (!lowerContents.contains("charset=\"utf-8\"") && !lowerContents.contains("charset=utf-8")) {
-		            if (contents.contains("<head>")) {
-		                contents = contents.replace("<head>", "<head>\n    " + metaTag);
-		            } else if (contents.contains("<html>")) {
-		                contents = contents.replace("<html>", "<html>\n<head>\n    " + metaTag + "\n</head>");
-		            } else {
-		                contents = metaTag + "\n" + contents;
-		            }
-		        }
-		    }
+			}			
 			
 			String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "html");
 			
-			try {
-	            if (Files.notExists(rootPath)) {
-	                Files.createDirectories(rootPath);
-	            }
-	            
-	            Path targetFile = rootPath.resolve(fileName);
-	            Files.write(targetFile, StringUtil.nvl(contents, "").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-
-	            String FileSeq = fileService.registFileWithFileName(filePath, fileName);
-	            
-	            Project projectParam = new Project();
-	            projectParam.setPrjId(project.getPrjId());
-	            projectParam.setNoticeFileId(FileSeq);
-	            projectParam.setUseCustomNoticeYn(StringUtil.nvl(project.getUseCustomNoticeYn(), CoConstDef.FLAG_NO));
-	            
-	            verificationMapper.updateNoticeFileInfo(projectParam);
-	        } catch (IOException ioException) {
-	            log.error("File Write Error (UTF-8 Enforce): " + ioException.getMessage(), ioException);
-	            procResult = false;
-	        }
+			if (oss.fosslight.util.FileUtil.writeFile(filePath, fileName, contents)) {
+				// 파일 등록
+				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
+				
+				// project 정보 업데이트
+				Project projectParam = new Project();
+				projectParam.setPrjId(project.getPrjId());
+				projectParam.setNoticeFileId(FileSeq);
+				projectParam.setUseCustomNoticeYn(StringUtil.nvl(project.getUseCustomNoticeYn(),CoConstDef.FLAG_NO));
+				
+				verificationMapper.updateNoticeFileInfo(projectParam);
+			} else {
+				procResult = false;
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			
@@ -2509,7 +2489,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
-	public ResponseEntity<FileSystemResource> getReviewReport(String prjId, String rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX) throws IOException {
+	public ResponseEntity<FileSystemResource> getReviewReport(String prjId,
+			String rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX) throws IOException {
 		String fileName = "";
 		String filePath = rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX;
 

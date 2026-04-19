@@ -305,7 +305,6 @@
 			, T1.HOMEPAGE
 			, T1.DOWNLOAD_LOCATION
 			, T1.SUMMARY_DESCRIPTION
-			, T1.IMPORTANT_NOTES
 			, T1.ATTRIBUTION
 			, T1.CREATOR
 			, T1.MODIFIER
@@ -345,7 +344,6 @@
     			OC.HOMEPAGE,
 				OC.DOWNLOAD_LOCATION,
     			OC.SUMMARY_DESCRIPTION,
-    			OC.IMPORTANT_NOTES,
     			OV.LICENSE_DIV,
     			OV.USE_YN,
     			OV.VULN_CPE_NM,
@@ -460,9 +458,6 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(importantNotes)">
-			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.IMPORTANT_NOTES, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		AND
@@ -744,7 +739,6 @@
 			</otherwise>
 		</choose>
 			, T1.SUMMARY_DESCRIPTION
-			, T1.IMPORTANT_NOTES
 			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
 			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
             , T1.CVSS_SCORE      
@@ -783,7 +777,6 @@
     			OC.HOMEPAGE,
 				OC.DOWNLOAD_LOCATION,
     			OC.SUMMARY_DESCRIPTION,
-    			OC.IMPORTANT_NOTES,
     			OV.LICENSE_DIV,
     			OV.USE_YN,
     			OV.VULN_CPE_NM,
@@ -898,9 +891,6 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(importantNotes)">
-			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.IMPORTANT_NOTES, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{importantNotes},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 			AND
@@ -1116,7 +1106,6 @@
 			, T1.HOMEPAGE
 			, T1.DOWNLOAD_LOCATION
 			, T1.SUMMARY_DESCRIPTION
-			, T1.IMPORTANT_NOTES
 			, T1.ATTRIBUTION
 			, T1.CREATOR
 			, T1.MODIFIER
@@ -1154,7 +1143,6 @@
 			</otherwise>
 		</choose>
 			, T1.SUMMARY_DESCRIPTION
-			, T1.IMPORTANT_NOTES
 			, T1.ATTRIBUTION
 			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
 			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
@@ -1193,7 +1181,6 @@
     			OC.HOMEPAGE,
 				OC.DOWNLOAD_LOCATION,
     			OC.SUMMARY_DESCRIPTION,
-    			OC.IMPORTANT_NOTES,
     			OV.LICENSE_DIV,
     			OV.USE_YN,
     			OV.VULN_CPE_NM,
@@ -1284,9 +1271,6 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(importantNotes)">
-			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.IMPORTANT_NOTES, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{importantNotes},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 			AND
@@ -4655,9 +4639,7 @@
 	</select>
 	
 	<update id="updateSendMailFlagForCoReviewerEmails">
-		UPDATE OSS_ANALYSIS_STATUS
-		SET SEND_MAIL_FLAG = 'Y', STATUS = 'FAIL'
-		WHERE SEND_MAIL_FLAG = 'N'
+		UPDATE OSS_ANALYSIS_STATUS SET SEND_MAIL_FLAG = 'Y' WHERE SEND_MAIL_FLAG = 'N'
 	</update>
 	
 	<select id="checkExistsOssNicknameBulk" resultType="oss.fosslight.domain.OssMaster">
@@ -4752,21 +4734,4 @@
 		GROUP BY A.OSS_NAME
 		ORDER BY A.S_ORDER
     </select>
-    
-    <select id="selectAnalysisListWithoutCoReviewer" parameterType="string" resultType="string">
-		SELECT OAM.COMPONENT_ID 
-		FROM OSS_ANALYSIS_STATUS OAS
-		INNER JOIN OSS_ANALYSIS_MAP OAM
-		ON OAS.PRJ_ID = OAM.REFERENCE_ID
-		AND OAS.STATUS = 'PROGRESS'
-		WHERE OAM.REFERENCE_ID = #{prjId} 
-		AND IFNULL(OAM.COREVIEWER_YN, '') = 'N'
-	</select>
-	
-	<update id="updateAnalysisComments" parameterType="string">
-		UPDATE OSS_ANALYSIS_MAP
-		SET COMMENTS_FLAG = #{commentsFlag}, COMMENTS = #{comments}, COREVIEWER_YN = 'Y'
-		WHERE REFERENCE_ID = #{prjId}
-		AND COMPONENT_ID = #{componentId}
-	</update>
 </mapper>

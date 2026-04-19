@@ -3544,8 +3544,11 @@ var com_fn = {
 			var accept1 = '';
 			var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
 			for (var i in fileAccept) {
-				if ('12' == fileAccept[i].cdDtlNo) {
-					accept1 = fileAccept[i].cdDtlExp;
+				if ('12' == fileAccept[i].cdDtlNo || "42" == fileAccept[i].cdDtlNo || "43" == fileAccept[i].cdDtlNo) {
+					if ("" != accept1) {
+						accept1 += ",";
+					}
+					accept1 += fileAccept[i].cdDtlExp;
 				}
 			}
 			
@@ -3575,7 +3578,7 @@ var com_fn = {
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 					} else {
-						if (result[0] == "FILE_SIZE_LIMIT_OVER") {
+						if ("FILE_SIZE_LIMIT_OVER" == result[0] || "UNSUPPORTED_FILE" == result[0] || "FILE_CONVERSION_FAILED" == result[0]) {
 							alertify.alert(result[1], function(){
 								$('.ajax-file-upload-statusbar').fadeOut('slow');
 								$('.ajax-file-upload-statusbar').remove();

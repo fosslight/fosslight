@@ -17,9 +17,9 @@
                                 	<!-- <div class="card collapsed-card search-form"> -->
                                 	<div class="card-header" style="border-bottom: none;">
                                         <div class="row">
-											<div class="col-md-7 d-flex pr-0">
+											<div class="col-md-7 d-flex">
 												<div class="row" style="width: 100%;">
-													<div class="col-lg-12 pr-0">
+													<div class="col-12">
 														<div class="input-group">
 															<input class="save-value" name="defaultSearchType" type="hidden" th:value="SELF_CHECK"/>
 															<button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_SelfCheck', '/selfCheck/edit')|" th:text="|+ Add|"></button>
@@ -37,17 +37,10 @@
 													</div>
 												</div>
 											</div>
-											<div class="col-md-3 pl-0 d-flex justify-content-start">
+											<div class="col-md-3 pl-3 d-flex justify-content-start">
 												<div class="input-group-append d-flex align-items-center">
-													<button class="btn btn-ivory btn-sm btn-icon mr-1" th:onclick="|resetForm('projectSearch')|" data-toggle="tooltip" data-placement="bottom" type="button" th:title="|reset|">
-											            <i class="fa fa-undo"></i>
-											        </button>
-											        <button class="btn btn-ivory btn-sm btn-icon mr-3" th:onclick="|updateSearchCondition('projectSearch')|" data-toggle="tooltip" data-placement="bottom" type="button" th:title="|save conditions|">
-											            <i class="fa fa-save"></i>
-											        </button>
-										        	<a class="text-blue-gray d-flex flex-column align-items-center" data-card-widget="collapse" style="font-size: 1rem; cursor: pointer; line-height: 1.1;" title="Collapse">
-														<span th:text="'+ Advanced Search'"></span>
-														<span class="text-lg-red text-xs mt-1 optionSelected" style="display: none;" th:text="'option selected'"></span>
+													<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+														<span class="row" th:text="'+ Advanced Search'"></span><span class="row ml-3 text-lg-red text-xs optionSelected" style="display: none;" th:text="'option selected'"></span>
 													</a>
 												</div>
 											</div>
@@ -63,6 +56,11 @@
                                 	</div>
                                 	<div class="card-body py-1">
                                 		<div class="row">
+<!--                                     	<div class="col-4">
+                                        		<div class="form-group">
+													<input type="text" name="prjId" class="form-control save-value" placeholder="ID" th:value="${searchBean?.prjId}"/>
+                                            	</div>
+                                      		</div> -->
                                         	<div class="col-3">
                                         		<div class="form-group">
                                             		<div class="form-group">
@@ -97,6 +95,18 @@
                                            		</div>
                                       		</div>
                                    		</div>
+                                   		<div class="row">
+                               				<div class="col-md-12">
+                               					<div class="p-2 text-center">
+                                         			<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-download mr-xm"></i> save conditions
+                                         			</button>
+                                           			<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-undo mr-xm"></i> reset
+                                           			</button>
+                                       			</div>
+                               				</div>
+                               			</div>
                                 	</div>
                             	</div>
                         	</div>
@@ -104,7 +114,12 @@
 					</form>
                     <div class="row px-1">
                         <div class="col-md-6"></div>
-                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+<!--                    	<div class="row float-right">
+                              	<button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                               <button type="button" class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_SelfCheck', '/selfCheck/edit')|" th:text="Add"></button>
+                            </div> -->
+                        </div>
                     </div>
 
                     <div class="row">

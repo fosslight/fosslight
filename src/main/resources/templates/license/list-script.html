@@ -617,24 +617,16 @@
 
                          var pageButtonArea = $('#list_toppager_left');
                         if (pageButtonArea.find('button').length == 0) {
+                        	var appendIcon = "";
                             if ([[${@CommonFunction.isAdmin()}]]) {
-                            	var appendIcon = `
-                                    <button type="button" class="btn btn-sm btn-grid-light-gray float-left ml-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Add License">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                        <span class="dropdown-item pointer" title="Add License" onclick="createTabInFrame('New_License', '/license/edit')">Add License</span>
-                                        <span class="dropdown-item pointer" title="Bulk Registration" onclick="createTabInFrame('BulkReg_License', '/license/licenseBulkReg')">Bulk Registration</span>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-grid-light-gray float-left ml-1" title="Delete License" onclick="fn.deleteLicense()">
-                                        <i class="far fa-trash-alt"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-grid-light-gray float-left ml-1" title="Export License List" onclick="fn.downloadExcel()">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                `;
-                            	pageButtonArea.append(appendIcon);
+                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
+                            	appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" title=\"Add License\" onclick=\"createTabInFrame('New_License', '/license/edit')\">Add License</span>";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" title=\"Bulk Registration\" onclick=\"createTabInFrame('BulkReg_License', '/license/licenseBulkReg')\">Bulk Registration</span></div>";
+                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete License\" onclick=\"fn.deleteLicense()\"><i class=\"far fa-trash-alt\"></i></button>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export License List\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
                             }
+                            pageButtonArea.append(appendIcon);
                         }
                         
                         var setUpColumnButton = $('#setUpColumnButtonLic');
