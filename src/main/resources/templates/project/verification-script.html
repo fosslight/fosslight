@@ -207,6 +207,32 @@
                 selectedList.push("chkAllowDownloadNoticeHTML");
                 datas.noticeFileFormat = selectedList;
             });
+            
+            const $noticeFileFormat = $('#noticeFileFormat');
+            const $docType = $('#docType');
+            
+            $noticeFileFormat.on('select2:selecting', function(e) {
+            	if ($("#hideOssVersion").is(':checked')) {
+                    const selectedVal = e.params.args.data.id;
+                    if (/SPDX|CDX/i.test(selectedVal)) {
+                        e.preventDefault();
+                        alertify.alert([[#{msg.package.notice.file.format.unavailable}]], function(){});
+                    }
+                }
+            });
+
+            $docType.on('change', function(e) {
+                if ($("#hideOssVersion").is(':checked')) {
+                    const currentVal = $(this).val();
+                    if (/SPDX|CDX/i.test(currentVal)) {
+                    	e.preventDefault();
+                        alertify.alert([[#{msg.package.notice.file.format.unavailable}]], function(){
+                        	const firstVal = $docType.find('option:first').val();
+                            $docType.val(firstVal);
+                        });
+                    }
+                }
+            });
         });
 
         var datas = {

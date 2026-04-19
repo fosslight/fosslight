@@ -3746,6 +3746,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			{
 				// BOM에 사용된 OSS Info중 License identifier가 설정되어 있지 않은 license 정보만 출력한다.
 				List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("noticeObligationList");
+				List<OssComponents> notObligationList = (List<OssComponents>) packageInfo.get("notObligationList");
+				if (CollectionUtils.isNotEmpty(notObligationList)) {
+					noticeList.addAll(notObligationList);
+				}
 				Map<String, LicenseMaster> nonIdetifierNoticeList = new HashMap<>();
 
 				for (OssComponents ocBean : noticeList) {
@@ -3756,7 +3760,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						licenseList = Arrays.asList(ocBean.getLicenseName());
 					} else {
 						OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
-						licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
+						if (_ossBean != null) {
+							licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
+						} else {
+							licenseList = Arrays.stream(ocBean.getLicenseName().split(",")).map(String::trim).collect(Collectors.toList());
+						}
 					}
 
 					for (String licenseNm : licenseList) {

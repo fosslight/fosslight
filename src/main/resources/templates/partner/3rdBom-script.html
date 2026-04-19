@@ -1520,7 +1520,7 @@ var bom_data = {
 					return true;
 				}
 				, onCellSelect: function(rowid,iCol,cellcontent,e) {
-					if (iCol == "1") {
+					if (iCol == "0") {
 						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					}
 				}
@@ -1541,9 +1541,9 @@ var bom_data = {
 							componentId = componentId.split(",")[0];	
 						}
 						
-						$("#tabMenuPartyBom").trigger("click");
-						$("#bomList").jqGrid("setSelection", componentId);
-						$("#bomList #" +componentId).focus();
+						$("#tabMenuParty").trigger("click");
+						$("#list").jqGrid("setSelection", componentId);
+						$("#list #" +componentId).focus();
 					}
 				}
 				, onPaging: function(action) {

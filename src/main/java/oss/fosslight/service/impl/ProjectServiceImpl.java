@@ -58,24 +58,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.CoMail;
-import oss.fosslight.domain.CoMailManager;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssComponentsLicense;
-import oss.fosslight.domain.OssLicense;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.PartnerMaster;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.ProjectIdentificationTree;
-import oss.fosslight.domain.T2File;
-import oss.fosslight.domain.T2Users;
-import oss.fosslight.domain.UploadFile;
-import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -4189,6 +4172,44 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
 				pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
 				rows = (List<ProjectIdentification>) map.get("rows");
+
+				Map<String, String> restrictionMap = new HashMap<>();
+				for (CoCodeDtl codeDtl : CoCodeManager.getCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION)) {
+					try {
+						int level = Integer.parseInt(avoidNull(codeDtl.getCdSubNo(), "0"));
+						if (level >= 4) {
+							restrictionMap.put(
+									avoidNull(codeDtl.getCdDtlNm()).trim().toUpperCase(),
+									avoidNull(codeDtl.getCdDtlNm()).trim() + " : " + avoidNull(codeDtl.getCdDtlExp()).trim());
+						}
+					} catch (NumberFormatException e) {
+						log.debug("Skip invalid restriction level. name: {}, level: {}", codeDtl.getCdDtlNm(), codeDtl.getCdSubNo());
+					}
+				}
+
+				Map<String, String> matchedRestrictionMessageMap = new LinkedHashMap<>();
+				for (ProjectIdentification _projectBean : rows) {
+					String restrictionRaw = avoidNull(_projectBean.getRestriction());
+					if (isEmpty(restrictionRaw)) {
+						continue;
+					}
+
+					for (String restrictionName : restrictionRaw.split("[\\|\\r\\n]+")) {
+						String restrictionKey = avoidNull(restrictionName).trim().toUpperCase();
+						if (isEmpty(restrictionKey) || restrictionKey.matches("\\d+")) {
+							continue;
+						}
+
+						if (restrictionMap.containsKey(restrictionKey)) {
+							matchedRestrictionMessageMap.put(restrictionKey, restrictionMap.get(restrictionKey));
+						}
+					}
+				}
+
+				if(matchedRestrictionMessageMap.size() > 0) {
+					userComment = avoidNull(userComment) + "<span style=\"color:red\"><b>Precautions for Use</b></br>"
+							+ matchedRestrictionMessageMap.values().stream().collect(Collectors.joining("</br>")) + "</span></br>";
+				}
 				
 				T2CoValidationResult vr = pv.validate(new HashMap<>());
 				
