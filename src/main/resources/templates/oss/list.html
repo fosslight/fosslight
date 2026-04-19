@@ -19,9 +19,9 @@
                             <div class="card card-dark card-outline collapsed-card search-form mb-3">
                                 <div class="card-header" style="border-bottom: none;">
                                     <div class="row">
-                                        <div class="col-md-7 d-flex">
+                                        <div class="col-md-7 d-flex pr-0">
                                             <div class="row" style="width: 100%;">
-                                            	<div class="col-12">
+                                            	<div class="col-lg-12 pr-0">
                                             		<div class="input-group">
                                                 		<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|" th:text="|+ Add|"></button>
                                                     	<input class="form-control save-value" style="border-right: 0px solid #fff;" name="ossName" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text">
@@ -39,10 +39,17 @@
                                             	</div>
                                             </div>
                                         </div>
-                                        <div class="col-md-3 pl-3 d-flex justify-content-start">
+                                        <div class="col-md-3 pl-0 d-flex justify-content-start">
                                             <div class="input-group-append d-flex align-items-center">
-                                            	<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
-                                            		<span class="row" th:text="'+ Advanced Search'"></span><span class="row ml-3 text-lg-red text-xs optionSelected" style="display: none;" th:text="'option selected'"></span>
+                                            	<button class="btn btn-ivory btn-sm btn-icon mr-1" th:onclick="|resetForm('ossSearch')|" data-toggle="tooltip" data-placement="bottom" type="button" th:title="|reset|">
+										            <i class="fa fa-undo"></i>
+										        </button>
+										        <button class="btn btn-ivory btn-sm btn-icon mr-3" th:onclick="|updateSearchCondition('ossSearch')|" data-toggle="tooltip" data-placement="bottom" type="button" th:title="|save conditions|">
+										            <i class="fa fa-save"></i>
+										        </button>
+										        <a class="text-blue-gray d-flex flex-column align-items-center" data-card-widget="collapse" style="font-size: 1rem; cursor: pointer; line-height: 1.1;" title="Collapse">
+                                            		<span th:text="'+ Advanced Search'"></span>
+                                            		<span class="text-lg-red text-xs mt-1 optionSelected" style="display: none;" th:text="'option selected'"></span>
                                             	</a>
                                            	</div>
                                         </div>
@@ -58,142 +65,40 @@
                                 </div>
                                 <div class="card-body py-1">
                                     <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="input-group mb-2">
-                                                <input class="form-control autoComLicense save-value" name="licenseName" style="border-right: 0px solid #fff;" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
-                                                    	<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y' }" type="checkbox">
-                                                		<label class="form-check-label text-blue-gray text-sm" for="licenseNameAllSearchFlag" th:text="'Exact Match'"></label>
-                                                		<input class="form-check-input text-orange save-value" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" type="hidden"/>
-                                                    </span>
-                                              	</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="input-group mb-2">
-                                                <input class="form-control autoComDetectedLicense" name="detectedLicenseName" style="border-right: 0px solid #fff;" placeholder="Detected License Name" type="text"/>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
-                                                    	<input class="form-check-input" id="detectedLicenseNameAllSearchFlag" type="checkbox">
-                                                		<label class="form-check-label text-blue-gray text-sm" for="detectedLicenseNameAllSearchFlag" th:text="'Exact Match'"></label>
-                                                		<input class="form-check-input text-orange" name="detectedLicenseNameAllSearchFlag" type="hidden"/>
-                                                    </span>
-                                              	</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="input-group mb-2">
-                                                <input class="form-control save-value" name="homepage" placeholder="Website" style="border-right: 0px solid #fff;" th:value="${searchBean.homepage}" type="text">
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
-                                                    	<input class="form-check-input" id="homepageAllSearchFlag" th:checked="${searchBean.homepageAllSearchFlag == 'Y' }" type="checkbox">
-                                                		<label class="form-check-label text-blue-gray text-sm" for="homepageAllSearchFlag" th:text="'Exact Match'"></label>
-                                                		<input class="form-check-input text-orange save-value" name="homepageAllSearchFlag" th:value="${searchBean.homepageAllSearchFlag}" type="hidden"/>
-                                                    </span>
-                                              	</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-5">
-                                            <div class="form-group mb-2">
-                                                <textarea class="form-control save-value" name="copyrights" placeholder="Copyright Text" rows="3" th:text="${searchBean.copyright}"></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-5">
-                                            <div class="form-group mb-2">
-                                                <textarea class="form-control save-value" name="summaryDescription" placeholder="Description" rows="3" th:text="${searchBean.summaryDescription}"></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group mb-2">
-                                                <input class="form-control save-value" id="cvssScoreInput" name="cvssScore" placeholder="Vulnerability (>=)" th:value="${searchBean.cvssScore}" type="text">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group mb-2">
-                                                <input class="form-control save-value" id="cveIdInput" name="cveId" placeholder="Cve Id" th:value="${searchBean.cveId}" type="text">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3 d-flex justify-content-start mx-2">
-                                            <div class="form-group mb-2 d-flex align-items-center">
-                                                <div class="form-check mb-1" style="font-size: .85rem">
-                                                    <input class="form-check-input text-orange" id="deactivateFlag" th:checked="${searchBean.deactivateFlag == 'Y'}" type="checkbox">
-                                                    <label class="form-check-label text-lg-gray" for="deactivateFlag" th:text="'Deactive'"></label>
-                                                    <input class="form-check-input text-orange save-value" name="deactivateFlag" th:value="${searchBean.deactivateFlag}" type="hidden">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-										<div class="col-md-10">
-											<div class="form-group mb-2">
-												<select class="select2 save-value" id="restrictionSelect" multiple="multiple" name="arrRestriction" style="width: 100%;">
-													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
-															th:text="${code.cdDtlNm}"
-															th:value="${code.cdDtlNo}">
-													</option>
-												</select>
-											</div>
-										</div>
-									</div>
-                                   	<div class="row">
-                                     	<div class="col-md-3">
+                                    	<div class="col-md-6 pl-3 pr-3 search-divider">
+                                    		<h5 class="search-title pt-2" th:text="'Basic Info'"></h5>
+                                    		<div class="form-group mb-2">
+                                               	<input class="form-control" id="createdDate" type="text"/>
+                                              	<input class="form-control save-value" name="cStartDate" type="hidden" th:value="${searchBean?.cStartDate}"/>
+                                              	<input class="form-control save-value" name="cEndDate" type="hidden" th:value="${searchBean?.cEndDate}"/>
+                                           	</div>
                                            	<div class="form-group mb-2">
+                                             	<input class="form-control" id="modifiedDate" placeholder="Modified Date" type="text"/>
+                                              	<input class="form-control save-value" name="mStartDate" th:value="${searchBean?.mStartDate}" type="hidden"/>
+                                              	<input class="form-control save-value" name="mEndDate" th:value="${searchBean?.mEndDate}" type="hidden"/>
+                                          	</div>
+                                          	
+                                          	<h5 class="search-title pt-2" th:text="Personnel"></h5>
+                                          	<div class="form-group mb-2">
                                               	<select class="select2 save-value" id="creatorSelect" name="creator" style="width: 100%;">
                                                  	<option value=""></option>
                                                   	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.creator)}"></th:block>
                                              	</select>
                                           	</div>
-                                     	</div>
-                                      	<div class="col-md-3">
-                                          	<div class="form-group mb-2">
-                                               	<input class="form-control" id="createdDate" type="text"/>
-                                              	<input class="form-control save-value" name="cStartDate" type="hidden" th:value="${searchBean?.cStartDate}"/>
-                                              	<input class="form-control save-value" name="cEndDate" type="hidden" th:value="${searchBean?.cEndDate}"/>
-                                           	</div>
-                                       	</div>
-                                      	<div class="col-md-3">
                                           	<div class="form-group mb-2">
                                               	<select class="select2 save-value" id="modifierSelect" name="modifier" style="width: 100%;">
                                                 	<option value=""></option>
-                                                  	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.modifier)}"></th:block>
+                                                	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.modifier)}"></th:block>
                                              	</select>
                                         	</div>
-                                    	</div>
-                                       	<div class="col-md-3">
-                                          	<div class="form-group mb-2">
-                                             	<input class="form-control" id="modifiedDate" placeholder="Modified Date" type="text"/>
-                                              	<input class="form-control save-value" name="mStartDate" th:value="${searchBean?.mStartDate}" type="hidden"/>
-                                              	<input class="form-control save-value" name="mEndDate" th:value="${searchBean?.mEndDate}" type="hidden"/>
-                                          	</div>
-                                       	</div>
-                                       	<div class="col-md-3">
-                                     		<select class="select2 save-value" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
-                                             	<option value=""></option>
-                                               	<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                                	<option th:text="${code.cdDtlNm}"
-                                                          	th:value="${code.cdDtlNo}"
-                                                          	th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}"></option>
-                                               	</th:block>
-                                          	</select>
-                                   		</div>
-                                     	<div class="col-md-3">
-                                     		<div class="form-group mb-2">
-                                     			<th:block th:with="ossTypeSearch=${#strings.arraySplit(searchBean.ossTypeSearch, ',')}">
-                                            		<select class="select2 save-value" multiple="multiple" name="ossTypeSearch" id="ossTypeSearchSelect" style="width: 100%;">
-                                                		<option th:text="None" th:value="N" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'N')}"></option>
-                                                    	<option th:text="Multi" th:value="M" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'M')}"></option>
-                                                    	<option th:text="Dual" th:value="D" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'D')}"></option>
-                                                    	<option th:text="V-Diff" th:value="V" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'V')}"></option>
-                                               		</select>
-                                               	</th:block>
+                                        	
+                                        	<h5 class="search-title pt-2" th:text="'OSS Vulnerability'"></h5>
+                                        	<div class="form-group mb-2">
+                                                <input class="form-control save-value" id="cveIdInput" name="cveId" placeholder="Cve Id" th:value="${searchBean.cveId}" type="text">
                                             </div>
-                                      	</div>
-                                      	<div class="col-md-3">
+                                        	<div class="form-group mb-2">
+                                                <input class="form-control save-value" id="cvssScoreInput" name="cvssScore" placeholder="Vulnerability (>=)" th:value="${searchBean.cvssScore}" type="text">
+                                            </div>
                                             <div class="input-group mb-2">
                                                 <input class="form-control" name="includeCpe" style="border-right: 0px solid #fff;" placeholder="Include cpe" value="" type="text"/>
                                                 <div class="input-group-append">
@@ -204,8 +109,6 @@
                                                     </span>
                                               	</div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-3">
                                             <div class="input-group mb-2">
                                                 <input class="form-control" name="excludeCpe" style="border-right: 0px solid #fff;" placeholder="Exclude cpe" value="" type="text"/>
                                                 <div class="input-group-append">
@@ -216,59 +119,98 @@
                                                     </span>
                                               	</div>
                                             </div>
-                                        </div>
-                                 	</div>
-                                 	<div th:if="${@CommonFunction.isAdmin()}" class="row">
-                                 		<div class="col-md-4">
-                                 			<div class="form-group mb-2">
-                                                <input type="text" class="form-control" id="comment" name="comment" placeholder="Comment (Admin Only)"/>
+                                            
+                                            <th:block th:if="${@CommonFunction.isAdmin()}">
+                                            	<h5 class="search-title pt-2" th:text="Others"></h5>
+                                            	<div class="form-group mb-2">
+	                                                <input type="text" class="form-control" id="comment" name="comment" placeholder="Comment (Admin Only)"/>
+	                                            </div>
+                                            </th:block>
+                                    	</div>
+                                    	<div class="col-md-6 pl-3 pr-3">
+                                    		<h5 class="search-title pt-2" th:text="'OSS Details'"></h5>
+                                    		<div class="input-group mb-2">
+                                                <input class="form-control autoComLicense save-value" name="licenseName" style="border-right: 0px solid #fff;" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
+                                                    	<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y' }" type="checkbox">
+                                                		<label class="form-check-label text-blue-gray text-sm" for="licenseNameAllSearchFlag" th:text="'Exact Match'"></label>
+                                                		<input class="form-check-input text-orange save-value" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" type="hidden"/>
+                                                    </span>
+                                              	</div>
                                             </div>
-                                 		</div>
-                                 	</div>
-                               	<div class="row mt-2">
-                               		<div class="col-md-12">
-                               			<div class="p-2 text-center">
-                                         	<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('ossSearch')|" data-toggle="tooltip" data-placement="right" type="button">
-                                              	<i class="fa fa-download px-1"></i> save conditions
-                                         	</button>
-                                           	<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('ossSearch')|" data-toggle="tooltip" data-placement="right" type="button">
-                                              	<i class="fa fa-undo px-1"></i> reset
-                                           	</button>
-                                       	</div>
-                               		</div>
-                               	</div>
+                                            <div class="input-group mb-2">
+                                                <input class="form-control autoComDetectedLicense" name="detectedLicenseName" style="border-right: 0px solid #fff;" placeholder="Detected License Name" type="text"/>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
+                                                    	<input class="form-check-input" id="detectedLicenseNameAllSearchFlag" type="checkbox">
+                                                		<label class="form-check-label text-blue-gray text-sm" for="detectedLicenseNameAllSearchFlag" th:text="'Exact Match'"></label>
+                                                		<input class="form-check-input text-orange" name="detectedLicenseNameAllSearchFlag" type="hidden"/>
+                                                    </span>
+                                              	</div>
+                                            </div>
+                                            <div class="form-group mb-2">
+                                            	<select class="select2 save-value" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
+	                                             	<option value=""></option>
+	                                               	<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+	                                                	<option th:text="${code.cdDtlNm}"
+	                                                          	th:value="${code.cdDtlNo}"
+	                                                          	th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}"></option>
+	                                               	</th:block>
+	                                          	</select>
+                                            </div>
+                                            <div class="form-group mb-2">
+                                     			<th:block th:with="ossTypeSearch=${#strings.arraySplit(searchBean.ossTypeSearch, ',')}">
+                                            		<select class="select2 save-value" multiple="multiple" name="ossTypeSearch" id="ossTypeSearchSelect" style="width: 100%;">
+                                                		<option th:text="None" th:value="N" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'N')}"></option>
+                                                    	<option th:text="Multi" th:value="M" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'M')}"></option>
+                                                    	<option th:text="Dual" th:value="D" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'D')}"></option>
+                                                    	<option th:text="V-Diff" th:value="V" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'V')}"></option>
+                                               		</select>
+                                               	</th:block>
+                                            </div>
+                                            <div class="form-group mb-2">
+												<select class="select2 save-value" id="restrictionSelect" multiple="multiple" name="arrRestriction" style="width: 100%;">
+													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+															th:text="${code.cdDtlNm}"
+															th:value="${code.cdDtlNo}">
+													</option>
+												</select>
+											</div>
+											<div class="input-group mb-2">
+                                                <input class="form-control save-value" name="homepage" placeholder="Website" style="border-right: 0px solid #fff;" th:value="${searchBean.homepage}" type="text">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
+                                                    	<input class="form-check-input" id="homepageAllSearchFlag" th:checked="${searchBean.homepageAllSearchFlag == 'Y' }" type="checkbox">
+                                                		<label class="form-check-label text-blue-gray text-sm" for="homepageAllSearchFlag" th:text="'Exact Match'"></label>
+                                                		<input class="form-check-input text-orange save-value" name="homepageAllSearchFlag" th:value="${searchBean.homepageAllSearchFlag}" type="hidden"/>
+                                                    </span>
+                                              	</div>
+                                            </div>
+											<div class="form-group mb-2">
+                                                <textarea class="form-control save-value" name="copyrights" placeholder="Copyright Text" rows="2" th:text="${searchBean.copyright}"></textarea>
+                                            </div>
+											<div class="form-group mb-2">
+                                                <textarea class="form-control save-value" name="summaryDescription" placeholder="Summary Description" rows="2" th:text="${searchBean.summaryDescription}"></textarea>
+                                            </div>
+                                            <div class="form-group mb-2">
+                                                <textarea class="form-control save-value" name="importantNotes" placeholder="Important Notes" rows="2" th:text="${searchBean.importantNotes}"></textarea>
+                                            </div>
+                                            <div class="form-group mb-2 d-flex align-items-center">
+                                                <div class="icheck-primary center-atom mb-1" style="font-size: .85rem">
+                                                    <input class="form-check-input text-orange" id="deactivateFlag" th:checked="${searchBean.deactivateFlag == 'Y'}" type="checkbox">
+                                                    <label class="form-check-label text-lg-gray" for="deactivateFlag" th:text="'Deactive'"></label>
+                                                    <input class="form-check-input text-orange save-value" name="deactivateFlag" th:value="${searchBean.deactivateFlag}" type="hidden">
+                                                </div>
+                                            </div>
+                                    	</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </form>
-                <div class="row px-1">
-<!--              	<div class="col-md-6">
-                		<div class="row">
-                            <th:block th:if="${@CommonFunction.isAdmin()}">
-                                <button class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|oss_lst_fn.deleteOss()|"
-                                        th:text="Delete" type="button"></button>
-                            </th:block>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                		<div class="row float-right">
-                            <th:block th:if="${@CommonFunction.isAdmin() and project?.dropYn != 'Y'}">
-                                <button class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')|"
-                                        th:text="'Bulk Registration'"
-                                        type="button"></button>
-                            </th:block>
-                            <button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"
-                                    type="button"><i class="far fa-file-excel mr-2"></i>Export
-                            </button>
-                            <th:block th:if="${@CommonFunction.isAdmin()}">
-                                <button class="btn btn-danger btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|"
-                                        th:text="Add"
-                                        type="button"></button>
-                            </th:block>
-                        </div>
-                    </div> -->
-                </div>
+                <div class="row px-1"></div>
                 <div class="row">
                     <div class="col-12 mt-3">
                         <div class="col-sm-12 jqGridSet" id="ossGrid">

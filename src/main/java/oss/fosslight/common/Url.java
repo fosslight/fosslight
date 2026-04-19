@@ -266,6 +266,8 @@ public final class Url {
 		public static final String CHECK_OSS_VERSION_DIFF = PATH + "/checkOssVersionDiff";
 		public static final String CHECK_OSS_NAME_DIFF = PATH + "/checkOssNameDiff";
 		public static final String SHARE_URL = PATH + "/shareUrl/{ossId}";
+		
+		public static final String FETCH_OSS_DETAIL = PATH + "/fetchOssDetail";
 	}
 	
 	public static final class PROJECT {
@@ -431,6 +433,8 @@ public final class Url {
 		public static final String REQUEST_PERMISSION = PATH + "/requestPermission";
 		public static final String CANCEL_REQUEST_PERMISSION = PATH + "/cancelRequestPermission";
 		public static final String SET_PROEJCT_PERMISSION = PATH + "/setProjectPermission";
+		
+		public static final String VALIDATE_ANALYSIS_PROGRESS = PATH + "/validateAnalysisProgress";
 	}
 	
 	public static final class VERIFICATION {

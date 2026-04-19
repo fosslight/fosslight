@@ -6,7 +6,6 @@
 package oss.fosslight.service.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,15 +13,17 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -33,17 +34,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.Component;
-import org.cyclonedx.model.ExternalReference;
-import org.spdx.tools.Main;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -66,23 +57,7 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.util.CompressUtil;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
-import oss.fosslight.util.SPDXUtil2;
 import oss.fosslight.util.StringUtil;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import org.w3c.dom.*;
-
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import java.util.*;
 
 @Service("fileService")
 @Slf4j
@@ -185,7 +160,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 			
 			String fileExt = FilenameUtils.getExtension(originalFileName);
-			String originalFileExt = fileExt; 
 			
 			if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 				fileExt = "tgz.gz";
@@ -206,176 +180,21 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 			
 			UUID randomUUID = UUID.randomUUID();
-			boolean isConverted = false;
-			long finalFileSize = mFile.getSize();
-			
-			try {
-				byte[] content = mFile.getBytes();
-				String contentStr = new String(content, StandardCharsets.UTF_8).trim();
-				
-				boolean isCycloneDxFile = isCycloneDX(contentStr);
-				boolean isSpdxFile = isSPDX(contentStr);
-				boolean isNotExcel = !fileExt.equalsIgnoreCase("xls");
-				
-				if (isCycloneDxFile || (isSpdxFile && isNotExcel)) {
-					String tempId = "temp_" + UUID.randomUUID().toString().substring(0, 8);
-					File tempFile = null;
-					
-					try {
-						File tempDir = new File(uploadFilePath);
-						if (!tempDir.exists()) {
-							tempDir.mkdirs();
-						}
-						
-						tempFile = File.createTempFile("spdx_origin_" + tempId, "." + fileExt, tempDir);
-						try (InputStream is = mFile.getInputStream()) {
-						    Files.copy(is, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-						} catch (IOException e) {
-						    log.error("An error occurred while copying files: {}", e.getMessage());
-						    
-						    upFile.setUploadSucc(false);
-		                	result.add(upFile);
-		                	return result;
-						}
-						
-						boolean isConvert = false;
-						String uploadFileName = "";
-						String convertFullStrPath = "";
-						
-			            if (isSpdxFile && isNotExcel) {
-			            	fileExt = "xlsx";
-							originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
-							uploadFileName = randomUUID + "." + fileExt;
-				            convertFullStrPath = uploadFilePath + "/" + uploadFileName;
-			            	
-			            	try {
-			            		String[] args = null;
-			            		switch (originalFileExt.toLowerCase()) {
-				            		case "yaml":
-				            			isConvert = convertYamlToXls(tempFile.toPath(), Paths.get(convertFullStrPath));
-				            			break;
-				            		case "rdf":
-				            		case "spdx":
-				            			args = new String[]{"Convert", tempFile.getPath(), convertFullStrPath};
-				            			Main.main(args);
-				            			break;
-				            		default : 
-				            			tempFile = getCleanedSpdxFile(tempId, tempFile);
-				            			if (tempFile == null) {
-						            		upFile.setUploadSucc(false);
-						            		upFile.setComments("parsing error.");
-						            		result.add(upFile);
-						                	return result;
-						            	}
-				            			SPDXUtil2.convert(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
-				            			break;
-				            	}
-			            	} catch (Exception e) {
-			            		log.error("SPDXUtil2.convert error : {}", e.getMessage());
-			            		upFile.setUploadSucc(false);
-			            		upFile.setComments(e.getMessage());
-			            		result.add(upFile);
-			                	return result;
-			            	}
-			            	isConvert = new File(convertFullStrPath).exists();
-			            } else {
-			            	fileExt = "xls";
-			            	originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
-							uploadFileName = randomUUID + "." + fileExt;
-				            convertFullStrPath = uploadFilePath + "/" + uploadFileName;
-			            	isConvert = convertCdxToExcel(tempFile, contentStr, convertFullStrPath);
-			            }
-			            
-			            if ((isCycloneDxFile && !isConvert) || !isConvert) {
-			            	upFile.setUploadSucc(false);
-			            	upFile.setComments("parsing error.");
-		                	result.add(upFile);
-		                	return result;
-			            }
-			            
-			            File convertedFile = new File(convertFullStrPath);
-			            finalFileSize = convertedFile.length();
-	                    isConverted = true;
-	                    log.info("SPDX conversion successful : " + convertFullStrPath);
-					} catch (Exception e) {
-						log.error(e.getMessage());
-					} finally {
-						if (tempFile != null && tempFile.exists()) {
-				            tempFile.delete();
-				        }
-					}
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				
-				upFile.setUploadSucc(false);
-				upFile.setComments("conversion error.");
-            	result.add(upFile);
-            	return result;
-			}
-			
-			File file = new File(uploadFilePath + "/" + randomUUID + "." + fileExt);
-			if (mFile.getSize() != 0) {
-		        if (!isConverted) {
-		            if (!file.getParentFile().exists()) {
-		                file.getParentFile().mkdirs();
-		            }
-		            uploadSucc = FileUtil.transferTo(mFile, file);
-		        } else {
-		            uploadSucc = file.exists();
-		        }
-		    }
-			
+			File file = new File(uploadFilePath+"/"+randomUUID+"."+fileExt);
+
 			/** Return Setting **/
 			upFile.setOriginalFilename(originalFileName);
+			upFile.setInputName(fileName);
+			upFile.setSize(mFile.getSize());
+			upFile.setFilePath(uploadFilePath);
 			upFile.setFileName(randomUUID+"."+fileExt);
 			upFile.setFileExt(fileExt);
-			upFile.setInputName(fileName);
-			upFile.setFilePath(uploadFilePath);
 			upFile.setIndexNum(indexNum);
 			upFile.setRegistFileId(fileId);
-			upFile.setUploadSucc(uploadSucc);
 			
 			try {
-				if (isConverted) {
-					upFile.setContentType("application/vnd.ms-excel");
-					upFile.setSize(finalFileSize);
-				} else {
-					upFile.setContentType(mFile.getContentType());
-					upFile.setSize(mFile.getSize());
-				}
+				upFile.setContentType(mFile.getContentType());
 			} catch (Exception e) {}
-			
-			if (isConverted) {
-				T2File originFile = new T2File(); 
-			    String originLogiNm = UUID.randomUUID() + "." + originalFileExt; 
-			    originFile.setFileId(fileId);
-			    originFile.setOrigNm(mFile.getOriginalFilename());
-			    originFile.setLogiNm(originLogiNm);
-			    originFile.setLogiPath(uploadFilePath);
-			    originFile.setExt(originalFileExt);
-			    originFile.setContentType(mFile.getContentType());
-			    originFile.setSize(String.valueOf(mFile.getSize()));
-			    originFile.setCreator(registFile.getCreator());
-			    
-			    try {
-			    	Path destination = Paths.get(uploadFilePath).resolve(originLogiNm).toAbsolutePath();
-			    	File originFileDest = destination.toFile();
-			    	
-			        if (!originFileDest.getParentFile().exists()) {
-			            originFileDest.getParentFile().mkdirs();
-			        }
-			        mFile.transferTo(originFileDest);
-			        
-			        registFile(originFile); 
-			        registFile.setRefFileSeq(originFile.getFileSeq()); 
-			        log.info("Original file saved successfully. SEQ: {}", originFile.getFileSeq());
-			    } catch (IOException e) {
-			        log.error("Failed to save original physical file: {}", e.getMessage());
-			    } catch (Exception e) {
-			        log.error("DB Error while registering original file: {}", e.getMessage());
-			    }
-			}
 			
 			/** DB Regist Setting **/
 			registFile.setFileId(fileId);
@@ -385,20 +204,36 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			registFile.setLogiThumbNm(randomUUID+"_thumb."+fileExt);
 			registFile.setLogiThumbPath(uploadThumbFilePath);
 			registFile.setExt(fileExt);
+			registFile.setSize(mFile.getSize()+"");
 			
 			try {
-				if (isConverted) {
-					registFile.setGubn("CV");
-					registFile.setContentType("application/vnd.ms-excel");
-					registFile.setSize(String.valueOf(finalFileSize));
-				} else {
-					registFile.setContentType(mFile.getContentType());
-					registFile.setSize(String.valueOf(mFile.getSize()));
-				}
+				registFile.setContentType(mFile.getContentType());
 			} catch (Exception e) {}
 			
 			upFile.setRegistSeq(registFile(registFile));
 			upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
+			
+			if (mFile.getSize()!=0){ //File Null Check
+				if (! file.exists()){ //경로상에 파일이 존재하지 않을 경우
+					try {
+						if (file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
+
+							boolean upSucc = file.createNewFile(); //이후 파일 생성
+							
+							if (!upSucc){
+								uploadSucc=false;
+							}
+						}
+					}
+					catch (IOException e) {
+						log.error("file upload create error : " + e.getMessage());
+						uploadSucc=false;
+					}
+				}
+				
+				uploadSucc = FileUtil.transferTo(mFile, file);
+				upFile.setUploadSucc(uploadSucc);
+			}
 			
 			result.add(upFile);
 		}
@@ -408,720 +243,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		}
 		
 		return result;
-	}
-	
-	private File getCleanedSpdxFile(String tempId, File tempFile) throws IOException {
-		String content = Files.readString(tempFile.toPath(), StandardCharsets.UTF_8).trim();
-		String fileName = tempFile.getName().toLowerCase();
-		
-	    if (content.startsWith("{")) {
-	        return cleanJsonDirectly(tempFile);
-	    } else if (content.startsWith("---") || fileName.endsWith(".yaml") || fileName.endsWith(".yml")) {
-	        return cleanYamlDirectly(tempFile);
-	    } else if (content.contains("<?xml") || content.contains("<rdf:RDF")) {
-	        return cleanRdfXmlDirectly(tempFile);
-	    } else if (content.contains("SPDXID:")) {
-	        return cleanTagValueDirectly(tempFile);
-	    }
-	    
-	    return tempFile;
-	}
-
-	public static boolean convertYamlToXls(Path yamlPath, Path xlsPath) {
-		try {
-            List<String> lines = Files.readAllLines(yamlPath, StandardCharsets.UTF_8);
-
-            Map<String, Map<String, String>> packages = new LinkedHashMap<>();
-            Map<String, Map<String, String>> files = new LinkedHashMap<>();
-            Map<String, Map<String, String>> snippets = new LinkedHashMap<>();
-            List<Map<String, String>> relationships = new ArrayList<>();
-
-            List<String> block = new ArrayList<>();
-            String currentType = null;
-
-            for (String line : lines) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty()) {
-                	continue;
-                }
-
-                if (!line.startsWith(" ") && line.contains(":") && !line.startsWith("-")) {
-                    if (!block.isEmpty()) {
-                        processYamlBlock(block, currentType, packages, files, snippets, relationships);
-                        block.clear();
-                    }
-                    currentType = line.split(":")[0].trim();
-                    continue;
-                }
-
-                if (line.startsWith("- ") || (line.startsWith("  - ") && block.isEmpty())) {
-                    if (!block.isEmpty()) {
-                        processYamlBlock(block, currentType, packages, files, snippets, relationships);
-                    }
-                    block.clear();
-                    block.add(line.trim().substring(2));
-                } else {
-                    block.add(line);
-                }
-            }
-
-            if (!block.isEmpty()) {
-                processYamlBlock(block, currentType, packages, files, snippets, relationships);
-            }
-
-            writeXls(xlsPath.toFile(), packages, files, snippets, relationships);
-            return true;
-        } catch (Exception e) {
-            log.error("convertYamlToXls error : {}", e.getMessage());
-            return false;
-        }
-    }
-
-	private static void processYamlBlock(List<String> block, String type, Map<String, Map<String, String>> packages, Map<String, Map<String, String>> files, Map<String, Map<String, String>> snippets, List<Map<String, String>> relationships) {
-	    if (block.isEmpty() || type == null) {
-	    	return;
-	    }
-
-	    Map<String, String> element = new HashMap<>();
-        String spdxId = null;
-        String relatedSpdxId = null;
-        String currentKey = null;
-        List<String> licenseFromFiles = new ArrayList<>();
-
-        for (String line : block) {
-            String trimmed = line.trim();
-            if (trimmed.isEmpty()) {
-            	continue;
-            }
-
-            if (trimmed.contains(":") && !trimmed.startsWith("-")) {
-                String[] parts = trimmed.split(":", 2);
-                String key = parts[0].trim();
-                String value = (parts.length > 1) ? parts[1].trim().replaceAll("^\"|\"$", "") : "";
-                if (key.equalsIgnoreCase("licenseInfoFromFiles")) {
-                	continue;
-            	}
-                currentKey = key;
-                if (key.equalsIgnoreCase("SPDXID")) {
-                	spdxId = value;
-                } else if (key.equalsIgnoreCase("relatedSpdxElement")) {
-                	relatedSpdxId = value;
-                } else {
-                	element.put(key, value);
-                }
-            } else if (trimmed.startsWith("-")) {
-                String val = trimmed.substring(1).trim().replaceAll("^\"|\"$", "");
-                if ("licenseInfoFromFiles".equals(currentKey)) {
-                    licenseFromFiles.add(val);
-                } else if (currentKey != null) {
-                    String existing = element.getOrDefault(currentKey, "");
-                    element.put(currentKey, existing.isEmpty() ? val : existing + ", " + val);
-                }
-            } else if (currentKey != null) {
-                String val = trimmed.replaceAll("^\"|\"$", "");
-                String existing = element.getOrDefault(currentKey, "");
-                element.put(currentKey, (existing + "\n" + val).trim());
-            }
-        }
-
-        if (spdxId == null) {
-        	return;
-        }
-        element.put("SPDXID", spdxId);
-        if (!licenseFromFiles.isEmpty()) {
-            element.put("licenseInfoFromFiles", String.join(", ", licenseFromFiles));
-        }
-
-        switch (type) {
-        	case "packages": packages.put(spdxId, element); break;
-	        case "files":    files.put(spdxId, element);    break;
-	        case "snippets": snippets.put(spdxId, element); break;
-	        case "relationships":
-	        	Map<String, String> rel = new HashMap<>();
-	            rel.put("spdxElementId", spdxId);
-	            rel.put("relatedSpdxElement", relatedSpdxId != null ? relatedSpdxId : "");
-	            rel.put("relationshipType", element.getOrDefault("relationshipType", ""));
-	            relationships.add(rel);
-	            break;
-        }
-	}
-
-    private static void writeXls(File xlsFile, Map<String, Map<String, String>> packages, Map<String, Map<String, String>> files, Map<String, Map<String, String>> snippets, List<Map<String, String>> relationships) throws Exception {
-    	String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-    	File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
-	    
-	    try (FileInputStream fis = new FileInputStream(templateFile);
-	    	Workbook workbook = WorkbookFactory.create(fis);
-	    	FileOutputStream fos = new FileOutputStream(xlsFile)) {
-	    	
-	    	createSheet(workbook, "Package Info", packages, 1);
-
-	        workbook.write(fos);
-	        fos.flush();
-	    } catch (Exception e) {
-	        log.error("writeXls failed : " + e.getMessage());
-	    }
-    }
-
-    private static void createSheet(Workbook workbook, String sheetName, Map<String, Map<String, String>> data, int startRow) {
-    	Sheet sheet = workbook.getSheet(sheetName);
-        if (sheet == null) {
-        	sheet = workbook.createSheet(sheetName);
-        }
-
-        int rowIdx = startRow;
-        for (Map<String, String> c : data.values()) {
-            Row row = sheet.getRow(rowIdx);
-            if (row == null) row = sheet.createRow(rowIdx);
-            rowIdx++;
-
-            setCellValue(row, 0, c.getOrDefault("name", ""));
-            setCellValue(row, 1, c.getOrDefault("SPDXID", ""));
-            setCellValue(row, 2, c.getOrDefault("versionInfo", ""));
-            setCellValue(row, 4, c.getOrDefault("supplier", "NOASSERTION"));
-            setCellValue(row, 5, c.getOrDefault("originator", "NOASSERTION"));
-            setCellValue(row, 6, c.getOrDefault("homepage", "NONE"));
-            setCellValue(row, 7, c.getOrDefault("downloadLocation", "NOASSERTION"));
-            setCellValue(row, 12, c.getOrDefault("licenseDeclared", "NOASSERTION"));
-            setCellValue(row, 13, c.getOrDefault("licenseConcluded", "NOASSERTION"));
-            setCellValue(row, 14, c.getOrDefault("licenseInfoFromFiles", "NOASSERTION"));
-            setCellValue(row, 16, c.getOrDefault("copyrightText", "NOASSERTION"));
-            
-            String filesAnalyzed = String.valueOf(c.getOrDefault("filesAnalyzed", "FALSE")).toUpperCase();
-            setCellValue(row, 20, filesAnalyzed);
-        }
-    }
-
-    private static void setCellValue(Row row, int cellIdx, String value) {
-        Cell cell = row.getCell(cellIdx);
-        if (cell == null) {
-        	cell = row.createCell(cellIdx);
-        }
-        cell.setCellValue(value);
-    }
-    
-	private File cleanJsonDirectly(File file) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
-			JsonNode rootNode = mapper.readTree(file);
-	        ObjectNode root = null;
-		    
-		    if (!rootNode.has("spdxVersion")) {
-	            boolean found = false;
-	            Iterator<JsonNode> elements = rootNode.elements();
-	            while (elements.hasNext()) {
-	                JsonNode child = elements.next();
-	                if (child.isObject() && child.has("spdxVersion")) {
-	                    root = (ObjectNode) child;
-	                    found = true;
-	                    log.info("Wrapped SPDX data detected and normalized from a child node.");
-	                    break;
-	                }
-	            }
-	            if (!found) {
-	                log.error("cleanJsonDirectly: Could not find valid SPDX content (spdxVersion missing).");
-	                return null;
-	            }
-	        } else {
-	            root = (ObjectNode) rootNode;
-	        }
-		    
-		    String[] globalFieldsToRemove = {"relationships", "snippets", "annotations", "externalDocumentRefs", "hasExtractedLicensingInfos", "reviewers"};
-		    for (String field : globalFieldsToRemove) {
-		    	root.remove(field);
-	    		log.info("Field '{}' removed to optimize Excel conversion and prevent row limits.", field);
-		    }
-		    
-		    if (root.has("packages") && root.get("packages").isArray()) {
-		        ArrayNode packages = (ArrayNode) root.get("packages");
-		        for (JsonNode pkgNode : packages) {
-		            if (pkgNode.isObject()) {
-		                ObjectNode pkg = (ObjectNode) pkgNode;
-		                
-		                if (pkg.has("externalRefs")) {
-		                    pkg.remove("externalRefs");
-		                    log.debug("ExternalRefs removed from package: {}", pkg.path("name").asText());
-		                }
-
-		                pkg.remove("relationships");
-		                pkg.remove("annotations");
-		                pkg.remove("attributionText");
-		            }
-		        }
-		    }
-		    
-//		    Set<String> validIds = new HashSet<>();
-//		    
-//		    if (root.has("packages")) {
-//		        for (JsonNode pkg : root.get("packages")) {
-//		        	validIds.add(pkg.path("SPDXID").asText());
-//		        }
-//		    }
-//		    validIds.add(root.path("SPDXID").asText());
-//
-//		    if (root.has("relationships")) {
-//		        ArrayNode rels = (ArrayNode) root.get("relationships");
-//		        for (int i = rels.size() - 1; i >= 0; i--) {
-//		            String target = rels.get(i).path("relatedSpdxElement").asText();
-//		            if (!validIds.contains(target) && !target.equals("NONE")) {
-//		            	rels.remove(i);
-//		            }
-//		        }
-//		    }
-		    mapper.writeValue(file, root);
-		} catch (Exception e) {
-			log.error("cleanJsonDirectly: {}", e.getMessage());
-			return null;
-		}
-	    return file;
-	}
-
-	private File cleanYamlDirectly(File file) {
-	    Path originalPath = file.toPath();
-	    
-	    try {
-	    	List<String> lines = Files.readAllLines(originalPath, StandardCharsets.UTF_8);
-	        Set<String> validIds = collectValidSpdxIds(lines);
-
-	        List<String> result = new ArrayList<>();
-	        List<String> relBlock = new ArrayList<>();
-
-	        boolean insideRelationships = false;
-	        int relationshipsIndent = -1;
-
-	        for (String line : lines) {
-
-	            String trimmed = line.trim();
-	            int currentIndent = countIndent(line);
-
-	            if (!insideRelationships && trimmed.startsWith("relationships:")) {
-	                insideRelationships = true;
-	                relationshipsIndent = currentIndent;
-	                result.add(line);
-	                continue;
-	            }
-
-	            if (insideRelationships) {
-	                if (currentIndent <= relationshipsIndent && !trimmed.startsWith("-")) {
-	                    processRelationshipBlock(relBlock, result, validIds);
-	                    relBlock.clear();
-	                    insideRelationships = false;
-	                    result.add(line);
-	                    continue;
-	                }
-
-	                if (trimmed.startsWith("-")) {
-	                    processRelationshipBlock(relBlock, result, validIds);
-	                    relBlock.clear();
-	                }
-
-	                relBlock.add(line);
-
-	            } else {
-	                result.add(line);
-	            }
-	        }
-
-	        processRelationshipBlock(relBlock, result, validIds);
-
-	        Files.write(originalPath, result, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
-
-	        log.info("SPDX YAML clean 완료: {}", file.getName());
-
-	    } catch (Exception e) {
-	        log.error("cleanYamlDirectly error: ", e);
-	        return null;
-	    }
-
-	    return file;
-	}
-	
-	private Set<String> collectValidSpdxIds(List<String> lines) {
-	    Set<String> validIds = new HashSet<>();
-
-	    for (String line : lines) {
-	        String trimmed = line.trim();
-	        if (trimmed.startsWith("SPDXID:")) {
-
-	            int idx = trimmed.indexOf(":");
-	            if (idx >= 0 && trimmed.length() > idx + 1) {
-
-	                String id = trimmed.substring(idx + 1).trim();
-
-	                if (!id.isEmpty()) {
-	                    validIds.add(id);
-	                }
-	            }
-	        }
-	    }
-
-	    log.info("수집된 SPDXID 개수: {}", validIds.size());
-	    return validIds;
-	}
-	
-	private void processRelationshipBlock(List<String> block, List<String> result, Set<String> validIds) {
-		if (block.isEmpty()) {
-			return;
-		}
-
-		String spdxElementId = null;
-		String relatedSpdxElement = null;
-
-		for (String line : block) {
-
-			String trimmed = line.trim();
-
-			if (trimmed.startsWith("spdxElementId:")) {
-				spdxElementId = extractValue(trimmed);
-			}
-
-			if (trimmed.startsWith("relatedSpdxElement:")) {
-				relatedSpdxElement = extractValue(trimmed);
-			}
-		}
-
-		boolean isValid = true;
-
-		if (spdxElementId != null && !isSpecialId(spdxElementId) && !validIds.contains(spdxElementId)) {
-			isValid = false;
-		}
-
-		if (relatedSpdxElement != null && !isSpecialId(relatedSpdxElement) && !validIds.contains(relatedSpdxElement)) {
-			isValid = false;
-		}
-
-		if (isValid) {
-			result.addAll(block);
-		} else {
-			log.warn("제거된 잘못된 relationship: spdxElementId={}, relatedSpdxElement={}", spdxElementId, relatedSpdxElement);
-		}
-	}
-	
-	private String extractValue(String line) {
-	    int idx = line.indexOf(":");
-	    if (idx >= 0 && line.length() > idx + 1) {
-	        return line.substring(idx + 1).trim();
-	    }
-	    return null;
-	}
-
-	private boolean isSpecialId(String id) {
-	    return id.equals("NONE") || id.equals("NOASSERTION") || id.startsWith("DocumentRef-");
-	}
-
-	private int countIndent(String line) {
-	    int count = 0;
-	    while (count < line.length() && line.charAt(count) == ' ') {
-	        count++;
-	    }
-	    return count;
-	}
-	
-	private File cleanRdfXmlDirectly(File file) {
-		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		    DocumentBuilder builder = factory.newDocumentBuilder();
-		    Document doc = builder.parse(file);
-
-		    Set<String> validIds = new HashSet<>();
-		    NodeList nodes = doc.getElementsByTagName("*");
-		    for (int i = 0; i < nodes.getLength(); i++) {
-		        Element el = (Element) nodes.item(i);
-		        String id = el.getAttribute("rdf:about");
-		        if (id.contains("#SPDXRef-")) validIds.add(id.substring(id.indexOf("#") + 1));
-		        if (el.hasAttribute("spdx:spdxId")) validIds.add(el.getAttribute("spdx:spdxId"));
-		    }
-
-		    NodeList rels = doc.getElementsByTagName("spdx:Relationship");
-		    for (int i = rels.getLength() - 1; i >= 0; i--) {
-		        Element rel = (Element) rels.item(i);
-		        NodeList targets = rel.getElementsByTagName("spdx:relatedSpdxElement");
-		        if (targets.getLength() > 0) {
-		            String targetRef = ((Element) targets.item(0)).getAttribute("rdf:resource");
-		            String targetId = targetRef.contains("#") ? targetRef.substring(targetRef.indexOf("#") + 1) : targetRef;
-		            
-		            if (!validIds.contains(targetId) && !targetId.equals("NONE")) {
-		                rel.getParentNode().removeChild(rel);
-		            }
-		        }
-		    }
-
-		    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		    transformer.transform(new DOMSource(doc), new StreamResult(file));
-		} catch (Exception e) {
-			log.error("cleanRdfXmlDirectly: {}", e.getMessage());
-			return null;
-		}
-	    return file;
-	}
-	
-	private File cleanTagValueDirectly(File file) {
-		try {
-			List<String> lines = Files.readAllLines(file.toPath());
-		    Set<String> validIds = new HashSet<>();
-		    for (String line : lines) {
-		        if (line.startsWith("SPDXID:")) validIds.add(line.replace("SPDXID:", "").trim());
-		    }
-		    List<String> cleaned = new ArrayList<>();
-		    for (String line : lines) {
-		        if (line.startsWith("Relationship:")) {
-		            String[] parts = line.split("\\s+");
-		            if (parts.length >= 4 && validIds.contains(parts[1]) && (validIds.contains(parts[3]) || parts[3].equals("NONE"))) {
-		                cleaned.add(line);
-		            }
-		        } else {
-		            cleaned.add(line);
-		        }
-		    }
-		    Files.write(file.toPath(), cleaned);
-		} catch (Exception e) {
-			log.error("cleanTagValueDirectly: {}", e.getMessage());
-			return null;
-		}
-	    return file;
-	}
-	
-	private boolean convertCdxToExcel(File tempFile, String contentStr, String convertFullStrPath) throws Exception {
-		String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-		
-	    Bom bom;
-	    try {
-	    	byte[] fileBytes = Files.readAllBytes(tempFile.toPath());
-	        if (fileBytes.length == 0) {
-	            log.error("The file contents are empty.");
-	            return false;
-	        }
-	        if (contentStr.trim().startsWith("<")) {
-	        	bom = new org.cyclonedx.parsers.XmlParser().parse(fileBytes);
-	        } else {
-	            bom = new org.cyclonedx.parsers.JsonParser().parse(fileBytes);
-	        }
-	    } catch (Exception e) {
-	        log.error("Actual Exception Class: {}", e.getClass().getName());
-	        
-	        if (e.getCause() != null) {
-	            log.error("Caused by: {} - {}", e.getCause().getClass().getName(), e.getCause().getMessage());
-	        }
-
-	        log.error("Error Message: {}", e.getMessage());
-	        return false;
-	    }
-
-	    File resultFile = new File(convertFullStrPath);
-	    File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
-	    
-	    try (FileInputStream fis = new FileInputStream(templateFile);
-	    	Workbook workbook = WorkbookFactory.create(fis);
-	    	FileOutputStream fos = new FileOutputStream(resultFile)) {
-
-	        Sheet pkgSheet = workbook.getSheet("Package Info");
-	        Sheet sheetExternalRefs = workbook.getSheet("External Refs");
-	        Sheet sheetRelationships = workbook.getSheet("Relationships");
-	        
-	        if (pkgSheet == null) {
-	        	throw new Exception("Could not find 'Package Info' sheet in template.");
-	        }
-
-	        int rowIdx = 1;
-	        Map<String, String> externalRefsMap = new HashMap<>();
-	        Map<String, Object> relationshipsMap = new HashMap<>();
-	        List<String> packageInfoidentifierList = new ArrayList<>();
-	        
-	        if (bom.getComponents() != null) {
-	            for (Component c : bom.getComponents()) {
-	                Row row = pkgSheet.createRow(rowIdx++);
-
-	                // [A] Package Name (0)
-	                row.createCell(0).setCellValue(c.getName());
-
-	                // [B] SPDX Identifier (1)
-	                String spdxId = (c.getBomRef() != null) ? "SPDXRef-" + c.getBomRef() : "SPDXRef-Package-" + UUID.randomUUID().toString().substring(0, 8);
-	                row.createCell(1).setCellValue(spdxId);
-
-	                // [C] Package Version (2)
-	                row.createCell(2).setCellValue(c.getVersion() != null ? c.getVersion() : "");
-
-	                // [D] Package FileName (3) - 보통 Name과 동일하게 처리
-	                row.createCell(3).setCellValue(c.getName());
-
-	                // [E] Package Supplier (4)
-	                row.createCell(4).setCellValue(c.getPublisher() != null ? "Organization: " + c.getPublisher() : "");
-
-	                // [F] Package Originator (5)
-	                row.createCell(5).setCellValue("");
-
-	                String targetUrl = "NOASSERTION";
-	                if (c.getExternalReferences() != null) {
-	                    for (ExternalReference ref : c.getExternalReferences()) {
-	                        if (ref.getType() != null && "website".equalsIgnoreCase(ref.getType().getTypeName())) {
-	                        	targetUrl = ref.getUrl();
-	                            break;
-	                        }
-	                    }
-	                }
-	                // [G] Home Page (6) - Website URL 추출
-	                row.createCell(6).setCellValue("");
-
-	                // [H] Package Download Location (7)
-	                row.createCell(7).setCellValue(targetUrl);
-
-	                // [N] License Declared (13) - 첫 번째 라이선스 ID 추출
-	                String licenseStr = "NOASSERTION";
-	                
-	                org.cyclonedx.model.LicenseChoice lc = c.getLicenses();
-	                if (lc != null) {
-	                    List<String> licenseNames = new ArrayList<>();
-
-	                    if (lc.getLicenses() != null && !lc.getLicenses().isEmpty()) {
-	                        for (org.cyclonedx.model.License l : lc.getLicenses()) {
-	                            // JSON 구조의 id ("BSL-1.0") 또는 name 추출
-	                            String idOrName = (l.getId() != null) ? l.getId() : l.getName();
-	                            if (idOrName != null) {
-	                                licenseNames.add(idOrName);
-	                            }
-	                        }
-	                    } else if (lc.getExpression() != null) {
-	                        licenseNames.add(String.valueOf(lc.getExpression()));
-	                    }
-	                    if (!licenseNames.isEmpty()) {
-	                        licenseStr = String.join(", ", licenseNames);
-	                    }
-	                }
-	                row.createCell(13).setCellValue(licenseStr);
-
-	                // [R] Package Copyright Text (17)
-	                row.createCell(17).setCellValue(c.getCopyright() != null ? c.getCopyright() : "");
-
-	                // [V] Files Analyzed (21) - 대문자 FALSE 기입
-	                row.createCell(21).setCellValue("FALSE");
-	                
-	                packageInfoidentifierList.add(spdxId);
-	                if (!isEmpty(c.getPurl())) {
-	                	relationshipsMap.put(c.getPurl(), spdxId);
-	                	externalRefsMap.put(spdxId, c.getPurl());
-	                }
-	            }
-	        }
-	        
-	        // External Refs
-	     	{
-	     		if (MapUtils.isNotEmpty(externalRefsMap)) {
-					rowIdx = 1;
-
-					for (String key : externalRefsMap.keySet()) {
-						Row row = sheetExternalRefs.getRow(rowIdx);
-
-						if (row == null) {
-							row = sheetExternalRefs.createRow(rowIdx);
-						}
-									
-						int cellIdx = 0;
-
-						// Package ID
-						Cell cellPackageId = row.createCell(cellIdx); cellIdx++;
-						cellPackageId.setCellValue(key);
-									
-						// Category
-						Cell cellCategory = row.createCell(cellIdx); cellIdx++;
-						cellCategory.setCellValue("PACKAGE_MANAGER");
-									
-						// Type
-						Cell cellType = row.createCell(cellIdx); cellIdx++;
-						cellType.setCellValue("purl");
-									
-						// Locator
-						Cell cellLocator = row.createCell(cellIdx); cellIdx++;
-						cellLocator.setCellValue(externalRefsMap.get(key));
-									
-						// Comment
-						cellIdx++;
-									
-						// User Defined
-						cellIdx++;
-						
-						rowIdx++;
-					}
-				}
-	     	}
-	     	
-	     	// Relationships
-	        if (bom.getDependencies() != null) {
-	        	rowIdx = 1;
-
-				for (String _identifierB : packageInfoidentifierList) {
-					int cellIdx = 0;
-
-					Row row = sheetRelationships.getRow(rowIdx);
-					if (row == null) {
-						row = sheetRelationships.createRow(rowIdx);
-					}
-					// SPDX Identifier A
-					Cell spdxIdentifierA = row.createCell(cellIdx); cellIdx++;
-					spdxIdentifierA.setCellValue("SPDXRef-DOCUMENT");
-
-					// Relationship
-					Cell relationship = row.createCell(cellIdx); cellIdx++;
-					relationship.setCellValue("DESCRIBES");
-
-					// SPDX Identifier B
-					Cell spdxIdentifierB = row.createCell(cellIdx); cellIdx++;
-					spdxIdentifierB.setCellValue(_identifierB);
-
-					rowIdx++;
-				}
-	        	
-				for (org.cyclonedx.model.Dependency dep : bom.getDependencies()) {
-					String key = dep.getRef();
-					if (relationshipsMap.containsKey(key) && CollectionUtils.isNotEmpty(dep.getDependencies())) {
-						String spdxElementId = (String) relationshipsMap.get(key);
-						for (org.cyclonedx.model.Dependency dependency : dep.getDependencies()) {
-							String relatedSpdxElementKey = dependency.getRef();
-							if (relationshipsMap.containsKey(relatedSpdxElementKey)) {
-								String relatedSpdxElement = String.valueOf(relationshipsMap.getOrDefault(relatedSpdxElementKey, ""));
-								int cellIdx = 0;
-
-								Row row = sheetRelationships.getRow(rowIdx);
-								if (row == null) {
-									row = sheetRelationships.createRow(rowIdx);
-								}
-								// SPDX Identifier A
-								Cell spdxIdentifierA = row.createCell(cellIdx); cellIdx++;
-								spdxIdentifierA.setCellValue(spdxElementId);
-
-								// Relationship
-								Cell relationship = row.createCell(cellIdx); cellIdx++;
-								relationship.setCellValue("DEPENDS_ON");
-
-								// SPDX Identifier B
-								Cell spdxIdentifierB = row.createCell(cellIdx); cellIdx++;
-								spdxIdentifierB.setCellValue(relatedSpdxElement);
-
-								rowIdx++;
-							}
-						}
-					}
-				}
-			}
-	        
-	        workbook.write(fos);
-	        fos.flush();
-	        log.info("convertCdxToExcel success : " + resultFile.getAbsolutePath());
-	        
-	        return true;
-	    } catch (Exception e) {
-	        log.error("convertCdxToExcel failed : " + e.getMessage());
-	        return false;
-	    }
-	}
-
-	private boolean isSPDX(String content) {
-		return content.contains("SPDXVersion:") || content.contains("\"spdxVersion\"") || content.contains("spdxVersion:") || content.contains("<spdx:SpdxDocument");
-	}
-
-	private boolean isCycloneDX(String content) {
-		return content.contains("\"bomFormat\"") && content.contains("\"CycloneDX\"") || content.contains("<bom") && content.contains("cyclonedx");
 	}
 	
 	//파일 DB 등록
@@ -2030,7 +1151,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		boolean isAndroidNoticeFolder = false;
 		String folderPath = "";
 		
-		if ("VERIFY".equalsIgnoreCase(flag) || CoConstDef.CD_CHECK_OSS_SELF.equals(flag) || CoConstDef.CD_CHECK_OSS_PARTNER.equals(flag) || CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(flag)) {
+		if ("VERIFY".equalsIgnoreCase(flag) || CoConstDef.CD_CHECK_OSS_SELF.equals(flag) || CoConstDef.CD_CHECK_OSS_PARTNER.equals(flag)) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
 		} else {
 			T2File T2file = fileMapper.getFileInfo2(file);

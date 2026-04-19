@@ -7,45 +7,39 @@
 	<insert id="insertFile" parameterType="oss.fosslight.domain.T2File" useGeneratedKeys="true" keyProperty="fileSeq">
 		INSERT INTO
 			T2_FILE (
-				FILE_ID
+				FILE_ID,
 				<if test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(gubn)">
-				, GUBN
+				GUBN,
 				</if>
-				, ORIG_NM
-				, LOGI_NM
-				, LOGI_THUMB_NM
-				, LOGI_PATH
-				, LOGI_THUMB_PATH
-				, EXT
-				, SIZE
-				, REG_ID
+				ORIG_NM,
+				LOGI_NM,
+				LOGI_THUMB_NM,
+				LOGI_PATH,
+				LOGI_THUMB_PATH,
+				EXT,
+				SIZE,
+				REG_ID,
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(tabNm)">
-					, DEL_YN
+				DEL_YN,
 				</if>
-				, CONTENT_TYPE
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(refFileSeq)">
-					, REF_FILE_SEQ
-				</if>
+				CONTENT_TYPE
 			) VALUES (
-				#{fileId}
+				#{fileId},
 				<if test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(gubn)">
-				, #{gubn}
+				#{gubn},
 				</if>
-				, #{origNm}
-				, #{logiNm}
-				, #{logiThumbNm}
-				, #{logiPath}
-				, #{logiThumbPath}
-				, #{ext}
-				, #{size}
-				, #{creator}
+				#{origNm},
+				#{logiNm},
+				#{logiThumbNm},
+				#{logiPath},
+				#{logiThumbPath},
+				#{ext},
+				#{size},
+				#{creator},
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(tabNm)">
-					, 'Y'
+				'Y',
 				</if>
-				, #{contentType}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(refFileSeq)">
-					, #{refFileSeq}
-				</if>			
+				#{contentType}				
 			)
 	</insert>
 	

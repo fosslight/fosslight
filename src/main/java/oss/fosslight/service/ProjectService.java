@@ -272,4 +272,6 @@ public interface ProjectService extends HistoryConfig{
 	public void sbomComparisonService(ProjectIdentification bean, List<ProjectIdentification> bomList);
 
 	public void replaceOssComponentsSnapshots(ProjectIdentification bean, List<ProjectIdentification> bomList, boolean shouldMerge);
+
+	public Map<String, Object> validateAnalysisProgress(Map<String, Object> param);
 }

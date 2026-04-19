@@ -2388,4 +2388,16 @@ public class OssController extends CoTopComponent{
 			ResponseUtil.DefaultAlertAndGo(res, getMessage("msg.common.cannot.access.page"), req.getContextPath() + "/index");
 		}
 	}
+	
+	@GetMapping(value = OSS.FETCH_OSS_DETAIL)
+	public ResponseEntity<Object> fetchOssDetail(@ModelAttribute OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Map<String, Object> resMap = new HashMap<>();
+		if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
+			OssMaster ossInfo = ossService.getOssInfo(null, ossMaster.getOssName(), false);
+			if (ossInfo != null) {
+				resMap.put("fetchOssInfo", ossInfo);
+			}
+		}
+		return makeJsonResponseHeader(resMap);
+	}
 }
