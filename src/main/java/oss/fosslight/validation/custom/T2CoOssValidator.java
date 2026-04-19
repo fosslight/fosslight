@@ -373,12 +373,11 @@ public class T2CoOssValidator extends T2CoValidator {
 
 	private void preProcessUrl(String ossName, String urls, Map<String, String> urlMap) {
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
-		List<String> validMavenHosts = Arrays.asList("repo.maven.apache.org", "repo1.maven.org", "dl.google.com/android", "maven.google.com", "repo.spring.io");
     	ProjectIdentification pi = new ProjectIdentification();
     	for (String url : urls.split(",")) {
     		pi.setOssName(ossName);
     		pi.setDownloadLocation(url.trim());
-    		ossService.preProcessUrl(pi, null, checkOssNameUrl, validMavenHosts);
+    		ossService.preProcessUrl(pi, null, checkOssNameUrl);
     		if (!isEmpty(pi.getDownloadLocation())) {
     			String downloadLocationUrl = pi.getDownloadLocation();
 	        	if (downloadLocationUrl.endsWith("/")) {

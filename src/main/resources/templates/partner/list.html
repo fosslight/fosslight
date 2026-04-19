@@ -19,9 +19,9 @@
                             <div class="card card-dark card-outline collapsed-card search-form mb-3">
                                 <div class="card-header" style="border-bottom: none;">
                                     <div class="row">
-                                        <div class="col-md-7 d-flex pr-0">
+                                        <div class="col-md-7 d-flex">
                                             <div class="row" style="width: 100%;">
-                                                <div class="col-lg-12 pr-0">
+                                                <div class="col-12">
                                                     <div class="input-group">
                                                         <input class="save-value" name="defaultSearchType" th:value="THIRD_PARTY" type="hidden"/>
                                                         <button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="|+ Add|"></button>
@@ -39,17 +39,10 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-3 pl-0 d-flex justify-content-start">
+                                        <div class="col-md-3 pl-3 d-flex justify-content-start">
                                             <div class="input-group-append d-flex align-items-center">
-                                            	<button class="btn btn-ivory btn-sm btn-icon mr-1" th:onclick="|resetForm('3rdSearch')|" data-toggle="tooltip" data-placement="bottom" type="button" th:title="|reset|">
-										            <i class="fa fa-undo"></i>
-										        </button>
-										        <button class="btn btn-ivory btn-sm btn-icon mr-3" th:onclick="|updateSearchCondition('3rdSearch')|" data-toggle="tooltip" data-placement="bottom" type="button" th:title="|save conditions|">
-										            <i class="fa fa-save"></i>
-										        </button>
-										        <a class="text-blue-gray d-flex flex-column align-items-center" data-card-widget="collapse" style="font-size: 1rem; cursor: pointer; line-height: 1.1;" title="Collapse">
-                                            		<span th:text="'+ Advanced Search'"></span>
-                                            		<span class="text-lg-red text-xs mt-1 optionSelected" style="display: none;" th:text="'option selected'"></span>
+                                            	<a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+                                            		<span class="row" th:text="'+ Advanced Search'"></span><span class="row ml-3 text-lg-red text-xs optionSelected" style="display: none;" th:text="'option selected'"></span>
                                             	</a>
                                            	</div>
                                         </div>
@@ -64,83 +57,122 @@
                                     </div>
                                 </div>
                                 <div class="card-body py-1">
-                                	<div class="col-md-6 pl-3 pr-3 search-divider">
-                                		<h5 class="search-title pt-2" th:text="'Basic Info'"></h5>
-                                		<div class="form-group mb-2">
-                                        	<div class="input-group" style="width: 100%;">
-                                            	<div class="input-group-prepend">
-                                                	<span class="input-group-text">
-                                                		<i class="far fa-calendar-alt"></i>
-                                                	</span>
+                                    <form action="enhanced-results.html">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
+                                                        <select class="form-control select2 save-value" id="parStatusSelect" multiple="multiple" name="status" style="width: 100%;">
+                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
+                                                            		th:if="${option.cdDtlNo != 'NA' and option.cdDtlNo != 'FREV'}"
+                                                                    th:text="${option.cdDtlNm}"
+                                                                    th:value="${option.cdDtlNo}"
+                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
+                                                            </option>
+                                                        </select>
+                                                    </th:block>
                                                 </div>
-                                                <input class="form-control" id="schDateRange" placeholder="Created Date" type="text">
-                                                <input class="save-value" id="createdDate1" name="createdDate1" th:value="${searchBean?.createdDate1}" type="hidden"/>
-                                                <input class="save-value" id="createdDate2" name="createdDate2" th:value="${searchBean?.createdDate2}" type="hidden"/>
-                                        	</div>
-                                    	</div>
-                                    	<div class="form-group mb-2">
-                                    		<th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
-                                    			<select class="form-control select2 save-value" id="parStatusSelect" multiple="multiple" name="status" style="width: 100%;">
-                                    				<option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
-                                    						th:if="${option.cdDtlNo != 'NA' and option.cdDtlNo != 'FREV'}"
-															th:text="${option.cdDtlNm}"
-															th:value="${option.cdDtlNo}"
-															th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
-													</option>
-												</select>
-											</th:block>
-										</div>
-										
-										<h5 class="search-title pt-2" th:text="'Personnel & Division'"></h5>
-										<div class="form-group mb-2">
-											<input class="form-control autoComCreatorDivision save-value" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
-										</div>
-										<div class="form-group mb-2">
-											<input class="form-control autoComReviewer save-value" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
-										</div>
-										<div class="form-group mb-2">
-											<input class="form-control save-value" name="watchers" placeholder="Editor" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
-										</div>
-										<div class="form-group mb-2">
-											<select class="form-control select2 save-value" id="division" name="division" style="width: 100%;">
-												<option value=""></option>
-												<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-													<option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}" th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"></option>
-												</th:block>
-											</select>
-										</div>
-										
-										<h5 class="search-title pt-2" th:text="Others"></h5>
-										<div class="form-group">
-											<textarea class="form-control" name="userComment" placeholder="Comment" rows="2" th:utext="${searchBean?.comment}"></textarea>
-										</div>
-                                	</div>
-                                	<div class="col-md-6 pl-3 pr-3">
-                                		<h5 class="search-title pt-2" th:text="'OSS Detail'"></h5>
-                                		<div class="form-group">
-                                			<input type="text" name="ossName" class="form-control save-value" placeholder="OSS Name" th:value="${searchBean?.ossName}" />
-                                		</div>
-                                		<div class="form-group">
-                                			<input type="text" name="ossVersion" class="form-control autoComOss" placeholder="OSS Version" th:value="${searchBean?.ossVersion}" />
-                                		</div>
-                                		<div class="form-group">
-                                			<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
-                                		</div>
-                                		<div class="form-group">
-                                			<input type="text" class="form-control save-value" name="binaryName" placeholder="Binary Name" th:value="${searchBean?.binaryName}"/>
-                                		</div>
-                                		
-                                		<h5 class="search-title pt-2" th:text="'3rd Party Software Details'"></h5>
-                                		<div class="form-group">
-                                			<input class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}" type="text"/>
-                                		</div>
-                                		<div class="form-group">
-                                			<input class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
-                                		</div>
-                                		<div class="form-group">
-                                			<textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
-                                		</div>
-                                	</div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <div class="input-group" style="width: 100%;">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">
+                                                                <i class="far fa-calendar-alt"></i>
+                                                            </span>
+                                                        </div>
+                                                        <input class="form-control" id="schDateRange" placeholder="Created Date" type="text">
+                                                        <input class="save-value" id="createdDate1" name="createdDate1" th:value="${searchBean?.createdDate1}" type="hidden"/>
+                                                        <input class="save-value" id="createdDate2" name="createdDate2" th:value="${searchBean?.createdDate2}" type="hidden"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <select class="form-control select2 save-value" id="division" name="division" style="width: 100%;">
+                                                        <option value=""></option>
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}" th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"></option>
+                                                        </th:block>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input class="form-control autoComCreatorDivision save-value" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input class="form-control autoComReviewer save-value" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input class="form-control save-value" name="watchers" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                        	<div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" name="ossName" class="form-control save-value" placeholder="OSS Name" th:value="${searchBean?.ossName}" />
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" name="ossVersion" class="form-control autoComOss" placeholder="OSS Version" th:value="${searchBean?.ossVersion}" />
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                        	<div class="col-4">
+                                                <div class="form-group">
+                                                    <input class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}" type="text"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control save-value" name="binaryName" placeholder="Binary Name" th:value="${searchBean?.binaryName}"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                               				<div class="col-md-12">
+                               					<div class="p-2 text-center">
+                                         			<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('3rdSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-download mr-xm"></i> save conditions
+                                         			</button>
+                                           			<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('3rdSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-undo mr-xm"></i> reset
+                                           			</button>
+                                       			</div>
+                               				</div>
+                               			</div>
                                 </div>
                             </div>
                         </div>
@@ -163,6 +195,12 @@
                        	<button type="button" class="btn btn-outline-dark btn-sm width-10rem mr-xm px-3" th:onclick="|fn.bomCompare()|" th:text="'SBOM Compare'"></button>
                     </div>
                 </div>
+<!--           	<div class="col-md-6">
+                    <div class="row float-right" style="margin-right: .1rem;">
+                        <button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"  type="button"><i class="far fa-file-excel mr-2"></i>Export</button>
+                        <button class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3 btnAdd" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="Add" type="button"></button>
+                    </div>
+                </div> -->
             </div>
 
             <div class="row">

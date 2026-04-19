@@ -233,9 +233,6 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
 				AND T1.DISTRIBUTION_TYPE = #{distributionType}
 			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
-				AND T1.OS_TYPE = #{osType}
-			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeType)">
 				AND T2.NOTICE_TYPE = #{noticeType}
 			</if>
@@ -512,9 +509,6 @@
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
 				AND T1.DISTRIBUTION_TYPE = #{distributionType}
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
-				AND T1.OS_TYPE = #{osType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{schStartDate}
@@ -2310,9 +2304,6 @@
 			</if>			
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
-				AND A.OS_TYPE = #{osType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
 				AND A.CREATED_DATE <![CDATA[>=]]> #{schStartDate}
@@ -6996,11 +6987,44 @@
 	/* ProjectMapper selectFileList */
 		SELECT A.REFERENCE_ID AS referenceId
 			 , A.REFERENCE_DIV AS referenceDiv
-		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT ORIG_NM FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END fileNm
-		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT LOGI_NM FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END logiNm
+		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN 
+            	(
+            		SELECT IFNULL(T2.ORIG_NM, T1.ORIG_NM)
+            		FROM T2_FILE T1
+               		LEFT JOIN T2_FILE T2
+               		ON T1.REF_FILE_SEQ = T2.FILE_SEQ
+               		AND T2.DEL_YN = 'N'
+              		WHERE T1.FILE_SEQ = A.FILE_SEQ
+                	AND T1.DEL_YN = 'N'
+                )
+        		ELSE '' END AS fileNm
+        	 , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN 
+            	(
+            		SELECT IFNULL(T2.LOGI_NM, T1.LOGI_NM)
+            		FROM T2_FILE T1
+            		LEFT JOIN T2_FILE T2
+            		ON T1.REF_FILE_SEQ = T2.FILE_SEQ
+            		AND T2.DEL_YN = 'N'
+            		WHERE T1.FILE_SEQ = A.FILE_SEQ
+            		AND T1.DEL_YN = 'N'
+            	)
+        		ELSE '' END AS logiNm
+<!-- 	     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT ORIG_NM FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END fileNm -->
+<!-- 	     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT LOGI_NM FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END logiNm -->
 		     , A.COMPONENT_COUNT AS componentCount
 		     , A.FILE_ID AS fileId
-		     , A.FILE_SEQ AS fileSeq
+		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN 
+        		(
+        			SELECT IFNULL(T2.FILE_SEQ, T1.FILE_SEQ)
+            		FROM T2_FILE T1
+            		LEFT JOIN T2_FILE T2
+              		ON T1.REF_FILE_SEQ = T2.FILE_SEQ
+             		AND T2.DEL_YN = 'N'
+            		WHERE T1.FILE_SEQ = A.FILE_SEQ
+              		AND T1.DEL_YN = 'N'
+        		)
+        		ELSE A.FILE_SEQ END AS fileSeq
+<!-- 	     , A.FILE_SEQ AS fileSeq -->
 		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT REG_ID FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END regId
 		     , CASE WHEN IFNULL(A.FILE_SEQ, '') != '' THEN (SELECT REG_DT FROM T2_FILE WHERE DEL_YN = 'N' AND FILE_SEQ = A.FILE_SEQ) ELSE '' END regDt
 		  FROM PROJECT_FILELIST A 
@@ -7272,5 +7296,9 @@
 	
 	<select id="selectOssComponentsSnapshot" parameterType="oss.fosslight.domain.ProjectIdentification">
 		SELECT * FROM OSS_COMPONENTS_SNAPSHOT WHERE REFERENCE_ID = #{referenceId} AND REFERENCE_DIV = #{referenceDiv}
+	</select>
+	
+	<select id="selectRefFileSeq" parameterType="string" resultType="string">
+		SELECT FILE_SEQ FROM T2_FILE WHERE REF_FILE_SEQ = #{fileSeq}
 	</select>
 </mapper>

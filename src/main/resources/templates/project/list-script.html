@@ -56,7 +56,6 @@ var evt = {
 		$('select[name=prjDivision]').select2({placeholder: "Select Division", allowClear: true});
 		if ([[${searchBean != null}]] && [[${searchBean.prjDivision}]] != null) $('select[name=prjDivision]').val([[${searchBean.prjDivision}]]).prop("selected", true);
 		$('select[name=noticeType]').select2({placeholder: "OSS Notice", allowClear: true});
-		$('select[name=osType]').select2({placeholder: "Operating System", allowClear: true});
 		
 		$('#priority').select2({placeholder: "Priority", allowClear: true});
 		$("#prjStatusSelect").select2({placeholder: "Status", allowClear: true,})

@@ -10,12 +10,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -229,8 +231,10 @@ public class ProjectController extends CoTopComponent {
 	 * @return the response entity
 	 */
 	@GetMapping(value = PROJECT.AUTOCOMPLETE_DIVISION_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteDivisonAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> autoCompleteDivisonAjax(Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
+
 		return makeJsonResponseHeader(projectService.getProjectDivisionList(project));
 	}
 	/**
@@ -3921,10 +3925,50 @@ public class ProjectController extends CoTopComponent {
 		try {
 			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
+				
+				String codeExp = codeMapper.getCodeDetail("120", "12").getCdDtlExp();
+				String codeExp2 = codeMapper.getCodeDetail("120", "42").getCdDtlExp();
+				String codeExp3 = codeMapper.getCodeDetail("120", "43").getCdDtlExp();
+				
+				List<String> fileExtList = new ArrayList<>();
+				if (!isEmpty(codeExp)) {
+					fileExtList.addAll(Arrays.stream(codeExp.split(",")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList()));
+				}
+				if (!isEmpty(codeExp2)) {
+					fileExtList.addAll(Arrays.stream(codeExp2.split(",")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList()));
+				}
+				if (!isEmpty(codeExp3)) {
+					fileExtList.addAll(Arrays.stream(codeExp3.split(",")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList()));
+				}
+				
+				boolean fileExtCheck = false;
+				if (CollectionUtils.isNotEmpty(fileExtList)) {
+					fileExtList = fileExtList.stream().distinct().collect(Collectors.toList());
+					for (String s : fileExtList) {
+						if (fileExtension.endsWith(s.trim())) {
+							fileExtCheck = true;
+							break;
+						}
+					}
+				}
+
+				if (!fileExtCheck) {
+					resultList.add("UNSUPPORTED_FILE");
+					String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{String.join(",", fileExtList)});
+					resultList.add(msg);
+					return toJson(resultList);
+				}
+				
 				if (fileId == null) {
 					list = fileService.uploadFile(req, file);
 				} else {
 					list = fileService.uploadFile(req, file, null, fileId);
+				}
+				
+				if (CollectionUtils.isNotEmpty(list) && !list.get(0).isUploadSucc()) {
+					resultList.add("FILE_CONVERSION_FAILED");
+					resultList.add(list.get(0).getComments());
+					return toJson(resultList);
 				}
 			}
 
@@ -6062,11 +6106,5 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, null);
 		}
 		return makeJsonResponseHeader(true, null);
-	}
-	
-	@PostMapping(value = PROJECT.VALIDATE_ANALYSIS_PROGRESS)
-	public @ResponseBody ResponseEntity<Object> validateAnalysisProgress(@RequestBody Map<String, Object> map) {
-		Map<String, Object> rtnMap = projectService.validateAnalysisProgress(map);
-		return makeJsonResponseHeader(true, null, rtnMap);
 	}
 }
