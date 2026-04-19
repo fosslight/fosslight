@@ -28,7 +28,6 @@
                             <div class="float-right">
                                 <button th:if="${@CommonFunction.isAdmin() and @environment.getProperty('ai.server.url') != null}" type="button" class="btn btn-outline-lg-red btn-sm width-10rem px-1" id="ai"><i class="fas fa-user-astronaut pt-1"></i> AI(Experimental)</button>
                                 <button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.dropYn != 'Y'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" id="autoReview">CoReviewer</button>
-                                <button th:if="${@CommonFunction.isAdmin() and project.ossAnalysisStatus == 'PROGRESS'}" type="button" class="btn btn-outline-lg-red btn-sm width-8rem px-1" th:onclick="|fn.handleProgressingAnalysis()|">Check CoReviewer</button>
                             	<button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF' and project.dropYn != 'Y'}" type="button" class="btn btn-outline-lg-red btn-sm width-7rem px-1" style="display: none;" id="autoReviewStop">Stop CoReviewer</button>
                         		<th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
                                 	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm" th:onclick="|com_fn.confirm()|"></button>
