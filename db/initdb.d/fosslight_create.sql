@@ -5088,6 +5088,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('120', '22', '3rd Party Oss List', '', 'xls,xlsm,xlsx,csv', 10, 'Y'),
 	('120', '31', 'BAT FILE', '', '', 11, 'Y'),
 	('120', '41', 'project notice append file', '', 'html,htm,txt', 15, 'Y'),
+	('120', '42', 'Spdx File Extension', '', 'rdf,tag,json,yaml,spdx', 16, 'Y'),
+	('120', '43', 'CycloneDX File Extension', '', 'json,xml', 17, 'Y'),
 	('121', '11', 'FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx', '', '/sample/FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx', 2, 'Y'),
 	('200', '999', 'N/A', '', '', 999, 'Y'),
 	('200', '1', 'Open Source Task', '', '', 1, 'Y'),
