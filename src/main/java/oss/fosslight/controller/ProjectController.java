@@ -7,6 +7,7 @@ package oss.fosslight.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -6109,5 +6110,32 @@ public class ProjectController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> validateAnalysisProgress(@RequestBody Map<String, Object> map) {
 		Map<String, Object> rtnMap = projectService.validateAnalysisProgress(map);
 		return makeJsonResponseHeader(true, null, rtnMap);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.DEPENDENCY_EXPORT)
+	public void dependencyExport(@RequestBody Map<String, Object> map, HttpServletResponse response) throws IOException {
+		String prjId = String.valueOf(map.getOrDefault("prjId", ""));
+		String mainDataString = String.valueOf(map.getOrDefault("rows", ""));
+		
+		if (isEmpty(mainDataString)) {
+	        return;
+	    }
+		
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+	    List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType);
+
+	    String txtContent = projectService.exportDependencyTreeToTxt(prjId, ossComponents);
+
+	    response.setContentType("text/plain");
+	    response.setCharacterEncoding("UTF-8");
+
+	    String fileName = "dependency_tree.txt";
+	    response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+	    
+	    try (PrintWriter writer = response.getWriter()) {
+	        writer.write(txtContent);
+	        writer.flush();
+	    }
 	}
 }

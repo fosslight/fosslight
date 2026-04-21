@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -9921,6 +9922,86 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	private void handleSingleComponentError(String prjId, String componentId, String reason) {
 		String errorComment = "<li><b>Parsing Error</b><br/>reason : [Failed] " + reason + "<br/><br/></li>";
 	    ossService.updateAnalysisComments(componentId, prjId, errorComment, "R");
+	}
+
+	@Override
+	public String exportDependencyTreeToTxt(String prjId, List<ProjectIdentification> ossComponents) {
+		if (ossComponents == null || ossComponents.isEmpty()) {
+	        return "No Data";
+	    }
+
+	    Map<String, String> packageUrlToDeps = new HashMap<>(ossComponents.size());
+	    Map<String, ProjectIdentification> componentMap = new HashMap<>(ossComponents.size());
+	    
+	    for (ProjectIdentification bean : ossComponents) {
+	        String url = bean.getPackageUrl();
+	        if (url != null && !url.isEmpty()) {
+	            packageUrlToDeps.put(url, bean.getDependencies() != null ? bean.getDependencies() : "");
+	            componentMap.put(url, bean);
+	        }
+	    }
+
+	    String title = "=== ";
+	    if (!isEmpty(prjId)) {
+	    	title += " [PRJ-" + prjId + "] ";
+	    }
+	    title += "Project Dependency Tree Export ===";
+	    
+	    StringBuilder sb = new StringBuilder();
+	    sb.append(title).append("\n");
+	    sb.append("Generated at: ").append(new Date()).append("\n\n");
+
+	    Set<Integer> visitedPathHashes = new HashSet<>();
+	    for (ProjectIdentification bean : ossComponents) {
+	        if (bean.getPackageUrl() != null && !bean.getPackageUrl().isEmpty() && bean.getComments() != null && bean.getComments().trim().contains("direct")) {
+	            generateTxtRow(bean, 0, sb, packageUrlToDeps, componentMap, visitedPathHashes);
+	        }
+	    }
+
+	    return sb.toString();
+	}
+
+	private void generateTxtRow(ProjectIdentification current, int level, StringBuilder sb, Map<String, String> packageUrlToDeps, Map<String, ProjectIdentification> componentMap, Set<Integer> visitedPathHashes) {
+	    if (level >= 50) {
+	        return;
+	    }
+
+	    for (int i = 0; i < level; i++) {
+	        sb.append("    ");
+	    }
+	    
+	    if (level > 0) {
+	        sb.append("ㄴ ");
+	    }
+	    sb.append(current.getPackageUrl()).append("\n");
+
+	    String depsString = packageUrlToDeps.getOrDefault(current.getPackageUrl(), "");
+	    if (depsString == null || depsString.isEmpty()) {
+	        return;
+	    }
+
+	    String[] childrenUrls = depsString.split(",");
+	    for (String childUrl : childrenUrls) {
+	        childUrl = childUrl.trim();
+	        if (childUrl.isEmpty()) {
+	            continue;
+	        }
+
+	        int edgeHash = (current.getPackageUrl() + childUrl).hashCode();
+	        if (!visitedPathHashes.add(edgeHash)) {
+	            continue;
+	        }
+
+	        ProjectIdentification childBean = componentMap.get(childUrl);
+	        if (childBean != null) {
+	            generateTxtRow(childBean, level + 1, sb, packageUrlToDeps, componentMap, visitedPathHashes);
+	        } else {
+	            for (int i = 0; i <= level; i++) {
+	                sb.append("    ");
+	            }
+	            sb.append("ㄴ ").append(childUrl).append("\n");
+	        }
+	    }
 	}
 }
  
