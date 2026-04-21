@@ -1145,6 +1145,53 @@ var dep_fn = {
     	} else {
     		alertify.alert([[#{msg.project.cannot.print.identification.dependency}]], function(){});
     	}
+    },
+    dependencyTreeExport : function() {
+    	if (typeof depMainData !== "undefined") {
+    		var depTreeDirectData = depMainData.filter(function(cur){
+    			let comments = $.trim(cur.comments);
+    			return comments.indexOf("direct") > -1;
+    		});
+    		
+    		if (depTreeDirectData.length == 0) {
+    			alertify.alert([[#{msg.project.cannot.print.identification.dependency}]], function(){});
+    		} else {
+    			loading.show();
+    	        
+    			var xhr = new XMLHttpRequest();
+    			xhr.open('POST', '/project/dependency/export', true);
+    			xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+    			xhr.responseType = 'blob';
+
+    			xhr.onload = function() {
+    				loading.hide();
+    			    if (this.status === 200) {
+    			        var blob = new Blob([this.response], { type: 'text/plain' });
+    			        var url = window.URL.createObjectURL(blob);
+    			        
+    			        var a = document.createElement('a');
+    			        a.href = url;
+    			        a.download = "[PRJ-" + [[${project.prjId}]] + "] Project Dependency Tree.txt";
+    			        document.body.appendChild(a);
+    			        a.click();
+    			        
+    			        window.URL.revokeObjectURL(url);
+    			        document.body.removeChild(a);
+    			    } else {
+    			    	alertify.alert("Download failed (Status Code: " + this.status + ")", function(){});
+    			    }
+    			};
+
+    			xhr.onerror = function() {
+    				loading.hide();
+    				alertify.alert("Server connection error", function(){});
+    			};
+
+    			xhr.send(JSON.stringify({ "prjId" : [[${project.prjId}]], "rows": JSON.stringify(depMainData) }));
+    		}
+    	} else {
+    		alertify.alert([[#{msg.project.cannot.print.identification.dependency}]], function(){});
+    	}
     }
 }
 
@@ -1575,7 +1622,7 @@ var dep_grid = {
                 	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
                 	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"dep_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
                 	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"dep_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span></div>";
-                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"dependency tree\" onclick=\"dep_fn.dependencyTreePopup()\">";
+                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Dependency Tree Export\" onclick=\"dep_fn.dependencyTreeExport()\">";
              		appendBtn += "<i class=\"fas fa-list-ul\"></i></button>";
                 	
                     $("#depList_toppager_left").append(appendBtn);
