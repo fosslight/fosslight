@@ -4777,16 +4777,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		            List<String> refComponentIdsAdmin = copyComponents.stream().filter(e -> CoConstDef.FLAG_YES.equals(avoidNull(e.getAdminCheckYn()))).map(ProjectIdentification::getRefComponentId).collect(Collectors.toList());
 		            List<ProjectIdentification> sources = mapper.selectOssComponentsCopyList(refIds);
 		            
-		            List<OssComponents> copyComponentsList = null;
+		            List<OssComponents> copyComponentsList = new ArrayList<>();
 		            if (CollectionUtils.isNotEmpty(refComponentIds)) {
-		            	copyComponentsList = mapper.selectOssComponentsLicenseCopyList(refComponentIds, CoConstDef.FLAG_NO);
+		            	List<OssComponents> results = mapper.selectOssComponentsLicenseCopyList(refComponentIds, CoConstDef.FLAG_NO);
+		                if (CollectionUtils.isNotEmpty(results)) {
+		                	copyComponentsList.addAll(results);
+		                }
 		            }
-		            List<OssComponents> copyComponentsList2 = null;
 		            if (CollectionUtils.isNotEmpty(refComponentIdsAdmin)) {
-		            	copyComponentsList2 = mapper.selectOssComponentsLicenseCopyList(refComponentIdsAdmin, CoConstDef.FLAG_YES);
-		            }
-		            if (CollectionUtils.isNotEmpty(copyComponentsList2)) {
-		            	copyComponentsList.addAll(copyComponentsList2);
+		            	List<OssComponents> copyComponentsList2 = mapper.selectOssComponentsLicenseCopyList(refComponentIdsAdmin, CoConstDef.FLAG_YES);
+		            	if (CollectionUtils.isNotEmpty(copyComponentsList2)) {
+			            	copyComponentsList.addAll(copyComponentsList2);
+			            }
 		            }
 		            copyComponentsList.sort(Comparator.comparing(OssComponents::getComponentLicenseId));
 		            
