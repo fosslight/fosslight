@@ -424,6 +424,7 @@ public final class Url {
 		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
 		public static final String CHANGE_PROJECT_STATUS = PATH + "/changeProjectStatus";
 		public static final String DEPENDENCY_TREE_POPUP = PATH + "/dependencyTreePopup";
+		public static final String DEPENDENCY_EXPORT = PATH + "/dependency/export";
 		public static final String CHECK_COMPONENTS_LOADED = PATH + "/checkComponentLoaded";
 		
 		public static final String INIT_AUTO_REVIEW = PATH + "/initAutoReview";
