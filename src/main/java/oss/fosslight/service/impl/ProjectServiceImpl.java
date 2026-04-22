@@ -9113,31 +9113,40 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             Map<String, Object> resMap = new HashMap<>();
             ProjectIdentification paramBean = new ProjectIdentification();
             Map<String, String> diffMap = new HashMap<>();
-            List<String> diffComponentIdList = new ArrayList<>();
+            Map<String, String> validMap = new HashMap<>();
+            List<String> exceptComponents = new ArrayList<>();
             paramBean.setReferenceId(prjId);
             String refId = "";
             switch(targetName.toUpperCase()){
                 case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
                     String[] referenceDiv = new String[] {CoConstDef.CD_DTL_COMPONENT_ID_SRC, CoConstDef.CD_DTL_COMPONENT_ID_BIN, CoConstDef.CD_DTL_COMPONENT_ID_DEP, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID};
                     for (int i=0; i<referenceDiv.length; i++) {
-                        diffComponentIdList.clear();
+                        exceptComponents.clear();
                         paramBean.setReferenceDiv(referenceDiv[i]);
                         resMap = ossService.getCheckOssNameAjax(paramBean, targetName, false);
                         diffMap = (Map<String, String>) resMap.get("diffMap");
                         if (diffMap != null) {
                             for (String key : diffMap.keySet()) {
                                 if (key.indexOf("downloadLocation") == 0) {
-                                    diffComponentIdList.add(key.split("[.]")[1]);
+                                    exceptComponents.add(key.split("[.]")[1]);
                                 }
                             }
-                            diffComponentIdList = diffComponentIdList.stream().distinct().collect(Collectors.toList());
                         }
+                        validMap = (Map<String, String>) resMap.get("validMap");
+                        if(validMap != null) {
+                            for(String key : validMap.keySet()) {
+                                if(key.indexOf("ossVersion") == 0 ) {
+                                    exceptComponents.add(key.split("[.]")[1]);
+                                }
+                            }
+                        }
+                        exceptComponents = exceptComponents.stream().distinct().collect(Collectors.toList());
                         if (resMap.containsKey("list")) {
                         	List<ProjectIdentification> prjList = (List<ProjectIdentification>) resMap.get("list");
                             List<ProjectIdentification> changeList = new ArrayList<>();
                         	if (!CollectionUtils.isEmpty(prjList)) {
                         		for (ProjectIdentification prj : prjList) {
-                                    if (prj.getCheckName().indexOf("|") > -1 || diffComponentIdList.contains(prj.getComponentId())
+                                    if (prj.getCheckName().indexOf("|") > -1 || exceptComponents.contains(prj.getComponentId())
                                             || prj.getLicenseName().toUpperCase().equals("LGE PROPRIETARY LICENSE") || prj.getLicenseName().toUpperCase().equals("OTHER PROPRIETARY LICENSE")) {
                                         continue;
                                     }
@@ -9145,7 +9154,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                                     prj.setReferenceId(refId);
                                     changeList.add(prj);
                                 }
-                        		
+
                         		Map<String, Object> save = ossService.saveOssCheckName(changeList, targetName);
                                 if (!(boolean) save.get("isValid")) {
                                     return false;
@@ -9173,16 +9182,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                     if(diffMap != null) {
                         for (String key : diffMap.keySet()) {
                             if (key.indexOf("downloadLocation") == 0) {
-                                diffComponentIdList.add(key.split("[.]")[1]);
+                                exceptComponents.add(key.split("[.]")[1]);
                             }
                         }
-                        diffComponentIdList = diffComponentIdList.stream().distinct().collect(Collectors.toList());
                     }
+                    validMap = (Map<String, String>) resMap.get("validMap");
+                    if(validMap != null) {
+                        for(String key : validMap.keySet()) {
+                            if(key.indexOf("ossVersion") == 0 ) {
+                                exceptComponents.add(key.split("[.]")[1]);
+                            }
+                        }
+                    }
+                    exceptComponents = exceptComponents.stream().distinct().collect(Collectors.toList());
                     if (resMap.containsKey("list")) {
                     	List<ProjectIdentification> prjList = (List<ProjectIdentification>) resMap.get("list");
                     	if (!CollectionUtils.isEmpty(prjList)) {
                     		for (ProjectIdentification prj : prjList) {
-                                if (prj.getCheckName().indexOf("|") > -1 || diffComponentIdList.contains(prj.getComponentId())) {
+                                if (prj.getCheckName().indexOf("|") > -1 || exceptComponents.contains(prj.getComponentId())) {
                                     continue;
                                 }
                                 prj.setRefPrjId(refId);
