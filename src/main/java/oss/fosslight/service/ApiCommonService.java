@@ -22,4 +22,6 @@ public interface ApiCommonService {
 	Map<String, Object> updateDivision(String cdDtlNo, String cdDtlNm, String cdDtlExp) throws Exception;
 
 	List<Map<String, Object>> getDivisionList() throws Exception;
+
+	boolean existsActiveDivision(String cdDtlNo) throws Exception;
 }

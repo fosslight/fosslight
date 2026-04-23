@@ -184,4 +184,10 @@ public class ApiCommonServiceImpl implements ApiCommonService {
 	public List<Map<String, Object>> getDivisionList() throws Exception {
 		return codeMapper.selectDivisionList(CoConstDef.CD_USER_DIVISION);
 	}
+
+	@Override
+	public boolean existsActiveDivision(String cdDtlNo) throws Exception {
+		T2CodeDtl division = codeMapper.getCodeDetail(CoConstDef.CD_USER_DIVISION, cdDtlNo);
+		return division != null && CoConstDef.FLAG_YES.equalsIgnoreCase(division.getUseYn());
+	}
 }

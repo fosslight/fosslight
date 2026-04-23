@@ -452,6 +452,14 @@
         WHERE 
         	USER_ID = #{userId}
     </update>
+
+	<update id="updateUserDivisionByUserId">
+		UPDATE T2_USERS
+		SET DIVISION = #{division}
+			, MODIFIER = #{modifier}
+			, MODIFIED_DATE = NOW()
+		WHERE USER_ID = #{userId}
+	</update>
     
     <select id="selectUnusedDivisionUserList" parameterType="string" resultType="oss.fosslight.domain.T2Users">
     	SELECT *

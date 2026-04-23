@@ -69,6 +69,8 @@ public interface T2UserMapper {
 	public void updateStatisticsMostUsedInfo(T2Users t2Users);
 
 	public int updateUserNameDivision(T2Users userInfo);
+
+	public int updateUserDivisionByUserId(@Param("userId") String userId, @Param("division") String division, @Param("modifier") String modifier);
 	
 	public List<T2Users> selectUnusedDivisionUserList(@Param("unusedDivisionList") String[] unusedDivisionList);
 
