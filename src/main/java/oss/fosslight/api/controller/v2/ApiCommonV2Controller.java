@@ -160,4 +160,49 @@ public class ApiCommonV2Controller extends CoTopComponent {
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @ApiOperation(value = "Update user division", notes = "Admin only. Update T2_USERS.DIVISION by USER_ID.")
+    @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USER_DIVISION})
+    public ResponseEntity<Map<String, Object>> updateUserDivision(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "User id (USER_ID)", required = true) @RequestParam(required = true) String userId,
+            @ApiParam(value = "Division code (DIVISION)", required = true) @RequestParam(required = true) String division) {
+
+        T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
+            return responseService.errorResponse(HttpStatus.FORBIDDEN);
+        }
+        if (isEmpty(userId) || isEmpty(division)) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
+        }
+        String targetUserId = userId.trim();
+        String targetDivision = division.trim();
+        if (!userService.existUserId(targetUserId)) {
+            return responseService.errorResponse(HttpStatus.NOT_FOUND, "User id not found: " + targetUserId);
+        }
+        try {
+            if (!apiCommonService.existsActiveDivision(targetDivision)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid division: " + targetDivision);
+            }
+        } catch (Exception e) {
+            log.error("division validation error: division={}", targetDivision, e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        try {
+            int updated = userService.updateUserDivisionByUserId(targetUserId, targetDivision, userInfo.getUserId());
+            if (updated == 0) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND);
+            }
+
+            result.put("success", true);
+            result.put("user_id", targetUserId);
+            result.put("division", targetDivision);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("user division update error: userId={}, division={}", userId, division, e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

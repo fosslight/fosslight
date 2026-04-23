@@ -670,6 +670,11 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 	}
 
 	@Override
+	public boolean existUserId(String userId) {
+		return userMapper.selectDuplicateId(userId) > 0;
+	}
+
+	@Override
 	public int updateUserNameDivision(T2Users userInfo) {
 		HashMap<String, Object> info = new HashMap<String, Object>();
 		info.put("sessUserInfo", userInfo);
@@ -677,6 +682,11 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 		AbstractAuthenticationToken auth = (AbstractAuthenticationToken)sec.getAuthentication();
 		auth.setDetails(info);
 		return userMapper.updateUserNameDivision(userInfo);
+	}
+
+	@Override
+	public int updateUserDivisionByUserId(String userId, String division, String modifier) {
+		return userMapper.updateUserDivisionByUserId(userId, division, modifier);
 	}
 
 	private Hashtable<String, String> makeLdapProperty() {
