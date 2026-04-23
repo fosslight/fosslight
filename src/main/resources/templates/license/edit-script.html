@@ -166,11 +166,25 @@
                             }
                         }
                     }
-                })
+                });
+                
+                $("[name='licenseName']").on("blur", function(e) {
+    				var licenseName = $.trim($(this).val());
+    				if ("" != licenseName) {
+    					var shortIdentifierInput = $("#shortIdentifierInput").val();
+        				if ("" == $.trim(shortIdentifierInput)) {
+        					lic_edit_fn.generateSpdxIdentifier(licenseName);
+        				}
+    				}
+    			});
             }
         }
 
         const lic_edit_fn = {
+        	generateSpdxIdentifier : function(licenseName) {
+            	var shortIdentifier = "LicenseRef-" + licenseName;
+        		$("#shortIdentifierInput").val(shortIdentifier);
+            },
             registSubmit: function () {
                 $("#licenseType option[value='']").removeAttr('disabled');
                 
@@ -324,6 +338,15 @@
             			$("#input_webpages").val("");
             		}
             	}
+            	
+            	inputValue = "";
+        		inputValue = $("#shortIdentifierInput").val();
+        		if ("" == inputValue) {
+        			var licenseName = $.trim($("#licenseNameInput").val());
+        			if ("" != licenseName) {
+        				lic_edit_fn.generateSpdxIdentifier(licenseName);
+        			}
+        		}
             },
         	checkValidMsg : function () {
         		$("#licenseNameInput").removeClass("is-invalid");
