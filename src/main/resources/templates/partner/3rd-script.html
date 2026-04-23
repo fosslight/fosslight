@@ -635,8 +635,8 @@ var fn = {
 				} else {
 					alertify.success([[#{msg.common.success}]]);
 					saveFlag = true;
+					fn.changeMode('view', true, [[${detail.status}]]);
 					party_evt.getPartyGridData();
-					
 				}
 			} else {
 				alertify.error([[#{msg.common.valid2}]], 0);
