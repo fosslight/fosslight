@@ -4428,28 +4428,6 @@ function basicAlertifyDialog(target) {
 	}, false, 'confirm');
 }
 
-function basicAlertifyDialog(target) {
-	alertify.dialog(target, function() {
-		var settings;
-
-		return {
-			setup: function() {
-				var settings = alertify.confirm().settings;
-
-				for (var prop in settings) {
-					this.settings[prop] = settings[prop];
-				}
-				
-				var setup = alertify.confirm().setup();
-				
-				setup.focus.element = 0;
-				
-				return setup;
-			}
-		};
-	}, false, 'confirm');
-}
-
 function alertifyUploadDialog(target, width, id) {
 	alertify.dialog(target, function() {
 		var settings;
