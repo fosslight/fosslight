@@ -1152,19 +1152,30 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 			}
 
-			if (ossInfoByName.containsKey(checkKey)) {
-				// oss Download_location 체크
-				if (!errMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId())
-						&& !diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId())
-						&& !isEmpty(bean.getDownloadLocation())) {
-					if (checkOssData(checkOSSMaster, bean.getDownloadLocation(), "DOWNLOAD")) {
+			// oss Download_location 체크
+			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())) {
+				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName());
+				String prefix = checkOssName.toUpperCase() + "_";
+				OssMaster ossBean = null;
+				
+			    for (String mapKey : ossInfoByName.keySet()) {
+			        if (mapKey.startsWith(prefix)) {
+			        	ossBean = ossInfoByName.get(mapKey);
+			            break;
+			        }
+			    }
+			    
+			    if (!errMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId()) && !diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId()) && !isEmpty(bean.getDownloadLocation())) {
+					if (checkOssData(ossBean, bean.getDownloadLocation(), "DOWNLOAD")) {
 						diffMap.put("DOWNLOAD_LOCATION." + bean.getComponentId(), "DOWNLOAD_LOCATION.DIFFERENT");
 					}
 				}
-
-				if(!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !errMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !isEmpty(bean.getLicenseName())) {
+			}
+			
+			if (ossInfoByName.containsKey(checkKey)) {
+				if (!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !errMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !isEmpty(bean.getLicenseName())) {
 					String licenseText = CommonFunction.makeRecommendedLicenseString(checkOSSMaster, bean);
-					if(!isEmpty(licenseText)) {
+					if (!isEmpty(licenseText)) {
 						diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Recommended : " + licenseText );
 					}
 				}
@@ -2484,18 +2495,30 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 			}
 
-			if (ossInfo.containsKey(checkKey)) {
-				// oss Download_location 체크
-				if (!diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getGridId())
-						&& !isEmpty(bean.getDownloadLocation())) {
-					if (checkOssData(ossInfo.get(checkKey), bean.getDownloadLocation(), "DOWNLOAD")) {
+			// oss Download_location 체크
+			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())) {
+				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName());
+				String prefix = checkOssName.toUpperCase() + "_";
+				OssMaster ossBean = null;
+				
+			    for (String mapKey : ossInfo.keySet()) {
+			        if (mapKey.startsWith(prefix)) {
+			        	ossBean = ossInfo.get(mapKey);
+			            break;
+			        }
+			    }
+			    
+			    if (!diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getGridId()) && !isEmpty(bean.getDownloadLocation())) {
+					if (checkOssData(ossBean, bean.getDownloadLocation(), "DOWNLOAD")) {
 						diffMap.put("DOWNLOAD_LOCATION." + bean.getGridId(), "DOWNLOAD_LOCATION.DIFFERENT");
 					}
 				}
-
+			}
+			
+			if (ossInfo.containsKey(checkKey)) {
 				if (!diffMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !errMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !isEmpty(bean.getLicenseName())) {
 					String licenseText = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
-					if(!isEmpty(licenseText)) {
+					if (!isEmpty(licenseText)) {
 						diffMap.put("LICENSE_NAME." + bean.getGridId(), "Recommended : " + licenseText );
 					}
 				}
