@@ -1154,7 +1154,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 
 			// oss Download_location 체크
 			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())) {
-				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName());
+				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName().toUpperCase());
 				String prefix = checkOssName.toUpperCase() + "_";
 				OssMaster ossBean = null;
 				
@@ -2497,7 +2497,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 
 			// oss Download_location 체크
 			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())) {
-				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName());
+				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName().toUpperCase());
 				String prefix = checkOssName.toUpperCase() + "_";
 				OssMaster ossBean = null;
 				
