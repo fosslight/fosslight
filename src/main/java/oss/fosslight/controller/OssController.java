@@ -539,11 +539,7 @@ public class OssController extends CoTopComponent{
 		HashMap<String, Object> resMap = new HashMap<>();
 
 		try {
-			if (CoConstDef.FLAG_NO.equals(avoidNull(ossMaster.getSkipMergeYn()))) {
-				ossService.deleteOssWithVersionMerege(ossMaster);
-			} else {
-				ossService.deleteOssWithVersionRegist(ossMaster);
-			}
+			ossService.preProcessOssWithVersionMerege(ossMaster);
 			resCd = "10";
 			
 			putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
@@ -859,7 +855,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=OSS.OSS_MERGE_CHECK_LIST, produces = "text/html; charset=utf-8")
-	public @ResponseBody ResponseEntity<Object> ossMergeCheckList(@PathVariable String ossId, @PathVariable String newOssId, @PathVariable String skipMergeYn, OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+	public @ResponseBody ResponseEntity<Object> ossMergeCheckList(@PathVariable String ossId, @PathVariable String newOssId, OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		Map<String, Object> map = ossService.ossMergeCheckList(ossMaster);
 		
 		return makeJsonResponseHeader(map);
@@ -1256,8 +1252,7 @@ public class OssController extends CoTopComponent{
 	}
 
 	@PostMapping(value=Url.OSS.BULK_VALIDATION)
-	public @ResponseBody ResponseEntity<Object> bulkValidation(
-			@RequestBody List<OssMaster> ossMasters){
+	public @ResponseBody ResponseEntity<Object> bulkValidation(@RequestBody List<OssMaster> ossMasters){
 		Map<String, Object> resMap = new HashMap<>();
 
 		T2CoOssValidator validator = new T2CoOssValidator();

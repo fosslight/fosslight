@@ -4,6 +4,7 @@
 <script th:inline="javascript">
 	var lastsel;	
 	var tempNewOssId;
+	var tempOssIds;
 	var skipMergeYn = "N";
 	var temp={
 		obligation:''
@@ -610,7 +611,7 @@
 					ossCommonId : [[${ossCommonId}]],
 					ossId : [[${ossId}]],
 					newOssId : tempNewOssId,
-					skipMergeYn : skipMergeYn,
+					ossIds : tempOssIds,
 					comment : editorVal
 				};
 				
@@ -1937,37 +1938,124 @@
 		var ossVersion = [[${detail?.ossVersion}]];
 		var message = [[${@CommonFunction.getCustomMessage('msg.oss.check.delete.merge', (detail?.ossName ?: '') + ' (' + (detail?.ossVersion ?: 'N/A') + ')')}]];
 		
-		const htmlContent = `
-			<div class="p-2">
-			    <div class="mb-3">
-			        <p>${message}</p>
-			    </div>
-			    <div>
-			        <span class="ml-4">
-			            <input class="form-check-input" type="radio" name="checkVersion" value="ALL" id="allVersion">
-			            <label class="form-check-label" for="allVersion">All version</label>
-			        </span>
-			        <span class="ml-5">
-			            <input class="form-check-input" type="radio" name="checkVersion" value="CURRENT" id="currentVersion" checked>
-			            <label class="form-check-label" for="currentVersion">Current version</label>
-			        </span>
-			    </div>
-			</div>
-    	`;
+		ossName = ossName.split("&#034;").join("\"").split("&#039;").join("\'");
 		
-    	var dlg = alertify.confirm();
-        dlg.setContent(htmlContent);
-        dlg.set('onok', function(e) {
-        	if (e) {
-                const selectedValue = $('.ajs-content input[name="checkVersion"]:checked').val();
-                $("#blind_wrap").show();
-                $('.ossSelectPop').show();
-                if ("CURRENT" == selectedValue) {
-                	skipMergeYn = 'Y';
-                }
-            } 
+        getAjaxData({ossName: ossName}, "/oss/getOssListByName", "json", function (res) {
+        	const htmlContent = `
+    			<div class="p-2">
+    			    <div class="mb-3">
+    			        <p>${message}</p>
+    			    </div>
+    			    <div class="mt-3">
+    		            <table id="delTargetTable" class="table table-sm table-bordered w-100">
+    		                <thead>
+    		                    <tr>
+    		                        <th class="text-center p-2"><input type="checkbox" id="delCheckAll"></th>
+    		                        <th class="text-center p-2">OSS Name (Version)</th>
+    		                    </tr>
+    		                </thead>
+    		            </table>
+    		        </div>
+    			</div>
+        	`;
+        	
+      		var dlg = alertify.confirm();
+    	    dlg.setContent(htmlContent);
+    	    dlg.set('onok', function (closeEvent) {
+    	    	const table = $('#delTargetTable').DataTable();
+    	        const selectedData = table.rows(function (idx, data, node) {
+    	            return $(node).find('.row-checkbox').prop('checked');
+    	        }).data().toArray();
+
+    	        if (selectedData.length === 0) {
+    	            alertify.alert("Please select the items you want to delete.", function(){});
+    	            return false;
+    	        }
+
+    	        const selectedIds = selectedData.reduce(function(acc, item) {
+    	            if (item.ossId) {
+    	            	acc.push(item.ossId);
+    	            }
+    	            return acc;
+    	        }, []);
+    	        
+    	        var existOssConf = false;
+    	        for (var i in selectedIds) {
+    	        	$.ajax({
+    	    			url : '/oss/checkExistOssConf',
+    	    			type : 'GET',
+    	    			dataType : 'json',
+    	    			cache : false,
+    	    			async : false,
+    	    			data : {'ossId' : selectedIds[i]},
+    	    			success : function(data){
+    	    				if (parseInt(data) > 0) {
+    	    					existOssConf = true;
+    	    				}
+    	    			},
+    	    			error : function(){
+    	    				alertify.error([[#{msg.common.valid2}]], 0);
+    	    			}
+    	    		});
+    	        }
+    	        
+    	        if (existOssConf) {
+    	        	tempOssIds = selectedIds;
+    	        	$("#blind_wrap").show();
+    	        	$('.ossSelectPop').show();
+    	        } else {
+    	        	loading.show();
+    	        	postAjaxData({"ossIds": selectedIds}, "/oss/multiDelAjax", "json", function (res) {
+    	        		loading.hide();
+    	        		alertify.alert([[#{msg.common.success}]], function () {
+    	        			deleteTabInFrame('/oss/edit/' + [[${ossId}]]);
+    						callCreateTabInFrame('Open Source', '/oss/list', 'oss-list', true);
+                        });
+    	        	}, function () {
+                        alertify.error(String([[#{msg.common.valid2}]]), 0);
+                    });
+    	        }
+    		});
+    	    dlg.show();
+    	    
+    	    var popupTable = $('#delTargetTable').DataTable({
+    	        data: res.ossList,
+    	        paging: false,
+    	        searching: false,
+    	        info: false,
+    	        lengthChange: false,
+    	        pageLength: 5,
+    	        autoWidth: false,
+    	        order: [],
+        		ordering : false,
+    	        destroy: true,
+    	        columns: [
+    	            {
+    	                data: null,
+    	                orderable: false,
+    	                className: 'text-center p-2',
+    	                render: function (data, type, row) {
+    	                    return '<input type="checkbox" class="row-checkbox">';
+    	                }
+    	            },
+    	            { 
+    	                data: "ossName",
+    	                className: 'text-left p-2',
+    	                render: function(data, type, row) {
+    	                    const version = row.ossVersion ? row.ossVersion : 'N/A';
+    	                    return `${data} (${version})`;
+    	                }
+    	            }
+    	        ],
+    	        drawCallback: function() {
+    	            $('#delCheckAll').prop('checked', false);
+    	        }
+    	    });
+
+    	    $(document).off('click', '#delCheckAll').on('click', '#delCheckAll', function() {
+    	        $('.row-checkbox').prop('checked', this.checked);
+    	    });
         });
-        dlg.show();
 	}
 	
 	// OSS 삭제
@@ -2606,8 +2694,15 @@
 		$('.mergeOssCheckPop').show();
 
 		$('#_ossMergeCheckList').jqGrid({
-            url: '/oss/ossMergeCheckList/' + [[${ossId}]] + '/' + newOssId + '/' + skipMergeYn,
+			url: '/oss/ossMergeCheckList/' + [[${ossId}]] + '/' + newOssId,
 			datatype: 'json',
+			mtype: 'GET',
+		    postData: {
+		    	ossIds: tempOssIds
+		    },
+		    serializeGridData: function(postData) {
+		        return $.param(postData, true); 
+		    },
 			jsonReader:{
 				repeatitems: false,
 				id:'ossId',
