@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.BinaryMaster;
 import oss.fosslight.domain.CoMail;
@@ -63,6 +64,38 @@ public interface MailManagerMapper {
 	public void deleteTempMail(String mailSeq);
 
 	public List<String> setProjectWatcherMailListNotCheckDivision(String paramPrjId);
+	
 	public List<String> setSelfCheckWatcherMailListNotCheckDivision(String paramPrjId);
 
+	public List<Map<String, Object>> getComponentOssBasicInfo(@Param("ossId") String ossId);
+
+	public List<Map<String, Object>> getComponentLicenseBasicInfo(@Param("licenseId") String licenseId);
+
+	public List<Map<String, Object>> getComponentProjectBasicInfo(@Param("prjId") String prjId);
+
+	public List<Map<String, Object>> getComponentSelfCheckBasicInfo(@Param("prjId") String prjId);
+
+	public List<Map<String, Object>> getComponentProjectDistributionInfo(@Param("prjId") String prjId);
+
+	public List<Map<String, Object>> getComponentProjectModelInfo(@Param("prjId") String prjId);
+
+	public List<Map<String, Object>> getComponentPartnerBasicInfo(@Param("partnerId") String partnerId);
+
+	public List<Map<String, Object>> getComponentPartnerOssList(@Param("partnerId") String partnerId);
+
+	public List<Map<String, Object>> getComponentDiscloseOssInfo(@Param("partnerId") String partnerId);
+
+	public List<Map<String, Object>> getComponentNotDiscloseOssInfo(@Param("partnerId") String partnerId);
+
+	public List<Map<String, Object>> getComponentBatResult(@Param("batId") String batId);
+
+	public List<Map<String, Object>> getComponentVulnerabilityProject(@Param("prjId") String prjId);
+
+	public List<Map<String, Object>> getComponentVulnerabilityOssInfo(@Param("ossKey") List<String> ossKey);
+
+	public List<Map<String, Object>> getComponentVulnerabilityRecalculatedAll(@Param("ossKey") List<String> ossKey);
+
+	public List<Map<String, Object>> getComponentVulnerabilityRecalculated(@Param("prjId") String prjId, @Param("standardScore") String standardScore);
+
+	public List<Map<String, Object>> getComponentVulnerabilityRemoveRecalculated(@Param("prjId") String prjId, @Param("standardScore") String standardScore);
 }
