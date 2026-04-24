@@ -130,6 +130,7 @@ public final class Url {
 		public static final String COMMENT_LIST = PATH + "/getCommentList";
 		public static final String COMMENT_ALL_LIST = PATH + "/getCommentAllList";
 		public static final String CUS_COMMENT_LIST = PATH + "/getCusCommentList";
+		public static final String DASHBOARD_COMMENT_LIST = PATH + "/getDashboardCommentList";
 		
 		public static final String MORE_COMMENT_LIST = PATH + "/getMoreCommentList";
 		public static final String COMMENT_LIST_JSP = TILES_ROOT + PATH + "/list";
@@ -193,7 +194,6 @@ public final class Url {
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
-		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}/{skipMergeYn}";
 		
 		public static final String SAVE_SESSION_OSS_INFO = PATH + "/saveSessionOssInfo";
 		

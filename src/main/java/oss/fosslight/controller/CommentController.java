@@ -7,12 +7,11 @@ package oss.fosslight.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.github.jsonldjava.utils.Obj;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +30,6 @@ import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
-import oss.fosslight.util.StringUtil;
 
 @Controller
 public class CommentController extends CoTopComponent {
@@ -83,9 +81,19 @@ public class CommentController extends CoTopComponent {
         return "fragments/comment-fragments :: commentAreaFragment";
     }
 
+    @GetMapping(value = COMMENT.DASHBOARD_COMMENT_LIST)
+	public String getDashboardCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model){
+    	commentsHistory.setUser(loginUserName());
+    	List<CommentsHistory> commentList = commentService.getCommentListHis(commentsHistory);
+    	model.addAttribute("commentList", commentList);
+    	model.addAttribute("commentListCnt", CollectionUtils.isNotEmpty(commentList) ? commentList.size() : 0);
+    	model.addAttribute("commentsHistory", commentsHistory);
+    	
+    	return "comment/commentList";
+	}
+    
     @GetMapping(value = COMMENT.POPUP)
-    public String index(HttpServletRequest req, HttpServletResponse res, Model model
-            , @PathVariable String rDiv, @PathVariable String _rDiv, @PathVariable String rId) {
+    public String index(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String rDiv, @PathVariable String _rDiv, @PathVariable String rId) {
         CommentsHistory commentsHistory = new CommentsHistory();
         commentsHistory.setReferenceDiv(rDiv);
         commentsHistory.setReferenceId(rId);
@@ -113,16 +121,14 @@ public class CommentController extends CoTopComponent {
     }
 
     @PostMapping(value = COMMENT.UPDATE_COMMENT)
-    public @ResponseBody ResponseEntity<Object> updateComment(@ModelAttribute CommentsHistory commentsHistory,
-                                                              HttpServletRequest req, HttpServletResponse res, Model model) {
+    public @ResponseBody ResponseEntity<Object> updateComment(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
         commentService.updateComment(commentsHistory);
 
         return makeJsonResponseHeader(true);
     }
 
     @PostMapping(value = COMMENT.DELETE_COMMENT)
-    public @ResponseBody ResponseEntity<Object> deleteComment(@ModelAttribute CommentsHistory commentsHistory,
-                                                              HttpServletRequest req, HttpServletResponse res, Model model) {
+    public @ResponseBody ResponseEntity<Object> deleteComment(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
         commentService.deleteComment(commentsHistory);
 
         return makeJsonResponseHeader(true);

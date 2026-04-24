@@ -3,20 +3,29 @@
 <th:block th:if="${commentListCnt > 0}">
 	<th:block th:each="comment, status : ${commentList}">
 		<div class="card-body" style="padding: .75rem; vertical-align: top; border-top: 1px solid #dee2e6;">
-			<div class="row">
+			<div class="row" th:data-id="${comment.dashboardYn != null} ? ${comment.referenceId} : null" th:data-div="${comment.dashboardYn != null} ? ${comment.referenceDiv} : null" th:data-flag="${comment.dashboardYn != null} ? ${comment.referenceDivFlag} : null" 
+				th:onclick="${comment.dashboardYn != null} ? 'fn_comment.moveToReference(this)' : null"  th:styleappend="${comment.dashboardYn != null} ? 'cursor: pointer;' : null">
 				<div class="col-lg-12">
 					<div class="post">
 						<div class="row">
 							<div class="col-lg-12" style="display: flex;">
-							<th:block th:if="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '40' or comment.referenceDiv == '42' or comment.referenceDiv == '60'}">
-								<span class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${comment.referenceDiv != '20' and not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
+							<th:block th:if="${comment.dashboardYn != null}">
+								<th:block th:if="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '14' or comment.referenceDiv == '19'}">
+									<span class="pt-1 pl-2 hashtag" th:text="'#prj-' + ${comment.referenceId}"></span>
+								</th:block>
+								<th:block th:if="${comment.referenceDiv == '20' or comment.referenceDiv == '22'}">
+									<span class="pt-1 pl-2 hashtag" th:text="'#3rd-' + ${comment.referenceId}"></span>
+								</th:block>
+							</th:block>
+							<th:block th:if="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '14' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '40' or comment.referenceDiv == '42' or comment.referenceDiv == '60'}">
+								<span th:class="${comment.dashboardYn != null} ? 'pt-1 pl-1 hashtag' : 'pt-1 pl-2 hashtag'" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${comment.referenceDiv != '20' and not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
 								<th:block th:if="${not #strings.isEmpty(comment.status)}">
 									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'}"></span>
 									<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
 								</th:block>							
 							</th:block>
-							<th:block th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '30' or comment.referenceDiv == '40' or comment.referenceDiv == '42' or comment.referenceDiv == '60' }">
-								<span class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
+							<th:block th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '14' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '30' or comment.referenceDiv == '40' or comment.referenceDiv == '42' or comment.referenceDiv == '60' }">
+								<span th:class="${comment.dashboardYn != null} ? 'pt-1 pl-1 hashtag' : 'pt-1 pl-2 hashtag'" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
 								<th:block th:if="${not #strings.isEmpty(comment.status)}">
 									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'}"></span>
 									<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
