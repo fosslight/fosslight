@@ -60,6 +60,7 @@ public class DashboardController extends CoTopComponent{
 	public @ResponseBody ResponseEntity<Object> jobsListAjax(Project project, HttpServletRequest req, HttpServletResponse res, Model model){
 		project.setCurPage(1);
 		project.setPageListSize(1);
+		project.setLoginUserName(loginUserName());
 		
 		return makeJsonResponseHeader(dashboardService.getDashboardJobsList(project));
 	}

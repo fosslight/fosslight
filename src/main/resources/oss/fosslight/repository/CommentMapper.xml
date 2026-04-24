@@ -203,20 +203,20 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(user)">
 			AND CH.CREATOR != #{user}
 			AND (
-				IFNULL(CH.STATUS, '') != ''
-				AND CH.STATUS != 'Confirmed' 
-				AND CH.STATUS != 'Terminated' 
-				AND CH.STATUS != 'Review' 
-				AND CH.STATUS != 'OSS Name Changed'
-				AND CH.STATUS != 'Cancelled Reservation' 
-				AND CH.STATUS != 'Add Model by OSDD' 
-				AND CH.STATUS != 'Distribute Rejected' 
-				AND CH.STATUS != 'Distribute Reserved' 
-				AND CH.STATUS != 'Distribute Model Only'
-				AND CH.STATUS NOT LIKE 'changed%' 
-				AND CH.STATUS NOT LIKE 'Distribute Deleted%' 
-				AND CH.STATUS NOT LIKE 'pre-review%'
-				AND CH.STATUS NOT LIKE 'Updated Model by%'
+				IFNULL(CH.STATUS, '') = ''
+				OR (
+					CH.STATUS != 'Terminated' 
+					AND CH.STATUS != 'OSS Name Changed'
+					AND CH.STATUS != 'Cancelled Reservation' 
+					AND CH.STATUS != 'Add Model by OSDD' 
+					AND CH.STATUS != 'Distribute Rejected' 
+					AND CH.STATUS != 'Distribute Reserved' 
+					AND CH.STATUS != 'Distribute Model Only'
+					AND CH.STATUS NOT LIKE 'changed%' 
+					AND CH.STATUS NOT LIKE 'Distribute Deleted%' 
+					AND CH.STATUS NOT LIKE 'pre-review%'
+					AND CH.STATUS NOT LIKE 'Updated Model by%'
+				)
 			)
 		</if>
 	ORDER BY 
@@ -225,7 +225,7 @@
 			CASE WHEN CH.CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
 		</if>
 	CH.COMM_ID DESC
-	<if test="@oss.fosslight.util.StringUtil@equals(moreFlag, 'N')">
+	<if test="@oss.fosslight.util.StringUtil@equals(moreFlag, 'N') and @oss.fosslight.util.StringUtil@isEmpty(user)">
 		<if test="@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
 			LIMIT 5
 		</if>
@@ -305,20 +305,20 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(user)">
 				AND CREATOR != #{user}
 				AND (
-					IFNULL(STATUS, '') != ''
-					AND STATUS != 'Confirmed' 
-					AND STATUS != 'Terminated' 
-					AND STATUS != 'Review' 
-					AND STATUS != 'OSS Name Changed'
-					AND STATUS != 'Cancelled Reservation' 
-					AND STATUS != 'Add Model by OSDD' 
-					AND STATUS != 'Distribute Rejected' 
-					AND STATUS != 'Distribute Reserved' 
-					AND STATUS != 'Distribute Model Only'
-					AND STATUS NOT LIKE 'changed%' 
-					AND STATUS NOT LIKE 'Distribute Deleted%' 
-					AND STATUS NOT LIKE 'pre-review%'
-					AND STATUS NOT LIKE 'Updated Model by%'
+					IFNULL(STATUS, '') = ''
+					OR (
+						STATUS != 'Terminated' 
+						AND STATUS != 'OSS Name Changed'
+						AND STATUS != 'Cancelled Reservation' 
+						AND STATUS != 'Add Model by OSDD' 
+						AND STATUS != 'Distribute Rejected' 
+						AND STATUS != 'Distribute Reserved' 
+						AND STATUS != 'Distribute Model Only'
+						AND STATUS NOT LIKE 'changed%' 
+						AND STATUS NOT LIKE 'Distribute Deleted%' 
+						AND STATUS NOT LIKE 'pre-review%'
+						AND STATUS NOT LIKE 'Updated Model by%'
+					)
 				)
 			</if>
 		ORDER BY 
@@ -374,20 +374,20 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(user)">
 			AND CREATOR != #{user}
 			AND (
-				IFNULL(STATUS, '') != ''
-				AND STATUS != 'Confirmed' 
-				AND STATUS != 'Terminated' 
-				AND STATUS != 'Review' 
-				AND STATUS != 'OSS Name Changed'
-				AND STATUS != 'Cancelled Reservation' 
-				AND STATUS != 'Add Model by OSDD' 
-				AND STATUS != 'Distribute Rejected' 
-				AND STATUS != 'Distribute Reserved' 
-				AND STATUS != 'Distribute Model Only'
-				AND STATUS NOT LIKE 'changed%' 
-				AND STATUS NOT LIKE 'Distribute Deleted%' 
-				AND STATUS NOT LIKE 'pre-review%'
-				AND STATUS NOT LIKE 'Updated Model by%'
+				IFNULL(STATUS, '') = ''
+				OR (
+					STATUS != 'Terminated' 
+					AND STATUS != 'OSS Name Changed'
+					AND STATUS != 'Cancelled Reservation' 
+					AND STATUS != 'Add Model by OSDD' 
+					AND STATUS != 'Distribute Rejected' 
+					AND STATUS != 'Distribute Reserved' 
+					AND STATUS != 'Distribute Model Only'
+					AND STATUS NOT LIKE 'changed%' 
+					AND STATUS NOT LIKE 'Distribute Deleted%' 
+					AND STATUS NOT LIKE 'pre-review%'
+					AND STATUS NOT LIKE 'Updated Model by%'
+				)
 			)
 		</if>
 		AND USE_YN = 'Y'

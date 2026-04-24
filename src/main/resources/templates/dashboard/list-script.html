@@ -61,21 +61,6 @@
         let _rowPrjDivision;
         let _referenceDiv;
 
-        $(document).on('click', '#jobListTable > tbody > tr', function(event) {
-        	var rowData = $("#jobListTable").DataTable().row($(this)).data();
-            _referenceDiv = rowData.prjDivision.toLowerCase();
-            _rowPrjId = rowData.prjId;
-            
-            var commentId = rowData.prjDivision + "-" + _rowPrjId + " Comment";
-        	$("#commentHeader").text(commentId);
-
-            var param = {"referenceDiv": _referenceDiv, "referenceId" : _rowPrjId};
-			fn_comment.getCommentsList(param);
-
-            $(this).css("background-color", "#f0f0f0");
-            $('#jobListTable > tbody > tr').not(this).css("background-color", "");
-        });
-
         $(document).on("click", "[name ='commentModifyBtn']", function (e){
         	e.preventDefault();
         	_referenceDiv = $(this).nextAll('input').val();
@@ -292,12 +277,43 @@
                             className : "text-center",
                             width: "15%"
                         }
-                    ]
-                });
+                    ],
+	            	initComplete: function(settings, json) {
+	            		var api = this.api();
+	            		var data = api.rows().data().toArray();
+	            		if (data.length > 0) {
+	            			var prjDivisionIdList = [];
+		            	    var uniqueObj = {};
+		            	    var param = {};
+		            	    
+		            	    $.each(data, function(index, row) {
+		            	        var id = row.prjDivisionId;
 
-                if (data.records > 0) {
-                    $('#jobListTable > tbody > tr:first').trigger('click');
-                }
+		            	        if (!uniqueObj[id]) {
+		            	            uniqueObj[id] = true;
+		            	            prjDivisionIdList.push(id);
+		            	        }
+		            	    });
+		            	    
+		            	    param["referenceIds"] = prjDivisionIdList;
+		            	    param["moreFlag"] = "Y";
+		            	    
+		            		$.ajax({
+		                        url: '/comment/getDashboardCommentList',
+		                        type: 'GET',
+		                        dataType : 'html',
+			        			data : param,
+			        			cache : false,
+			        			contentType : 'application/json',
+		                        success: function(res) {
+		                        	$("#commentList").html(res);
+		                        }
+		                    });
+	            		} else {
+	            			fn_comment.getCommentsList(commentsParam);
+	            		}
+	            	}
+                });
            	},
             getSortedByStatusJobsList :  function(status) {
                 $.ajax({
@@ -945,24 +961,28 @@
         	closeAlertifyView : function () {
         		$(".ajs-close").trigger("click");
         	},
-        	locateComment : function (referenceId, referenceDiv, referenceDivFlag) {
-        		switch(referenceDiv) {
+        	moveToReference : function (elem) {
+	        	const refId = elem.dataset.id;
+	            const refDiv = elem.dataset.div;
+	            const refFlag = elem.dataset.flag;
+	            
+        		switch(refDiv) {
         			case "10" :
-        				if (referenceDivFlag == null || "Y" != referenceDivFlag) {
-        					chart_fn.mvIdentification(referenceId, "5");
+        				if (refFlag == null || "Y" != refFlag) {
+        					chart_fn.mvIdentification(refId, "5");
         				} else {
-        					chart_fn.mvIdentification(referenceId, "4");
+        					chart_fn.mvIdentification(refId, "4");
         				}
         				break;
-        			case "12" : chart_fn.mvVerification(referenceId);
+        			case "12" : chart_fn.mvVerification(refId);
         				break;
-        			case "14" : chart_fn.mvDistribution(referenceId);
+        			case "14" : chart_fn.mvDistribution(refId);
         				break;
-        			case "19" : chart_fn.mvEditProject(referenceId);
+        			case "19" : chart_fn.mvEditProject(refId);
         				break;
-        			case "20" : chart_fn.mvEditPartner(referenceId);
+        			case "20" : chart_fn.mvEditPartner(refId);
         				break;
-        			case "22" : chart_fn.mvIdentificationPartner(referenceId);
+        			case "22" : chart_fn.mvIdentificationPartner(refId);
         				break;
         		}
         	}

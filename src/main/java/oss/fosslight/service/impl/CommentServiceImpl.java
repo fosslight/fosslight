@@ -5,10 +5,16 @@
 
 package oss.fosslight.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,22 +38,62 @@ public class CommentServiceImpl implements CommentService {
 	
 	@Override
 	public List<CommentsHistory> getCommentListHis(CommentsHistory bean) {
-		List<CommentsHistory> commentsHistoryList = commentMapper.getCommentListHis(bean);
-		String user = bean.getUser();
+		List<CommentsHistory> commentsHistoryList = new ArrayList<>();
+		if (bean.getReferenceIds() != null) {
+			for (String referenceId : bean.getReferenceIds()) {
+				String id = referenceId.split("-")[1];
+				String referenceDiv = "";
+				if (referenceId.startsWith("P")) {
+					referenceDiv = "prj";
+				} else {
+					referenceDiv = "3rd";
+				}
+				
+				bean.setReferenceId(id);
+				bean.setReferenceDiv(referenceDiv);
+				
+				List<CommentsHistory> list = commentMapper.getCommentListHis(bean);
+				if (CollectionUtils.isNotEmpty(list)) {
+					for (CommentsHistory commentsHistory : list) {
+						commentsHistory.setDashboardYn(CoConstDef.FLAG_YES);
+						String contents = commentsHistory.getContents();
+						if (!StringUtils.isEmpty(contents)) {
+						    contents = contents.replaceAll("<a(?![^>]*target=)", "<a target=\"_blank\"");
+						    commentsHistory.setContents(contents);
+						}
+					}
+					commentsHistoryList.addAll(list);
+				}
+			}
+			
+			if (CollectionUtils.isNotEmpty(commentsHistoryList)) {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				List<CommentsHistory> sortedList = commentsHistoryList.stream()
+													    .sorted(Comparator.comparing(
+													        ch -> {
+													            String dateStr = !StringUtils.isEmpty(ch.getModifiedDate()) ? ch.getModifiedDate() : ch.getCreatedDate();
+													            return (dateStr == null || dateStr.isEmpty()) ? null : LocalDateTime.parse(dateStr, formatter);
+													        },
+													        Comparator.nullsLast(Comparator.reverseOrder())
+													    ))
+													    .limit(20)
+													    .collect(Collectors.toList());
+				commentsHistoryList = sortedList;
+			}
+		} else {
+			commentsHistoryList = commentMapper.getCommentListHis(bean);
 		
-		for (CommentsHistory commentsHistory : commentsHistoryList) {
-			if (!StringUtils.isEmpty(user)) {
-				commentsHistory.setUser(user);
+			for (CommentsHistory commentsHistory : commentsHistoryList) {
+				if (!StringUtils.isEmpty(bean.getRecentFlag())) {
+					commentsHistory.setRecentFlag(bean.getRecentFlag());
+				}
+				String contents = commentsHistory.getContents();
+				if (!StringUtils.isEmpty(contents)) {
+				    contents = contents.replaceAll("<a(?![^>]*target=)", "<a target=\"_blank\"");
+				    commentsHistory.setContents(contents);
+				}
+				commentMapper.updateHistoryReadYn(commentsHistory);
 			}
-			if (!StringUtils.isEmpty(bean.getRecentFlag())) {
-				commentsHistory.setRecentFlag(bean.getRecentFlag());
-			}
-			String contents = commentsHistory.getContents();
-			if (!StringUtils.isEmpty(contents)) {
-			    contents = contents.replaceAll("<a(?![^>]*target=)", "<a target=\"_blank\"");
-			    commentsHistory.setContents(contents);
-			}
-			commentMapper.updateHistoryReadYn(commentsHistory);
 		}
 		
 		return commentsHistoryList;
