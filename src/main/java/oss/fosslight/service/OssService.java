@@ -70,9 +70,11 @@ public interface OssService extends HistoryConfig{
 	
 	void updateLicenseTypeAndObligation(OssMaster ossBean);
 	
-	void deleteOssWithVersionMerege(OssMaster ossMaster) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException ;
+	void preProcessOssWithVersionMerege(OssMaster ossMaster);
 	
-	void deleteOssWithVersionRegist(OssMaster ossMaster);
+	void deleteOssWithVersionMerege(OssMaster ossMaster, List<OssMaster> rowList) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException ;
+	
+	void deleteOssWithVersionRegist(OssMaster ossMaster, List<OssMaster> rowList);
 	
 	Map<String, Object> checkExistsOssDownloadLocation(OssMaster ossMaster);
 	

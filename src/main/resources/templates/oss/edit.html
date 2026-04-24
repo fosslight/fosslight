@@ -1,6 +1,9 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<link rel="stylesheet" th:href="@{/css/datatables/dataTables.bootstrap4.min.css}">
+<script th:src="@{/js/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/js/datatables/dataTables.bootstrap4.min.js}"></script>
 <th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
 <th:block th:replace="oss/edit-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">

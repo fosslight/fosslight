@@ -614,14 +614,46 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
+	public void preProcessOssWithVersionMerege(OssMaster ossMaster) {
+		Map<String, Object> map = ossMergeCheckList(ossMaster);
+		List<OssMaster> rowList = (List<OssMaster>) map.get("rows");
+		boolean isAllVersion = (boolean) map.getOrDefault("isAllVersion", false);
+		if (isAllVersion) {
+			try {
+				deleteOssWithVersionMerege(ossMaster, rowList);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		} else {
+			List<OssMaster> ossMergeTargetList = new ArrayList<>();
+			List<OssMaster> ossRegistrationTargetList = new ArrayList<>();
+			
+			for (OssMaster bean : rowList) {
+				String existOssConfStr = checkExistOssConf(bean.getOssId());
+				if ("1".equals(existOssConfStr)) {
+					ossMergeTargetList.add(bean);
+				} else {
+					ossRegistrationTargetList.add(bean);
+				}
+			}
+			if (CollectionUtils.isNotEmpty(ossMergeTargetList)) {
+				try {
+					deleteOssWithVersionMerege(ossMaster, ossMergeTargetList);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+			if (CollectionUtils.isNotEmpty(ossRegistrationTargetList)) {
+				deleteOssWithVersionRegist(ossMaster, ossRegistrationTargetList);
+			}
+		}
+	}
+	
+	@Override
 	@Transactional
-	public void deleteOssWithVersionMerege(OssMaster ossMaster) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+	public void deleteOssWithVersionMerege(OssMaster ossMaster, List<OssMaster> rowList) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
 		// 동일한 oss에서 이동하는 경우, nick name을 별도로 등록하지 않음
 		OssMaster beforeBean = getOssInfo(ossMaster.getOssId(), false);
-		
-		// 삭제대상 OSS 목록 취득
-		Map<String, Object> rowMap = ossMergeCheckList(ossMaster);
-		List<OssMaster> rowList = (List<OssMaster>) rowMap.get("rows");
 		
 		String chagedOssName = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssName();
 		String chagedOssCommonId = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssCommonId();
@@ -876,16 +908,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public void deleteOssWithVersionRegist(OssMaster ossMaster) {
+	public void deleteOssWithVersionRegist(OssMaster ossMaster, List<OssMaster> rowList) {
 		try {
 			String changedOssName = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssName();
 			OssMaster delOssInfo = getOssInfo(ossMaster.getOssId(), true);
 			OssMaster changedOssInfo = null;
-			
-			Map<String, Object> rowMap = ossMergeCheckList(ossMaster);
-			List<OssMaster> rowList = (List<OssMaster>) rowMap.get("rows");
 			
 			for (OssMaster bean : rowList) {
 				if (!isEmpty(bean.getMergeStr())) {
@@ -1532,21 +1560,30 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public Map<String, Object> ossMergeCheckList(OssMaster ossMaster) {
-		boolean hasSkipMerge = CoConstDef.FLAG_YES.equals(ossMaster.getSkipMergeYn()) ? true : false;
-		String currentVersion = "";
-		if (hasSkipMerge) {
-			currentVersion = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssVersion();
-		}
 		Map<String, Object> map = new HashMap<String, Object>();
 		List<OssMaster> list1 = ossMapper.getBasicOssListByName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName());
 		List<OssMaster> list2 = ossMapper.getBasicOssListByName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getNewOssId()).getOssName());
+		
+		boolean isAllVersion = false;
+		if (CollectionUtils.isNotEmpty(list1) && ossMaster.getOssIds() != null) {
+			isAllVersion = list1.size() == ossMaster.getOssIds().length ? true : false;
+		}
 		
 		Map<String, OssMaster> mergeMap = new HashMap<>();
 		
 		// 이관 대상 OSS 정보를 먼저 격납한다.
 		for (OssMaster bean : list2) {
-			if (hasSkipMerge && !CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssVersion().equals(currentVersion)) {
-				continue;
+			if (!isAllVersion && ossMaster.getOssIds() != null) {
+				boolean isMatch = false;
+				for (String delOssId : ossMaster.getOssIds()) {
+					if (CoCodeManager.OSS_INFO_BY_ID.get(delOssId).getOssVersion().equals(bean.getOssVersion())) {
+						isMatch = true;
+						break;
+					}
+				}
+				if (!isMatch) {
+					continue;
+				}
 			}
 			bean.setLicenseName(CommonFunction.makeLicenseExpression(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssLicenses()));
 			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, bean.getLicenseType()));
@@ -1557,8 +1594,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		// 삭제 대상 OSS Version이 이관 대상 OSS 에 존재하는지 확인 
 		for (OssMaster bean : list1) {
-			if (hasSkipMerge && !CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssVersion().equals(currentVersion)) {
-				continue;
+			if (!isAllVersion && ossMaster.getOssIds() != null) {
+				boolean isMatch = false;
+				for (String delOssId : ossMaster.getOssIds()) {
+					if (CoCodeManager.OSS_INFO_BY_ID.get(delOssId).getOssVersion().equals(bean.getOssVersion())) {
+						isMatch = true;
+						break;
+					}
+				}
+				if (!isMatch) {
+					continue;
+				}
 			}
 			bean.setLicenseName(CommonFunction.makeLicenseExpression(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssLicenses()));
 			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, bean.getLicenseType()));
@@ -1579,6 +1625,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		Map<String, OssMaster> treeMap = new TreeMap<>(mergeMap);
 		
 		map.put("rows", new ArrayList<>(treeMap.values()));
+		map.put("isAllVersion", isAllVersion);
 		
 		return map;
 	}

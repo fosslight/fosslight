@@ -2212,8 +2212,11 @@ public class CoMailManager extends CoTopComponent {
 			String[] beforePurl = null;
 			if (!isEmpty(before.getDownloadLocation())) {
 				beforeUrl = before.getDownloadLocation().split(",");
-				beforePurl = before.getPurl().split(",");
-				
+				if (!isEmpty(before.getPurl())) {
+					beforePurl = before.getPurl().split(",");
+				} else {
+					beforePurl = new String[0];
+				}
 				List<String> downloadLocationList = new ArrayList<>();
 				for (String downloadLocation : beforeUrl) {
 					downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
@@ -2228,7 +2231,11 @@ public class CoMailManager extends CoTopComponent {
 			String[] afterPurl = null;
 			if (!isEmpty(after.getDownloadLocation())) {
 				afterUrl = after.getDownloadLocation().split(",");
-				afterPurl = after.getPurl().split(",");
+				if (!isEmpty(after.getPurl())) {
+					afterPurl = after.getPurl().split(",");
+				} else {
+					afterPurl = new String[0];
+				}
 			} else {
 				afterUrl = new String[0];
 				afterPurl = new String[0];
