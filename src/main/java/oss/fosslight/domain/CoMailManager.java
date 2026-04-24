@@ -3302,15 +3302,17 @@ public class CoMailManager extends CoTopComponent {
 		// 순서대로
 		switch (component) {
 			case CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO:
-				param.add(bean.getParamOssId());
-				return makeOssBasicInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> ossBasicInfo = mailManagerMapper.getComponentOssBasicInfo(bean.getParamOssId());
+				return makeOssBasicInfo(filterMailComponentData(component, ossBasicInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_LICENSEBASICINFO:
-				param.add(bean.getParamLicenseId());
-				return makeLicenseBasicInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> licenseBasicInfo = mailManagerMapper.getComponentLicenseBasicInfo(bean.getParamLicenseId());
+				return makeLicenseBasicInfo(filterMailComponentData(component, licenseBasicInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BASICINFO:
+				List<Map<String, Object>> projectBasicInfo = mailManagerMapper.getComponentProjectBasicInfo(bean.getParamPrjId());
+				return makeProjectBasicInfo(filterMailComponentData(component, projectBasicInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_SELFCHECK_PROJECT_BASICINFO:
-				param.add(bean.getParamPrjId());
-				return makeProjectBasicInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> selfCheckBasicInfo = mailManagerMapper.getComponentSelfCheckBasicInfo(bean.getParamPrjId());
+				return makeProjectBasicInfo(filterMailComponentData(component, selfCheckBasicInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BOMOSSINFO:
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO:
 				Project project = new Project();
@@ -3328,41 +3330,78 @@ public class CoMailManager extends CoTopComponent {
 				}
 				return makeIdentificationOssListInfo(mailComponentDataMap, component);
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO:
-				param.add(bean.getParamPrjId());
-				return makeDistributionInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> projectDistributionInfo = mailManagerMapper.getComponentProjectDistributionInfo(bean.getParamPrjId());
+				return makeDistributionInfo(filterMailComponentData(component, projectDistributionInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_MODELINFO:
-				param.add(bean.getParamPrjId());
-				return makeModelInfo(getMailComponentData(param, component), bean.getMsgType());
+				List<Map<String, Object>> projectModelInfo = mailManagerMapper.getComponentProjectModelInfo(bean.getParamPrjId());
+				return makeModelInfo(filterMailComponentData(component, projectModelInfo), bean.getMsgType());
 			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_BASICINFO:
-				param.add(bean.getParamPartnerId());
-				return makePartnerBasicInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> partnerBasicInfo = mailManagerMapper.getComponentPartnerBasicInfo(bean.getParamPartnerId());
+				return makePartnerBasicInfo(filterMailComponentData(component, partnerBasicInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_OSSLIST:
+				List<Map<String, Object>> partnerOssList = mailManagerMapper.getComponentPartnerOssList(bean.getParamPartnerId());
+				return makePartnerOssListInfo(filterMailComponentData(component, partnerOssList));
 			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO:
+				List<Map<String, Object>> partnerDiscloseOssInfo = mailManagerMapper.getComponentDiscloseOssInfo(bean.getParamPartnerId());
+				return makePartnerOssListInfo(filterMailComponentData(component, partnerDiscloseOssInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_NOT_DISCLOSEOSSINFO:
-				param.add(bean.getParamPartnerId());
-				return makePartnerOssListInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> partnerNotDiscloseOssInfo = mailManagerMapper.getComponentNotDiscloseOssInfo(bean.getParamPartnerId());
+				return makePartnerOssListInfo(filterMailComponentData(component, partnerNotDiscloseOssInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_BATRESULT:
-				param.add(bean.getParamBatId());
-				return makeBatResultInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> batResult = mailManagerMapper.getComponentBatResult(bean.getParamBatId());
+				return makeBatResultInfo(filterMailComponentData(component, batResult));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ:
-				param.add(bean.getParamPrjId());
-				param.add(bean.getParamPrjId());
-				return makeVulnerabilityInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> vulnerabilityProject = mailManagerMapper.getComponentVulnerabilityProject(bean.getParamPrjId());
+				return makeVulnerabilityInfo(filterMailComponentData(component, vulnerabilityProject));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS:
+				List<Map<String, Object>> vulnerabilityOssInfo = mailManagerMapper.getComponentVulnerabilityOssInfo(bean.getParamOssKey());
+				return makeVulnerabilityInfo(filterMailComponentData(component, vulnerabilityOssInfo));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
-				return makeVulnerabilityInfo(getMailComponentDataWithArray(bean.getParamOssKey(), component));
+				List<Map<String, Object>> vulnerabilityRecalculatedAll = mailManagerMapper.getComponentVulnerabilityRecalculatedAll(bean.getParamOssKey());
+				return makeVulnerabilityInfo(filterMailComponentData(component, vulnerabilityRecalculatedAll));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED:
+				List<Map<String, Object>> vulnerabilityRecalculated = mailManagerMapper.getComponentVulnerabilityRecalculated(bean.getParamPrjId(), bean.getParamStandardScore());
+				return makeVulnerabilityInfo(filterMailComponentData(component, vulnerabilityRecalculated));
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED:
-				param.add(bean.getParamPrjId());
-				param.add(bean.getParamStandardScore());
-				param.add(bean.getParamStandardScore());
-				return makeVulnerabilityInfo(getMailComponentData(param, component));
+				List<Map<String, Object>> vulnerabilityRemoveRecalculated = mailManagerMapper.getComponentVulnerabilityRemoveRecalculated(bean.getParamPrjId(), bean.getParamStandardScore());
+				return makeVulnerabilityInfo(filterMailComponentData(component, vulnerabilityRemoveRecalculated));
 			case CoConstDef.CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL:
 				return CoCodeManager.getCodeExpString(CoConstDef.CD_COLLAB_INFO, CoConstDef.CD_PACKAGING_REQUESTED_URL);
 			default:
 				break;
 		}
 		return null;
+	}
+
+	private List<Map<String, Object>> filterMailComponentData(String key, List<Map<String, Object>> list) {
+		if (!CollectionUtils.isEmpty(list)) {
+	        for (Map<String, Object> dataMap : list) {
+	            dataMap.replaceAll((k, v) -> {
+	                if (v instanceof String) {
+	                    String str = (String) v;
+	                    return str.contains("\n") ? str.replace("\n", "<br />") : str;
+	                }
+	                return v;
+	            });
+
+	            if (CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO.equals(key)) {
+	                String iStatus = String.valueOf(dataMap.get("identificationStatus"));
+	                String vStatus = String.valueOf(dataMap.get("verificationStatus"));
+	                String confirmStatus = CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM;
+
+	                if (confirmStatus.equals(iStatus) && confirmStatus.equals(vStatus)) {
+	                    dataMap.remove("noticeFileId");
+	                    dataMap.remove("packageFileId");
+	                }
+	            }
+
+	            if (CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ.equals(key) || CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS.equals(key) || CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(key)) {
+	                dataMap.remove("noticeFileId");
+	                dataMap.remove("packageFileId");
+	            }
+	        }
+	    }
+		return list;
 	}
 
 	/**
@@ -3377,9 +3416,9 @@ public class CoMailManager extends CoTopComponent {
 			list = new ArrayList<>();
 			for (Map<String, Object> dataMap : mailComponentData) {
 				Map<String, String> oss = new HashMap<String, String>();
-				oss.put("OSS_NAME", (String)dataMap.get("OSS_NAME"));
-				oss.put("OSS_VERSION", (String)dataMap.get("OSS_VERSION"));
-				oss.put("LICENSE_NAME", (String)dataMap.get("LICENSE_NAME"));
+				oss.put("OSS_NAME", getValue(dataMap, "OSS_NAME"));
+				oss.put("OSS_VERSION", getValue(dataMap, "OSS_VERSION"));
+				oss.put("LICENSE_NAME", getValue(dataMap, "LICENSE_NAME"));
 				ossSet.add(oss);
 			}
 
@@ -3404,7 +3443,7 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			String customCveId = "";
-			String cveId = (String) dataMap.get("CVE_ID");
+			String cveId = getValue(dataMap, "CVE_ID");
 			if (!isEmpty(cveId)) {
 				if (cveId.contains("->")) {
 					String[] splitCveIds = cveId.split("\\->");
@@ -3428,8 +3467,8 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			
-			String ossId = (String) dataMap.get("OSS_ID");
-			String ossName = (String) dataMap.get("OSS_NAME");
+			String ossId = getValue(dataMap, "OSS_ID");
+			String ossName = getValue(dataMap, "OSS_NAME");
 			
 			if (!isEmpty(ossId)) {
 				ossName = "<a href='" + appEnv.getProperty("server.domain") + "/oss/edit/" + ossId + "' target='_blank'>" + ossName + "</a>";
@@ -3438,20 +3477,20 @@ public class CoMailManager extends CoTopComponent {
 			bean = new OssMaster();
 			
 			if (dataMap.containsKey("PRJ_ID")) {
-				bean.setPrjId((String) dataMap.get("PRJ_ID"));
+				bean.setPrjId(getValue(dataMap, "PRJ_ID"));
 			}
 			if (dataMap.containsKey("COMPONENT_ID")) {
-				bean.setComponentId((String) dataMap.get("COMPONENT_ID"));
+				bean.setComponentId(getValue(dataMap, "COMPONENT_ID"));
 			}
 			
 			bean.setOssId(ossId);
 			bean.setOssName(ossName);
-			bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
+			bean.setOssVersion(getValue(dataMap, "OSS_VERSION"));
 			bean.setCveId(customCveId);
-			bean.setCvssScore(String.valueOf(dataMap.get("CVSS_SCORE")));
-			bean.setVulnSummary((String) dataMap.get("VULN_SUMMARY"));
-			bean.setPublishedDate((String) dataMap.get("PUBL_DATE"));
-			bean.setModifiedDate((String) dataMap.get("MODI_DATE"));
+			bean.setCvssScore(getValue(dataMap, "CVSS_SCORE"));
+			bean.setVulnSummary(getValue(dataMap, "VULN_SUMMARY"));
+			bean.setPublishedDate(getValue(dataMap, "PUBL_DATE"));
+			bean.setModifiedDate(getValue(dataMap, "MODI_DATE"));
 			list.add(bean);
 		}
 		
@@ -3462,14 +3501,14 @@ public class CoMailManager extends CoTopComponent {
 		BinaryMaster bean = null;
 		for (Map<String, Object> dataMap : mailComponentData) {
 			bean = new BinaryMaster();
-			bean.setBatId((String) dataMap.get("BAT_ID"));
-			bean.setSoftwareName((String) dataMap.get("SOFTWARE_NAME"));
-			bean.setSoftwareVersion((String) dataMap.get("SOFTWARE_VERSION"));
-			bean.setPartnerName(avoidNull((String) dataMap.get("PARTNER_NAME")));
-			bean.setBinaryFileId((String) dataMap.get("BINARY_FILE_ID"));
-			bean.setBatStatus((String) dataMap.get("BAT_STATUS"));
-			bean.setBatResultCount((String) dataMap.get("BAT_RESULT_COUNT"));
-			bean.setCreator(makeUserNameFormatWithDivision((String) dataMap.get("CREATOR")));
+			bean.setBatId(getValue(dataMap, "BAT_ID"));
+			bean.setSoftwareName(getValue(dataMap, "SOFTWARE_NAME"));
+			bean.setSoftwareVersion(getValue(dataMap, "SOFTWARE_VERSION"));
+			bean.setPartnerName(avoidNull(getValue(dataMap, "PARTNER_NAME")));
+			bean.setBinaryFileId(getValue(dataMap, "BINARY_FILE_ID"));
+			bean.setBatStatus(getValue(dataMap, "BAT_STATUS"));
+			bean.setBatResultCount(getValue(dataMap, "BAT_RESULT_COUNT"));
+			bean.setCreator(makeUserNameFormatWithDivision(getValue(dataMap, "CREATOR")));
 			
 			if (!isEmpty((String) dataMap.get("BAT_ERROR_MSG"))) {
 				bean.setBatErrorMsg((String) dataMap.get("BAT_ERROR_MSG"));
@@ -3487,19 +3526,19 @@ public class CoMailManager extends CoTopComponent {
 		PartnerMaster bean = null;
 		for (Map<String, Object> dataMap : mailComponentData) {
 			bean = new PartnerMaster();
-			bean.setPartnerId((String) dataMap.get("PARTNER_ID"));
-			bean.setStatus((String) dataMap.get("STATUS"));
-			bean.setPartnerName((String) dataMap.get("PARTNER_NAME"));
-			bean.setSoftwareName((String) dataMap.get("SOFTWARE_NAME"));
-			bean.setSoftwareVersion((String) dataMap.get("SOFTWARE_VERSION"));
-			bean.setDeliveryForm(CoCodeManager.getCodeString(CoConstDef.CD_PARTNER_DELIVERY_FORM, (String) dataMap.get("DELIVERY_FORM")));
-			bean.setDescription((String) dataMap.get("DESCRIPTION"));
-			bean.setConfirmationFileId((String) dataMap.get("CONFIRMATION_FILE_ID"));
-			bean.setOssFileId((String) dataMap.get("OSS_FILE_ID"));
-			bean.setReviewer(makeUserNameFormatWithDivision((String) dataMap.get("REVIEWER")));
-			bean.setCreator(makeUserNameFormatWithDivision((String) dataMap.get("CREATOR")));
-			bean.setCreatedDate(CommonFunction.formatDate((String) dataMap.get("CREATED_DATE")));
-			bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, (String) dataMap.get("DIVISION")));
+			bean.setPartnerId(getValue(dataMap, "PARTNER_ID"));
+			bean.setStatus(getValue(dataMap, "STATUS"));
+			bean.setPartnerName(getValue(dataMap, "PARTNER_NAME"));
+			bean.setSoftwareName(getValue(dataMap, "SOFTWARE_NAME"));
+			bean.setSoftwareVersion(getValue(dataMap, "SOFTWARE_VERSION"));
+			bean.setDeliveryForm(CoCodeManager.getCodeString(CoConstDef.CD_PARTNER_DELIVERY_FORM, getValue(dataMap, "DELIVERY_FORM")));
+			bean.setDescription(getValue(dataMap, "DESCRIPTION"));
+			bean.setConfirmationFileId(getValue(dataMap, "CONFIRMATION_FILE_ID"));
+			bean.setOssFileId(getValue(dataMap, "OSS_FILE_ID"));
+			bean.setReviewer(makeUserNameFormatWithDivision(getValue(dataMap, "REVIEWER")));
+			bean.setCreator(makeUserNameFormatWithDivision(getValue(dataMap, "CREATOR")));
+			bean.setCreatedDate(CommonFunction.formatDate(getValue(dataMap, "CREATED_DATE")));
+			bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, getValue(dataMap, "DIVISION")));
 			break;
 		}
 		return bean;
@@ -3517,19 +3556,19 @@ public class CoMailManager extends CoTopComponent {
 				distributeTargetCode = CoConstDef.CD_MODEL_TYPE;
 			}
 			bean = new Project();
-			bean.setPrjId((String) dataMap.get("PRJ_ID"));
-			bean.setCategory(CommonFunction.makeCategoryFormat((String) dataMap.get("DISTRIBUTE_TARGET"),  (String) dataMap.get("CATEGORY"), (String) dataMap.get("SUBCATEGORY")));
-			bean.setModelName((String) dataMap.get("MODEL_NAME"));
-			if (dataMap.get("RELEASE_DATE") != null && !isEmpty((String) dataMap.get("RELEASE_DATE"))) {
-				bean.setReleaseDate(CommonFunction.formatDateSimple((String) dataMap.get("RELEASE_DATE")));
+			bean.setPrjId(getValue(dataMap, "PRJ_ID"));
+			bean.setCategory(CommonFunction.makeCategoryFormat(getValue(dataMap, "DISTRIBUTE_TARGET"), getValue(dataMap, "CATEGORY"), getValue(dataMap, "SUBCATEGORY")));
+			bean.setModelName(getValue(dataMap, "MODEL_NAME"));
+			if (!isEmpty(getValue(dataMap, "RELEASE_DATE"))) {
+				bean.setReleaseDate(CommonFunction.formatDateSimple(getValue(dataMap, "RELEASE_DATE")));
 			}
-			if (dataMap.get("MODIFIER") != null && !isEmpty((String) dataMap.get("MODIFIER"))) {
-				bean.setModifier((String) dataMap.get("MODIFIER"));
+			if (!isEmpty(getValue(dataMap, "MODIFIER"))) {
+				bean.setModifier(getValue(dataMap, "MODIFIER"));
 			}
-			if (dataMap.get("MODIFIED_DATE") != null && !isEmpty((String) dataMap.get("MODIFIED_DATE"))) {
-				bean.setModifiedDate(CommonFunction.formatDateSimple((String) dataMap.get("MODIFIED_DATE")));
+			if (!isEmpty(getValue(dataMap, "MODIFIED_DATE"))) {
+				bean.setModifiedDate(CommonFunction.formatDateSimple(getValue(dataMap, "MODIFIED_DATE")));
 			}
-			if (dataMap.containsKey("DEL_YN") && CoConstDef.FLAG_YES.equals(dataMap.get("DEL_YN"))) {
+			if (dataMap.containsKey("DEL_YN") && CoConstDef.FLAG_YES.equals(getValue(dataMap, "DEL_YN"))) {
 				bean.setCategory(changeStyle(bean.getCategory(), "del", true));
 				bean.setModelName(changeStyle(bean.getModelName(), "del", true));
 				bean.setReleaseDate(changeStyle(bean.getReleaseDate(), "del", true));
@@ -3552,20 +3591,20 @@ public class CoMailManager extends CoTopComponent {
 		Project bean = null;
 		for (Map<String, Object> dataMap : mailComponentData) {
 			bean = new Project();
-			bean.setDistributeName((String) dataMap.get("DISTRIBUTE_NAME"));
-			bean.setDistributeMasterCategory((String) dataMap.get("DISTRIBUTE_MASTER_CATEGORY"));
-			bean.setDistributeSoftwareType((String) dataMap.get("DISTRIBUTE_SOFTWARE_TYPE"));
-			bean.setDistributeDeployTime((String) dataMap.get("DISTRIBUTE_DEPLOY_TIME"));
-			bean.setDistributeDeployYn((String) dataMap.get("DISTRIBUTE_DEPLOY_YN"));
-			bean.setDistributeDeployModelYn((String) dataMap.get("DISTRIBUTE_DEPLOY_MODEL_YN"));
-			bean.setDistributeDeployErrorMsg((String) dataMap.get("DISTRIBUTE_DEPLOY_ERROR_MSG"));
-			bean.setDistributeTarget((String) dataMap.get("DISTRIBUTE_TARGET"));
-			bean.setPackageFileId((String) dataMap.get("PACKAGE_FILE_ID"));
-			bean.setPackageFileId2((String) dataMap.get("PACKAGE_FILE_ID2"));
-			bean.setPackageFileId3((String) dataMap.get("PACKAGE_FILE_ID3"));
-			bean.setPackageFileId4((String) dataMap.get("PACKAGE_FILE_ID4"));
-			bean.setPackageFileId5((String) dataMap.get("PACKAGE_FILE_ID5"));
-			bean.setNoticeFileId((String) dataMap.get("NOTICE_FILE_ID"));
+			bean.setDistributeName(getValue(dataMap, "DISTRIBUTE_NAME"));
+			bean.setDistributeMasterCategory(getValue(dataMap, "DISTRIBUTE_MASTER_CATEGORY"));
+			bean.setDistributeSoftwareType(getValue(dataMap, "DISTRIBUTE_SOFTWARE_TYPE"));
+			bean.setDistributeDeployTime(getValue(dataMap, "DISTRIBUTE_DEPLOY_TIME"));
+			bean.setDistributeDeployYn(getValue(dataMap, "DISTRIBUTE_DEPLOY_YN"));
+			bean.setDistributeDeployModelYn(getValue(dataMap, "DISTRIBUTE_DEPLOY_MODEL_YN"));
+			bean.setDistributeDeployErrorMsg(getValue(dataMap, "DISTRIBUTE_DEPLOY_ERROR_MSG"));
+			bean.setDistributeTarget(getValue(dataMap, "DISTRIBUTE_TARGET"));
+			bean.setPackageFileId(getValue(dataMap, "PACKAGE_FILE_ID"));
+			bean.setPackageFileId2(getValue(dataMap, "PACKAGE_FILE_ID2"));
+			bean.setPackageFileId3(getValue(dataMap, "PACKAGE_FILE_ID3"));
+			bean.setPackageFileId4(getValue(dataMap, "PACKAGE_FILE_ID4"));
+			bean.setPackageFileId5(getValue(dataMap, "PACKAGE_FILE_ID5"));
+			bean.setNoticeFileId(getValue(dataMap, "NOTICE_FILE_ID"));
 			
 			// code convert
 			
@@ -3649,35 +3688,39 @@ public class CoMailManager extends CoTopComponent {
 		String packageFileName = null;
 		String packageFileName2 = null;
 		String packageFileName3 = null;
+		String packageFileName4 = null;
+		String packageFileName5 = null;
 		String noticeFileName = null;
 		for (Map<String, Object> dataMap : mailComponentData) {
 			bean = new Project();
-			bean.setPrjId(avoidNull((String) dataMap.get("PRJ_ID"))); 
-			bean.setPrjName(avoidNull((String) dataMap.get("PRJ_NAME"))); 
-			bean.setPrjVersion(avoidNull((String) dataMap.get("PRJ_VERSION"))); 
-			bean.setDistributionType(avoidNull((String) dataMap.get("DISTRIBUTION_TYPE"))); 
-			bean.setNetworkServerType(avoidNull((String) dataMap.get("NETWORK_SERVER_TYPE")));
-			bean.setComment(avoidNull((String) dataMap.get("COMMENT"))); 
-			bean.setOsType(avoidNull((String) dataMap.get("OS_TYPE"))); 
-			bean.setOsTypeEtc(avoidNull((String) dataMap.get("OS_TYPE_ETC"))); 
-			bean.setDistributeTarget(avoidNull((String) dataMap.get("DISTRIBUTE_TARGET"))); 
-			bean.setCreator(makeUserNameFormatWithDivision(avoidNull((String) dataMap.get("CREATOR")))); 
-			bean.setReviewer(makeUserNameFormatWithDivision(avoidNull((String) dataMap.get("REVIEWER")))); 
-			bean.setIdentificationStatus(avoidNull((String) dataMap.get("IDENTIFICATION_STATUS"))); 
-			bean.setVerificationStatus(avoidNull((String) dataMap.get("VERIFICATION_STATUS"))); 
-			bean.setDistributionStatus(avoidNull((String) dataMap.get("DESTRIBUTION_STATUS")));
-			bean.setNoticeType(avoidNull((String) dataMap.get("NOTICE_TYPE")));
-			bean.setNoticeTypeEtc(avoidNull((String) dataMap.get("NOTICE_TYPE_ETC")));
-			bean.setPriority(avoidNull((String) dataMap.get("PRIORITY")));
-			bean.setDivision(avoidNull((String) dataMap.get("DIVISION")));
-			bean.setSecMailYn(avoidNull((String) dataMap.get("SECMAIL_YN")));
-			bean.setSecMailDesc(avoidNull((String) dataMap.get("SECMAIL_DESC")));
-			bean.setSecPersonNm(avoidNull((String) dataMap.get("SECPERSON_NM")));
+			bean.setPrjId(avoidNull(getValue(dataMap, "PRJ_ID"))); 
+			bean.setPrjName(avoidNull(getValue(dataMap, "PRJ_NAME"))); 
+			bean.setPrjVersion(avoidNull(getValue(dataMap, "PRJ_VERSION"))); 
+			bean.setDistributionType(avoidNull(getValue(dataMap, "DISTRIBUTION_TYPE"))); 
+			bean.setNetworkServerType(avoidNull(getValue(dataMap, "NETWORK_SERVER_TYPE")));
+			bean.setComment(avoidNull(getValue(dataMap, "COMMENT"))); 
+			bean.setOsType(avoidNull(getValue(dataMap, "OS_TYPE"))); 
+			bean.setOsTypeEtc(avoidNull(getValue(dataMap, "OS_TYPE_ETC"))); 
+			bean.setDistributeTarget(avoidNull(getValue(dataMap, "DISTRIBUTE_TARGET"))); 
+			bean.setCreator(makeUserNameFormatWithDivision(avoidNull(getValue(dataMap, "CREATOR")))); 
+			bean.setReviewer(makeUserNameFormatWithDivision(avoidNull(getValue(dataMap, "REVIEWER")))); 
+			bean.setIdentificationStatus(avoidNull(getValue(dataMap, "IDENTIFICATION_STATUS"))); 
+			bean.setVerificationStatus(avoidNull(getValue(dataMap, "VERIFICATION_STATUS"))); 
+			bean.setDistributionStatus(avoidNull(getValue(dataMap, "DESTRIBUTION_STATUS")));
+			bean.setNoticeType(avoidNull(getValue(dataMap, "NOTICE_TYPE")));
+			bean.setNoticeTypeEtc(avoidNull(getValue(dataMap, "NOTICE_TYPE_ETC")));
+			bean.setPriority(avoidNull(getValue(dataMap, "PRIORITY")));
+			bean.setDivision(avoidNull(getValue(dataMap, "DIVISION")));
+			bean.setSecMailYn(avoidNull(getValue(dataMap, "SECMAIL_YN")));
+			bean.setSecMailDesc(avoidNull(getValue(dataMap, "SECMAIL_DESC")));
+			bean.setSecPersonNm(avoidNull(getValue(dataMap, "SECPERSON_NM")));
 			
-			packageFileName = (String) dataMap.get("PACKAGE_FILE_ID");
-			packageFileName2 = (String) dataMap.get("PACKAGE_FILE_ID2");
-			packageFileName3 = (String) dataMap.get("PACKAGE_FILE_ID3");
-			noticeFileName = (String) dataMap.get("NOTICE_FILE_ID");
+			packageFileName = getValue(dataMap, "PACKAGE_FILE_ID");
+			packageFileName2 = getValue(dataMap, "PACKAGE_FILE_ID2");
+			packageFileName3 = getValue(dataMap, "PACKAGE_FILE_ID3");
+			packageFileName4 = getValue(dataMap, "PACKAGE_FILE_ID4");
+			packageFileName5 = getValue(dataMap, "PACKAGE_FILE_ID5");
+			noticeFileName = getValue(dataMap, "NOTICE_FILE_ID");
 			break;
 		}
 
@@ -3700,6 +3743,18 @@ public class CoMailManager extends CoTopComponent {
 					T2File packageFile3 = fileService.selectFileInfo(packageFileName3);
 					if (packageFile3 != null) {
 						bean.setPackageFileId3(packageFile3.getOrigNm());
+					}
+				}
+				if (!isEmpty(packageFileName4)) {
+					T2File packageFile4 = fileService.selectFileInfo(packageFileName4);
+					if (packageFile4 != null) {
+						bean.setPackageFileId4(packageFile4.getOrigNm());
+					}
+				}
+				if (!isEmpty(packageFileName5)) {
+					T2File packageFile5 = fileService.selectFileInfo(packageFileName5);
+					if (packageFile5 != null) {
+						bean.setPackageFileId5(packageFile5.getOrigNm());
 					}
 				}
 				if (!isEmpty(noticeFileName)) {
@@ -3766,12 +3821,12 @@ public class CoMailManager extends CoTopComponent {
 		LicenseMaster bean = null;
 		for (Map<String, Object> dataMap : mailComponentData) {
 			bean = new LicenseMaster();
-			bean.setLicenseId(avoidNull((String) dataMap.get("LICENSE_ID"))); 
-			bean.setLicenseName(avoidNull((String) dataMap.get("LICENSE_NAME"))); 
-			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull((String) dataMap.get("LICENSE_TYPE")))); 
-			bean.setObligationDisclosingSrcYn(avoidNull((String) dataMap.get("OBLIGATION_DISCLOSING_SRC_YN"))); 
-			bean.setObligationNotificationYn(avoidNull((String) dataMap.get("OBLIGATION_NOTIFICATION_YN"))); 
-			bean.setObligationNeedsCheckYn(avoidNull((String) dataMap.get("OBLIGATION_NEEDS_CHECK_YN"))); 
+			bean.setLicenseId(avoidNull(getValue(dataMap, "LICENSE_ID"))); 
+			bean.setLicenseName(avoidNull(getValue(dataMap, "LICENSE_NAME"))); 
+			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull(getValue(dataMap, "LICENSE_TYPE")))); 
+			bean.setObligationDisclosingSrcYn(avoidNull(getValue(dataMap, "OBLIGATION_DISCLOSING_SRC_YN"))); 
+			bean.setObligationNotificationYn(avoidNull(getValue(dataMap, "OBLIGATION_NOTIFICATION_YN"))); 
+			bean.setObligationNeedsCheckYn(avoidNull(getValue(dataMap, "OBLIGATION_NEEDS_CHECK_YN"))); 
 			
 			if (CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationNeedsCheckYn()))) {
 				bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK)); 
@@ -3781,22 +3836,24 @@ public class CoMailManager extends CoTopComponent {
 				bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, CoConstDef.CD_DTL_OBLIGATION_NOTICE));
 			}
 			
-			bean.setShortIdentifier(avoidNull((String) dataMap.get("SHORT_IDENTIFIER"))); 
-			bean.setWebpage(avoidNull((String) dataMap.get("WEBPAGE")));
+			bean.setShortIdentifier(avoidNull(getValue(dataMap, "SHORT_IDENTIFIER"))); 
+			bean.setWebpage(avoidNull(getValue(dataMap, "WEBPAGE")));
 			if (!isEmpty(bean.getWebpage()) && !(bean.getWebpage().startsWith("http://") || bean.getWebpage().startsWith("https://"))) {
 				bean.setWebpage("http://" + bean.getWebpage());
 			}
-			if (!isEmpty(bean.getWebpage())) bean.setWebpage(appendChangeStyleLinkFormatArray(bean.getWebpage()));
+			if (!isEmpty(bean.getWebpage())) {
+				bean.setWebpage(appendChangeStyleLinkFormatArray(bean.getWebpage()));
+			}
 			
-			bean.setDescription(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("DESCRIPTION")))); 
-			bean.setLicenseText(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("LICENSE_TEXT")))); 
-			bean.setAttribution(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("ATTRIBUTION")))); 
+			bean.setDescription(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "DESCRIPTION")))); 
+			bean.setLicenseText(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "LICENSE_TEXT")))); 
+			bean.setAttribution(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "ATTRIBUTION")))); 
 		
-			bean.setLicenseNickname(avoidNull((String) dataMap.get("LICENSE_NICKNAME")));
+			bean.setLicenseNickname(avoidNull(getValue(dataMap, "LICENSE_NICKNAME")));
 			
 			// RESTRICTION 정보 메일에 추가
 			String restrictionStr = "";
-			if (!isEmpty((String) dataMap.get("RESTRICTION"))) {
+			if (!isEmpty(getValue(dataMap, "RESTRICTION"))) {
 				for (String restrictionCd : ((String) dataMap.get("RESTRICTION")).split(",")) {
 					if (!isEmpty(restrictionStr)) {
 						restrictionStr += ", ";
@@ -3805,16 +3862,16 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			bean.setRestriction(restrictionStr);
-			bean.setDisclosingSrc(CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, avoidNull((String) dataMap.get("DISCLOSING_SRC"))));
+			bean.setDisclosingSrc(CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, avoidNull(getValue(dataMap, "DISCLOSING_SRC"))));
 			
-			bean.setCreator(avoidNull((String) dataMap.get("CREATOR")));
+			bean.setCreator(avoidNull(getValue(dataMap, "CREATOR")));
 			if (!isEmpty(bean.getCreator())) {
 				T2Users userParam = new T2Users();
 				userParam.setUserId(bean.getCreator());
     			T2Users userInfo = userMapper.getUser(userParam);
     			bean.setCreatorName(makeUserNameFormatWithDivision(userInfo));
 			}
-			bean.setCreatedDate(avoidNull((String) dataMap.get("CREATED_DATE")));
+			bean.setCreatedDate(avoidNull(getValue(dataMap, "CREATED_DATE")));
 			if (!isEmpty(bean.getCreatedDate())) {
 				bean.setCreatedDate(DateUtil.dateFormatConvert(bean.getCreatedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
 			}
@@ -3840,64 +3897,66 @@ public class CoMailManager extends CoTopComponent {
 		for (Map<String, Object> dataMap : mailComponentData) {
 			if (isFirst) {
 				bean = new OssMaster();
-				bean.setOssId(avoidNull((String) dataMap.get("OSS_ID")));
-				bean.setOssName((String) dataMap.get("OSS_NAME"));
-				bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
-				bean.setOssType(avoidNull((String) dataMap.get("OSS_TYPE")));
-				if (dataMap.get("DOWNLOAD_LOCATION") != null) {
-					String[] downloadLocations = ((String) dataMap.get("DOWNLOAD_LOCATION")).split(",");
+				bean.setOssId(avoidNull(getValue(dataMap, "OSS_ID")));
+				bean.setOssName(avoidNull(getValue(dataMap, "OSS_NAME")));
+				bean.setOssVersion(avoidNull(getValue(dataMap, "OSS_VERSION")));
+				bean.setOssType(avoidNull(getValue(dataMap, "OSS_TYPE")));
+				if (!isEmpty(avoidNull(getValue(dataMap, "DOWNLOAD_LOCATION")))) {
+					String[] downloadLocations = getValue(dataMap, "DOWNLOAD_LOCATION").split(",");
 					List<String> downloadLocationList = new ArrayList<>();
 					for (String downloadLocation : downloadLocations) {
 						downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
 					}
 					bean.setDownloadLocations(downloadLocationList.toArray(new String[downloadLocationList.size()]));
-					String[] purl = ((String) dataMap.get("PURL")).split(",");
-					bean.setPurls(purl);
+					if (!isEmpty(avoidNull(getValue(dataMap, "PURL")))) {
+						String[] purl = getValue(dataMap, "PURL").split(",");
+						bean.setPurls(purl);
+					}
 				}
-				bean.setHomepage(avoidNull((String) dataMap.get("HOMEPAGE")));
-				bean.setSummaryDescription(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("SUMMARY_DESCRIPTION"))));
-				bean.setImportantNotes(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("IMPORTANT_NOTES"))));
-				bean.setAttribution(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("ATTRIBUTION"))));
-				bean.setCopyright(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("COPYRIGHT")))); // copyright 는 tag 를 포함하고 있기 때문에, 메일 발송시는 (html) escape 처리함
-				bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull((String) dataMap.get("OSS_LICENSE_TYPE"))));
-				bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, avoidNull((String) dataMap.get("OSS_OBLIGATION_TYPE"))));
-				bean.setOssNickname(avoidNull((String) dataMap.get("OSS_NICKNAME")));
-				if (!isEmpty((String) dataMap.get("CREATED_DATE"))) {
-					bean.setCreatedDate(DateUtil.dateFormatConvert((String) dataMap.get("CREATED_DATE"), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
+				bean.setHomepage(avoidNull(getValue(dataMap, "HOMEPAGE")));
+				bean.setSummaryDescription(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "SUMMARY_DESCRIPTION"))));
+				bean.setImportantNotes(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "IMPORTANT_NOTES"))));
+				bean.setAttribution(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "ATTRIBUTION"))));
+				bean.setCopyright(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "COPYRIGHT")))); // copyright 는 tag 를 포함하고 있기 때문에, 메일 발송시는 (html) escape 처리함
+				bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull(getValue(dataMap, "OSS_LICENSE_TYPE"))));
+				bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, avoidNull(getValue(dataMap, "OSS_OBLIGATION_TYPE"))));
+				bean.setOssNickname(avoidNull(getValue(dataMap, "OSS_NICKNAME")));
+				if (!isEmpty(avoidNull(getValue(dataMap, "CREATED_DATE")))) {
+					bean.setCreatedDate(DateUtil.dateFormatConvert(getValue(dataMap, "CREATED_DATE"), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
 				}
 				
-				if (!isEmpty((String) dataMap.get("CREATOR"))) {
-					bean.setCreator(CoMailManager.getInstance().makeUserNameFormat((String) dataMap.get("CREATOR")));
+				if (!isEmpty(avoidNull(getValue(dataMap, "CREATOR")))) {
+					bean.setCreator(CoMailManager.getInstance().makeUserNameFormat(getValue(dataMap, "CREATOR")));
 				}
 				
 				if (!isEmpty(bean.getOssId()) && CoCodeManager.OSS_INFO_BY_ID.containsKey(bean.getOssId())) {
 					bean.setMultiLicenseFlag(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getLicenseDiv());
 				}
 				
-				if (!isEmpty((String) dataMap.get("INCLUDE_CPE"))) {
-					bean.setIncludeCpe(((String) dataMap.get("INCLUDE_CPE")).replaceAll(",", "<br>"));
+				if (!isEmpty(avoidNull(getValue(dataMap, "INCLUDE_CPE")))) {
+					bean.setIncludeCpe(getValue(dataMap, "INCLUDE_CPE").replaceAll(",", "<br>"));
 				}
 				
-				if (!isEmpty((String) dataMap.get("EXCLUDE_CPE"))) {
-					bean.setExcludeCpe(((String) dataMap.get("EXCLUDE_CPE")).replaceAll(",", "<br>"));
+				if (!isEmpty(avoidNull(getValue(dataMap, "EXCLUDE_CPE")))) {
+					bean.setExcludeCpe(getValue(dataMap, "EXCLUDE_CPE").replaceAll(",", "<br>"));
 				}
 				
-				if (!isEmpty((String) dataMap.get("OSS_VERSION_ALIAS"))) {
-					bean.setOssVersionAlias(((String) dataMap.get("OSS_VERSION_ALIAS")).replaceAll(",", "<br>"));
+				if (!isEmpty(avoidNull(getValue(dataMap, "OSS_VERSION_ALIAS")))) {
+					bean.setOssVersionAlias(getValue(dataMap, "OSS_VERSION_ALIAS").replaceAll(",", "<br>"));
 				}
 				
-				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? (String) dataMap.get("DETECTED_LICENSE") : "";
+				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? avoidNull(getValue(dataMap, "DETECTED_LICENSE")) : "";
 				bean.setDetectedLicense(detectedLicenses);
 			}
 			if (dataMap.containsKey("LICENSE_ID")) {
 				license = new OssLicense();
-				license.setLicenseId((String) dataMap.get("LICENSE_ID"));
-				license.setOssLicenseIdx((String) dataMap.get("OSS_LICENSE_IDX"));
-				license.setOssLicenseComb((String) dataMap.get("OSS_LICENSE_COMB"));
-				license.setOssCopyright(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("OSS_COPYRIGHT"))));
-				license.setOssLicenseText((String) dataMap.get("OSS_LICENSE_TEXT"));
-				license.setLicenseName((String) dataMap.get("LICENSE_NAME"));
-				license.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull((String) dataMap.get("LICENSE_TYPE"))));
+				license.setLicenseId(getValue(dataMap, "LICENSE_ID"));
+				license.setOssLicenseIdx(getValue(dataMap, "OSS_LICENSE_IDX"));
+				license.setOssLicenseComb(getValue(dataMap, "OSS_LICENSE_COMB"));
+				license.setOssCopyright(CommonFunction.htmlEscape(avoidNull(getValue(dataMap, "OSS_COPYRIGHT"))));
+				license.setOssLicenseText(getValue(dataMap, "OSS_LICENSE_TEXT"));
+				license.setLicenseName(getValue(dataMap, "LICENSE_NAME"));
+				license.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull(getValue(dataMap, "LICENSE_TYPE"))));
 				bean.addOssLicense(license);
 			}
 			
@@ -3910,6 +3969,11 @@ public class CoMailManager extends CoTopComponent {
 		return bean;
 	}
 
+	private String getValue(Map<String, Object> map, String key) {
+	    Object val = map.get(key);
+	    return (val == null) ? "" : String.valueOf(val);
+	}
+	
 	/**
 	 * Sets the basic info.
 	 *
@@ -4070,12 +4134,6 @@ public class CoMailManager extends CoTopComponent {
 				_replyToId = "PN"+coMail.getParamPartnerId();
 			}
 			
-			if (!isEmpty(_replyToId)) {
-				_replyToId = "<OSC." +_replyToId + "@fosslight.org>";
-				message.setHeader("In-Reply-To", _replyToId);
-				message.setHeader("References", _replyToId);
-			}
-			
 			MimeMessageHelper helper = new MimeMessageHelper(message, true);
 			
 			String userId = coMail.getLoginUserName();
@@ -4143,6 +4201,13 @@ public class CoMailManager extends CoTopComponent {
             helper.setTo(coMail.getToIds());
 			helper.setCc(coMail.getCcIds() != null ? coMail.getCcIds() : new String[]{});
 			helper.setBcc(coMail.getBccIds() != null ? coMail.getBccIds() : new String[]{});
+			
+			if (!isEmpty(_replyToId)) {
+				_replyToId = "<OSC." +_replyToId + "@fosslight.org>";
+				message.setHeader("In-Reply-To", _replyToId);
+				message.setHeader("References", _replyToId);
+			}
+			
 			helper.setSubject(coMail.getEmlTitle());
 			
 			// emlMessage base64 to cid
