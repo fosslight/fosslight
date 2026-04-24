@@ -2221,20 +2221,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Transactional
 	public void deleteProjectRefFiles(Project projectInfo) {
 		// delete identification files
-		deleteFiles(projectInfo.getCsvFile());
-		deleteFiles(projectInfo.getAndroidCsvFile());
-		deleteFiles(projectInfo.getAndroidNoticeFile());
-		deleteFiles(projectInfo.getAndroidResultFile());
-		deleteFiles(projectInfo.getBinCsvFile());
-		deleteFiles(projectInfo.getBinBinaryFile());
+		deleteFiles(projectInfo.getCsvFile(), null);
+		deleteFiles(projectInfo.getAndroidCsvFile(), null);
+		deleteFiles(projectInfo.getAndroidNoticeFile(), null);
+		deleteFiles(projectInfo.getAndroidResultFile(), null);
+		deleteFiles(projectInfo.getBinCsvFile(), null);
+		deleteFiles(projectInfo.getBinBinaryFile(), null);
 	}
 	
-	private void deleteFiles(List<T2File> list) {
+	private void deleteFiles(List<T2File> list, String flag) {
 		if(list != null) {
 			for(T2File fileInfo : list) {
 				projectMapper.updateDeleteYNByFileSeq(fileInfo);
 				projectMapper.deleteFileBySeq(fileInfo);
-				fileService.deletePhysicalFile(fileInfo, null);
+				fileService.deletePhysicalFile(fileInfo, flag);
 			}
 		}
 	}
@@ -9606,10 +9606,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		Project project = new Project();
 		project.setPrjId(prjId);
-		List<Map<String, Object>> addFileList = new ArrayList<>();
+		List<Map<String, Object>> delFileList = new ArrayList<>();
 		
 		if (param.containsKey("reset")) {
-			addFileList = projectMapper.selectFileList(project);
+			delFileList = projectMapper.selectFileList(project);
 			
 			List<String> fileSeqList = new ArrayList<>();
 			List<String> itemList = (List<String>) param.get("items");
@@ -9619,7 +9619,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			if (CollectionUtils.isNotEmpty(fileSeqList)) {
-				addFileList = addFileList.stream().filter(e -> fileSeqList.stream().anyMatch(f -> f.equals(String.valueOf(e.get("fileSeq"))))).collect(Collectors.toList());
+				delFileList = delFileList.stream().filter(e -> fileSeqList.stream().anyMatch(f -> f.equals(String.valueOf(e.get("fileSeq"))))).collect(Collectors.toList());
 			}
 		} else {
 			String fileSeq = (String) param.get("fileSeq");
@@ -9630,29 +9630,40 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				Map<String, Object> map = new HashMap<>();
 				map.put("fileSeq", fileSeq);
 				map.put("referenceDiv", referenceDiv);
-				addFileList.add(map);
+				delFileList.add(map);
 			}
 		}
 		
-		for (Map<String, Object> addFile : addFileList) {
-			String referenceDiv = String.valueOf(addFile.get("referenceDiv"));
-			String fileSeq = String.valueOf(addFile.get("fileSeq"));
-			projectMapper.deleteProjectFileList(prjId, referenceDiv, fileSeq);
-			projectMapper.deleteLoadedOssComponents(prjId, referenceDiv, fileSeq);
+		for (Map<String, Object> delFileInfo : delFileList) {
+			String referenceDiv = String.valueOf(delFileInfo.get("referenceDiv"));
+			String fileSeq = String.valueOf(delFileInfo.get("fileSeq"));
+			String refFileSeq = projectMapper.selectRefFileSeq(fileSeq);
+			String fileSeqStr = fileSeq;
+			if (!isEmpty(refFileSeq)) {
+				fileSeqStr = refFileSeq;
+			}
+			projectMapper.deleteProjectFileList(prjId, referenceDiv, fileSeqStr);
+			projectMapper.deleteLoadedOssComponents(prjId, referenceDiv, fileSeqStr);
 			
 			// delete Physical File
-			T2File file = fileService.selectFileInfo(fileSeq);
+			T2File file = fileService.selectFileInfo(fileSeqStr);
 			if (file != null) {
 				int cnt = projectMapper.selectProjectFileList(prjId, file.getFileId());
+				List<T2File> delFile = new ArrayList<>();
 				if (cnt == 0) {
-					List<T2File> delFile = new ArrayList<>();
 					delFile.add(file);
-					deleteFiles(delFile);
 					
 					project.setPrjId(prjId);
 					project.setIdentificationCsvFileFlag(CoConstDef.FLAG_YES);
 					projectMapper.updateFileId2(project);
 				}
+				if (!isEmpty(refFileSeq)) {
+					T2File fileInfo = fileService.selectFileInfo(fileSeq);
+					if (fileInfo != null) {
+						delFile.add(fileInfo);
+					}
+				}
+				deleteFiles(delFile, CoConstDef.CD_CHECK_OSS_IDENTIFICATION);
 			}
 		}
 	}

@@ -346,6 +346,37 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				}
 			} catch (Exception e) {}
 			
+			if (isConverted) {
+				T2File originFile = new T2File(); 
+			    String originLogiNm = UUID.randomUUID() + "." + originalFileExt; 
+			    originFile.setFileId(fileId);
+			    originFile.setOrigNm(mFile.getOriginalFilename());
+			    originFile.setLogiNm(originLogiNm);
+			    originFile.setLogiPath(uploadFilePath);
+			    originFile.setExt(originalFileExt);
+			    originFile.setContentType(mFile.getContentType());
+			    originFile.setSize(String.valueOf(mFile.getSize()));
+			    originFile.setCreator(registFile.getCreator());
+			    
+			    try {
+			    	Path destination = Paths.get(uploadFilePath).resolve(originLogiNm).toAbsolutePath();
+			    	File originFileDest = destination.toFile();
+			    	
+			        if (!originFileDest.getParentFile().exists()) {
+			            originFileDest.getParentFile().mkdirs();
+			        }
+			        mFile.transferTo(originFileDest);
+			        
+			        registFile(originFile); 
+			        registFile.setRefFileSeq(originFile.getFileSeq()); 
+			        log.info("Original file saved successfully. SEQ: {}", originFile.getFileSeq());
+			    } catch (IOException e) {
+			        log.error("Failed to save original physical file: {}", e.getMessage());
+			    } catch (Exception e) {
+			        log.error("DB Error while registering original file: {}", e.getMessage());
+			    }
+			}
+			
 			/** DB Regist Setting **/
 			registFile.setFileId(fileId);
 			registFile.setOrigNm(originalFileName);
@@ -357,6 +388,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			try {
 				if (isConverted) {
+					registFile.setGubn("CV");
 					registFile.setContentType("application/vnd.ms-excel");
 					registFile.setSize(String.valueOf(finalFileSize));
 				} else {
@@ -1587,9 +1619,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		for (String fileSeq : fileSeqs){
 			T2File paramT2File = new T2File();
-			
 			paramT2File.setFileSeq(fileSeq);
-			uploadFileInfos.add(fileMapper.getFileInfo(paramT2File));
+			T2File uploadFileInfo = fileMapper.getFileInfo(paramT2File);
+			if (uploadFileInfo != null) {
+				uploadFileInfos.add(uploadFileInfo);
+			}
 		}
 						
 		String publicUrl = appEnv.getProperty("upload.path", "/upload");
@@ -1998,7 +2032,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		boolean isAndroidNoticeFolder = false;
 		String folderPath = "";
 		
-		if ("VERIFY".equalsIgnoreCase(flag) || CoConstDef.CD_CHECK_OSS_SELF.equals(flag) || CoConstDef.CD_CHECK_OSS_PARTNER.equals(flag)) {
+		if ("VERIFY".equalsIgnoreCase(flag) || CoConstDef.CD_CHECK_OSS_SELF.equals(flag) || CoConstDef.CD_CHECK_OSS_PARTNER.equals(flag) || CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(flag)) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
 		} else {
 			T2File T2file = fileMapper.getFileInfo2(file);

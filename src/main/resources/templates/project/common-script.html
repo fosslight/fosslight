@@ -3326,6 +3326,11 @@ var com_fn = {
 	    $('#' + pagerId).children().last().find('#' + pagerId+ '_right').html(message);
 	},
 	addUploadFunc : function (target, permission, referenceDiv) {
+		if ("CONF" == [[${project.identificationStatus}]]) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+			return false
+		}
+		
 		const data = {
         	category: "project/fragments",
            	templateName: "edit",
@@ -3352,6 +3357,11 @@ var com_fn = {
        	});
 	},
 	delUploadFunc : function (target, permission, permission, referenceDiv) {
+		if ("CONF" == [[${project.identificationStatus}]]) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+			return false
+		}
+		
 		var chk = $("#" + target).jqGrid("getGridParam", "selarrrow").length;
 		if (chk == 1) {
 			var selData = $("#" + target).jqGrid("getGridParam", "selarrrow");
@@ -3431,6 +3441,11 @@ var com_fn = {
 		}
 	},
 	resetUploadFunc : function (target, permission, permission, referenceDiv) {
+		if ("CONF" == [[${project.identificationStatus}]]) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+			return false
+		}
+		
 		var rowIds = $("#" + target).jqGrid('getDataIDs');
 		var selectedRowIds = $("#" + target).jqGrid("getGridParam", "selarrrow");
 		var items = [];
