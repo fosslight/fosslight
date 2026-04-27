@@ -78,13 +78,8 @@ public class LicenseController extends CoTopComponent {
 	}
 
 	@GetMapping(value = LICENSE.LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> listAjax(
-			LicenseMaster licenseMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) {
-
-		if ("Y".equals(req.getParameter("ignoreSearchFlag"))) {
+	public @ResponseBody ResponseEntity<Object> listAjax(LicenseMaster licenseMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
+		if (CoConstDef.FLAG_YES.equals(req.getParameter("ignoreSearchFlag"))) {
 			return makeJsonResponseHeader(new HashMap<String, Object>());
 		}
 
@@ -188,11 +183,7 @@ public class LicenseController extends CoTopComponent {
 	}
 
 	@PostMapping(value = LICENSE.DEL_AJAX)
-	public @ResponseBody ResponseEntity<Object> delAjax(
-			@ModelAttribute LicenseMaster licenseMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) {
+	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute LicenseMaster licenseMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
 		T2CoLicenseValidator lv = new T2CoLicenseValidator();
 		lv.setProcType(lv.PROC_TYPE_DELETE);
 		lv.setAppendix("licenseId", licenseMaster.getLicenseId());
@@ -221,14 +212,13 @@ public class LicenseController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 
-		licenseService.deleteLicenseMaster(licenseMaster);
-
-		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag 
-		CoCodeManager.getInstance().refreshLicenseInfo();
-
 		try {
-			boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+			licenseService.deleteLicenseMaster(licenseMaster);
 
+			putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag 
+			CoCodeManager.getInstance().refreshLicenseInfo();
+			
+			boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 			licenseService.deleteDistributeLicense(beforeBean, distributionFlag);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
