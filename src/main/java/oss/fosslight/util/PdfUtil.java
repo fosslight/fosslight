@@ -123,7 +123,7 @@ public final class PdfUtil extends CoTopComponent {
 
         convertData.put("project", project);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Calendar c1 = Calendar.getInstance();
         String strToday = sdf.format(c1.getTime());
         convertData.put("date", strToday);
@@ -190,29 +190,44 @@ public final class PdfUtil extends CoTopComponent {
                 }
             }
         }
+
+        String domain = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
         
         for(OssMaster ossMaster : ossMasterMapSummary.values()) {
             OssMaster oss = new OssMaster();
-            oss.setOssName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") +"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
+            oss.setOssName("<a href='" + domain+"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
             oss.setSummaryDescription(ossMaster.getSummaryDescription());
             ossReviewSummary.add(oss);
         }
 
         for(OssMaster ossMaster : ossMasterMapImportantNotes.values()) {
             OssMaster oss = new OssMaster();
-            oss.setOssName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") +"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
+            oss.setOssName("<a href='" + domain+"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
             oss.setImportantNotes(ossMaster.getImportantNotes());
             ossReviewImportantNotes.add(oss);
         }
 
+        Map<String, LicenseMaster> mergedLicenseMap = new HashMap<>();
+
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
-            LicenseMaster license = new LicenseMaster();
-            license.setLicenseName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/license/edit/" + licenseMaster.getLicenseId() + "' target='_blank'>" + licenseMaster.getLicenseName() + "</a>");
-            license.setDescriptionHtml(licenseMaster.getDescriptionHtml());
-            license.setRestrictionStr(licenseMaster.getRestrictionStr());
-            licenseReview.add(license);
+            String key = licenseMaster.getDescriptionHtml() + "||" + licenseMaster.getRestrictionStr();
+
+            if (mergedLicenseMap.containsKey(key)) {
+                LicenseMaster existingLicense = mergedLicenseMap.get(key);
+                String existingName = existingLicense.getLicenseName();
+                String newName = "<a href='" + domain+ "/license/edit/" + licenseMaster.getLicenseId() + "' target='_blank'>" + licenseMaster.getLicenseName() + "</a>";
+                existingLicense.setLicenseName(existingName + ", " + newName);
+            } else {
+                LicenseMaster license = new LicenseMaster();
+                license.setLicenseName("<a href='" + domain+ "/license/edit/" + licenseMaster.getLicenseId() + "' target='_blank'>" + licenseMaster.getLicenseName() + "</a>");
+                license.setDescriptionHtml(licenseMaster.getDescriptionHtml());
+                license.setRestrictionStr(licenseMaster.getRestrictionStr());
+                mergedLicenseMap.put(key, license);
+            }
         }
-        
+
+        licenseReview.addAll(mergedLicenseMap.values());
+
         for(Vulnerability vulnerability : vulnerabilityMap.values()){
             vulnerability.setVulnerabilityLink("<a href='" + vulnerability.getVulnerabilityLink() + "' target='_blank'>" + vulnerability.getVulnerabilityLink() + "</a>");
             vulnerabilityReview.add(vulnerability);
