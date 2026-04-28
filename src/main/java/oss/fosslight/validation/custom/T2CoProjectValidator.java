@@ -1231,18 +1231,20 @@ public class T2CoProjectValidator extends T2CoValidator {
 			if ("COPYRIGHT".equals(kind)) {
 				if (getData.equalsIgnoreCase(checkVal)) return true;
 			} else if ("PURL".equals(kind)) {
-				param.setDownloadLocation(checkVal);
-				String purlStr = ossService.getPurlByDownloadLocation(param);
-				if (!isEmpty(purlStr)) {
-					boolean chkFlag = false;
-					for (String purl : getData.split(",")) {
-						if (purlStr.equalsIgnoreCase(purl.trim())) {
-							chkFlag = true;
-							break;
+				if (!isEmpty(getData)) {
+					param.setDownloadLocation(checkVal);
+					String purlStr = ossService.getPurlByDownloadLocation(param);
+					if (!isEmpty(purlStr)) {
+						boolean chkFlag = false;
+						for (String purl : getData.split(",")) {
+							if (purlStr.equalsIgnoreCase(purl.trim())) {
+								chkFlag = true;
+								break;
+							}
 						}
-					}
-					if (!chkFlag) {
-						return true;
+						if (!chkFlag) {
+							return true;
+						}
 					}
 				}
 			} else {
