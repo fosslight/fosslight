@@ -1166,7 +1166,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 			    }
 			    
 			    if (!errMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId()) && !diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId()) && !isEmpty(bean.getDownloadLocation())) {
-					if (checkOssData(ossBean, bean.getDownloadLocation(), "DOWNLOAD")) {
+					if (checkOssData(ossBean, bean.getDownloadLocation(), "PURL")) {
 						diffMap.put("DOWNLOAD_LOCATION." + bean.getComponentId(), "DOWNLOAD_LOCATION.DIFFERENT");
 					}
 				}
@@ -1200,33 +1200,51 @@ public class T2CoProjectValidator extends T2CoValidator {
 		}
 		
 		switch (kind) {
-		case "DOWNLOAD":
-			getData = ossMaster.getDownloadLocation();
-			getData2 = ossMaster.getDownloadLocationGroup();
-			if (getData.contains(",") && isEmpty(getData2)) {
-				ossMaster.setDownloadLocationGroup(getData);
-				getData2 = getData;
-			}
-			break;
-		case "HOMEPAGE":
-			getData = ossMaster.getHomepage();
-			break;
-		case "COPYRIGHT":
-			getData = avoidNull(ossMaster.getCopyright(), "").trim();
-			break;
-		case "LICENSE":
-			getData = ossMaster.getOssLicenseText();
-			break;
-		default:
-			break;
+			case "DOWNLOAD":
+				getData = ossMaster.getDownloadLocation();
+				getData2 = ossMaster.getDownloadLocationGroup();
+				if (getData.contains(",") && isEmpty(getData2)) {
+					ossMaster.setDownloadLocationGroup(getData);
+					getData2 = getData;
+				}
+				break;
+			case "HOMEPAGE":
+				getData = ossMaster.getHomepage();
+				break;
+			case "COPYRIGHT":
+				getData = avoidNull(ossMaster.getCopyright(), "").trim();
+				break;
+			case "LICENSE":
+				getData = ossMaster.getOssLicenseText();
+				break;
+			case "PURL":
+				getData = ossMaster.getPurl();
+			default:
+				break;
 		}
 
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+		OssMaster param = new OssMaster();
 		boolean splitFlag = false;
 		
 		for (String checkVal : splitCheckVal) {
 			if ("COPYRIGHT".equals(kind)) {
 				if (getData.equalsIgnoreCase(checkVal)) return true;
+			} else if ("PURL".equals(kind)) {
+				param.setDownloadLocation(checkVal);
+				String purlStr = ossService.getPurlByDownloadLocation(param);
+				if (!isEmpty(purlStr)) {
+					boolean chkFlag = false;
+					for (String purl : getData.split(",")) {
+						if (purlStr.equalsIgnoreCase(purl.trim())) {
+							chkFlag = true;
+							break;
+						}
+					}
+					if (!chkFlag) {
+						return true;
+					}
+				}
 			} else {
 				checkVal = linkPatternCompile(checkOssNameUrl, checkVal);
 				splitFlag = checkVal.split("//").length == 2 ? true : false;
@@ -2509,7 +2527,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 			    }
 			    
 			    if (!diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getGridId()) && !isEmpty(bean.getDownloadLocation())) {
-					if (checkOssData(ossBean, bean.getDownloadLocation(), "DOWNLOAD")) {
+					if (checkOssData(ossBean, bean.getDownloadLocation(), "PURL")) {
 						diffMap.put("DOWNLOAD_LOCATION." + bean.getGridId(), "DOWNLOAD_LOCATION.DIFFERENT");
 					}
 				}
