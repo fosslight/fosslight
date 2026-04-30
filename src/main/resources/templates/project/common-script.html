@@ -2258,10 +2258,10 @@ var com_fn = {
 					
 					switch (tabDiv) {
 						case "third" :
-							if (!resetFlag) {
-								$('#_list').jqGrid(party_evt.setParamParty1());
-								$('#_list2').jqGrid(party_evt.setParamParty2());
-							}
+// 							if (!resetFlag) {
+// 								$('#_list').jqGrid(party_evt.setParamParty1());
+// 								$('#_list2').jqGrid(party_evt.setParamParty2());
+// 							}
 							
 							if ("edit" == mode) {
 								$(".partyBtn").show();
@@ -2274,13 +2274,13 @@ var com_fn = {
 								if ("N" == $("input[name='identificationSubStatusPartner']").val()) {
 									com_fn.customCheckApplicable("partyBtn", "edit");
 								} else {
-									$('#_3rdAddList').jqGrid(party_evt.setParamParty3());
+//									$('#_3rdAddList').jqGrid(party_evt.setParamParty3());
 								}
 							} else {
 								if ("N" == $("input[name='identificationSubStatusPartner']").val()) {
 									com_fn.customCheckApplicable("partyBtn", "view");
 								} else {
-									$('#_3rdAddList').jqGrid(party_evt.setParamParty3());
+//									$('#_3rdAddList').jqGrid(party_evt.setParamParty3());
 								}
 							}
 							
@@ -2290,10 +2290,10 @@ var com_fn = {
 							
 							break;
 						case "dep" : 
-							if (!resetFlag) {
-								dep_fn.csvUploadFile();
-								$('#_depAddList').jqGrid(dep_fn.setParamProject3());
-							}
+// 							if (!resetFlag) {
+// 								dep_fn.csvUploadFile();
+// 								$('#_depAddList').jqGrid(dep_fn.setParamProject3());
+// 							}
 							
 							if ("edit" == mode) {
 								$(".depBtn").show();
@@ -2315,10 +2315,10 @@ var com_fn = {
 							
 							break;
 						case "src" : 
-							if (!resetFlag) {
-								src_fn.csvUploadFile();
-								$('#_srcAddList').jqGrid(src_fn.setParamProject3());
-							}
+// 							if (!resetFlag) {
+// 								src_fn.csvUploadFile();
+// 								$('#_srcAddList').jqGrid(src_fn.setParamProject3());
+// 							}
 							
 							if ("edit" == mode) {
 								$(".srcBtn").show();
@@ -2336,11 +2336,11 @@ var com_fn = {
 							
 							break;
 						case "bin" : 
-							if (!resetFlag) {
-								bin_fn.csvUploadFile();
+//							if (!resetFlag) {
+//								bin_fn.csvUploadFile();
 //								bin_fn.binaryUploadFile();
-								$('#_binAddList').jqGrid(bin_fn.setParamProject3());
-							}
+//								$('#_binAddList').jqGrid(bin_fn.setParamProject3());
+//							}
 							
 							if ("edit" == mode) {
 								$(".binBtn").show();
