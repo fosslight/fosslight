@@ -203,7 +203,7 @@ public class CoMailManager extends CoTopComponent {
 							if (CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(component)) {
 								component = CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS;
 							}
-							convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, component), _contents);
+							convertDataMap.put(setContentsName(component), _contents);
 						}
 					}
 				}
@@ -216,13 +216,13 @@ public class CoMailManager extends CoTopComponent {
 				if (oss_basic_info.getPurl() != null && oss_basic_info.getPurls() == null) {
 					oss_basic_info.setPurls(oss_basic_info.getPurl().split(","));
 				}
-    			convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO), oss_basic_info); // oss_basic_info
+    			convertDataMap.put(setContentsName(CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO), oss_basic_info); // oss_basic_info
     		}
     		
     		if (CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT.equals(bean.getMsgType()) && bean.getParamPrjInfo() != null) {
 
 				// In case of distribution reject, distribution info must be received as a separate parameter (already deleted)
-    			convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO), bean.getParamPrjInfo()); // oss_basic_info
+    			convertDataMap.put(setContentsName(CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO), bean.getParamPrjInfo()); // oss_basic_info
     		}
     		
     		// TODO 92번 메일 ( vulnerability recalculated )의 경우 as-is to-be 가 존재하기 때문에 예외처리한다.
@@ -3303,10 +3303,54 @@ public class CoMailManager extends CoTopComponent {
 
 		return rtnVal;
 	}
-
+	
+	private String setContentsName(String component) {
+		switch (component) {
+			case CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO:
+				return "oss_basic_info";
+			case CoConstDef.CD_MAIL_COMPONENT_LICENSEBASICINFO:
+				return "license_basic_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BASICINFO:
+				return "project_basic_info";
+			case CoConstDef.CD_MAIL_COMPONENT_SELFCHECK_PROJECT_BASICINFO:
+				return "selfcheck_basic_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BOMOSSINFO:
+				return "bom_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO:
+				return "disclosure_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO:
+				return "distribution_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_MODELINFO:
+				return "model_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_BASICINFO:
+				return "partner_basic_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_OSSLIST:
+				return "partner_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO:
+				return "partner_disclose_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_NOT_DISCLOSEOSSINFO:
+				return "partner_not_disclose_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_BATRESULT:
+				return "bat_exe_info";
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ:
+				return "vulnerability_prj_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS:
+				return "vulnerability_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
+				return "Vulnerability_recalculated_oss_info_admin";
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED:
+				return "vulnerability_recalculated_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED:
+				return "vulnerability_recalculated_oss_info";
+			case CoConstDef.CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL:
+				return "packaging_requested_url_info";
+			default:
+				break;
+		}
+		return null;
+	}
+	
 	private Object setContentsInfo(CoMail bean, String component) {
-		List<String> param = new ArrayList<>();
-		// 순서대로
 		switch (component) {
 			case CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO:
 				List<Map<String, Object>> ossBasicInfo = mailManagerMapper.getComponentOssBasicInfo(bean.getParamOssId());
