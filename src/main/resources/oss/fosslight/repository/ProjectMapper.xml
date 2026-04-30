@@ -7230,6 +7230,7 @@
 				, ADMIN_CHECK_YN
 				, REF_OSS_NAME
 				, PACKAGE_URL
+				, REF_DIV
 		FROM OSS_COMPONENTS
 		WHERE COMPONENT_ID IN
 	    <foreach collection="list" item="id" open="(" separator="," close=")">
