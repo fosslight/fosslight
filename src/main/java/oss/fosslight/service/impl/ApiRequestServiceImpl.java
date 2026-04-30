@@ -142,7 +142,7 @@ public class ApiRequestServiceImpl extends CoTopComponent implements ApiRequestS
 
 			            bean.setRedirectLocation(redirectlocationUrl);
 		            } else {
-		            	checkName = "";
+			            checkName = generateCheckOSSName(bean.getUrlSearchSeq(), redirectlocationUrl, p);
 		            }
 		        }
 
