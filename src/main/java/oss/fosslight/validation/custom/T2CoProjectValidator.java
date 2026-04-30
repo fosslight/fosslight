@@ -1229,9 +1229,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 		
 		for (String checkVal : splitCheckVal) {
 			if ("COPYRIGHT".equals(kind)) {
-				if (getData.equalsIgnoreCase(checkVal)) return true;
+				if (getData.equalsIgnoreCase(checkVal)) {
+					return true;
+				}
 			} else if ("PURL".equals(kind)) {
 				if (!isEmpty(getData)) {
+					param.setOssName(ossMaster.getOssName());
 					param.setDownloadLocation(checkVal);
 					String purlStr = ossService.getPurlByDownloadLocation(param);
 					if (!isEmpty(purlStr)) {
