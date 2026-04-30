@@ -397,6 +397,53 @@ var party_evt = {
 				el["prjId"] = [[${project.prjId}]];
 				addDataList.push(el);
 			});
+		} else {
+			var loadedData = $('#identificationAddList').jqGrid('getGridParam','data');
+			if (loadedData && loadedData.length > 0) {
+			    for (var i = 0; i < loadedData.length; i++) {
+			        var row = loadedData[i];
+			        var item = row.item;
+
+			        if (item && item.indexOf("3rd-") === 0) {
+			            var loadedItem = row.loadedItem || "";
+			            var loadedTab = row.loadedTab || "";
+			            var partnerId = item.replace("3rd-", "");
+
+			            var partnerName = "";
+			            var softwareName = "";
+			            var softwareVersion = "";
+
+			            if (loadedItem.includes("-")) {
+			                var parts = loadedItem.split("-");
+			                partnerName = parts[0].trim();
+			                
+			                var fullSoftwarePart = parts.slice(1).join("-").trim();
+
+			                var versionMatch = fullSoftwarePart.match(/\(([^)]+)\)/);
+			                if (versionMatch) {
+			                    softwareVersion = versionMatch[1];
+			                    softwareName = fullSoftwarePart.replace(versionMatch[0], "").trim();
+			                } else {
+			                    softwareName = fullSoftwarePart;
+			                }
+			            }
+
+			            var componentCount = 0;
+			            var countMatch = loadedTab.match(/\((\d+)\)/);
+			            if (countMatch) {
+			                componentCount = countMatch[1];
+			            }
+
+			            addDataList.push({
+			            	partnerId: partnerId,
+			                partnerName: partnerName,
+			                softwareName: softwareName,
+			                softwareVersion: softwareVersion,
+			                componentCount: componentCount
+			            });
+			        }
+			    }
+			}
 		}
 		finalData["thirdPartyData"] = JSON.stringify(addDataList);
 		
