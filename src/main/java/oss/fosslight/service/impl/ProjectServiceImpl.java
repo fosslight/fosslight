@@ -3902,17 +3902,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                     }
                     bean.setPreObligationType(bean.getObligationType());
                     
-                    String copyCheckKey = bean.getRefComponentId();
-                    if (isCopyConfirm) {
-                        copyCheckKey = (bean.getRefDiv() + "_" + bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName()).toUpperCase();
-                    }
+                    String copyCheckKey = (bean.getRefDiv() + "_" + bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName()).toUpperCase();
                     
                     // 그리드 데이터 넣기
                     for (ProjectIdentification gridData : projectIdentification) {
-                        String copyCheckKey2 = gridData.getRefComponentId();
-                        if (isCopyConfirm) {
-                            copyCheckKey2 = (gridData.getRefDiv() + "_" + gridData.getOssName() + "_" + gridData.getOssVersion() + "_" + gridData.getLicenseName()).toUpperCase();
-                        }
+                        String copyCheckKey2 = (gridData.getRefDiv() + "_" + gridData.getOssName() + "_" + gridData.getOssVersion() + "_" + gridData.getLicenseName()).toUpperCase();
                         
                         // merge 결과 (src/bat/3rd) 일시
                         if (copyCheckKey2.contains(copyCheckKey)){
@@ -4665,7 +4659,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			List<OssComponents> oldPackagingList = verificationService.getVerifyOssList(project);
 			Map<String, OssComponents> oldPackageInfoMap = new HashMap<>();
 			
-			if (oldPackagingList != null && !oldPackagingList.isEmpty()) {
+			if (CollectionUtils.isNotEmpty(oldPackagingList)) {
 				// key value 형식으로
 				// key = ref + oss name + oss version + license name
 				for (OssComponents oldBean : oldPackagingList) {
@@ -4854,10 +4848,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		        }
 			}
 			
-			if (oldPackageInfoMap != null && !oldPackageInfoMap.isEmpty()) {
+			if (MapUtils.isNotEmpty(oldPackageInfoMap)) {
 				List<OssComponents> afterPackagingList = verificationService.getVerifyOssList(project);
 				
-				if (afterPackagingList != null && !afterPackagingList.isEmpty()) {
+				if (CollectionUtils.isNotEmpty(afterPackagingList)) {
 					// key value 형식으로
 					// key = ref + oss name + oss version + license name
 					for (OssComponents newBean : afterPackagingList) {
