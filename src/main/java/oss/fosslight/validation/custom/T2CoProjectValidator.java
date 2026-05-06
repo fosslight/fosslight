@@ -1155,14 +1155,17 @@ public class T2CoProjectValidator extends T2CoValidator {
 			// oss Download_location 체크
 			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())) {
 				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName().toUpperCase());
-				String prefix = checkOssName.toUpperCase() + "_";
 				OssMaster ossBean = null;
 				
-			    for (String mapKey : ossInfoByName.keySet()) {
-			        if (mapKey.startsWith(prefix)) {
-			        	ossBean = ossInfoByName.get(mapKey);
-			            break;
-			        }
+				for (String mapKey : ossInfoByName.keySet()) {
+			    	int lastUnderscoreIndex = mapKey.lastIndexOf("_");
+			    	if (lastUnderscoreIndex != -1) {
+			    		String extractedName = mapKey.substring(0, lastUnderscoreIndex);
+			    		if (extractedName.equals(checkOssName)) {
+			                ossBean = ossInfoByName.get(mapKey);
+			                break;
+			            }
+			    	}
 			    }
 			    
 			    if (!errMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId()) && !diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getComponentId()) && !isEmpty(bean.getDownloadLocation())) {
@@ -2521,14 +2524,17 @@ public class T2CoProjectValidator extends T2CoValidator {
 			// oss Download_location 체크
 			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())) {
 				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName().toUpperCase());
-				String prefix = checkOssName.toUpperCase() + "_";
 				OssMaster ossBean = null;
 				
-			    for (String mapKey : ossInfo.keySet()) {
-			        if (mapKey.startsWith(prefix)) {
-			        	ossBean = ossInfo.get(mapKey);
-			            break;
-			        }
+				for (String mapKey : ossInfo.keySet()) {
+			    	int lastUnderscoreIndex = mapKey.lastIndexOf("_");
+			    	if (lastUnderscoreIndex != -1) {
+			    		String extractedName = mapKey.substring(0, lastUnderscoreIndex);
+			    		if (extractedName.equals(checkOssName)) {
+			                ossBean = ossInfo.get(mapKey);
+			                break;
+			            }
+			    	}
 			    }
 			    
 			    if (!diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getGridId()) && !isEmpty(bean.getDownloadLocation())) {
