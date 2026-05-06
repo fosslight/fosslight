@@ -5529,8 +5529,7 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	@PostMapping(value=PROJECT.CHANGE_PROJECT_STATUS)
-	public @ResponseBody ResponseEntity<Object> changeProjectStatus(@RequestBody Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> changeProjectStatus(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String resCd = "";
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		Project prjBean = projectService.getProjectDetail(project);
@@ -5583,6 +5582,9 @@ public class ProjectController extends CoTopComponent {
 						case "1" :
 							param.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
 							if (CommonFunction.isAdmin()) {
+								if (prjBean != null && CoConstDef.FLAG_YES.equals(avoidNull(prjBean.getStatusRequestYn()))) {
+									param.setStatusRequestYn(CoConstDef.FLAG_NO);
+								}
 								if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(avoidNull(prjBean.getIdentificationStatus()))) {
 									if (completeFlag) {
 										param.setCompleteYn(CoConstDef.FLAG_NO);
