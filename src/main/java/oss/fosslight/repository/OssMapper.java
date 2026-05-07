@@ -137,7 +137,9 @@ public interface OssMapper {
 	
 	OssMaster checkExistsOssNickname2(OssMaster param);
 	
-	List<OssMaster> getOssInfoAll();
+	int getMaxOssCommonId();
+	
+	List<OssMaster> getOssInfoAll(@Param("startOssCommonId") int startOssCommonId, @Param("endOssCommonId") int endOssCommonId);
 	
 	List<OssMaster> getOssInfoAllWithNick();
 	
@@ -318,4 +320,8 @@ public interface OssMapper {
 	List<String> selectAnalysisListWithoutCoReviewer(@Param("prjId") String prjId);
 
 	void updateAnalysisComments(@Param("componentId") String componentId, @Param("prjId") String prjId, @Param("comments") String comments, @Param("commentsFlag") String commentsFlag);
+
+	OssAnalysis selectOssAnalysisOne(@Param("componentId") String componentId);
+
+	List<Map<String, Object>> selectEntAnalysisJobList(@Param("ossName") String ossName, @Param("ossVersion") String ossVersion, @Param("list") List<String> prjIds);
 }

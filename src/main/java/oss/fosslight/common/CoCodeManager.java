@@ -7,6 +7,10 @@ package oss.fosslight.common;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -118,7 +122,29 @@ public class CoCodeManager extends CoTopComponent {
     
 	private void loadOssInfo() {
 		try {
-			List<OssMaster> list = ossMapper.getOssInfoAll();
+			int maxOssCommonId = ossMapper.getMaxOssCommonId();
+			if (maxOssCommonId == 0) {
+				return;
+			}
+			
+			int step = 8000;
+			ExecutorService executor = Executors.newFixedThreadPool(20);
+	        List<CompletableFuture<List<OssMaster>>> futures = new ArrayList<>();
+			
+	        for (int i = 1; i <= maxOssCommonId; i += step) {
+	            int startOssCommonId = i;
+	            int endOssCommonId = i + step - 1;
+
+	            CompletableFuture<List<OssMaster>> future = CompletableFuture.supplyAsync(() -> {
+	                return ossMapper.getOssInfoAll(startOssCommonId, endOssCommonId);
+	            }, executor);
+	            
+	            futures.add(future);
+	        }
+	        
+	        List<OssMaster> list = futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
+	        executor.shutdown();
+	        
 			List<OssMaster> listNick = ossMapper.getOssInfoAllWithNick();
 			List<OssMaster> nickNameList = ossMapper.getOssAllNickNameList();
 			Map<String, String[]> nickNameMap = new HashMap<>();
