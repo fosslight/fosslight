@@ -4823,19 +4823,4 @@
 		WHERE REFERENCE_ID = #{prjId}
 		AND COMPONENT_ID = #{componentId}
 	</update>
-	
-	<select id="selectOssAnalysisOne" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssAnalysis">
-		SELECT * FROM OSS_ANALYSIS_MAP WHERE COMPONENT_ID = #{componentId}
-	</select>
-	
-	<select id="selectEntAnalysisJobList" resultType="oss.fosslight.domain.CamelMap">
-		SELECT *
-		FROM ENT_ANALYSIS_JOB_DETAILS
-		WHERE REFERENCE_ID IN
-		<foreach item="item" collection="list" open="(" separator="," close=")">
-	        #{item}
-	    </foreach>
-	    AND OSS_NAME = #{ossName}
-	    AND OSS_VERSION = #{ossVersion}
-	</select>
 </mapper>
