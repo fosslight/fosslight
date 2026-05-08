@@ -276,4 +276,6 @@ public interface ProjectService extends HistoryConfig{
 	public Map<String, Object> validateAnalysisProgress(Map<String, Object> param);
 
 	public String exportDependencyTreeToTxt(String prjId, List<ProjectIdentification> ossComponents);
+
+	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv);
 }
