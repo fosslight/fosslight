@@ -1161,7 +1161,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 			    	int lastUnderscoreIndex = mapKey.lastIndexOf("_");
 			    	if (lastUnderscoreIndex != -1) {
 			    		String extractedName = mapKey.substring(0, lastUnderscoreIndex);
-			    		if (extractedName.equals(checkOssName)) {
+			    		if (extractedName.equalsIgnoreCase(checkOssName)) {
 			                ossBean = ossInfoByName.get(mapKey);
 			                break;
 			            }
@@ -2530,7 +2530,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 			    	int lastUnderscoreIndex = mapKey.lastIndexOf("_");
 			    	if (lastUnderscoreIndex != -1) {
 			    		String extractedName = mapKey.substring(0, lastUnderscoreIndex);
-			    		if (extractedName.equals(checkOssName)) {
+			    		if (extractedName.equalsIgnoreCase(checkOssName)) {
 			                ossBean = ossInfo.get(mapKey);
 			                break;
 			            }
