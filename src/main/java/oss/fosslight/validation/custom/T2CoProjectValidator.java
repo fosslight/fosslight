@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1891,7 +1893,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 		String errKey;
 		String errCd;
 		String LICENSE_KEY;
-		List<ProjectIdentification> licenseList = null;
+//		List<ProjectIdentification> licenseList = null;
 		// 설정된 oss 정보를 DB에서 취득한다.
 		OssMaster ossParam = new OssMaster();
 		ossParam.setOssNames(getOssNames());
@@ -1905,701 +1907,603 @@ public class T2CoProjectValidator extends T2CoValidator {
 		List<String> deactivateOssList = ossService.getDeactivateOssList();
 		deactivateOssList.replaceAll(String::toUpperCase);
 		Map<String, String[]> checkSumInfoMap = new HashMap<>();
+		
+		final boolean isAndroid = PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE);
+		final boolean isPartner = PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE);
+		final boolean isSource = PROC_TYPE_IDENTIFICATION_SOURCE.equals(PROC_TYPE);
+
+		final Map<String, OssMaster> ossNameOnlyMap = new HashMap<>(ossInfo.size());
+
+		for (Map.Entry<String, OssMaster> entry : ossInfo.entrySet()) {
+		    String mapKey = entry.getKey();
+
+		    int idx = mapKey.lastIndexOf('_');
+		    if (idx > 0) {
+		        String ossName = mapKey.substring(0, idx).toUpperCase();
+		        ossNameOnlyMap.putIfAbsent(ossName, entry.getValue());
+		    }
+		}
+
+		final Map<String, List<ProjectIdentification>> licenseCache = new HashMap<>();
+		final Map<String, Boolean> permissiveCache = new HashMap<>();
+
+		final Set<String> deactivateUpperSet = new HashSet<>(deactivateOssList.size());
+		for (String deactivate : deactivateOssList) {
+		    deactivateUpperSet.add(avoidNull(deactivate).toUpperCase());
+		}
+		
 		// checkBasicError : REQUIRED, LENGTH, FORMAT 만 체크!
 		for (ProjectIdentification bean : ossComponetList) {
-			if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(bean.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(bean.getReferenceDiv())) {
-				if (!isEmpty(bean.getBinaryName()) && !isEmpty(bean.getCheckSum())) {
-					checkSumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), avoidNull(bean.getTlsh(), "0")});
-				}
-			} else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(bean.getReferenceDiv())) {
-				if (!isEmpty(bean.getBinaryName()) && !isEmpty(bean.getCheckSum()) && !isEmpty(bean.getTlsh())) {
-					String binaryName = bean.getBinaryName();
-					if (binaryName.endsWith("/") || binaryName.endsWith("\\")) {
-					} else {
-						if (!isEmpty(binaryName)) {
-							checkSumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), bean.getTlsh(), avoidNull(bean.getFilePath())});
-						}
-					}
-				}
-			}
+			// -----------------------------------------------------------------------------
+		    // COMMON VALUE CACHE
+		    // -----------------------------------------------------------------------------
+
+		    final String gridId = avoidNull(bean.getGridId());
+		    final String ossName = avoidNull(bean.getOssName()).trim();
+		    final String ossVersion = avoidNull(bean.getOssVersion()).trim();
+		    final String ossNameUpper = ossName.toUpperCase();
+		    final String ossVersionUpper = ossVersion.toUpperCase();
+		    final String binaryName = avoidNull(bean.getBinaryName());
+		    final String binaryNotice = avoidNull(bean.getBinaryNotice());
+		    final String checkSum = avoidNull(bean.getCheckSum());
+		    final String tlsh = avoidNull(bean.getTlsh(), "0");
+		    final String filePath = avoidNull(bean.getFilePath());
+		    final String licenseName = avoidNull(bean.getLicenseName());
+		    final String downloadLocation = avoidNull(bean.getDownloadLocation());
+		    final String refOssName = avoidNull(bean.getRefOssName()).trim();
+		    final String refOssNameUpper = refOssName.toUpperCase();
+		    final String checkKey = ossNameUpper + "_" + ossVersionUpper;
+		    final String licenseErrKey = "LICENSE_NAME." + gridId;
 			
-			boolean hasError = false;
-			boolean hasMultiError = false; // multi license용
+		    // -----------------------------------------------------------------------------
+		    // CHECKSUM
+		    // -----------------------------------------------------------------------------
+
+		    if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(bean.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(bean.getReferenceDiv())) {
+		        if (!binaryName.isEmpty() && !checkSum.isEmpty()) {
+		            checkSumInfoMap.put(binaryName, new String[]{checkSum, tlsh});
+		        }
+		    } else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(bean.getReferenceDiv())) {
+		        if (!binaryName.isEmpty() && !checkSum.isEmpty() && !tlsh.isEmpty()) {
+		            if (!(binaryName.endsWith("/") || binaryName.endsWith("\\"))) {
+		                checkSumInfoMap.put(binaryName, new String[]{checkSum, tlsh, filePath});
+		            }
+		        }
+		    }
+		    
+		    // -----------------------------------------------------------------------------
+		    // OSS MASTER
+		    // -----------------------------------------------------------------------------
+
+		    OssMaster ossmaster = ossInfo.get(checkKey);
+		    if (ossmaster == null && !refOssNameUpper.isEmpty()) {
+		        ossmaster = ossInfo.get(refOssNameUpper + "_" + ossVersionUpper);
+		    }
+		    
+		    // -----------------------------------------------------------------------------
+		    // EXCLUDE CHECK
+		    // -----------------------------------------------------------------------------
+
+		    if (!ignoreExcludeDataFlag && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+		        if (existsResultBinaryNameList != null && !binaryName.isEmpty() && existsResultBinaryNameList.contains(binaryName)) {
+		            errMap.put("BINARY_NAME." + gridId, "BINARY_NAME.RESULTTXT_EXISTS");
+		        }
+		        continue;
+		    }
+		    
+		    // -----------------------------------------------------------------------------
+		    // LICENSE CACHE
+		    // -----------------------------------------------------------------------------
+
+		    final List<ProjectIdentification> licenseList = licenseCache.computeIfAbsent(gridId, k -> {
+												                List<ProjectIdentification> result = findLicense(k);
+												                return result != null ? result : Collections.emptyList();
+												            });
+		    
+		    // -----------------------------------------------------------------------------
+		    // "-" OSS
+		    // -----------------------------------------------------------------------------
+
+		    if ("-".equals(ossName)) {
+
+		        // -----------------------------------------------------------------------------
+		        // LICENSE
+		        // -----------------------------------------------------------------------------
+
+		        if (!licenseName.isEmpty() && licenseName.split(",").length > 1) {
+		            errMap.put(licenseErrKey, "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
+		        } else {
+		            errCd = checkBasicError("LICENSE_NAME", "licenseName", licenseName);
+		            if (!isEmpty(errCd)) {
+		                errMap.put(licenseErrKey, errCd);
+		            } else if (isEmpty(licenseName)) {
+		                errMap.put(licenseErrKey, "LICENSE_NAME.REQUIRED");
+		            } else if (!CommonFunction.checkLicense(licenseName)) {
+		                if (isAdmin) {
+		                    errMap.put(licenseErrKey, "LICENSE_NAME.UNCONFIRMED");
+		                } else {
+		                    diffMap.put(licenseErrKey, "errLv|LICENSE_NAME.UNCONFIRMED");
+		                }
+		            } else if (bean.getComponentLicenseList() != null) {
+						if (bean.getComponentLicenseList().size() > 1) {
+							errMap.put(licenseErrKey, "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
+						}
+					} else if (CommonFunction.checkLicense(licenseName)) {
+		                LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
+		                if (master != null && CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))) {
+		                    diffMap.put("OSS_NAME." + gridId, "OSS_NAME.REQUIRED2");
+		                }
+		            }
+		        }
+
+		        // -----------------------------------------------------------------------------
+		        // FILE PATH
+		        // -----------------------------------------------------------------------------
+
+		        {
+		            errCd = checkBasicError("FILE_PATH", "filePath", filePath, true);
+		            if (!isEmpty(errCd)) {
+		                errMap.put("FILE_PATH." + gridId, errCd);
+		            } else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(bean.getRefDiv()) && filePath.isEmpty()) {
+		                errMap.put("FILE_PATH." + gridId, "FILE_PATH.REQUIRED");
+		            }
+		        }
+
+		        // -----------------------------------------------------------------------------
+		        // ANDROID
+		        // -----------------------------------------------------------------------------
+
+		        if (isAndroid) {
+		            // BINARY NAME
+		            {
+		            	errKey = "BINARY_NAME." + gridId;
+		            	if (!errMap.containsKey(errKey)) {
+		            		errCd = checkBasicError("BINARY_NAME", "binaryName", binaryName, true);
+			                if (!isEmpty(errCd)) {
+			                    errMap.put(errKey, errCd);
+			                } else if (binaryName.isEmpty()) {
+			                    errMap.put(errKey, "BINARY_NAME.REQUIRED");
+			                }
+		            	}
+		            }
+
+		            // BINARY NOTICE
+		            {
+		            	errKey = "BINARY_NOTICE." + gridId;
+		                errCd = checkBasicError("BINARY_NOTICE", "binaryNotice", binaryNotice, true);
+		                bean.setBinaryNotice(binaryNotice);
+		                if (!diffMap.containsKey(errKey)) {
+		                	String permissiveKey = checkKey + "|" + licenseName;
+		                	boolean permissive = permissiveCache.computeIfAbsent(permissiveKey, k -> checkUsedPermissive(bean, licenseList));
+			                if (!isEmpty(errCd)) {
+			                    diffMap.put("BINARY_NOTICE." + gridId, errCd);
+			                } else if (("ok".equalsIgnoreCase(binaryNotice) || "ok(NA)".equalsIgnoreCase(binaryNotice)) && !permissive) {
+			                    diffMap.put("BINARY_NOTICE." + gridId, "BINARY_NOTICE.NOTICE_FIND");
+			                } else if (("nok".equalsIgnoreCase(binaryNotice) || "nok(NA)".equalsIgnoreCase(binaryNotice)) && permissive) {
+			                    diffMap.put("BINARY_NOTICE." + gridId, "BINARY_NOTICE.NOTICE_PERMISSIVE");
+			                }
+		                }
+		            }
+		        }
+
+		        continue;
+		    }
+
+		    // -----------------------------------------------------------------------------
+		    // OSS NAME VALIDATION
+		    // -----------------------------------------------------------------------------
+
+		    {
+		        errCd = checkBasicError("OSS_NAME", "ossName", ossName, CommonFunction.isIgnoreLicense(licenseName));
+		        if (!isEmpty(errCd)) {
+		            errMap.put("OSS_NAME." + gridId, errCd);
+		        }
+
+		        // multi license with empty or "-"
+		        if ((ossName.isEmpty() || "-".equals(ossName)) && bean.getComponentLicenseList() != null && bean.getComponentLicenseList().size() > 1) {
+		            errMap.put(licenseErrKey, "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
+		        }
+
+		        // deactivate
+		        if (ossmaster != null) {
+		            if (CoConstDef.FLAG_YES.equals(ossmaster.getDeactivateFlag())) {
+		                if (isAdmin) {
+		                    errMap.put("OSS_NAME." + gridId, "OSS_NAME.DEACTIVATED");
+		                } else {
+		                    diffMap.put("OSS_NAME." + gridId, "OSS_NAME.DEACTIVATED");
+		                }
+		            }
+		        } else if (!ossName.isEmpty() && deactivateUpperSet.contains(ossNameUpper)) {
+		            if (isAdmin) {
+		                errMap.put("OSS_NAME." + gridId, "OSS_NAME.DEACTIVATED");
+		            } else {
+		                diffMap.put("OSS_NAME." + gridId, "OSS_NAME.DEACTIVATED");
+		            }
+		        }
+		    }
+		    
+		    // -----------------------------------------------------------------------------
+		    // OSS VERSION
+		    // -----------------------------------------------------------------------------
+
+		    {
+		        errCd = checkBasicError("OSS_VERSION", "ossVersion", ossVersion);
+		        if (!isEmpty(errCd)) {
+		            errMap.put("OSS_VERSION." + gridId, errCd);
+		        }
+		    }
+		    
+		    // -----------------------------------------------------------------------------
+		    // DOWNLOAD LOCATION
+		    // -----------------------------------------------------------------------------
+
+		    {
+		        errCd = checkBasicError("DOWNLOAD_LOCATION", "downloadLocation", downloadLocation);
+		        if (!isEmpty(errCd)) {
+		            errMap.put("DOWNLOAD_LOCATION." + gridId, errCd);
+		        }
+		    }
+		    
+		    // -----------------------------------------------------------------------------
+		    // HOMEPAGE
+		    // -----------------------------------------------------------------------------
+
+		    {
+		        errCd = checkBasicError("HOMEPAGE", "homepage", bean.getHomepage());
+		        if (!isEmpty(errCd)) {
+		            errMap.put("HOMEPAGE." + gridId, errCd);
+		        }
+		    }
 			
-			String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
-			checkKey = checkKey.toUpperCase();
-			if (!ossInfo.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
-				checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
-				checkKey = checkKey.toUpperCase();
-			}
-			OssMaster ossmaster = ossInfo.get(checkKey);
-			
-			// exclude=Y 상태인 경우 체크하지 않음
-			if (!ignoreExcludeDataFlag && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-				// exclude 상태에서도 체크 되어야하는 case
-				// bin android case only
-				if (existsResultBinaryNameList != null && !isEmpty(bean.getBinaryName())) {
-					if (existsResultBinaryNameList.contains(bean.getBinaryName())) {
-						errMap.put("BINARY_NAME." + bean.getGridId(), "BINARY_NAME.RESULTTXT_EXISTS");
-					}
-				}
+		    // -----------------------------------------------------------------------------
+		    // LICENSE VALIDATION
+		    // -----------------------------------------------------------------------------
 
-				continue;
-			}
+		    if (licenseList.isEmpty() || licenseList.size() < 2) {
+		        // -----------------------------------------------------------------------------
+		        // SINGLE LICENSE
+		        // -----------------------------------------------------------------------------
 
-			// nullpoint
-			bean.setOssName(avoidNull(bean.getOssName()));
-			licenseList = findLicense(bean.getGridId());
+		        {
+		            errCd = checkBasicError("LICENSE_NAME", "licenseName", licenseName);
+		            if (!isEmpty(errCd)) {
+		                errMap.put(licenseErrKey, errCd);
+		            }
+		        }
+		    } else {
+		        // -----------------------------------------------------------------------------
+		        // MULTI LICENSE
+		        // -----------------------------------------------------------------------------
 
-			// oss 를 설정하지 않고, class 파일을 추가하는 경우, oss Name 에 하이픈을 입력한다.
-			// class 파일을 설정한 경우, 라이선스 유무와 파일패스 설정 여부만 확인한다.
-			if ("-".equals(avoidNull(bean.getOssName()).trim())) {
-				// license check
-				{
-					basicKey = "LICENSE_NAME";
-					gridKey = StringUtil.convertToCamelCase(basicKey);
-					if (!isEmpty(bean.getLicenseName()) && bean.getLicenseName().split(",").length > 1) {
-						errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
-					} else {
-						// 기본체크
-						errCd = checkBasicError(basicKey, gridKey, bean.getLicenseName());
+		        boolean hasMultiError = false;
+		        List<ProjectIdentification> unExcludeLicenseList = new ArrayList<>();
 
-						if (!isEmpty(errCd)) {
-							errMap.put(basicKey + "." + bean.getGridId(), errCd);
-						} else if (isEmpty(bean.getLicenseName())) {
-							errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.REQUIRED");
-						} else if (!CommonFunction.checkLicense(bean.getLicenseName())) {
-							if (isAdmin) {
-								errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
-							} else {
-								diffMap.put(basicKey + "." + bean.getGridId(), "errLv|LICENSE_NAME.UNCONFIRMED");
-							}
-						} else if (bean.getComponentLicenseList() != null) {
-							if (bean.getComponentLicenseList().size() > 1) {
-								errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
-							}
-						} else if (CommonFunction.checkLicense(bean.getLicenseName())) {
-							LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER
-									.get(bean.getLicenseName().trim().toUpperCase());
-							if (master != null && CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))) {
-								diffMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.REQUIRED2");
-							}
-						}
-					}
-				}
-				
-				// FILE PATH
-				{
+		        for (ProjectIdentification licenseBean : licenseList) {
+		            if (CoConstDef.FLAG_YES.equals(licenseBean.getExcludeYn())) {
+		                continue;
+		            }
 
-					basicKey = "FILE_PATH";
-					gridKey = StringUtil.convertToCamelCase(basicKey);
-					// FILE_PATH의 경우 basic validator에서 형식, 길이 체크만 한다.
-					// basic validator의 체크 순서가 필수부터 체크하기 때문에, 필수체크를 무시하는
-					// 파라미터 플래그를 추가
-					errCd = checkBasicError(basicKey, gridKey, bean.getFilePath(), true);
-					
-					if (!isEmpty(errCd)) {
-						errMap.put(basicKey + "." + bean.getGridId(), errCd);
-					}
-					// OSS가 DB에 존재하고, 선택된 라이선스(멀티인 경우 복수)의 oblication이 소스코드를
-					// 공개해야하는 경우, 필수 체크
-					else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(bean.getRefDiv())
-							&& isEmpty(bean.getFilePath())) {
-						errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".REQUIRED");
-					}
-				}
-				
-				// Notice는 OSS와 상관없이, 
-				if (PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE)) {
-					basicKey = "BINARY_NAME";
-					gridKey = StringUtil.convertToCamelCase(basicKey);
-					errKey = basicKey + "." + bean.getGridId();
-					
-					if (!errMap.containsKey(errKey)) {
-						// 길이, 형식 체크만 한다.
-						errCd = checkBasicError(basicKey, gridKey, bean.getBinaryName(), true);
-						
-						if (!isEmpty(errCd)) {
-							errMap.put(errKey, errCd);
-						} else if (isEmpty(bean.getBinaryName())) {
-							errMap.put(errKey, basicKey + ".REQUIRED");
-						}
+		            unExcludeLicenseList.add(licenseBean);
+		            String subLicenseName = avoidNull(licenseBean.getLicenseName());
+		            errCd = checkBasicError("LICENSE_NAME", "licenseName", subLicenseName);
 
-					}
-					
-					basicKey = "BINARY_NOTICE";
-					gridKey = StringUtil.convertToCamelCase(basicKey);
-					errKey = basicKey + "." + bean.getGridId();
-					// nullpoint 대응
-					bean.setBinaryNotice(avoidNull(bean.getBinaryNotice()));
-					
-					if (!diffMap.containsKey(errKey)) {
-						// 길이, 형식 체크만 한다.
-						errCd = checkBasicError(basicKey, gridKey, bean.getBinaryNotice(), true);
-						
-						if (!isEmpty(errCd)) {
-							diffMap.put(errKey, errCd);
-						} else if (("ok".equalsIgnoreCase(bean.getBinaryNotice())
-								|| "ok(NA)".equalsIgnoreCase(bean.getBinaryNotice()))
-								&& !checkUsedPermissive(bean, licenseList)) {
-							diffMap.put(errKey, basicKey + ".NOTICE_FIND");
-						} else if (("nok".equalsIgnoreCase(bean.getBinaryNotice())
-								|| "nok(NA)".equalsIgnoreCase(bean.getBinaryNotice()))
-								&& checkUsedPermissive(bean, licenseList)) {
-							diffMap.put(errKey, basicKey + ".NOTICE_PERMISSIVE");
-						}
-					}
-				}
-				
-				continue;
-			}
+		            if (!isEmpty(errCd)) {
+		                errMap.put("LICENSE_NAME." + licenseBean.getGridId(), errCd);
+		                hasMultiError = true;
+		            }
+		        }
 
-			// 1) oss name
-			{
-				basicKey = "OSS_NAME";
-				gridKey = StringUtil.convertToCamelCase(basicKey);
-				// 기본체크
-				errCd = checkBasicError(basicKey, gridKey, bean.getOssName(),
-						CommonFunction.isIgnoreLicense(bean.getLicenseName()));
-						
-				if (!isEmpty(errCd)) {
-					errMap.put(basicKey + "." + bean.getGridId(), errCd);
-				} else {
-					// OSS NAME에 대해서 추가적으로 해야할 것이 있다면
-				}
-				
-				if ((isEmpty(bean.getOssName()) || "-".equals(bean.getOssName())) && bean.getComponentLicenseList() != null) {
-					if (bean.getComponentLicenseList().size() > 1) {
-						basicKey = "LICENSE_NAME";
-						gridKey = StringUtil.convertToCamelCase(basicKey);
-						
-						errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
-					}
-				}
-				
-				if (ossmaster != null) {
-					if (CoConstDef.FLAG_YES.equals(ossmaster.getDeactivateFlag())){
-						if (isAdmin) {
-							errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
-						} else {
-							diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
-						}
-					}
-				} else {
-					boolean deactivateFlag = false;
-					
-					if (!isEmpty(bean.getOssName())) {
-						if (deactivateOssList.contains(bean.getOssName().toUpperCase())) {
-							deactivateFlag = true;
-						}
-						
-						if (deactivateFlag) {
-							if (isAdmin) {
-								errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
-							} else {
-								diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
-							}
-						}
-					}
-				}
-			}
+		        if (!hasMultiError) {
+		            if (unExcludeLicenseList.isEmpty()) {
+		                errMap.put(licenseErrKey, "LICENSE_NAME.NOLICENSE");
+		            } else if (checkOROperation(licenseList, ossmaster)) {
+		                errMap.put(licenseErrKey, "LICENSE_NAME.INCLUDE_DUAL_OPERATE");
+		            }
+		        }
+		    }
 
-			// 2) OSS VERSION
-			{
-				basicKey = "OSS_VERSION";
-				gridKey = StringUtil.convertToCamelCase(basicKey);
-				// 기본체크
-				errCd = checkBasicError(basicKey, gridKey, bean.getOssVersion());
-				
-				if (!isEmpty(errCd)) {
-					errMap.put(basicKey + "." + bean.getGridId(), errCd);
-				} else {
-					// OSS VERSION에 대해서 추가적으로 해야할 것이 있다면
-				}
-			}
+			 // -----------------------------------------------------------------------------
+			 // LICENSE UNCONFIRMED CHECK
+			 // -----------------------------------------------------------------------------
+	
+			 if (!licenseName.isEmpty()) {
+			     if (bean.getOssComponentsLicenseList() != null) {
+			         for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
+			             if (CoConstDef.FLAG_YES.equals(license.getExcludeYn())) {
+			                 continue;
+			             }
+	
+			             String upperLicense = avoidNull(license.getLicenseName()).toUpperCase();
+			             if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(upperLicense) && !ossInfo.containsKey(checkKey)) {
+			                 if (isAdmin) {
+			                     errMap.put(licenseErrKey, "LICENSE_NAME.UNCONFIRMED");
+			                 } else if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "LICENSE_NAME.UNCONFIRMED");
+			                 }
+	
+			                 break;
+			             }
+			         }
+			     } else if (ossComponentLicenseListMap != null && ossComponentLicenseListMap.containsKey(gridId)) {
+			         for (ProjectIdentification license : ossComponentLicenseListMap.get(gridId)) {
+			             if (CoConstDef.FLAG_YES.equals(license.getExcludeYn())) {
+			                 continue;
+			             }
+	
+			             String upperLicense = avoidNull(license.getLicenseName()).toUpperCase();
+			             if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(upperLicense) && !ossInfo.containsKey(checkKey)) {
+			                 if (isAdmin) {
+			                     errMap.put(licenseErrKey, "LICENSE_NAME.UNCONFIRMED");
+			                 } else if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "LICENSE_NAME.UNCONFIRMED");
+			                 }
+			                 break;
+			             }
+			         }
+			     }
+			 }
+	
+			 // -----------------------------------------------------------------------------
+			 // OSS / LICENSE MATCH VALIDATION
+			 // -----------------------------------------------------------------------------
+	
+			 if (!CommonFunction.isIgnoreLicense(licenseName)) {
+			     // -----------------------------------------------------------------------------
+			     // OSS 존재 여부
+			     // -----------------------------------------------------------------------------
+	
+			     if (!errMap.containsKey("OSS_NAME." + gridId) && !errMap.containsKey("OSS_VERSION." + gridId) && !ossInfo.containsKey(checkKey)) {
+			         if (checkNonVersionOss(ossInfo, ossName)) {
+			             if (isAdmin) {
+			                 errMap.put("OSS_VERSION." + gridId, "OSS_VERSION.UNCONFIRMED");
+			             } else {
+			                 diffMap.put("OSS_VERSION." + gridId, "OSS_VERSION.UNCONFIRMED");
+			             }
+			         } else {
+			             if (isAdmin) {
+			                 errMap.put("OSS_NAME." + gridId, "OSS_NAME.UNCONFIRMED");
+			             } else {
+			                 diffMap.put("OSS_NAME." + gridId, "OSS_NAME.UNCONFIRMED");
+			             }
+			         }
+			     }
+	
+			     // -----------------------------------------------------------------------------
+			     // OSS는 존재하지만 입력한 license가 declared/detected 와 다른 경우
+			     // -----------------------------------------------------------------------------
+			     else if (!errMap.containsKey("OSS_NAME." + gridId) && !errMap.containsKey(licenseErrKey)) {
+			         String licenseText = "";
+	
+			         if (ossmaster != null) {
+			             licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true);
+			         }
+	
+			         if (bean.getOssComponentsLicenseList() != null && !bean.getOssComponentsLicenseList().isEmpty()) {
+			             // Declared + Detected 전체 불일치
+			             if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList())) {
+			                 if (isAdmin) {
+			                     errMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 } else if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "errLv|Declared : " + licenseText);
+			                 }
+			             }
+			             // Declared 불일치
+			             else if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList(), false)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			             // Non-permissive 누락
+			             else if (hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			         } else if (ossComponentLicenseListMap != null && ossComponentLicenseListMap.containsKey(gridId)) {
+			             List<ProjectIdentification> useLicenseList = ossComponentLicenseListMap.get(gridId);
+			             // Declared + Detected 전체 불일치
+			             if (!hasOssLicense2(ossmaster, useLicenseList)) {
+			                 if (isAdmin) {
+			                     errMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 } else if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "errLv|Declared : " + licenseText);
+			                 }
+			             }
+			             // Declared 불일치
+			             else if (!hasOssLicense2(ossmaster, useLicenseList, false)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			             // Non-permissive 누락
+			             else if (hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			         } else if (ossComponentLicenseListMap == null && isPartner) {
+			             // Declared + Detected 전체 불일치
+			             if (!hasOssLicense(ossmaster, licenseName, bean.getExcludeYn())) {
+			                 if (isAdmin) {
+			                     errMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 } else if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "errLv|Declared : " + licenseText);
+			                 }
+			             }
+			             // Declared 불일치
+			             else if (!hasOssLicense(ossmaster, licenseName, bean.getExcludeYn(), false)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			             // Non-permissive 누락
+			             else if (hasOssLicenseTypeSingle(ossmaster, licenseName)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			         }
+			     }
+			 } else {
+			     if (!errMap.containsKey("OSS_NAME." + gridId) && !errMap.containsKey("OSS_VERSION." + gridId) && !ossInfo.containsKey(checkKey)) {
+			         if (checkNonVersionOss(ossInfo, ossName)) {
+			             if (isAdmin) {
+			                 errMap.put("OSS_VERSION." + gridId, "OSS_VERSION.UNCONFIRMED");
+			             } else {
+			                 diffMap.put("OSS_VERSION." + gridId, "OSS_VERSION.UNCONFIRMED");
+			             }
+			         }
+			     } else if (!errMap.containsKey("OSS_NAME." + gridId) && !errMap.containsKey("OSS_VERSION." + gridId) && ossInfo.containsKey(checkKey)) {
+			         String licenseText = "";
+			         if (ossmaster != null) {
+			             licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true);
+			         }
+	
+			         if (CollectionUtils.isNotEmpty(bean.getOssComponentsLicenseList())) {
+			             if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList())) {
+			                 if (isAdmin) {
+			                     errMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 } else if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "errLv|Declared : " + licenseText);
+			                 }
+			             } else if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList(), false)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             } else if (hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			         } else if (ossComponentLicenseListMap != null && ossComponentLicenseListMap.containsKey(gridId)) {
+			             List<ProjectIdentification> useLicenseList = ossComponentLicenseListMap.get(gridId);
+			             if (!hasOssLicense2(ossmaster, useLicenseList)) {
+			                 if (isAdmin) {
+			                     errMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 } else if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "errLv|Declared : " + licenseText);
+			                 }
+			             } else if (!hasOssLicense2(ossmaster, useLicenseList, false)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             } else if (hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
+			                 if (!errMap.containsKey(licenseErrKey)) {
+			                     diffMap.put(licenseErrKey, "Declared : " + licenseText);
+			                 }
+			             }
+			         }
+			     }
+			 }
 
-			// 3) DOWNLOAD LOCATION
-			{
-				basicKey = "DOWNLOAD_LOCATION";
-				gridKey = StringUtil.convertToCamelCase(basicKey);
-				// 기본체크
-				errCd = checkBasicError(basicKey, gridKey, bean.getDownloadLocation());
-				
-				if (!isEmpty(errCd)) {
-					errMap.put(basicKey + "." + bean.getGridId(), errCd);
-				} else {
-					// OSS VERSION에 대해서 추가적으로 해야할 것이 있다면
-				}
-			}
-			// 4) HOMEPAGE
-			{
-				basicKey = "HOMEPAGE";
-				gridKey = StringUtil.convertToCamelCase(basicKey);
-				// 기본체크
-				errCd = checkBasicError(basicKey, gridKey, bean.getHomepage());
-				
-				if (!isEmpty(errCd)) {
-					errMap.put(basicKey + "." + bean.getGridId(), errCd);
-				} else {
-					// OSS VERSION에 대해서 추가적으로 해야할 것이 있다면
-				}
-			}
+			 // -------------------------------------------------------------------------
+			 // FILE PATH
+			 // -------------------------------------------------------------------------
 
-			// 이후부터는 license와 관련됨
+			 {
+				 errCd = checkBasicError("FILE_PATH", "filePath", filePath, true);
+				 if (!isEmpty(errCd)) {
+					 errMap.put("FILE_PATH." + gridId, errCd);
+				 } else if (isAndroid && filePath.isEmpty()) {
+					 errMap.put("FILE_PATH." + gridId, "FILE_PATH.REQUIRED");
+				 } else if (diffMap != null && isSource && (filePath.contains("\r\n") || filePath.contains("\n"))) {
+					 diffMap.put("FILE_PATH." + gridId, "FILE_PATH.FORMAT");
+				 }
+			 }
+			 
+			 // -------------------------------------------------------------------------
+			 // ANDROID
+			 // -------------------------------------------------------------------------
 
-			if (licenseList == null || licenseList.isEmpty() || licenseList.size() < 2) {
-				hasError = false; // 초기화
+			 if (isAndroid) {
+				 // -------------------------------------------------------------------------
+				 // BINARY NAME
+				 // -------------------------------------------------------------------------
+				 {
+					 errKey = "BINARY_NAME." + gridId;
+					 if (!errMap.containsKey(errKey)) {
+						 errCd = checkBasicError("BINARY_NAME", "binaryName", binaryName, true);
+						 if (!isEmpty(errCd)) {
+							 errMap.put("BINARY_NAME." + gridId, errCd);
+						 } else if (binaryName.isEmpty()) {
+							 errMap.put("BINARY_NAME." + gridId, "BINARY_NAME.REQUIRED");
+						 }
+					 }
+				 }
 
-				// subGrid가 없을 경우, 싱글라이선스로 간주
-				{
-					basicKey = "LICENSE_NAME";
-					gridKey = StringUtil.convertToCamelCase(basicKey);
-					// 5-1. license name의 basic validator
-					// 기본체크
-					errCd = checkBasicError(basicKey, gridKey, bean.getLicenseName());
-					
-					if (!isEmpty(errCd)) {
-						errMap.put(basicKey + "." + bean.getGridId(), errCd);
-						hasError = true;
-					}
-				}
-			} else {
-				// Multi 또는 dual 라이선스의 경우
-				hasMultiError = false; // 초기화
-				List<ProjectIdentification> unExcludeLicenseList = new ArrayList<>();
-				
-				for (ProjectIdentification licenseBean : licenseList) {
-					hasError = false; // 초기화
+				 // -------------------------------------------------------------------------
+				 // BINARY NOTICE
+				 // -------------------------------------------------------------------------
+				 {
+					 errKey = "BINARY_NOTICE." + gridId;
+					 if (!diffMap.containsKey(errKey)) {
+						 errCd = checkBasicError("BINARY_NOTICE", "binaryNotice", binaryNotice, true);
+						 String permissiveKey = checkKey + "|" + licenseName;
+						 boolean permissive = permissiveCache.computeIfAbsent(permissiveKey, k -> checkUsedPermissive(bean, licenseList));
+						 if (!isEmpty(errCd)) {
+							 diffMap.put("BINARY_NOTICE." + gridId, errCd);
+						 } else if (("ok".equalsIgnoreCase(binaryNotice) || "ok(NA)".equalsIgnoreCase(binaryNotice)) && !permissive) {
+							 diffMap.put("BINARY_NOTICE." + gridId, "BINARY_NOTICE.NOTICE_FIND");
+						 } else if (("nok".equalsIgnoreCase(binaryNotice) || "nok(NA)".equalsIgnoreCase(binaryNotice)) && permissive) {
+							 diffMap.put("BINARY_NOTICE." + gridId, "BINARY_NOTICE.NOTICE_PERMISSIVE");
+						 }
+					 }
+				 }
+			 }
+			 
+			 // -------------------------------------------------------------------------
+			 // DOWNLOAD LOCATION CHECK
+			 // -------------------------------------------------------------------------
+			 if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossNameUpper)) {
+				 String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(ossNameUpper);
+				 OssMaster ossBean = ossNameOnlyMap.get(checkOssName.toUpperCase());
+				 if (ossBean != null && !diffMap.containsKey("DOWNLOAD_LOCATION." + gridId) && !downloadLocation.isEmpty() && checkOssData(ossBean, downloadLocation, "PURL")) {
+					 diffMap.put("DOWNLOAD_LOCATION." + gridId, "DOWNLOAD_LOCATION.DIFFERENT");
+				 }
+			 }
+			 
+			 // -------------------------------------------------------------------------
+			 // RECOMMENDED LICENSE
+			 // -------------------------------------------------------------------------
+			 if (ossmaster != null && !licenseName.isEmpty() && !diffMap.containsKey(licenseErrKey) && !errMap.containsKey(licenseErrKey)) {
+				 String recommended = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
+			     if (!isEmpty(recommended)) {
+			    	 diffMap.put(licenseErrKey, "Recommended : " + recommended);
+			     }
+			 }
+			 
+			 // -------------------------------------------------------------------------
+			 // NOTICE EXCEPTION
+			 // -------------------------------------------------------------------------
+			 if (isAndroid) {
+				 String noticeKey = "BINARY_NOTICE." + gridId;
+			     if (errMap.containsKey(licenseErrKey) && (errMap.containsKey(noticeKey) || diffMap.containsKey(noticeKey))) {
+			    	 String errCode = errMap.get(licenseErrKey);
+			    	 if ("LICENSE_NAME.UNCONFIRMED".equals(errCode)) {
+			    		 errMap.remove(noticeKey);
+			    		 diffMap.remove(noticeKey);
+			    	 }
+			     }
+			     if (diffMap.containsKey(licenseErrKey) && (errMap.containsKey(noticeKey) || diffMap.containsKey(noticeKey))) {
+			    	 String diffCode = diffMap.get(licenseErrKey);
+				     if ("LICENSE_NAME.UNCONFIRMED".equals(diffCode)) {
+				    	 errMap.remove(noticeKey);
+				         diffMap.remove(noticeKey);
+				     }
+			     }
+			 }
 
-					// exclude=Y 상태인 경우 체크하지 않음
-					if (!CoConstDef.FLAG_YES.equals(licenseBean.getExcludeYn())) {
-						unExcludeLicenseList.add(licenseBean);
-						
-						{
-							basicKey = "LICENSE_NAME";
-							gridKey = StringUtil.convertToCamelCase(basicKey);
-							// 5-1. license name의 basic validator
-							// 기본체크
-							errCd = checkBasicError(basicKey, gridKey, licenseBean.getLicenseName());
-							
-							if (!isEmpty(errCd)) {
-								errMap.put(basicKey + "." + licenseBean.getGridId(), errCd);
-								hasMultiError = hasError = true;
-							}
-						}
-					}
-				}
-
-				// exclude를 포함하여 체크해야할 validator
-				if (!hasMultiError) {
-					basicKey = "LICENSE_NAME";
-					
-					// 모두 exlucde가 체크되어 선택된 라이선스가 없을 경우
-					if (unExcludeLicenseList.isEmpty()) {
-						// header row의 라이선스에 에러 표시
-						errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".NOLICENSE");
-					} else if (checkOROperation(licenseList, ossmaster)) {
-						// OR 조건이 두개이상 선택된 경우
-						errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".INCLUDE_DUAL_OPERATE");
-					}
-				}
-			}
-
-			// 6) path 정보
-			{
-				basicKey = "FILE_PATH";
-				gridKey = StringUtil.convertToCamelCase(basicKey);
-				// FILE_PATH의 경우 basic validator에서 형식, 길이 체크만 한다.
-				// basic validator의 체크 순서가 필수부터 체크하기 때문에, 필수체크를 무시하는 파라미터
-				// 플래그를 추가
-				errCd = checkBasicError(basicKey, gridKey, bean.getFilePath(), true);
-				
-				if (!isEmpty(errCd)) {
-					errMap.put(basicKey + "." + bean.getGridId(), errCd);
-				}
-				// OSS가 DB에 존재하고, 선택된 라이선스(멀티인 경우 복수)의 oblication이 소스코드를
-				// 공개해야하는 경우, 필수 체크
-				else if (PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE) && isEmpty(bean.getFilePath())) {
-					// 17.02.21 yuns bin(android)의 경우 무조건 필수체크로 변경
-					errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".REQUIRED");
-				}
-				// 170524 add yun SRC의 path 정보에 복수개의 path를 선언하는 경우, 에러는 아니지만
-				// 다른 색상으로 표시
-				else if (diffMap != null && PROC_TYPE_IDENTIFICATION_SOURCE.equals(PROC_TYPE)
-						&& (avoidNull(bean.getFilePath()).contains("\r\n")
-								|| avoidNull(bean.getFilePath()).contains("\n"))) {
-					diffMap.put(basicKey + "." + bean.getGridId(), basicKey + ".FORMAT");
-				}
-			}
-
-			// binary name (Android Model만)
-			// TODO Android Model과 일반 Model이 같이 있는 경우, 어떻게 구분할 것인가? 일단
-			// binary name과 notice 칼럼으로 판단
-			if (PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE)) {
-				basicKey = "BINARY_NAME";
-				gridKey = StringUtil.convertToCamelCase(basicKey);
-				errKey = basicKey + "." + bean.getGridId();
-				
-				if (!errMap.containsKey(errKey)) {
-					// 길이, 형식 체크만 한다.
-					errCd = checkBasicError(basicKey, gridKey, bean.getBinaryName(), true);
-					if (!isEmpty(errCd)) {
-						errMap.put(errKey, errCd);
-					} else if (isEmpty(bean.getBinaryName())) {
-						errMap.put(errKey, basicKey + ".REQUIRED");
-					}
-
-				}
-				
-				basicKey = "BINARY_NOTICE";
-				gridKey = StringUtil.convertToCamelCase(basicKey);
-				errKey = basicKey + "." + bean.getGridId();
-				// nullpoint 대응
-				bean.setBinaryNotice(avoidNull(bean.getBinaryNotice()));
-				
-				if (!diffMap.containsKey(errKey)) {
-					// 길이, 형식 체크만 한다.
-					errCd = checkBasicError(basicKey, gridKey, bean.getBinaryNotice(), true);
-					
-					if (!isEmpty(errCd)) {
-						diffMap.put(errKey, errCd);
-					}
-					else if (("ok".equalsIgnoreCase(bean.getBinaryNotice())
-							|| "ok(NA)".equalsIgnoreCase(bean.getBinaryNotice()))
-							&& !checkUsedPermissive(bean, licenseList)) {
-						diffMap.put(errKey, basicKey + ".NOTICE_FIND");
-					} else if (("nok".equalsIgnoreCase(bean.getBinaryNotice())
-							|| "nok(NA)".equalsIgnoreCase(bean.getBinaryNotice()))
-							&& checkUsedPermissive(bean, licenseList)) {
-						diffMap.put(errKey, basicKey + ".NOTICE_PERMISSIVE");
-					}
-				}
-			}
-
-			// Admin용 validation
-			// admin review시 confirm을 위한 추가 validation
-			if (!isEmpty(bean.getLicenseName())) {
-				if (bean.getOssComponentsLicenseList() != null) {
-					for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
-						if (CoConstDef.FLAG_YES.equals(license.getExcludeYn())) {
-							continue;
-						}
-						
-						LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-						if (!CoCodeManager.LICENSE_INFO_UPPER
-								.containsKey(avoidNull(license.getLicenseName()).toUpperCase())
-								&& !ossInfo.containsKey(checkKey)) {
-							if (isAdmin) {
-								errMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
-							} else {
-								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
-								}
-							}
-							
-							break;
-						}
-					}
-				} else if (ossComponentLicenseListMap != null
-						&& ossComponentLicenseListMap.containsKey(bean.getGridId())) {
-					for (ProjectIdentification license : ossComponentLicenseListMap.get(bean.getGridId())) {
-						if (CoConstDef.FLAG_YES.equals(license.getExcludeYn())) {
-							continue;
-						}
-						
-						LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-						if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license.getLicenseName()).toUpperCase())
-								&& !ossInfo.containsKey(checkKey)) {
-							if (isAdmin) {
-								errMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
-							} else {
-								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
-								}
-							}
-							
-							break;
-						}
-					}
-				}
-			}
-			
-			// LGE license인 경우는 OSS name과 version을 입력하지 않아도 된다.
-			if (!CommonFunction.isIgnoreLicense(bean.getLicenseName())) {
-				// oss 등록 여부 체크
-				if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
-						&& !errMap.containsKey("OSS_VERSION." + bean.getGridId())
-						&& !ossInfo.containsKey(checkKey)) {
-					if (checkNonVersionOss(ossInfo, bean.getOssName())) {
-						// oss는 등록되어 있지만, 해당 version은 없는 경우
-						if (isAdmin) {
-							errMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.UNCONFIRMED");
-						} else {
-							diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.UNCONFIRMED");
-						}
-					} else {
-						if (isAdmin) {
-							errMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.UNCONFIRMED");
-						} else {
-							diffMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.UNCONFIRMED");
-						}
-					}
-				}
-				// license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은
-				// 경우)
-				else if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
-						&& !errMap.containsKey("LICENSE_NAME." + bean.getGridId())) {
-					String licenseText = "";
-					
-					if (ossmaster != null) {
-						licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
-					}
-					
-					if (bean.getOssComponentsLicenseList() != null
-							&& !bean.getOssComponentsLicenseList().isEmpty()) {
-						LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-						
-						// Declared & Detected License를 전부 사용하지 않는 case
-						if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList())) {
-							if (isAdmin) {
-								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							} else {
-								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
-								}
-							}
-						}
-						// Declared License를 사용하지 않는 case
-						else if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList(), false)) {
-							if (!errMap.containsKey(LICENSE_KEY)) {
-								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							}
-						}
-						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
-						else if (hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
-							if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-							}
-						}
-					} else if (ossComponentLicenseListMap != null
-							&& ossComponentLicenseListMap.containsKey(bean.getGridId())) {
-						List<ProjectIdentification> useLicenseList = ossComponentLicenseListMap.get(bean.getGridId());
-						LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-						
-						// Declared & Detected License를 전부 사용하지 않는 case
-						if (!hasOssLicense2(ossmaster, useLicenseList)) {								
-							if (isAdmin) {
-								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							} else {
-								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
-								}
-							}
-						}
-						// Declared License를 사용하지 않는 case
-						else if (!hasOssLicense2(ossmaster, useLicenseList, false)) {
-							if (!errMap.containsKey(LICENSE_KEY)) {
-								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							}
-						}
-						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
-						else if (hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
-							if (!errMap.containsKey(LICENSE_KEY)) {
-								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							}
-						}
-					} else if (ossComponentLicenseListMap == null) {
-						if (PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)) {
-							// Declared & Detected License를 전부 사용하지 않는 case
-							if (!hasOssLicense(ossmaster, bean.getLicenseName(), bean.getExcludeYn())) {
-								LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-								
-								if (isAdmin) {
-									errMap.put(LICENSE_KEY, "Declared : " + licenseText);
-								} else {
-									if (!errMap.containsKey(LICENSE_KEY)) {
-										diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
-									}
-								}
-							} 
-							// Declared License를 사용하지 않는 case
-							else if (!hasOssLicense(ossmaster, bean.getLicenseName(), bean.getExcludeYn(), false)) {
-								LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-								
-								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
-								}
-							}
-							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
-							else if (hasOssLicenseTypeSingle(ossmaster, bean.getLicenseName())) {
-								if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-								}
-							}
-						}
-					}
-				}
-			} else {
-				if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
-						&& !errMap.containsKey("OSS_VERSION." + bean.getGridId())
-						&& !ossInfo.containsKey(checkKey)) {
-					if (checkNonVersionOss(ossInfo, bean.getOssName())) {
-						// oss는 등록되어 있지만, 해당 version은 없는 경우
-						if (isAdmin) {
-							errMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.UNCONFIRMED");
-						} else {
-							diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.UNCONFIRMED");
-						}
-					}
-				}
-				else if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
-						&& !errMap.containsKey("OSS_VERSION." + bean.getGridId())
-						&& ossInfo.containsKey(checkKey)
-						) {
-					String licenseText = "";
-					
-					if (ossmaster != null) {
-						licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
-					}
-					
-					if (bean.getOssComponentsLicenseList() != null
-							&& !bean.getOssComponentsLicenseList().isEmpty()) {
-						// Declared & Detected License를 전부 사용하지 않는 case
-						if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList())) {
-							LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-							
-							if (isAdmin) {
-								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							} else {
-								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
-								}
-							}
-						}
-						// Declared License를 사용하지 않는 case
-						else if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList(), false)) {
-							LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-							
-							if (!errMap.containsKey(LICENSE_KEY)) {
-								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							}
-						}
-						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
-						else if (hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
-							if (!errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
-								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
-							}
-						}
-					} else if (ossComponentLicenseListMap != null
-							&& ossComponentLicenseListMap.containsKey(bean.getGridId())) {
-						List<ProjectIdentification> useLicenseList = ossComponentLicenseListMap.get(bean.getGridId());
-						LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-						
-						// Declared & Detected License를 전부 사용하지 않는 case
-						if (!hasOssLicense2(ossmaster, useLicenseList)) {
-							if (isAdmin) {
-								errMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							} else {
-								if (!errMap.containsKey(LICENSE_KEY)) {
-									diffMap.put(LICENSE_KEY, "errLv|Declared : " + licenseText);
-								}
-							}
-						} 
-						// Declared License를 사용하지 않는 case
-						else if (!hasOssLicense2(ossmaster, useLicenseList, false)) {								
-							if (!errMap.containsKey(LICENSE_KEY)) {
-								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							}
-						}
-						//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
-						else if (hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
-							if (!errMap.containsKey(LICENSE_KEY)) {
-								diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
-							}
-						}
-					}
-				}
-			}
-
-			// oss Download_location 체크
-			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())) {
-				String checkOssName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(bean.getOssName().toUpperCase());
-				OssMaster ossBean = null;
-				
-				for (String mapKey : ossInfo.keySet()) {
-			    	int lastUnderscoreIndex = mapKey.lastIndexOf("_");
-			    	if (lastUnderscoreIndex != -1) {
-			    		String extractedName = mapKey.substring(0, lastUnderscoreIndex);
-			    		if (extractedName.equalsIgnoreCase(checkOssName)) {
-			                ossBean = ossInfo.get(mapKey);
-			                break;
-			            }
-			    	}
-			    }
-			    
-			    if (!diffMap.containsKey("DOWNLOAD_LOCATION." + bean.getGridId()) && !isEmpty(bean.getDownloadLocation())) {
-					if (checkOssData(ossBean, bean.getDownloadLocation(), "PURL")) {
-						diffMap.put("DOWNLOAD_LOCATION." + bean.getGridId(), "DOWNLOAD_LOCATION.DIFFERENT");
-					}
-				}
-			}
-			
-			if (ossInfo.containsKey(checkKey)) {
-				if (!diffMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !errMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !isEmpty(bean.getLicenseName())) {
-					String licenseText = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
-					if (!isEmpty(licenseText)) {
-						diffMap.put("LICENSE_NAME." + bean.getGridId(), "Recommended : " + licenseText );
-					}
-				}
-			}
-			
-			// exception 처리
-			// LICENSE_NAME.UNCONFIRMED 의 경우, notice warning message 미표시
-			if (PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE)) {
-				String chkKey1 = "LICENSE_NAME." + bean.getGridId();
-				String chkKey2 = "BINARY_NOTICE." + bean.getGridId();
-				
-				if (errMap.containsKey(chkKey1) && (errMap.containsKey(chkKey2) || diffMap.containsKey(chkKey2))) {
-					String _diffCode1 = errMap.get(chkKey1);
-					
-					if ("LICENSE_NAME.UNCONFIRMED".equals(_diffCode1)) {
-						if (errMap.containsKey(chkKey2)) {
-							errMap.remove(chkKey2);
-						}
-						
-						if (diffMap.containsKey(chkKey2)) {
-							diffMap.remove(chkKey2);
-						}
-					}
-				}
-				if (diffMap.containsKey(chkKey1) && (errMap.containsKey(chkKey2) || diffMap.containsKey(chkKey2))) {
-					String _diffCode1 = diffMap.get(chkKey1);
-					
-					if ("LICENSE_NAME.UNCONFIRMED".equals(_diffCode1)) {
-						if (errMap.containsKey(chkKey2)) {
-							errMap.remove(chkKey2);
-						}
-						
-						if (diffMap.containsKey(chkKey2)) {
-							diffMap.remove(chkKey2);
-						}
-					}
-				}
-			}
-
-			{ // ADD OSS_VERSION REQUIRED MSG
-				if (!isEmpty(bean.getOssName()) 
-						&& !bean.getOssName().equals("-") 
-						&& isEmpty(bean.getOssVersion())) {
-					if (!errMap.containsKey("OSS_VERSION." + bean.getGridId())) {
-						if (CoCodeManager.OSS_INFO_UPPER.containsKey((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
-							if (avoidNull(CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase()).getOssType()).contains("V")) {
-								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.REQUIRED");
-							}
-						}
-					}
-				}
-			}
+			 // -------------------------------------------------------------------------
+			 // ADD OSS_VERSION REQUIRED MSG
+			 // -------------------------------------------------------------------------
+			 if (!ossName.isEmpty() && !"-".equals(ossName) && ossVersion.isEmpty()) {
+				 if (!errMap.containsKey("OSS_VERSION." + gridId)) {
+					 OssMaster noVersionMaster = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_").toUpperCase());
+			         if (noVersionMaster != null && avoidNull(noVersionMaster.getOssType()).contains("V")) {
+			        	 diffMap.put("OSS_VERSION." + gridId,"OSS_VERSION.REQUIRED");
+			         }
+				 }
+			 }
 		} // end of loop
 		Map<String, List<BinaryData>> checkBinaryInfoMap = new HashMap<>();
 		if ((PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_BIN.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)) && !isEmpty(projectId)) {
