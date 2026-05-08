@@ -2743,8 +2743,6 @@ public class ProjectController extends CoTopComponent {
 
 		StringBuffer resultSb = new StringBuffer();
 		if (result != null) {
-			boolean hasOssNick = false;
-			boolean hasLicenseNick = false;
 			List<String> ossNickList = result.get("OSS");
 			List<String> licenseNickList = result.get("LICENSE");
 
@@ -6048,6 +6046,7 @@ public class ProjectController extends CoTopComponent {
 							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(depOssComponents, ossComponentsLicense);
 							depOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
 							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+							projectService.registCommentWithNickNameValid(prjId, depOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
 							projectService.registDepOss(depOssComponents, ossComponentsLicense, project, true);
 						}
 						if (isSrcLoaded) {
@@ -6055,6 +6054,7 @@ public class ProjectController extends CoTopComponent {
 							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(srcOssComponents, ossComponentsLicense);
 							srcOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
 							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+							projectService.registCommentWithNickNameValid(prjId, srcOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
 							projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, true);
 						}
 						if (isBinLoaded) {
@@ -6062,6 +6062,7 @@ public class ProjectController extends CoTopComponent {
 							Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(binOssComponents, ossComponentsLicense);
 							binOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
 							ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+							projectService.registCommentWithNickNameValid(prjId, binOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
 							projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN, true);
 						}
 						if (uploadFile != null) {

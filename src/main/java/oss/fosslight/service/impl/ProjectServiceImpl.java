@@ -1361,39 +1361,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 
-	private OssMaster buildOssMasterFromKey(String key, Map<String, OssMaster> ossInfoMap) {
-		if (ossInfoMap.containsKey(key)) {
-			return ossInfoMap.get(key);
-		} else {
-			String[] parts = key.split("_", 2);
-		    String ossName = parts[0];
-		    String ossVersion = (parts.length > 1) ? parts[1] : "";
-		    String namePrefix = (ossName + "_").toUpperCase();
-		    
-		    boolean isMatch = false;
-		    OssMaster ossMaster = new OssMaster();
-		    for (Map.Entry<String, OssMaster> entry : ossInfoMap.entrySet()) {
-		    	if (entry.getKey().startsWith(namePrefix)) {
-	                ossMaster = entry.getValue();
-	                ossMaster.setOssId(null);
-	                ossMaster.setOssVersion(ossVersion);
-	                ossMaster.setOssVersionAlias(null);
-	                ossMaster.setOssVersionAliases(null);
-	                isMatch = true;
-	                break;
-	            }
-	        }
-		    
-	        if (isMatch) {
-	        	return ossMaster;
-	        } else {
-	        	ossMaster.setOssName(ossName);
-			    ossMaster.setOssVersion(ossVersion);
-			    return ossMaster;
-	        }
-		}
-	}
-	
 	private String findAddedOssCopyright(String ossId, String licenseId, String ossCopyright) {
 		if (!isEmpty(ossId) && !isEmpty(licenseId)) {
 			OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
@@ -3733,6 +3700,47 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return result;
 	}
 
+	@Override
+	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv) {
+		Map<String, List<String>> result = nickNameValid(prjId, ossComponent, ossComponentLicense);
+		if (MapUtils.isNotEmpty(result)) {
+			StringBuffer resultSb = new StringBuffer();
+			List<String> ossNickList = result.get("OSS");
+			List<String> licenseNickList = result.get("LICENSE");
+
+			if (!CollectionUtils.isEmpty(ossNickList) || !CollectionUtils.isEmpty(licenseNickList)) {
+				resultSb.append("<p><b>" + getMessage("msg.oss.changed.by.system") + "</b></p>");
+				if (!CollectionUtils.isEmpty(ossNickList)) {
+					resultSb.append(CommonFunction.changeDataToTableFormat("oss", "", ossNickList));
+				}
+
+				if (!CollectionUtils.isEmpty(licenseNickList)) {
+					if (!CollectionUtils.isEmpty(ossNickList)) {
+						resultSb.append("<br>");
+					}
+					resultSb.append(CommonFunction.changeDataToTableFormat("license", "", licenseNickList));
+				}
+			}
+			
+			if (!isEmpty(resultSb.toString())) {
+				String referenceDivStr = "";
+				switch (referenceDiv) {
+					case CoConstDef.CD_DTL_COMPONENT_ID_DEP : referenceDivStr = "DEP"; break;
+					case CoConstDef.CD_DTL_COMPONENT_ID_SRC : referenceDivStr = "SRC"; break;
+					case CoConstDef.CD_DTL_COMPONENT_ID_BIN : referenceDivStr = "BIN"; break;
+					default : break;
+				}
+				
+				CommentsHistory commentHisBean = new CommentsHistory();
+				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+				commentHisBean.setReferenceId(prjId);
+				commentHisBean.setExpansion1(referenceDivStr);
+				commentHisBean.setContents(resultSb.toString());
+				commentService.registComment(commentHisBean, false);
+			}
+		}
+	}
+	
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public List<PartnerMaster> nickNameValidMessage(String prjId, String partnerId, List<OssComponents> thirdPartyData, String code) {
