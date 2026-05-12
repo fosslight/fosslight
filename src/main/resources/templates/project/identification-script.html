@@ -50,10 +50,8 @@ $(document).ready(function () {
 		$('#save').attr('onclick', "com_fn.save('"+tabId+"')");
 		
 		if ("Bom" == tabId) {
-			$('#save').attr('data-original-title', "merge and save");
 			$('#reset').hide();
 		} else {
-			$('#save').attr('data-original-title', "save");
 			$('#reset').attr('onclick', "com_fn.reset('"+tabId+"')");
 			$('#reset').show();
 		}
