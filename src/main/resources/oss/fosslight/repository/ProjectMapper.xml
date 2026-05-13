@@ -2984,9 +2984,14 @@
 		SET
 			EXCEPT_FILE_CONTENT = #{exceptFileContent},
 			VERIFY_FILE_CONTENT = #{verifyFileContent}
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryFileYn)">
-			,BINARY_FILE_YN = #{binaryFileYn}
-			</if>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@isEmpty(binaryFileYn)">
+				,BINARY_FILE_YN = NULL
+			</when>
+			<otherwise>
+				,BINARY_FILE_YN = #{binaryFileYn}
+			</otherwise>
+		</choose>
 		WHERE
 			PRJ_ID	= #{prjId}
 	</update>
