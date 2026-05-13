@@ -1107,33 +1107,33 @@
 		AND T1.OSS_ID = #{ossId}
 	</select>
 	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT T1.OSS_COMMON_ID
-			, T1.REF_OSS_ID 
-			, T1.OSS_ID
-			, T1.OSS_NAME
-			, T1.OSS_VERSION
-			, T1.LICENSE_DIV
-			, T1.HOMEPAGE
-			, T1.DOWNLOAD_LOCATION
-			, T1.SUMMARY_DESCRIPTION
-			, T1.IMPORTANT_NOTES
-			, T1.ATTRIBUTION
-			, T1.CREATOR
-			, T1.MODIFIER
-            , T1.CVE_ID
-            , T1.CVSS_SCORE      
-			, T1.CREATED_DATE
-			, T1.MODIFIED_DATE
-			, T1.LICENSE_NAME
-			, T1.OBLIGATION
-			, T1.OBLIGATION_TYPE
-			, T1.OBLIGATION_CHECKS
-			, T1.OSS_TYPE
-			, T1.LICENSE_TYPE
-			, T1.OSS_NICKNAME
-			, T1.COPYRIGHT
-			, T1.DEACTIVATE_FLAG
-			, GROUP_CONCAT(T1.RESTRICTION) AS RESTRICTION
+		SELECT TBL.OSS_COMMON_ID
+			, TBL.REF_OSS_ID 
+			, TBL.OSS_ID
+			, TBL.OSS_NAME
+			, TBL.OSS_VERSION
+			, TBL.LICENSE_DIV
+			, TBL.HOMEPAGE
+			, TBL.DOWNLOAD_LOCATION
+			, TBL.SUMMARY_DESCRIPTION
+			, TBL.IMPORTANT_NOTES
+			, TBL.ATTRIBUTION
+			, TBL.CREATOR
+			, TBL.MODIFIER
+            , TBL.CVE_ID
+            , TBL.CVSS_SCORE      
+			, TBL.CREATED_DATE
+			, TBL.MODIFIED_DATE
+			, TBL.LICENSE_NAME
+			, TBL.OBLIGATION
+			, TBL.OBLIGATION_TYPE
+			, TBL.OBLIGATION_CHECKS
+			, TBL.OSS_TYPE
+			, TBL.LICENSE_TYPE
+			, TBL.OSS_NICKNAME
+			, TBL.COPYRIGHT
+			, TBL.DEACTIVATE_FLAG
+			, GROUP_CONCAT(TBL.RESTRICTION) AS RESTRICTION
 		FROM
 		(SELECT
 			T1.OSS_COMMON_ID
@@ -1378,15 +1378,15 @@
 				AND CONTENTS LIKE CONCAT('%', #{comment}, '%')
 			)
 		</if>
-		) T1
+		) TBL
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrRestriction)">
 			WHERE
 			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
-				FIND_IN_SET(#{item}, T1.RESTRICTION)
+				FIND_IN_SET(#{item}, TBL.RESTRICTION)
 			</foreach>
 		</if>
-		GROUP BY T1.OSS_ID
-		ORDER BY T1.OSS_VERSION DESC
+		GROUP BY TBL.OSS_ID
+		<include refid="orderby"/>
 	</select>
 	<select id="selectOssLicenseList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssLicense">
 		SELECT
