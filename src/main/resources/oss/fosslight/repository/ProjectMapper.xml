@@ -6251,10 +6251,21 @@
 					AND NVD.VERSION = TBL.OSS_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6299,10 +6310,21 @@
 					AND NVD.VERSION = TBL.SEARCH_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6343,10 +6365,21 @@
 					AND NVD.VERSION = TBL.OSS_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6394,10 +6427,21 @@
 					AND NVD.VERSION = TBL.SEARCH_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6438,10 +6482,21 @@
 					AND NVD.VERSION = TBL.OSS_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6489,10 +6544,21 @@
 					AND NVD.VERSION = TBL.SEARCH_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6529,10 +6595,21 @@
 					AND NVD.VERSION = '-'
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6576,10 +6653,21 @@
 					AND NVD.VERSION = TBL.SEARCH_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6618,10 +6706,21 @@
 					ON NVD.VENDORPRODUCT = TBL.SEARCH_NAME
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6669,10 +6768,21 @@
 					AND NVD.VERSION = TBL.SEARCH_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6711,10 +6821,21 @@
 					ON NVD.PRODUCT = TBL.SEARCH_NAME
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
@@ -6762,10 +6883,21 @@
 					AND NVD.VERSION = TBL.SEARCH_VERSION
 					AND NOT EXISTS (
 					    SELECT 1 
-					    FROM OSS_COMMON COMMON
-					    INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
-					    WHERE COMMON.OSS_NAME = TBL.OSS_NAME
-					      AND NVD.VENDORPRODUCT = REPLACE(OEC.CPE23URI, ':', '-')
+						FROM OSS_COMMON COMMON
+						INNER JOIN OSS_EXCLUDE_CPE OEC ON COMMON.OSS_COMMON_ID = OEC.OSS_COMMON_ID
+						WHERE COMMON.OSS_NAME = TBL.OSS_NAME
+						  AND NVD.VENDORPRODUCT = (
+						    CASE 
+						        WHEN OEC.CPE23URI LIKE 'cpe:2.3:%' THEN 
+						            CONCAT(
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 4), ':', -1),
+						                '-',
+						                SUBSTRING_INDEX(SUBSTRING_INDEX(OEC.CPE23URI, ':', 5), ':', -1)
+						            )
+						        ELSE 
+						            REPLACE(OEC.CPE23URI, ':', '-')
+						    END
+						)
 					)
 					LEFT JOIN NVD_CVE_V3 CVE
 					ON NVD.CVE_ID = CVE.CVE_ID
