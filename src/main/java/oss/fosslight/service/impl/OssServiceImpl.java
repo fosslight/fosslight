@@ -1507,7 +1507,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			for (String url : downloadLocations){
 				if (!isEmpty(url)) {
 					String downloadLocationUrl = url;
-					if (downloadLocationUrl.endsWith("/") && checkUrlConnection(downloadLocationUrl)) {
+					boolean endsWithSlash = downloadLocationUrl.endsWith("/");
+					
+					if (endsWithSlash && checkUrlConnection(downloadLocationUrl)) {
 						downloadLocationUrl = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
 					}
 					
@@ -1516,9 +1518,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					master.setDownloadLocation(downloadLocationUrl);
 					master.setOssDlIdx(++idx);
 					
-					String purlString = generatePurlByDownloadLocation(master);
+					if (endsWithSlash) {
+						master.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
+					}
 					
+					String purlString = generatePurlByDownloadLocation(master);
 					purls.add(purlString);
+					master.setDownloadLocation(downloadLocationUrl);
 					master.setPurl(purlString);
 					ossMapper.insertOssDownloadLocation(master);
 				}
