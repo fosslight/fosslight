@@ -1912,6 +1912,9 @@ public class OssController extends CoTopComponent{
 		
 		// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
 		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase());
+		Set<String> downloadLocationSet = new LinkedHashSet<>();
+		boolean isRefined = false;
+		
 		if (isNewVersion) {
 			resultData.setExistOssNickNames(ossService.getOssNickNameListByOssName(resultData.getOssName()));
 			OssMaster ossBean = ossService.getOssInfo(null, analysisBean.getOssName(), true);
@@ -1919,8 +1922,8 @@ public class OssController extends CoTopComponent{
 				resultData.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
 				resultData.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
 				
-				Set<String> downloadLocationSet = new LinkedHashSet<>();
 				if (ossBean.getDownloadLocations() != null && !isEmpty(analysisBean.getDownloadLocation())) {
+					isRefined = true;
 					for (String dl : ossBean.getDownloadLocations()) {
 						String trimmed = dl.trim();
 		                if (!isEmpty(trimmed)) {
@@ -1939,6 +1942,19 @@ public class OssController extends CoTopComponent{
 		            }
 				}
 			}
+		}
+		
+		if (!isRefined && !isEmpty(analysisBean.getDownloadLocation())) {
+			String[] splitData = analysisBean.getDownloadLocation().split(",");
+            for (String s : splitData) {
+                String trimmed = s.trim();
+                if (!isEmpty(trimmed)) {
+                	downloadLocationSet.add(trimmed);
+                }
+            }
+            if (!downloadLocationSet.isEmpty()) {
+            	analysisBean.setDownloadLocation(String.join(",", downloadLocationSet));
+            }
 		}
 		
 		resultData.setGridId(analysisBean.getGridId());
@@ -2005,17 +2021,9 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if (!isEmpty(analysisBean.getDownloadLocation())){
-			String result = "";
-			
-			for (String url : analysisBean.getDownloadLocation().split(",")) {
-				if (!isEmpty(result)) {
-					result += ",";
-				}
-				result += url;
-			}
-			
-			resultData.setDownloadLocations(result.split(","));
-			resultData.setDownloadLocation(result);
+			String[] downloadLocations = analysisBean.getDownloadLocation().split(",");
+			resultData.setDownloadLocation(downloadLocations[0]);
+			resultData.setDownloadLocations(downloadLocations);
 		} else {
 			resultData.setDownloadLocation("");
 		}
