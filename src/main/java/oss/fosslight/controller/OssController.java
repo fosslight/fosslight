@@ -1893,11 +1893,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.SAVE_OSS_ANALYSIS_DATA)
-	public @ResponseBody ResponseEntity<Object> saveOssAnalysisData(
-			@RequestBody OssAnalysis analysisBean
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveOssAnalysisData(@RequestBody OssAnalysis analysisBean, HttpServletRequest req, HttpServletResponse res, Model model){
 		// 이미등록되어 있는 OSS의 경우 Skip한다.
 		if (CoCodeManager.OSS_INFO_UPPER.containsKey( (analysisBean.getOssName() + "_" + avoidNull(analysisBean.getOssVersion())).toUpperCase() )) {
 			return makeJsonResponseHeader(false, "Skip");
@@ -1922,6 +1918,26 @@ public class OssController extends CoTopComponent{
 			if (ossBean != null) {
 				resultData.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
 				resultData.setExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+				
+				Set<String> downloadLocationSet = new LinkedHashSet<>();
+				if (ossBean.getDownloadLocations() != null && !isEmpty(analysisBean.getDownloadLocation())) {
+					for (String dl : ossBean.getDownloadLocations()) {
+						String trimmed = dl.trim();
+		                if (!isEmpty(trimmed)) {
+		                	downloadLocationSet.add(trimmed);
+		                }
+					}
+					String[] splitData = analysisBean.getDownloadLocation().split(",");
+		            for (String s : splitData) {
+		                String trimmed = s.trim();
+		                if (!isEmpty(trimmed)) {
+		                	downloadLocationSet.add(trimmed);
+		                }
+		            }
+		            if (!downloadLocationSet.isEmpty()) {
+		            	analysisBean.setDownloadLocation(String.join(",", downloadLocationSet));
+		            }
+				}
 			}
 		}
 		
