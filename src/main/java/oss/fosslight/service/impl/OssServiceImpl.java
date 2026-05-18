@@ -3393,6 +3393,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					updateOssNameVersionDiffMergeObject = updateOssNameVersionDiff(ossMaster);
 				} else {
 					result = registOssMaster(ossMaster);
+					CoCodeManager.getInstance().refreshOssInfoByOssId(beforeBean, result);
 				}
 				if (!isEmpty(nickChangeComment)) {
 					CommentsHistory commentsParam = new CommentsHistory();
@@ -3401,11 +3402,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					commentsParam.setContents(nickChangeComment);
 					commentService.registComment(commentsParam);
 				}
-//				if (updateNvdFlag) {
-//					updateVulnInfoByOssMaster(ossMaster, true);
-//				}
 				
-				CoCodeManager.getInstance().refreshOssInfoByOssId(beforeBean, result);
 				action = CoConstDef.ACTION_CODE_UPDATE;
 				afterBean = getOssInfo(ossId, true);
 
@@ -3442,9 +3439,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setOssCommonId(null);
 				}
 				ossId = registOssMaster(ossMaster);
-				
-				// update vulnerability info
-//				updateVulnInfoByOssMaster(ossMaster, false);
 				
 				CoCodeManager.getInstance().refreshOssInfoByOssId(beforeBean, ossId);
 				action = CoConstDef.ACTION_CODE_INSERT;
