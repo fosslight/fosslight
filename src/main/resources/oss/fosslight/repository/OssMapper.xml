@@ -3765,6 +3765,7 @@
 		SELECT COUNT(*) AS CNT 
 		  FROM OSS_ANALYSIS_MAP
 		 WHERE REFERENCE_ID = #{prjId}
+		   AND IFNULL(COMMENTS_FLAG, '') = 'F'
 		 <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(startAnalysisFlag,'Y')">
 			AND ANALYSIS_YN = #{startAnalysisFlag}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(csvComponentIdList)">
