@@ -229,9 +229,6 @@
 		<if test="@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
 			LIMIT 5
 		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
-			LIMIT 1
-		</if>
 	</if>
 	</select>
 	
@@ -391,9 +388,6 @@
 			)
 		</if>
 		AND USE_YN = 'Y'
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
-		LIMIT 1
-		</if>
 	</select>
 	
 	<select id="checkStatusCommentsHistory" parameterType="string" resultType="int">
