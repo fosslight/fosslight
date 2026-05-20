@@ -249,27 +249,20 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				            convertFullStrPath = uploadFilePath + "/" + uploadFileName;
 			            	
 			            	try {
-			            		String[] args = null;
-			            		switch (originalFileExt.toLowerCase()) {
-				            		case "yaml":
-				            			isConvert = convertYamlToXls(tempFile.toPath(), Paths.get(convertFullStrPath));
-				            			break;
-				            		case "rdf":
-				            		case "spdx":
-				            			args = new String[]{"Convert", tempFile.getPath(), convertFullStrPath};
-				            			Main.main(args);
-				            			break;
-				            		default : 
-				            			tempFile = getCleanedSpdxFile(tempId, tempFile);
-				            			if (tempFile == null) {
-						            		upFile.setUploadSucc(false);
-						            		upFile.setComments("parsing error.");
-						            		result.add(upFile);
-						                	return result;
-						            	}
-				            			SPDXUtil2.convert(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
-				            			break;
-				            	}
+			            		if (("yaml").equalsIgnoreCase(originalFileExt.toLowerCase())) {
+			            			isConvert = convertYamlToXls(tempFile.toPath(), Paths.get(convertFullStrPath));
+			            		} else if (("rdf").equalsIgnoreCase(originalFileExt.toLowerCase()) || ("spdx").equalsIgnoreCase(originalFileExt.toLowerCase())) {
+			            			SPDXUtil2.convert2(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
+			            		} else {
+			            			tempFile = getCleanedSpdxFile(tempId, tempFile);
+			            			if (tempFile == null) {
+					            		upFile.setUploadSucc(false);
+					            		upFile.setComments("parsing error.");
+					            		result.add(upFile);
+					                	return result;
+					            	}
+		            				SPDXUtil2.convert(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
+			            		}
 			            	} catch (Exception e) {
 			            		log.error("SPDXUtil2.convert error : {}", e.getMessage());
 			            		upFile.setUploadSucc(false);

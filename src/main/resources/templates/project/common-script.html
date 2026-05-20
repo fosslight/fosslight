@@ -3697,6 +3697,12 @@ var com_fn = {
 							$('.ajax-file-upload-statusbar').remove();
 						}
 					}
+				},
+				onError: function(files, status, errMsg, pd) {
+					loadingIden.hide();
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+					alertify.alert("An error occurred while uploading the file", function(){});
 				}
 			});
 		});
