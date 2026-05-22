@@ -29,6 +29,7 @@ public class SPDXUtil2 {
 		}
 	}
 	
+	@SuppressWarnings("removal")
 	public static void convert2(String prjId, String inputFilePath, String outputFilePath) throws Exception {
         File outputFile = Paths.get(outputFilePath).toFile();
         if (outputFile.exists()) {
