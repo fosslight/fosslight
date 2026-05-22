@@ -3206,7 +3206,9 @@
 		FROM (
 			SELECT T1.OSS_NAME 
 				  , (CASE 
-				  		  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%', #{downloadLocation}) THEN 1
+				  	  <if test="!@oss.fosslight.util.StringUtil@isEmpty(purl)">
+                    	  WHEN IFNULL(T2.PURL, '') = #{purl} THEN 1
+                	  </if>
 						  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT(#{downloadLocation},'%') THEN 2
 						  ELSE 3
 					  END) AS S_ORDER
