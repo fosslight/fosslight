@@ -2540,9 +2540,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 9:
 					checkName = "stackoverflow-" + ossNameMatcher.group(3);
 					break;
-				case 10 :
-					checkName = "pypi:" + ossNameMatcher.group(3);
-					break;
 				case 11:
 					checkName = "cargo:" + ossNameMatcher.group(3);
 					break;
@@ -2627,9 +2624,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			case 9:
 				p = Pattern.compile("((http|https)://stackoverflow.com/revisions/([^/]+)/([^/]+))");
 				break;
-			case 10:
-				p = Pattern.compile("((http|https)://files.pythonhosted.org/packages/source/./([^/]+))");
-				break;
 			case 11:
 				p = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
 				break;
@@ -2673,14 +2667,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.indexOf("#"));
 		}
 
-		if (urlSearchSeq != 10) {
-			Pattern p = generatePattern(urlSearchSeq, downloadlocationUrl);
+		Pattern p = generatePattern(urlSearchSeq, downloadlocationUrl);
 
-			Matcher m = p.matcher(downloadlocationUrl);
+		Matcher m = p.matcher(downloadlocationUrl);
 
-			while (m.find()) {
-				bean.setDownloadLocation(m.group(0));
-			}
+		while (m.find()) {
+			bean.setDownloadLocation(m.group(0));
 		}
 
 		if (bean.getDownloadLocation().startsWith("http://")
@@ -2933,7 +2925,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					if (bean.getUrlSearchSeq() == 7) {
 						generateCheckOSSName(bean, p, androidPlatformList, bean.getDownloadLocation());
 						checkName = bean.getCheckName();
-					} else if (bean.getUrlSearchSeq() == 3 || bean.getUrlSearchSeq() == 5 || bean.getUrlSearchSeq() == 10) {
+					} else if (bean.getUrlSearchSeq() == 3 || bean.getUrlSearchSeq() == 5) {
 						checkName = generateCheckOSSName(bean.getUrlSearchSeq(), bean.getDownloadLocation(), p);
 					} else {
 						redirectTargets.add(bean);
@@ -3062,12 +3054,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	    
 	    try {
 	        if (urlSearchSeq > -1) {
-//	            if (urlSearchSeq == 10) {
-//	                String[] nameParts = downloadlocationUrl.split("/");
-//	                if(nameParts.length >= 2) {
-//	                     bean.setDownloadLocation(checkOssNameUrl.get(2) + nameParts[nameParts.length-2]);
-//	                }
-//	            }
+	            if (urlSearchSeq == 10) {
+	                String[] nameParts = downloadlocationUrl.split("/");
+	                if(nameParts.length >= 2) {
+	                     bean.setDownloadLocation(checkOssNameUrl.get(2) + nameParts[nameParts.length-2]);
+	                }
+	            }
 	            
 	            if (!isTransformable) {
 	            	bean = downloadlocationFormatter(bean, urlSearchSeq);
@@ -5559,19 +5551,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						        errorFlag = true;
 							}
 							break;
-						case 23:
-							try {
-								if (splitDownloadLocation.length >= 5 && "source".equals(splitDownloadLocation[2])) {
-						            String packageName = splitDownloadLocation[4].replaceAll("_", "-");
-						            purl = new PackageURL(StandardTypes.PYPI, null, packageName, null, null, null);
-						        } else {
-						            errorFlag = true;
-						        }
-							} catch (Exception e) {
-						        log.error("PURL generation failed for pythonhosted: {}", e.getMessage());
-						        errorFlag = true;
-						    }
-							break;
 						default:
 							break;
 					}
@@ -5904,17 +5883,5 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag) {
 		ossMapper.updateAnalysisComments(componentId, prjId, comments, commentsFlag);
-	}
-
-	@Override
-	public OssAnalysis selectOssAnalysisOne(String componentId) {
-		return ossMapper.selectOssAnalysisOne(componentId);
-	}
-
-	@Override
-	public void updateOssAnalysis(String ossName, String ossVersion, String entPrjId, String ossId) {
-		// UPDATE ENT_ANALYSIS_JOB_DETAILS
-		List<String> prjIds = Arrays.asList(entPrjId.split(","));
-		ossMapper.updateEntAnalysisJobDetails(ossId, ossName, ossVersion, prjIds);
 	}
 }
