@@ -3430,16 +3430,22 @@
                     var editAppendedYn = $("#append").val();
                     var noticeAppendType = $("#noticeAppendType").val();
 
-                    if (editCompanyYn == "Y") {
+                    if ("Y" == editNoticeYn) {
                     	$("#companyName").trigger("click").attr("checked", true);
-                    }
-
-                    if (editDistributionSiteUrlYn == "Y") {
                     	$("#ossDistributionSite").trigger("click").attr("checked", true);
-                    }
-
-                    if (editEmailYn == "Y") {
                     	$("#email").trigger("click").attr("checked", true);
+                    } else {
+                    	if (editCompanyYn == "Y") {
+                        	$("#companyName").trigger("click").attr("checked", true);
+                        }
+
+                        if (editDistributionSiteUrlYn == "Y") {
+                        	$("#ossDistributionSite").trigger("click").attr("checked", true);
+                        }
+
+                        if (editEmailYn == "Y") {
+                        	$("#email").trigger("click").attr("checked", true);
+                        }
                     }
 
                     if ("Y" == hideOssVersionYn) {
@@ -3504,6 +3510,10 @@
 
                                 break;
                         }
+                    }
+                    
+                    if ("N" == editNoticeYn && [[${ossNotice?.companyNameFull}]] == null && [[${ossNotice?.distributionSiteUrl}]] == null && [[${ossNotice?.email}]] == null) {
+                    	fn.changeNotice(false);
                     }
                 }, 1);
             },
