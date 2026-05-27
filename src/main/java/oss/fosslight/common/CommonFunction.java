@@ -4738,8 +4738,12 @@ public class CommonFunction extends CoTopComponent {
 		}
 		
 		changeAnalysisResultList = changeAnalysisResultList.stream()
-						          .collect(Collectors.groupingBy(vo -> avoidNull(vo.getGroupId()) + "|" + avoidNull(vo.getTitle()) + "|" + avoidNull(vo.getOssName()) + "|" + avoidNull(vo.getOssVersion()), LinkedHashMap::new, Collectors.toList()))
-						          .values().stream().flatMap(List::stream).collect(Collectors.toList());
+			    					.collect(Collectors.toMap(
+			    						vo -> avoidNull(vo.getGroupId()) + "|" + avoidNull(vo.getTitle()) + "|" + avoidNull(vo.getOssName()) + "|" + avoidNull(vo.getOssVersion()),
+			    						vo -> vo,
+			    						(existing, replacement) -> existing,
+			    						LinkedHashMap::new
+			    					)).values().stream().collect(Collectors.toList());
 		
 		getAnalysisValidation(map, changeAnalysisResultList);
 		map.replace("rows", changeAnalysisResultList);
