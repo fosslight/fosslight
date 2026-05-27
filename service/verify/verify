@@ -73,5 +73,17 @@ chmod -R 777 $6/output/$2/verify_chk_list_$5
 chmod -R 777 $6/output/$2/verify_chk_list
 chmod -R 777 $6/output/$2/except_file_result_$5
 
+if [ -f "$7/bin/pip3" ]; then
+    $7/bin/pip3 show fosslight-binary > $6/output/$2/fl_binary_install 2>&1
+elif [ -f "$7/bin/pip" ]; then
+    $7/bin/pip show fosslight-binary > $6/output/$2/fl_binary_install 2>&1
+elif command -v pip3 > /dev/null 2>&1; then
+    pip3 show fosslight-binary > $6/output/$2/fl_binary_install 2>&1
+elif command -v pip > /dev/null 2>&1; then
+    pip show fosslight-binary > $6/output/$2/fl_binary_install 2>&1
+else
+    echo "pip not found" > $6/output/$2/fl_binary_install
+fi
+
 cd $7
 ./bin/fosslight_binary -s -p $6/decompression/$2 -o $6/output/$2/binary_$5
