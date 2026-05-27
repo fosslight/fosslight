@@ -445,6 +445,7 @@ public class VerificationController extends CoTopComponent {
 		
 		List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
 		String prjId = (String) map.get("prjId");
+		String flBinaryInstalled = "";
 		
 		try {
 			
@@ -471,7 +472,7 @@ public class VerificationController extends CoTopComponent {
 				String exceptFileContent = "";
 				String readmeFileName = "";
 				String verifyBinary = "";
-				
+
 				for (Map<String, Object> resultMap : result) {
 					if (isEmpty(verifyChkList) && resultMap.containsKey("verifyChkList")) {
 						verifyChkList = String.valueOf(resultMap.get("verifyChkList"));
@@ -484,6 +485,9 @@ public class VerificationController extends CoTopComponent {
 					}
 					if(isEmpty(verifyBinary) && resultMap.containsKey("verifyBinary")) {
 						verifyBinary = String.valueOf(resultMap.get("verifyBinary"));
+					}
+					if(isEmpty(flBinaryInstalled) && resultMap.containsKey("flBinaryInstalled")){
+						flBinaryInstalled = String.valueOf(resultMap.get("flBinaryInstalled"));
 					}
 				}
 				
@@ -506,6 +510,10 @@ public class VerificationController extends CoTopComponent {
 			
 			resMap = result.get(0);
 			
+			if (!isEmpty(flBinaryInstalled)) {
+				resMap.put("flBinaryInstalled", flBinaryInstalled);
+			}
+
 			Map<String, Object> fileCountsMap = new HashMap<>();
 			List<String> verifyValidChkList = new ArrayList<>();
 			

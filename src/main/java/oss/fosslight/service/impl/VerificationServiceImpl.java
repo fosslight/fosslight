@@ -740,7 +740,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			log.info("VERIFY END : " + prjId);
-			
+
+			boolean flBinaryInstalled = false;
+			String flBinaryInstallFilePath = VERIFY_PATH_OUTPUT + "/" + prjId + "/fl_binary_install";
+			String flBinaryInstallContent = CommonFunction.getStringFromFile(flBinaryInstallFilePath);
+			if (!isEmpty(flBinaryInstallContent) && flBinaryInstallContent.contains("Name: fosslight_binary")) {
+				flBinaryInstalled = true;
+				log.info("VERIFY fosslight_binary is installed.");
+			} else {
+				log.warn("VERIFY fosslight_binary is NOT installed. Please install it via 'pip install fosslight_binary'.");
+			}
+			resMap.put("flBinaryInstalled", flBinaryInstalled ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+
 			//STEP 2 : Verify 진행후 특정 위치의 파일리스트 출력
 			//STEP 3 : 결과 문자열 리스트값을 배열로 변환 		
 			String chk_list_file_path = null;
@@ -985,7 +996,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			secondDeCompResultMap.clear();
-			
+
 			if (!secondDeCompResultFileMap.isEmpty()) {
 				for (String path : secondDeCompResultFileMap.keySet()) {
 					if (!deCompResultFileMap.containsKey(path)) {

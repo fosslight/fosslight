@@ -3912,6 +3912,10 @@
                                 $("#btnBinaryFileYn").removeClass("btn-outline-primary");
                             }
 
+                            if (json.flBinaryInstalled === 'N') {
+                                alertify.alert([[#{msg.project.packaging.fosslight.binary.install}]]);
+                            }
+
                             $("#deleteFlag").val("N");
                             $("#verifyBtnSet").show();
                         } else {
