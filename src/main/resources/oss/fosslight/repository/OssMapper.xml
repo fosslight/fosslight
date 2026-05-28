@@ -882,84 +882,114 @@
         <include refid="limitPage"/>
 	</select>
 	
-	<select id="selectOssNameList" resultType="oss.fosslight.domain.OssMaster">
-	    /* selectOssNameList Auto complete */
-		SELECT OSS_NAME
-		FROM OSS_COMMON
-		WHERE USE_YN = 'Y'
-		UNION
-		SELECT T1.OSS_NICKNAME AS OSS_NAME
-		FROM OSS_NICKNAME T1
-		INNER JOIN OSS_COMMON T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
-		WHERE T2.USE_YN = 'Y'
+	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+				SELECT T1.OSS_NAME
+		        FROM (
+					SELECT OC.OSS_NAME
+					FROM OSS_COMMON OC
+		  			LEFT JOIN OSS_VERSION OV
+		  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		  			WHERE OV.USE_YN = 'Y'
+				) T1
+				GROUP BY T1.OSS_NAME
+				HAVING COUNT(T1.OSS_NAME) <![CDATA[>]]> 1
+			</when>
+			<otherwise>
+				SELECT TBL.OSS_NAME
+				FROM
+				(	
+					SELECT T2.OSS_NAME
+			    	FROM
+			    	(
+			    		SELECT DISTINCT PRODUCT
+						FROM NVD_DATA_V3
+			      		WHERE CVE_ID = #{cveId}
+			    	) T1
+			    	INNER JOIN
+			    	(
+			    		SELECT OC.OSS_NAME
+			  			FROM OSS_COMMON OC
+			  			LEFT JOIN OSS_VERSION OV
+			  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			  			WHERE OV.USE_YN = 'Y'
+			    	) T2
+			    	ON T1.PRODUCT = T2.OSS_NAME
+			    	
+			    	UNION ALL
+			    	
+			    	SELECT T2.OSS_NAME
+			    	FROM
+			    	(
+			    		SELECT DISTINCT REPLACE(PRODUCT, '_', ' ') AS SEARCH_NAME
+						FROM NVD_DATA_V3
+			      		WHERE CVE_ID = #{cveId}
+			    	) T1
+			    	INNER JOIN
+			    	(
+			    		SELECT OC.OSS_NAME
+			  			FROM OSS_COMMON OC
+			  			LEFT JOIN OSS_VERSION OV
+			  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			  			WHERE OV.USE_YN = 'Y'
+			    	) T2
+			    	ON T1.SEARCH_NAME = T2.OSS_NAME
+			    	
+			    	UNION ALL
+			    	
+			    	SELECT T2.OSS_NAME
+			    	FROM
+			    	(
+			    		SELECT DISTINCT REPLACE(PRODUCT, '_', ' ') AS SEARCH_NAME
+						FROM NVD_DATA_V3
+			      		WHERE CVE_ID = #{cveId}
+			    	) T1
+			    	INNER JOIN
+			    	(
+			    		SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+			  			FROM OSS_COMMON OC
+			  			LEFT JOIN OSS_NICKNAME NICK
+			  			ON OC.OSS_COMMON_ID = NICK.OSS_COMMON_ID
+			  			WHERE IFNULL(NICK.OSS_NICKNAME, '') <![CDATA[<>]]> ''
+			    	) T2
+			    	ON T1.SEARCH_NAME = T2.OSS_NICKNAME
+			    	
+			    	UNION ALL
+			    	
+			    	SELECT T2.OSS_NAME
+			    	FROM
+			    	(
+			    		SELECT DISTINCT VENDORPRODUCT
+						FROM NVD_DATA_V3
+			      		WHERE CVE_ID = #{cveId}
+			    	) T1
+			    	INNER JOIN
+			    	(
+			    		SELECT OC.OSS_NAME,
+			    				CASE WHEN OIC.CPE23URI LIKE 'cpe:2.3:%'
+								THEN 
+									CONCAT(
+										SUBSTRING_INDEX(SUBSTRING_INDEX(OIC.CPE23URI, ':', 4), ':', -1),
+											'-',
+										SUBSTRING_INDEX(SUBSTRING_INDEX(OIC.CPE23URI, ':', 5), ':', -1)
+									)
+								ELSE 
+									REPLACE(OIC.CPE23URI, ':', '-')
+								END CPE23URI
+			  			FROM OSS_COMMON OC
+			  			LEFT JOIN OSS_INCLUDE_CPE OIC
+			  			ON OC.OSS_COMMON_ID = OIC.OSS_COMMON_ID
+			  			WHERE IFNULL(OIC.CPE23URI, '') <![CDATA[<>]]> ''
+			    	) T2
+			    	ON T1.VENDORPRODUCT = T2.CPE23URI
+			   	) TBL
+			   	GROUP BY TBL.OSS_NAME
+			   	HAVING COUNT(TBL.OSS_NAME) <![CDATA[>]]> 1
+			</otherwise>
+		</choose>
 	</select>
 	
-	<select id="selectOssOne" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT
-			T1.OSS_COMMON_ID 
-			, T1.OSS_ID
-			, T1.OSS_NAME
-			, T1.OSS_VERSION
-			, T1.LICENSE_DIV
-			, T1.DOWNLOAD_LOCATION
-			, T1.HOMEPAGE
-			, T1.SUMMARY_DESCRIPTION
-			, T1.ATTRIBUTION
-			, T1.LICENSE_TYPE
-			, T1.OBLIGATION_TYPE
-			, T1.COPYRIGHT
-			, T2.OSS_COPYRIGHT	
-			, SUB1.OSS_TYPE
-			, T1.DEACTIVATE_FLAG
-			, T1.MODIFIER
-			, T1.MODIFIED_DATE
-			, T1.CVE_ID
-			, T1.CVSS_SCORE
-			, T1.RESTRICTION
-			, T1.IMPORTANT_NOTES
-			, T1.IN_CPE_MATCH_FLAG
-		FROM
-			(
-			SELECT
-    			OV.OSS_ID,
-    			OC.OSS_COMMON_ID,
-    			OC.OSS_NAME,
-    			OV.OSS_VERSION,
-    			OC.HOMEPAGE,
-				OC.DOWNLOAD_LOCATION,
-    			OC.SUMMARY_DESCRIPTION,
-    			OV.LICENSE_DIV,
-    			OV.USE_YN,
-    			OV.VULN_CPE_NM,
-    			OV.CVSS_SCORE,
-    			OV.CVE_ID,
-    			OV.VULN_YN,
-    			OV.VULN_RECHECK,
-    			OV.VULN_DATE,
-    			OV.LICENSE_TYPE,
-    			OV.OBLIGATION_TYPE,
-    			OV.COPYRIGHT,
-    			OV.ATTRIBUTION,
-				OC.DEACTIVATE_FLAG,
-				OV.CREATOR,
-				OV.CREATED_DATE,
-				OV.MODIFIER,
-				OV.MODIFIED_DATE,
-				OV.RESTRICTION,
-				OC.IMPORTANT_NOTES,
-				OV.IN_CPE_MATCH_FLAG
-  			FROM OSS_COMMON OC
-  			LEFT JOIN OSS_VERSION OV
-  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-		) T1
-			LEFT OUTER JOIN OSS_LICENSE_DECLARED		T2	ON T1.OSS_ID = T2.OSS_ID AND T2.OSS_LICENSE_IDX  = 1
-			INNER JOIN (
-			SELECT OSS_ID, 
-			CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1')) AS OSS_TYPE
-			FROM OSS_MASTER_LICENSE_FLAG) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
-		WHERE T1.USE_YN = 'Y'		
-		AND T1.OSS_ID = #{ossId}
-	</select>
 	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT TBL.OSS_COMMON_ID
 			, TBL.REF_OSS_ID 
@@ -1226,6 +1256,7 @@
 				SELECT 1
 				FROM NVD_DATA_V3
 				WHERE CVE_ID = #{cveId}
+				AND VERSION = CASE WHEN IFNULL(T1.OSS_VERSION, '') = '' THEN VERSION ELSE T1.OSS_VERSION END
 				AND (
 					PRODUCT = T1.OSS_NAME 
 					OR REPLACE(PRODUCT, '_', ' ') = T1.OSS_NAME
@@ -1270,6 +1301,86 @@
 		GROUP BY TBL.OSS_ID
 		<include refid="orderby"/>
 	</select>
+	
+	<select id="selectOssNameList" resultType="oss.fosslight.domain.OssMaster">
+	    /* selectOssNameList Auto complete */
+		SELECT OSS_NAME
+		FROM OSS_COMMON
+		WHERE USE_YN = 'Y'
+		UNION
+		SELECT T1.OSS_NICKNAME AS OSS_NAME
+		FROM OSS_NICKNAME T1
+		INNER JOIN OSS_COMMON T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
+		WHERE T2.USE_YN = 'Y'
+	</select>
+	
+	<select id="selectOssOne" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT
+			T1.OSS_COMMON_ID 
+			, T1.OSS_ID
+			, T1.OSS_NAME
+			, T1.OSS_VERSION
+			, T1.LICENSE_DIV
+			, T1.DOWNLOAD_LOCATION
+			, T1.HOMEPAGE
+			, T1.SUMMARY_DESCRIPTION
+			, T1.ATTRIBUTION
+			, T1.LICENSE_TYPE
+			, T1.OBLIGATION_TYPE
+			, T1.COPYRIGHT
+			, T2.OSS_COPYRIGHT	
+			, SUB1.OSS_TYPE
+			, T1.DEACTIVATE_FLAG
+			, T1.MODIFIER
+			, T1.MODIFIED_DATE
+			, T1.CVE_ID
+			, T1.CVSS_SCORE
+			, T1.RESTRICTION
+			, T1.IMPORTANT_NOTES
+			, T1.IN_CPE_MATCH_FLAG
+		FROM
+			(
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OC.IMPORTANT_NOTES,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
+			LEFT OUTER JOIN OSS_LICENSE_DECLARED		T2	ON T1.OSS_ID = T2.OSS_ID AND T2.OSS_LICENSE_IDX  = 1
+			INNER JOIN (
+			SELECT OSS_ID, 
+			CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1')) AS OSS_TYPE
+			FROM OSS_MASTER_LICENSE_FLAG) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
+		WHERE T1.USE_YN = 'Y'		
+		AND T1.OSS_ID = #{ossId}
+	</select>
+	
 	<select id="selectOssLicenseList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssLicense">
 		SELECT
 			T1.OSS_ID
@@ -4202,114 +4313,6 @@
 		ON NVD.CVE_ID = CVE.CVE_ID
 		ORDER BY CVE.CVSS_SCORE DESC, CVE.MODI_DATE DESC
 		LIMIT 20
-	</select>
-	
-	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@isEmpty(cveId)">
-				SELECT T1.OSS_NAME
-		        FROM (
-					SELECT OC.OSS_NAME
-					FROM OSS_COMMON OC
-		  			LEFT JOIN OSS_VERSION OV
-		  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-		  			WHERE OV.USE_YN = 'Y'
-				) T1
-				GROUP BY T1.OSS_NAME
-				HAVING COUNT(T1.OSS_NAME) <![CDATA[>]]> 1
-			</when>
-			<otherwise>
-				SELECT TBL.OSS_NAME
-				FROM
-				(	
-					SELECT T2.OSS_NAME
-			    	FROM
-			    	(
-			    		SELECT DISTINCT PRODUCT
-						FROM NVD_DATA_V3
-			      		WHERE CVE_ID = #{cveId}
-			    	) T1
-			    	INNER JOIN
-			    	(
-			    		SELECT OC.OSS_NAME
-			  			FROM OSS_COMMON OC
-			  			LEFT JOIN OSS_VERSION OV
-			  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-			  			WHERE OV.USE_YN = 'Y'
-			    	) T2
-			    	ON T1.PRODUCT = T2.OSS_NAME
-			    	
-			    	UNION ALL
-			    	
-			    	SELECT T2.OSS_NAME
-			    	FROM
-			    	(
-			    		SELECT DISTINCT REPLACE(PRODUCT, '_', ' ') AS SEARCH_NAME
-						FROM NVD_DATA_V3
-			      		WHERE CVE_ID = #{cveId}
-			    	) T1
-			    	INNER JOIN
-			    	(
-			    		SELECT OC.OSS_NAME
-			  			FROM OSS_COMMON OC
-			  			LEFT JOIN OSS_VERSION OV
-			  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-			  			WHERE OV.USE_YN = 'Y'
-			    	) T2
-			    	ON T1.SEARCH_NAME = T2.OSS_NAME
-			    	
-			    	UNION ALL
-			    	
-			    	SELECT T2.OSS_NAME
-			    	FROM
-			    	(
-			    		SELECT DISTINCT REPLACE(PRODUCT, '_', ' ') AS SEARCH_NAME
-						FROM NVD_DATA_V3
-			      		WHERE CVE_ID = #{cveId}
-			    	) T1
-			    	INNER JOIN
-			    	(
-			    		SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
-			  			FROM OSS_COMMON OC
-			  			LEFT JOIN OSS_NICKNAME NICK
-			  			ON OC.OSS_COMMON_ID = NICK.OSS_COMMON_ID
-			  			WHERE IFNULL(NICK.OSS_NICKNAME, '') <![CDATA[<>]]> ''
-			    	) T2
-			    	ON T1.SEARCH_NAME = T2.OSS_NICKNAME
-			    	
-			    	UNION ALL
-			    	
-			    	SELECT T2.OSS_NAME
-			    	FROM
-			    	(
-			    		SELECT DISTINCT VENDORPRODUCT
-						FROM NVD_DATA_V3
-			      		WHERE CVE_ID = #{cveId}
-			    	) T1
-			    	INNER JOIN
-			    	(
-			    		SELECT OC.OSS_NAME,
-			    				CASE WHEN OIC.CPE23URI LIKE 'cpe:2.3:%'
-								THEN 
-									CONCAT(
-										SUBSTRING_INDEX(SUBSTRING_INDEX(OIC.CPE23URI, ':', 4), ':', -1),
-											'-',
-										SUBSTRING_INDEX(SUBSTRING_INDEX(OIC.CPE23URI, ':', 5), ':', -1)
-									)
-								ELSE 
-									REPLACE(OIC.CPE23URI, ':', '-')
-								END CPE23URI
-			  			FROM OSS_COMMON OC
-			  			LEFT JOIN OSS_INCLUDE_CPE OIC
-			  			ON OC.OSS_COMMON_ID = OIC.OSS_COMMON_ID
-			  			WHERE IFNULL(OIC.CPE23URI, '') <![CDATA[<>]]> ''
-			    	) T2
-			    	ON T1.VENDORPRODUCT = T2.CPE23URI
-			   	) TBL
-			   	GROUP BY TBL.OSS_NAME
-			   	HAVING COUNT(TBL.OSS_NAME) <![CDATA[>]]> 1
-			</otherwise>
-		</choose>
 	</select>
 	
 	<select id="getDeactivateOssList" resultType="string">
