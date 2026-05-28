@@ -1788,15 +1788,17 @@
 			var value = $(cur).val().trim();
 			$(cur).val(value);
 			if (value.match(pattern)) {
-				$(cur).parent().next("span.urltxt").empty();
-				$(cur).parent().next("span.urltxt").css("display", "none");
-				$(cur).parent().next().next("span.retxt").empty();
-				$(cur).parent().next().next("span.retxt").html("Remove spaces").show();
+				var $purlArea = $(cur).closest('.row').find('.purlArea');
+				$purlArea.find("span.urltxt").empty().css("display", "none");
+		        $purlArea.find("span.retxt").html("Remove spaces").css("display", "block");
+		        
 				patternFlag = true;
 				patternCheckFlag = true;
 			}
 		});
-		if (patternFlag) alertify.error("DownloadLocation remove spaces", 0);
+		if (patternFlag) {
+			alertify.error("DownloadLocation remove spaces", 0);
+		}
 		patternFlag = false;
 		$("[name='homepage']").each(function(idx, cur){
 			var value = $(cur).val().trim();
@@ -1810,8 +1812,12 @@
 				patternCheckFlag = true;
 			}
 		});
-		if (patternFlag) alertify.error("Homepage remove spaces", 0);
-		if (patternCheckFlag) return false;
+		if (patternFlag) {
+			alertify.error("Homepage remove spaces", 0);
+		}
+		if (patternCheckFlag) {
+			return false;
+		}
 		
 		var nicknameFormatErrorFlag = true;
 		$("[name='ossNicknames']").each(function(idx, cur){
@@ -2958,7 +2964,7 @@
 				$(target).parent().parent().next().find("span.urltxt").empty();
 				$(target).parent().parent().next().find("span.urltxt").css("display", "none");
 				$(target).parent().parent().next().find("span.retxt").empty();
-				$(target).parent().parent().next().find("span.retxt").html("Remove spaces").show();
+//				$(target).parent().parent().next().find("span.retxt").html("Remove spaces").show();
 			} else {
 				$(target).parent().parent().next().find("span.retxt").empty();
 				$(target).parent().parent().next().find("span.retxt").css("display", "none");
@@ -3014,7 +3020,7 @@
 					$(cur).parent().next("span.urltxt").empty();
 					$(cur).parent().next("span.urltxt").css("display", "none");
 					$(cur).parent().next().next("span.retxt").empty();
-					$(cur).parent().next().next("span.retxt").html("Remove spaces");
+//					$(cur).parent().next().next("span.retxt").html("Remove spaces");
 				}
 			});
 			
