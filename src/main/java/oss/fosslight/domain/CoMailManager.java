@@ -2210,7 +2210,9 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getCopyright(), after.getCopyright(), isModified);
 			String[] beforeUrl = null;
 			String[] beforePurl = null;
-			if (!isEmpty(before.getDownloadLocation())) {
+			if (before.getDownloadLocations() != null && !isEmpty(before.getPurl())) {
+				before.setPurls(before.getPurl().split(","));
+			} else if (!isEmpty(before.getDownloadLocation())) {
 				beforeUrl = before.getDownloadLocation().split(",");
 				if (!isEmpty(before.getPurl())) {
 					beforePurl = before.getPurl().split(",");
@@ -2229,7 +2231,9 @@ public class CoMailManager extends CoTopComponent {
 			}
 			String[] afterUrl = null;
 			String[] afterPurl = null;
-			if (!isEmpty(after.getDownloadLocation())) {
+			if (after.getDownloadLocations() != null && !isEmpty(after.getPurl())) {
+				after.setPurls(after.getPurl().split(","));
+			} else if (!isEmpty(after.getDownloadLocation())) {
 				afterUrl = after.getDownloadLocation().split(",");
 				if (!isEmpty(after.getPurl())) {
 					afterPurl = after.getPurl().split(",");
@@ -4010,7 +4014,23 @@ public class CoMailManager extends CoTopComponent {
 				license.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull(getValue(dataMap, "LICENSE_TYPE"))));
 				bean.addOssLicense(license);
 			}
-			
+			if (dataMap.containsKey("RESTRICTION")) {
+				String restriction = avoidNull(getValue(dataMap, "RESTRICTION"));
+				if (!isEmpty(restriction)) {
+					String restrictionStr = "";
+					List<String> restrictionList = Arrays.asList(restriction.split(","));
+					for (String resNo : restrictionList) {
+						String resStr = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, resNo.trim().toUpperCase());
+						if (!isEmpty(resStr)) {
+							restrictionStr += resStr + ","; 
+						}
+					}
+					if (!isEmpty(restrictionStr)) {
+						restrictionStr = restrictionStr.substring(0, restrictionStr.length()-1);
+						bean.setRestriction(restrictionStr.replaceAll(",", "<br>"));
+					}
+				}
+			}
 			isFirst = false;
 		}
 		if (bean != null && bean.getOssLicenses() != null && !bean.getOssLicenses().isEmpty()) {
