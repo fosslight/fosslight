@@ -1527,6 +1527,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					
 					if (endsWithSlash && checkUrlConnection(downloadLocationUrl)) {
 						downloadLocationUrl = downloadLocationUrl.substring(0, downloadLocationUrl.length()-1);
+						endsWithSlash = false;
 					}
 					
 					master.setOssCommonId(ossMaster.getOssCommonId());
@@ -4466,7 +4467,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				sb.append(downloadLocation.split("[|]")[0]).append(",");
 				sb1.append(downloadLocation.split("[|]")[1]).append(",");
 			} else {
-				sb.append(downloadLocation);
+				sb.append(downloadLocation).append(",");
 			}
 		}
 		String[] ossDownloadLocations = new String(sb).split("[,]");
@@ -5679,22 +5680,37 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	private String mavenUrlFormatter(String downloadLocation) {
         String path = downloadLocation.split("maven2/")[1];
+        path = path.replaceAll("/+$", "");
+        
         String[] parts = path.split("/");
         
-        int artifactIndex = parts.length - 3;
+        String artifactId;
+        int artifactIndex;
+        
+        if (parts.length >= 2 && isVersion(parts[parts.length - 1])) {
+            artifactIndex = parts.length - 2;
+        } else if (parts.length >= 3 && isVersion(parts[parts.length - 2])) {
+            artifactIndex = parts.length - 3;
+        } else {
+            artifactIndex = parts.length - 1;
+        }
+        
+        artifactId = parts[artifactIndex];
         
         StringBuilder groupIdBuilder = new StringBuilder();
         for (int i = 0; i < artifactIndex; i++) {
             if (i > 0) {
-            	groupIdBuilder.append(".");
+                groupIdBuilder.append(".");
             }
             groupIdBuilder.append(parts[i]);
         }
         
         String groupId = groupIdBuilder.toString();
-        String artifactId = parts[artifactIndex];
-        
         return "mvnrepository.com/artifact/" + groupId + "/" + artifactId;
+	}
+
+	private boolean isVersion(String value) {
+		return value.matches("^[0-9].*");
 	}
 
 	private Pattern generatePatternPurl(int urlSearchSeq, String downloadlocationUrl) {
