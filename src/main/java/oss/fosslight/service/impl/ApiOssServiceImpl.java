@@ -94,8 +94,8 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
     @Override
     public ListOssDto.Result listOss(ListOssDto.Request request) {
         var ossMaster = request.toOssMaster();
-
-        request.setVersionCheck(true);
+        boolean hasCveId = request.getCveId() != null && !request.getCveId().isEmpty();
+        request.setVersionCheck(!hasCveId);
         var list = apiOssMapper.selectOssList(request);
 
         List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
