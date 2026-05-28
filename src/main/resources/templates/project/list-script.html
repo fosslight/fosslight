@@ -669,11 +669,12 @@ var fn = {
 	},
 	displayComment : function(cellvalue, options, rowObject){
 		var display = "";
-		
-		if(cellvalue !="") {
+
+        if (cellvalue != null && cellvalue !== "") {
+			var commentText = String(cellvalue);
 			var tmpStr = new RegExp();
 			tmpStr = /[<][^>]*[>]/gi;
-			display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
+			display ="<div style=\"height : 29px; overflow: hidden;\">"+commentText.replace(tmpStr , "")+"</div>";
 		}
 		
 		return display;
