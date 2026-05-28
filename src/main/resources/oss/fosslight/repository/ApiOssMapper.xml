@@ -629,6 +629,9 @@
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
 			]]>
         </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+            AND T1.CVE_ID LIKE CONCAT('%', #{cveId}, '%')
+        </if>
         <if test="versionCheck">
             GROUP BY T1.OSS_NAME
         </if>

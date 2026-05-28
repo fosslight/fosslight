@@ -47,6 +47,8 @@ public class ListOssDto {
         private String modifiedTo;
 
 
+        private String cveId;
+
         @Builder.Default
         @Setter(AccessLevel.NONE)
         private Boolean searchFlag = true;
