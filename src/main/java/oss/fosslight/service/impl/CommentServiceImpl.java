@@ -130,7 +130,8 @@ public class CommentServiceImpl implements CommentService {
 				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_SECURITY_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_LICENSE.equals(bean.getReferenceDiv())
-				|| CoConstDef.CD_DTL_COMMENT_OSS.equals(bean.getReferenceDiv()))) {
+				|| CoConstDef.CD_DTL_COMMENT_OSS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS.equals(bean.getReferenceDiv()))) {
 			boolean isDel = true;
 			switch (bean.getReferenceDiv()) {
 				case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
@@ -163,6 +164,10 @@ public class CommentServiceImpl implements CommentService {
 					break;
 				case CoConstDef.CD_DTL_COMMENT_OSS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS_USER);
+					
+					break;
+				case CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER);
 					
 					break;
 				default: isDel = false;
