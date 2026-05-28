@@ -106,6 +106,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
             @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
+            @ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
+            @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
             @ApiParam(value = "Count Per Page (max: 1000)", required = false)
             @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
             @ApiParam(value = "Page", required = false)
@@ -133,6 +135,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("prjNameExactYn", prjNameExactYn);
             paramMap.put("countPerPage", countPerPage);
             paramMap.put("offset", (page - 1) * countPerPage);
+            if (!isEmpty(ossName)) {
+                paramMap.put("ossName", ossName);
+            }
+            if (!isEmpty(ossVersion)) {
+                paramMap.put("ossVersion", ossVersion);
+            }
 
             try {
                 resultMap = apiProjectService.selectProjectList(paramMap);
