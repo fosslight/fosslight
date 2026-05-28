@@ -64,6 +64,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
             @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
             @ApiParam(value = "Download Location Exact Flag (values: Y or N)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
+            @ApiParam(value = "CVE ID", required = false) @RequestParam(required = false) String cveId,
             @ApiParam(value = "Count Per Page (max: 10000)", required = false)
             @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="10000") int countPerPage,
             @ApiParam(value = "Page", required = false)
@@ -77,6 +78,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                             .ossVersion(ossVersion)
                             .ossNameExact(Objects.equals(ossNameExact, "Y"))
                             .urlExact(Objects.equals(downloadLocationExact, "Y"))
+                            .cveId(cveId)
                             .build();
             ossQuery.setPage(page);
             ossQuery.setCountPerPage(countPerPage);

@@ -100,9 +100,6 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
 
         List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
         multiOssList.replaceAll(String::toUpperCase);
-        var wrapperCount = new Object() {
-            int totalCount = ossMapper.selectOssMasterTotalCount(ossMaster);;
-        };
 
         var rows = list.stream().flatMap(oss -> {
             if (!multiOssList.contains(oss.getOssName().toUpperCase())) {
@@ -114,7 +111,6 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
                     .build()
                     .toOssMaster();
             var sublist = apiOssMapper.selectOssSubList(query);
-            wrapperCount.totalCount += sublist.size() - 1;
             return sublist.stream().sorted(Comparator.comparing(OssDto::getOssId).reversed());
         }).collect(Collectors.toList());
 
@@ -138,7 +134,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
 
         return ListOssDto.Result.builder()
                 .list(rows)
-                .totalCount(wrapperCount.totalCount)
+                .totalCount(rows.size())
                 .build();
     }
 
