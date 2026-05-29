@@ -565,14 +565,21 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 			throw new CUserAuthFailedException("Token not found");
 		}
 		
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate dbDate = LocalDate.parse(params.getExpireDate(), formatter);
-        LocalDate today = LocalDate.now();
-        long diff = ChronoUnit.DAYS.between(dbDate, today);
-        if (diff > 0) {
-        	throw new CUserAuthFailedException("Token expired");
-        }
-        
+		if (!StringUtil.isEmpty(params.getExpireDate())) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			LocalDate dbDate;
+			try {
+				dbDate = LocalDate.parse(params.getExpireDate(), formatter);
+			} catch (Exception e) {
+				throw new CUserAuthFailedException("Token expire date is invalid");
+			}
+			LocalDate today = LocalDate.now();
+			long diff = ChronoUnit.DAYS.between(dbDate, today);
+			if (diff > 0) {
+				throw new CUserAuthFailedException("Token expired");
+			}
+		}
+
 		// Token 인증
 		if (checkToken(params, _token)) { // 추출된 USER 정보로 동일한 token이 생성이 되는지 확인.
             return getUserAndAuthorities(params);

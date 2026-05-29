@@ -98,7 +98,9 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
         request.setVersionCheck(!hasCveId);
         var list = apiOssMapper.selectOssList(request);
 
-        List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
+        List<String> multiOssList = hasCveId
+                ? new java.util.ArrayList<>()
+                : ossMapper.selectMultiOssList(ossMaster);
         multiOssList.replaceAll(String::toUpperCase);
 
         var rows = list.stream().flatMap(oss -> {

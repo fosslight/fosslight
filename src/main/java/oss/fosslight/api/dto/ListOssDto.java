@@ -135,6 +135,7 @@ public class ListOssDto {
             ossMaster.setmEndDate(modifiedTo);
             ossMaster.setCreator(creator);
             ossMaster.setModifier(modifier);
+            ossMaster.setCveId(cveId);
 
             return ossMaster;
         }
