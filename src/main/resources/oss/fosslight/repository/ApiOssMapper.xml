@@ -630,37 +630,42 @@
 			]]>
         </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
-            AND (
-                T1.CVE_ID LIKE CONCAT('%', #{cveId}, '%')
-                OR T1.OSS_NAME IN (
-                    SELECT PRODUCT FROM NVD_DATA_V3 WHERE CVE_ID = #{cveId}
-                    UNION
-                    SELECT REPLACE(PRODUCT, '_', ' ') FROM NVD_DATA_V3 WHERE CVE_ID = #{cveId}
-                )
-                OR EXISTS (
-                    SELECT 1 FROM OSS_NICKNAME NICK
-                    INNER JOIN NVD_DATA_V3 NVD ON NICK.OSS_NICKNAME = REPLACE(NVD.PRODUCT, '_', ' ')
-                    WHERE NVD.CVE_ID = #{cveId}
-                    AND NICK.OSS_COMMON_ID = T1.OSS_COMMON_ID
-                )
-                OR EXISTS (
-                    SELECT 1 FROM (
-                        SELECT DISTINCT VENDORPRODUCT FROM NVD_DATA_V3 WHERE CVE_ID = #{cveId}
-                    ) NVD_VP
-                    INNER JOIN (
-                        SELECT OSS_COMMON_ID,
-                               CASE WHEN CPE23URI LIKE 'cpe:2.3:%' THEN
-                                         CONCAT(SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 4), ':', -1), '-', SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -1))
-                                    ELSE REPLACE(CPE23URI, ':', '-') END AS PARSED_VENDORPRODUCT
-                        FROM OSS_INCLUDE_CPE WHERE CPE23URI IS NOT NULL
-                    ) CPE_MATCH ON CPE_MATCH.PARSED_VENDORPRODUCT = NVD_VP.VENDORPRODUCT
-                    WHERE CPE_MATCH.OSS_COMMON_ID = T1.OSS_COMMON_ID
+            AND EXISTS (
+                SELECT 1
+                FROM NVD_DATA_V3 NVD
+                WHERE NVD.CVE_ID = #{cveId}
+                AND NVD.VERSION = CASE WHEN IFNULL(T1.OSS_VERSION, '') = '' THEN NVD.VERSION ELSE T1.OSS_VERSION END
+                AND (
+                    NVD.PRODUCT = T1.OSS_NAME
+                    OR REPLACE(NVD.PRODUCT, '_', ' ') = T1.OSS_NAME
+                    OR EXISTS (
+                        SELECT 1 FROM OSS_NICKNAME NICK
+                        WHERE NICK.OSS_COMMON_ID = T1.OSS_COMMON_ID
+                        AND NICK.OSS_NICKNAME = REPLACE(NVD.PRODUCT, '_', ' ')
+                    )
+                    OR EXISTS (
+                        SELECT 1 FROM OSS_INCLUDE_CPE OIC
+                        WHERE OIC.OSS_COMMON_ID = T1.OSS_COMMON_ID
+                        AND OIC.CPE23URI IS NOT NULL
+                        AND NVD.VENDORPRODUCT = CASE
+                            WHEN OIC.CPE23URI LIKE 'cpe:2.3:%' THEN
+                                CONCAT(SUBSTRING_INDEX(SUBSTRING_INDEX(OIC.CPE23URI, ':', 4), ':', -1),
+                                       '-',
+                                       SUBSTRING_INDEX(SUBSTRING_INDEX(OIC.CPE23URI, ':', 5), ':', -1))
+                            ELSE REPLACE(OIC.CPE23URI, ':', '-')
+                        END
+                    )
                 )
             )
         </if>
-        <if test="versionCheck">
-            GROUP BY T1.OSS_NAME
-        </if>
+        <choose>
+            <when test="versionCheck">
+                GROUP BY T1.OSS_NAME
+            </when>
+            <otherwise>
+                GROUP BY T1.OSS_ID
+            </otherwise>
+        </choose>
         <include refid="orderby"/>
         <include refid="limitPage"/>
     </select>

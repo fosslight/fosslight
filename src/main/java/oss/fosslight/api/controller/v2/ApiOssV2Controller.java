@@ -71,6 +71,9 @@ public class ApiOssV2Controller extends CoTopComponent {
             @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page
     ) {
         try {
+            // 사용자 인증
+            userService.checkApiUserAuth(authorization);
+
             ListOssDto.Request ossQuery =
                     ListOssDto.Request.builder()
                             .ossName(ossName)
@@ -78,7 +81,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                             .ossVersion(ossVersion)
                             .ossNameExact(Objects.equals(ossNameExact, "Y"))
                             .urlExact(Objects.equals(downloadLocationExact, "Y"))
-                            .cveId(cveId)
+                            .cveId(cveId != null ? cveId.trim() : null)
                             .build();
             ossQuery.setPage(page);
             ossQuery.setCountPerPage(countPerPage);
