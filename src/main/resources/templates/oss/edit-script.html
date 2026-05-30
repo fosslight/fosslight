@@ -1799,6 +1799,10 @@
 		if (patternFlag) {
 			alertify.error("DownloadLocation remove spaces", 0);
 		}
+		if (patternCheckFlag) {
+			return false;
+		}
+		
 		patternFlag = false;
 		$("[name='homepage']").each(function(idx, cur){
 			var value = $(cur).val().trim();
