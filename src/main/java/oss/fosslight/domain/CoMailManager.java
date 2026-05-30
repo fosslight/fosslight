@@ -2210,7 +2210,13 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getCopyright(), after.getCopyright(), isModified);
 			String[] beforeUrl = null;
 			String[] beforePurl = null;
+			List<String> downloadLocationList = new ArrayList<>();
 			if (before.getDownloadLocations() != null && !isEmpty(before.getPurl())) {
+				beforeUrl = before.getDownloadLocations();
+				for (String downloadLocation : before.getDownloadLocations()) {
+					downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
+				}
+				before.setDownloadLocations(downloadLocationList.toArray(new String[0]));
 				before.setPurls(before.getPurl().split(","));
 			} else if (!isEmpty(before.getDownloadLocation())) {
 				beforeUrl = before.getDownloadLocation().split(",");
@@ -2219,11 +2225,10 @@ public class CoMailManager extends CoTopComponent {
 				} else {
 					beforePurl = new String[0];
 				}
-				List<String> downloadLocationList = new ArrayList<>();
 				for (String downloadLocation : beforeUrl) {
 					downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
 				}
-				before.setDownloadLocations(downloadLocationList.toArray(new String[downloadLocationList.size()]));
+				before.setDownloadLocations(downloadLocationList.toArray(new String[0]));
 				before.setPurls(beforePurl);
 			} else {
 				beforeUrl = new String[0];
@@ -2232,6 +2237,7 @@ public class CoMailManager extends CoTopComponent {
 			String[] afterUrl = null;
 			String[] afterPurl = null;
 			if (after.getDownloadLocations() != null && !isEmpty(after.getPurl())) {
+				afterUrl = after.getDownloadLocations();
 				after.setPurls(after.getPurl().split(","));
 			} else if (!isEmpty(after.getDownloadLocation())) {
 				afterUrl = after.getDownloadLocation().split(",");
