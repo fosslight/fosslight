@@ -1782,8 +1782,8 @@
 		$('input[name=ossLicensesJson]').val(JSON.stringify(newRows));
 		
 		var pattern = /\s/g;
-		var patternFlag = false;
 		var patternCheckFlag = false;
+		
 		$("[name='downloadLocations']").each(function(idx, cur){
 			var value = $(cur).val().trim();
 			$(cur).val(value);
@@ -1792,18 +1792,15 @@
 				$purlArea.find("span.urltxt").empty().css("display", "none");
 		        $purlArea.find("span.retxt").html("Remove spaces").css("display", "block");
 		        
-				patternFlag = true;
 				patternCheckFlag = true;
+				return false;
 			}
 		});
-		if (patternFlag) {
-			alertify.error("DownloadLocation remove spaces", 0);
-		}
 		if (patternCheckFlag) {
+			alertify.error("DownloadLocation remove spaces", 0);
 			return false;
 		}
 		
-		patternFlag = false;
 		$("[name='homepage']").each(function(idx, cur){
 			var value = $(cur).val().trim();
 			$(cur).val(value);
@@ -1812,14 +1809,13 @@
 				$(cur).next("span.urltxt").css("display", "none");
 				$(cur).next().next("span.retxt").empty();
 				$(cur).next().next("span.retxt").html("Remove spaces").show();
-				patternFlag = true;
+				
 				patternCheckFlag = true;
+				return false;
 			}
 		});
-		if (patternFlag) {
-			alertify.error("Homepage remove spaces", 0);
-		}
 		if (patternCheckFlag) {
+			alertify.error("Homepage remove spaces", 0);
 			return false;
 		}
 		
@@ -1827,15 +1823,15 @@
 		$("[name='ossNicknames']").each(function(idx, cur){
 			var nickname = $(cur).val();
 			
-			if(nickname.indexOf(",") > -1){
+			if (nickname.indexOf(",") > -1) {
 				fn.checkNickName(cur);
 				nicknameFormatErrorFlag = false;
+				return false;
 			}
 		});
 
-		if(!nicknameFormatErrorFlag){
+		if (!nicknameFormatErrorFlag) {
 			alertify.alert("Format error", function(){});
-			
 			return false;
 		}
 
@@ -1891,8 +1887,9 @@
 	
 	//OSS등록로직
 	function registSubmit(){
-		if(validationDataSet()){
-			fn.checkAddData();
+		fn.checkAddData();
+		
+		if (validationDataSet()) {
 			$("input[name=ossName]").prop("disabled", false);
 			
 			$("#ossForm").ajaxForm({
