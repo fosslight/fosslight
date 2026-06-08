@@ -551,7 +551,34 @@ var sec_com_fn = {
 	displayLineBreakData : function(cellvalue, options, rowObject){
 		var display = "";
 		if (typeof cellvalue !== "undefined" && cellvalue != null && "" != cellvalue) {
-			var groups = cellvalue.split("#");
+			var cpeName = cellvalue;
+			if (cpeName.endsWith("|")) {
+				cpeName = cpeName.slice(0, -1);
+            }
+			
+			if (cpeName.indexOf("|") > -1) {
+                var items = cpeName.split("|");
+                for (var i = 0; i < items.length; i++) {
+                	display += items[i];
+                    if (i < items.length - 1) {
+                    	display += "<br/>";
+                    }
+                }
+            } else {
+            	display += cpeName;
+            }
+		}
+		return display;
+	},
+	displayLineBreakDataRange : function(cellvalue, options, rowObject){
+		var display = "";
+		if (typeof cellvalue !== "undefined" && cellvalue != null && "" != cellvalue) {
+			var cleanValue = cellvalue.replace(/^#|#$/g, ''); 
+	        if ("" === cleanValue) {
+	        	return "";
+	        }
+			
+			var groups = cleanValue.split("#");
 			var length = groups.length;
 			
 			for (var g = 0; g < length; g++) {
@@ -1224,10 +1251,10 @@ var total = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakData, template: searchStringOptions, editable:false,
+		colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakDataRange, template: searchStringOptions, editable:false,
 						cellattr: function (rowId, tv, rawObject, cm, rdata) {
 							if (typeof rawObject.verStartEndRange !== "undefined") {
-								return ' title="' + rawObject.verStartEndRange.replaceAll('|', '&#10;') + '"';
+								return ' title="' + rawObject.verStartEndRange.replaceAll('#', '').replaceAll('|', '&#10;') + '"';
 							}
 						}
 		};
@@ -1524,10 +1551,10 @@ var fullDiscovered = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false};
 			colModelArr.push(colModelObj);
-			colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakData, template: searchStringOptions, editable:false,
+			colModelObj = {name: 'verStartEndRange', index: 'verStartEndRange', width: 120, align: 'left', formatter: sec_com_fn.displayLineBreakDataRange, template: searchStringOptions, editable:false,
 							cellattr: function (rowId, tv, rawObject, cm, rdata) {
 								if (typeof rawObject.verStartEndRange !== "undefined") {
-									return ' title="' + rawObject.verStartEndRange.replaceAll('|', '&#10;') + '"';
+									return ' title="' + rawObject.verStartEndRange.replaceAll('#', '').replaceAll('|', '&#10;') + '"';
 								}
 							}		
 			};
