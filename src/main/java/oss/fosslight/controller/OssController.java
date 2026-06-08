@@ -1890,8 +1890,9 @@ public class OssController extends CoTopComponent{
 					if (!isEmpty(oa.getDownloadLocation())) {
 						List<String> downloadLocationList = Arrays.asList(oa.getDownloadLocation().split(","));
 						if (ossBean.getDownloadLocations() != null) {
+							Set<String> uniqueLocations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 							List<String> downloadLocations = Arrays.asList(ossBean.getDownloadLocations());
-							String mergeDownloadLocation = Stream.concat(downloadLocationList.stream(), downloadLocations.stream()).map(String::trim).filter(s -> !isEmpty(s)).distinct().collect(Collectors.joining(","));
+							String mergeDownloadLocation = Stream.concat(downloadLocationList.stream(), downloadLocations.stream()).map(String::trim).filter(s -> !isEmpty(s)).filter(uniqueLocations::add).collect(Collectors.joining(","));
 							oa.setDownloadLocation(mergeDownloadLocation);
 						}
 					}
