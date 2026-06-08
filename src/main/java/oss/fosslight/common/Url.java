@@ -269,6 +269,7 @@ public final class Url {
 		public static final String SHARE_URL = PATH + "/shareUrl/{ossId}";
 		
 		public static final String FETCH_OSS_DETAIL = PATH + "/fetchOssDetail";
+		public static final String CHECK_OSS_ANALYSIS_STATUS = PATH + "/checkOssAnalysisStatus";
 	}
 	
 	public static final class PROJECT {

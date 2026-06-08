@@ -2454,4 +2454,19 @@ public class OssController extends CoTopComponent{
 		}
 		return makeJsonResponseHeader(resMap);
 	}
+	
+	@PostMapping(value = OSS.CHECK_OSS_ANALYSIS_STATUS)
+	public @ResponseBody ResponseEntity<Object> checkOssAnalysisStatus(@RequestBody Map<String, Object> map, HttpServletResponse response) {
+		String prjId = String.valueOf(map.getOrDefault("prjId", ""));
+		if (isEmpty(prjId)) {
+			return makeJsonResponseHeader(true, null);
+		}
+		
+		String status = ossService.getOssAnalysisStatus(prjId);
+		if (!isEmpty(status) && status.equalsIgnoreCase("CONFIRM")) {
+			return makeJsonResponseHeader(true, null);
+		}
+		
+		return makeJsonResponseHeader(false, null);
+	}
 }
