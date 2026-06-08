@@ -831,6 +831,12 @@ div.jqcloud span.w1 { color: #feb24c; }
 	text-overflow : ellipsis;
 }
 
+.ui-jqgrid tr.jqgrow td hr {
+	border: 0;
+    border-top: 1px solid #ccc;
+    margin: 6px 0;
+}
+
 .ui-jqgrid tr.jqgrow td .btnCLight {
     background-color: #999;
     color: #fff;
@@ -1188,7 +1194,7 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .pr-7 {padding-right: 5rem !important;}
 .multiTxtSet .form-group .form-control, .multiWebPageSet .form-group .form-control, .detectedLicensesDiv .form-group .form-control { padding: .375rem 1.75rem .375rem .75rem; }
 .unremovable-defualt-option-select .select2-selection__rendered li:first-child .select2-selection__choice__remove {
-  display: none;
+	display: none;
 }
 .ml-1 {margin-left: .1rem;}
 .text-overflow-space {text-overflow: ellipsis; white-space: nowrap !important;}

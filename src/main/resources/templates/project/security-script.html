@@ -549,23 +549,36 @@ var sec_com_fn = {
 		return url;
 	},
 	displayLineBreakData : function(cellvalue, options, rowObject){
-		var data = "";
-		if(cellvalue != null && cellvalue !== undefined && "" != cellvalue){
-			var dataInfo = cellvalue;
-			if (dataInfo.indexOf("|") > -1){
-				dataInfo = dataInfo.split("|");
-				for (var i=0; i < dataInfo.length; i++){
-					data += dataInfo[i];
-					if (i < dataInfo.length-1){
-						data += "<br/>";
-					}
-				}
-			} else {
-				data = cellvalue;
+		var display = "";
+		if (typeof cellvalue !== "undefined" && cellvalue != null && "" != cellvalue) {
+			var groups = cellvalue.split("#");
+			var length = groups.length;
+			
+			for (var g = 0; g < length; g++) {
+				var groupData = groups[g];
+				
+				if (groupData.endsWith("|")) {
+	                groupData = groupData.slice(0, -1);
+	            }
+				
+				if (groupData.indexOf("|") > -1) {
+	                var items = groupData.split("|");
+	                for (var i = 0; i < items.length; i++) {
+	                	display += items[i];
+	                    if (i < items.length - 1) {
+	                    	display += "<br/>";
+	                    }
+	                }
+	            } else {
+	            	display += groupData;
+	            }
+				
+				if (g < length - 1) {
+					display += "<hr>";
+	            }
 			}
 		}
-		
-		return data;
+		return display;
 	},
 	showVulnViewPage : function(_ossName, _ossVersion){
 		var prjId = [[${project.prjId}]];
