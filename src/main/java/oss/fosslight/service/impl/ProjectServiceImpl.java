@@ -7711,24 +7711,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							
 							boolean emptyFlag = false;
 							for (Map<String, Object> cpeInfo : matchCpeInfoList) {
-//								Map<String, Object> paramMap = new HashMap<>();
-//								paramMap = cpeInfo;
-//								if (!paramMap.containsKey("verStartInc")) {
-//									paramMap.put("verStartInc", "");
-//								}
-//								if (!paramMap.containsKey("verEndInc")) {
-//									paramMap.put("verEndInc", "");
-//								}
-//								if (!paramMap.containsKey("verStartExc")) {
-//									paramMap.put("verStartExc", "");
-//								}
-//								if (!paramMap.containsKey("verEndExc")) {
-//									paramMap.put("verEndExc", "");
-//								}
-//								if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
-//									continue;
-//								}
-								
 								if (cpeInfo.containsKey("criteria")) {
 									String cpeInfoCriteria = (String) cpeInfo.get("criteria");
 									String[] url = cpeInfoCriteria.split(":");
@@ -7750,6 +7732,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								}
 								if (cpeInfo.containsKey("verEndExc")) {
 									verStartEndRange += "Up to (excluding) : " + (String) cpeInfo.get("verEndExc")+"|";
+								}
+								if (!isEmpty(verStartEndRange)) {
+									verStartEndRange += "#";
 								}
 								
 								emptyFlag = true;
