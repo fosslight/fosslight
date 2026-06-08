@@ -616,6 +616,31 @@ public class OssController extends CoTopComponent{
 						return makeJsonResponseHeader(false, "hasDelNick", diffMap);
 					}
 					
+					Set<String> checkedNicks = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+					List<String> delNickList = new ArrayList<>();
+					boolean hasDuplicate = false;
+
+					if (ossMaster.getOssNicknames() != null) {
+					    for (String nick : ossMaster.getOssNicknames()) {
+					        if (!isEmpty(nick)) {
+					            if (!checkedNicks.add(nick)) {
+					                hasDuplicate = true;
+					                delNickList.add(nick);
+					            }
+					        }
+					    }
+					}
+					
+					if (hasDuplicate) {
+					    Map<String, List<String>> diffMap = new HashMap<>();
+					    
+					    List<String> uniqueNickList = new ArrayList<>(checkedNicks);
+					    diffMap.put("addNickArr", uniqueNickList);
+					    diffMap.put("delNickArr", delNickList);
+					    
+					    return makeJsonResponseHeader(false, "hasDelNick", diffMap);
+					}
+					
 					if (checkOssInfo != null) {
 						boolean isSame = false;
 						Map<String, Object> diffMap = new HashMap<>();
@@ -704,20 +729,29 @@ public class OssController extends CoTopComponent{
 					String[] orgNicks = ossService.getOssNickNameListByOssName(ossMaster.getOssName());
 					
 					if (orgNicks != null && orgNicks.length > 0) {
+						Set<String> uniqueOrgNicks = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 						for (String s : orgNicks) {
-							orgNickList.add(s);
-						}
+					        if (!isEmpty(s)) {
+					            uniqueOrgNicks.add(s);
+					        }
+					    }
+						orgNickList.addAll(uniqueOrgNicks);
 					}
 					
 					// 기존 oss name에 물려있는 nick name이 존재하는 경우, nick name은 무시됨
 					// 변경 후 oss name에 nick name이 존재하는 경우 이관됨
 					if (ossMaster.getOssNicknames() != null) {
+						Set<String> uniqueNicks = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 						for (String _nick : ossMaster.getOssNicknames()) {
-							if (!isEmpty(_nick)) {
-								// 삭제되는 oss
-								if (orgNickList.isEmpty() || !orgNickList.contains(_nick)) {
-									delNickList.add(_nick);
-								}
+					        if (!isEmpty(_nick)) {
+					            uniqueNicks.add(_nick);
+					        }
+					    }
+						
+						for (String _nick : uniqueNicks) {
+							// 삭제되는 oss
+							if (orgNickList.isEmpty() || !orgNickList.contains(_nick)) {
+								delNickList.add(_nick);
 							}
 						}
 					}
