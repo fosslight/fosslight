@@ -5365,9 +5365,21 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
 			}
 			for (String url : checkPurl) {
-				if (urlSearchSeq == -1 && downloadLocation.startsWith(url)) {
-					urlSearchSeq = seq;
-					break;
+				if (urlSearchSeq == -1) {
+					if (url.contains("pypi") && url.contains("/project/")) {
+						String[] parts = url.split("/project/");
+						String prefix = Pattern.quote(parts[0]);
+						Pattern pypiPattern = Pattern.compile("^" + prefix + "/(project|pypi)/");
+			            if (pypiPattern.matcher(downloadLocation).find()) {
+			                urlSearchSeq = seq;
+			                break;
+			            }
+					} else {
+						if (downloadLocation.startsWith(url)) {
+			                urlSearchSeq = seq;
+			                break;
+			            }
+					}
 				}
 				seq++;
 			}
@@ -5742,10 +5754,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://npmjs.(org|com)/([^/]+))");
 				break;
 			case 9: // pypi
-				p = Pattern.compile("((http|https)://pypi.python.org/project/([^/]+))");
+				p = Pattern.compile("((http|https)://pypi.python.org/(project|pypi)/([^/]+))");
 				break;
 			case 10: // pypi
-				p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
+				p = Pattern.compile("((http|https)://pypi.org/(project|pypi)/([^/]+))");
 				break;
 			case 11: // maven
 				p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
