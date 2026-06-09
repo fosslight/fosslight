@@ -1834,6 +1834,16 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
 		for (OssAnalysis oa : analysisResultData) {
+			if (!isEmpty(oa.getDownloadLocation())) {
+				Set<String> uniqueLocations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+				String cleanedLocation = Arrays.stream(oa.getDownloadLocation().split(","))
+									            .map(String::trim)
+									            .filter(s -> !isEmpty(s))
+									            .filter(url -> uniqueLocations.add(url.replaceFirst("^[^:]+://", "")))
+									            .collect(Collectors.joining(","));
+			    oa.setDownloadLocation(cleanedLocation);
+			}
+			
 			if (oa.getTitle().contains("최신 등록 정보")) {
 				OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
 				if (bean != null) {
@@ -1883,6 +1893,17 @@ public class OssController extends CoTopComponent{
 						oa.setOssVersionAliases(ossInfo.getOssVersionAliases());
 					}
 				}
+				
+				if (!isEmpty(oa.getDownloadLocation())) {
+					Set<String> uniqueLocations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+					String cleanedLocation = Arrays.stream(oa.getDownloadLocation().split(","))
+										            .map(String::trim)
+										            .filter(s -> !isEmpty(s))
+										            .filter(url -> uniqueLocations.add(url.replaceFirst("^[^:]+://", "")))
+										            .collect(Collectors.joining(","));
+				    oa.setDownloadLocation(cleanedLocation);
+				}
+				
 				OssMaster ossBean = ossService.getOssInfo(null, oa.getOssName(), true);
 				if (ossBean != null && oa.getTitle().contains("최신 등록 정보")) {
 					oa.setIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
@@ -1892,7 +1913,11 @@ public class OssController extends CoTopComponent{
 						if (ossBean.getDownloadLocations() != null) {
 							Set<String> uniqueLocations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 							List<String> downloadLocations = Arrays.asList(ossBean.getDownloadLocations());
-							String mergeDownloadLocation = Stream.concat(downloadLocationList.stream(), downloadLocations.stream()).map(String::trim).filter(s -> !isEmpty(s)).filter(uniqueLocations::add).collect(Collectors.joining(","));
+							String mergeDownloadLocation = Stream.concat(downloadLocationList.stream(), downloadLocations.stream())
+														            .map(String::trim)
+														            .filter(s -> !isEmpty(s))
+														            .filter(url -> uniqueLocations.add(url.replaceFirst("^[^:]+://", "")))
+														            .collect(Collectors.joining(","));
 							oa.setDownloadLocation(mergeDownloadLocation);
 						}
 					}
