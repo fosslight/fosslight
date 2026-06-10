@@ -3440,6 +3440,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
 				if (isNewVersion) {
 					setExistedOssInfo(ossMaster);
+					ossCommonId = ossMaster.getOssCommonId();
 				} else {
 					ossMaster.setOssCommonId(null);
 				}
@@ -3465,6 +3466,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		} finally {
 			resMap.put("ossMaster", ossMaster);
 			resMap.put("ossId", ossId);
+			resMap.put("ossCommonId", (ossCommonId == null || ossCommonId.isEmpty()) ? "" : ossCommonId);
 			resMap.put("isNew", isNew);
 			resMap.put("isNewVersion", isNewVersion);
 			resMap.put("isChangedName", isChangedName);
@@ -4117,6 +4119,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		return resultMap;
+	}
+
+	@Override
+	public void saveLicenseScanResult(OssAnalysis ossAnalysis) {
+		if (ossAnalysis == null) {
+			return;
+		}
+
+		ossMapper.insertOrUpdateLicenseScanResult(ossAnalysis);
+
 	}
 
 	@Override

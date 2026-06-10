@@ -183,4 +183,6 @@ public interface OssService extends HistoryConfig{
 	List<String> selectAnalysisListWithoutCoReviewer(String prjId);
 
 	void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag);
+
+	void saveLicenseScanResult(OssAnalysis ossAnalysis);
 }
