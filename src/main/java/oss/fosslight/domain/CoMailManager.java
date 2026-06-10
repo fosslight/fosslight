@@ -3535,6 +3535,29 @@ public class CoMailManager extends CoTopComponent {
 				ossName = "<a href='" + appEnv.getProperty("server.domain") + "/oss/edit/" + ossId + "' target='_blank'>" + ossName + "</a>";
 			}
 			
+			String customPatchLink = "";
+			String patchLink = getValue(dataMap, "PATCH_LINK");
+			
+			if (!isEmpty(patchLink)) {
+				if (patchLink.contains(",")) {
+					String[] splitLinks = patchLink.split(",");
+					int idx = 1;
+					for (String splitLink : splitLinks) {
+						String trimLink = splitLink.trim();
+						if (!isEmpty(trimLink)) {
+							customPatchLink += "<a href='" + trimLink + "' title='" + trimLink + "' target='_blank'>LINK</a>";
+						}
+						if (idx < splitLinks.length) {
+							customPatchLink += "<br />";
+						}
+						idx++;
+					}
+				} else {
+					String trimLink = patchLink.trim();
+					customPatchLink = "<a href='" + trimLink + "' title='" + trimLink + "' target='_blank'>LINK</a>";
+				}
+			}
+			
 			bean = new OssMaster();
 			
 			if (dataMap.containsKey("PRJ_ID")) {
@@ -3550,6 +3573,7 @@ public class CoMailManager extends CoTopComponent {
 			bean.setCveId(customCveId);
 			bean.setCvssScore(getValue(dataMap, "CVSS_SCORE"));
 			bean.setVulnSummary(getValue(dataMap, "VULN_SUMMARY"));
+			bean.setPatchLink(customPatchLink);
 			bean.setPublishedDate(getValue(dataMap, "PUBL_DATE"));
 			bean.setModifiedDate(getValue(dataMap, "MODI_DATE"));
 			list.add(bean);
