@@ -4428,7 +4428,15 @@ public class CommonFunction extends CoTopComponent {
 				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, scancodeLicense, copyright, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
-				
+				totalAnalysis.setAskalonoLicense(bean.getAskalonoLicense());
+				totalAnalysis.setScancodeLicense(bean.getScancodeLicense());
+				totalAnalysis.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
+				askalono.setAskalonoLicense(bean.getAskalonoLicense());
+				askalono.setScancodeLicense(bean.getScancodeLicense());
+				askalono.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
+				scancode.setAskalonoLicense(bean.getAskalonoLicense());
+				scancode.setScancodeLicense(bean.getScancodeLicense());
+				scancode.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
 				List<OssAnalysis> ossAnalysisByNickList = new ArrayList<>();
 				OssAnalysis ossInfoByNick = null;
 				int idx = 1;
@@ -4485,6 +4493,9 @@ public class CommonFunction extends CoTopComponent {
 									, license.substring(0, license.length()-1), ossInfoByNickList.get(0).getCopyright(), ossInfoByNickList.get(0).getDownloadLocation()
 									, ossInfoByNickList.get(0).getHomepage(), null, comment, "", analysisTitle + " 최신 등록 정보"); // nick oss 최신정보
 							ossInfoByNick.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + idx);
+							ossInfoByNick.setAskalonoLicense(bean.getAskalonoLicense());
+							ossInfoByNick.setScancodeLicense(bean.getScancodeLicense());
+							ossInfoByNick.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
 							
 							ossAnalysisByNickList.add(ossInfoByNick);
 						}

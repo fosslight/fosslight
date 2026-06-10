@@ -320,4 +320,6 @@ public interface OssMapper {
 	List<String> selectAnalysisListWithoutCoReviewer(@Param("prjId") String prjId);
 
 	void updateAnalysisComments(@Param("componentId") String componentId, @Param("prjId") String prjId, @Param("comments") String comments, @Param("commentsFlag") String commentsFlag);
+
+	void insertOrUpdateLicenseScanResult(OssAnalysis bean);
 }

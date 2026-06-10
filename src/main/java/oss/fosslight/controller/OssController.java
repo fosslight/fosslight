@@ -1936,12 +1936,37 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.UPDATE_ANALYSIS_COMPLETE)
 	public @ResponseBody ResponseEntity<Object> updateAnalysisComplete(HttpServletRequest req, HttpServletResponse res, @RequestBody OssAnalysis analysisBean, Model model){
 		Map<String, Object> result = null;
 		
 		try {
 			result = ossService.updateAnalysisComplete(analysisBean);
+
+			String ossCommonId = analysisBean.getOssCommonId();
+			String ossId = analysisBean.getReferenceOssId();
+			if (!isEmpty(ossCommonId)) {
+				String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, analysisBean.getComponentId());
+				List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
+				if (detailData != null) {
+					OssAnalysis saveBean = new OssAnalysis();
+					saveBean.setOssCommonId(ossCommonId);
+					saveBean.setReferenceOssId(ossId);
+					for (OssAnalysis oa : detailData) {
+						if (!isEmpty(oa.getAskalonoLicense())) {
+							saveBean.setAskalonoLicense(oa.getAskalonoLicense());
+						}
+						if (!isEmpty(oa.getScancodeLicense())) {
+							saveBean.setScancodeLicense(oa.getScancodeLicense());
+						}
+						if (!isEmpty(oa.getNeedReviewLicenseScanode())) {
+							saveBean.setNeedReviewLicenseScanode(oa.getNeedReviewLicenseScanode());
+						}
+					}
+					ossService.saveLicenseScanResult(saveBean);
+				}
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			

@@ -4775,4 +4775,15 @@
 		WHERE REFERENCE_ID = #{prjId}
 		AND COMPONENT_ID = #{componentId}
 	</update>
+
+	<insert id="insertOrUpdateLicenseScanResult" parameterType="oss.fosslight.domain.OssAnalysis">
+		INSERT INTO LICENSE_SCAN_RESULT (OSS_COMMON_ID, OSS_ID, DECLARED, FULL_LIC, NEED_REVIEW)
+		VALUES (#{ossCommonId}, #{referenceOssId}, #{askalonoLicense}, #{scancodeLicense}, #{needReviewLicenseAskalono})
+		ON DUPLICATE KEY UPDATE
+		    OSS_ID     = VALUES(OSS_ID),
+		    DECLARED   = VALUES(DECLARED),
+		    FULL_LIC   = VALUES(FULL_LIC),
+		    NEED_REVIEW = VALUES(NEED_REVIEW)
+	</insert>
+
 </mapper>
