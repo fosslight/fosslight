@@ -186,6 +186,7 @@
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'CVE ID'"></th>
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Score'"></th>
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Summary'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Official CVE Security Patch Link'"></th>
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Published Date'"></th>
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Modified Date'"></th>
 										</tr>
@@ -195,6 +196,7 @@
 											<td th:style="'padding:5px;'"><span th:utext="${vulnerability.cveId}"></span></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.cvssScore}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.vulnSummary}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability.patchLink}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.publishedDate}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.modifiedDate}"></td>
 										</tr>
