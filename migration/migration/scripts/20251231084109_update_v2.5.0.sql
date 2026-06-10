@@ -144,6 +144,16 @@ ALTER TABLE `T2_FILE` ADD `REF_FILE_SEQ` INT(11) DEFAULT NULL;
 
 DELETE FROM `T2_CODE_DTL` WHERE CD_NO = '104';
 DELETE FROM `T2_CODE` WHERE CD_NO = '104';
+
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+		('903', '011', 'files.pythonhosted.org/packages/source/', '1', 'pypi url', 11, 'Y'),
+		('913', '024', 'files.pythonhosted.org/packages/source/', '', 'pypi', 24, 'Y')
+ON DUPLICATE KEY UPDATE
+		`CD_DTL_NM`  = VALUES(`CD_DTL_NM`),
+    	`CD_SUB_NO`  = VALUES(`CD_SUB_NO`),
+    	`CD_DTL_EXP` = VALUES(`CD_DTL_EXP`),
+    	`CD_ORDER`   = VALUES(`CD_ORDER`),
+    	`USE_YN`     = VALUES(`USE_YN`);
 -- //@UNDO
 -- SQL to undo the change goes here.
 
