@@ -213,6 +213,8 @@ public class OssMaster extends ComBean implements Serializable{
 	/** The vuln summary. */
 	private String vulnSummary;
 	
+	private String patchLink;
+	
 	/** The cve cnt. */
 	private String cveCnt;
 	
@@ -2470,5 +2472,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setSkipMergeYn(String skipMergeYn) {
 		this.skipMergeYn = skipMergeYn;
+	}
+
+	public String getPatchLink() {
+		return patchLink;
+	}
+
+	public void setPatchLink(String patchLink) {
+		this.patchLink = patchLink;
 	}
 }
