@@ -905,12 +905,15 @@
 
                 $('#btnBinaryFileYn').click(function (e) {
                     e.preventDefault();
+                    if([[${project.binaryFileYn}]] === "I") {
+                        alertify.alert([[#{msg.project.packaging.fosslight.binary.install}]]);
+                    } else {
+                        var fileNm = $("#binaryFile").val();
+                        var downloadFlag = $(this).hasClass("btn-outline-primary");
 
-                    var fileNm = $("#binaryFile").val();
-                    var downloadFlag = $(this).hasClass("btn-outline-primary");
-
-                    if (downloadFlag) {
-                        location.href = '/project/verification/downloadFile?prjId=' + [[${project.prjId}]] + '&fileNm=' + fileNm;
+                        if (downloadFlag) {
+                            location.href = '/project/verification/downloadFile?prjId=' + [[${project.prjId}]] + '&fileNm=' + fileNm;
+                        }
                     }
                 });
 
@@ -3910,10 +3913,6 @@
                                 $("#btnBinaryFileYn").addClass("btn-outline-primary");
                             } else {
                                 $("#btnBinaryFileYn").removeClass("btn-outline-primary");
-                            }
-
-                            if (json.flBinaryInstalled === 'N') {
-                                alertify.alert([[#{msg.project.packaging.fosslight.binary.install}]]);
                             }
 
                             $("#deleteFlag").val("N");
