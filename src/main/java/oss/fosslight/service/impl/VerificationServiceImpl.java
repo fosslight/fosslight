@@ -741,17 +741,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			log.info("VERIFY END : " + prjId);
 
-			boolean flBinaryInstalled = false;
-			String flBinaryInstallFilePath = VERIFY_PATH_OUTPUT + "/" + prjId + "/fl_binary_install";
-			String flBinaryInstallContent = CommonFunction.getStringFromFile(flBinaryInstallFilePath);
-			if (!isEmpty(flBinaryInstallContent) && flBinaryInstallContent.contains("Name: fosslight_binary")) {
-				flBinaryInstalled = true;
-				log.info("VERIFY fosslight_binary is installed.");
-			} else {
-				log.warn("VERIFY fosslight_binary is NOT installed. Please install it via 'pip install fosslight_binary'.");
-			}
-			resMap.put("flBinaryInstalled", flBinaryInstalled ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-
 			//STEP 2 : Verify 진행후 특정 위치의 파일리스트 출력
 			//STEP 3 : 결과 문자열 리스트값을 배열로 변환 		
 			String chk_list_file_path = null;
@@ -1534,6 +1523,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				project.setBinaryFileYn("");
 			}
 
+			boolean flBinaryInstalled = false;
+			String flBinaryInstallFilePath = VERIFY_PATH_OUTPUT + "/" + prjId + "/fl_binary_install";
+			String flBinaryInstallContent = CommonFunction.getStringFromFile(flBinaryInstallFilePath);
+			if (!isEmpty(flBinaryInstallContent) && flBinaryInstallContent.contains("Name: fosslight_binary")) {
+				flBinaryInstalled = true;
+				log.info("VERIFY fosslight_binary is installed.");
+			} else {
+				log.warn("VERIFY fosslight_binary is NOT installed. Please install it via 'pip install fosslight_binary'.");
+			}
+
+			if(!project.getBinaryFileYn().equals(CoConstDef.FLAG_YES) && !flBinaryInstalled) {
+				project.setBinaryFileYn("I");
+			}
+
 			if (doUpdate) {
 				projectService.registVerifyContents(project);
 			}
@@ -1557,8 +1560,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			resMap.put("verifyReadme", readmeFileName);
 			resMap.put("verifyCheckList", !isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
 			resMap.put("verifyProprietary", !isEmpty(exceptFileContent) ? CoConstDef.FLAG_YES : "");
-			resMap.put("verifyBinary", project.getBinaryFileYn().equals(CoConstDef.FLAG_YES) ? CoConstDef.FLAG_YES : "");
-			
+			resMap.put("verifyBinary", !isEmpty(project.getBinaryFileYn()) ? project.getBinaryFileYn() : "");
+
 			//path not found.가 1건이라도 있으면 status_verify_yn의 flag는 N으로 저장함.
 			// packagingFileId, filePath는 1번만 저장하며, gValidIdxlist의 값때문에 마지막 fileSeq일때 저장함.
 			if (doUpdate && packagingFileIdx == fileSeqs.size()) {
