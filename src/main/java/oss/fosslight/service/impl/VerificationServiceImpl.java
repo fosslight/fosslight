@@ -1497,14 +1497,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				int cnt = 0;
 				for (File bFile : f.listFiles()){
 					if (bFile.exists()) {
-						isExistFile = true;
-						if (packagingFileIdx == 1 && cnt == 0) {
-							File copiedFile = new File(VERIFY_PATH_OUTPUT + "/" + prjId + "/verify_binary_list");
-							Files.copy(bFile.toPath(), copiedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-						} else {
-							FileUtil.addFileContents(VERIFY_PATH_OUTPUT +"/"+prjId+"/verify_binary_list", bFile.getPath());
+						if(bFile.getName().startsWith("binary_list")) {
+							isExistFile = true;
+							if (packagingFileIdx == 1 && cnt == 0) {
+								File copiedFile = new File(VERIFY_PATH_OUTPUT + "/" + prjId + "/verify_binary_list");
+								Files.copy(bFile.toPath(), copiedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+							} else {
+								FileUtil.addFileContents(VERIFY_PATH_OUTPUT + "/" + prjId + "/verify_binary_list", bFile.getPath());
+							}
+							cnt++;
 						}
-						cnt++;
 					}
 				}
 
