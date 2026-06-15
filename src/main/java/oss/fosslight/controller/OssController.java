@@ -612,8 +612,33 @@ public class OssController extends CoTopComponent{
 					// null을 반환하지는 않는다.
 					if (_mergeNicknames.length > 0) {
 						Map<String, List<String>> diffMap = new HashMap<>();
-						diffMap.put("addNickArr", Arrays.asList(_mergeNicknames));
-						return makeJsonResponseHeader(false, "hasDelNick", diffMap);
+						if (ossMaster.getOssNicknames() != null && ossMaster.getOssNicknames().length > 0) {
+							Set<String> dbNickSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+							for (String nick : _mergeNicknames) {
+						        if (!isEmpty(nick)) {
+						        	dbNickSet.add(nick.trim());
+						        }
+						    }
+							
+							Set<String> ossNickSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+					        for (String nick : ossMaster.getOssNicknames()) {
+					            if (!isEmpty(nick)) {
+					                ossNickSet.add(nick.trim());
+					            }
+					        }
+					        
+					        if (!ossNickSet.equals(dbNickSet)) {
+					        	Set<String> mergedNickSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+					            mergedNickSet.addAll(ossNickSet);
+					            mergedNickSet.addAll(dbNickSet);
+
+					            diffMap.put("addNickArr", new ArrayList<>(mergedNickSet)); 
+					            return makeJsonResponseHeader(false, "hasDelNick", diffMap);
+					        }
+						} else {
+							diffMap.put("addNickArr", Arrays.asList(_mergeNicknames));
+							return makeJsonResponseHeader(false, "hasDelNick", diffMap);
+						}
 					}
 					
 					Set<String> checkedNicks = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -1564,12 +1589,7 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@GetMapping(value = OSS.CHECK_OSS_NAME_AJAX, produces = "text/html; charset=utf-8")
-	public @ResponseBody ResponseEntity<Object> getCheckOssNameAjax(
-			HttpServletRequest req, 
-			HttpServletResponse res,
-			@ModelAttribute ProjectIdentification paramBean, 
-			Model model,
-			@PathVariable String targetName) {
+	public @ResponseBody ResponseEntity<Object> getCheckOssNameAjax(HttpServletRequest req, HttpServletResponse res, @ModelAttribute ProjectIdentification paramBean, Model model, @PathVariable String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
 		resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
 /*		Map<String, Object> map = null;
