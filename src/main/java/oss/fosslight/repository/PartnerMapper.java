@@ -170,6 +170,10 @@ public interface PartnerMapper {
 	public List<OssComponents> selectVulnerabilityDataForPartner(@Param("prjId") String partnerId, @Param("referenceDiv") String referenceDiv);
 
 	public void updateVulnerabilityDataForPartner(OssComponents ossComponents);
+	
 	List<PartnerMaster> selectPartnersModifiedBeforeMonths(@Param("months") int months);
 
+	public void deletePartnerMapByPrjId(@Param("prjId") String prjId);
+
+	List<PartnerMaster> selectPartnerComponentCount(@Param("prjId") String prjId, @Param("referenceDiv") String referenceDiv);
 }

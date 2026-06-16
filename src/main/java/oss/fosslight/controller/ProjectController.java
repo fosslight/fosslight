@@ -2068,15 +2068,13 @@ public class ProjectController extends CoTopComponent {
 			Type collectionType = new TypeToken<List<T2File>>() {}.getType();
 			List<T2File> delFile = new ArrayList<T2File>(); delFile = (List<T2File>) fromJson(delFileString, collectionType);
 
-			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {
-			}.getType();
+			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
 			List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
 			ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
 			
 			List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
 			
-			Type collectionType4 = new TypeToken<List<Project>>() {
-			}.getType();
+			Type collectionType4 = new TypeToken<List<Project>>() {}.getType();
 			List<Project> binAddList = new ArrayList<Project>();
 			binAddList = (List<Project>) fromJson(binAddListDataString, collectionType4);
 			
@@ -2137,6 +2135,8 @@ public class ProjectController extends CoTopComponent {
 
 				project.setCsvFile(delFile);
 				project.setIdentificationSubStatusBin(identificationSubStatusBin);
+				project.setPrjAddList(binAddList);
+				project.setResetFlag(resetFlag);
 				
 				Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
 				ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
@@ -2299,20 +2299,13 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 			
-			Project project = new Project();
-			project.setPrjId(prjId);
-			if (CoConstDef.FLAG_YES.equals(resetFlag)) {
-				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
-				projectService.existsAddList(project);
-			} else {
-				projectService.existsAddList(binAddList);
-				projectService.insertAddList(binAddList);
-			}
-			
 			// session 삭제
 			deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
 			deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
 
+			Project project = new Project();
+			project.setPrjId(prjId);
+			
 			// success code set 10
 			resCd = "10";
 			resMap.put("isValid", String.valueOf(isValid));
@@ -2422,6 +2415,8 @@ public class ProjectController extends CoTopComponent {
 			project.setCsvFile(delFile);
 			project.setCsvFileSeq(addFile);
 			project.setIdentificationSubStatusDep(identificationSubStatusDep);
+			project.setPrjAddList(depAddList);
+			project.setResetFlag(resetFlag);
 
 			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
 			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
@@ -2485,20 +2480,13 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 
-		Project project = new Project();
-		project.setPrjId(prjId);
-		if (CoConstDef.FLAG_YES.equals(resetFlag)) {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-			projectService.existsAddList(project);
-		} else {
-			projectService.existsAddList(depAddList);
-			projectService.insertAddList(depAddList);
-		}
-
 		// 정상처리된 경우 세션 삭제
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
 
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
 		// success code set 10
 		resCd = "10";
 		resMap.put("isValid", String.valueOf(isValid));
@@ -2603,6 +2591,8 @@ public class ProjectController extends CoTopComponent {
 			project.setCsvFile(delFile);
 			project.setCsvFileSeq(addFile);
 			project.setIdentificationSubStatusSrc(identificationSubStatusSrc);
+			project.setPrjAddList(srcAddList);
+			project.setResetFlag(resetFlag);
 			
 			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
 			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
@@ -2686,20 +2676,13 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 		
-		Project project = new Project();
-		project.setPrjId(prjId);
-		if (CoConstDef.FLAG_YES.equals(resetFlag)) {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
-			projectService.existsAddList(project);
-		} else {
-			projectService.existsAddList(srcAddList);
-			projectService.insertAddList(srcAddList);
-		}
-		
 		// 정상처리된 경우 세션 삭제
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
 
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
 		// success code set 10
 		resCd = "10";
 		resMap.put("isValid", String.valueOf(isValid));
@@ -5774,8 +5757,10 @@ public class ProjectController extends CoTopComponent {
 			String mainGrid = (String) param.get("mainData");
 			
 			Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
-			List<OssComponents> ossComponents = new ArrayList<>();
-			ossComponents = (List<OssComponents>) fromJson(mainGrid, collectionType);
+			List<OssComponents> ossComponents = (List<OssComponents>) fromJson(mainGrid, collectionType);
+		    if (ossComponents == null) {
+		        ossComponents = new ArrayList<>();
+		    }
 			
 			List<OssComponents> rows = null;
 			if (map.containsKey("rows")) {

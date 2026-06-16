@@ -120,6 +120,14 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			}
 		}
 		
+		String partnerId = "3rd_" + result.getPartnerId();
+		int resultCnt = partnerMapper.getOssAnalysisDataCnt(partnerId);
+		if (resultCnt > 0) {
+			PartnerMaster analysisStatus = partnerMapper.getOssAnalysisData(partnerId);
+			result.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
+			result.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
+		}
+		
 		//파트너 와쳐
 		List<PartnerWatcher> watcher = partnerMapper.selectPartnerWatcher(partnerMaster);
 		
@@ -143,15 +151,6 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 					}
 				}
 				result.setPartnerWatcher(watcher);
-			}
-			String partnerId = "3rd_" + result.getPartnerId();
-			int resultCnt = partnerMapper.getOssAnalysisDataCnt(partnerId);
-			
-			if (resultCnt > 0) {
-				PartnerMaster analysisStatus = partnerMapper.getOssAnalysisData(partnerId);
-				
-				result.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
-				result.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
 			}
 			
 			List<String> reqPerUserIds = projectMapper.selectRequestProjectPermissionList("3rd_" + partnerMaster.getPartnerId(), CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
