@@ -1303,10 +1303,10 @@
 	</select>
 	
 	<select id="selectThirdPartyMapList" parameterType="String" resultType="oss.fosslight.domain.PartnerMaster">
-	/* PartnerMapper selectThirdPartyMapList */
-	SELECT * 
-	FROM PROJECT_PARTNER_MAP
-	WHERE PRJ_ID = #{prjId}
+		/* PartnerMapper selectThirdPartyMapList */
+		SELECT * 
+		FROM PROJECT_PARTNER_MAP
+		WHERE PRJ_ID = #{prjId}
 	</select>
 	
 	<update id="updatePartnerMapList" parameterType="oss.fosslight.domain.PartnerMaster">
@@ -1324,6 +1324,10 @@
 	 	WHERE 
 	 		PRJ_ID = #{prjId}
 	 		<foreach collection="thirdPartyPartnerIdList" item="item" separator="," open="AND PARTNER_ID IN (" close=")">#{item}</foreach>
+	</delete>
+	
+	<delete id="deletePartnerMapByPrjId" parameterType="string">
+		DELETE FROM PROJECT_PARTNER_MAP WHERE PRJ_ID = #{prjId}
 	</delete>
 	
 	<insert id="insertPartnerMapList" parameterType="oss.fosslight.domain.PartnerMaster">
@@ -3106,5 +3110,14 @@
 		  AND MODIFIED_DATE IS NOT NULL
 		  AND MODIFIED_DATE <![CDATA[<=]]> DATE_SUB(NOW(), INTERVAL #{months} MONTH)
 		ORDER BY MODIFIED_DATE ASC
+	</select>
+	
+	<select id="selectPartnerComponentCount" parameterType="string" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT REF_PARTNER_ID AS PARTNER_ID, COUNT(*) AS COMPONENT_COUNT
+		FROM OSS_COMPONENTS
+		WHERE REFERENCE_ID = #{prjId}
+		AND REFERENCE_DIV = #{referenceDiv}
+		AND IFNULL(EXCLUDE_YN, 'N') = 'N'
+		GROUP BY REF_PARTNER_ID
 	</select>
 </mapper>

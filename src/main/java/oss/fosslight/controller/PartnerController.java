@@ -582,27 +582,19 @@ public class PartnerController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=PARTNER.AUTOCOMPLETE_SW_NM_AJAX)
-	public @ResponseBody ResponseEntity<Object> autoCompleteSwNmAjax(
-			PartnerMaster partnerMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> autoCompleteSwNmAjax(PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model) {
 		partnerMaster.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
 		
 		return makeJsonResponseHeader(partnerService.getPartnerSwNmList(partnerMaster));
 	}
 	
 	@GetMapping(value=PARTNER.USER_LIST)
-	public @ResponseBody ResponseEntity<Object> getUserList(
-			T2Users t2Users
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> getUserList(T2Users t2Users, HttpServletRequest req, HttpServletResponse res, Model model){
 		List<T2Users> result = null;
 		
-		try{
+		try {
 			result = partnerService.getUserList(t2Users);	
-		}catch(Exception e){
+		} catch(Exception e) {
 			log.error(e.getMessage());
 		}
 		
@@ -610,11 +602,7 @@ public class PartnerController extends CoTopComponent{
 	}
 	
 	@PostMapping(value = PARTNER.UPDATE_REVIEWER)
-	public @ResponseBody ResponseEntity<Object> partnerMod(
-			@RequestBody PartnerMaster vo
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) throws Exception{
+	public @ResponseBody ResponseEntity<Object> partnerMod(@RequestBody PartnerMaster vo, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
 		PartnerMaster orgPartnerMaster = null;
 		boolean reviewerEmptyFlag = false;
 		

@@ -877,6 +877,10 @@ public class Project extends ComBean implements Serializable {
 	
 	private int prjRefIdx;
 	
+	private List<Project> prjAddList;
+	
+	private String resetFlag;
+	
 	/**
 	 * Gets the prj id.
 	 *
@@ -4930,5 +4934,21 @@ public class Project extends ComBean implements Serializable {
 
 	public void setActionType(String actionType) {
 		this.actionType = actionType;
+	}
+
+	public List<Project> getPrjAddList() {
+		return prjAddList;
+	}
+
+	public void setPrjAddList(List<Project> prjAddList) {
+		this.prjAddList = prjAddList;
+	}
+
+	public String getResetFlag() {
+		return resetFlag;
+	}
+
+	public void setResetFlag(String resetFlag) {
+		this.resetFlag = resetFlag;
 	}
 }
