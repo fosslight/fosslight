@@ -496,7 +496,7 @@
           	</when>
 	    </choose>
 	</select>
-	
+
 	<select id="selectVerificationCheck" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
 		SELECT COUNT(PACKAGE_FILE_ID)+COUNT(PACKAGE_FILE_ID2)+COUNT(PACKAGE_FILE_ID3)+1 AS PACKAGE_FILE_SEQ
 		     , USE_YN

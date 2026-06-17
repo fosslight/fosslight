@@ -266,7 +266,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		return records == prjIdList.size() ? true : false;
 	}
-	
+
 	@Override
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet) {
 		return getSheetData(ufile, prjId, readType, sheet, false);
@@ -347,7 +347,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 			
 			// 1) build image를 기준으로 oss data mapping (공통)
-			if (!ExcelUtil.readAndroidBuildImage("BIN (Android)", true, sheet, ossReportfileId, resultFileId, reportData, errMsgList, checkHeaderSheetName)) {
+			if (!ExcelUtil.readAndroidBuildImage("BIN (Yocto)", true, sheet, ossReportfileId, resultFileId, reportData, errMsgList, checkHeaderSheetName)) {
 				for (String s : errMsgList) { // error 처리
 					if (isEmpty(s)) {
 						continue;
