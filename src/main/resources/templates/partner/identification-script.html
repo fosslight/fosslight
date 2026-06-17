@@ -166,7 +166,7 @@ var fn_comment = {
 		if ([[${detail.permission}]] > 0) {
 			fn_comment.activateCommentArea();
 			
-			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS')}]];
 	        openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + [[${detail.partnerId}]]);
 		} else {
 			alertify.alert([[#{msg.common.not.permission}]], function(){});
