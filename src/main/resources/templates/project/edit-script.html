@@ -285,7 +285,7 @@
 				.show();
 			});
 			
-			$('#drop').on ('click', function(){
+			$('#drop').on ('click', function() {
 				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
                 innerHtml 		+= '<textarea id="dropEditor"></textarea>';
 				
@@ -395,12 +395,6 @@
 			// 삭제
 			$("#delete").click(function(){
 				fn.getProjectStatus();
-				var isAdmin = [[${@CommonFunction.isAdmin()}]];
-				
-				if (!isAdmin && ("DONE" == displayInfo.distributionStatus || "PROC" == displayInfo.distributionStatus)) {
-					alertify.alert([[#{msg.project.cannot.deleted}]], function(){});
-					return false;
-				}
 				
 				var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
                	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';

@@ -2710,19 +2710,23 @@ public class ProjectController extends CoTopComponent {
 		String mainDataString = (String) map.get("mainData");
 		String prjId = (String) map.get("prjId");
 
-		Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponent = new ArrayList<ProjectIdentification>();
-		ossComponent = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
-		
-		List<List<ProjectIdentification>> ossComponentLicense = null;
-		if (code.equals(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) {
-			ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, true);
-		} else {
-			ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, false, true);
+		try {
+			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
+			List<ProjectIdentification> ossComponent = new ArrayList<ProjectIdentification>();
+			ossComponent = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
+			
+			List<List<ProjectIdentification>> ossComponentLicense = null;
+			if (code.equals(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) {
+				ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, true);
+			} else {
+				ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, false, true);
+			}
+			
+			ossComponentLicense = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense, CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
+			result = projectService.nickNameValid(prjId, ossComponent, ossComponentLicense);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
-		
-		ossComponentLicense = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense, CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
-		result = projectService.nickNameValid(prjId, ossComponent, ossComponentLicense);
 
 		StringBuffer resultSb = new StringBuffer();
 		if (result != null) {
@@ -5534,8 +5538,7 @@ public class ProjectController extends CoTopComponent {
 						}
 					}
 				} else if (changeCode.equals("2")) {
-					if (!dropFlag && !completeFlag) {
-					} else {
+					if (!dropFlag && !CommonFunction.isAdmin() && prjBean.getStatusPermission() == 0) {
 						notChangeFlag = true;
 						rtnMap.put("notChangePrjId", prjId);
 					}
