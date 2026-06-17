@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
@@ -2648,7 +2649,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		ossComponent = convertOssNickName(ossComponent);
 		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
 		String refId = project.getReferenceId();
-		List<Project> prjAddList = project.getPrjAddList();
+		List<Project> prjAddList = Optional.ofNullable(project.getPrjAddList()).orElseGet(ArrayList::new);
 		
 		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense, isUploadProcess);
 
