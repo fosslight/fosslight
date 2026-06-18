@@ -1075,7 +1075,7 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
-			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/report-android";
+			public static final String FOSSLIGHT_API_OSS_REPORT_PLATFORM_GENERATED = "/projects/{id}/report-platform";
 
 			/** API Verification Packaging Upload */
 			public static final String FOSSLIGHT_API_PACKAGE_UPLOAD			= "/projects/{id}/packages";
