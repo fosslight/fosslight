@@ -3545,7 +3545,7 @@ public class CoMailManager extends CoTopComponent {
 					for (String splitLink : splitLinks) {
 						String trimLink = splitLink.trim();
 						if (!isEmpty(trimLink)) {
-							customPatchLink += "<a href='" + trimLink + "' title='" + trimLink + "' target='_blank'>LINK</a>";
+							customPatchLink += "<a href='" + trimLink + "' target='_blank'>" + trimLink + "</a>";
 						}
 						if (idx < splitLinks.length) {
 							customPatchLink += "<br />";
@@ -3554,7 +3554,7 @@ public class CoMailManager extends CoTopComponent {
 					}
 				} else {
 					String trimLink = patchLink.trim();
-					customPatchLink = "<a href='" + trimLink + "' title='" + trimLink + "' target='_blank'>LINK</a>";
+					customPatchLink = "<a href='" + trimLink + "' target='_blank'>" + trimLink + "</a>";
 				}
 			}
 			
