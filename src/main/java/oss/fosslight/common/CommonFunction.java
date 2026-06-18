@@ -1262,19 +1262,19 @@ public class CommonFunction extends CoTopComponent {
 			gridBean.setOssName(bean.getOssName());
 			// oss version이 정수형인 경우 분석결과서 서식에 따라, ".0" 이 사라지는 경우를 위해 
 			// 기 등록된 oss에 존재하는 경우 자동으로 .0을 채워줌
-			if (!isEmpty(bean.getOssName()) && !isEmpty(bean.getOssVersion()) && StringUtil.isNumeric(bean.getOssVersion())) {
-				String _test = bean.getOssName().trim() + "_" + bean.getOssVersion().trim();
-				String _test2 = bean.getOssName().trim() + "_" + bean.getOssVersion().trim() + ".0";
-				if (!CoCodeManager.OSS_INFO_UPPER.containsKey(_test.toUpperCase()) 
-						&& CoCodeManager.OSS_INFO_UPPER.containsKey(_test2.toUpperCase())) {
-					if (!versionChangeCheckList.contains(bean.getOssName() + "_" + bean.getOssVersion())) {
-						versionChangeCheckList.add(bean.getOssName() + "_" + bean.getOssVersion());
-						versionChangeList.add(bean.getOssName() + " : " + bean.getOssVersion() + " => " + bean.getOssVersion().trim() + ".0");
-					}
-					
-					bean.setOssVersion(bean.getOssVersion().trim() + ".0");
-				}
-			}
+//			if (!isEmpty(bean.getOssName()) && !isEmpty(bean.getOssVersion()) && StringUtil.isNumeric(bean.getOssVersion())) {
+//				String _test = bean.getOssName().trim() + "_" + bean.getOssVersion().trim();
+//				String _test2 = bean.getOssName().trim() + "_" + bean.getOssVersion().trim() + ".0";
+//				if (!CoCodeManager.OSS_INFO_UPPER.containsKey(_test.toUpperCase()) 
+//						&& CoCodeManager.OSS_INFO_UPPER.containsKey(_test2.toUpperCase())) {
+//					if (!versionChangeCheckList.contains(bean.getOssName() + "_" + bean.getOssVersion())) {
+//						versionChangeCheckList.add(bean.getOssName() + "_" + bean.getOssVersion());
+//						versionChangeList.add(bean.getOssName() + " : " + bean.getOssVersion() + " => " + bean.getOssVersion().trim() + ".0");
+//					}
+//					
+//					bean.setOssVersion(bean.getOssVersion().trim() + ".0");
+//				}
+//			}
 			
 			gridBean.setOssVersion(bean.getOssVersion());
 			if (!isEmpty(bean.getDownloadLocation())) {
