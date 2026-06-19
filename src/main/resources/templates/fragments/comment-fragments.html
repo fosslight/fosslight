@@ -141,7 +141,7 @@
                     <div class="col-md-12">
                         <form class="mb-0" id="commentSchForm">
                             <div class="row mt-3">
-                            	<th:block th:if="${basicInfo.referenceDiv == 'prj'}">
+                            	<th:block th:if="${basicInfo.referenceDiv == 'prj' or basicInfo.referenceDiv == 'security'}">
                                 	<div class="col-md-3 px-1">
                                         <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
                                             <option value="" th:text="Section"></option>
