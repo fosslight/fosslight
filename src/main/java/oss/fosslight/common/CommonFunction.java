@@ -46,6 +46,7 @@ import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -91,6 +92,7 @@ import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.config.AppConstBean;
+import oss.fosslight.domain.CoCodeDtl;
 import oss.fosslight.domain.ComBean;
 import oss.fosslight.domain.LicenseHtmlGeneratorFromXml;
 import oss.fosslight.domain.LicenseMaster;
@@ -5704,34 +5706,52 @@ public class CommonFunction extends CoTopComponent {
 				case CoConstDef.CD_LICENSE_TYPE_PMS:
 					if (pmsCnt == 0) {
 						licenseList = andList;
-						pmsCnt++;
+					} else {
+						licenseList = determineHighestPriorityLicense(licenseList, andList);
 					}
+					pmsCnt++;
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_WCP:
-					if (pmsCnt == 0 && wcpCnt == 0) {
-						licenseList = andList;
+					if (pmsCnt == 0) {
+						if (wcpCnt == 0) {
+							licenseList = andList;
+						} else {
+							licenseList = determineHighestPriorityLicense(licenseList, andList);
+						}
 						wcpCnt++;
 					}
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_CP:
-					if (pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0) {
-						licenseList = andList;
+					if (pmsCnt == 0 && wcpCnt == 0) {
+						if (cpCnt == 0) {
+							licenseList = andList;
+						} else {
+							licenseList = determineHighestPriorityLicense(licenseList, andList);
+						}
 						cpCnt++;
 					}
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_PF:
-					if (pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0) {
-						licenseList = andList;
+					if (pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0) {
+						if (pfCnt == 0) {
+							licenseList = andList;
+						} else {
+							licenseList = determineHighestPriorityLicense(licenseList, andList);
+						}
 						pfCnt++;
 					}
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_NA:
-					if (pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0 && naCnt == 0) {
-						licenseList = andList;
+					if (pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0) {
+						if (naCnt == 0) {
+							licenseList = andList;
+						} else {
+							licenseList = determineHighestPriorityLicense(licenseList, andList);
+						}
 						naCnt++;
 					}
 					
@@ -5740,6 +5760,60 @@ public class CommonFunction extends CoTopComponent {
 		}
 		
 		return licenseList;
+	}
+
+	private static List<ProjectIdentification> determineHighestPriorityLicense(List<ProjectIdentification> licenseList, List<ProjectIdentification> andList) {
+		Comparator<ProjectIdentification> licenseComparator = (p1, p2) -> {
+	        boolean p1HasNoRestriction = isEmpty(p1.getRestriction());
+	        boolean p2HasNoRestriction = isEmpty(p2.getRestriction());
+	        
+	        if (p1HasNoRestriction != p2HasNoRestriction) {
+	            return p1HasNoRestriction ? -1 : 1;
+	        }
+
+	        Vector<CoCodeDtl> disclosingSrcList = CoCodeManager.getCodeDtlsRegardlessUseYn(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE);
+	        int p1Order = 1;
+	        int p2Order = 1;
+	        
+	        if (disclosingSrcList != null) {
+	        	for (CoCodeDtl bean : disclosingSrcList) {
+	        		if (bean.getCdDtlNo().equals(p1.getDisclosingSrc())) {
+	        			p1Order = bean.getCdOrder();
+	        		}
+	        		if (bean.getCdDtlNo().equals(p2.getDisclosingSrc())) {
+	        			p2Order = bean.getCdOrder();
+	        		}
+	        	}
+	        }
+	        
+	        if (p1Order != p2Order) {
+	            return Integer.compare(p1Order, p2Order);
+	        }
+	        
+	        String p1Name = avoidNull(p1.getLicenseName());
+	        String p2Name = avoidNull(p2.getLicenseName());
+	        return p1Name.compareToIgnoreCase(p2Name);
+	    };
+		
+	    ProjectIdentification topLicense = !CollectionUtils.isEmpty(licenseList) ? licenseList.stream().min(licenseComparator).orElse(null) : null;
+	    ProjectIdentification topAndLicense = !CollectionUtils.isEmpty(andList) ? andList.stream().min(licenseComparator).orElse(null) : null;
+
+	    List<ProjectIdentification> resultList = new ArrayList<>();
+	    
+	    if (topLicense != null && topAndLicense != null) {
+	        int finalCompare = licenseComparator.compare(topLicense, topAndLicense);
+	        if (finalCompare <= 0) {
+	            resultList.addAll(licenseList);
+	        } else {
+	            resultList.addAll(andList);
+	        }
+	    } else if (topLicense != null) {
+	    	resultList.addAll(licenseList);
+	    } else if (topAndLicense != null) {
+	    	resultList.addAll(andList);
+	    }
+	    
+		return resultList;
 	}
 
 	public static List<String> checkUserPermissions(String userId, String[] prjIds, String gubn) {
