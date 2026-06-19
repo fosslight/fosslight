@@ -324,6 +324,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The Restriction. */
 	private String restriction;
 	
+	private String disclosingSrc;
+	
 	private String guireportFlag = "N";
 	
 	private String typeFlag = "N";
@@ -365,6 +367,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String refLoadedVal;
 	
 	private String originalDownloadLocation;
+	
 	private int urlSearchSeq;
 	
 	public String getRedirectLocation() {
@@ -1954,6 +1957,14 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setRestriction(String restriction) {
 		this.restriction = restriction;
+	}
+
+	public String getDisclosingSrc() {
+		return disclosingSrc;
+	}
+
+	public void setDisclosingSrc(String disclosingSrc) {
+		this.disclosingSrc = disclosingSrc;
 	}
 
 	public String getCvssScore2() {
