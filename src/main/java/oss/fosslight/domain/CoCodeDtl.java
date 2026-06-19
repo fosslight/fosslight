@@ -46,6 +46,10 @@ public class CoCodeDtl {
 		return cdSubNo;
 	}
 	
+	public int getCdOrder() {
+		return cdOrder;
+	}
+	
 	/** The cd sub no. */
     String cdSubNo;
     
