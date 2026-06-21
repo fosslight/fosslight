@@ -67,7 +67,7 @@ import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
-@Api(tags = {"3. Project"})
+@Api(tags = {"03. Project"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")

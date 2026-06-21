@@ -36,7 +36,7 @@ import oss.fosslight.service.RefineOssService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
 
-@Api(tags = {"1. OSS & License"})
+@Api(tags = {"01. OSS & License"})
 @RequiredArgsConstructor
 @RestController
 @Slf4j

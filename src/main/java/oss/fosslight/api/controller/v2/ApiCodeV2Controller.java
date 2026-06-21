@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"6. Code v2"})
+@Api(tags = {"06. Code v2"})
 @RequiredArgsConstructor
 @RestController()
 @RequestMapping(value = "/api/v2")

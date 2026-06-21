@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 
-@Api(tags = {"7. Binary"})
+@Api(tags = {"07. Binary"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")

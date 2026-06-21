@@ -30,7 +30,7 @@ import oss.fosslight.common.Url.API;
 import oss.fosslight.service.ApiCodeService;
 import oss.fosslight.service.T2UserService;
 
-@Api(tags = {"6. Code"})
+@Api(tags = {"06. Code"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")

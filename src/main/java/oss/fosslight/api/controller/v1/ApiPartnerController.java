@@ -35,7 +35,7 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.ApiPartnerService;
 import oss.fosslight.service.T2UserService;
 
-@Api(tags = {"2. 3rd Party"})
+@Api(tags = {"02. 3rd Party"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
