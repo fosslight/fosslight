@@ -9,7 +9,7 @@ import java.util.*;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.context.annotation.Primary;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -20,6 +20,9 @@ import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger.web.InMemorySwaggerResourcesProvider;
+import springfox.documentation.swagger.web.SwaggerResource;
+import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
@@ -49,6 +52,22 @@ public class SwaggerConfig {
                 .groupName("v2")
                 .securityContexts(List.of(securityContext()))
                 .securitySchemes(List.of(securityScheme()));
+    }
+
+    @Bean
+    @Primary
+    SwaggerResourcesProvider swaggerResourcesProvider(InMemorySwaggerResourcesProvider defaultResourcesProvider) {
+        return () -> {
+            List<SwaggerResource> resources = new ArrayList<>(defaultResourcesProvider.get());
+            resources.sort((left, right) -> {
+                if ("v2".equals(left.getName())) return -1;
+                if ("v2".equals(right.getName())) return 1;
+                if ("v1".equals(left.getName())) return 1;
+                if ("v1".equals(right.getName())) return -1;
+                return left.getName().compareToIgnoreCase(right.getName());
+            });
+            return resources;
+        };
     }
 
     private SecurityContext securityContext() {

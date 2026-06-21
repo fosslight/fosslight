@@ -57,7 +57,7 @@ import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
-@Api(tags = {"5. SelfCheck"})
+@Api(tags = {"05. SelfCheck"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
