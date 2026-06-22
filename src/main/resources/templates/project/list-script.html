@@ -163,15 +163,15 @@ var evt = {
 			$(".optionSelected").hide();
 		}
         
-		refreshParam = fn.setGridParam();
+		refreshParam = fn.setGridParam(true);
 		
 		$('#search').on('click',function(e){
 			e.preventDefault();
 			var exPostdata = $("#list").jqGrid('getGridParam','postData');
 			exPostdata.ossId = ''; 
-			var postData = fn.setGridParam();
+			var postData = fn.setGridParam(false);
 			
-			var localStorageData = fn.setGridParam();
+			var localStorageData = fn.setGridParam(false);
             sessionStorage.setItem("projectSearchConditions", JSON.stringify(localStorageData));
 			
             optionSelectedFlag = false;
@@ -741,7 +741,7 @@ var fn = {
 	downloadExcel : function(){
 		loading.show();
 		if (isMaximumRowCheck(totalRow)) {
-			var data = fn.setGridParam();
+			var data = fn.setGridParam(false);
 			
 			$.ajax({
 				type: "POST",
@@ -832,7 +832,7 @@ var fn = {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
-	setGridParam : function(){
+	setGridParam : function(init){
 		var paramData = $('#projectSearch').serializeObject();
 		
 		//public 값 넣어주기
@@ -849,7 +849,7 @@ var fn = {
 			paramData.statuses = "";
 		}
 		
-		if (typeof paramData.distributionType === "undefined" && [[${searchBean.distributionTypes}]] != null) {
+		if (init && typeof paramData.distributionType === "undefined" && [[${searchBean.distributionTypes}]] != null) {
 			paramData.distributionType = [[${searchBean.distributionTypes}]];
 		}
 		if (paramData.distributionType != null) {
