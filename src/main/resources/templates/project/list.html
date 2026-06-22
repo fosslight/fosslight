@@ -147,12 +147,11 @@
                                                	</div>
                                       	    </div>
                                           	<div class="form-group mb-2">
-                                              	<select class="select2 save-value" name="distributionType" id="distributionTypeSelect" style="width: 100%;">
-	                                        		<option value=""></option>
-	                                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
-	                                                  	<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.distributionType != null && option.cdDtlNo == searchBean?.distributionType}"></option>
-	                                                </th:block>
-	                                           	</select>
+                                          		<select class="select2 save-value" multiple="multiple" name="distributionType" id="distributionTypeSelect" style="width: 100%;">
+		                                       		<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
+													    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+													</th:block>
+		                                      	</select>
                                           	</div>
                                             <div class="form-group mb-2">
 												<select class="select2 save-value" name="noticeType" id="noticeTypeSelect" style="width: 100%;">

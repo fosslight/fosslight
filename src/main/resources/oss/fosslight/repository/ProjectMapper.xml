@@ -231,7 +231,19 @@
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
-				AND T1.DISTRIBUTION_TYPE = #{distributionType}
+				<choose>
+			 		<when test="distributionTypes != null">
+			 			AND
+						<foreach collection="distributionTypes" item="item" open="(" close=")" separator="OR">
+							T1.DISTRIBUTION_TYPE = #{item}
+						</foreach>
+			 		</when>
+			 		<otherwise>
+			 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
+							AND T1.DISTRIBUTION_TYPE = #{distributionType}
+						</if>
+			 		</otherwise>
+			 	</choose>
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
 				AND T1.OS_TYPE = #{osType}
@@ -510,9 +522,19 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
 		 	</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
-				AND T1.DISTRIBUTION_TYPE = #{distributionType}
-			</if>
+		 	<choose>
+		 		<when test="distributionTypes != null">
+		 			AND
+					<foreach collection="distributionTypes" item="item" open="(" close=")" separator="OR">
+						T1.DISTRIBUTION_TYPE = #{item}
+					</foreach>
+		 		</when>
+		 		<otherwise>
+		 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
+						AND T1.DISTRIBUTION_TYPE = #{distributionType}
+					</if>
+		 		</otherwise>
+		 	</choose>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(osType)">
 				AND T1.OS_TYPE = #{osType}
 			</if>
@@ -7456,5 +7478,12 @@
 	
 	<select id="selectRefFileSeq" parameterType="string" resultType="string">
 		SELECT FILE_SEQ FROM T2_FILE WHERE REF_FILE_SEQ = #{fileSeq}
+	</select>
+	
+	<select id="selectMaxProjectVersion" parameterType="string" resultType="java.lang.Double">
+		SELECT MAX(CAST(PRJ_VERSION AS DECIMAL(10,1)))
+    	FROM PROJECT_MASTER
+    	WHERE PRJ_NAME = #{prjName}
+      	AND IFNULL(PRJ_VERSION, '') != ''
 	</select>
 </mapper>

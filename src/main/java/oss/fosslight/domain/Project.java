@@ -70,6 +70,8 @@ public class Project extends ComBean implements Serializable {
 	/** The distribution type. */
 	private String distributionType;
 	
+	private String[] distributionTypes;
+	
 	/**  distribution type 코드의 상세 코드 설명 (유형에 따른 버튼 표시 제어를 위해 필요). */
 	private String distributionTypeOfCodeDtlExp;
 	
@@ -4950,5 +4952,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setResetFlag(String resetFlag) {
 		this.resetFlag = resetFlag;
+	}
+
+	public String[] getDistributionTypes() {
+		return distributionTypes;
+	}
+
+	public void setDistributionTypes(String[] distributionTypes) {
+		this.distributionTypes = distributionTypes;
 	}
 }
