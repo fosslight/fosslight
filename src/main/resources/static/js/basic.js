@@ -3738,7 +3738,7 @@ function resetForm(el) {
 
 function updateSearchCondition(el){
     // multiple checkbox values to comma separate
-    var chkElArr = ["restrictions", "statuses", "status"];
+    var chkElArr = ["restrictions", "statuses", "status", "distributionType"];
     $.each(chkElArr, function(index, item){
         var selectedValues  = "";
         $('#' + el + ' select[name="'+item+'"]').find(':selected').each(function() {
@@ -4762,7 +4762,7 @@ function displayProjectStage(displayInfo, pId, pNm, distributeTarget) {
 	var cvssScoreMax = displayInfo.cvssScoreMax;
 	if (typeof displayInfo.vulnerabilityResolution !== "undefined") {
 		var vulnerabilityResolution = displayInfo.vulnerabilityResolution;
-		if ("Need to resolve" == vulnerabilityResolution) {
+		if ("DROP" != projectStatus && "Need to resolve" == vulnerabilityResolution) {
 			vulnerability += '<span type="button" class="badge badge-dark-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 		} else {
 			vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
