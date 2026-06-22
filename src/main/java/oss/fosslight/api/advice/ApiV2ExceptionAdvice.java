@@ -44,14 +44,19 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         return responseService.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    @ExceptionHandler(CInvalidProjectTypeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ResponseEntity<Map<String, Object>> handleCInvalidProjectTypeException(HttpServletRequest request, CInvalidProjectTypeException e){
+        return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                "Project Type is invalid. " + e.getMessage());
+    }
+
     @ExceptionHandler(CProjectNotAvailableException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     protected ResponseEntity<Map<String, Object>> userNoPermission(HttpServletRequest request, CProjectNotAvailableException e){
         return responseService.errorResponse(HttpStatus.NOT_FOUND,
                 "The user does not have edit permissions for Project " + e.getMessage());
     }
-
-
 
     @ExceptionHandler(CUserNotFoundException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
