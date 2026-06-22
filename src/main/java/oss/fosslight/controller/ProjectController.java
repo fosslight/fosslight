@@ -172,6 +172,10 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 
+		if (searchBean != null && !isEmpty(searchBean.getDistributionType())) {
+			searchBean.setDistributionTypes(searchBean.getDistributionType().split(","));
+		}
+		
 		model.addAttribute("searchBean", searchBean);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
@@ -299,6 +303,10 @@ public class ProjectController extends CoTopComponent {
 				String[] arrStatuses = statuses.split(",");
 				project.setArrStatuses(arrStatuses);
 			}
+		}
+		
+		if (!isEmpty(project.getDistributionType())) {
+			project.setDistributionTypes(project.getDistributionType().split(","));
 		}
 		
 		project.setPublicYn(isEmpty(project.getPublicYn())?CoConstDef.FLAG_YES:project.getPublicYn());

@@ -64,7 +64,14 @@ var evt = {
 		$('#statuses').select2({placeholder: "Status", allowClear: true});
         $('#distributionTypeSelect').select2({placeholder: "Distribution Type", allowClear: true});
         $('#secMailYnSelect').select2({placeholder: "Security Mail(Vulnerabiltiy)", allowClear: true});
-
+        
+        var distributionTypes = [[${searchBean.distributionTypes}]];
+        if (distributionTypes && distributionTypes.length > 0) {
+        	setTimeout(function() {
+                $('#distributionTypeSelect').val(distributionTypes).trigger('change');
+            }, 50);
+        }
+        
         var startDate;
         var endDate;
         
@@ -841,7 +848,7 @@ var fn = {
 		} else {
 			paramData.statuses = "";
 		}
-		
+		console.log(paramData);
 		return paramData;
 	}, getUserName : function(cellvalue, options, rowObject){
 		var reviewerName = adminUserList[cellvalue] || "";
