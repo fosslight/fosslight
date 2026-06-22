@@ -7,6 +7,7 @@
 		.commentDiv table {border: 1px solid #ddd;}
 		.commentDiv table th {border: 1px solid #ddd;}
 		.commentDiv table td {border: 1px solid #ddd;}
+		.text-ellipsis {padding:5px; max-width: 130px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;}
 	</style>
 	<title>FOSSLight Hub</title>
 </head>
@@ -196,7 +197,7 @@
 											<td th:style="'padding:5px;'"><span th:utext="${vulnerability.cveId}"></span></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.cvssScore}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.vulnSummary}"></td>
-											<td th:style="'padding:5px;'" th:utext="${vulnerability.patchLink}"></td>
+											<td class="text-ellipsis" th:utext="${vulnerability.patchLink}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.publishedDate}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.modifiedDate}"></td>
 										</tr>
