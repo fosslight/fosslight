@@ -848,7 +848,17 @@ var fn = {
 		} else {
 			paramData.statuses = "";
 		}
-		console.log(paramData);
+		
+		if (typeof paramData.distributionType === "undefined" && [[${searchBean.distributionTypes}]] != null) {
+			paramData.distributionType = [[${searchBean.distributionTypes}]];
+		}
+		if (paramData.distributionType != null) {
+			paramData.distributionType = JSON.stringify(paramData.distributionType);
+			paramData.distributionType = paramData.distributionType.replace(/\"|\[|\]/gi, "");
+		} else {
+			paramData.distributionType = "";
+		}
+		
 		return paramData;
 	}, getUserName : function(cellvalue, options, rowObject){
 		var reviewerName = adminUserList[cellvalue] || "";
