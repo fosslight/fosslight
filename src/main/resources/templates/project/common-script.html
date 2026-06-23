@@ -319,9 +319,41 @@ var com_fn = {
 				commonAlertifyDialog('bomConfirmDialog');
         	}
 			
+			var restrictionNames = [];
+			var bomList = $("#bomList").jqGrid('getGridParam','data');
+			var validNames = [];
+			bomList.forEach(function(row) {
+			    if (row.restriction && row.restriction.indexOf('|') !== -1) {
+			        var parts = row.restriction.split('|');
+			        var name = parts[0].trim();
+			        var level = parseInt(parts[1], 10);
+			        
+			        if (level >= 4 && level != 99) {
+			        	validNames.push(name);
+			        }
+			    }
+			});
+			
+			$.each(validNames, function(index, element) {
+			    if ($.inArray(element, restrictionNames) === -1) {
+			    	restrictionNames.push(element);
+			    }
+			});
+			
 			var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.confirm', true)}]];
        		innerHtml 		+= '<br><textarea id="bomConfirmEditor"></textarea>';
 			
+       		if (restrictionNames.length > 0) {
+       			innerHtml += "<b style=\"color: #dc3545;\">Restrictions with level 4 or higher :<br>";
+       			for (var i in restrictionNames) {
+       				innerHtml += "<span class=\"ml-3\">• " + restrictionNames[i] + "</span>";
+       				if (i < restrictionNames.length-1) {
+       					innerHtml += "<br>";
+       				}
+       			}
+       			innerHtml += "</b>";
+       		}
+       		
        		alertify.bomConfirmDialog()
        		.set('onok', function(e) {
        			var editorVal = $("#bomConfirmEditor").summernote('code');
