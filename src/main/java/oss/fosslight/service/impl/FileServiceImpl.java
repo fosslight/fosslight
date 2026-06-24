@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -2021,58 +2022,58 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	@Override
 	public void deletePhysicalFile(T2File file, String flag) {
-		String filePath = "";
-		boolean isAndroidNoticeFolder = false;
-		String folderPath = "";
-		
+		if (file == null || isEmpty(file.getLogiPath()) || isEmpty(file.getLogiNm())) {
+			return;
+		}
+
+		T2File fileInfo = fileMapper.getFileInfo2(file);
+		if (fileInfo == null) {
+			fileInfo = file;
+		}
+
+		if (fileInfo == null || isEmpty(fileInfo.getLogiPath()) || isEmpty(fileInfo.getLogiNm())) {
+			return;
+		}
+
+		String filePath = fileInfo.getLogiPath() + "/" + fileInfo.getLogiNm();
+		File physicalFile = new File(filePath);
+		File folder = null;
+
+		// Android report 업로드(zip/tar.gz)는 파일과 함께 압축 해제된 폴더도 같이 삭제한다.
+		String lowerExt = avoidNull(fileInfo.getExt()).toLowerCase();
+		boolean archiveFile = "zip".equals(lowerExt) || "tar.gz".equals(lowerExt) || "tar.bz2".equals(lowerExt) || "tgz.gz".equals(lowerExt);
+		if (archiveFile && !isEmpty(fileInfo.getLogiPath()) && !isEmpty(fileInfo.getLogiNm())) {
+			String folderName = fileInfo.getLogiNm();
+			String extSuffix = "." + lowerExt;
+			if (folderName.toLowerCase().endsWith(extSuffix)) {
+				folderName = folderName.substring(0, folderName.length() - extSuffix.length());
+			} else {
+				folderName = FilenameUtils.getBaseName(folderName);
+			}
+			folder = new File(fileInfo.getLogiPath(), folderName);
+
+			if (folder != null && folder.exists()) {
+				try {
+					FileUtils.deleteDirectory(folder);
+				} catch (Exception e) {
+					log.info("Failed to delete folder {} : {}", folder.getAbsolutePath(), e.getMessage(), e);
+				}
+			}
+		}
+//		else if (fileInfo.getLogiPath().contains("android_notice") && "html".equals(lowerExt)) {
+//			folder = new File(fileInfo.getLogiPath());
+//		}
+
 		if ("VERIFY".equalsIgnoreCase(flag) || CoConstDef.CD_CHECK_OSS_SELF.equals(flag) || CoConstDef.CD_CHECK_OSS_PARTNER.equals(flag) || CoConstDef.CD_CHECK_OSS_IDENTIFICATION.equals(flag)) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
-		} else {
-			T2File T2file = fileMapper.getFileInfo2(file);
-			if (T2file != null) {
-				filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
-				if (T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
-					isAndroidNoticeFolder = true;
-					folderPath = T2file.getLogiPath();
-				}
-			}
+			physicalFile = new File(filePath);
 		}
-		
-		if (!isEmpty(folderPath)) {
-			try {
-				FileOutputStream to = new FileOutputStream(filePath);
-				to.flush();
-	   	 		to.close();
-				if(isAndroidNoticeFolder) {
-					File folder = new File(folderPath);
-					while(folder.exists()) {
-						File[] folder_list = folder.listFiles();
-						for(int i = 0;i < folder_list.length; i++) {
-							folder_list[i].delete();
-						}
-						if(folder_list.length == 0 && folder.isDirectory()) {
-							folder.delete();
-						}
-					}
-				} else{
-					File LogiFile = new File(filePath);
-					if (LogiFile.exists()) {
-						LogiFile.delete();
-					}
-				}
-			} catch(Exception e) {
-				log.info(e.getMessage(), e);
-			}
-		} else {
-			try {
-				File LogiFile = new File(filePath);
-				if (LogiFile.exists()) {
-					LogiFile.delete();
-				}
-			} catch (Exception e) {
-				log.info(e.getMessage(), e);
-			}
+
+		if (physicalFile.exists() && !physicalFile.delete()) {
+			log.info("{} is delete failed.", filePath);
 		}
+
+
 	}
 
 	@Override
