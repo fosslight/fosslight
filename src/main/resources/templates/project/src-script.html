@@ -96,12 +96,12 @@ var src_fn = {
 			
 			var notApplicable = false;
 			var saveMsg = [[#{msg.common.confirm.save}]];
-			var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
-			if ("N" == identificationSubStatusSrc) {
-				notApplicable = true;
-				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
-				_srcLoadListLength = 0;	
-			}
+// 			var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
+// 			if ("N" == identificationSubStatusSrc) {
+// 				notApplicable = true;
+// 				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
+// 				_srcLoadListLength = 0;	
+// 			}
 			
 			alertify.confirm(saveMsg, function (e) {
 				if (e) {
@@ -126,8 +126,11 @@ var src_fn = {
 		var accept1 = '';
 		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
 		for (var i in fileAccept) {
-			if ('12' == fileAccept[i].cdDtlNo) {
-				accept1 = fileAccept[i].cdDtlExp;
+			if ('12' == fileAccept[i].cdDtlNo || "42" == fileAccept[i].cdDtlNo || "43" == fileAccept[i].cdDtlNo) {
+				if ("" != accept1) {
+					accept1 += ",";
+				}
+				accept1 += fileAccept[i].cdDtlExp;
 			}
 		}
 		
@@ -141,6 +144,9 @@ var src_fn = {
 			sequential:true,
 			sequentialCount:1,
 			formData:{"registFileId" : $('#srcCsvFileId').val(), "tabNm" : "SRC"},
+			onSubmit : function(files) {
+				loadingIden.show();
+			},
 			onSuccess:function(files,data,xhr,pd) {
 				var result = jQuery.parseJSON(data);
 				
@@ -149,7 +155,7 @@ var src_fn = {
 					$('.ajax-file-upload-statusbar').fadeOut('slow');
 					$('.ajax-file-upload-statusbar').remove();
 				} else {
-					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
+					if("FILE_SIZE_LIMIT_OVER" == result[0] || "UNSUPPORTED_FILE" == result[0] || "FILE_CONVERSION_FAILED" == result[0]) {
 						alertify.alert(result[1], function(){
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();

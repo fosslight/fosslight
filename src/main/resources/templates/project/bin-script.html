@@ -923,8 +923,11 @@ var bin_fn = {
 		var accept1 = '';
 		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
 		for (var i in fileAccept) {
-			if ('12' == fileAccept[i].cdDtlNo) {
-				accept1 = fileAccept[i].cdDtlExp;
+			if ('12' == fileAccept[i].cdDtlNo || "42" == fileAccept[i].cdDtlNo || "43" == fileAccept[i].cdDtlNo) {
+				if ("" != accept1) {
+					accept1 += ",";
+				}
+				accept1 += fileAccept[i].cdDtlExp;
 			}
 		}
 		
@@ -942,6 +945,9 @@ var bin_fn = {
 				
 				return data;
 			},
+			onSubmit : function(files) {
+				loadingIden.show();
+			},
 			onSuccess:function(files,data,xhr,pd){
 				var result = jQuery.parseJSON(data);
 				if(result[1] == null) {
@@ -949,7 +955,7 @@ var bin_fn = {
 					$('.ajax-file-upload-statusbar').fadeOut('slow');
 					$('.ajax-file-upload-statusbar').remove();
 				} else {
-					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
+					if("FILE_SIZE_LIMIT_OVER" == result[0] || "UNSUPPORTED_FILE" == result[0] || "FILE_CONVERSION_FAILED" == result[0]) {
 						alertify.alert(result[1], function() {
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();
@@ -1153,12 +1159,12 @@ var bin_fn = {
 			
 			var notApplicable = false;
 			var saveMsg = [[#{msg.common.confirm.save}]];
-			var identificationSubStatusBin = $("input[name='identificationSubStatusBin']").val();
-			if ("N" == identificationSubStatusBin) {
-				notApplicable = true;
-				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
-				_binLoadListLength = 0;	
-			}
+// 			var identificationSubStatusBin = $("input[name='identificationSubStatusBin']").val();
+// 			if ("N" == identificationSubStatusBin) {
+// 				notApplicable = true;
+// 				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
+// 				_binLoadListLength = 0;	
+// 			}
 			
 			alertify.confirm(saveMsg, function (e) {
 				if (e) {
