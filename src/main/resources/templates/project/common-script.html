@@ -329,7 +329,12 @@ var com_fn = {
 			        var level = parseInt(parts[1], 10);
 			        
 			        if (level >= 4 && level != 99) {
-			        	validNames.push(name);
+			        	name.split(/\r?\n/).forEach(function(item) {
+			                item = item.trim();
+			                if (item) {
+			                    validNames.push(item);
+			                }
+			            });
 			        }
 			    }
 			});
