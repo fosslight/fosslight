@@ -96,12 +96,13 @@ var src_fn = {
 			
 			var notApplicable = false;
 			var saveMsg = [[#{msg.common.confirm.save}]];
-// 			var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
-// 			if ("N" == identificationSubStatusSrc) {
+			var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
+			if ("N" == identificationSubStatusSrc) {
+				$("input[name='identificationSubStatusSrc']").val("Y");
 // 				notApplicable = true;
 // 				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
 // 				_srcLoadListLength = 0;	
-// 			}
+ 			}
 			
 			alertify.confirm(saveMsg, function (e) {
 				if (e) {

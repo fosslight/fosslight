@@ -104,12 +104,13 @@ var dep_fn = {
 			
 			var notApplicable = false;
 			var saveMsg = [[#{msg.common.confirm.save}]];
-// 			var identificationSubStatusDep = $("input[name='identificationSubStatusDep']").val();
-// 			if ("N" == identificationSubStatusDep) {
+			var identificationSubStatusDep = $("input[name='identificationSubStatusDep']").val();
+			if ("N" == identificationSubStatusDep) {
+				$("input[name='identificationSubStatusDep']").val("Y");
 // 				notApplicable = true;
 // 				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
 // 				_depLoadListLength = 0;	
-// 			}
+ 			}
 			
 			alertify.confirm(saveMsg, function (e) {
 				if (e) {
