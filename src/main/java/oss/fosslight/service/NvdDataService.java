@@ -2,10 +2,12 @@ package oss.fosslight.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
@@ -44,6 +46,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.NvdDataMapper;
@@ -52,7 +55,7 @@ import oss.fosslight.util.StringUtil;
 
 @Service("NvdDataService")
 @Slf4j
-public class NvdDataService {
+public class NvdDataService extends CoTopComponent {
 	static final Logger schlog = LoggerFactory.getLogger("SCHEDULER_LOG");
 	
 	private final String NVD_META_REST_URL = "https://services.nvd.nist.gov/rest/json/cpematch/2.0";
@@ -63,8 +66,8 @@ public class NvdDataService {
 	private static final String NVD_REST_BASE_URL = "https://services.nvd.nist.gov";
 	private static final String NVD_REST_CPE_MATCH_URL = "/rest/json/cpematch/2.0";
 	private static final String NVD_REST_CPE_URL = "/rest/json/cves/2.0";
-	private static final int API_MATCH_CHUNK_SIZE = 500;
-	private static final int API_CPE_CHUNK_SIZE = 2000;
+	private static final int API_MATCH_CHUNK_SIZE = 150; // 500;
+	private static final int API_CPE_CHUNK_SIZE = 1000; // 2000;
 	
 	private String lastModStartDate;
 	private String lastModEndDate;
@@ -95,7 +98,8 @@ public class NvdDataService {
 		    String endTime = sdformat.format(cal.getTime());
 
 			Calendar mon = Calendar.getInstance();
-		    mon.add(Calendar.MONTH, -1);
+			mon.add(Calendar.DATE, -7); // Set start time (2 weeks ago from current time)
+//		    mon.add(Calendar.MONTH, -1);
 		    String startTime = sdformat.format(mon.getTime());
 
 			lastModStartDate = startTime + "%2B01:00";
@@ -845,38 +849,74 @@ public class NvdDataService {
 			httpsURLConnection = (HttpsURLConnection) url.openConnection();
 			httpsURLConnection.setRequestMethod("GET");
 			httpsURLConnection.addRequestProperty("x-api-key", NVD_API_KEY);
-			httpsURLConnection.setConnectTimeout(1000 * 15);
+			httpsURLConnection.setConnectTimeout(15000);
+			httpsURLConnection.setReadTimeout(180000);
 
-			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-				Map<String, Object> convertMap = getFromJSONObjectToMap(bufferedReader);
-				if (convertMap != null) {
-					connectionFlag = true;
-					rtnMap = convertMap;
-				} else {
-					connectionFlag = false;
-				}
-			} else {
-				schlog.error("httpsURLConnection error : " + HttpStatus.valueOf(httpsURLConnection.getResponseCode()));
-				connectionFlag = false;
-			}
+			int responseCode = httpsURLConnection.getResponseCode();
+
+	        if (responseCode != HttpURLConnection.HTTP_OK) {
+	        	schlog.error("NVD API response error. status={}",responseCode);
+
+	        	connectionFlag = false;
+	        	rtnMap.put("connectionFlag", connectionFlag);
+	        	return rtnMap;
+	        }
+			
+	        String responseBody;
+
+	        try (
+	            InputStream is = httpsURLConnection.getInputStream();
+	            InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+	            BufferedReader br = new BufferedReader(isr)
+	        ) {
+	            StringBuilder sb = new StringBuilder(1024 * 1024);
+	            String line;
+	            while ((line = br.readLine()) != null) {
+	                sb.append(line);
+	            }
+	            responseBody = sb.toString();
+	        }
+
+	        schlog.info("[NVD] startIndex={}, responseLength={}", startIndex, responseBody.length());
+
+	        Map<String, Object> convertMap = getFromJSONObjectToMap(responseBody);
+	        if (convertMap != null) {
+	            rtnMap = convertMap;
+	            connectionFlag = true;
+	        } else {
+	            connectionFlag = false;
+	        }
+	        
+//			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+//				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
+//				Map<String, Object> convertMap = getFromJSONObjectToMap(bufferedReader);
+//				if (convertMap != null) {
+//					connectionFlag = true;
+//					rtnMap = convertMap;
+//				} else {
+//					connectionFlag = false;
+//				}
+//			} else {
+//				schlog.error("httpsURLConnection error : " + HttpStatus.valueOf(httpsURLConnection.getResponseCode()));
+//				connectionFlag = false;
+//			}
 		} catch (Exception e) {
-			schlog.error(e.getMessage());
+			schlog.error("[NVD] API connection error. startIndex={}", startIndex, e);
 			connectionFlag = false;
 		} finally {
-			if(httpsURLConnection != null) {
+			if (httpsURLConnection != null) {
 				httpsURLConnection.disconnect();
 			}
 			if (connectionFlag) {
 				try {
-					Thread.sleep(1000 * 6);
+					Thread.sleep(1000 * 8);
 				} catch (InterruptedException e) {
 					schlog.error(e.getMessage());
 				}
 			} else {
 				try {
-					schlog.warn("Try again in 15 seconds...");
-					Thread.sleep(1000 * 15);
+					schlog.warn("[NVD] Retry after 30 sec. startIndex={}", startIndex);
+					Thread.sleep(1000 * 30);
 				} catch (InterruptedException e) {
 					schlog.error(e.getMessage());
 				}
@@ -887,15 +927,19 @@ public class NvdDataService {
 		return rtnMap;
 	}
 
-	private Map<String, Object> getFromJSONObjectToMap(BufferedReader br) {
-		if (br == null) {
+	private Map<String, Object> getFromJSONObjectToMap(String json) {
+		if (isEmpty(json)) {
 			return null;
 		}
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-	        return mapper.readValue(br, new TypeReference<Map<String, Object>>() {});
+			return mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
         } catch (Exception e) {
-        	log.error("NVD JSON parsing error (Jackson): {}", e.getMessage());
+        	int length = json.length();
+            String tail = json.substring(Math.max(0, length - 2000));
+            log.error("NVD JSON parsing error (Jackson): {}", e.getMessage());
+            log.error("NVD response length={}", length);
+            log.error("NVD response tail={}", tail);
         	return null;
         }
 	}
@@ -1063,39 +1107,4 @@ public class NvdDataService {
             return;
         }
     }
-	
-	
-//	@SuppressWarnings("unchecked")
-//	private Map<String, Object> getNvdData(String uri) throws SSLException, JsonProcessingException {
-//		final String responseString = getNvdRestWebClient().method(HttpMethod.GET).uri(uri)
-//				.header("Accept", "application/json")
-//				.header("apiKey", NVD_API_KEY).retrieve()
-//				.onStatus(HttpStatus::is4xxClientError,clientResponse -> clientResponse.createException().map(it -> new RuntimeException("code : " + clientResponse.statusCode())))
-//				.bodyToMono(String.class)
-//				.timeout(Duration.ofMillis(1000 * 10))
-//				.retryWhen(Retry.fixedDelay(5, Duration.ofSeconds(15)))
-//				.block();
-//		
-//		log.debug("getNvdData URL:{}, result:{}", uri, responseString);
-//		
-//		return new ObjectMapper().readValue(responseString, Map.class);
-//	}
-//	
-//	private WebClient getNvdRestWebClient() throws SSLException {
-//		return WebClient.builder()
-//				.codecs(c -> c.defaultCodecs().maxInMemorySize(1024 * 1024 * 1024))
-//				.clientConnector(new ReactorClientHttpConnector(getHttpClient()))
-//				.baseUrl(NVD_REST_BASE_URL)
-//				.build();
-//	}
-//	
-//	private HttpClient getHttpClient() throws SSLException {
-//		
-//	    final SslContext sslContext = SslContextBuilder
-//	            .forClient()
-//	            .trustManager(InsecureTrustManagerFactory.INSTANCE)
-//	            .build();
-//
-//	    return HttpClient.create().secure(t -> t.sslContext(sslContext));
-//	}
 }
