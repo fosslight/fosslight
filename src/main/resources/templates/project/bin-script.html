@@ -1159,12 +1159,13 @@ var bin_fn = {
 			
 			var notApplicable = false;
 			var saveMsg = [[#{msg.common.confirm.save}]];
-// 			var identificationSubStatusBin = $("input[name='identificationSubStatusBin']").val();
-// 			if ("N" == identificationSubStatusBin) {
+			var identificationSubStatusBin = $("input[name='identificationSubStatusBin']").val();
+			if ("N" == identificationSubStatusBin) {
+				$("input[name='identificationSubStatusBin']").val("Y");
 // 				notApplicable = true;
 // 				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
 // 				_binLoadListLength = 0;	
-// 			}
+ 			}
 			
 			alertify.confirm(saveMsg, function (e) {
 				if (e) {
