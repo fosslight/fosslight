@@ -345,12 +345,12 @@ var party_evt = {
 		if (com_fn.checkStatus()){
 			var notApplicable = false;
 			var saveMsg = [[#{msg.common.confirm.save}]];
-			var identificationSubStatusPartner = $("input[name='identificationSubStatusPartner']").val();
-			if ("N" == identificationSubStatusPartner) {
-				notApplicable = true;
-				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
-				_3rdLoadListLength = 0;
-			}
+// 			var identificationSubStatusPartner = $("input[name='identificationSubStatusPartner']").val();
+// 			if ("N" == identificationSubStatusPartner) {
+// 				notApplicable = true;
+// 				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
+// 				_3rdLoadListLength = 0;
+// 			}
 			
 			alertify.confirm(saveMsg, function (e) {
 				if (e) {
