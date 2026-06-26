@@ -5627,6 +5627,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				if (!verifyFlag) {
 					ossNotice.setRefDiv(projectInfo.getReferenceDiv());
+				} else {
+					ossNotice = verificationService.selectOssNoticeOne(prjId);
 				}
 				String createDate = projectInfo.getCreatedDate();
 				

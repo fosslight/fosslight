@@ -2570,15 +2570,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (isEmpty(prjName)) {
 				prjName = project.getPrjName();
 			}
-			
 			if (isEmpty(prjId)) {
 				prjId = project.getPrjId();
 			}
-			
 			if (isEmpty(prjVersion)) {
 				prjVersion = project.getPrjVersion();
 			}
-			
 			if (isEmpty(distributeSite)) {
 				distributeSite = project.getDistributeTarget();
 			}
@@ -2634,10 +2631,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 			}
 			
-			String componentKey = (hideOssVersionFlag
-									? bean.getOssName() 
-									: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
-			
+			String componentKey = (hideOssVersionFlag ? bean.getOssName() : bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 			if ("-".equals(bean.getOssName())) {
 				componentKey += dashSeq++;
 			}
@@ -2674,14 +2668,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			if (hideOssVersionFlag) {
-				
-				List<String> copyrightList = componentCopyright.containsKey(componentKey) 
-						? (List<String>) componentCopyright.get(componentKey) 
-						: new ArrayList<>();
-						
-				List<String> attributionList = componentAttribution.containsKey(componentKey) 
-						? (List<String>) componentAttribution.get(componentKey) 
-						: new ArrayList<>();
+				List<String> copyrightList = componentCopyright.containsKey(componentKey) ? (List<String>) componentCopyright.get(componentKey) : new ArrayList<>();
+				List<String> attributionList = componentAttribution.containsKey(componentKey) ? (List<String>) componentAttribution.get(componentKey) : new ArrayList<>();
 						
 				if (!isEmpty(bean.getCopyrightText())) {
 					for (String copyright : bean.getCopyrightText().split("\n")) {
@@ -2706,7 +2694,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				if (CoConstDef.FLAG_NO.equals(avoidNull(bean.getAdminCheckYn(), CoConstDef.FLAG_NO))) {
 					String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
-					
 					// multi license 추가 copyright
 					if (!isEmpty(ossCopyright)) {
 						for (String copyright : ossCopyright.split("\n")) {
@@ -2742,7 +2729,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					licenseInfo.put(license.getLicenseName(), license);
 				}
 			} else {
-				
 				// 라이선스 정보 생성
 				OssComponentsLicense license = new OssComponentsLicense();
 				license.setLicenseId(bean.getLicenseId());
@@ -2819,13 +2805,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			List<String> checkKeyInfo = new ArrayList<>();
 			
 			for (OssComponents bean : addOssComponentList) {
-				String componentKey = (hideOssVersionFlag
-											? bean.getOssName() 
-											: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
-				
-				String checkKey = (hideOssVersionFlag
-										? bean.getOssName() + "|" + bean.getLicenseName()
-										: bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName()).toUpperCase();
+				String componentKey = (hideOssVersionFlag ? bean.getOssName() : bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				String checkKey = (hideOssVersionFlag ? bean.getOssName() + "|" + bean.getLicenseName() : bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName()).toUpperCase();
 				
 				if (checkKeyInfo.contains(checkKey)) {
 					continue;
@@ -2842,8 +2823,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				license.setAttribution(bean.getAttribution());
 				bean.addOssComponentsLicense(license);
 				
-				if (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
-						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) { // Accompanied with source code 의 경우 source 공개 의무
+				if (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) { // Accompanied with source code 의 경우 source 공개 의무
 					srcInfo.put(componentKey, bean);
 				} else {
 					noticeInfo.put(componentKey, bean);
