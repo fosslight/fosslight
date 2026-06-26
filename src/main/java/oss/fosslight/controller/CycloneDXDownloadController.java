@@ -5,7 +5,6 @@
 
 package oss.fosslight.controller;
 
-import java.io.File;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
@@ -13,7 +12,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
@@ -27,10 +25,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.CYCLONEDXDOWNLOAD;
-import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.service.CommentService;
@@ -53,8 +49,7 @@ public class CycloneDXDownloadController extends CoTopComponent {
 	@Autowired CommentService commentService;
 	
 	@PostMapping(value =CYCLONEDXDOWNLOAD.CYCLONEDX_POST)
-	public @ResponseBody ResponseEntity<Object> getCycloneDXPost(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> getCycloneDXPost(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model) {
 		String downloadId = null;
 		String rtnMsg = "";
 		
@@ -72,11 +67,13 @@ public class CycloneDXDownloadController extends CoTopComponent {
 				prjBean = projectService.getProjectBasicInfo(prjId);
 			}
 			
+			boolean isSBOM = isEmpty(dataStr) ? true : false;
+			
 			if ("cycloneDXJson".equals(type)) {
-				if (!partnerIdCheckFlag && (prjBean != null && !isEmpty(prjBean.getCdxJsonFileId()))) {
+				if (!isSBOM && !partnerIdCheckFlag && (prjBean != null && !isEmpty(prjBean.getCdxJsonFileId()))) {
 					downloadId = prjBean.getCdxJsonFileId();
 				} else {
-					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isEmpty(dataStr) ? "verify" : "bom");
+					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isSBOM ? "verify" : "bom");
 					if (!isEmpty(fileId)) {
 						downloadId = fileId;
 					} else {
@@ -84,10 +81,10 @@ public class CycloneDXDownloadController extends CoTopComponent {
 					}
 				}
 			} else if ("cycloneDXXml".equals(type)) {
-				if (!partnerIdCheckFlag && (prjBean != null && !isEmpty(prjBean.getCdxXmlFileId()))) {
+				if (!isSBOM && !partnerIdCheckFlag && (prjBean != null && !isEmpty(prjBean.getCdxXmlFileId()))) {
 					downloadId = prjBean.getCdxXmlFileId();
 				} else {
-					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isEmpty(dataStr) ? "verify" : "bom");
+					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isSBOM ? "verify" : "bom");
 					if (!isEmpty(fileId)) {
 						downloadId = fileId;
 					} else {
@@ -114,9 +111,7 @@ public class CycloneDXDownloadController extends CoTopComponent {
 	
 	@ResponseBody
 	@GetMapping(value = CYCLONEDXDOWNLOAD.FILE)
-	public ResponseEntity<FileSystemResource> getFile (
-			HttpServletRequest req,
-			HttpServletResponse res, Model model) throws Exception{
+	public ResponseEntity<FileSystemResource> getFile (HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		T2File fileInfo = fileService.selectFileInfo(req.getParameter("id"));
 		String filePath = fileInfo.getLogiPath();
 		
