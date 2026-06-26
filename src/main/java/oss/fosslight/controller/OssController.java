@@ -1982,7 +1982,7 @@ public class OssController extends CoTopComponent{
 						saveBean.setScancodeLicense(oa.getScancodeLicense());
 					}
 					if (!isEmpty(oa.getNeedReviewLicenseScanode())) {
-						saveBean.setNeedReviewLicenseScanode(oa.getNeedReviewLicenseScanode());
+						saveBean.setNeedReviewLicenseAskalono(oa.getNeedReviewLicenseScanode());
 					}
 				}
 				ossService.saveLicenseScanResult(saveBean);
