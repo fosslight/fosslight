@@ -2448,7 +2448,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			hyperLinkFont.setUnderline(Font.U_SINGLE);
 			hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
 			hyperLinkStyle.setFont(hyperLinkFont);
-			sheet = wb.getSheetAt(7);
+			sheet = wb.getSheetAt(8);
 			
 			if (securityGridList != null){
 				List<String[]> rowInfoData = new ArrayList<>();
@@ -6063,6 +6063,19 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		return makeBomCompareExcelFileId(bean.getReferenceId(), wb, "SBOM_Compare", "xlsx");
+	}
+	
+	public static String generateSecurityExcelId(Map<String, Object> result, Project projectMaster, String code) {
+		if (isEmpty(downloadpath)) {
+			downloadpath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+		}
+		String downloadId = "";
+		try {
+			downloadId = getSecurityExcelId(result, projectMaster, code);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return downloadId;
 	}
 }
 

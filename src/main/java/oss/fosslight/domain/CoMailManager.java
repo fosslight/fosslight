@@ -38,6 +38,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 
+import org.apache.commons.collections.MapUtils;
 import org.jsoup.Jsoup;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
@@ -796,10 +797,23 @@ public class CoMailManager extends CoTopComponent {
 				}
     		}
     		
+    		if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY.equals(bean.getMsgType())) {
+    			if (MapUtils.isNotEmpty(bean.getParamMap())) {
+    				Map<String, Object> paramMap = bean.getParamMap();
+    				if (paramMap.containsKey("isVulnerable")) {
+    					convertDataMap.put("isVulnerable", (boolean) paramMap.get("isVulnerable"));
+    				}
+    				if (paramMap.containsKey("message")) {
+    					convertDataMap.put("message", (String) paramMap.get("message"));
+    				}
+    				if (paramMap.containsKey("security_oss_info")) {
+    					convertDataMap.put("security_oss_info", (Map<String, Map<String, Object>>) paramMap.get("security_oss_info"));
+    				}
+    			}
+    		}
+    		
 			if (CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT.equals(bean.getMsgType())) {
-				var flhSelfCheckUrl = avoidNull(bean.getParamExpansion1())
-						+ "/self-check/"
-						+ avoidNull(bean.getParamExpansion2());
+				String flhSelfCheckUrl = avoidNull(bean.getParamExpansion1()) + "/self-check/" + avoidNull(bean.getParamExpansion2());
 				convertDataMap.put("url", flhSelfCheckUrl);
 			}
     		
@@ -911,6 +925,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED:
@@ -1083,6 +1098,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY.equals(bean.getMsgType())
@@ -1145,6 +1161,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_REJECT.equals(bean.getMsgType())
@@ -1168,7 +1185,8 @@ public class CoMailManager extends CoTopComponent {
         						(
         								CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType()) 
         								|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()))
-        								|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())) {
+        								|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())
+        								|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY.equals(bean.getMsgType())) {
         					ccList.addAll(Arrays.asList(MAIL_LIST_SECURITY));
 							Project project = new Project();
 							project.setPrjId(bean.getParamPrjId());
@@ -4331,6 +4349,21 @@ public class CoMailManager extends CoTopComponent {
 					helper.addAttachment(new String(fileName.getBytes("UTF-8"),"UTF-8"), dataSource);
 				}catch(Exception e){
 					// Don't Exist Pdf
+					log.debug(e.getMessage(), e);
+				}
+			} else if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY.equals(coMail.getMsgType())) {
+				try {
+					Map<String, Object> paramMap = coMail.getParamMap();
+					if (MapUtils.isNotEmpty(paramMap) && paramMap.containsKey("attachFile")) {
+						T2File attachFile = (T2File) paramMap.get("attachFile");
+						if (attachFile != null) {
+							String fileName = attachFile.getOrigNm();
+							String filePath = attachFile.getLogiPath() + attachFile.getLogiNm();
+							DataSource dataSource = new FileDataSource(filePath);
+							helper.addAttachment(new String(fileName.getBytes("UTF-8"),"UTF-8"), dataSource);
+						}
+					}
+				} catch (Exception e) {
 					log.debug(e.getMessage(), e);
 				}
 			}

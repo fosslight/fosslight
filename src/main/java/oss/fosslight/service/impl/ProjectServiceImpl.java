@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -4355,6 +4357,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			verificationService.getReviewReportPdfFile(prjInfo.getPrjId());
 			replaceOssComponentsSnapshots(param, rows, false);
+			vulnerabilitySummaryEmailDispatcher(prjInfo);
 		} else if (!isEmpty(project.getCompleteYn())) {
 			// project complete 시
 			updateProjectMaster(project);
@@ -4917,6 +4920,73 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void vulnerabilitySummaryEmailDispatcher(Project prjInfo) {
+		Project project = new Project();
+		project.setPrjId(prjInfo.getPrjId());
+		
+		Map<String, Object> paramMap = new HashMap<>();
+		Map<String, Object> securityMap = getSecurityGridList(project);
+		
+		if (securityMap.containsKey("totalList")) {
+			boolean isVulnerable = false;
+			List<OssComponents> needToResolveList = (List<OssComponents>) securityMap.get("totalList");
+			if (CollectionUtils.isNotEmpty(needToResolveList)) {
+				isVulnerable = true;
+			}
+			paramMap.put("isVulnerable", isVulnerable);
+		}
+		
+		if (securityMap.containsKey("overviewData")) {
+			Map<String, Object> overViewData = (Map<String, Object>) securityMap.get("overviewData");
+			if (overViewData.containsKey("vulnScoreByOssVersion")) {
+				Map<String, Map<String, Object>> vulnScoreByOssVersion = (Map<String, Map<String, Object>>) overViewData.get("vulnScoreByOssVersion");
+				paramMap.put("security_oss_info", vulnScoreByOssVersion);
+			}
+		}
+		
+		if (securityMap.containsKey("msg")) {
+			String msg = String.valueOf(securityMap.get("msg"));
+
+		    String domain = CommonFunction.emptyCheckProperty("server.domain", "https://enterprise.fosslight.org");
+		    Pattern pattern = Pattern.compile("<span[^>]*onclick=\"overview\\.vulnDetailPopup\\('([^']*)',\\s*''\\s*,\\s*''\\s*,\\s*1\\);\"[^>]*>(.*?)</span>");
+
+		    Matcher matcher = pattern.matcher(msg);
+		    StringBuffer sb = new StringBuffer();
+
+		    while (matcher.find()) {
+		        String ossName = matcher.group(1);
+		        String text = matcher.group(2);
+
+		        String linkUrl = domain
+		                + "/vulnerability/vulnpopup"
+		                + "?prjId=" + prjInfo.getPrjId()
+		                + "&ossName=" + URLEncoder.encode(ossName, StandardCharsets.UTF_8)
+		                + "&ossVersion="
+		                + "&vulnType="
+		                + "&range=";
+
+		        String replacement = "<a href=\"" + linkUrl + "\" style=\"color: blue;\" target=\"_blank\">" + text + "</a>";
+		        matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+		    }
+
+		    matcher.appendTail(sb);
+		    paramMap.put("message", sb.toString());
+		}
+		
+		String securityExcelId = ExcelDownLoadUtil.generateSecurityExcelId(securityMap, prjInfo, "fullDiscovered");
+		T2File attachFile = fileService.selectFileInfo(securityExcelId);
+		if (attachFile != null) {
+			paramMap.put("attachFile", attachFile);
+		}
+		
+		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY);
+		mailBean.setParamPrjId(prjInfo.getPrjId());
+		mailBean.setParamMap(paramMap);
+		CoMailManager.getInstance().sendMail(mailBean);
+	}
+	
 	@Override
 	public void updateIdentificationConfirmSkipPackaing(Project project) {
 		projectMapper.updateIdentificationConfirm(project);
