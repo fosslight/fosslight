@@ -154,6 +154,11 @@ ON DUPLICATE KEY UPDATE
     	`CD_DTL_EXP` = VALUES(`CD_DTL_EXP`),
     	`CD_ORDER`   = VALUES(`CD_ORDER`),
     	`USE_YN`     = VALUES(`USE_YN`);
+    	
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES 
+		('102', '461', '[FOSSLight][PRJ-${Project ID}] Vulnerability Summary : "${Project Name}"', '', '', 461, 'Y'),
+		('103', '461', 'identification confirm 시', '', '200', 461, 'Y'),
+		('110', '73', 'vulnerabilitySummary.html', '', '461', 19, 'Y');
 -- //@UNDO
 -- SQL to undo the change goes here.
 
