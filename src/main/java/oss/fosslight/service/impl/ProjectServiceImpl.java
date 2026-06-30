@@ -4981,6 +4981,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			paramMap.put("attachFile", attachFile);
 		}
 		
+		if (!isEmpty(CommonFunction.getProperty("fosslight.suffix"))) {
+			paramMap.put("suffix", CoConstDef.FLAG_YES);
+		}
+		
 		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY);
 		mailBean.setParamPrjId(prjInfo.getPrjId());
 		mailBean.setParamMap(paramMap);
