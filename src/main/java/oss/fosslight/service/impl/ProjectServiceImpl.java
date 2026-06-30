@@ -2377,17 +2377,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		List<PartnerMaster> thirdPartyUpdateList = new ArrayList<>();
 		List<PartnerMaster> thirdPartyInsertList = new ArrayList<>();
-		
 		for (PartnerMaster bean : thirdPartyList) {
 		    String partnerId = avoidNull(bean.getPartnerId(), "").trim();
 		    if (!isEmpty(partnerId)) {
-		    	if (thirdPartyMap.containsKey(partnerId)) {
-			        thirdPartyUpdateList.add(bean);
-			    } else {
-			        thirdPartyInsertList.add(bean);
-			    }
+		    	thirdPartyInsertList.add(bean);
 		    }
 		}
 
