@@ -806,6 +806,9 @@ public class CoMailManager extends CoTopComponent {
     				if (paramMap.containsKey("message")) {
     					convertDataMap.put("message", (String) paramMap.get("message"));
     				}
+    				if (paramMap.containsKey("suffix")) {
+    					convertDataMap.put("suffix", (String) paramMap.get("suffix"));
+    				}
     				if (paramMap.containsKey("security_oss_info")) {
     					convertDataMap.put("security_oss_info", (Map<String, Map<String, Object>>) paramMap.get("security_oss_info"));
     				}
