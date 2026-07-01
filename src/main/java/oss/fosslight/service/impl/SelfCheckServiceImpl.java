@@ -174,15 +174,15 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Override
 	public Project getProjectDetail(Project project) {
 		// master
-		project = selfCheckMapper.selectProjectMaster(project);
-		if (project == null) {
+		Project bean = selfCheckMapper.selectProjectMaster(project);
+		if (bean == null) {
 			return null;
 		}
 		
-		project.setDestributionName(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType()));
+		bean.setDestributionName(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType()));
 		//OS_TYPE
-		if (!"999".equals(project.getOsType())){
-			project.setOsTypeEtc(CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, project.getOsType()));
+		if (!"999".equals(bean.getOsType())){
+			bean.setOsTypeEtc(CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, project.getOsType()));
 		}
 
 		// watcher
@@ -205,19 +205,19 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					}
 				}
 			}
-			project.setWatcherList(watcherList);
+			bean.setWatcherList(watcherList);
 		}
 
 		// file
-		project.setCsvFile(selfCheckMapper.selectCsvFile(project));
+		bean.setCsvFile(selfCheckMapper.selectCsvFile(project));
 		
 		// scan file
-		if (!isEmpty(project.getSrcScanFileId())) {
-			project.setScanFile(selfCheckMapper.selectScanFile(project));
+		if (!isEmpty(bean.getSrcScanFileId())) {
+			bean.setScanFile(selfCheckMapper.selectScanFile(project));
 		}
 		
 		List<String> userIdList = new ArrayList<>();
-		userIdList.add(project.getCreator());
+		userIdList.add(bean.getCreator());
 		
 		if (watcherList != null && !watcherList.isEmpty()) {
 			for (Project watcher : watcherList) {
@@ -228,14 +228,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		}
 		
 		if (!CommonFunction.isAdmin() && !userIdList.contains(loginUserName())) {
-			project.setPermission(0);
-			project.setStatusPermission(0);
+			bean.setPermission(0);
+			bean.setStatusPermission(0);
 		} else {
-			project.setPermission(1);
-			project.setStatusPermission(1);
+			bean.setPermission(1);
+			bean.setStatusPermission(1);
 		}
 		
-		return project;
+		return bean;
 	}
 	
 	@Override
