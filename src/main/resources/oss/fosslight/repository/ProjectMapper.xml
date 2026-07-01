@@ -3862,7 +3862,7 @@
 						, REFERENCE_DIV
 						, COMPONENT_IDX
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
-						, OSS_ID
+							, OSS_ID
 						</if>
 						, OSS_NAME
 						, OSS_VERSION
@@ -3872,64 +3872,64 @@
 						, EXCLUDE_YN
 						, COPYRIGHT
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
-						, BINARY_NAME
+							, BINARY_NAME
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(binarySize)">
-						, BINARY_SIZE
+							, BINARY_SIZE
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryNotice)">
-						, BINARY_NOTICE
+							, BINARY_NOTICE
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(customBinaryYn)">
-						, CUSTOM_BINARY_YN
+							, CUSTOM_BINARY_YN
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerId)">
-						, REF_PARTNER_ID
+							, REF_PARTNER_ID
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPrjId)">
-						, REF_PRJ_ID
+							, REF_PRJ_ID
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refBatId)">
-						, REF_BAT_ID
+							, REF_BAT_ID
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refComponentId)">
-						, REF_COMPONENT_ID
+							, REF_COMPONENT_ID
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(reportFileId)">
-						, REPORT_FILE_ID
+							, REPORT_FILE_ID
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batStringMatchPercentage)">
-						, BAT_STRING_MATCH_PERCENTAGE
+							, BAT_STRING_MATCH_PERCENTAGE
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batPercentage)">
-						, BAT_PERCENTAGE
+							, BAT_PERCENTAGE
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batScore)">
-						, BAT_SCORE
+							, BAT_SCORE
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">
-						, OBLIGATION_TYPE
+							, OBLIGATION_TYPE
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
-						, COMMENTS
+							, COMMENTS
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@equals('16', referenceDiv) and !@oss.fosslight.util.StringUtil@isEmpty(dependencies)">
-						, DEPENDENCIES
+							, DEPENDENCIES
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
-						, REF_OSS_NAME
+							, REF_OSS_NAME
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
-						, TLSH
+							, TLSH
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
-						, CHECK_SUM
+							, CHECK_SUM
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
-						, PACKAGE_URL
+							, PACKAGE_URL
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refLoadedVal)">
-						, REF_LOADED_VAL
+							, REF_LOADED_VAL
 						</if>
 					)
 			VALUES
@@ -3938,7 +3938,7 @@
 						, #{referenceDiv}
 						, #{componentIdx}
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
-						, (CASE WHEN #{ossId} = '' THEN NULL ELSE #{ossId} END)
+							, (CASE WHEN #{ossId} = '' THEN NULL ELSE #{ossId} END)
 						</if>
 						, TRIM(#{ossName})
 						, TRIM(REPLACE(#{ossVersion}, 'N/A',''))
@@ -3948,64 +3948,64 @@
 						, #{excludeYn}
 						, #{copyrightText}
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
-						, #{binaryName}
+							, #{binaryName}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(binarySize)">
-						, #{binarySize}
+							, #{binarySize}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryNotice)">
-						, #{binaryNotice}
+							, #{binaryNotice}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(customBinaryYn)">
-						, #{customBinaryYn}
+							, #{customBinaryYn}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerId)">
-						, #{refPartnerId}
+							, #{refPartnerId}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPrjId)">
-						, #{refPrjId}
+							, #{refPrjId}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refBatId)">
-						, #{refBatId}
+							, #{refBatId}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refComponentId)">
-						, #{refComponentId}
+							, #{refComponentId}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(reportFileId)">
-						, #{reportFileId}
+							, #{reportFileId}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batStringMatchPercentage)">
-						, #{batStringMatchPercentage}
+							, #{batStringMatchPercentage}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batPercentage)">
-						, #{batPercentage}
+							, #{batPercentage}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batScore)">
-						, #{batScore}
+							, #{batScore}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">
-						, #{obligationType}
+							, #{obligationType}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
-						, #{comments}
+							, #{comments}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@equals('16', referenceDiv) and !@oss.fosslight.util.StringUtil@isEmpty(dependencies)">
-						, #{dependencies}
+							, #{dependencies}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
-						, #{refOssName}
+							, #{refOssName}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
-						, #{tlsh}
+							, #{tlsh}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
-						, #{checkSum}
+							, #{checkSum}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
-						, #{packageUrl}
+							, #{packageUrl}
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refLoadedVal)">
-						, #{refLoadedVal}
+							, #{refLoadedVal}
 						</if>
 					)
 	</insert>
@@ -6699,7 +6699,7 @@
 					
 					UNION ALL
 					
-					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, CVE.CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
+					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, MAX(CVE.CVSS_SCORE) AS CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
 					FROM
 					(
 						SELECT OC.OSS_NAME
@@ -6814,7 +6814,7 @@
 					
 					UNION ALL
 					
-					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, CVE.CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
+					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, MAX(CVE.CVSS_SCORE) AS CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
 					FROM
 					(
 						SELECT OC.OSS_NAME
