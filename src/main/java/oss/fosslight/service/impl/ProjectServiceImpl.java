@@ -4576,7 +4576,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm, List<ProjectIdentification> rows) {
 		if (CollectionUtils.isEmpty(rows)) {
 			ProjectIdentification param = new ProjectIdentification();
@@ -4589,61 +4589,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		if (CollectionUtils.isNotEmpty(rows)) {
-			rows.forEach(bean -> {
-				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId());
-				
-				String baseCopyright = "";
-			    String addedCopyright = null;
-				
-			    if (oss != null) {
-			        baseCopyright = avoidNull(oss.getCopyright());
-			        addedCopyright = findAddedOssCopyright(oss, bean.getLicenseId(), bean.getOssCopyright());
-			    } else {
-			        addedCopyright = bean.getOssCopyright();
-			    }
-
-			    if (!isEmpty(addedCopyright)) {
-			        StringBuilder sb = new StringBuilder(baseCopyright);
-			        if (!isEmpty(baseCopyright)) {
-			            sb.append('\n');
-			        }
-			        sb.append(addedCopyright);
-			        bean.setCopyrightText(sb.toString());
-			    } else {
-			        bean.setCopyrightText(baseCopyright);
-			    }
-			    
-//				String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
-//				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId());
-//				if(oss != null) {
-//					bean.setCopyrightText(avoidNull(oss.getCopyright()));
-//				}
-//				if (!isEmpty(ossCopyright)) {
-//					String addCopyright = avoidNull(bean.getCopyrightText());
-//					if (!isEmpty(bean.getCopyrightText())) {
-//						addCopyright += "\n";
-//					}
-//					addCopyright += ossCopyright;
-//					bean.setCopyrightText(addCopyright);
-//				}
-//				projectMapper.updateComponentsCopyrightInfo(bean);
-			});
-			
-			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-	            ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
-	            int saveCnt = 0;
-	            for (ProjectIdentification bean : rows) {
-	                mapper.updateComponentsCopyrightInfo(bean);
-	                if (++saveCnt >= 5000) {
-	                    sqlSession.flushStatements();
-	                }
-	            }
-	            sqlSession.flushStatements();
-	            sqlSession.commit();
-	        }
-		}
-
+		updateComponentsCopyrightBatch(rows);
+		
 		// oss id 등록
 		projectMapper.updateComponentsOssId(project);
 		// downlaod location, homepage등 master 정보로 치환
@@ -4765,93 +4712,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					copyComponents.add(copyParam);
 				}
 				
-				try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-					try {
-						ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
-			            
-			            Project param = new Project();
-			            param.setReferenceId(project.getPrjId());
-			    		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
-			    		int componentIdx = projectMapper.selectOssComponentMaxIdx(param);
-			            
-			            List<String> refIds = copyComponents.stream().map(ProjectIdentification::getRefComponentId).collect(Collectors.toList());
-			            List<String> refComponentIds = copyComponents.stream().filter(e -> !CoConstDef.FLAG_YES.equals(avoidNull(e.getAdminCheckYn()))).map(ProjectIdentification::getRefComponentId).collect(Collectors.toList());
-			            List<String> refComponentIdsAdmin = copyComponents.stream().filter(e -> CoConstDef.FLAG_YES.equals(avoidNull(e.getAdminCheckYn()))).map(ProjectIdentification::getRefComponentId).collect(Collectors.toList());
-			            List<ProjectIdentification> sources = mapper.selectOssComponentsCopyList(refIds);
-			            
-			            List<OssComponents> copyComponentsList = new ArrayList<>();
-			            if (CollectionUtils.isNotEmpty(refComponentIds)) {
-			            	List<OssComponents> results = mapper.selectOssComponentsLicenseCopyList(refComponentIds, CoConstDef.FLAG_NO);
-			                if (CollectionUtils.isNotEmpty(results)) {
-			                	copyComponentsList.addAll(results);
-			                }
-			            }
-			            if (CollectionUtils.isNotEmpty(refComponentIdsAdmin)) {
-			            	List<OssComponents> copyComponentsList2 = mapper.selectOssComponentsLicenseCopyList(refComponentIdsAdmin, CoConstDef.FLAG_YES);
-			            	if (CollectionUtils.isNotEmpty(copyComponentsList2)) {
-				            	copyComponentsList.addAll(copyComponentsList2);
-				            }
-			            }
-			            copyComponentsList.sort(Comparator.comparing(OssComponents::getComponentLicenseId));
-			            
-			            Map<String, ProjectIdentification> sourceMap = sources.stream().collect(Collectors.toMap(ProjectIdentification::getComponentId, Function.identity(), (existing, replacement) -> existing));
-			            
-			            int saveCnt = 0;
-			            for (ProjectIdentification bean : copyComponents) {
-			            	ProjectIdentification source = sourceMap.get(bean.getRefComponentId());
-			            	
-			            	if (source != null) {
-			            		bean.setComponentIdx(String.valueOf(componentIdx));
-			            		bean.setOssId(source.getOssId());
-			            		bean.setOssName(source.getOssName());
-			            		bean.setOssVersion(source.getOssVersion());
-			            		bean.setDownloadLocation(source.getDownloadLocation());
-			            		bean.setHomepage(source.getHomepage());
-			            		bean.setFilePath(source.getFilePath());
-			            		bean.setCopyright(source.getCopyright());
-			            		bean.setObligationType(source.getObligationType());
-			            		bean.setBinaryName(source.getBinaryName());
-			            		bean.setBinarySize(source.getBinarySize());
-			            		bean.setBinaryNotice(source.getBinaryNotice());
-			            		bean.setRefDiv(source.getRefDiv());
-			            		bean.setObligationType(source.getObligationType());
-			            		bean.setRefOssName(source.getRefOssName());
-			            		bean.setPackageUrl(source.getPackageUrl());
-			            	}
-			            	
-			            	mapper.insertProjectIdentificationCopy(bean);
-			            	componentIdx++;
-			            	
-			                if (++saveCnt >= 5000) {
-			                    sqlSession.flushStatements();
-			                }
-			            }
-			            
-			            sqlSession.flushStatements();
-			            
-			            Map<String, String> refToComponentMap = copyComponents.stream().collect(Collectors.toMap(ProjectIdentification::getRefComponentId, ProjectIdentification::getComponentId, (existing, replacement) -> existing));
-			            
-			            saveCnt = 0;
-			            for (OssComponents bean : copyComponentsList) {
-			            	bean.setComponentId(refToComponentMap.get(bean.getRefComponentId()));
-			            	mapper.insertOssComponentsLicenseCopy2(bean);
-			            	if (++saveCnt >= 5000) {
-			                    sqlSession.flushStatements();
-			                }
-			            }
-			            
-			            sqlSession.flushStatements();
-			            sqlSession.commit();
-			            
-			            copyComponents.clear();
-			            copyComponentsList.clear();
-			            refToComponentMap.clear();
-					} catch (Exception e) {
-			            sqlSession.rollback();
-			            log.error("Error occurred during Project Identification Confirm batch process: ", e);
-			            throw e;
-			        }
-		        }
+				copyPackagingComponents(copyComponents, project.getPrjId());
 			}
 			
 			if (MapUtils.isNotEmpty(oldPackageInfoMap)) {
@@ -4911,6 +4772,145 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			// StatisticsMostUsed > LicenseInfo INSERT
 			projectMapper.insertStatisticsMostUsedLicenseInfo(project);
+		}
+	}
+
+	private void copyPackagingComponents(List<ProjectIdentification> copyComponents, String prjId) {
+		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+			try {
+				ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+	            
+	            Project param = new Project();
+	            param.setReferenceId(prjId);
+	    		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
+	    		int componentIdx = projectMapper.selectOssComponentMaxIdx(param);
+	            
+	            List<String> refIds = copyComponents.stream().map(ProjectIdentification::getRefComponentId).collect(Collectors.toList());
+	            List<String> refComponentIds = copyComponents.stream().filter(e -> !CoConstDef.FLAG_YES.equals(avoidNull(e.getAdminCheckYn()))).map(ProjectIdentification::getRefComponentId).collect(Collectors.toList());
+	            List<String> refComponentIdsAdmin = copyComponents.stream().filter(e -> CoConstDef.FLAG_YES.equals(avoidNull(e.getAdminCheckYn()))).map(ProjectIdentification::getRefComponentId).collect(Collectors.toList());
+	            List<ProjectIdentification> sources = mapper.selectOssComponentsCopyList(refIds);
+	            
+	            List<OssComponents> copyComponentsList = new ArrayList<>();
+	            if (CollectionUtils.isNotEmpty(refComponentIds)) {
+	            	List<OssComponents> results = mapper.selectOssComponentsLicenseCopyList(refComponentIds, CoConstDef.FLAG_NO);
+	                if (CollectionUtils.isNotEmpty(results)) {
+	                	copyComponentsList.addAll(results);
+	                }
+	            }
+	            if (CollectionUtils.isNotEmpty(refComponentIdsAdmin)) {
+	            	List<OssComponents> copyComponentsList2 = mapper.selectOssComponentsLicenseCopyList(refComponentIdsAdmin, CoConstDef.FLAG_YES);
+	            	if (CollectionUtils.isNotEmpty(copyComponentsList2)) {
+		            	copyComponentsList.addAll(copyComponentsList2);
+		            }
+	            }
+	            copyComponentsList.sort(Comparator.comparing(OssComponents::getComponentLicenseId));
+	            
+	            Map<String, ProjectIdentification> sourceMap = sources.stream().collect(Collectors.toMap(ProjectIdentification::getComponentId, Function.identity(), (existing, replacement) -> existing));
+	            
+	            int saveCnt = 0;
+	            for (ProjectIdentification bean : copyComponents) {
+	            	ProjectIdentification source = sourceMap.get(bean.getRefComponentId());
+	            	
+	            	if (source != null) {
+	            		bean.setComponentIdx(String.valueOf(componentIdx));
+	            		bean.setOssId(source.getOssId());
+	            		bean.setOssName(source.getOssName());
+	            		bean.setOssVersion(source.getOssVersion());
+	            		bean.setDownloadLocation(source.getDownloadLocation());
+	            		bean.setHomepage(source.getHomepage());
+	            		bean.setFilePath(source.getFilePath());
+	            		bean.setCopyright(source.getCopyright());
+	            		bean.setObligationType(source.getObligationType());
+	            		bean.setBinaryName(source.getBinaryName());
+	            		bean.setBinarySize(source.getBinarySize());
+	            		bean.setBinaryNotice(source.getBinaryNotice());
+	            		bean.setRefDiv(source.getRefDiv());
+	            		bean.setObligationType(source.getObligationType());
+	            		bean.setRefOssName(source.getRefOssName());
+	            		bean.setPackageUrl(source.getPackageUrl());
+	            	}
+	            	
+	            	mapper.insertProjectIdentificationCopy(bean);
+	            	componentIdx++;
+	            	
+	            	if (++saveCnt % 1000 == 0) {
+	                    sqlSession.flushStatements();
+	                }
+	            }
+	            if (saveCnt > 0) {
+	            	sqlSession.flushStatements();
+	            }
+	            
+	            Map<String, String> refToComponentMap = copyComponents.stream().collect(Collectors.toMap(ProjectIdentification::getRefComponentId, ProjectIdentification::getComponentId, (existing, replacement) -> existing));
+	            
+	            saveCnt = 0;
+	            for (OssComponents bean : copyComponentsList) {
+	            	bean.setComponentId(refToComponentMap.get(bean.getRefComponentId()));
+	            	mapper.insertOssComponentsLicenseCopy2(bean);
+	            	if (++saveCnt % 1000 == 0) {
+	                    sqlSession.flushStatements();
+	                }
+	            }
+	            if (saveCnt > 0) {
+		            sqlSession.flushStatements();
+	            }
+	            sqlSession.commit();
+			} catch (Exception e) {
+				sqlSession.rollback();
+	            log.error("Error occurred during Project Identification Confirm batch process: ", e);
+	            throw e;
+	        }
+        }
+	}
+
+	private void updateComponentsCopyrightBatch(List<ProjectIdentification> rows) {
+		if (CollectionUtils.isNotEmpty(rows)) {
+			rows.forEach(bean -> {
+				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId());
+				
+				String baseCopyright = "";
+			    String addedCopyright = null;
+				
+			    if (oss != null) {
+			        baseCopyright = avoidNull(oss.getCopyright());
+			        addedCopyright = findAddedOssCopyright(oss, bean.getLicenseId(), bean.getOssCopyright());
+			    } else {
+			        addedCopyright = bean.getOssCopyright();
+			    }
+
+			    if (!isEmpty(addedCopyright)) {
+			        StringBuilder sb = new StringBuilder(baseCopyright);
+			        if (!isEmpty(baseCopyright)) {
+			            sb.append('\n');
+			        }
+			        sb.append(addedCopyright);
+			        bean.setCopyrightText(sb.toString());
+			    } else {
+			        bean.setCopyrightText(baseCopyright);
+			    }
+			});
+			
+			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+				try {
+					ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+		            int saveCnt = 0;
+		            for (ProjectIdentification bean : rows) {
+		                mapper.updateComponentsCopyrightInfo(bean);
+		                if (++saveCnt % 1000 == 0) {
+		                    sqlSession.flushStatements();
+		                    saveCnt = 0;
+		                }
+		            }
+		            if (saveCnt > 0) {
+		                sqlSession.flushStatements();
+		            }
+		            sqlSession.commit();
+				} catch (Exception e) {
+					sqlSession.rollback();
+		        	log.error("Failed to update project identification info (Batch processing failed)", e);
+		        	throw e;
+				}
+	        }
 		}
 	}
 
