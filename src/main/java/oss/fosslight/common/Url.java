@@ -1088,6 +1088,8 @@ public final class Url {
 
       		public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
 
+  			public static final String FOSSLIGHT_API_REVIEW_REQUEST 				= "/projects/{id}/{step}/review-request";
+
     
 		/** VULNABILITY */
 			/** vulnerability info search */
