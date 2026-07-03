@@ -29,24 +29,28 @@ public class RestResponseService {
         return new ResponseEntity<>(resultMap, status);
     }
 
+    public <T> ResponseEntity<T> successResponse(T body) {
+        return ResponseEntity.ok(body);
+    }
+
     public ResponseEntity<Map<String, Object>> errorResponse(HttpStatus status) {
         String msg = null;
         switch (status) {
             case BAD_REQUEST:
-                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+                msg = CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
                 break;
             case PAYLOAD_TOO_LARGE:
-                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE);
+                msg = CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE);
                 break;
             case INTERNAL_SERVER_ERROR:
-                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE);
+                msg = CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE);
                 break;
             case FORBIDDEN:
-                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE);
+                msg = CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE);
                 break;
             case NOT_FOUND:
-                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_NOT_FOUND_MESSAGE);
-
+                msg = CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_NOT_FOUND_MESSAGE);
+                break;
             default:
         }
 

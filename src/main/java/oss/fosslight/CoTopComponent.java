@@ -321,6 +321,10 @@ public class CoTopComponent {
 		return messageSource.getMessage(code, args, getLocale());
 	}
 
+	protected static String getMessage(String code, Object[] args, Locale locale) {
+		return messageSource.getMessage(code, args, locale);
+	}
+
 	protected static String getEnvMessage(String code) {
 		return appEnv.getProperty(code);
 	}
