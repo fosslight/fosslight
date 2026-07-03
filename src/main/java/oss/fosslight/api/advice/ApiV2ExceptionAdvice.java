@@ -31,6 +31,17 @@ import java.util.Map;
 public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     private final RestResponseService responseService;
 
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected ResponseEntity<Map<String, Object>> handleInternalServerError(
+            HttpServletRequest request, Exception e) {
+        log.error("Unhandled exception", e);
+        return responseService.errorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE)
+        );
+    }
+
     @ExceptionHandler(MultipartException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Map<String, Object>> fileParameterMissiongException(HttpServletRequest request, MultipartException e) {
@@ -45,9 +56,9 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(CInvalidProjectTypeException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     protected ResponseEntity<Map<String, Object>> handleCInvalidProjectTypeException(HttpServletRequest request, CInvalidProjectTypeException e){
-        return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+        return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
                 "Project Type is invalid. " + e.getMessage());
     }
 
