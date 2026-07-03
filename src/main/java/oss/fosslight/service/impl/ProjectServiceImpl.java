@@ -1609,6 +1609,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (Project.class.equals(param.getClass())) {
 			Project vo = (Project) param;
 			Project prj = getProjectDetail(vo);
+			if (!isEmpty(vo.getLoginUserName())) {
+				prj.setLoginUserName(vo.getLoginUserName());
+			}
+			if (!isEmpty(vo.getModifier())) {
+				prj.setModifier(vo.getModifier());
+			}
 			prj.setModelList(projectMapper.selectModelList(prj.getPrjId()));
 			h.sethKey(prj.getPrjId());
 			h.sethTitle(prj.getPrjName());
@@ -9286,6 +9292,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			String userComment = (String) param.get("userComment");
 			String commentDiv = (String) param.get("commentDiv");
 			String status = (String) param.get("status");
+			String loginUserName = (String) param.get("loginUserName");
+			if (isEmpty(loginUserName)) {
+				loginUserName = project.getLoginUserName();
+			}
+			if (!isEmpty(loginUserName)) {
+				project.setLoginUserName(loginUserName);
+				project.setModifier(loginUserName);
+			}
 			
 			try {
 				History h = new History();
@@ -9304,6 +9318,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					CoMail mailBean = new CoMail(mailType);
 					mailBean.setParamPrjId(project.getPrjId());
 					mailBean.setComment(userComment);
+					if (!isEmpty(loginUserName)) {
+						mailBean.setLoginUserName(loginUserName);
+						mailBean.setModifier(loginUserName);
+					}
 					
 					CoMailManager.getInstance().sendMail(mailBean);
 				} catch (Exception e) {
@@ -9318,6 +9336,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					commHisBean.setReferenceId(project.getPrjId());
 					commHisBean.setContents(userComment);
 					commHisBean.setStatus(status);
+					if (!isEmpty(loginUserName)) {
+						commHisBean.setLoginUserName(loginUserName);
+						commHisBean.setModifier(loginUserName);
+					}
 					log.info(status + " 상태 comment 저장!!");
 					commentService.registComment(commHisBean);
 				} catch (Exception e) {
@@ -9330,6 +9352,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					commHisBean.setReferenceId(project.getPrjId());
 					commHisBean.setContents(userComment);
 					commHisBean.setStatus(status);
+					if (!isEmpty(loginUserName)) {
+						commHisBean.setLoginUserName(loginUserName);
+						commHisBean.setModifier(loginUserName);
+					}
 					log.info("comment empty, " + status + " 상태 comment 저장!!");
 					commentService.registComment(commHisBean);
 				} catch (Exception e) {
