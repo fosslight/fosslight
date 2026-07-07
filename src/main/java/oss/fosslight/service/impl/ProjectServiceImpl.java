@@ -6457,8 +6457,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					rtnBean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
 					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE_ONLY);
-				}else if (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(temp.getObligationType())
-						&& ("").equals(avoidNull(rtnBean.getObligationType(), ""))){
+				} else if (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(temp.getObligationType()) && ("").equals(avoidNull(rtnBean.getObligationType(), ""))){
 					rtnBean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
@@ -6468,6 +6467,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					if (!isEmpty(temp.getDependencies())) {
 						rtnBean.setDependencies(temp.getDependencies());
 					}
+				}
+				
+				if (CoConstDef.FLAG_NO.equals(rtnBean.getAdminCheckYn()) && CoConstDef.FLAG_YES.equals(temp.getAdminCheckYn())) {
+					rtnBean.setAdminCheckYn(temp.getAdminCheckYn());
 				}
 			}
 			
