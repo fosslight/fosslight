@@ -3732,7 +3732,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					case CoConstDef.CD_DTL_COMPONENT_ID_DEP : referenceDivStr = "DEP"; break;
 					case CoConstDef.CD_DTL_COMPONENT_ID_SRC : referenceDivStr = "SRC"; break;
 					case CoConstDef.CD_DTL_COMPONENT_ID_BIN : referenceDivStr = "BIN"; break;
-					default : break;
+					default :
+						referenceDivStr = referenceDiv;
+					break;
 				}
 				
 				CommentsHistory commentHisBean = new CommentsHistory();
