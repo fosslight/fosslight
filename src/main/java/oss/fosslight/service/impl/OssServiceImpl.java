@@ -3454,7 +3454,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				ossId = registOssMaster(ossMaster);
 				
-				CoCodeManager.getInstance().refreshOssInfoByOssId(beforeBean, ossId);
+				CoCodeManager.getInstance().refreshOssInfoByOssId(null, ossId);
 				action = CoConstDef.ACTION_CODE_INSERT;
 			}
 
@@ -5602,7 +5602,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 				} catch (Exception e) {
 					errorFlag = true;
-					log.error("failed to generate purl download location : {}, link generate purl {}", downloadLocation, "link:" + downloadLocation);
+					log.debug("failed to generate purl download location : {}, link generate purl {}", downloadLocation, "link:" + downloadLocation);
 				}
 				
 				if (errorFlag) {
