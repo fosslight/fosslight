@@ -3706,47 +3706,54 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv) {
-		Map<String, List<String>> result = nickNameValid(prjId, ossComponent, ossComponentLicense);
-		if (MapUtils.isNotEmpty(result)) {
-			StringBuffer resultSb = new StringBuffer();
-			List<String> ossNickList = result.get("OSS");
-			List<String> licenseNickList = result.get("LICENSE");
-
-			if (!CollectionUtils.isEmpty(ossNickList) || !CollectionUtils.isEmpty(licenseNickList)) {
-				resultSb.append("<p><b>" + getMessage("msg.oss.changed.by.system") + "</b></p>");
-				if (!CollectionUtils.isEmpty(ossNickList)) {
-					resultSb.append(CommonFunction.changeDataToTableFormat("oss", "", ossNickList));
-				}
-
-				if (!CollectionUtils.isEmpty(licenseNickList)) {
-					if (!CollectionUtils.isEmpty(ossNickList)) {
-						resultSb.append("<br>");
-					}
-					resultSb.append(CommonFunction.changeDataToTableFormat("license", "", licenseNickList));
-				}
+		String resultSb = makeNickNameValidResult(prjId, ossComponent, ossComponentLicense);
+		if (!isEmpty(resultSb)) {
+			String referenceDivStr = "";
+			switch (referenceDiv) {
+				case CoConstDef.CD_DTL_COMPONENT_ID_DEP : referenceDivStr = "DEP"; break;
+				case CoConstDef.CD_DTL_COMPONENT_ID_SRC : referenceDivStr = "SRC"; break;
+				case CoConstDef.CD_DTL_COMPONENT_ID_BIN : referenceDivStr = "BIN"; break;
+				default :
+				break;
 			}
 			
-			if (!isEmpty(resultSb.toString())) {
-				String referenceDivStr = "";
-				switch (referenceDiv) {
-					case CoConstDef.CD_DTL_COMPONENT_ID_DEP : referenceDivStr = "DEP"; break;
-					case CoConstDef.CD_DTL_COMPONENT_ID_SRC : referenceDivStr = "SRC"; break;
-					case CoConstDef.CD_DTL_COMPONENT_ID_BIN : referenceDivStr = "BIN"; break;
-					default :
-						referenceDivStr = referenceDiv;
-					break;
-				}
-				
-				CommentsHistory commentHisBean = new CommentsHistory();
-				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-				commentHisBean.setReferenceId(prjId);
-				commentHisBean.setExpansion1(referenceDivStr);
-				commentHisBean.setContents(resultSb.toString());
-				commentService.registComment(commentHisBean, false);
-			}
+			CommentsHistory commentHisBean = new CommentsHistory();
+			commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+			commentHisBean.setReferenceId(prjId);
+			commentHisBean.setExpansion1(referenceDivStr);
+			commentHisBean.setContents(resultSb);
+			commentService.registComment(commentHisBean, false);
 		}
 	}
-	
+
+	@Override
+	public String makeNickNameValidResult(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense) {
+		Map<String, List<String>> result = nickNameValid(prjId, ossComponent, ossComponentLicense);
+		if (MapUtils.isEmpty(result)) {
+			return "";
+		}
+
+		List<String> ossNickList = result.get("OSS");
+		List<String> licenseNickList = result.get("LICENSE");
+		StringBuffer resultSb = new StringBuffer();
+
+		if (!CollectionUtils.isEmpty(ossNickList) || !CollectionUtils.isEmpty(licenseNickList)) {
+			resultSb.append("<p><b>" + getMessage("msg.oss.changed.by.system") + "</b></p>");
+			if (!CollectionUtils.isEmpty(ossNickList)) {
+				resultSb.append(CommonFunction.changeDataToTableFormat("oss", "", ossNickList));
+			}
+
+			if (!CollectionUtils.isEmpty(licenseNickList)) {
+				if (!CollectionUtils.isEmpty(ossNickList)) {
+					resultSb.append("<br>");
+				}
+				resultSb.append(CommonFunction.changeDataToTableFormat("license", "", licenseNickList));
+			}
+		}
+
+		return resultSb.toString();
+	}
+
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public List<PartnerMaster> nickNameValidMessage(String prjId, String partnerId, List<OssComponents> thirdPartyData, String code) {
@@ -3777,27 +3784,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<List<ProjectIdentification>> ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, true);
 		ossComponentLicense = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense, CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
 		
-		Map<String, List<String>> result = nickNameValid(prjId, ossComponent, ossComponentLicense);
-		StringBuffer resultSb = new StringBuffer();
-		if (result != null) {
-			List<String> ossNickList = result.get("OSS");
-			List<String> licenseNickList = result.get("LICENSE");
-
-			if (CollectionUtils.isNotEmpty(ossNickList) || CollectionUtils.isNotEmpty(licenseNickList)) {
-				resultSb.append("<p><b>" + getMessage("msg.oss.changed.by.system") + "</b></p>");
-				if (CollectionUtils.isNotEmpty(ossNickList)) {
-					resultSb.append(CommonFunction.changeDataToTableFormat("oss", "", ossNickList));
-				}
-
-				if (CollectionUtils.isNotEmpty(licenseNickList)) {
-					if (CollectionUtils.isNotEmpty(ossNickList)) {
-						resultSb.append("<br>");
-					}
-					resultSb.append(CommonFunction.changeDataToTableFormat("license", "", licenseNickList));
-				}
-
-				putSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, code), resultSb.toString());
-			}
+		String resultSb = makeNickNameValidResult(prjId, ossComponent, ossComponentLicense);
+		if (!isEmpty(resultSb)) {
+			putSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, code), resultSb);
 		}
 		
 		return thirdPartyList;
