@@ -2713,10 +2713,9 @@ public class ProjectController extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = PROJECT.NICKNAME_CD)
 	public @ResponseBody ResponseEntity<Object> nickNameValid(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
-		Map<String, List<String>> result = null;
-
 		String mainDataString = (String) map.get("mainData");
 		String prjId = (String) map.get("prjId");
+		String resultSb = "";
 
 		try {
 			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
@@ -2731,33 +2730,14 @@ public class ProjectController extends CoTopComponent {
 			}
 			
 			ossComponentLicense = CommonFunction.mergeGridAndSession(CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense, CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
-			result = projectService.nickNameValid(prjId, ossComponent, ossComponentLicense);
+			resultSb = projectService.makeNickNameValidResult(prjId, ossComponent, ossComponentLicense);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 
-		StringBuffer resultSb = new StringBuffer();
-		if (result != null) {
-			List<String> ossNickList = result.get("OSS");
-			List<String> licenseNickList = result.get("LICENSE");
-
-			if (!CollectionUtils.isEmpty(ossNickList) || !CollectionUtils.isEmpty(licenseNickList)) {
-				resultSb.append("<p><b>" + getMessage("msg.oss.changed.by.system") + "</b></p>");
-				if (!CollectionUtils.isEmpty(ossNickList)) {
-					resultSb.append(CommonFunction.changeDataToTableFormat("oss", "", ossNickList));
-				}
-
-				if (!CollectionUtils.isEmpty(licenseNickList)) {
-					if (!CollectionUtils.isEmpty(ossNickList)) {
-						resultSb.append("<br>");
-					}
-					resultSb.append(CommonFunction.changeDataToTableFormat("license", "", licenseNickList));
-				}
-
-				putSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, code), resultSb.toString());
-
-				return makeJsonResponseHeader(true, resultSb.toString());
-			}
+		if (!isEmpty(resultSb)) {
+			putSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, code), resultSb);
+			return makeJsonResponseHeader(true, resultSb);
 		}
 
 		return makeJsonResponseHeader();
