@@ -4776,14 +4776,16 @@
 		AND COMPONENT_ID = #{componentId}
 	</update>
 
-	<insert id="insertOrUpdateLicenseScanResult" parameterType="oss.fosslight.domain.OssAnalysis">
-		INSERT INTO LICENSE_SCAN_RESULT (OSS_COMMON_ID, OSS_ID, DECLARED, FULL_LIC, NEED_REVIEW)
-		VALUES (#{ossCommonId}, #{referenceOssId}, #{askalonoLicense}, #{scancodeLicense}, #{needReviewLicenseAskalono})
+	<insert id="insertOrUpdateLicenseScanResult" parameterType="map">
+		INSERT INTO LICENSE_SCAN_RESULT (OSS_COMMON_ID, OSS_ID, DECLARED, FULL_LIC, NEED_REVIEW, CREATE_DATE, CREATOR, MODIFIED_DATE, MODIFIER)
+		VALUES (#{ossAnalysis.ossCommonId}, #{ossAnalysis.referenceOssId}, #{ossAnalysis.askalonoLicense}, #{ossAnalysis.scancodeLicense}, #{ossAnalysis.needReviewLicenseAskalono}, NOW(), #{loginUserName}, NOW(), #{loginUserName})
 		ON DUPLICATE KEY UPDATE
 		    OSS_ID     = VALUES(OSS_ID),
 		    DECLARED   = VALUES(DECLARED),
 		    FULL_LIC   = VALUES(FULL_LIC),
-		    NEED_REVIEW = VALUES(NEED_REVIEW)
+		    NEED_REVIEW = VALUES(NEED_REVIEW),
+		    MODIFIED_DATE = NOW(),
+		    MODIFIER = #{loginUserName}
 	</insert>
 
 </mapper>
