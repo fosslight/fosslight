@@ -32,17 +32,6 @@ public class SwaggerConfig {
     private static final String REFERENCE = "authorization header value";
 
     @Bean
-    Docket swaggerApiV1() {
-        return new Docket(DocumentationType.SWAGGER_2).apiInfo(swaggerInfo())
-                .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
-                .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE+".api.controller"))
-                .paths(PathSelectors.ant("/api/v1/**"))
-                .build()
-                .groupName("v1")
-                .useDefaultResponseMessages(false); // 기본으로 세팅되는 200,401,403,404 메시지를 표시 하지 않음
-    }
-
-    @Bean
     Docket swaggerApiV2() {
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(swaggerInfo())
                 .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
@@ -52,22 +41,6 @@ public class SwaggerConfig {
                 .groupName("v2")
                 .securityContexts(List.of(securityContext()))
                 .securitySchemes(List.of(securityScheme()));
-    }
-
-    @Bean
-    @Primary
-    SwaggerResourcesProvider swaggerResourcesProvider(InMemorySwaggerResourcesProvider defaultResourcesProvider) {
-        return () -> {
-            List<SwaggerResource> resources = new ArrayList<>(defaultResourcesProvider.get());
-            resources.sort((left, right) -> {
-                if ("v2".equals(left.getName())) return -1;
-                if ("v2".equals(right.getName())) return 1;
-                if ("v1".equals(left.getName())) return 1;
-                if ("v1".equals(right.getName())) return -1;
-                return left.getName().compareToIgnoreCase(right.getName());
-            });
-            return resources;
-        };
     }
 
     private SecurityContext securityContext() {
