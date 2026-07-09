@@ -184,5 +184,5 @@ public interface OssService extends HistoryConfig{
 
 	void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag);
 
-	void saveLicenseScanResult(OssAnalysis ossAnalysis);
+	void saveLicenseScanResult(OssAnalysis ossAnalysis, String loginUserName);
 }

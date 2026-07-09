@@ -4130,12 +4130,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
-	public void saveLicenseScanResult(OssAnalysis ossAnalysis) {
+	public void saveLicenseScanResult(OssAnalysis ossAnalysis, String loginUserName) {
 		if (ossAnalysis == null) {
 			return;
 		}
 
-		ossMapper.insertOrUpdateLicenseScanResult(ossAnalysis);
+		ossMapper.insertOrUpdateLicenseScanResult(ossAnalysis, loginUserName);
 
 	}
 
