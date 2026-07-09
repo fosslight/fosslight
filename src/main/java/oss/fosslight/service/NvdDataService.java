@@ -98,7 +98,7 @@ public class NvdDataService extends CoTopComponent {
 		    String endTime = sdformat.format(cal.getTime());
 
 			Calendar mon = Calendar.getInstance();
-			mon.add(Calendar.DATE, -7); // Set start time (2 weeks ago from current time)
+			mon.add(Calendar.DATE, -7); // Set start time (1 weeks ago from current time)
 //		    mon.add(Calendar.MONTH, -1);
 		    String startTime = sdformat.format(mon.getTime());
 
@@ -1036,21 +1036,21 @@ public class NvdDataService extends CoTopComponent {
 			schlog.info("MaxCvssScore Added Count : 0");
 		}
 
-		int diffCvssScoreCnt = nvdDataMapper.ossNameNickNameCvssScoreDiffCnt();
-		if (diffCvssScoreCnt > 0){
-			schlog.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
-			nvdDataMapper.ossNameToNickNameMgrtCvssScore();
-		} else{
-			schlog.info("NickName -> ossName cvssScore Diff Count : 0");
-		}
-
-		int ossNameToNickDiffCvssScoreCnt = nvdDataMapper.ossNameToNickMgrtCvssScoreDiffCnt();
-		if (ossNameToNickDiffCvssScoreCnt > 0){
-			schlog.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
-			nvdDataMapper.nickNameToOssNameMgrtCvssScore();
-		} else{
-			schlog.info("ossName -> NickName cvssScore Diff Count : 0");
-		}
+//		int diffCvssScoreCnt = nvdDataMapper.ossNameNickNameCvssScoreDiffCnt();
+//		if (diffCvssScoreCnt > 0){
+//			schlog.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
+//			nvdDataMapper.ossNameToNickNameMgrtCvssScore();
+//		} else{
+//			schlog.info("NickName -> ossName cvssScore Diff Count : 0");
+//		}
+//
+//		int ossNameToNickDiffCvssScoreCnt = nvdDataMapper.ossNameToNickMgrtCvssScoreDiffCnt();
+//		if (ossNameToNickDiffCvssScoreCnt > 0){
+//			schlog.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
+//			nvdDataMapper.nickNameToOssNameMgrtCvssScore();
+//		} else{
+//			schlog.info("ossName -> NickName cvssScore Diff Count : 0");
+//		}
 
 		int vendorProductNvdDataScoreV3Cnt = nvdDataMapper.selectVendorProductNvdDataScoreV3Cnt();
 		if (vendorProductNvdDataScoreV3Cnt > 0) {
