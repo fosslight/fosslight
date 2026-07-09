@@ -3271,10 +3271,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
 			try {
-				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-						CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
-					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
 					if (!isEmpty(changedLicenseName)) {
 						CommentsHistory commentHisBean = new CommentsHistory();
 						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
@@ -3316,6 +3314,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 
 	@Override
+	@Transactional
 	public Map<String, Object> registProjectOssComponent(Map<String, Object> param, String referenceDiv) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		
@@ -3440,6 +3439,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			ossComponentIdx = projectMapper.selectOssComponentMaxIdx(targetProjectParam);
 		}
 
+		int count = 0;
 		for (ProjectIdentification bean : components) {
 			bean.setReferenceId(targetPrjId);
 			bean.setReportFileId(null);
@@ -3447,12 +3447,14 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			bean.setComponentIdx(String.valueOf(ossComponentIdx++));
 			String loadToListComment = "(From Prj " + prjIdToLoad + ")";
 			bean.setComments(loadToListComment);
-			projectMapper.insertOssComponents(bean);
+			bean.setRefLoadedVal(prjIdToLoad);
+			projectMapper.insertSrcOssList(bean);
 
 			for (OssComponentsLicense licenseBean : licenses) {
 				licenseBean.setComponentId(bean.getComponentId());
-				projectMapper.insertOssComponentsLicense(licenseBean);
+				projectMapper.registComponentLicense(licenseBean);
 			}
+			count++;
 		}
 		
 		// Insert the project information list to load
@@ -3460,7 +3462,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		addProjectParam.setPrjId(targetPrjId);
 		addProjectParam.setReferenceId(prjIdToLoad);
 		addProjectParam.setReferenceDiv(referenceDiv);
-		addProjectParam.setComponentCount(Integer.toString(components.size()));
+		addProjectParam.setComponentCount(Integer.toString(count));
 
 		if (resetFlag) {
 		    projectService.existsAddList(targetProjectParam);
