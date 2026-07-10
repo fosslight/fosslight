@@ -268,6 +268,38 @@
 		, VENDOR = values(VENDOR)
     </insert>
     
+    <select id="streamDistinctProductList" fetchSize="-2147483648" resultType="String">
+	    SELECT PRODUCT FROM NVD_DATA_V3 WHERE PRODUCT != '-' GROUP BY PRODUCT
+	</select>
+    
+    <insert id="insertNvdDataScoreV3TempByProduct">
+	    INSERT INTO NVD_DATA_SCORE_V3_TEMP (
+	        PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE, VENDOR
+	    )
+	    SELECT 
+	        X.PRODUCT, X.VERSION, X.CVE_ID, X.CVSS_SCORE, X.VULN_SUMMARY, X.MODI_DATE, X.VENDOR
+	    FROM (
+	        SELECT 
+	            T2.PRODUCT, T2.VERSION, T1.CVE_ID, T1.CVSS_SCORE, T1.VULN_SUMMARY, T1.MODI_DATE, T2.VENDOR,
+	            ROW_NUMBER() OVER (
+	                PARTITION BY T2.VERSION, T2.VENDOR 
+	                ORDER BY T1.CVSS_SCORE DESC, T1.CVE_ID DESC
+	            ) AS RN
+	        FROM NVD_DATA_V3 T2
+	        STRAIGHT_JOIN NVD_CVE_V3 T1 ON T2.CVE_ID = T1.CVE_ID
+	        WHERE T2.PRODUCT = #{product}
+	    ) X
+	    WHERE X.RN = 1
+	    ON DUPLICATE KEY UPDATE 
+	        PRODUCT      = X.PRODUCT,
+	        VERSION      = X.VERSION,
+	        CVE_ID       = X.CVE_ID,
+	        CVSS_SCORE   = X.CVSS_SCORE,
+	        VULN_SUMMARY = X.VULN_SUMMARY,
+	        MODI_DATE    = X.MODI_DATE,
+	        VENDOR       = X.VENDOR
+	</insert>
+    
 	<delete id="deleteNvdDataScoreV3Temp">TRUNCATE TABLE NVD_DATA_SCORE_V3_TEMP</delete>
 	<delete id="deleteNvdDataScoreV3">DELETE FROM NVD_DATA_SCORE_V3</delete>
 	<insert id="insertNvdDataScoreV3">INSERT INTO NVD_DATA_SCORE_V3 SELECT * FROM NVD_DATA_SCORE_V3_TEMP</insert>
