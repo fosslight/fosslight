@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
@@ -30,6 +31,8 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.ResultContext;
+import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -985,31 +988,23 @@ public class NvdDataService extends CoTopComponent {
 			nvdDataMapper.createTableNvdDavaScoreV3Temp();
 			nvdDataMapper.deleteNvdDataScoreV3Temp();
 			
-			int cnt = nvdDataMapper.getProducVerCnt();
-			List<Map<String, Object>> itemList = new ArrayList<>();
-			
-			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-				NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
-				for (int idx = 0; idx < cnt; ) {
-					itemList = nvdDataMapper.getProducVerList(idx, BATCH_SIZE);
-					for (Map<String, Object> item : itemList) {
-						String vendorList = (String) item.get("VENDOR");
-						for (String vendor : vendorList.split(",")) {
-							Map<String, Object> nvdDataMap = nvdDataMapper.getMaxScoreProductVer((String)item.get("PRODUCT"), (String)item.get("VERSION"), vendor);
-							if (nvdDataMap != null) {
-								mapper.insertNvdDataScoreV3Temp(nvdDataMap);
-							}
-						}
-					}
-
-					sqlSession.flushStatements();
-					idx = idx + BATCH_SIZE;
-					itemList.clear();
-				}
-
-				sqlSession.flushStatements();
-				sqlSession.commit();
-			}
+			AtomicInteger processedCount = new AtomicInteger(0);
+	        nvdDataMapper.streamDistinctProductList(new ResultHandler<String>() {
+	            @Override
+	            public void handleResult(ResultContext<? extends String> resultContext) {
+	                String product = resultContext.getResultObject();
+	                
+	                if (product != null && !product.trim().isEmpty()) {
+	                    nvdDataMapper.insertNvdDataScoreV3TempByProduct(product);
+	                    
+	                    int currentCount = processedCount.incrementAndGet();
+	                    if (currentCount % 1000 == 0) {
+	                    	schlog.info("Progress: {} products processed...", currentCount);
+	                    }
+	                }
+	            }
+	        });
+	        schlog.info("Product split-loading completed. (Total products: {} items)", processedCount.get());
 
 			nvdDataMapper.deleteNvdDataScoreV3();
 			nvdDataMapper.insertNvdDataScoreV3();
@@ -1023,7 +1018,7 @@ public class NvdDataService extends CoTopComponent {
 			schlog.info("Nickname Migration Count : " + nickNameMgrCnt);
 			// OSS_NICKNAME 기준으로 NVD_DATA_SCORE_V3에 NICKNAME을 추가함.
 			nvdDataMapper.insertNickNameMgrtNvdDataScoreV3();
-		}else{
+		} else{
 			schlog.info("Nickname Migration Count : 0");
 		}
 
@@ -1032,7 +1027,7 @@ public class NvdDataService extends CoTopComponent {
 			schlog.info("MaxCvssScore Added Count : " + MaxCvssScoreCnt);
 			// NVD_DATA_SCORE_V3에서 CVSS_SCORE MAX값을 기준으로 PRODUCT에서 VERSION이 없는 DATA를 추가함.
 			nvdDataMapper.insertMaxCvssScoreNvdDataScoreV3();
-		}else{
+		} else {
 			schlog.info("MaxCvssScore Added Count : 0");
 		}
 

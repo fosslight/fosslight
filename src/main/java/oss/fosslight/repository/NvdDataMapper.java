@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.ResultHandler;
 import org.springframework.context.annotation.Configuration;
 @Configuration("NvdDataMapper")
 @Mapper
@@ -91,4 +92,7 @@ public interface NvdDataMapper {
 	void truncateNvdDataRunningOnWithTemp();
 	void truncateNvdDataRunningOnWith();
 	void copyNvdDataRunningOnWithFromTemp();
+	
+	void streamDistinctProductList(ResultHandler<String> resultHandler);
+	void insertNvdDataScoreV3TempByProduct(String product);
 }
