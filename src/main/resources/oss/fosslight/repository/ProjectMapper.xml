@@ -7032,6 +7032,25 @@
 		</if>
 	</delete>
 	
+	<delete id="resetOssComponentsLicense">
+		DELETE L
+		FROM OSS_COMPONENTS_LICENSE L
+		JOIN OSS_COMPONENTS C
+		ON C.COMPONENT_ID=L.COMPONENT_ID
+		WHERE C.REFERENCE_ID = #{referenceId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			AND C.REFERENCE_DIV = #{referenceDiv}
+		</if>
+	</delete>
+	
+	<delete id="resetOssComponents">
+		DELETE FROM OSS_COMPONENTS
+		WHERE REFERENCE_ID = #{referenceId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+			AND REFERENCE_DIV = #{referenceDiv}
+		</if>
+	</delete>
+	
 	<insert id="insertOssComponentListWithComponentId">
 		INSERT INTO
 			OSS_COMPONENTS
