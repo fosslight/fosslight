@@ -45,7 +45,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -2653,7 +2655,31 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String refId = project.getReferenceId();
 		List<Project> prjAddList = Optional.ofNullable(project.getPrjAddList()).orElseGet(ArrayList::new);
 		
-		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense, isUploadProcess);
+		final int maxRetry = 3;
+		for (int retry = 1; retry <= maxRetry; retry++) {
+			try {
+				updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense, isUploadProcess);
+				break;
+			} catch (PersistenceException e) {
+				String message = ExceptionUtils.getRootCauseMessage(e);
+		        boolean deadlock = message != null && message.contains("Deadlock found");
+		        if (!deadlock) {
+		            throw e;
+		        }
+		        if (retry == maxRetry) {
+		            log.error("Deadlock retry exhausted. referenceId={}", refId, e);
+		            throw e;
+		        }
+
+		        log.warn("Deadlock detected. referenceId={}, retry={}/{}", refId, retry, maxRetry);
+		        try {
+		            Thread.sleep(100L * retry);
+		        } catch (InterruptedException ie) {
+		            Thread.currentThread().interrupt();
+		            throw new RuntimeException(ie);
+		        }
+		    }
+		}
 
 		if (CoConstDef.FLAG_YES.equals(avoidNull(project.getResetFlag()))) {
 			project.setReferenceDiv(refDiv);
@@ -2804,7 +2830,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		int ossComponentIdx = projectMapper.selectOssComponentMaxIdx(project);
 		// Delete project all components and license
-		projectMapper.resetOssComponentsAndLicense(refId, refDiv);
+		projectMapper.resetOssComponentsLicense(refId, refDiv);
+		projectMapper.resetOssComponents(refId, refDiv);
 		
 		// loaded components
 		Map<String, Long> refLoadedComponents = ossComponent.stream().filter(e -> !isEmpty(e.getRefLoadedVal())).collect(Collectors.groupingBy(ProjectIdentification::getRefLoadedVal, Collectors.counting()));
@@ -2873,14 +2900,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	                int saveCnt = 0;
 	                for (ProjectIdentification bean : insertOssComponentListWithComponentId) {
 	                    mapper.insertSrcOssList(bean);
-	                    if(saveCnt++ == 1000) {
+	                    if(saveCnt++ == 200) {
 	                        sqlSession.flushStatements();
 	                        saveCnt = 0;
 	                    }
 	                }
 	                for (ProjectIdentification bean : insertOssComponentList) {
 	                    mapper.insertSrcOssList(bean);
-	                    if(saveCnt++ == 1000) {
+	                    if(saveCnt++ == 200) {
 	                        sqlSession.flushStatements();
 	                        saveCnt = 0;
 	                    }
@@ -2895,7 +2922,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	                saveCnt = 0;
 	                for (OssComponentsLicense bean : insertOssComponentLicenseList) {
 	                    mapper.registComponentLicense(bean);
-	                    if (saveCnt++ == 1000) {
+	                    if (saveCnt++ == 200) {
 	                        sqlSession.flushStatements();
 	                        saveCnt = 0;
 	                    }

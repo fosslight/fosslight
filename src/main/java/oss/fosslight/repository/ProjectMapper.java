@@ -404,6 +404,10 @@ public interface ProjectMapper {
 
 	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
 	
+	int resetOssComponentsLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
+	int resetOssComponents(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
 	int resetSecurityData(@Param("prjId")String prjId);
 	
 	void insertOssComponentListWithComponentId(@Param("list")List<ProjectIdentification> OssComponentList);
