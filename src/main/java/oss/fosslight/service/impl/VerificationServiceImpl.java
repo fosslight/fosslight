@@ -643,8 +643,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				&& CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull((String) NoticeInfo.get("noticeType"), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL)) 
 				&& !isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
 			T2File androidFile = fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId());
-			
-			return CommonFunction.getStringFromFile(androidFile.getLogiPath() + "/" + androidFile.getLogiNm());
+			String htmlContent = CommonFunction.getStringFromFile(androidFile.getLogiPath() + "/" + androidFile.getLogiNm(), true);
+	        if (htmlContent != null) {
+	        	boolean hasCharsetInHead = htmlContent.matches("(?is).*<head>.*charset=.*</head>.*");
+	            if (!hasCharsetInHead) {
+	                if (htmlContent.contains("<head>")) {
+	                    htmlContent = htmlContent.replace("<head>", "<head>\n<meta charset=\"UTF-8\">");
+	                } else if (htmlContent.contains("<HEAD>")) {
+	                    htmlContent = htmlContent.replace("<HEAD>", "<HEAD>\n<meta charset=\"UTF-8\">");
+	                } else {
+	                    htmlContent = "<meta charset=\"UTF-8\">\n" + htmlContent;
+	                }
+	            }
+	        }
+	        return htmlContent;
 		}
 		
 		return null;
