@@ -7,6 +7,7 @@ package oss.fosslight.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -70,6 +71,7 @@ import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.util.OssComponentUtil;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -104,6 +106,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private CommentService commentService;
 	@Autowired private T2UserService t2UserService;
 	@Autowired private PartnerService partnerService;
+	@Autowired private ProjectService projectService;
 	@Autowired private HistoryService historyService;
 	
 	// Mapper
@@ -6725,7 +6728,177 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			// 파일 등록
 			fileId = fileService.registFileDownload(filePath, fileName, fileName);
 		}
-		
+
+		return fileId;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map) {
+		if (map == null) {
+			return null;
+		}
+
+		List<String> noticeBinaryList = null;
+		List<String> existsBinaryName = null;
+
+		if (!isEmpty(identification.getReferenceId())) {
+			// 다른 project에서 load하는 경우
+			if (CoConstDef.FLAG_YES.equals(identification.getLoadFromAndroidProjectFlag())) {
+				if (!isEmpty(identification.getAndroidNoticeFileId())) {
+					log.info("identification.getAndroidNoticeFileId() : OK");
+					noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(identification.getAndroidNoticeFileId()));
+				}
+
+				if (!isEmpty(identification.getAndroidResultFileId())) {
+					List<String> removedCheckList = null;
+					List<OssComponents> addCheckList = null;
+					log.info("identification.getAndroidResultFileId() : OK");
+					existsBinaryName = CommonFunction.getExistsBinaryNames(
+							fileService.selectFileInfoById(identification.getAndroidResultFileId()));
+
+					List<String> _checkExistsBinaryName = new ArrayList<>();
+					List<ProjectIdentification> _list = (List<ProjectIdentification>) map.get("mainData");
+
+					for (ProjectIdentification bean : _list) {
+						if (!isEmpty(bean.getBinaryName())) {
+							_checkExistsBinaryName.add(bean.getBinaryName());
+						}
+					}
+
+					T2File resultFileInfo = fileService.selectFileInfoById(identification.getAndroidResultFileId());
+					Map<String, Object> _resultFileInfoMap = CommonFunction.getAndroidResultFileInfo(resultFileInfo,
+							_checkExistsBinaryName);
+
+					if (_resultFileInfoMap.containsKey("removedCheckList")) {
+						removedCheckList = (List<String>) _resultFileInfoMap.get("removedCheckList");
+					}
+
+					if (_resultFileInfoMap.containsKey("addCheckList")) {
+						addCheckList = (List<OssComponents>) _resultFileInfoMap.get("addCheckList");
+					}
+
+					if (removedCheckList != null) {
+						for (ProjectIdentification bean : _list) {
+							if (removedCheckList.contains(bean.getBinaryName())) {
+								bean.setExcludeYn(CoConstDef.FLAG_YES);
+							}
+						}
+					}
+
+					if (addCheckList != null) {
+						try {
+							OssComponentUtil.getInstance().makeOssComponent(addCheckList, true);
+						} catch (IllegalAccessException | InstantiationException | InvocationTargetException
+								| NoSuchMethodException e) {
+							log.error(e.getMessage());
+						}
+
+						for (OssComponents bean : addCheckList) {
+							ProjectIdentification _tempBean = new ProjectIdentification();
+							_tempBean.setBinaryName(bean.getBinaryName());
+							_tempBean.setFilePath(bean.getFilePath());
+							_tempBean.setBinaryNotice(bean.getBinaryNotice());
+							_tempBean.setOssName(bean.getOssName());
+							_tempBean.setOssVersion(bean.getOssVersion());
+							_tempBean.setLicenseName(bean.getLicenseName());
+							_tempBean.setDownloadLocation(bean.getDownloadLocation());
+							_tempBean.setHomepage(bean.getHomepage());
+							_tempBean.setCopyrightText(bean.getCopyrightText());
+							_tempBean.setExcludeYn(bean.getExcludeYn());
+							_tempBean.setEditable(CoConstDef.FLAG_YES);
+
+							_list.add(_tempBean);
+						}
+					}
+
+					map.replace("mainData", _list);
+				}
+			} else {
+				Project prjInfo = projectService.getProjectBasicInfo(identification.getReferenceId());
+
+				if (prjInfo != null) {
+					if (!isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
+						noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
+					}
+
+					if (isEmpty(prjInfo.getSrcAndroidNoticeFileId()) && !isEmpty(prjInfo.getSrcAndroidNoticeXmlId())) {
+						noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeXmlId()));
+					}
+
+					if (!isEmpty(prjInfo.getSrcAndroidResultFileId())) {
+						existsBinaryName = CommonFunction.getExistsBinaryNames(fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
+					}
+				}
+			}
+		}
+
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+		pv.setAppendix("projectId", avoidNull(identification.getReferenceId()));
+		pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+		pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+
+		if (noticeBinaryList != null) {
+			pv.setAppendix("noticeBinaryList", noticeBinaryList);
+		}
+
+		if (existsBinaryName != null) {
+			pv.setAppendix("existsResultBinaryName", existsBinaryName);
+		}
+
+		T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+		if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
+			map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+			if (!vr.isValid()) {
+				map.put("validData", vr.getValidMessageMap());
+			}
+			if (!vr.isDiff()) {
+				map.put("diffData", vr.getDiffMessageMap(true));
+			}
+			if (vr.hasInfo()) {
+				map.put("infoData", vr.getInfoMessageMap());
+			}
+		}
+
+		return map;
+	}
+	
+	@Override
+	public String getSupplementNoticeFileId(String prjId, String zipFlag) throws Exception {
+		Project project = new Project();
+		project.setPrjId(prjId);
+
+		Project projectDetail = getProjectDetail(project);
+		if (projectDetail == null) {
+			throw new IllegalStateException("Project not found.");
+		}
+
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(prjId);
+		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+
+		Map<String, Object> result = getIdentificationGridList(identification, true);
+		result = applyAndroidIdentificationGridData(identification, result);
+		String validMsg = checkValidData(result);
+
+		if (!isEmpty(validMsg)) {
+			throw new IllegalArgumentException(validMsg);
+		}
+
+		String fileId;
+		if (CoConstDef.FLAG_YES.equals(zipFlag)) {
+			fileId = makeZipFileId(result, projectDetail);
+		} else {
+			String contents = makeNoticeFileContents(result);
+			fileId = makeSupplementFileId(contents, projectDetail);
+		}
+
+		if (isEmpty(fileId)) {
+			throw new IllegalStateException("overflow");
+		}
+
 		return fileId;
 	}
 	
