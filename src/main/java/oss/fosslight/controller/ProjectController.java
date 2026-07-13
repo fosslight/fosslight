@@ -4667,6 +4667,12 @@ public class ProjectController extends CoTopComponent {
 		try {
 			String fileId = projectService.getSupplementNoticeFileId(prjId, zipFlag);
 			return makeJsonResponseHeader(fileId);
+		} catch (IllegalArgumentException e) {
+			// Validation error - message code 처리
+			String messageCode = e.getMessage();
+			String localizedMessage = getMessage(messageCode);
+			log.error("Validation failed for supplement notice: {}", messageCode);
+			return makeJsonResponseHeader(false, localizedMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return makeJsonResponseHeader(false, e.getMessage());

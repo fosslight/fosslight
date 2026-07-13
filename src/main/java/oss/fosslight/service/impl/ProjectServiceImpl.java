@@ -6547,20 +6547,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
 		Map<String, Object> validData = (Map<String, Object>) map.get("validData");
 		Map<String, Object> diffData = (Map<String, Object>) map.get("diffData");
-		String validMsg = null;
+		String messageCode = null;
 		
-		int emptyBinaryPathCnt = 0;
-		int errCnt = 0;
-		int diffCnt = 0;
-		
-		if (mainData != null) {
-			emptyBinaryPathCnt = mainData.stream()
-											.filter(c -> isEmpty(c.getBinaryName()) && !CoConstDef.FLAG_YES.equals(avoidNull(c.getExcludeYn(), CoConstDef.FLAG_NO)))
-											.collect(Collectors.toList())
-											.size();
+		// Check 0: 기본 데이터 유무 확인 (mainData 또는 diffData가 없거나 비어있는 경우)
+		if (mainData == null || mainData.isEmpty() || diffData == null || diffData.isEmpty()) {
+			messageCode = "msg.project.no.binary";
+			return messageCode;
 		}
 		
-		if (validData != null) {
+		// Check 1: OSS Name, OSS Version, License에 Warning message가 있는지 확인
+		int errCnt = 0;
+		if (validData != null && !validData.isEmpty()) {
 			errCnt = validData.keySet().stream()
 								.filter(c -> c.toUpperCase().contains("OSS_NAME") 
 												|| c.toUpperCase().contains("OSS_VERSION") 
@@ -6569,41 +6566,35 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								.size();
 		}
 		
-		if (diffData != null) {
-			Map<String, Object> diffDataMap = new HashMap<String, Object>();
-			for (String key : diffData.keySet()) {
-				if (key.toUpperCase().contains("LICENSENAME")) {
-					String diffMsg = (String) diffData.get(key);
-					if (!diffMsg.contains("Declared")) {
-						diffDataMap.put(key, diffData.get(key));
-					}
-				} else {
-					diffDataMap.put(key, diffData.get(key));
-				}
-			}
-			
-			if (!diffDataMap.isEmpty()) {
-				diffCnt = diffDataMap.keySet()
-						.stream()
-						.filter(c -> c.toUpperCase().contains("OSSNAME") 
-										|| c.toUpperCase().contains("OSSVERSION") 
-										|| c.toUpperCase().contains("LICENSENAME"))
-						.collect(Collectors.toList())
-						.size();
-			}
+		// Check 2: Binary Path이 공란인 Row 확인 (excludeYn != Y인 행만 체크)
+		int emptyBinaryPathCnt = 0;
+		emptyBinaryPathCnt = mainData.stream()
+										.filter(c -> isEmpty(c.getBinaryName()) && !CoConstDef.FLAG_YES.equals(avoidNull(c.getExcludeYn(), CoConstDef.FLAG_NO)))
+										.collect(Collectors.toList())
+										.size();
+		
+		// Check 1 또는 2 중 하나라도 위반 시: Error Message Code 1 반환
+		if (emptyBinaryPathCnt > 0 || errCnt > 0) {
+			messageCode = "msg.project.download.notice";
+			return messageCode;
 		}
 		
-		// OSS Name, OSS Version, License에 Warning message(빨간색, 파란색)가 있는 Row 또는 Binary Name이 공란인 Row
-		if (emptyBinaryPathCnt > 0 || errCnt > 0 ) {
-			validMsg = "You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.";
+		// Check 3: 출력 조건을 만족하는 Binary가 있는지 확인 (BINARYNOTICE 메시지 확인)
+		String ruleMsg = (String) T2CoValidationConfig.getInstance().getRuleAllMap().get("BINARY_NOTICE.NOTICE_PERMISSIVE.MSG");
+		int validBinaryCnt = 0;
+		if (ruleMsg != null) {
+			validBinaryCnt = diffData.entrySet().stream()
+									   .filter(c -> ((String) c.getValue()).equals(ruleMsg) && c.getKey().toUpperCase().contains("BINARYNOTICE"))
+									   .collect(Collectors.toList())
+									   .size();
 		}
 		
-		// 출력할 Binary가 없는 경우(= 출력 조건에 해당하는 Row가 없는 경우)
-		if (mainData.size() == 0 || diffData.size() == 0) {
-			validMsg = "There is no binary that meets the conditions for creating NOTICE.";
+		// Check 3 위반 시: Error Message Code 2 반환
+		if (validBinaryCnt == 0) {
+			messageCode = "msg.project.no.binary";
 		}
 		
-		return validMsg;
+		return messageCode;
 	}
 	
 	@Override
