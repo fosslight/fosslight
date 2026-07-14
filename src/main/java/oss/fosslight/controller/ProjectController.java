@@ -685,129 +685,7 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 		} else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(code) && map != null) {
-			List<String> noticeBinaryList = null;
-			List<String> existsBinaryName = null;
-			
-			if (!isEmpty(identification.getReferenceId())) {
-				// 다른 project에서 load하는 경우
-				if (CoConstDef.FLAG_YES.equals(identification.getLoadFromAndroidProjectFlag())) {
-					if (!isEmpty(identification.getAndroidNoticeFileId())) {
-						log.info("identification.getAndroidNoticeFileId() : OK");
-						noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(identification.getAndroidNoticeFileId()));
-					}
-					
-					if (!isEmpty(identification.getAndroidResultFileId())) {
-						List<String> removedCheckList = null;
-						List<OssComponents> addCheckList = null;
-						log.info("identification.getAndroidResultFileId() : OK");
-						existsBinaryName = CommonFunction.getExistsBinaryNames(
-								fileService.selectFileInfoById(identification.getAndroidResultFileId()));
-
-						List<String> _checkExistsBinaryName = new ArrayList<>();
-						List<ProjectIdentification> _list = (List<ProjectIdentification>) map.get("mainData");
-						
-						for (ProjectIdentification bean : _list) {
-							if (!isEmpty(bean.getBinaryName())) {
-								_checkExistsBinaryName.add(bean.getBinaryName());
-							}
-						}
-						
-						T2File resultFileInfo = fileService.selectFileInfoById(identification.getAndroidResultFileId());
-						Map<String, Object> _resultFileInfoMap = CommonFunction.getAndroidResultFileInfo(resultFileInfo,
-								_checkExistsBinaryName);
-						
-						if (_resultFileInfoMap.containsKey("removedCheckList")) {
-							removedCheckList = (List<String>) _resultFileInfoMap.get("removedCheckList");
-						}
-						
-						if (_resultFileInfoMap.containsKey("addCheckList")) {
-							addCheckList = (List<OssComponents>) _resultFileInfoMap.get("addCheckList");
-						}
-
-						if (removedCheckList != null) {
-							for (ProjectIdentification bean : _list) {
-								if (removedCheckList.contains(bean.getBinaryName())) {
-									bean.setExcludeYn(CoConstDef.FLAG_YES);
-								}
-							}
-						}
-
-						if (addCheckList != null) {
-							// ossComponent에서 ProjectIdentification으로 변환
-							try {
-								OssComponentUtil.getInstance().makeOssComponent(addCheckList, true);
-							} catch (IllegalAccessException | InstantiationException | InvocationTargetException
-									| NoSuchMethodException e) {
-								log.error(e.getMessage());
-							}
-
-							for (OssComponents bean : addCheckList) {
-								ProjectIdentification _tempBean = new ProjectIdentification();
-								_tempBean.setBinaryName(bean.getBinaryName());
-								_tempBean.setFilePath(bean.getFilePath());
-								_tempBean.setBinaryNotice(bean.getBinaryNotice());
-								_tempBean.setOssName(bean.getOssName());
-								_tempBean.setOssVersion(bean.getOssVersion());
-								_tempBean.setLicenseName(bean.getLicenseName());
-								_tempBean.setDownloadLocation(bean.getDownloadLocation());
-								_tempBean.setHomepage(bean.getHomepage());
-								_tempBean.setCopyrightText(bean.getCopyrightText());
-								_tempBean.setExcludeYn(bean.getExcludeYn());
-								_tempBean.setEditable(CoConstDef.FLAG_YES);
-
-								_list.add(_tempBean);
-							}
-						}
-
-						map.replace("mainData", _list);
-					}
-				} else {
-					Project prjInfo = projectService.getProjectBasicInfo(identification.getReferenceId());
-					
-					if (prjInfo != null) {
-						if (!isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
-							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
-						}
-						
-						if (isEmpty(prjInfo.getSrcAndroidNoticeFileId()) && !isEmpty(prjInfo.getSrcAndroidNoticeXmlId())) {
-							noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeXmlId()));
-						}
-						
-						if (!isEmpty(prjInfo.getSrcAndroidResultFileId())) {
-							existsBinaryName = CommonFunction.getExistsBinaryNames(fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
-						}
-					}
-				}
-			}
-
-			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
-			pv.setAppendix("projectId", avoidNull(identification.getReferenceId()));
-			pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
-			// sub grid
-			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
-
-			if (noticeBinaryList != null) {
-				pv.setAppendix("noticeBinaryList", noticeBinaryList);
-			}
-			
-			if (existsBinaryName != null) {
-				pv.setAppendix("existsResultBinaryName", existsBinaryName);
-			}
-			
-			T2CoValidationResult vr = pv.validate(new HashMap<>());
-			
-			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
-				if (!vr.isValid()) {
-					map.put("validData", vr.getValidMessageMap());
-				}
-				if (!vr.isDiff()) {
-					map.put("diffData", vr.getDiffMessageMap(true));
-				}
-				if (vr.hasInfo()) {
-					map.put("infoData", vr.getInfoMessageMap());
-				}
-			}
+			map = projectService.applyAndroidIdentificationGridData(identification, map);
 		} else if ((CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals(code) || CoConstDef.CD_DTL_COMPONENT_BAT.equals(code) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BAT.equals(code))
 				&& map != null) {
 			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BAT);
@@ -4783,46 +4661,23 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value = PROJECT.SUPPLEMENT_NOTICE_FILE)
 	public @ResponseBody ResponseEntity<Object> getSupplementNoticeFile(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
-		String fileId = null;
 		String prjId = (String) map.get("referenceId");
 		String zipFlag = (String) map.get("zipFlag");
 		
 		try {
-			Project project = new Project();
-			project.setPrjId(prjId); 
-			Project projectDetail = projectService.getProjectDetail(project);
-			
-			ProjectIdentification identification = new ProjectIdentification();
-			identification.setReferenceId(prjId);
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			Map<String, Object> result = getOssComponentDataInfo(identification, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			
-			String validMsg = projectService.checkValidData(result);
-			
-			if (isEmpty(validMsg)) {
-				if (CoConstDef.FLAG_YES.equals(zipFlag)) {
-					fileId = projectService.makeZipFileId(result, projectDetail);
-				} else {
-					try {
-						String contents = projectService.makeNoticeFileContents(result);
-						fileId = projectService.makeSupplementFileId(contents, projectDetail);
-					} catch(Exception e) {
-						log.error(e.getMessage());
-					}
-				}
-			} else {
-				return makeJsonResponseHeader(false, validMsg);
-			}
-			
-			if (isEmpty(fileId)){
-				return makeJsonResponseHeader(false, "overflow");
-			}
+			// Authorization check: User must have view permission for the project (enforced by web security context)
+			String fileId = projectService.getSupplementNoticeFileId(prjId, zipFlag);
+			return makeJsonResponseHeader(fileId);
+		} catch (IllegalArgumentException e) {
+			// Validation error - message code 처리
+			String messageCode = e.getMessage();
+			String localizedMessage = getMessage(messageCode);
+			log.error("Validation failed for supplement notice: {}", messageCode);
+			return makeJsonResponseHeader(false, localizedMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
-
-		return makeJsonResponseHeader(fileId);
 	}
 	
 	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectController > ProjectController) >>>

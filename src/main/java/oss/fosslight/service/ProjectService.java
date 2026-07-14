@@ -181,6 +181,12 @@ public interface ProjectService extends HistoryConfig{
 	
 	String makeZipFileId(Map<String, Object>paramMap, Project project);
 
+	String getSupplementNoticeFileId(String prjId, String zipFlag) throws Exception;
+
+	Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map);
+
+	Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map, boolean forSupplementNotice);
+
 	public List<Map<String, String>> getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList, String flag) throws Exception;
 
 	public void deleteStatisticsMostUsedInfo(Project project);

@@ -20,6 +20,8 @@ public interface ApiProjectMapper {
 	int selectProjectCount(Map<String, Object> paramMap);
 
 	boolean checkProjectExist(Map<String, Object> paramMap);
+
+	boolean checkProjectReadable(Map<String, Object> paramMap);
 	
 	Map<String, Object> selectVerificationCheck(@Param("prjId") String prjId);
 	

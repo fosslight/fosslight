@@ -63,10 +63,15 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(CProjectNotAvailableException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     protected ResponseEntity<Map<String, Object>> userNoPermission(HttpServletRequest request, CProjectNotAvailableException e){
-        return responseService.errorResponse(HttpStatus.NOT_FOUND,
-                "The user does not have edit permissions for Project " + e.getMessage());
+        String message;
+        if (e.getPermissionType() == ProjectPermissionType.VIEW) {
+            message = "The user does not have view permissions for Project " + e.getMessage();
+        } else {
+            message = "The user does not have edit permissions for Project " + e.getMessage();
+        }
+        return responseService.errorResponse(HttpStatus.FORBIDDEN, message);
     }
 
     @ExceptionHandler(CUserNotFoundException.class)
