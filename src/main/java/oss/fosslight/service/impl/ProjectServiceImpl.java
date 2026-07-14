@@ -108,7 +108,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private PartnerService partnerService;
 	@Autowired private ProjectService projectService;
 	@Autowired private HistoryService historyService;
-	@Autowired private oss.fosslight.service.ApiProjectService apiProjectService;
 	
 	// Mapper
 	@Autowired private ProjectMapper projectMapper;
@@ -6866,15 +6865,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	public String getSupplementNoticeFileId(String prjId, String zipFlag) throws Exception {
-		// Check project view permission
-		T2Users userInfo = new T2Users();
-		userInfo.setUserId(loginUserName());
-		userInfo = t2UserService.getUser(userInfo);
-
-		if (!apiProjectService.checkUserAvailableToViewProject(userInfo, prjId)) {
-			throw new IllegalStateException("msg.common.cannot.access.page");
-		}
-
 		Project project = new Project();
 		project.setPrjId(prjId);
 
@@ -6904,7 +6894,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		if (isEmpty(fileId)) {
-			throw new IllegalStateException("msg.project.notice.save");
+			throw new IllegalStateException("overflow");
 		}
 
 		return fileId;
