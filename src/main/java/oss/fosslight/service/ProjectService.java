@@ -185,6 +185,8 @@ public interface ProjectService extends HistoryConfig{
 
 	Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map);
 
+	Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map, boolean forSupplementNotice);
+
 	public List<Map<String, String>> getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList, String flag) throws Exception;
 
 	public void deleteStatisticsMostUsedInfo(Project project);

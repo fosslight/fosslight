@@ -6549,8 +6549,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> diffData = (Map<String, Object>) map.get("diffData");
 		String messageCode = null;
 		
-		// Check 0: 기본 데이터 유무 확인 (mainData 또는 diffData가 없거나 비어있는 경우)
-		if (mainData == null || mainData.isEmpty() || diffData == null || diffData.isEmpty()) {
+		// Check 0: 기본 데이터 유무 확인 (mainData가 없거나 비어있는 경우)
+		if (mainData == null || mainData.isEmpty()) {
 			messageCode = "msg.project.no.binary";
 			return messageCode;
 		}
@@ -6559,9 +6559,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		int errCnt = 0;
 		if (validData != null && !validData.isEmpty()) {
 			errCnt = validData.keySet().stream()
-								.filter(c -> c.toUpperCase().contains("OSS_NAME") 
-												|| c.toUpperCase().contains("OSS_VERSION") 
-												|| c.toUpperCase().contains("LICENSE_NAME"))
+								.filter(c -> c.toUpperCase().contains("OSSNAME")
+												|| c.toUpperCase().contains("OSSVERSION")
+												|| c.toUpperCase().contains("LICENSENAME"))
 								.collect(Collectors.toList())
 								.size();
 		}
@@ -6726,6 +6726,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map) {
+		return applyAndroidIdentificationGridData(identification, map, false);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map, boolean forSupplementNotice) {
 		if (map == null) {
 			return null;
 		}
@@ -6826,6 +6832,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 		T2CoProjectValidator pv = new T2CoProjectValidator();
 		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+		pv.setCheckForAdmin(forSupplementNotice);
 		pv.setAppendix("projectId", avoidNull(identification.getReferenceId()));
 		pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
 		pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
@@ -6871,7 +6878,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 
 		Map<String, Object> result = getIdentificationGridList(identification, true);
-		result = applyAndroidIdentificationGridData(identification, result);
+		result = applyAndroidIdentificationGridData(identification, result, true);
 		String validMsg = checkValidData(result);
 
 		if (!isEmpty(validMsg)) {

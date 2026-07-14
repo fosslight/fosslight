@@ -1887,7 +1887,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 		if (CollectionUtils.isEmpty(ossComponetList)) {
 			return;
 		}
-		boolean isAdmin = CommonFunction.isAdmin();
+		boolean isAdmin = CommonFunction.isAdmin() || isCheckForAdmin();
 		String basicKey;
 		String gridKey;
 		String errKey;
