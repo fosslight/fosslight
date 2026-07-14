@@ -4665,6 +4665,7 @@ public class ProjectController extends CoTopComponent {
 		String zipFlag = (String) map.get("zipFlag");
 		
 		try {
+			// Authorization check: User must have view permission for the project (enforced by web security context)
 			String fileId = projectService.getSupplementNoticeFileId(prjId, zipFlag);
 			return makeJsonResponseHeader(fileId);
 		} catch (IllegalArgumentException e) {

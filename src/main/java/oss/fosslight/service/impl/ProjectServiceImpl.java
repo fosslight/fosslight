@@ -6582,7 +6582,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// Check 3: 출력 조건을 만족하는 Binary가 있는지 확인 (BINARYNOTICE 메시지 확인)
 		String ruleMsg = (String) T2CoValidationConfig.getInstance().getRuleAllMap().get("BINARY_NOTICE.NOTICE_PERMISSIVE.MSG");
 		int validBinaryCnt = 0;
-		if (ruleMsg != null) {
+		if (ruleMsg != null && diffData != null) {
 			validBinaryCnt = diffData.entrySet().stream()
 									   .filter(c -> ((String) c.getValue()).equals(ruleMsg) && c.getKey().toUpperCase().contains("BINARYNOTICE"))
 									   .collect(Collectors.toList())
@@ -6751,8 +6751,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					List<String> removedCheckList = null;
 					List<OssComponents> addCheckList = null;
 					log.info("identification.getAndroidResultFileId() : OK");
-					existsBinaryName = CommonFunction.getExistsBinaryNames(
-							fileService.selectFileInfoById(identification.getAndroidResultFileId()));
+
+					T2File resultFileInfo = fileService.selectFileInfoById(identification.getAndroidResultFileId());
+					existsBinaryName = CommonFunction.getExistsBinaryNames(resultFileInfo);
 
 					List<String> _checkExistsBinaryName = new ArrayList<>();
 					List<ProjectIdentification> _list = (List<ProjectIdentification>) map.get("mainData");
@@ -6763,7 +6764,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 					}
 
-					T2File resultFileInfo = fileService.selectFileInfoById(identification.getAndroidResultFileId());
 					Map<String, Object> _resultFileInfoMap = CommonFunction.getAndroidResultFileInfo(resultFileInfo,
 							_checkExistsBinaryName);
 
@@ -6894,7 +6894,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		if (isEmpty(fileId)) {
-			throw new IllegalStateException("overflow");
+			throw new IllegalStateException("Failed to generate supplement notice file. Please verify that the project contains valid binary components.");
 		}
 
 		return fileId;
