@@ -4675,7 +4675,7 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, localizedMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return makeJsonResponseHeader(false, e.getMessage());
+			return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
 		}
 	}
 	
