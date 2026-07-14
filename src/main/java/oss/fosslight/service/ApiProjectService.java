@@ -29,6 +29,8 @@ public interface ApiProjectService {
 
 	public boolean checkProjectAvailability(T2Users userInfo, String prjId, String needToUploadReport);
 
+	public boolean checkUserAvailableToViewProject(T2Users userInfo, String prjId);
+
 	public boolean existProjectCnt(Map<String, Object> paramMap);
 
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet);

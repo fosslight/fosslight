@@ -411,6 +411,29 @@
 		AND T1.PRJ_ID = #{prjId}
 	</select>
 
+	<select id="checkProjectReadable" parameterType="hashMap" resultType="boolean">
+		SELECT IF(COUNT(*) = 1, 1, 0)
+		FROM PROJECT_MASTER T1
+		WHERE T1.USE_YN = 'Y'
+		AND T1.PRJ_ID = #{prjId}
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', userRole)">
+			</when>
+			<otherwise>
+				AND (
+					T1.PUBLIC_YN = 'Y'
+					OR T1.CREATOR = #{userId}
+					OR EXISTS (
+						SELECT 1
+						FROM PROJECT_WATCHER A1
+						WHERE A1.PRJ_ID = T1.PRJ_ID
+						AND A1.USER_ID = #{userId}
+					)
+				)
+			</otherwise>
+		</choose>
+	</select>
+
 	
 	<select id="selectProjectCount" parameterType="hashMap" resultType="int">
 		/* ProjectMapper.selectProjectCount */

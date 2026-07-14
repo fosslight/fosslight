@@ -236,6 +236,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return checkProjectAvailability(userInfo, prjId, CoConstDef.FLAG_NO);
 	}
 
+	@Override
+	public boolean checkUserAvailableToViewProject(T2Users userInfo, String prjId){
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("userRole", userRole(userInfo));
+		paramMap.put("prjId", prjId);
+
+		return apiProjectMapper.checkProjectReadable(paramMap);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean existProjectCnt(Map<String, Object> paramMap) {
