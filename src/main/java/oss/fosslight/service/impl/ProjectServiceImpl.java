@@ -7,6 +7,7 @@ package oss.fosslight.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -70,6 +71,7 @@ import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.util.OssComponentUtil;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -104,6 +106,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private CommentService commentService;
 	@Autowired private T2UserService t2UserService;
 	@Autowired private PartnerService partnerService;
+	@Autowired private ProjectService projectService;
 	@Autowired private HistoryService historyService;
 	
 	// Mapper
@@ -6544,63 +6547,54 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
 		Map<String, Object> validData = (Map<String, Object>) map.get("validData");
 		Map<String, Object> diffData = (Map<String, Object>) map.get("diffData");
-		String validMsg = null;
+		String messageCode = null;
 		
-		int emptyBinaryPathCnt = 0;
-		int errCnt = 0;
-		int diffCnt = 0;
-		
-		if (mainData != null) {
-			emptyBinaryPathCnt = mainData.stream()
-											.filter(c -> isEmpty(c.getBinaryName()) && !CoConstDef.FLAG_YES.equals(avoidNull(c.getExcludeYn(), CoConstDef.FLAG_NO)))
-											.collect(Collectors.toList())
-											.size();
+		// Check 0: 기본 데이터 유무 확인 (mainData가 없거나 비어있는 경우)
+		if (mainData == null || mainData.isEmpty()) {
+			messageCode = "msg.project.no.binary";
+			return messageCode;
 		}
 		
-		if (validData != null) {
+		// Check 1: OSS Name, OSS Version, License에 Warning message가 있는지 확인
+		int errCnt = 0;
+		if (validData != null && !validData.isEmpty()) {
 			errCnt = validData.keySet().stream()
-								.filter(c -> c.toUpperCase().contains("OSS_NAME") 
-												|| c.toUpperCase().contains("OSS_VERSION") 
-												|| c.toUpperCase().contains("LICENSE_NAME"))
+								.filter(c -> c.toUpperCase().contains("OSSNAME")
+												|| c.toUpperCase().contains("OSSVERSION")
+												|| c.toUpperCase().contains("LICENSENAME"))
 								.collect(Collectors.toList())
 								.size();
 		}
 		
-		if (diffData != null) {
-			Map<String, Object> diffDataMap = new HashMap<String, Object>();
-			for (String key : diffData.keySet()) {
-				if (key.toUpperCase().contains("LICENSENAME")) {
-					String diffMsg = (String) diffData.get(key);
-					if (!diffMsg.contains("Declared")) {
-						diffDataMap.put(key, diffData.get(key));
-					}
-				} else {
-					diffDataMap.put(key, diffData.get(key));
-				}
-			}
-			
-			if (!diffDataMap.isEmpty()) {
-				diffCnt = diffDataMap.keySet()
-						.stream()
-						.filter(c -> c.toUpperCase().contains("OSSNAME") 
-										|| c.toUpperCase().contains("OSSVERSION") 
-										|| c.toUpperCase().contains("LICENSENAME"))
-						.collect(Collectors.toList())
-						.size();
-			}
+		// Check 2: Binary Path이 공란인 Row 확인 (excludeYn != Y인 행만 체크)
+		int emptyBinaryPathCnt = 0;
+		emptyBinaryPathCnt = mainData.stream()
+										.filter(c -> isEmpty(c.getBinaryName()) && !CoConstDef.FLAG_YES.equals(avoidNull(c.getExcludeYn(), CoConstDef.FLAG_NO)))
+										.collect(Collectors.toList())
+										.size();
+		
+		// Check 1 또는 2 중 하나라도 위반 시: Error Message Code 1 반환
+		if (emptyBinaryPathCnt > 0 || errCnt > 0) {
+			messageCode = "msg.project.download.notice";
+			return messageCode;
 		}
 		
-		// OSS Name, OSS Version, License에 Warning message(빨간색, 파란색)가 있는 Row 또는 Binary Name이 공란인 Row
-		if (emptyBinaryPathCnt > 0 || errCnt > 0 ) {
-			validMsg = "You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.";
+		// Check 3: 출력 조건을 만족하는 Binary가 있는지 확인 (BINARYNOTICE 메시지 확인)
+		String ruleMsg = (String) T2CoValidationConfig.getInstance().getRuleAllMap().get("BINARY_NOTICE.NOTICE_PERMISSIVE.MSG");
+		int validBinaryCnt = 0;
+		if (ruleMsg != null && diffData != null) {
+			validBinaryCnt = diffData.entrySet().stream()
+									   .filter(c -> ((String) c.getValue()).equals(ruleMsg) && c.getKey().toUpperCase().contains("BINARYNOTICE"))
+									   .collect(Collectors.toList())
+									   .size();
 		}
 		
-		// 출력할 Binary가 없는 경우(= 출력 조건에 해당하는 Row가 없는 경우)
-		if (mainData.size() == 0 || diffData.size() == 0) {
-			validMsg = "There is no binary that meets the conditions for creating NOTICE.";
+		// Check 3 위반 시: Error Message Code 2 반환
+		if (validBinaryCnt == 0) {
+			messageCode = "msg.project.no.binary";
 		}
 		
-		return validMsg;
+		return messageCode;
 	}
 	
 	@Override
@@ -6725,7 +6719,184 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			// 파일 등록
 			fileId = fileService.registFileDownload(filePath, fileName, fileName);
 		}
-		
+
+		return fileId;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map) {
+		return applyAndroidIdentificationGridData(identification, map, false);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> applyAndroidIdentificationGridData(ProjectIdentification identification, Map<String, Object> map, boolean forSupplementNotice) {
+		if (map == null) {
+			return null;
+		}
+
+		List<String> noticeBinaryList = null;
+		List<String> existsBinaryName = null;
+
+		if (!isEmpty(identification.getReferenceId())) {
+			// 다른 project에서 load하는 경우
+			if (CoConstDef.FLAG_YES.equals(identification.getLoadFromAndroidProjectFlag())) {
+				if (!isEmpty(identification.getAndroidNoticeFileId())) {
+					log.info("identification.getAndroidNoticeFileId() : OK");
+					noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(identification.getAndroidNoticeFileId()));
+				}
+
+				if (!isEmpty(identification.getAndroidResultFileId())) {
+					List<String> removedCheckList = null;
+					List<OssComponents> addCheckList = null;
+					log.info("identification.getAndroidResultFileId() : OK");
+
+					T2File resultFileInfo = fileService.selectFileInfoById(identification.getAndroidResultFileId());
+					existsBinaryName = CommonFunction.getExistsBinaryNames(resultFileInfo);
+
+					List<String> _checkExistsBinaryName = new ArrayList<>();
+					List<ProjectIdentification> _list = (List<ProjectIdentification>) map.get("mainData");
+
+					for (ProjectIdentification bean : _list) {
+						if (!isEmpty(bean.getBinaryName())) {
+							_checkExistsBinaryName.add(bean.getBinaryName());
+						}
+					}
+
+					Map<String, Object> _resultFileInfoMap = CommonFunction.getAndroidResultFileInfo(resultFileInfo,
+							_checkExistsBinaryName);
+
+					if (_resultFileInfoMap.containsKey("removedCheckList")) {
+						removedCheckList = (List<String>) _resultFileInfoMap.get("removedCheckList");
+					}
+
+					if (_resultFileInfoMap.containsKey("addCheckList")) {
+						addCheckList = (List<OssComponents>) _resultFileInfoMap.get("addCheckList");
+					}
+
+					if (removedCheckList != null) {
+						for (ProjectIdentification bean : _list) {
+							if (removedCheckList.contains(bean.getBinaryName())) {
+								bean.setExcludeYn(CoConstDef.FLAG_YES);
+							}
+						}
+					}
+
+					if (addCheckList != null) {
+						try {
+							OssComponentUtil.getInstance().makeOssComponent(addCheckList, true);
+						} catch (IllegalAccessException | InstantiationException | InvocationTargetException
+								| NoSuchMethodException e) {
+							log.error(e.getMessage());
+						}
+
+						for (OssComponents bean : addCheckList) {
+							ProjectIdentification _tempBean = new ProjectIdentification();
+							_tempBean.setBinaryName(bean.getBinaryName());
+							_tempBean.setFilePath(bean.getFilePath());
+							_tempBean.setBinaryNotice(bean.getBinaryNotice());
+							_tempBean.setOssName(bean.getOssName());
+							_tempBean.setOssVersion(bean.getOssVersion());
+							_tempBean.setLicenseName(bean.getLicenseName());
+							_tempBean.setDownloadLocation(bean.getDownloadLocation());
+							_tempBean.setHomepage(bean.getHomepage());
+							_tempBean.setCopyrightText(bean.getCopyrightText());
+							_tempBean.setExcludeYn(bean.getExcludeYn());
+							_tempBean.setEditable(CoConstDef.FLAG_YES);
+
+							_list.add(_tempBean);
+						}
+					}
+
+					map.replace("mainData", _list);
+				}
+			} else {
+				Project prjInfo = projectService.getProjectBasicInfo(identification.getReferenceId());
+
+				if (prjInfo != null) {
+					if (!isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
+						noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId()));
+					}
+
+					if (isEmpty(prjInfo.getSrcAndroidNoticeFileId()) && !isEmpty(prjInfo.getSrcAndroidNoticeXmlId())) {
+						noticeBinaryList = CommonFunction.getNoticeBinaryList(fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeXmlId()));
+					}
+
+					if (!isEmpty(prjInfo.getSrcAndroidResultFileId())) {
+						existsBinaryName = CommonFunction.getExistsBinaryNames(fileService.selectFileInfoById(prjInfo.getSrcAndroidResultFileId()));
+					}
+				}
+			}
+		}
+
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+		pv.setCheckForAdmin(forSupplementNotice);
+		pv.setAppendix("projectId", avoidNull(identification.getReferenceId()));
+		pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+		pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+
+		if (noticeBinaryList != null) {
+			pv.setAppendix("noticeBinaryList", noticeBinaryList);
+		}
+
+		if (existsBinaryName != null) {
+			pv.setAppendix("existsResultBinaryName", existsBinaryName);
+		}
+
+		T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+		if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
+			map.replace("mainData", CommonFunction.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+			if (!vr.isValid()) {
+				map.put("validData", vr.getValidMessageMap());
+			}
+			if (!vr.isDiff()) {
+				map.put("diffData", vr.getDiffMessageMap(true));
+			}
+			if (vr.hasInfo()) {
+				map.put("infoData", vr.getInfoMessageMap());
+			}
+		}
+
+		return map;
+	}
+	
+	@Override
+	public String getSupplementNoticeFileId(String prjId, String zipFlag) throws Exception {
+		Project project = new Project();
+		project.setPrjId(prjId);
+
+		Project projectDetail = getProjectDetail(project);
+		if (projectDetail == null) {
+			throw new IllegalStateException("Project not found.");
+		}
+
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(prjId);
+		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+
+		Map<String, Object> result = getIdentificationGridList(identification, true);
+		result = applyAndroidIdentificationGridData(identification, result, true);
+		String validMsg = checkValidData(result);
+
+		if (!isEmpty(validMsg)) {
+			throw new IllegalArgumentException(validMsg);
+		}
+
+		String fileId;
+		if (CoConstDef.FLAG_YES.equals(zipFlag)) {
+			fileId = makeZipFileId(result, projectDetail);
+		} else {
+			String contents = makeNoticeFileContents(result);
+			fileId = makeSupplementFileId(contents, projectDetail);
+		}
+
+		if (isEmpty(fileId)) {
+			throw new IllegalStateException("Failed to generate supplement notice file. Please verify that the project contains valid binary components.");
+		}
+
 		return fileId;
 	}
 	

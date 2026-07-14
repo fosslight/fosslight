@@ -1055,6 +1055,9 @@ public final class Url {
 			/** API Project BOM Tab Export JSON*/
 			public static final String FOSSLIGHT_API_PROJECT_BOM_JSON	    = "/projects/{id}/sbom/json-data";
 
+			/** API Project Supplement Notice Download */
+			public static final String FOSSLIGHT_API_PROJECT_SUPPLEMENT_NOTICE = "/projects/{id}/platform/supplement-notice";
+
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/sbom/compare-with/{compareId}";
 
@@ -1153,4 +1156,3 @@ public final class Url {
 	}
 
 }
-
