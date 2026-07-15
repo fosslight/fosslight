@@ -268,11 +268,11 @@
 		, VENDOR = values(VENDOR)
     </insert>
     
-    <select id="streamDistinctProductList" fetchSize="-2147483648" resultType="String">
+    <select id="streamDistinctProductList" fetchSize="1000" resultType="String">
 	    SELECT PRODUCT FROM NVD_DATA_V3 WHERE PRODUCT != '-' GROUP BY PRODUCT
 	</select>
     
-    <insert id="insertNvdDataScoreV3TempByProduct">
+    <insert id="insertNvdDataScoreV3TempList">
 	    INSERT INTO NVD_DATA_SCORE_V3_TEMP (
 	        PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE, VENDOR
 	    )
@@ -287,17 +287,20 @@
 	            ) AS RN
 	        FROM NVD_DATA_V3 T2
 	        STRAIGHT_JOIN NVD_CVE_V3 T1 ON T2.CVE_ID = T1.CVE_ID
-	        WHERE T2.PRODUCT = #{product}
+	        WHERE T2.PRODUCT IN 
+	        <foreach collection="productList" item="product" open="(" separator="," close=")">
+	            #{product}
+	        </foreach>
 	    ) X
 	    WHERE X.RN = 1
 	    ON DUPLICATE KEY UPDATE 
-	        PRODUCT      = X.PRODUCT,
-	        VERSION      = X.VERSION,
-	        CVE_ID       = X.CVE_ID,
-	        CVSS_SCORE   = X.CVSS_SCORE,
-	        VULN_SUMMARY = X.VULN_SUMMARY,
-	        MODI_DATE    = X.MODI_DATE,
-	        VENDOR       = X.VENDOR
+	        PRODUCT      = VALUES(PRODUCT),
+	        VERSION      = VALUES(VERSION),
+	        CVE_ID       = VALUES(CVE_ID),
+	        CVSS_SCORE   = VALUES(CVSS_SCORE),
+	        VULN_SUMMARY = VALUES(VULN_SUMMARY),
+	        MODI_DATE    = VALUES(MODI_DATE),
+	        VENDOR       = VALUES(VENDOR)
 	</insert>
     
 	<delete id="deleteNvdDataScoreV3Temp">TRUNCATE TABLE NVD_DATA_SCORE_V3_TEMP</delete>
