@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -988,22 +989,31 @@ public class NvdDataService extends CoTopComponent {
 			nvdDataMapper.createTableNvdDavaScoreV3Temp();
 			nvdDataMapper.deleteNvdDataScoreV3Temp();
 			
+			List<String> chunkList = new ArrayList<>();
 			AtomicInteger processedCount = new AtomicInteger(0);
 	        nvdDataMapper.streamDistinctProductList(new ResultHandler<String>() {
 	            @Override
 	            public void handleResult(ResultContext<? extends String> resultContext) {
 	                String product = resultContext.getResultObject();
-	                
 	                if (product != null && !product.trim().isEmpty()) {
-	                    nvdDataMapper.insertNvdDataScoreV3TempByProduct(product);
-	                    
-	                    int currentCount = processedCount.incrementAndGet();
-	                    if (currentCount % 1000 == 0) {
-	                    	schlog.info("Progress: {} products processed...", currentCount);
-	                    }
+	                	chunkList.add(product);
+	                	
+	                	if (chunkList.size() >= 1000) {
+	                		insertInBatch(chunkList);
+	                		processedCount.addAndGet(chunkList.size());
+	                        schlog.info("Progress: {} products processed...", processedCount.get());
+	                        chunkList.clear();
+	                	}
 	                }
 	            }
 	        });
+	        
+	        if (!chunkList.isEmpty()) {
+	        	insertInBatch(chunkList);
+	            processedCount.addAndGet(chunkList.size());
+	            schlog.info("Progress: {} products processed...", processedCount.get());
+	        }
+	        
 	        schlog.info("Product split-loading completed. (Total products: {} items)", processedCount.get());
 
 			nvdDataMapper.deleteNvdDataScoreV3();
@@ -1055,7 +1065,14 @@ public class NvdDataService extends CoTopComponent {
 
 		return resCd;
 	}
-  
+	
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void insertInBatch(List<String> chunkList) {
+        if (!CollectionUtils.isEmpty(chunkList)) {
+            nvdDataMapper.insertNvdDataScoreV3TempList(chunkList);
+        }
+    }
+	
 	private void ignoreSsl() {
 		HostnameVerifier hv = new HostnameVerifier() {
 			public boolean verify(String urlHostName, SSLSession session) {

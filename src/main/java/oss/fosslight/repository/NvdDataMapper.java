@@ -94,5 +94,5 @@ public interface NvdDataMapper {
 	void copyNvdDataRunningOnWithFromTemp();
 	
 	void streamDistinctProductList(ResultHandler<String> resultHandler);
-	void insertNvdDataScoreV3TempByProduct(String product);
+	void insertNvdDataScoreV3TempList(@Param("productList") List<String> productList);
 }
