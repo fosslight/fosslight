@@ -128,6 +128,12 @@
             </a>
           </li>
           <li class="nav-item">
+         	<a th:href="@{/system/notice}" class="nav-link">
+            	<i class="nav-icon fas fa-list"></i>
+               	<p th:text="Notification"></p>
+           	</a>
+          </li>
+          <li class="nav-item">
             <a th:href="@{/configuration/edit}" class="nav-link userSettings">
               <i class="nav-icon fas fa-user-cog"></i>
 	          	<p th:text="'User Settings'"></p>
@@ -161,12 +167,6 @@
                 <a th:href="@{/system/history}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   	<p th:text="'History List'"></p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/system/notice}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  	<p th:text="Notification"></p>
                 </a>
               </li>
               <li class="nav-item">

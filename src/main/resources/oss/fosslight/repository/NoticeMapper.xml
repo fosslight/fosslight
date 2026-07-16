@@ -9,26 +9,26 @@
 	</sql>
 	
     <sql id="orderby">
+    	ORDER BY FIX_YN DESC, MODIFIED_DATE DESC
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(sidx)">
-        	ORDER BY
         	<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('SEQ', sidx)">
-					SEQ
+					, SEQ
 				</when>
 				<when test="@oss.fosslight.util.StringUtil@equals('TITLE', sidx)">
-					TITLE
+					, TITLE
 				</when>
 				<when test="@oss.fosslight.util.StringUtil@equals('REPLACE_NOTICE', sidx)">
-					NOTICE
+					, NOTICE
 				</when>
 				<when test="@oss.fosslight.util.StringUtil@equals('S_DATE', sidx)">
-					S_DATE
+					, S_DATE
 				</when>
 				<when test="@oss.fosslight.util.StringUtil@equals('E_DATE', sidx)">
-					E_DATE
+					, E_DATE
 				</when>
 				<when test="@oss.fosslight.util.StringUtil@equals('PUBLISH_YN', sidx)">
-					PUBLISH_YN
+					, PUBLISH_YN
 				</when>
 			</choose>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
@@ -61,6 +61,7 @@
 			, S_DATE
 			, E_DATE
 			, PUBLISH_YN
+			, FIX_YN
 			, MODIFIER
 			, MODIFIED_DATE
 			, CREATOR
@@ -80,6 +81,7 @@
 			, S_DATE
 			, E_DATE
 			, PUBLISH_YN
+			, FIX_YN
 			, MODIFIER
 			, MODIFIED_DATE
 			, CREATOR
@@ -88,14 +90,15 @@
 		VALUES
 		(
 			#{title}
-			,#{notice}
-			,#{sDate}
-			,#{eDate}
-			,#{publishYn}
-			,#{loginUserName}
-			,now()
-			,#{loginUserName}
-			,now()
+			, #{notice}
+			, #{sDate}
+			, #{eDate}
+			, #{publishYn}
+			, #{fixYn}
+			, #{loginUserName}
+			, now()
+			, #{loginUserName}
+			, now()
 		)
 	</insert>
 	
@@ -107,6 +110,7 @@
 			, S_DATE		= #{sDate}
 			, E_DATE		= #{eDate}
 			, PUBLISH_YN	= #{publishYn}
+			, FIX_YN		= #{fixYn}
 			, MODIFIER		= #{loginUserName}
 			, MODIFIED_DATE	= now()
 		WHERE SEQ			= #{seq}

@@ -35,11 +35,7 @@ public class NoticeController extends CoTopComponent {
 	}
 	
 	@GetMapping(value=NOTICE.LIST_AJAX)
-	public @ResponseBody ResponseEntity<Object> listAjax(
-			@ModelAttribute Notice vo
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) throws Exception{
+	public @ResponseBody ResponseEntity<Object> listAjax(@ModelAttribute Notice vo, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -55,11 +51,7 @@ public class NoticeController extends CoTopComponent {
 	}
 	
 	@PostMapping(value=NOTICE.SAVE_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjax(
-			@ModelAttribute Notice vo
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) throws Exception{
+	public @ResponseBody ResponseEntity<Object> saveAjax(@ModelAttribute Notice vo, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		T2CoValidationResult vResult = validateWithAppendix(req, "PROC_MODE", "ADD");
 		
 		if (!vResult.isValid()) {
@@ -71,11 +63,7 @@ public class NoticeController extends CoTopComponent {
 	}
 	
 	@RequestMapping(value=NOTICE.PUBLISHED_NOTICE, method = {RequestMethod.POST, RequestMethod.GET})
-	public @ResponseBody ResponseEntity<Object> getPublishedNotice(
-			@ModelAttribute Notice vo
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model) throws Exception{
+	public @ResponseBody ResponseEntity<Object> getPublishedNotice(@ModelAttribute Notice vo, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		return makeJsonResponseHeader(noticeService.getPublishedNotice(vo));
 	}
 }
