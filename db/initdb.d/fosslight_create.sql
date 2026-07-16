@@ -4619,6 +4619,7 @@ CREATE TABLE IF NOT EXISTS `USER_NOTICE` (
   `S_DATE` date NOT NULL,
   `E_DATE` date NOT NULL,
   `PUBLISH_YN` char(1) NOT NULL DEFAULT 'Y',
+  `FIX_YN` char(1) NOT NULL DEFAULT 'N',
   `MODIFIER` varchar(50) NOT NULL,
   `MODIFIED_DATE` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `CREATOR` varchar(50) NOT NULL,

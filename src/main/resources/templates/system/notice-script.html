@@ -2,8 +2,18 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="script">
 <script th:inline="javascript">
+var hasAuth = [[${@CommonFunction.isAdmin()}]];
+
 $(function () {
 	noticeList.load();
+	
+	$("#noticeTextarea").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	$("#sDate").datepicker({dateFormat: "yy-mm-dd", changeMonth: true, changeYear: true});
+   	$("#eDate").datepicker({dateFormat: "yy-mm-dd", changeMonth: true, changeYear: true});
+   	
+   	$("#noticeSave").on("click", function () {
+   		noticePopup.save();
+   	});
 });	
 
 // 함수
@@ -67,108 +77,6 @@ var gridFormatter = {
 	}
 };
 
-var updateDialogAdd = {
-	url:'/system/notice/saveAjax'
-    , closeAfterAdd: true
-   	, reloadAfterSubmit: true
-  	, modal: true
-	, serializeDelData: function(postdata) {
-		return JSON.stringify(postdata);
-	}
-	, beforeShowForm: function(formid) {
-		$("#tr_seq", formid).css("display", "none");
-		var appendHtml = '<textarea id="noticeTextarea" style="display : none;"></textarea>';
-    	$("#tr_notice", formid).show();
-		$("#notice", formid).hide();
-		$("#tr_notice", formid).children().eq(1).append(appendHtml);
-		
-		$("#noticeTextarea").summernote({width:500, height: 200, lang: "ko-KR"});
-	}
-	, onClose: function() {}	
-	, afterSubmit: function(response, postdata) {
- 		if("false" == response.responseJSON.isValid) {
-   			alertify.error([[#{msg.common.valid}]], 0);
-      		createValidMsg('FrmGrid_list', response.responseJSON);
-
-    		return [false, [[#{msg.common.valid}]], ""]
-		} else {
- 			alertify.success([[#{msg.common.success}]]);
-
-   			return [true,"",""]
- 		}
-
- 		noticeList.load();
-	}
-	, beforeSubmit: function(postdata, formid) {
-		postdata.notice = $("#noticeTextarea").summernote('code');
-   		$("span.retxt", formid).remove();
-
-   		return [true];
-	}
-	,width: "600"
-};
-
-var updateDialogEdit = {
-	url:'/system/notice/saveAjax'
-  	, closeAfterEdit: true
-  	, reloadAfterSubmit: true
-	, modal: true
-	, serializeDelData: function(postdata) {
-		return JSON.stringify(postdata);
-	}
-	, beforeShowForm: function(formid) {
-		var appendHtml = '<textarea id="noticeTextarea" style="display : none;">'+$("#notice", formid).val()+'</textarea>';
-    	$("#tr_notice", formid).show();
-		$("#notice", formid).hide();
-		$("#tr_notice", formid).children().eq(1).append(appendHtml);
-
-		$("#noticeTextarea").summernote({width:500, height: 200, lang: "ko-KR"});
-	}
-	, onClose: function() {}
-	, afterSubmit: function(response, postdata) {
- 		if("false" == response.responseJSON.isValid) {
- 			alertify.error([[#{msg.common.valid}]], 0);
-			createValidMsg('FrmGrid_list', response.responseJSON);
-
- 			return [false, [[#{msg.common.valid}]], ""]
- 		} else {
-   			alertify.success([[#{msg.common.success}]]);
-
-			return [true,"",""]
-		}
-
-   		noticeList.load();
-	}
-	, beforeSubmit: function(postdata, formid) {
-  		postdata.notice = $("#noticeTextarea").summernote('code');
- 		$("span.retxt", formid).remove();
- 		
- 		return [true];
-	}
-	,width: "600"
-	,viewPagerButtons: false
-};
-
-var updateDialogDel = {
-	url:'/system/notice/saveAjax'
-    , closeAfterDel: true
-    , reloadAfterSubmit: true
-    , modal: true
-    , onclickSubmit: function(params, rowid) {
-    	var rowData = $("#list").jqGrid("getRowData", rowid);
-		return rowData;
-  	}
-	, afterSubmit: function(response, postdata) {
-    	if("false" == response.responseJSON.isValid) {
-       		alertify.error([[#{msg.common.valid}]], 0);
-    		return [false, [[#{msg.common.valid}]], ""]
-   		} else {
-    		alertify.success([[#{msg.common.success}]]);
- 			return [true,"",""]
-  		}
-	}
-};
-
 var noticeList = {
 	modifyRowId: [],		// 수정된 모든 rowid
 	deleteRowList: [],		// 삭제할 LIST
@@ -195,11 +103,16 @@ var noticeList = {
 				total:function(obj){return obj.total;},
 				records:function(obj){return obj.records;}
 			}
-			, colNames: ['gridId', 'Notice No', 'Title', 'Notice', 'notice', 'Start Date', 'End Date', 'Publish']
+			, colNames: ['gridId', 'Notice No', 'Title', 'Notice', 'notice', 'Start Date', 'End Date', 'Publish', 'Fixed']
 			, colModel: [
                 {name: 'gridId', index: 'gridId', key:true, editable:false, hidden:true},
                 {name: 'seq', index: 'seq', width: 50, align: 'center', editable:true},
-				{name: 'title', index: 'title', width: 200, align: 'left', editable:true, editrules : {required: true}},
+				{name: 'title', index: 'title', width: 200, align: 'left', editable:true, editrules : {required: true},
+                	formatter: function(cellvalue, options, rowObject) {
+                		var rowid = options.rowId;
+                		return "<a href='javascript:void(0);' style='color: #0066cc; text-decoration: underline;' onclick='noticePopup.editPopup(\"" + rowid + "\");'>" + cellvalue + "</a>";
+                	}
+				},
 				{name: 'replaceNotice', index: 'replaceNotice', width: 400, align: 'left', editable:false},
                 {name: 'notice', index: 'notice', editable:true, hidden:true},
 				{name: 'sDate', index: 'sDate', width: 50, align: 'center', editable:true, editrules : {required: true}, 
@@ -236,7 +149,8 @@ var noticeList = {
 						}
 					}
 				},
-				{name: 'publishYn', index: 'publishYn', width: 50, align: 'center', editable:true, edittype:"checkbox", editoptions: {value: "Y:N:N"}}
+				{name: 'publishYn', index: 'publishYn', width: 50, align: 'center', editable:true, edittype:"checkbox", editoptions: {value: "Y:N:N"}},
+				{name: 'fixYn', index: 'fixYn', width: 50, align: 'center', editable:true, edittype:"checkbox", editoptions: {value: "Y:N:N"}}
 			]
 			, emptyrecords: "Nothing to display"
 			, autoencode: true
@@ -252,15 +166,216 @@ var noticeList = {
 			, sortorder: 'desc'
 			, height: 'auto'
 			, loadonce: false
-			// 데이터 로딩 후
-			, loadComplete: function(data) {}
+			, loadComplete: function(data) {
+				// Execute only when hasAuth is false
+				if (typeof hasAuth !== "undefined" && !hasAuth) {
+					var $grid = $("#list");
+					// Get all row IDs currently displayed in the grid
+					var rowIds = $grid.jqGrid('getDataIDs');
+					
+					for (var i = 0; i < rowIds.length; i++) {
+						var rowid = rowIds[i];
+						// Get the data object for the current row
+						var rowData = $grid.jqGrid('getRowData', rowid);
+						
+						// Delete the row if publishYn is 'N' or empty
+						if (rowData.publishYn === "N" || rowData.publishYn === "") {
+							$grid.jqGrid('delRowData', rowid);
+						}
+					}
+				}
+			}
+			, onSelectRow: function(rowid, status, e) {
+				noticePopup.editPopup(rowid);
+			}
 			, gridComplete : function() {
 				updateGridRowCount('list', 'pager');	
 			}
 		});
 		
-        $("#list").jqGrid('navGrid', "#list_toppager", {edit:true, add:true, del:true, search:false, refresh:false}, updateDialogEdit, updateDialogAdd, updateDialogDel);
+		$("#list").jqGrid('navGrid', "#list_toppager", {edit: false, add: false, del: false, search: false, refresh: false});
+		
+		if (hasAuth) {
+			$("#list").jqGrid('navButtonAdd', '#list_toppager', {
+				caption: "",
+			    buttonicon: "ui-icon-plus",
+			    title: "Add",
+			    position: "last",
+			    onClickButton: function () {
+			    	noticePopup.addPopup();
+			    }
+			});
+			
+			$("#list").jqGrid('navButtonAdd', '#list_toppager', {
+		        caption: "",
+		        buttonicon: "ui-icon-trash",
+		        title: "Delete",
+		        position: "last",
+		        onClickButton: function () {
+		        	noticePopup.delPopup();
+		        }
+		    });
+		}
 	}		
 };
+
+var noticePopup = {
+	save : function() {
+		if (!hasAuth) {
+   	        alertify.error("You do not have permission to edit.", 0);
+   	        return;
+   	    }
+
+   	    $("span.retxt", "#noticeForm").remove();
+
+   	    var postData = {
+   	        oper: $("#seq").val() ? "edit" : "add",
+   	        seq: $("#seq").val(),
+   	        title: $("#title").val(),
+   	        notice: $("#noticeTextarea").summernote("code"),
+   	        sDate: $("#sDate").val(),
+   	        eDate: $("#eDate").val(),
+   	        publishYn: $("#publish").is(":checked") ? "Y" : "N",
+   	        fixYn: $("#fixed").is(":checked") ? "Y" : "N"
+   	    };
+
+   	    $.ajax({
+   	        url: "/system/notice/saveAjax",
+   	        type: "POST",
+   	        data: postData,
+   	        dataType: "json",
+   	        success: function (response) {
+   	            if (response.isValid === false) {
+   	                alertify.error([[#{msg.common.valid}]], 0);
+   	                createValidMsg("noticeForm", response);
+   	            	return;
+   	            }
+   	            
+   	         	alertify.success([[#{msg.common.success}]]);
+   	        	$("#noticeModal").modal("hide");
+   	        	$("#list").trigger("reloadGrid");
+   	        },
+   	        error: function () {
+   	            alertify.error("Save Fail.");
+   	        }
+   	    });
+	},
+	editPopup : function(rowid) {
+		var rowData = $("#list").jqGrid("getRowData", rowid);
+
+		$("#seq").val(rowData.seq);
+	    $("#noticeNo").val(rowData.seq);
+	    
+	    var pureTitle = $("<div>").html(rowData.title).text();
+	    $("#title").val(pureTitle);
+		
+	    $("#noticeTextarea").summernote("code", rowData.notice);
+
+	    $("#sDate").val(rowData.sDate);
+	    $("#eDate").val(rowData.eDate);
+
+	    $("#publish").prop("checked", rowData.publishYn === "Y");
+	    $("#fixed").prop("checked", rowData.fixYn === "Y");
+	    
+	 	// Default authorization handling
+	    if (!hasAuth) {
+	    	$("#noticeForm").find("input,textarea").prop("disabled",true);
+	        $("#noticeTextarea").summernote("disable");
+	        $("#noticeSave").hide();
+	        
+	     	// Hide unnecessary elements
+	        $("#noticeNoDiv").hide();
+	        $("#sDate").closest(".form-row").hide();
+	        $("#publish").closest(".form-row").hide();
+	        $("#noticeSave").hide();
+
+	        // Set Title and Notice inputs to disabled for read-only view
+	        $("#title").prop("disabled", true);
+	        $("#noticeTextarea").summernote("disable");
+	        
+	     	// Hide Summernote toolbar for Simple View
+	        $("#noticeTextarea").next().find(".note-toolbar").hide();
+	   	} else {
+	    	$("#noticeForm").find("input,textarea").prop("disabled",false);
+	        $("#noticeTextarea").summernote("enable");
+	        $("#noticeSave").show();
+	        
+	     	// Restore elements for regular Edit mode
+	        $("#noticeNoDiv").show();
+	        $("#sDate").closest(".form-row").show();
+	        $("#publish").closest(".form-row").show();
+	        $("#noticeNo").prop("readonly", true);
+	        
+	        // Show Summernote toolbar for regular Edit mode
+	        $("#noticeTextarea").next().find(".note-toolbar").show();
+	   	}
+	    
+	   	$("#noticeModal").modal("show");
+	},
+	addPopup : function() {
+		$("#noticeForm")[0].reset();
+		
+		$("#noticeNoDiv").hide();
+	    $("#seq").val("");
+	    $("#noticeNo").val("");
+
+	    $("#noticeTextarea").summernote("code", "");
+
+	    $("#publish").prop("checked", true);
+	    $("#fixed").prop("checked", false);
+
+	    $("#noticeModal").modal("show");
+	},
+	delPopup : function() {
+		var rowId = $("#list").jqGrid("getGridParam", "selrow");
+	    if (!rowId) {
+	        alertify.alert("Please select a notice.");
+	        return;
+	    }
+	    
+	    var rowId = $("#list").jqGrid("getGridParam", "selrow");
+
+	    if (!rowId) {
+	        alertify.alert("Please select a notice.");
+	        return;
+	    }
+
+	    var rowData = $("#list").jqGrid("getRowData", rowId);
+
+	    alertify.confirm(
+	        "Delete",
+	        "Are you sure you want to delete this notice?",
+	        function () {
+	        	var postData = {
+	        		oper: "del",
+	        		seq: rowData.seq
+	        	};
+
+	            $.ajax({
+	                url: "/system/notice/saveAjax",
+	                type: "POST",
+	                data: postData,
+	                dataType: "json",
+	                success: function (response) {
+	                    if (response.isValid == false) {
+	                        alertify.error([[#{msg.common.valid}]], 0);
+	                        return;
+	                    }
+
+	                    alertify.success([[#{msg.common.success}]]);
+	                    $("#list").trigger("reloadGrid");
+	                },
+	                error: function () {
+	                	alertify.error([[#{msg.common.valid2}]], 0);
+	                }
+	            });
+
+	        },
+	        function () {
+	            return;
+	        }
+	    );
+	}
+}
 </script>
 </th:block>

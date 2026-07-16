@@ -159,6 +159,9 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 		('102', '461', '[FOSSLight][PRJ-${Project ID}] Vulnerability Summary : "${Project Name}"', '', '', 461, 'Y'),
 		('103', '461', 'identification confirm 시', '', '200', 461, 'Y'),
 		('110', '73', 'vulnerabilitySummary.html', '', '461', 19, 'Y');
+		
+ALTER TABLE `USER_NOTICE` ADD `FIX_YN` CHAR(1) DEFAULT 'N' NOT NULL;
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 

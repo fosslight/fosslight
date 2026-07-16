@@ -20,5 +20,6 @@ public class Notice extends ComBean implements Serializable {
 	private String replaceNotice;
 	private String sDate;
 	private String eDate;
-	private String publishYn;	
+	private String publishYn;
+	private String fixYn;
 }
