@@ -58,6 +58,7 @@ public class OssDto implements ExcelData {
         var notice = 'Y' == obligations.get(0);
         var source = 'Y' == obligations.get(1);
         var obligationString = "";
+        var downloadUrlsString = String.join(",", getDownloadUrls());
         if (notice && source) obligationString = "Notice & Distribute";
         else if (notice) obligationString = "Notice";
         var nicknameString = "";
@@ -74,7 +75,7 @@ public class OssDto implements ExcelData {
                 licenseType,
                 obligationString,
                 homepageUrl,
-                downloadUrl,
+                downloadUrlsString,
                 copyright,
                 attribution,
                 cvssScore
