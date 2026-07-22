@@ -36,6 +36,8 @@ public class OssDto implements ExcelData {
 
     String copyright = "";
     String nicknames = "";
+    @Setter(AccessLevel.NONE)
+    List<String> nicknameList = new ArrayList<>();
     String attribution = "";
 
     Boolean exclude = false;
@@ -60,6 +62,11 @@ public class OssDto implements ExcelData {
     public void setOssType(String ossTypeCode) {
         this.ossType = ossTypeCode;
         this.ossTypeMap = buildOssTypeMap(ossTypeCode);
+    }
+
+    public void setNicknames(String nicknames) {
+        this.nicknames = nicknames;
+        this.nicknameList = splitNicknames(nicknames);
     }
 
     @Override
@@ -140,6 +147,16 @@ public class OssDto implements ExcelData {
         return Stream.of(source.split(","))
                 .map(String::trim)
                 .filter(url -> !url.isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> splitNicknames(String source) {
+        if (CommonFunction.isEmpty(source)) {
+            return new ArrayList<>();
+        }
+        return Stream.of(source.split("\\|"))
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
                 .collect(Collectors.toList());
     }
 }
