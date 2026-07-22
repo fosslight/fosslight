@@ -7,6 +7,8 @@ import oss.fosslight.domain.OssComponents;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 public class OssDto implements ExcelData {
@@ -17,6 +19,7 @@ public class OssDto implements ExcelData {
     String licenseName;
     String licenseType;
     String downloadUrl = "";
+    List<String> downloadUrls = new ArrayList<>();
     String homepageUrl = "";
     String description = "";
     String cveId = "";
@@ -43,6 +46,11 @@ public class OssDto implements ExcelData {
             obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
             obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
         }
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
+        this.downloadUrls = splitDownloadUrls(downloadUrl);
     }
 
     @Override
@@ -91,5 +99,22 @@ public class OssDto implements ExcelData {
             rtn.add("v-Diff");
         }
         return String.join(", ", rtn);
+    }
+
+    public List<String> getDownloadUrls() {
+        if ((downloadUrls == null || downloadUrls.isEmpty()) && !CommonFunction.isEmpty(downloadUrl)) {
+            downloadUrls = splitDownloadUrls(downloadUrl);
+        }
+        return downloadUrls;
+    }
+
+    private List<String> splitDownloadUrls(String source) {
+        if (CommonFunction.isEmpty(source)) {
+            return new ArrayList<>();
+        }
+        return Stream.of(source.split(","))
+                .map(String::trim)
+                .filter(url -> !url.isEmpty())
+                .collect(Collectors.toList());
     }
 }
