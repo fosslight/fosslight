@@ -33,6 +33,8 @@ public class OssDto implements ExcelData {
     String modifier;
     String modified;
     List<Character> obligations;
+    @Setter(AccessLevel.NONE)
+    Map<String, String> obligationTypeMap = new LinkedHashMap<>();
 
     String copyright = "";
     String nicknames = "";
@@ -52,6 +54,20 @@ public class OssDto implements ExcelData {
             obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
             obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
         }
+        this.obligationTypeMap = buildObligationTypeMap(obligationType);
+    }
+
+    private Map<String, String> buildObligationTypeMap(String obligationType) {
+        Map<String, String> rtn = new LinkedHashMap<>();
+        var typeArr = obligationType.toCharArray();
+        if (typeArr.length == 0) {
+            rtn.put("Notice", "N");
+            rtn.put("Source", "N");
+        } else {
+            rtn.put("Notice", typeArr[0] == '0' ? "N" : "Y");
+            rtn.put("Source", typeArr[1] == '0' ? "N" : "Y");
+        }
+        return rtn;
     }
 
     public void setDownloadUrl(String downloadUrl) {
