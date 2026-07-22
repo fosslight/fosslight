@@ -87,6 +87,9 @@ public class ApiOssV2Controller extends CoTopComponent {
             ossQuery.setCountPerPage(countPerPage);
 
             var map = apiOssService.listOss(ossQuery);
+            if (!userService.isApiAdmin(authorization) && map.list != null) {
+                map.list.forEach(oss -> oss.setExclude(null));
+            }
             return ResponseEntity.ok(map);
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().build();

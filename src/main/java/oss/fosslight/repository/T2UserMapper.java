@@ -75,4 +75,6 @@ public interface T2UserMapper {
 	public List<T2Users> selectUnusedDivisionUserList(@Param("unusedDivisionList") String[] unusedDivisionList);
 
 	public T2Users checkExpiredUser(T2Users bean);
+
+	public int selectApiAdminCount(@Param("token") String token);
 }

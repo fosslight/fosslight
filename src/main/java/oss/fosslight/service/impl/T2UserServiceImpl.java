@@ -832,6 +832,12 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 		return false;
 	}
 
+	@Override
+	public boolean isApiAdmin(String _token) {
+		int adminCount = userMapper.selectApiAdminCount(_token);
+        return adminCount > 0;
+    }
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap) {
