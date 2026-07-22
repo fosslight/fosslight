@@ -1,19 +1,23 @@
 package oss.fosslight.api.dto;
 
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.OssComponents;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
 public class OssDto implements ExcelData {
     String ossId;
-    String ossType;
+    String ossType = "";
+    @Setter(AccessLevel.NONE)
+    Map<String, String> ossTypeMap = new LinkedHashMap<>();
     String ossName;
     String ossVersion;
     String licenseName;
@@ -53,6 +57,11 @@ public class OssDto implements ExcelData {
         this.downloadUrls = splitDownloadUrls(downloadUrl);
     }
 
+    public void setOssType(String ossTypeCode) {
+        this.ossType = ossTypeCode;
+        this.ossTypeMap = buildOssTypeMap(ossTypeCode);
+    }
+
     @Override
     public String[] toRow() {
         var notice = 'Y' == obligations.get(0);
@@ -84,22 +93,37 @@ public class OssDto implements ExcelData {
 
     private String getOssTypeString() {
         var rtn = new ArrayList<String>();
-        if (CommonFunction.isEmpty(ossType)) {
+        if (CommonFunction.isEmpty(ossType) || ossType.length() < 3) {
             return "";
         }
-        var ossTypeFlags = ossType.toCharArray();
-        if (ossType.toCharArray()[0] == '1') {
+        if (ossType.charAt(0) == '1') {
             rtn.add("Multi");
         }
 
-        if (ossType.toCharArray()[1] == '1') {
+        if (ossType.charAt(1) == '1') {
             rtn.add("Dual");
         }
 
-        if (ossType.toCharArray()[2] == '1') {
+        if (ossType.charAt(2) == '1') {
             rtn.add("v-Diff");
         }
         return String.join(", ", rtn);
+    }
+
+    private Map<String, String> buildOssTypeMap(String code) {
+        Map<String, String> rtn = new LinkedHashMap<>();
+        rtn.put("Multi", "N");
+        rtn.put("Dual", "N");
+        rtn.put("V-Diff", "N");
+
+        if (CommonFunction.isEmpty(code) || code.length() < 3) {
+            return rtn;
+        }
+
+        rtn.put("Multi", code.charAt(0) == '1' ? "Y" : "N");
+        rtn.put("Dual", code.charAt(1) == '1' ? "Y" : "N");
+        rtn.put("V-Diff", code.charAt(2) == '1' ? "Y" : "N");
+        return rtn;
     }
 
     public List<String> getDownloadUrls() {
