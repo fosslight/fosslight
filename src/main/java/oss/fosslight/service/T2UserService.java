@@ -72,8 +72,10 @@ public interface T2UserService extends UserDetailsService {
 	public int updateUserDivisionByUserId(String userId, String division, String modifier);
 	
 	public String[] checkUserInfo(T2Users userInfo);
-
+	
 	public boolean isAdmin(String _token);
+	
+	public boolean isApiAdmin(String _token);
 	
 	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap);
 	

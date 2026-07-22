@@ -679,7 +679,7 @@
         , T1.LICENSE_DIV
         , T1.HOMEPAGE
         <choose>
-            <when test="@oss.fosslight.util.StringUtil@notEquals(searchFlag,'N')">
+            <when test="searchFlag">
                 , SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
             </when>
             <otherwise>

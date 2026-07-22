@@ -51,7 +51,7 @@ public class ListOssDto {
 
         @Builder.Default
         @Setter(AccessLevel.NONE)
-        private Boolean searchFlag = true;
+        private Boolean searchFlag = false;
         @Setter(AccessLevel.NONE)
         private String cvssScore;
         private Boolean versionCheck;
@@ -60,6 +60,10 @@ public class ListOssDto {
             url = url
                     .replaceFirst("^((http|https)://)?(www\\.)?", "")
                     .replaceFirst("/$", "");
+        }
+
+        public void setSearchFlag(Boolean searchFlag) {
+            this.searchFlag = searchFlag;
         }
 
         public void setDeactivate(List<String> flagList) {
