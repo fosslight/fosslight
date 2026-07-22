@@ -130,6 +130,23 @@
         WHERE U.TOKEN = #{token}
       </if>
     </select>
+    
+    <!-- API 관리자 여부 확인 -->
+    <select id="selectApiAdminCount" parameterType="String" resultType="int">
+        SELECT
+            COUNT(1)
+        FROM
+            T2_USERS U
+            INNER JOIN T2_AUTHORITIES A ON U.USER_ID = A.USER_ID
+        WHERE
+            U.TOKEN = #{token}
+            AND U.USE_YN = 'Y'
+            AND A.AUTHORITY = 'ROLE_ADMIN'
+            AND (
+                U.EXPIRE_DATE IS NULL
+                OR DATE(U.EXPIRE_DATE) >= CURDATE()
+            )
+    </select>
     <!-- 특정 권한 사용자 목록 가져오기 -->
     <select id="getAuthorityUsers" parameterType="String" resultType="oss.fosslight.domain.T2Users"> 
         SELECT

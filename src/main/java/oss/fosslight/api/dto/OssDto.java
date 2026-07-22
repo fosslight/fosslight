@@ -85,6 +85,10 @@ public class OssDto implements ExcelData {
         this.nicknameList = splitNicknames(nicknames);
     }
 
+    public void setExclude(Boolean exclude) {
+        this.exclude = exclude;
+    }
+
     @Override
     public String[] toRow() {
         var notice = 'Y' == obligations.get(0);
