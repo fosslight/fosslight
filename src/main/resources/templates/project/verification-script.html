@@ -3482,6 +3482,18 @@
                             	$("#btnNoticeAppendType1").trigger("click");
                             }
                         }
+                        
+                        if ("N" == editCompanyYn) {
+                    		$("#companyName").trigger("click").attr("checked", false);
+                    	}
+                    	
+                    	if ("N" == editDistributionSiteUrlYn) {
+                    		$("#ossDistributionSite").trigger("click").attr("checked", false);
+                    	}
+                    	
+                    	if ("N" == editEmailYn) {
+                    		$("#email").trigger("click").attr("checked", false);
+                    	}
                     }
                     
                     if (userRole == "ROLE_ADMIN") { // 관리자 권한 일 경우
