@@ -6258,7 +6258,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
@@ -6316,7 +6316,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
@@ -6371,7 +6371,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
@@ -6432,7 +6432,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
@@ -6488,7 +6488,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
@@ -6549,7 +6549,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 							AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
@@ -6603,7 +6603,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 							AND IFNULL(OC.OSS_NAME, '') != '' 
@@ -6660,7 +6660,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 							AND IFNULL(OC.OSS_NAME, '') != '' 
@@ -6714,7 +6714,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 							AND IFNULL(OC.OSS_NAME, '') != '' 
@@ -6774,7 +6774,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 							AND IFNULL(OC.OSS_NAME, '') != '' 
@@ -6829,7 +6829,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 							AND IFNULL(OC.OSS_NAME, '') != '' 
@@ -6889,7 +6889,7 @@
 						AND OC.REFERENCE_DIV = #{referenceDiv}
 						AND OC.OSS_NAME != '-'
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-							AND IFNULL(OC.OSS_NAME, '') = #{ossName}
+							AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
 						</if>
 						<if test="@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 							AND IFNULL(OC.OSS_NAME, '') != '' 
