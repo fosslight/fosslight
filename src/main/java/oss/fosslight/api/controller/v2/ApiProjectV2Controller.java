@@ -10,12 +10,14 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -37,10 +39,7 @@ import oss.fosslight.repository.NoticeMapper;
 import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
-import oss.fosslight.util.StringUtil;
-import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.api.validator.ValuesAllowed;
-import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -857,6 +856,199 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
             }
         } catch (Exception e) {
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @ApiOperation(value = "Identification OSS Report (Multi-sheet)", notes = "Identification > upload one oss report file that contains sheets for dep/src/bin tabs at once. Map each tab to the sheet names to load via tabSheetMapping.")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_UPLOAD_OSS_REPORT}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> uploadReport(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
+            @ApiParam(value = "OSS Report (one excel file containing dep/src/bin sheets)", required = true) @RequestPart(required = true) MultipartFile ossReport,
+            @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
+            @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
+            @ApiParam(value = "Tab to Sheet Names mapping JSON, e.g. {\"src\":[\"SRC_LIST\"],\"dep\":[\"DEP_LIST\"],\"bin\":[\"BIN_LIST\"]}", required = true)
+            @RequestParam(required = true) String tabSheetMapping) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info(String.format("/api/v2/projects/%s/reports (multi) called by %s", prjId, userInfo.getUserId()));
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
+
+        try {
+            // 1. Parse tabSheetMapping JSON
+            Map<String, List<String>> tabSheetMap = null;
+            try {
+                Type mapType = new TypeToken<Map<String, List<String>>>() {}.getType();
+                tabSheetMap = (Map<String, List<String>>) fromJson(tabSheetMapping, mapType);
+            } catch (Exception e) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tabSheetMapping JSON format.");
+            }
+
+            if (MapUtils.isEmpty(tabSheetMap)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "tabSheetMapping is required and must not be empty.");
+            }
+
+            // Validate tab keys
+            for (String tab : tabSheetMap.keySet()) {
+                if (!"dep".equalsIgnoreCase(tab) && !"src".equalsIgnoreCase(tab) && !"bin".equalsIgnoreCase(tab)) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tab name in tabSheetMapping: " + tab + " (allowed: dep, src, bin)");
+                }
+                if (CollectionUtils.isEmpty(tabSheetMap.get(tab))) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Sheet names for tab '" + tab + "' must not be empty.");
+                }
+            }
+
+            // 2. Validate uploaded file
+            if (ossReport == null) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "ossReport is required.");
+            }
+            if (!ossReport.getOriginalFilename().contains("xls")) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid oss report file format.");
+            }
+            if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) {
+                return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+            }
+
+            // 3. Distribution type check
+            Map<String, Object> paramMap = new HashMap<>();
+            List<String> prjIdList = new ArrayList<String>();
+            prjIdList.add(prjId);
+            paramMap.put("prjId", prjIdList);
+            paramMap.put("distributionType", "normal");
+
+            try {
+                boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap);
+                if (!checkDistributionTypeFlag) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE) + " Check Project Distribution Type");
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+
+            // 4. Upload file (reuse old file id when resetFlag is N)
+            String oldFileId = "";
+            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+                Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+                // check any of the target tabs' csv file id
+                for (String tab : tabSheetMap.keySet()) {
+                    String key = tab.toLowerCase() + "CsvFileId";
+                    if (prjInfo.get(key) != null) {
+                        oldFileId = String.valueOf((int) prjInfo.get(key));
+                        break;
+                    }
+                }
+            }
+
+            UploadFile bean;
+            if (!isEmpty(oldFileId)) {
+                bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+            } else {
+                bean = apiFileService.uploadFile(ossReport);
+            }
+
+            String registFileId = bean.getRegistFileId();
+
+            // 5. Reset target tabs if resetFlag is Y
+            if (CoConstDef.FLAG_YES.equals(avoidNull(resetFlag))) {
+                Project projectMaster = projectService.getProjectDetail(new Project() {{ setPrjId(prjId); }});
+                List<ProjectIdentification> emptyComponents = new ArrayList<>();
+                List<List<ProjectIdentification>> emptyLicenses = CommonFunction.setOssComponentLicense(emptyComponents);
+                Map<String, Object> remakeMap = CommonFunction.remakeMutiLicenseComponents(emptyComponents, emptyLicenses);
+                emptyComponents = (List<ProjectIdentification>) remakeMap.get("mainList");
+                emptyLicenses = (List<List<ProjectIdentification>>) remakeMap.get("subList");
+
+                for (String tab : tabSheetMap.keySet()) {
+                    apiProjectService.processResetTab(tab.toUpperCase(), projectMaster, emptyComponents, emptyLicenses);
+                }
+            }
+
+            // 6. For each tab, read the mapped sheets and process
+            Map<String, Object> aggregatedResult = new HashMap<>();
+            for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
+                String tabName = entry.getKey().toUpperCase();
+                List<String> sheetNames = entry.getValue();
+
+                int sheetIdx = 0;
+                int sheetLength = sheetNames.size();
+                for (String sheetNm : sheetNames) {
+                    if (isEmpty(sheetNm.trim())) {
+                        continue;
+                    }
+
+                    // get sheet numbers that match the sheet name (exact match)
+                    List<UploadFile> list = new ArrayList<UploadFile>();
+                    list.add(bean);
+                    String[] sheetArr = ArrayUtils.EMPTY_STRING_ARRAY;
+                    try {
+                        List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+                        for (Object obj : sheets) {
+                            Map<String, Object> sheetMap = (Map<String, Object>) obj;
+                            if (sheetMap.containsKey("name") && sheetNm.trim().equals((String) sheetMap.get("name"))) {
+                                sheetArr = new String[]{ (String) sheetMap.get("no") };
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+
+                    Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(), sheetArr, true);
+                    Map<String, Object> processed = apiProjectService.getProcessSheetData(
+                            result, prjId, resetFlag, registFileId, userInfo.getUserId(), comment,
+                            tabName, sheetNm.trim(), false, sheetLength > 1, sheetIdx);
+
+                    if (processed != null && !processed.isEmpty()) {
+                        if (processed.containsKey("errorMessage")) {
+                            aggregatedResult.put(tabName + "_error", processed.get("errorMessage"));
+                        } else if (processed.containsKey("validError")) {
+                            aggregatedResult.put(tabName + "_error", "validation error");
+                        }
+                    }
+                    sheetIdx++;
+                }
+
+                // session cleanup per tab
+                switch (tabName) {
+                    case "DEP":
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+                        break;
+                    case "SRC":
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+                        break;
+                    case "BIN":
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+                        break;
+                }
+            }
+
+            // 7. SBOM save
+            if (CoConstDef.FLAG_YES.equals(sbomSave)) {
+                apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
+                projectService.updateSecurityDataForProject(prjId);
+            }
+
+            if (aggregatedResult.isEmpty()) {
+                resultMap.put("success", true);
+                return new ResponseEntity<>(resultMap, HttpStatus.OK);
+            } else {
+                resultMap.put("success", false);
+                resultMap.putAll(aggregatedResult);
+                return new ResponseEntity<>(resultMap, HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
