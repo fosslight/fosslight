@@ -868,8 +868,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
             @ApiParam(value = "OSS Report (one excel file containing dep/src/bin sheets)", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
             @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
             @ApiParam(value = "Tab to Sheet Names mapping JSON, e.g. {\"src\":[\"SRC_LIST\"],\"dep\":[\"DEP_LIST\"],\"bin\":[\"BIN_LIST\"]}", required = true)
@@ -934,17 +932,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 log.error(e.getMessage(), e);
             }
 
-            // 4. Upload file (reuse old file id when resetFlag is N)
+            // 4. Upload file (reuse old file id if any)
             String oldFileId = "";
-            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-                Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
-                // check any of the target tabs' csv file id
-                for (String tab : tabSheetMap.keySet()) {
-                    String key = tab.toLowerCase() + "CsvFileId";
-                    if (prjInfo.get(key) != null) {
-                        oldFileId = String.valueOf((int) prjInfo.get(key));
-                        break;
-                    }
+            Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+            // check any of the target tabs' csv file id
+            for (String tab : tabSheetMap.keySet()) {
+                String key = tab.toLowerCase() + "CsvFileId";
+                if (prjInfo.get(key) != null) {
+                    oldFileId = String.valueOf((int) prjInfo.get(key));
+                    break;
                 }
             }
 
@@ -957,21 +953,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             String registFileId = bean.getRegistFileId();
 
-            // 5. Reset target tabs if resetFlag is Y
-            if (CoConstDef.FLAG_YES.equals(avoidNull(resetFlag))) {
-                Project projectMaster = projectService.getProjectDetail(new Project() {{ setPrjId(prjId); }});
-                List<ProjectIdentification> emptyComponents = new ArrayList<>();
-                List<List<ProjectIdentification>> emptyLicenses = CommonFunction.setOssComponentLicense(emptyComponents);
-                Map<String, Object> remakeMap = CommonFunction.remakeMutiLicenseComponents(emptyComponents, emptyLicenses);
-                emptyComponents = (List<ProjectIdentification>) remakeMap.get("mainList");
-                emptyLicenses = (List<List<ProjectIdentification>>) remakeMap.get("subList");
-
-                for (String tab : tabSheetMap.keySet()) {
-                    apiProjectService.processResetTab(tab.toUpperCase(), projectMaster, emptyComponents, emptyLicenses);
-                }
-            }
-
-            // 6. For each tab, read the mapped sheets and process
+            // 5. For each tab, read the mapped sheets and process
             Map<String, Object> aggregatedResult = new HashMap<>();
             for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
                 String tabName = entry.getKey().toUpperCase();
@@ -1003,7 +985,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
                     Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(), sheetArr, true);
                     Map<String, Object> processed = apiProjectService.getProcessSheetData(
-                            result, prjId, resetFlag, registFileId, userInfo.getUserId(), comment,
+                            result, prjId, "N", registFileId, userInfo.getUserId(), comment,
                             tabName, sheetNm.trim(), false, sheetLength > 1, sheetIdx);
 
                     if (processed != null && !processed.isEmpty()) {
