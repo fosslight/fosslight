@@ -1075,6 +1075,9 @@ public final class Url {
 			/** API OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT = "/projects/{id}/{tab_name}/reports";
 
+			/** API OSS Report upload (multi-sheet: one file loads dep/src/bin tabs at once) */
+			public static final String FOSSLIGHT_API_UPLOAD_OSS_REPORT = "/projects/{id}/reports";
+
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
 			public static final String FOSSLIGHT_API_OSS_REPORT_PLATFORM_GENERATED = "/projects/{id}/platform/reports";
