@@ -3267,18 +3267,38 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			Project project = new Project();
 			project.setPrjId(prjId);
-			
+
+			boolean isDepLoaded = false;
+			boolean isSrcLoaded = false;
+			boolean isBinLoaded = false;
+
+			int depComponentCount = 0;
+			int srcComponentCount = 0;
+			int binComponentCount = 0;
+
 			if (tabName.equals("DEP")) {
-				project.setDepCsvFileId(registFileId); // set file id
+				isDepLoaded = true;
+				depComponentCount = ossComponentList.size();
 				projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
 			} else if (tabName.equals("SRC")){
-				project.setSrcCsvFileId(registFileId); // set file id
+				isSrcLoaded = true;
+				srcComponentCount = ossComponentList.size();
 				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
 			} else if (tabName.equals("BIN")){
-				project.setBinCsvFileId(registFileId); // set file id
+				isBinLoaded = true;
+				binComponentCount = ossComponentList.size();
 				projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
 			}
-			
+
+			T2File uploadFile = fileService.selectFileInfoById(registFileId);
+			if (uploadFile == null) {
+				rtnMap.put("errorMessage", "File information not found.");
+				return rtnMap;
+			}
+			projectService.setFileAddList(uploadFile, project, CoConstDef.CD_DTL_COMPONENT_ID_BOM,
+				depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
+
+
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
 			try {
 				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
