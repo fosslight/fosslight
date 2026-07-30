@@ -963,25 +963,25 @@ public class ApiProjectV2Controller extends CoTopComponent {
             List<Map<String, Object>> errorList = new ArrayList<>();
             for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
                 String tabName = entry.getKey().toUpperCase();
-                List<String> sheetNames = entry.getValue();
+                List<String> targetSheetNames = entry.getValue();
 
                 int sheetIdx = 0;
-                int sheetLength = sheetNames.size();
-                for (String sheetNm : sheetNames) {
-                    if (isEmpty(sheetNm.trim())) {
+                int targetSheetCount = targetSheetNames.size();
+                for (String targetSheetName : targetSheetNames) {
+                    if (isEmpty(targetSheetName.trim())) {
                         continue;
                     }
 
                     // get sheet numbers that match the sheet name (exact match)
                     List<UploadFile> list = new ArrayList<UploadFile>();
                     list.add(bean);
-                    String[] sheetArr = ArrayUtils.EMPTY_STRING_ARRAY;
+                    String[] sheetNumberArray = ArrayUtils.EMPTY_STRING_ARRAY;
                     try {
-                        List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-                        for (Object obj : sheets) {
+                        List<Object> excelSheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+                        for (Object obj : excelSheets) {
                             Map<String, Object> sheetMap = (Map<String, Object>) obj;
-                            if (sheetMap.containsKey("name") && sheetNm.trim().equals((String) sheetMap.get("name"))) {
-                                sheetArr = new String[]{ (String) sheetMap.get("no") };
+                            if (sheetMap.containsKey("name") && targetSheetName.trim().equals((String) sheetMap.get("name"))) {
+                                sheetNumberArray = new String[]{ (String) sheetMap.get("no") };
                                 break;
                             }
                         }
@@ -989,27 +989,27 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         log.error(e.getMessage(), e);
                     }
 
-                    Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(), sheetArr, true);
+                    Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, targetSheetName.trim(), sheetNumberArray, true);
                     Map<String, Object> processed = apiProjectService.getProcessSheetData(
                             result, prjId, "N", registFileId, userInfo.getUserId(), comment,
-                            tabName, sheetNm.trim(), false, sheetLength > 1, sheetIdx);
+                            tabName, targetSheetName.trim(), false, targetSheetCount > 1, sheetIdx);
 
                     if (processed != null && !processed.isEmpty()) {
                         if (processed.containsKey(KEY_ERROR_MESSAGE)) {
                             Map<String, Object> errorItem = new LinkedHashMap<>();
-                            errorItem.put("name", sheetNm.trim());
+                            errorItem.put("name", targetSheetName.trim());
                             errorItem.put("reason", processed.get(KEY_ERROR_MESSAGE));
                             errorItem.put("tab", tabName);
                             errorList.add(errorItem);
                         } else if (processed.containsKey(KEY_VALID_ERROR)) {
                             Map<String, Object> errorItem = new LinkedHashMap<>();
-                            errorItem.put("name", sheetNm.trim());
+                            errorItem.put("name", targetSheetName.trim());
                             errorItem.put("reason", "validation error");
                             errorItem.put("tab", tabName);
                             errorList.add(errorItem);
                         } else {
                             Map<String, Object> uploadedItem = new LinkedHashMap<>();
-                            uploadedItem.put("name", sheetNm.trim());
+                            uploadedItem.put("name", targetSheetName.trim());
                             uploadedItem.put("count", processed.getOrDefault("addedCount", 0));
                             uploadedItem.put("tab", tabName);
                             uploadedList.add(uploadedItem);
