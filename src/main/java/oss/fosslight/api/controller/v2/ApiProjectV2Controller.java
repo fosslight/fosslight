@@ -54,6 +54,9 @@ import java.util.*;
 @RequestMapping(value = "/api/v2")
 @Validated
 public class ApiProjectV2Controller extends CoTopComponent {
+    private static final String KEY_ERROR_MESSAGE = "errorMessage";
+    private static final String KEY_VALID_ERROR = "validError";
+
 
     @Resource
     private Environment env;
@@ -849,8 +852,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
             } else {
                 if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
-                } else if (resultMap.containsKey("validError")) {
+                } else if (resultMap.containsKey(KEY_VALID_ERROR)) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+                } else if (resultMap.containsKey(KEY_ERROR_MESSAGE)) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get(KEY_ERROR_MESSAGE));
                 } else {
                     return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
                 }
@@ -989,9 +994,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
                             tabName, sheetNm.trim(), false, sheetLength > 1, sheetIdx);
 
                     if (processed != null && !processed.isEmpty()) {
-                        if (processed.containsKey("errorMessage")) {
-                            aggregatedResult.put(tabName + "_error", processed.get("errorMessage"));
-                        } else if (processed.containsKey("validError")) {
+                        if (processed.containsKey(KEY_ERROR_MESSAGE)) {
+                            aggregatedResult.put(tabName + "_error", processed.get(KEY_ERROR_MESSAGE));
+                        } else if (processed.containsKey(KEY_VALID_ERROR)) {
                             aggregatedResult.put(tabName + "_error", "validation error");
                         }
                     }
