@@ -1682,6 +1682,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMapper.deleteOssLicense(ossMaster);
 			ossMapper.deleteOssLicenseDeclaredSync(ossMaster);
 			ossMapper.deleteOssLicenseDetectedSync(ossMaster);
+			ossMapper.deleteOssLicenseFlag(ossMaster.getOssId());
 			
 			updateLicenseDivDetail(ossMaster);
 			
