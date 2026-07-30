@@ -97,7 +97,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Search Project List", notes = "Search Project Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project Name", required = false) @RequestParam(required = false) String prjName,
             @ApiParam(value = "Project Name exact match (Y: true, N: false)", allowableValues = "Y,N", required = false) @RequestParam(required = false, defaultValue = "N") String prjNameExactYn,
             @ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
@@ -111,9 +111,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
             @ApiParam(value = "Count Per Page (max: 1000)", required = false)
-            @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
+            @Min(value = 1, message = "Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue = "1000") int countPerPage,
             @ApiParam(value = "Page", required = false)
-            @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
+            @Min(value = 1, message = "Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue = "1") int page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -159,7 +159,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Retrieve the model list of the project", notes = "Retrieve Project Model Information")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList) {
 
         // 사용자 인증
@@ -185,7 +185,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
     public ResponseEntity<Map<String, Object>> updateModelList(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
             @ApiParam(
                     value = "Model List, in format of: ${MODEL_NAME}|${CATEGORY}|${yyyyMMdd} (ex. MODEL_NAME|ETC > Etc|20220428)",
@@ -199,7 +199,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, List<Project>> modelList = null;
 
-        if (!apiProjectService.checkUserHasProject(userInfo, prjId)){
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
 
@@ -236,7 +236,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Update model list of project with file", notes = "Basic Information > Model list with file")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
 
@@ -247,7 +247,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         if (modelReport == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
-            if (!apiProjectService.checkUserHasProject(userInfo, prjId)){
+            if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
                 throw new CProjectNotAvailableException(prjId);
             }
             try {
@@ -282,7 +282,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Create Project", notes = "Create New Project")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project Name (Duplicate not allowed)", required = true) @RequestParam(required = true) String prjName,
             @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
             @ApiParam(value = "OS Type (\"Check the input value with /api/v2/codes\")", required = true) @RequestParam(required = true) String osType,
@@ -354,16 +354,16 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     noticeType = CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL;
                 }
             } else if (!isEmpty(noticeType)) {
-                if(!CoCodeManager.checkValidCodeDtl(CoConstDef.CD_NOTICE_TYPE, noticeType)) {
+                if (!CoCodeManager.checkValidCodeDtl(CoConstDef.CD_NOTICE_TYPE, noticeType)) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Notice type code is invalid.");
                 }
             }
 
-            if(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType)){
-                if(isEmpty(noticeTypeEtc)) {
+            if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType)) {
+                if (isEmpty(noticeTypeEtc)) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Must select 'noticeTypeEtc' code for Platform-generated type");
                 }
-                if(!CoCodeManager.checkValidCodeDtl(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc)) {
+                if (!CoCodeManager.checkValidCodeDtl(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc)) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, "noticeTypeEtc code is invalid.");
                 }
             } else {
@@ -399,7 +399,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (result == null || result.isEmpty()) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                        String.format("Project '%s%s' already exists", prjName, avoidNull(" ("+prjVersion+")", "")));
+                        String.format("Project '%s%s' already exists", prjName, avoidNull(" (" + prjVersion + ")", "")));
             }
 
             String resultPrjId = (String) result.get("prjId");
@@ -418,11 +418,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             try {
-            	String initMessage = "<p>Project Created via API</p>";
+                String initMessage = "<p>Project Created via API</p>";
                 if (!isEmpty(userComment)) {
                     initMessage += userComment;
                 }
-                
+
                 CommentsHistory commentHisBean = new CommentsHistory();
                 commentHisBean.setLoginUserName(userInfo.getUserId());
                 commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
@@ -430,7 +430,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 commentHisBean.setContents(initMessage);
                 commentHisBean.setStatus("created");
                 commentService.registComment(commentHisBean);
-                
+
                 CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED);
                 mailBean.setParamPrjId(resultPrjId);
                 String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED));
@@ -453,24 +453,24 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Project Bom Download as File", notes = "Project > Bom tab download as file")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD})
     public ResponseEntity<FileSystemResource> getPrjBomDownload(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
+            @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
-            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+            @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) {
         return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
     }
 
     @ApiOperation(value = "Project Bom Download as File (Deprecated)", notes = "Project > Bom tab download as file", hidden = true)
     @GetMapping(value = {"/projects/{id}/bom/file"})
     public ResponseEntity<FileSystemResource> getPrjBomDownloadDeprecated(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
+            @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
-            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+            @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) {
         return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
     }
 
@@ -479,7 +479,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        if (!apiProjectService.checkUserHasProject(userInfo,prjId)) {
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
 
@@ -497,7 +497,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             project.setPrjId(prjId);
             Project projectMaster = projectService.getProjectDetail(project);
 
-            if(projectMaster.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+            if (projectMaster.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
                 type = "binAndroidBom";
             } else {
                 type = "bom";
@@ -515,29 +515,29 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Get Project Bom Tab As Json", notes = "Project > Get Bom tab data as json")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
     public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
+            @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false) String saveFlag) {
         return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
     }
 
     @ApiOperation(value = "Get Project Bom Tab As Json (Deprecated)", notes = "Project > Get Bom tab data as json", hidden = true)
     @GetMapping(value = {"/projects/{id}/bom/json-data"})
     public ResponseEntity<Map<String, Object>> getPrjBomAsJsonDeprecated(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
+            @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false) String saveFlag) {
         return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
     }
 
-    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(String authorization, String prjId,String saveFlag){
+    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(String authorization, String prjId, String saveFlag) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
-        
+
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         try {
@@ -568,7 +568,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Project Bom Compare", notes = "Project > Bom tab Compare")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_COMPARE})
     public ResponseEntity<Map<String, Object>> getPrjBomCompare(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
         return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
@@ -577,7 +577,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Project Bom Compare (Deprecated)", notes = "Project > Bom tab Compare", hidden = true)
     @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
     public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
         return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
@@ -608,28 +608,28 @@ public class ApiProjectV2Controller extends CoTopComponent {
             int records = apiProjectService.existProjectCntBomCompare(paramMap);
 
             if (records > 0) {
-				List<Map<String, Object>> beforeBomList = new ArrayList<>();
-				List<Map<String, Object>> afterBomList = new ArrayList<>();
+                List<Map<String, Object>> beforeBomList = new ArrayList<>();
+                List<Map<String, Object>> afterBomList = new ArrayList<>();
 
-				Map<String, Object> beforePrjInfo = apiProjectService.getProjectBasicInfo(beforePrjId);
-				if (!((String) beforePrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-					beforeBomList = apiProjectService.getBomList(beforePrjId);
-				} else {
-					apiProjectService.getIdentificationGridList(beforePrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, beforeBomList);
-					beforeBomList = apiProjectService.setMergeGridData(beforeBomList);
-				}
+                Map<String, Object> beforePrjInfo = apiProjectService.getProjectBasicInfo(beforePrjId);
+                if (!((String) beforePrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                    beforeBomList = apiProjectService.getBomList(beforePrjId);
+                } else {
+                    apiProjectService.getIdentificationGridList(beforePrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, beforeBomList);
+                    beforeBomList = apiProjectService.setMergeGridData(beforeBomList);
+                }
 
-				Map<String, Object> afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
-				if (!((String) afterPrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-					afterBomList = apiProjectService.getBomList(afterPrjId);
-				} else {
-					apiProjectService.getIdentificationGridList(afterPrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, afterBomList);
-					afterBomList = apiProjectService.setMergeGridData(afterBomList);
-				}
+                Map<String, Object> afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
+                if (!((String) afterPrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                    afterBomList = apiProjectService.getBomList(afterPrjId);
+                } else {
+                    apiProjectService.getIdentificationGridList(afterPrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, afterBomList);
+                    afterBomList = apiProjectService.setMergeGridData(afterBomList);
+                }
 
-				if (beforeBomList.isEmpty() || afterBomList.isEmpty()) {
-					throw new Exception();
-				}
+                if (beforeBomList.isEmpty() || afterBomList.isEmpty()) {
+                    throw new Exception();
+                }
 
                 resultMap.put("contents", apiProjectService.getBomCompare(beforeBomList, afterBomList));
 
@@ -648,13 +648,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Reset specific identification tab", notes = "Identification > reset")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_IDENTIFICATION_RESET})
     public ResponseEntity<Map<String, Object>> identificationReset(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
-            @ApiParam( value = "Upload Target Tab Name (Valid Input: dep, src, bin, all)", required = true, allowableValues = "dep, src, bin, all")
-            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin", "all"}) @PathVariable(name="tab_name") String tabName
-    ){
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin, all)", required = true, allowableValues = "dep, src, bin, all")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin", "all"}) @PathVariable(name = "tab_name") String tabName
+    ) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info(String.format("/api/v2/projects/%s/%s/reset called by %s",prjId,tabName, userInfo.getUserId()));
+        log.info(String.format("/api/v2/projects/%s/%s/reset called by %s", prjId, tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
@@ -678,8 +678,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Project projectMaster = projectService.getProjectDetail(project);
         project.setCsvFileSeq(new ArrayList<T2File>());
 
-        switch(tabName) {
-            case "ALL" :
+        switch (tabName) {
+            case "ALL":
                 apiProjectService.processResetTab("DEP", projectMaster, ossComponents, ossComponentsLicense);
                 apiProjectService.processResetTab("SRC", projectMaster, ossComponents, ossComponentsLicense);
                 apiProjectService.processResetTab("BIN", projectMaster, ossComponents, ossComponentsLicense);
@@ -694,31 +694,30 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @SuppressWarnings("unchecked")
-	@ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
+    @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT})
     public ResponseEntity<Map<String, Object>> ossReportAll(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id") @PathVariable(name="id") String prjId,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id") @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
-            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name="tab_name") String tabName,
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
             @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
-            @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
+            @ApiParam(value = "Comment") @RequestParam(name = "comment", required = false) String comment,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
-            @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames,
+            @ApiParam(value = "Sheet Names") @RequestParam(name = "sheet_names", required = false) String sheetNames,
             @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
-            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N", hidden=true)
-            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false) String bomSave)
-            {
+            @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N", hidden = true)
+            @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false) String bomSave) {
 
 
-    	T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info(String.format("/api/v2/projects/%s/%s/reports called by %s", prjId, tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         tabName = tabName.toUpperCase();
-        
+
         // bomSave 파라미터가 있으면 sbomSave로 사용
         if (!isEmpty(bomSave)) {
             sbomSave = bomSave;
@@ -767,7 +766,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE) + " Check Project Distribution Type");
                 }
             } catch (Exception e) {
-                log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
             }
 
             UploadFile bean = null;
@@ -801,7 +800,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         }
                     }
                 }
-            }  catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
 
@@ -814,7 +813,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 int sheetIdx = 0;
                 for (String sheetNm : sheetNames.split(",")) {
                     if (isEmpty(sheetNm.trim())) {
-                    	continue;
+                        continue;
                     }
                     result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(), sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY, true);
                     resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, tabName, sheetNm.trim(), sheetNamesEmptyFlag, sheetLength > 1 ? true : false, sheetIdx);
@@ -832,7 +831,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (resultMap.isEmpty()) {
                 // 정상처리된 경우 세션 삭제
-                switch(tabName) {
+                switch (tabName) {
                     case "DEP":
                         deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
                         deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
@@ -846,7 +845,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
                         break;
                 }
-                
+
                 resultMap.put("success", true);
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } else {
@@ -869,10 +868,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Identification OSS Report (Multi-sheet)", notes = "Identification > upload one oss report file that contains sheets for dep/src/bin tabs at once. Map each tab to the sheet names to load via tabSheetMapping.")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_UPLOAD_OSS_REPORT}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> uploadReport(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "OSS Report (one excel file containing dep/src/bin sheets)", required = true) @RequestPart(required = true) MultipartFile ossReport,
-            @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
+            @ApiParam(value = "Comment") @RequestParam(name = "comment", required = false) String comment,
             @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
             @ApiParam(value = "Tab to Sheet Names mapping JSON, e.g. {\"src\":[\"SRC_LIST\"],\"dep\":[\"DEP_LIST\"],\"bin\":[\"BIN_LIST\"]}", required = true)
@@ -890,7 +889,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             // 1. Parse tabSheetMapping JSON
             Map<String, List<String>> tabSheetMap = null;
             try {
-                Type mapType = new TypeToken<Map<String, List<String>>>() {}.getType();
+                Type mapType = new TypeToken<Map<String, List<String>>>() {
+                }.getType();
                 tabSheetMap = (Map<String, List<String>>) fromJson(tabSheetMapping, mapType);
             } catch (Exception e) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tabSheetMapping JSON format.");
@@ -949,24 +949,36 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
             }
 
-            UploadFile bean;
+            UploadFile uploadFile;
             if (!isEmpty(oldFileId)) {
-                bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+                uploadFile = apiFileService.uploadFile(ossReport, null, oldFileId);
             } else {
-                bean = apiFileService.uploadFile(ossReport);
+                uploadFile = apiFileService.uploadFile(ossReport);
             }
 
-            String registFileId = bean.getRegistFileId();
+            String registFileId = uploadFile.getRegistFileId();
 
-            // 5. For each tab, read the mapped sheets and process
+            T2File registFile = fileService.selectFileInfoById(registFileId);
+            if (uploadFile == null) {
+                resultMap.put(KEY_ERROR_MESSAGE, "File information not found.");
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get(KEY_ERROR_MESSAGE));
+            }
+            String uploadFileSeq = registFile.getFileSeq();
+            String uploadFileNm = registFile.getOrigNm();
+
             List<Map<String, Object>> uploadedList = new ArrayList<>();
             List<Map<String, Object>> errorList = new ArrayList<>();
+
+            // 5. Save sheet data with sheet name
+            Map<String, List<OssComponents>> reportDataMap = new HashMap<>();
+            Map<String, String> errMsgListMap = new HashMap<>();
+
             for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
                 String tabName = entry.getKey().toUpperCase();
                 List<String> targetSheetNames = entry.getValue();
 
-                int sheetIdx = 0;
-                int targetSheetCount = targetSheetNames.size();
+//                int sheetIdx = 0;
+//                int targetSheetCount = targetSheetNames.size();
                 for (String targetSheetName : targetSheetNames) {
                     if (isEmpty(targetSheetName.trim())) {
                         continue;
@@ -974,66 +986,216 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
                     // get sheet numbers that match the sheet name (exact match)
                     List<UploadFile> list = new ArrayList<UploadFile>();
-                    list.add(bean);
+                    list.add(uploadFile);
                     String[] sheetNumberArray = ArrayUtils.EMPTY_STRING_ARRAY;
                     try {
                         List<Object> excelSheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
                         for (Object obj : excelSheets) {
                             Map<String, Object> sheetMap = (Map<String, Object>) obj;
                             if (sheetMap.containsKey("name") && targetSheetName.trim().equals((String) sheetMap.get("name"))) {
-                                sheetNumberArray = new String[]{ (String) sheetMap.get("no") };
+                                sheetNumberArray = new String[]{(String) sheetMap.get("no")};
                                 break;
                             }
+                        }
+                        Map<String, Object> sheetDataResult = apiProjectService.getSheetOriginalData(uploadFile, tabName, sheetNumberArray, true);
+                        reportDataMap.put(targetSheetName, (List<OssComponents>) sheetDataResult.get("reportData"));
+
+                        String errMsg = "";
+                        String errorMessage = (String) sheetDataResult.get(KEY_ERROR_MESSAGE);
+                        if (!isEmpty(errorMessage)) {
+                            errMsg += errorMessage;
+                        }
+                        String emptyErrMsg = (String) sheetDataResult.get("emptyErrMsg");
+                        if (!isEmpty(emptyErrMsg)) {
+                            errMsg += emptyErrMsg;
+                        }
+                        if (!errMsg.isEmpty()) {
+                            errMsgListMap.put(targetSheetName, errMsg);
                         }
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
 
-                    Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, targetSheetName.trim(), sheetNumberArray, true);
-                    Map<String, Object> processed = apiProjectService.getProcessSheetData(
-                            result, prjId, "N", registFileId, userInfo.getUserId(), comment,
-                            tabName, targetSheetName.trim(), false, targetSheetCount > 1, sheetIdx);
-
-                    if (processed != null && !processed.isEmpty()) {
-                        if (processed.containsKey(KEY_ERROR_MESSAGE)) {
-                            Map<String, Object> errorItem = new LinkedHashMap<>();
-                            errorItem.put("name", targetSheetName.trim());
-                            errorItem.put("reason", processed.get(KEY_ERROR_MESSAGE));
-                            errorItem.put("tab", tabName);
-                            errorList.add(errorItem);
-                        } else if (processed.containsKey(KEY_VALID_ERROR)) {
-                            Map<String, Object> errorItem = new LinkedHashMap<>();
-                            errorItem.put("name", targetSheetName.trim());
-                            errorItem.put("reason", "validation error");
-                            errorItem.put("tab", tabName);
-                            errorList.add(errorItem);
-                        } else {
-                            Map<String, Object> uploadedItem = new LinkedHashMap<>();
-                            uploadedItem.put("name", targetSheetName.trim());
-                            uploadedItem.put("count", processed.getOrDefault("addedCount", 0));
-                            uploadedItem.put("tab", tabName);
-                            uploadedList.add(uploadedItem);
-                        }
-                    }
-                    sheetIdx++;
-                }
-
-                // session cleanup per tab
-                switch (tabName) {
-                    case "DEP":
-                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
-                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
-                        break;
-                    case "SRC":
-                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
-                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-                        break;
-                    case "BIN":
-                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
-                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
-                        break;
                 }
             }
+
+            boolean isDepLoaded = false;
+            boolean isSrcLoaded = false;
+            boolean isBinLoaded = false;
+
+            int depComponentCount = 0;
+            int srcComponentCount = 0;
+            int binComponentCount = 0;
+
+            List<ProjectIdentification> depOssComponents = new ArrayList<ProjectIdentification>();
+            List<ProjectIdentification> srcOssComponents = new ArrayList<ProjectIdentification>();
+            List<ProjectIdentification> binOssComponents = new ArrayList<ProjectIdentification>();
+            List<String> versionChangedList = versionChangedList = new ArrayList<>();
+
+            // 6. Aggregate sheet data based on each tab
+            for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
+                String tabName = entry.getKey().toUpperCase();
+                List<String> targetSheetNames = entry.getValue();
+
+                int sheetIdx = 0;
+                int targetSheetCount = targetSheetNames.size();
+                if (MapUtils.isEmpty(reportDataMap)) {
+                    //TODO: exception 처리
+                }
+
+                // loop all targetSheet in the tab
+                for (String targetSheetName : targetSheetNames) {
+                    if (isEmpty(targetSheetName.trim())) {
+                        continue;
+                    }
+                    if (errMsgListMap.get(targetSheetName) != null) {
+                        Map<String, Object> errorItem = new LinkedHashMap<>();
+                        errorItem.put("name", targetSheetName.trim());
+                        errorItem.put("reason", errMsgListMap.get(targetSheetName));
+                        errorItem.put("tab", tabName);
+                        errorList.add(errorItem);
+                    }
+
+                    int uploadedItemCount = 0;
+
+                    if (tabName.toUpperCase().equals("DEP")) {
+                        isDepLoaded = true;
+                        Map<String, Object> gridDataMap = CommonFunction.makeGridDataFromReport(
+                                null, null, null,
+                                reportDataMap.get(targetSheetName), uploadFileSeq, "dep");
+
+                        List<ProjectIdentification> reportData = (List<ProjectIdentification>) gridDataMap.get("mainData");
+                        if (CollectionUtils.isNotEmpty(reportData)) {
+                            for (ProjectIdentification oc : reportData) {
+                                String comments = oc.getComments();
+                                if (!isEmpty(comments)) {
+                                    comments = comments + "\n";
+                                }
+                                comments += "(From " + uploadFileNm + ")";
+                                oc.setComments(comments);
+                                oc.setRefLoadedVal(uploadFileSeq);
+                            }
+                            uploadedItemCount = reportData.size();
+                            depComponentCount += reportData.size();
+                            depOssComponents.addAll(reportData);
+                        }
+                        if (MapUtils.isNotEmpty(gridDataMap) && gridDataMap.containsKey("versionChangedList")) {
+                            if (versionChangedList == null) {
+                                versionChangedList = new ArrayList<>();
+                            }
+                            versionChangedList.addAll((List<String>) gridDataMap.get("versionChangedList"));
+                        }
+                    } else if (tabName.toUpperCase().equals("SRC")) {
+                        isSrcLoaded = true;
+                        Map<String, Object> gridDataMap = CommonFunction.makeGridDataFromReport(
+                                null, null, null,
+                                reportDataMap.get(targetSheetName), uploadFileSeq, "src");
+
+                        List<ProjectIdentification> reportData = (List<ProjectIdentification>) gridDataMap.get("mainData");
+                        if (CollectionUtils.isNotEmpty(reportData)) {
+                            for (ProjectIdentification oc : reportData) {
+                                String comments = oc.getComments();
+                                if (!isEmpty(comments)) {
+                                    comments = comments + "\n";
+                                }
+                                comments += "(From " + uploadFileNm + ")";
+                                oc.setComments(comments);
+                                oc.setRefLoadedVal(uploadFileSeq);
+                            }
+                            uploadedItemCount = reportData.size();
+                            srcComponentCount += reportData.size();
+                            srcOssComponents.addAll(reportData);
+                        }
+                        if (MapUtils.isNotEmpty(gridDataMap) && gridDataMap.containsKey("versionChangedList")) {
+                            if (versionChangedList == null) {
+                                versionChangedList = new ArrayList<>();
+                            }
+                            versionChangedList.addAll((List<String>) gridDataMap.get("versionChangedList"));
+                        }
+                    } else if (tabName.toUpperCase().equals("BIN")) {
+                        isBinLoaded = true;
+                        Map<String, Object> gridDataMap = CommonFunction.makeGridDataFromReport(
+                                null, null, null,
+                                reportDataMap.get(targetSheetName), uploadFileSeq, "bin");
+
+                        List<ProjectIdentification> reportData = (List<ProjectIdentification>) gridDataMap.get("mainData");
+                        if (CollectionUtils.isNotEmpty(reportData)) {
+                            for (ProjectIdentification oc : reportData) {
+                                String comments = oc.getComments();
+                                if (!isEmpty(comments)) {
+                                    comments = comments + "\n";
+                                }
+                                comments += "(From " + uploadFileNm + ")";
+                                oc.setComments(comments);
+                                oc.setRefLoadedVal(uploadFileSeq);
+                            }
+                            uploadedItemCount = reportData.size();
+                            binComponentCount += reportData.size();
+                            binOssComponents.addAll(reportData);
+                        }
+                        if (MapUtils.isNotEmpty(gridDataMap) && gridDataMap.containsKey("versionChangedList")) {
+                            if (versionChangedList == null) {
+                                versionChangedList = new ArrayList<>();
+                            }
+                            versionChangedList.addAll((List<String>) gridDataMap.get("versionChangedList"));
+                        }
+                    }
+
+                    if (reportDataMap.containsKey(targetSheetName)) {
+                        Map<String, Object> uploadedItem = new LinkedHashMap<>();
+                        uploadedItem.put("name", targetSheetName.trim());
+                        uploadedItem.put("count", uploadedItemCount);
+                        uploadedItem.put("tab", tabName);
+                        uploadedList.add(uploadedItem);
+                    }
+
+                }
+            }
+
+            String versionChangedStr = "";
+            if (versionChangedList != null) {
+                versionChangedStr = "<b>The following open source version below has been changed to a registered version</b><br><br>";
+                for (String s : versionChangedList) {
+                    versionChangedStr += "<br>" + s;
+                }
+            }
+            Project project = projectService.getProjectBasicInfo(prjId);
+            if (isDepLoaded) {
+                List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(depOssComponents);
+                Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(depOssComponents, ossComponentsLicense);
+                depOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+                ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+                projectService.registCommentWithNickNameValid(prjId, depOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+                projectService.registDepOss(depOssComponents, ossComponentsLicense, project, true);
+            }
+            if (isSrcLoaded) {
+                List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(srcOssComponents);
+                Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(srcOssComponents, ossComponentsLicense);
+                srcOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+                ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+                projectService.registCommentWithNickNameValid(prjId, srcOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+                projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, true);
+            }
+            if (isBinLoaded) {
+                List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(binOssComponents);
+                Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(binOssComponents, ossComponentsLicense);
+                binOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+                ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+                projectService.registCommentWithNickNameValid(prjId, binOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+                projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN, true);
+            }
+            if (registFile != null) {
+                projectService.setFileAddList(registFile, project, CoConstDef.CD_DTL_COMPONENT_ID_BOM,
+                        depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
+            }
+
+            // session cleanup per tab
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
 
             // 7. SBOM save
             if (CoConstDef.FLAG_YES.equals(sbomSave)) {
@@ -1050,12 +1212,199 @@ public class ApiProjectV2Controller extends CoTopComponent {
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+//
+//    @SuppressWarnings("unchecked")
+//    @ApiOperation(value = "Identification OSS Report (Multi-sheet)", notes = "Identification > upload one oss report file that contains sheets for dep/src/bin tabs at once. Map each tab to the sheet names to load via tabSheetMapping.")
+//    @PostMapping(value = {APIV2.FOSSLIGHT_API_UPLOAD_OSS_REPORT}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<Map<String, Object>> uploadReport_backup(
+//            @ApiParam(hidden = true) @RequestHeader String authorization,
+//            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+//            @ApiParam(value = "OSS Report (one excel file containing dep/src/bin sheets)", required = true) @RequestPart(required = true) MultipartFile ossReport,
+//            @ApiParam(value = "Comment") @RequestParam(name = "comment", required = false) String comment,
+//            @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
+//            @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
+//            @ApiParam(value = "Tab to Sheet Names mapping JSON, e.g. {\"src\":[\"SRC_LIST\"],\"dep\":[\"DEP_LIST\"],\"bin\":[\"BIN_LIST\"]}", required = true)
+//            @RequestParam(required = true) String tabSheetMapping) {
+//
+//        T2Users userInfo = userService.checkApiUserAuth(authorization);
+//        log.info(String.format("/api/v2/projects/%s/reports (multi) called by %s", prjId, userInfo.getUserId()));
+//        Map<String, Object> resultMap = new HashMap<String, Object>();
+//
+//        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+//            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+//        }
+//
+//        try {
+//            // 1. Parse tabSheetMapping JSON
+//            Map<String, List<String>> tabSheetMap = null;
+//            try {
+//                Type mapType = new TypeToken<Map<String, List<String>>>() {
+//                }.getType();
+//                tabSheetMap = (Map<String, List<String>>) fromJson(tabSheetMapping, mapType);
+//            } catch (Exception e) {
+//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tabSheetMapping JSON format.");
+//            }
+//
+//            if (MapUtils.isEmpty(tabSheetMap)) {
+//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "tabSheetMapping is required and must not be empty.");
+//            }
+//
+//            // Validate tab keys
+//            for (String tab : tabSheetMap.keySet()) {
+//                if (!"dep".equalsIgnoreCase(tab) && !"src".equalsIgnoreCase(tab) && !"bin".equalsIgnoreCase(tab)) {
+//                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tab name in tabSheetMapping: " + tab + " (allowed: dep, src, bin)");
+//                }
+//                if (CollectionUtils.isEmpty(tabSheetMap.get(tab))) {
+//                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Sheet names for tab '" + tab + "' must not be empty.");
+//                }
+//            }
+//
+//            // 2. Validate uploaded file
+//            if (ossReport == null) {
+//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "ossReport is required.");
+//            }
+//            if (!ossReport.getOriginalFilename().contains("xls")) {
+//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid oss report file format.");
+//            }
+//            if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) {
+//                return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+//            }
+//
+//            // 3. Distribution type check
+//            Map<String, Object> paramMap = new HashMap<>();
+//            List<String> prjIdList = new ArrayList<String>();
+//            prjIdList.add(prjId);
+//            paramMap.put("prjId", prjIdList);
+//            paramMap.put("distributionType", "normal");
+//
+//            try {
+//                boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap);
+//                if (!checkDistributionTypeFlag) {
+//                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE) + " Check Project Distribution Type");
+//                }
+//            } catch (Exception e) {
+//                log.error(e.getMessage(), e);
+//            }
+//
+//            // 4. Upload file (reuse old file id if any)
+//            String oldFileId = "";
+//            Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+//            // check any of the target tabs' csv file id
+//            for (String tab : tabSheetMap.keySet()) {
+//                String key = tab.toLowerCase() + "CsvFileId";
+//                if (prjInfo.get(key) != null) {
+//                    oldFileId = String.valueOf((int) prjInfo.get(key));
+//                    break;
+//                }
+//            }
+//
+//            UploadFile bean;
+//            if (!isEmpty(oldFileId)) {
+//                bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+//            } else {
+//                bean = apiFileService.uploadFile(ossReport);
+//            }
+//
+//            String registFileId = bean.getRegistFileId();
+//
+//            // 5. For each tab, read the mapped sheets and process
+//            List<Map<String, Object>> uploadedList = new ArrayList<>();
+//            List<Map<String, Object>> errorList = new ArrayList<>();
+//            for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
+//                String tabName = entry.getKey().toUpperCase();
+//                List<String> targetSheetNames = entry.getValue();
+//
+//                int sheetIdx = 0;
+//                int targetSheetCount = targetSheetNames.size();
+//                for (String targetSheetName : targetSheetNames) {
+//                    if (isEmpty(targetSheetName.trim())) {
+//                        continue;
+//                    }
+//
+//                    // get sheet numbers that match the sheet name (exact match)
+//                    List<UploadFile> list = new ArrayList<UploadFile>();
+//                    list.add(bean);
+//                    String[] sheetNumberArray = ArrayUtils.EMPTY_STRING_ARRAY;
+//                    try {
+//                        List<Object> excelSheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+//                        for (Object obj : excelSheets) {
+//                            Map<String, Object> sheetMap = (Map<String, Object>) obj;
+//                            if (sheetMap.containsKey("name") && targetSheetName.trim().equals((String) sheetMap.get("name"))) {
+//                                sheetNumberArray = new String[]{(String) sheetMap.get("no")};
+//                                break;
+//                            }
+//                        }
+//                    } catch (Exception e) {
+//                        log.error(e.getMessage(), e);
+//                    }
+//
+//                    Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, targetSheetName.trim(), sheetNumberArray, true);
+//                    Map<String, Object> processed = apiProjectService.getProcessSheetData(
+//                            result, prjId, "N", registFileId, userInfo.getUserId(), comment,
+//                            tabName, targetSheetName.trim(), false, targetSheetCount > 1, sheetIdx);
+//
+//                    if (processed != null && !processed.isEmpty()) {
+//                        if (processed.containsKey(KEY_ERROR_MESSAGE)) {
+//                            Map<String, Object> errorItem = new LinkedHashMap<>();
+//                            errorItem.put("name", targetSheetName.trim());
+//                            errorItem.put("reason", processed.get(KEY_ERROR_MESSAGE));
+//                            errorItem.put("tab", tabName);
+//                            errorList.add(errorItem);
+//                        } else if (processed.containsKey(KEY_VALID_ERROR)) {
+//                            Map<String, Object> errorItem = new LinkedHashMap<>();
+//                            errorItem.put("name", targetSheetName.trim());
+//                            errorItem.put("reason", "validation error");
+//                            errorItem.put("tab", tabName);
+//                            errorList.add(errorItem);
+//                        } else {
+//                            Map<String, Object> uploadedItem = new LinkedHashMap<>();
+//                            uploadedItem.put("name", targetSheetName.trim());
+//                            uploadedItem.put("count", processed.getOrDefault("addedCount", 0));
+//                            uploadedItem.put("tab", tabName);
+//                            uploadedList.add(uploadedItem);
+//                        }
+//                    }
+//                    sheetIdx++;
+//                }
+//
+//                // session cleanup per tab
+//                switch (tabName) {
+//                    case "DEP":
+//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
+//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+//                        break;
+//                    case "SRC":
+//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
+//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+//                        break;
+//                    case "BIN":
+//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
+//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+//                        break;
+//                }
+//            }
+//
+//            // 7. SBOM save
+//            if (CoConstDef.FLAG_YES.equals(sbomSave)) {
+//                apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
+//                projectService.updateSecurityDataForProject(prjId);
+//            }
+//
+//            resultMap.put("success", true);
+//            resultMap.put("uploaded", uploadedList);
+//            resultMap.put("error", errorList);
+//            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+//        } catch (Exception e) {
+//            log.error(e.getMessage(), e);
+//            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Verification Package File Upload", notes = "Verification > Package File Upload")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PACKAGE_UPLOAD})
     public ResponseEntity<Map<String, Object>> ossUploadPackage(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
             @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", allowableValues = "Y,N") @RequestParam(required = false, defaultValue = "N") String verifyFlag) {
@@ -1193,7 +1542,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Project Add Editor", notes = "Project Add Editor (A person with edit permissions)")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_EDITOR})
     public ResponseEntity<Map<String, Object>> addPrjEditor(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Editor Id", required = true) @RequestParam(required = true) String[] idList) {
 
@@ -1209,7 +1558,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Editor ID list is required.");
             }
 
-            for(String id : idList) {
+            for (String id : idList) {
                 T2Users targetUser = new T2Users();
                 targetUser.setUserId(id);
                 T2Users existingUser = userService.getUser(targetUser);
@@ -1232,7 +1581,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Project Add Security Responsible Person", notes = "Project Add Security Responsible Person")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_SECURITY_PERSON})
     public ResponseEntity<Map<String, Object>> addSecurityPerson(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "User ID", required = true) @RequestParam(required = true) String userId) {
 
@@ -1252,7 +1601,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             T2Users targetUser = new T2Users();
             targetUser.setUserId(userId);
             T2Users existingUser = userService.getUser(targetUser);
-            
+
             if (existingUser == null) {
                 return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in FOSSLight Hub. User ID: " + userId);
             }
@@ -1268,7 +1617,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             // Security responsible person 설정
             project.setSecPerson(userId);
             project.setSecPersonNm(existingUser.getUserName());
-            
+
             // 프로젝트 업데이트
             projectService.updateSecurityPerson(project);
 
@@ -1311,7 +1660,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Project Set Security Mail", notes = "Project Set Security Mail")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SET_SECURITY_MAIL})
     public ResponseEntity<Map<String, Object>> setSecurityMail(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Security Enable (Y: Enable, N: Disable)", required = true, allowableValues = "Y,N") @RequestParam(required = true) String secMailYn,
             @ApiParam(value = "Security Description (Required when secMailYn is N)", required = false) @RequestParam(required = false) String secMailDesc) {
@@ -1352,11 +1701,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
             param.setPrjId(prjId);
             param.setSecMailYn(secMailYn);
             if (secMailYn.equals("N")) {
-            	param.setSecMailDesc(secMailDesc);
+                param.setSecMailDesc(secMailDesc);
             } else {
-            	param.setSecMailDesc("Enable");
+                param.setSecMailDesc("Enable");
             }
-            
+
             // 프로젝트 업데이트
             projectService.updateProjectMaster(param);
 
@@ -1398,7 +1747,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Project get Notice", notes = "Project Get")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
     public ResponseEntity getProjectNotice(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
             HttpServletRequest req
     ) {
@@ -1434,19 +1783,19 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
 
     @ApiOperation(value = "Load Searched Project Oss to Target Project", notes = "Project > Identification > 'Project Search'")
-    @PostMapping(value = { Url.APIV2.FOSSLIGHT_API_OSS_LOAD })
+    @PostMapping(value = {Url.APIV2.FOSSLIGHT_API_OSS_LOAD})
     public ResponseEntity<Map<String, Object>> ossLoad(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
             @ApiParam(value = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
             @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
             @ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name")
-            @ValuesAllowed(propName = "searchCondition", values = {"id", "name"})@RequestParam(required = true) String searchCondition,
+            @ValuesAllowed(propName = "searchCondition", values = {"id", "name"}) @RequestParam(required = true) String searchCondition,
             @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
             @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
             @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y, N")
-            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false, defaultValue = "Y") String resetFlag) {
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag) {
 
         log.error("/api/v2/oss_load called:" + targetPrjId);
 
@@ -1502,7 +1851,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     break;
             }
 
-            switch(tabName) {
+            switch (tabName) {
                 case "dep":
                     resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
                     break;
@@ -1528,48 +1877,48 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Delete Target Project", notes = "Delete Project'")
-    @DeleteMapping(value = { Url.APIV2.FOSSLIGHT_API_PROJECT_BY_ID })
+    @DeleteMapping(value = {Url.APIV2.FOSSLIGHT_API_PROJECT_BY_ID})
     public ResponseEntity<Map<String, Object>> deleteProject(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String prjId
     ) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        if (!apiProjectService.checkUserHasProject(userInfo, prjId)){
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
 
         Project project = new Project();
         project.setPrjId(prjId);
         Project projectInfo = projectService.getProjectDetail(project);
-        
+
         boolean hasPermission = false;
         List<String> permissionCheckUserList = new ArrayList<>();
         if (!isEmpty(projectInfo.getCreator())) {
-        	permissionCheckUserList.add(projectInfo.getCreator());
+            permissionCheckUserList.add(projectInfo.getCreator());
         }
         if (CollectionUtils.isNotEmpty(projectInfo.getWatcherList())) {
-        	for (Project watcher : projectInfo.getWatcherList()) {
-        		if (!permissionCheckUserList.contains(watcher.getPrjUserId())) {
-        			permissionCheckUserList.add(watcher.getPrjUserId());
-        		}
-        	}
+            for (Project watcher : projectInfo.getWatcherList()) {
+                if (!permissionCheckUserList.contains(watcher.getPrjUserId())) {
+                    permissionCheckUserList.add(watcher.getPrjUserId());
+                }
+            }
         }
         if (CollectionUtils.isNotEmpty(permissionCheckUserList)) {
-        	for (String checkUserId : permissionCheckUserList) {
-        		if (checkUserId.equalsIgnoreCase(userInfo.getUserId())) {
-        			hasPermission = true;
-        			break;
-        		}
-        	}
+            for (String checkUserId : permissionCheckUserList) {
+                if (checkUserId.equalsIgnoreCase(userInfo.getUserId())) {
+                    hasPermission = true;
+                    break;
+                }
+            }
         }
-        
+
         if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && !hasPermission) {
-        	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete project.");
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete project.");
         } else if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN") && hasPermission
-        		&& (Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) || Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS))) {
-        	return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
+                && (Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) || Objects.equals(projectInfo.getDistributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS))) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
         }
 
         try {
