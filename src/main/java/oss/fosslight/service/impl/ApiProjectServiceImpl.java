@@ -3302,6 +3302,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 			projectService.setFileAddList(uploadFile, project, CoConstDef.CD_DTL_COMPONENT_ID_BOM,
 				depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
+			rtnMap.put("addedCount", ossComponents.size());
 
 
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
