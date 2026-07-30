@@ -69,6 +69,8 @@ import javax.naming.directory.Attributes;
 @Service
 @Slf4j
 public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectService {
+	private static final String KEY_ERROR_MESSAGE = "errorMessage";
+
 	@Autowired ApiProjectMapper apiProjectMapper;
 	@Autowired ProjectMapper projectMapper;
 	@Autowired ApiFileMapper apiFileMapper;
@@ -333,7 +335,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			result.put("ossComponents", (List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
 			result.put("ossComponentLicense", (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
 		} else {
-			result.put("errorMsg", errMsg);
+			result.put(KEY_ERROR_MESSAGE, errMsg);
 		}
 		
 		return result;
@@ -473,7 +475,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			result.put("ossComponentLicense", ossComponentsLicense);
 			result.put("systemChangeHisStr", systemChangeHisStr);
 		}  else {
-			result.put("errorMsg", errMsg);
+			result.put(KEY_ERROR_MESSAGE, errMsg);
 		}
 		
 		return result;
@@ -3234,15 +3236,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		
-		String errorMsg = (String) result.get("errorMessage");
+		String errorMsg = (String) result.get(KEY_ERROR_MESSAGE);
+		if (!isEmpty(errorMsg)) {
+			rtnMap.put(KEY_ERROR_MESSAGE, errorMsg);
+			return rtnMap;
+		}
 
 		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 		ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>());
 		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+		ossComponentsLicense = (ossComponentsLicense != null ? ossComponentsLicense : new ArrayList<>());
 
-		if (!isEmpty(errorMsg)) {
-			rtnMap.put("errorMessage", errorMsg);
-		}
+
 		
 //		T2CoProjectValidator pv = new T2CoProjectValidator();
 //		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);

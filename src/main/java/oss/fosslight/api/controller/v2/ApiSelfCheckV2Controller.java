@@ -49,6 +49,9 @@ import java.util.Map;
 @RequestMapping(value = "/api/v2")
 @Validated
 public class ApiSelfCheckV2Controller extends CoTopComponent {
+    private static final String KEY_ERROR_MESSAGE = "errorMessage";
+    private static final String KEY_VALID_ERROR = "validError";
+
     @Resource
     private Environment env;
     private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
@@ -215,7 +218,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
                 if (!resultMap.isEmpty()) {
                     rtnMap = resultMap;
-                    if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
+                    if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE) ||
+                            rtnMap.containsKey(KEY_ERROR_MESSAGE)) {
                         rtnMap = null;
                         continue;
                     } else if (rtnMap.containsKey("ossComponents")) {
@@ -230,7 +234,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                 }
             }
 
-            if (rtnMap != null && rtnMap.containsKey("validError")) {
+            if (rtnMap != null && rtnMap.containsKey(KEY_VALID_ERROR)) {
                 return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, getMessage("api.dataValidationError.msg")); // data validation error
             }
 
@@ -265,8 +269,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         Map<String, Object> rtnMap = new HashMap<>();
         String errorMsg = "";
 
-        if (result.containsKey("errorMsg")) {
-            errorMsg = (String) result.get("errorMsg");
+        if (result.containsKey(KEY_ERROR_MESSAGE)) {
+            errorMsg = (String) result.get(KEY_ERROR_MESSAGE);
         }
 
         if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
@@ -275,7 +279,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         }
 
         if (!isEmpty(errorMsg)) {
-            rtnMap.put("errorMessage", errorMsg);
+            rtnMap.put(KEY_ERROR_MESSAGE, errorMsg);
+            return rtnMap;
         }
 
         List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
@@ -294,7 +299,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         T2CoValidationResult vr = pv.validate(new HashMap<>());
 
         if (!vr.isValid()) {
-            rtnMap.put("validError", "validError");
+            rtnMap.put(KEY_VALID_ERROR, KEY_VALID_ERROR);
         } else {
             rtnMap.put("ossComponents", ossComponents);
             rtnMap.put("ossComponentsLicense", ossComponentsLicense != null ? ossComponentsLicense : new ArrayList<ProjectIdentification>());
