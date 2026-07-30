@@ -36,6 +36,8 @@ public interface ApiProjectService {
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet);
 	
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet, boolean exactMatchFlag);
+
+	public Map<String, Object> getSheetOriginalData(UploadFile ufile, String readType, String[] sheet, boolean exactMatchFlag);
 	
 	public Map<String, Object> readAndroidBuildImage(UploadFile ossReportBean, UploadFile noticeHtmlBean, UploadFile resultTxtBean);
 	

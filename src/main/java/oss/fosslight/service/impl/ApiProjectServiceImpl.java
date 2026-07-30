@@ -283,6 +283,51 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet) {
 		return getSheetData(ufile, prjId, readType, sheet, false);
 	}
+
+	public Map<String, Object> getSheetOriginalData(UploadFile ufile, String readType, String[] sheet, boolean exactMatchFlag) {
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		String errMsg = "";
+		List<OssComponents> reportData = new ArrayList<OssComponents>();
+		List<String> errMsgList = new ArrayList<>();
+		Map<String, String> emptyErrMsg = new HashMap<>();
+		try {
+			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList, emptyErrMsg, exactMatchFlag)) {
+				for (String s : errMsgList) { // error 처리
+					if (isEmpty(s)) {
+						continue;
+					}
+
+					if (!isEmpty(errMsg)) {
+						errMsg += "<br/>";
+					}
+
+					errMsg += s;
+				}
+			} else {
+				for (String s : errMsgList) {
+					if (isEmpty(s)) {
+						continue;
+					}
+
+					if (!isEmpty(errMsg)) {
+						errMsg += "<br/>";
+					}
+
+					errMsg += s;
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			errMsg = e.getMessage();
+		}
+
+		result.put("reportData", reportData);
+		result.put(KEY_ERROR_MESSAGE, errMsg);
+		result.putAll(emptyErrMsg);
+
+		return result;
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
