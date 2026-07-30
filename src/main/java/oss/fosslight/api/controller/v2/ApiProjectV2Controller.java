@@ -959,7 +959,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             String registFileId = bean.getRegistFileId();
 
             // 5. For each tab, read the mapped sheets and process
-            Map<String, Object> aggregatedResult = new HashMap<>();
+            List<Map<String, Object>> uploadedList = new ArrayList<>();
+            List<Map<String, Object>> errorList = new ArrayList<>();
             for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
                 String tabName = entry.getKey().toUpperCase();
                 List<String> sheetNames = entry.getValue();
@@ -995,9 +996,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
                     if (processed != null && !processed.isEmpty()) {
                         if (processed.containsKey(KEY_ERROR_MESSAGE)) {
-                            aggregatedResult.put(tabName + "_error", processed.get(KEY_ERROR_MESSAGE));
+                            Map<String, Object> errorItem = new LinkedHashMap<>();
+                            errorItem.put("name", sheetNm.trim());
+                            errorItem.put("reason", processed.get(KEY_ERROR_MESSAGE));
+                            errorItem.put("tab", tabName);
+                            errorList.add(errorItem);
                         } else if (processed.containsKey(KEY_VALID_ERROR)) {
-                            aggregatedResult.put(tabName + "_error", "validation error");
+                            Map<String, Object> errorItem = new LinkedHashMap<>();
+                            errorItem.put("name", sheetNm.trim());
+                            errorItem.put("reason", "validation error");
+                            errorItem.put("tab", tabName);
+                            errorList.add(errorItem);
+                        } else {
+                            Map<String, Object> uploadedItem = new LinkedHashMap<>();
+                            uploadedItem.put("name", sheetNm.trim());
+                            uploadedItem.put("count", processed.getOrDefault("addedCount", 0));
+                            uploadedItem.put("tab", tabName);
+                            uploadedList.add(uploadedItem);
                         }
                     }
                     sheetIdx++;
@@ -1026,14 +1041,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 projectService.updateSecurityDataForProject(prjId);
             }
 
-            if (aggregatedResult.isEmpty()) {
-                resultMap.put("success", true);
-                return new ResponseEntity<>(resultMap, HttpStatus.OK);
-            } else {
-                resultMap.put("success", false);
-                resultMap.putAll(aggregatedResult);
-                return new ResponseEntity<>(resultMap, HttpStatus.BAD_REQUEST);
-            }
+            resultMap.put("success", true);
+            resultMap.put("uploaded", uploadedList);
+            resultMap.put("error", errorList);
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
