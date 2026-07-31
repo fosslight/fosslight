@@ -304,7 +304,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 					errMsg += s;
 				}
-			} else {
+			}
+			else {
 				for (String s : errMsgList) {
 					if (isEmpty(s)) {
 						continue;
@@ -322,9 +323,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			errMsg = e.getMessage();
 		}
 
-		result.put("reportData", reportData);
-		result.put(KEY_ERROR_MESSAGE, errMsg);
-		result.putAll(emptyErrMsg);
+		String emptyErrStr = (String) emptyErrMsg.get("emptyErrMsg");
+		if (errMsg.isEmpty() && (emptyErrStr == null || emptyErrStr.isEmpty())) {
+			result.put("reportData", reportData);
+			result.put(KEY_ERROR_MESSAGE, errMsg);
+			result.putAll(emptyErrMsg);
+		} else {
+			result.put(KEY_ERROR_MESSAGE, errMsg);
+			result.putAll(emptyErrMsg);
+		}
 
 		return result;
 	}
