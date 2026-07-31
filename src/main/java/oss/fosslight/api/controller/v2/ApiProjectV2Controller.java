@@ -1167,7 +1167,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(depOssComponents, ossComponentsLicense);
                 depOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
                 ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-                projectService.registCommentWithNickNameValid(prjId, depOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+                projectService.registCommentWithNickNameValid(prjId, depOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_DEP, userInfo.getUserId());
                 projectService.registDepOss(depOssComponents, ossComponentsLicense, project, true);
             }
             if (isSrcLoaded) {
@@ -1175,7 +1175,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(srcOssComponents, ossComponentsLicense);
                 srcOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
                 ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-                projectService.registCommentWithNickNameValid(prjId, srcOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+                projectService.registCommentWithNickNameValid(prjId, srcOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_SRC, userInfo.getUserId());
                 projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, true);
             }
             if (isBinLoaded) {
@@ -1183,7 +1183,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(binOssComponents, ossComponentsLicense);
                 binOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
                 ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-                projectService.registCommentWithNickNameValid(prjId, binOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+                projectService.registCommentWithNickNameValid(prjId, binOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_BIN, userInfo.getUserId());
                 projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN, true);
             }
             if (registFile != null) {
@@ -1205,6 +1205,26 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 projectService.updateSecurityDataForProject(prjId);
             }
 
+            if (comment != null) {
+                CommentsHistory commentHisBean = new CommentsHistory();
+                commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+                commentHisBean.setReferenceId(prjId);
+                commentHisBean.setExpansion1(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+                commentHisBean.setContents(comment+ " (by API)" );
+                commentHisBean.setLoginUserName(userInfo.getUserId());
+                commentService.registComment(commentHisBean, false);
+            }
+
+            try {
+                History h = new History();
+                h = projectService.work(project);
+                h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+                project = (Project) h.gethData();
+                h.sethEtc(project.etcStr());
+                historyService.storeData(h);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
             resultMap.put("success", true);
             resultMap.put("uploaded", uploadedList);
             resultMap.put("error", errorList);
