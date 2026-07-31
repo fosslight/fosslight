@@ -1211,7 +1211,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 CommentsHistory commentHisBean = new CommentsHistory();
                 commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
                 commentHisBean.setReferenceId(prjId);
-                commentHisBean.setExpansion1(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
                 commentHisBean.setContents(comment+ " (by API)" );
                 commentHisBean.setLoginUserName(userInfo.getUserId());
                 commentService.registComment(commentHisBean, false);
