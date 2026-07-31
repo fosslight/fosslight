@@ -997,6 +997,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
                                 break;
                             }
                         }
+                        if (sheetNumberArray.length == 0) {
+                            errMsgListMap.put(targetSheetName, "'" + targetSheetName.trim() + "' sheet not found in the uploaded file. Note that sheet names are case-sensitive.");
+                            continue;
+                        }
                         Map<String, Object> sheetDataResult = apiProjectService.getSheetOriginalData(uploadFile, tabName, sheetNumberArray, true);
 
 
@@ -1032,15 +1036,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
             List<ProjectIdentification> depOssComponents = new ArrayList<ProjectIdentification>();
             List<ProjectIdentification> srcOssComponents = new ArrayList<ProjectIdentification>();
             List<ProjectIdentification> binOssComponents = new ArrayList<ProjectIdentification>();
-            List<String> versionChangedList = versionChangedList = new ArrayList<>();
+            List<String> versionChangedList = new ArrayList<>();
 
             // 6. Aggregate sheet data based on each tab
             for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
                 String tabName = entry.getKey().toUpperCase();
                 List<String> targetSheetNames = entry.getValue();
 
-                int sheetIdx = 0;
-                int targetSheetCount = targetSheetNames.size();
                 if (MapUtils.isEmpty(reportDataMap)) {
                     //TODO: exception 처리
                 }
@@ -1235,193 +1237,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//
-//    @SuppressWarnings("unchecked")
-//    @ApiOperation(value = "Identification OSS Report (Multi-sheet)", notes = "Identification > upload one oss report file that contains sheets for dep/src/bin tabs at once. Map each tab to the sheet names to load via tabSheetMapping.")
-//    @PostMapping(value = {APIV2.FOSSLIGHT_API_UPLOAD_OSS_REPORT}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<Map<String, Object>> uploadReport_backup(
-//            @ApiParam(hidden = true) @RequestHeader String authorization,
-//            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-//            @ApiParam(value = "OSS Report (one excel file containing dep/src/bin sheets)", required = true) @RequestPart(required = true) MultipartFile ossReport,
-//            @ApiParam(value = "Comment") @RequestParam(name = "comment", required = false) String comment,
-//            @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
-//            @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
-//            @ApiParam(value = "Tab to Sheet Names mapping JSON, e.g. {\"src\":[\"SRC_LIST\"],\"dep\":[\"DEP_LIST\"],\"bin\":[\"BIN_LIST\"]}", required = true)
-//            @RequestParam(required = true) String tabSheetMapping) {
-//
-//        T2Users userInfo = userService.checkApiUserAuth(authorization);
-//        log.info(String.format("/api/v2/projects/%s/reports (multi) called by %s", prjId, userInfo.getUserId()));
-//        Map<String, Object> resultMap = new HashMap<String, Object>();
-//
-//        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
-//            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
-//        }
-//
-//        try {
-//            // 1. Parse tabSheetMapping JSON
-//            Map<String, List<String>> tabSheetMap = null;
-//            try {
-//                Type mapType = new TypeToken<Map<String, List<String>>>() {
-//                }.getType();
-//                tabSheetMap = (Map<String, List<String>>) fromJson(tabSheetMapping, mapType);
-//            } catch (Exception e) {
-//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tabSheetMapping JSON format.");
-//            }
-//
-//            if (MapUtils.isEmpty(tabSheetMap)) {
-//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "tabSheetMapping is required and must not be empty.");
-//            }
-//
-//            // Validate tab keys
-//            for (String tab : tabSheetMap.keySet()) {
-//                if (!"dep".equalsIgnoreCase(tab) && !"src".equalsIgnoreCase(tab) && !"bin".equalsIgnoreCase(tab)) {
-//                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tab name in tabSheetMapping: " + tab + " (allowed: dep, src, bin)");
-//                }
-//                if (CollectionUtils.isEmpty(tabSheetMap.get(tab))) {
-//                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Sheet names for tab '" + tab + "' must not be empty.");
-//                }
-//            }
-//
-//            // 2. Validate uploaded file
-//            if (ossReport == null) {
-//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "ossReport is required.");
-//            }
-//            if (!ossReport.getOriginalFilename().contains("xls")) {
-//                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid oss report file format.");
-//            }
-//            if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) {
-//                return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
-//            }
-//
-//            // 3. Distribution type check
-//            Map<String, Object> paramMap = new HashMap<>();
-//            List<String> prjIdList = new ArrayList<String>();
-//            prjIdList.add(prjId);
-//            paramMap.put("prjId", prjIdList);
-//            paramMap.put("distributionType", "normal");
-//
-//            try {
-//                boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap);
-//                if (!checkDistributionTypeFlag) {
-//                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE) + " Check Project Distribution Type");
-//                }
-//            } catch (Exception e) {
-//                log.error(e.getMessage(), e);
-//            }
-//
-//            // 4. Upload file (reuse old file id if any)
-//            String oldFileId = "";
-//            Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
-//            // check any of the target tabs' csv file id
-//            for (String tab : tabSheetMap.keySet()) {
-//                String key = tab.toLowerCase() + "CsvFileId";
-//                if (prjInfo.get(key) != null) {
-//                    oldFileId = String.valueOf((int) prjInfo.get(key));
-//                    break;
-//                }
-//            }
-//
-//            UploadFile bean;
-//            if (!isEmpty(oldFileId)) {
-//                bean = apiFileService.uploadFile(ossReport, null, oldFileId);
-//            } else {
-//                bean = apiFileService.uploadFile(ossReport);
-//            }
-//
-//            String registFileId = bean.getRegistFileId();
-//
-//            // 5. For each tab, read the mapped sheets and process
-//            List<Map<String, Object>> uploadedList = new ArrayList<>();
-//            List<Map<String, Object>> errorList = new ArrayList<>();
-//            for (Map.Entry<String, List<String>> entry : tabSheetMap.entrySet()) {
-//                String tabName = entry.getKey().toUpperCase();
-//                List<String> targetSheetNames = entry.getValue();
-//
-//                int sheetIdx = 0;
-//                int targetSheetCount = targetSheetNames.size();
-//                for (String targetSheetName : targetSheetNames) {
-//                    if (isEmpty(targetSheetName.trim())) {
-//                        continue;
-//                    }
-//
-//                    // get sheet numbers that match the sheet name (exact match)
-//                    List<UploadFile> list = new ArrayList<UploadFile>();
-//                    list.add(bean);
-//                    String[] sheetNumberArray = ArrayUtils.EMPTY_STRING_ARRAY;
-//                    try {
-//                        List<Object> excelSheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-//                        for (Object obj : excelSheets) {
-//                            Map<String, Object> sheetMap = (Map<String, Object>) obj;
-//                            if (sheetMap.containsKey("name") && targetSheetName.trim().equals((String) sheetMap.get("name"))) {
-//                                sheetNumberArray = new String[]{(String) sheetMap.get("no")};
-//                                break;
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        log.error(e.getMessage(), e);
-//                    }
-//
-//                    Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, targetSheetName.trim(), sheetNumberArray, true);
-//                    Map<String, Object> processed = apiProjectService.getProcessSheetData(
-//                            result, prjId, "N", registFileId, userInfo.getUserId(), comment,
-//                            tabName, targetSheetName.trim(), false, targetSheetCount > 1, sheetIdx);
-//
-//                    if (processed != null && !processed.isEmpty()) {
-//                        if (processed.containsKey(KEY_ERROR_MESSAGE)) {
-//                            Map<String, Object> errorItem = new LinkedHashMap<>();
-//                            errorItem.put("name", targetSheetName.trim());
-//                            errorItem.put("reason", processed.get(KEY_ERROR_MESSAGE));
-//                            errorItem.put("tab", tabName);
-//                            errorList.add(errorItem);
-//                        } else if (processed.containsKey(KEY_VALID_ERROR)) {
-//                            Map<String, Object> errorItem = new LinkedHashMap<>();
-//                            errorItem.put("name", targetSheetName.trim());
-//                            errorItem.put("reason", "validation error");
-//                            errorItem.put("tab", tabName);
-//                            errorList.add(errorItem);
-//                        } else {
-//                            Map<String, Object> uploadedItem = new LinkedHashMap<>();
-//                            uploadedItem.put("name", targetSheetName.trim());
-//                            uploadedItem.put("count", processed.getOrDefault("addedCount", 0));
-//                            uploadedItem.put("tab", tabName);
-//                            uploadedList.add(uploadedItem);
-//                        }
-//                    }
-//                    sheetIdx++;
-//                }
-//
-//                // session cleanup per tab
-//                switch (tabName) {
-//                    case "DEP":
-//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
-//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
-//                        break;
-//                    case "SRC":
-//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
-//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-//                        break;
-//                    case "BIN":
-//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
-//                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
-//                        break;
-//                }
-//            }
-//
-//            // 7. SBOM save
-//            if (CoConstDef.FLAG_YES.equals(sbomSave)) {
-//                apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
-//                projectService.updateSecurityDataForProject(prjId);
-//            }
-//
-//            resultMap.put("success", true);
-//            resultMap.put("uploaded", uploadedList);
-//            resultMap.put("error", errorList);
-//            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Verification Package File Upload", notes = "Verification > Package File Upload")
