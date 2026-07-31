@@ -998,7 +998,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                             }
                         }
                         Map<String, Object> sheetDataResult = apiProjectService.getSheetOriginalData(uploadFile, tabName, sheetNumberArray, true);
-                        reportDataMap.put(targetSheetName, (List<OssComponents>) sheetDataResult.get("reportData"));
+
 
                         String errMsg = "";
                         String errorMessage = (String) sheetDataResult.get(KEY_ERROR_MESSAGE);
@@ -1011,6 +1011,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         }
                         if (!errMsg.isEmpty()) {
                             errMsgListMap.put(targetSheetName, errMsg);
+                        } else {
+                            reportDataMap.put(targetSheetName, (List<OssComponents>) sheetDataResult.get("reportData"));
                         }
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
