@@ -1219,6 +1219,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 History h = new History();
                 h = projectService.work(project);
                 h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+                h.setLoginUserName(userInfo.getUserId());
                 project = (Project) h.gethData();
                 h.sethEtc(project.etcStr());
                 historyService.storeData(h);
