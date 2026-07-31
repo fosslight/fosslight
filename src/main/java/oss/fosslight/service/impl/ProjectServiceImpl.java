@@ -3736,6 +3736,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv) {
+		registCommentWithNickNameValid(prjId, ossComponent, ossComponentLicense, referenceDiv, null);
+	}
+
+	@Override
+	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv, String userId) {
 		String resultSb = makeNickNameValidResult(prjId, ossComponent, ossComponentLicense);
 		if (!isEmpty(resultSb)) {
 			String referenceDivStr = "";
@@ -3746,12 +3751,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				default :
 				break;
 			}
-			
+
 			CommentsHistory commentHisBean = new CommentsHistory();
 			commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 			commentHisBean.setReferenceId(prjId);
 			commentHisBean.setExpansion1(referenceDivStr);
 			commentHisBean.setContents(resultSb);
+			if (!isEmpty(userId)) {
+				commentHisBean.setLoginUserName(userId);
+			}
 			commentService.registComment(commentHisBean, false);
 		}
 	}
