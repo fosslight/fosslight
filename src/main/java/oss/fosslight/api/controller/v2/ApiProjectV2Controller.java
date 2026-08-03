@@ -872,8 +872,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "OSS Report (one excel file containing dep/src/bin sheets)", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "Comment") @RequestParam(name = "comment", required = false) String comment,
-            @ApiParam(value = "SBOM save (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "SBOM save", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String sbomSave,
             @ApiParam(value = "Tab to Sheet Names mapping JSON, e.g. {\"src\":[\"SRC_LIST\"],\"dep\":[\"DEP_LIST\"],\"bin\":[\"BIN_LIST\"]}", required = true)
             @RequestParam(required = true) String tabSheetMapping) {
 
@@ -1225,10 +1223,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
 
             // 7. SBOM save
-            if (CoConstDef.FLAG_YES.equals(sbomSave)) {
-                apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
-                projectService.updateSecurityDataForProject(prjId);
-            }
+            apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
+            projectService.updateSecurityDataForProject(prjId);
 
             if (comment != null) {
                 CommentsHistory commentHisBean = new CommentsHistory();
@@ -1250,9 +1246,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
+
             resultMap.put("success", true);
             resultMap.put("uploaded", uploadedList);
             resultMap.put("error", errorList);
+
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
