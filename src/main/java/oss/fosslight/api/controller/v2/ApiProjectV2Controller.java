@@ -1167,6 +1167,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
             project.setLoginUserName(userInfo.getUserId());
             project.setModifier(userInfo.getUserId());
             if (isDepLoaded) {
+                // Prepend existing DEP components from DB so new data is appended
+                List<ProjectIdentification> existingDep = new ArrayList<>();
+                List<List<ProjectIdentification>> existingDepLicense = new ArrayList<>();
+                apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP, existingDep, existingDepLicense, null);
+                existingDep.addAll(depOssComponents);
+                depOssComponents = existingDep;
+
                 List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(depOssComponents);
                 Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(depOssComponents, ossComponentsLicense);
                 depOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
@@ -1175,6 +1182,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 projectService.registDepOss(depOssComponents, ossComponentsLicense, project, true);
             }
             if (isSrcLoaded) {
+                // Prepend existing SRC components from DB so new data is appended
+                List<ProjectIdentification> existingSrc = new ArrayList<>();
+                List<List<ProjectIdentification>> existingSrcLicense = new ArrayList<>();
+                apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_SRC, existingSrc, existingSrcLicense, null);
+                existingSrc.addAll(srcOssComponents);
+                srcOssComponents = existingSrc;
+
                 List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(srcOssComponents);
                 Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(srcOssComponents, ossComponentsLicense);
                 srcOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
@@ -1183,6 +1197,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, true);
             }
             if (isBinLoaded) {
+                // Prepend existing BIN components from DB so new data is appended
+                List<ProjectIdentification> existingBin = new ArrayList<>();
+                List<List<ProjectIdentification>> existingBinLicense = new ArrayList<>();
+                apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BIN, existingBin, existingBinLicense, null);
+                existingBin.addAll(binOssComponents);
+                binOssComponents = existingBin;
+
                 List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(binOssComponents);
                 Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(binOssComponents, ossComponentsLicense);
                 binOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
