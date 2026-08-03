@@ -1226,14 +1226,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
             apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
             projectService.updateSecurityDataForProject(prjId);
 
-            if (comment != null) {
-                CommentsHistory commentHisBean = new CommentsHistory();
-                commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-                commentHisBean.setReferenceId(prjId);
-                commentHisBean.setContents(comment+ " (by API)" );
-                commentHisBean.setLoginUserName(userInfo.getUserId());
-                commentService.registComment(commentHisBean, false);
-            }
+            String uploadLogComment = "OSS Report Uploaded (by API)";
+
+            CommentsHistory commentHisBean = new CommentsHistory();
+            commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+            commentHisBean.setReferenceId(prjId);
+            commentHisBean.setContents((comment == null ? "" : comment + "<br>") + uploadLogComment);
+            commentHisBean.setLoginUserName(userInfo.getUserId());
+            commentService.registComment(commentHisBean, false);
+
 
             try {
                 History h = new History();
