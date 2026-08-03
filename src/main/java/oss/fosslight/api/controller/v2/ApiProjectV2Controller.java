@@ -1147,7 +1147,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
                     if (reportDataMap.containsKey(targetSheetName)) {
                         Map<String, Object> uploadedItem = new LinkedHashMap<>();
-                        uploadedItem.put("name", targetSheetName.trim());
+                        uploadedItem.put("sheet_name", targetSheetName.trim());
                         uploadedItem.put("count", uploadedItemCount);
                         uploadedItem.put("tab", tabName);
                         uploadedList.add(uploadedItem);
