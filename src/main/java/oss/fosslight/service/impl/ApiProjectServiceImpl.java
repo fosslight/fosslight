@@ -3284,10 +3284,17 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
-			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId,
+	                                               String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx, boolean lastSheet) {
+		return getProcessSheetData(result, prjId, resetFlag, registFileId, userId, comment, tabName, sheetName, sheetNamesEmptyFlag, loopFlag, sheetIdx, lastSheet, 0);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId,
+	                                               String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx, boolean lastSheet, int prevAddedCount) {
 		Map<String, Object> rtnMap = new HashMap<>();
-		
+
 		String errorMsg = (String) result.get(KEY_ERROR_MESSAGE);
 		if (!isEmpty(errorMsg)) {
 			rtnMap.put(KEY_ERROR_MESSAGE, errorMsg);
@@ -3299,106 +3306,135 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 		ossComponentsLicense = (ossComponentsLicense != null ? ossComponentsLicense : new ArrayList<>());
 
+		T2File uploadFile = fileService.selectFileInfoById(registFileId);
+		if (uploadFile == null) {
+			rtnMap.put("errorMessage", "File information not found.");
+			return rtnMap;
+		}
 
-		
+		for (ProjectIdentification oc : ossComponents) {
+			String comments = oc.getComments();
+			if (!isEmpty(comments)) {
+				comments = comments + "\n";
+			}
+			comments += "(From " + uploadFile.getOrigNm() + ")";
+			oc.setComments(comments);
+			oc.setRefLoadedVal(uploadFile.getFileSeq());
+		}
+
+
 //		T2CoProjectValidator pv = new T2CoProjectValidator();
 //		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
 //		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
 //		pv.setAppendix("mainList", ossComponents); // sub grid
 //		pv.setAppendix("subList", ossComponentsLicense);
 //		T2CoValidationResult vr = pv.validate(new HashMap<>());
-//		
+//
 //		if (!vr.isValid()) {
 //			rtnMap.put("validError", "validError");
 //			return rtnMap;
 //		} else {
-			List<ProjectIdentification> ossComponentList = new ArrayList<>();
-			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
-			
-			if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
-				getIdentificationGridList(prjId, tabName.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
-			}
-			
-			ossComponentList.addAll(ossComponents);
-			ossComponentsLicenseList.addAll(ossComponentsLicense);
-			
-			Project project = new Project();
-			project.setPrjId(prjId);
+		List<ProjectIdentification> ossComponentList = new ArrayList<>();
+		List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 
-			boolean isDepLoaded = false;
-			boolean isSrcLoaded = false;
-			boolean isBinLoaded = false;
+		if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
+			getIdentificationGridList(prjId, tabName.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
+		}
 
-			int depComponentCount = 0;
-			int srcComponentCount = 0;
-			int binComponentCount = 0;
+		ossComponentList.addAll(ossComponents);
+		ossComponentsLicenseList.addAll(ossComponentsLicense);
 
+		Project project = new Project();
+		project.setPrjId(prjId);
+
+		boolean isDepLoaded = false;
+		boolean isSrcLoaded = false;
+		boolean isBinLoaded = false;
+
+		int depComponentCount = 0;
+		int srcComponentCount = 0;
+		int binComponentCount = 0;
+
+		if (tabName.equals("DEP")) {
+			projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
+		} else if (tabName.equals("SRC")){
+			projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+		} else if (tabName.equals("BIN")){
+			projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
+		}
+
+		int currentSheetAddedCount = ossComponents.size();
+		rtnMap.put("addedCount", currentSheetAddedCount);
+
+		if (lastSheet) {
 			if (tabName.equals("DEP")) {
 				isDepLoaded = true;
-				depComponentCount = ossComponentList.size();
+				depComponentCount = prevAddedCount + currentSheetAddedCount;
 				projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
 			} else if (tabName.equals("SRC")){
 				isSrcLoaded = true;
-				srcComponentCount = ossComponentList.size();
+				srcComponentCount = prevAddedCount + currentSheetAddedCount;
 				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
 			} else if (tabName.equals("BIN")){
 				isBinLoaded = true;
-				binComponentCount = ossComponentList.size();
+				binComponentCount = prevAddedCount + currentSheetAddedCount;
 				projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
 			}
 
-			T2File uploadFile = fileService.selectFileInfoById(registFileId);
-			if (uploadFile == null) {
-				rtnMap.put("errorMessage", "File information not found.");
-				return rtnMap;
-			}
 			projectService.setFileAddList(uploadFile, project, CoConstDef.CD_DTL_COMPONENT_ID_BOM,
-				depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
-			rtnMap.put("addedCount", ossComponents.size());
+					depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
+		}
 
 
-			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
-			try {
-				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
-					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
-					if (!isEmpty(changedLicenseName)) {
-						CommentsHistory commentHisBean = new CommentsHistory();
-						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-						commentHisBean.setReferenceId(prjId);
-						commentHisBean.setExpansion1(tabName);
-						commentHisBean.setContents(changedLicenseName);
-						commentHisBean.setLoginUserName(userId);
-						commentService.registComment(commentHisBean, false);
-					}
+		// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
+		try {
+			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
+				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
+				if (!isEmpty(changedLicenseName)) {
+					CommentsHistory commentHisBean = new CommentsHistory();
+					commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+					commentHisBean.setReferenceId(prjId);
+					commentHisBean.setExpansion1(tabName);
+					commentHisBean.setContents(changedLicenseName);
+					commentHisBean.setLoginUserName(userId);
+					commentService.registComment(commentHisBean, false);
 				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
 			}
-			
-			if (comment != null) {
-				CommentsHistory commentHisBean = new CommentsHistory();
-				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-				commentHisBean.setReferenceId(prjId);
-				commentHisBean.setExpansion1(tabName);
-				commentHisBean.setContents(comment);
-				commentHisBean.setLoginUserName(userId);
-				commentService.registComment(commentHisBean, false);
-			}
-			
-			try {
-				History h = new History();
-				h = projectService.work(project);
-				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-				project = (Project) h.gethData();
-				h.sethEtc(project.etcStr());
-				historyService.storeData(h);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-			
-//		} 
-		
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+		if (comment != null) {
+			CommentsHistory commentHisBean = new CommentsHistory();
+			commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+			commentHisBean.setReferenceId(prjId);
+			commentHisBean.setExpansion1(tabName);
+			commentHisBean.setContents(comment);
+			commentHisBean.setLoginUserName(userId);
+			commentService.registComment(commentHisBean, false);
+		}
+
+		try {
+			History h = new History();
+			h = projectService.work(project);
+			h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+			project = (Project) h.gethData();
+			h.sethEtc(project.etcStr());
+			historyService.storeData(h);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+//		}
+
 		return rtnMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
+			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+		return getProcessSheetData(result, prjId, resetFlag, registFileId, userId, comment, tabName, sheetName, sheetNamesEmptyFlag, loopFlag, sheetIdx, false, 0);
 	}
 
 	@Override
