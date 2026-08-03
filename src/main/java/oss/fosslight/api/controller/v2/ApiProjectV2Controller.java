@@ -1164,6 +1164,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
             }
             Project project = projectService.getProjectBasicInfo(prjId);
+            project.setLoginUserName(userInfo.getUserId());
+            project.setModifier(userInfo.getUserId());
             if (isDepLoaded) {
                 List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(depOssComponents);
                 Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(depOssComponents, ossComponentsLicense);
