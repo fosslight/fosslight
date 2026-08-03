@@ -1103,6 +1103,9 @@ public final class Url {
 			/** vulnerability max score info search */
 			public static final String FOSSLIGHT_API_VULNERABILITY_MAX_DATA	= "/max-vulnerabilities";
 
+			/** discovered CVE IDs by email send date */
+			public static final String FOSSLIGHT_API_VULNERABILITY_DISCOVERED_CVE = "/discovered-cves";
+
 
 		/** SELFCHECK */
 			/** create SelfCheck */
