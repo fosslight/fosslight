@@ -805,9 +805,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             Map<String, Object> result = null;
+            int addedCount = 0;
             if (sheetNamesEmptyFlag) {
                 result = apiProjectService.getSheetData(bean, prjId, tabName.toUpperCase(), sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
-                resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, tabName, tabName, sheetNamesEmptyFlag, false, 0);
+                resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, tabName, tabName, sheetNamesEmptyFlag, false, 0, true, addedCount);
+                addedCount += Integer.parseInt(String.valueOf(resultMap.getOrDefault("addedCount", 0)));
             } else {
                 int sheetLength = sheetNames.split(",").length;
                 int sheetIdx = 0;
@@ -816,9 +818,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         continue;
                     }
                     result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(), sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY, true);
-                    resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, tabName, sheetNm.trim(), sheetNamesEmptyFlag, sheetLength > 1 ? true : false, sheetIdx);
+                    resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, tabName, sheetNm.trim(), sheetNamesEmptyFlag, sheetLength > 1 ? true : false, sheetIdx, sheetIdx == sheetLength-1, addedCount);
+                    addedCount += Integer.parseInt(String.valueOf(resultMap.getOrDefault("addedCount", 0)));
+                    resultMap.put("addedCount", addedCount);
                     sheetIdx++;
-                    if (!resultMap.isEmpty()) {
+                    if (resultMap.containsKey(KEY_ERROR_MESSAGE) || resultMap.containsKey(KEY_VALID_ERROR)) {
                         break;
                     }
                 }
@@ -829,7 +833,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 projectService.updateSecurityDataForProject(prjId);
             }
 
-            if (resultMap.isEmpty()) {
+            if (!resultMap.containsKey(KEY_ERROR_MESSAGE) && !resultMap.containsKey(KEY_VALID_ERROR)) {
                 // 정상처리된 경우 세션 삭제
                 switch (tabName) {
                     case "DEP":
