@@ -954,13 +954,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 uploadFile = apiFileService.uploadFile(ossReport);
             }
 
-            String registFileId = uploadFile.getRegistFileId();
-
-            T2File registFile = fileService.selectFileInfoById(registFileId);
             if (uploadFile == null) {
                 resultMap.put(KEY_ERROR_MESSAGE, "File information not found.");
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get(KEY_ERROR_MESSAGE));
             }
+
+            String registFileId = uploadFile.getRegistFileId();
+
+            T2File registFile = fileService.selectFileInfoById(registFileId);
+
             String uploadFileSeq = registFile.getFileSeq();
             String uploadFileNm = registFile.getOrigNm();
 
@@ -1018,6 +1020,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         }
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
+                        errMsgListMap.put(targetSheetName, "Unexpected error occurred while reading the sheet '" + targetSheetName.trim() + "'.");
                     }
 
                 }
