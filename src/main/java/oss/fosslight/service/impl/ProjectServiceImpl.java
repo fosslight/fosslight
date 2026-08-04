@@ -7438,6 +7438,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		partnerList = convertOssNickName3rd(partnerList);
 		
 		// Identification > 3rd Party Tab Insert
+		int componentCount = 0;
 		for (OssComponents bean : partnerList) {
 			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			bean.setReferenceId(project.getPrjId());
@@ -7445,11 +7446,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			projectMapper.insertOssComponentsCopy(bean);
 			projectMapper.insertOssComponentsLicenseCopy(bean);
+			componentCount++;
 		}
 		
 		PartnerMaster partnerBean = new PartnerMaster();
 		partnerBean.setPrjId(project.getPrjId());
 		partnerBean.setPartnerId(project.getRefPartnerId());
+		partnerBean.setComponentCount(String.valueOf(componentCount));
 		
 		// project - partner Map Insert
 		partnerMapper.insertPartnerMapList(partnerBean);
