@@ -3775,32 +3775,8 @@ public class ProjectController extends CoTopComponent {
 			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
 				
-				String codeExp = codeMapper.getCodeDetail("120", "12").getCdDtlExp();
-				String codeExp2 = codeMapper.getCodeDetail("120", "42").getCdDtlExp();
-				String codeExp3 = codeMapper.getCodeDetail("120", "43").getCdDtlExp();
-				
-				List<String> fileExtList = new ArrayList<>();
-				if (!isEmpty(codeExp)) {
-					fileExtList.addAll(Arrays.stream(codeExp.split(",")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList()));
-				}
-				if (!isEmpty(codeExp2)) {
-					fileExtList.addAll(Arrays.stream(codeExp2.split(",")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList()));
-				}
-				if (!isEmpty(codeExp3)) {
-					fileExtList.addAll(Arrays.stream(codeExp3.split(",")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList()));
-				}
-				
-				boolean fileExtCheck = false;
-				if (CollectionUtils.isNotEmpty(fileExtList)) {
-					fileExtList = fileExtList.stream().distinct().collect(Collectors.toList());
-					for (String s : fileExtList) {
-						if (fileExtension.endsWith(s.trim())) {
-							fileExtCheck = true;
-							break;
-						}
-					}
-				}
-
+				List<String> fileExtList = projectService.getAllowedProjectReportExtensions();
+				boolean fileExtCheck = projectService.isAllowedProjectReportExtension(fileExtension);
 				if (!fileExtCheck) {
 					resultList.add("UNSUPPORTED_FILE");
 					String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{String.join(",", fileExtList)});

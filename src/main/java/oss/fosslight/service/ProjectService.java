@@ -290,4 +290,8 @@ public interface ProjectService extends HistoryConfig{
 	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv);
 
 	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv, String userId);
+
+	List<String> getAllowedProjectReportExtensions();
+
+	boolean isAllowedProjectReportExtension(String fileExtension);
 }

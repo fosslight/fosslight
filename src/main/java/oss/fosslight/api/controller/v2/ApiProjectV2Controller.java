@@ -747,8 +747,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
             if (ossReport == null) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "ossReport is required.");
             }
-            if (!ossReport.getOriginalFilename().contains("xls")) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid oss report file format.");
+            String originalFilename = ossReport.getOriginalFilename();
+            int extensionIndex = originalFilename == null ? -1 : originalFilename.lastIndexOf('.');
+            String fileExtension = extensionIndex > -1 ? StringUtils.lowerCase(originalFilename.substring(extensionIndex + 1)) : "";
+            if (!projectService.isAllowedProjectReportExtension(fileExtension)) {
+                List<String> fileExtList = projectService.getAllowedProjectReportExtensions();
+                String msg = getMessage("msg.project.packaging.upload.fileextension", new String[]{String.join(",", fileExtList)});
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, msg);
             }
             if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) {
                 return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
@@ -916,8 +921,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
             if (ossReport == null) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "ossReport is required.");
             }
-            if (!ossReport.getOriginalFilename().contains("xls")) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid oss report file format.");
+            String originalFilename = ossReport.getOriginalFilename();
+            int extensionIndex = originalFilename == null ? -1 : originalFilename.lastIndexOf('.');
+            String fileExtension = extensionIndex > -1 ? StringUtils.lowerCase(originalFilename.substring(extensionIndex + 1)) : "";
+            if (!projectService.isAllowedProjectReportExtension(fileExtension)) {
+                List<String> fileExtList = projectService.getAllowedProjectReportExtensions();
+                String msg = getMessage("msg.project.packaging.upload.fileextension", new String[]{String.join(",", fileExtList)});
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, msg);
             }
             if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) {
                 return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));

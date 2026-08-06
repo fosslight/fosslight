@@ -676,8 +676,15 @@ public class ApiProjectController extends CoTopComponent {
 				}
 				
 				if (ossReport != null) {
-					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
-							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
+					String originalFilename = ossReport.getOriginalFilename();
+					int extensionIndex = originalFilename == null ? -1 : originalFilename.lastIndexOf('.');
+					String fileExtension = extensionIndex > -1 ? StringUtils.lowerCase(originalFilename.substring(extensionIndex + 1)) : "";
+					if (!projectService.isAllowedProjectReportExtension(fileExtension)) {
+						List<String> fileExtList = projectService.getAllowedProjectReportExtensions();
+						String msg = getMessage("msg.project.packaging.upload.fileextension", new String[]{String.join(",", fileExtList)});
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE, msg);
+					}
+					if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
 						
 						boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap);
 						if (!checkDistributionTypeFlag) {
@@ -813,8 +820,15 @@ public class ApiProjectController extends CoTopComponent {
 				}
 				
 				if (ossReport != null) {
-					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
-							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
+					String originalFilename = ossReport.getOriginalFilename();
+					int extensionIndex = originalFilename == null ? -1 : originalFilename.lastIndexOf('.');
+					String fileExtension = extensionIndex > -1 ? StringUtils.lowerCase(originalFilename.substring(extensionIndex + 1)) : "";
+					if (!projectService.isAllowedProjectReportExtension(fileExtension)) {
+						List<String> fileExtList = projectService.getAllowedProjectReportExtensions();
+						String msg = getMessage("msg.project.packaging.upload.fileextension", new String[]{String.join(",", fileExtList)});
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE, msg);
+					}
+					if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
 						
 						boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
 						if (!checkDistributionTypeFlag) {
@@ -960,9 +974,13 @@ public class ApiProjectController extends CoTopComponent {
 				}
 				
 				if (ossReport != null) {
-					if (!ossReport.getOriginalFilename().contains("xls")) { // 확장자 xls, xlsx, xlsm 허용
-						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE
-								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
+					String originalFilename = ossReport.getOriginalFilename();
+					int extensionIndex = originalFilename == null ? -1 : originalFilename.lastIndexOf('.');
+					String fileExtension = extensionIndex > -1 ? StringUtils.lowerCase(originalFilename.substring(extensionIndex + 1)) : "";
+					if (!projectService.isAllowedProjectReportExtension(fileExtension)) {
+						List<String> fileExtList = projectService.getAllowedProjectReportExtensions();
+						String msg = getMessage("msg.project.packaging.upload.fileextension", new String[]{String.join(",", fileExtList)});
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE, msg);
 					} else if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
 					} else {
@@ -1305,9 +1323,13 @@ public class ApiProjectController extends CoTopComponent {
 			UploadFile ossReportBean = null;
 			
 			if (searchFlag) {
-				if (!ossReport.getOriginalFilename().contains("xls")){ // 확장자 xls, xlsx, xlsm 허용
-					return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE
-							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
+				String originalFilename = ossReport.getOriginalFilename();
+				int extensionIndex = originalFilename == null ? -1 : originalFilename.lastIndexOf('.');
+				String fileExtension = extensionIndex > -1 ? StringUtils.lowerCase(originalFilename.substring(extensionIndex + 1)) : "";
+				if (!projectService.isAllowedProjectReportExtension(fileExtension)){ // 확장자 xls, xlsx, xlsm 허용
+					List<String> fileExtList = projectService.getAllowedProjectReportExtensions();
+					String msg = getMessage("msg.project.packaging.upload.fileextension", new String[]{String.join(",", fileExtList)});
+					return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE, msg);
 				} else if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
 					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
 							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));

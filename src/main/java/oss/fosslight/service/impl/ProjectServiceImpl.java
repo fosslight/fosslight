@@ -10321,4 +10321,33 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	        }
 	    }
 	}
+
+	@Override
+	public List<String> getAllowedProjectReportExtensions() {
+		List<String> fileExtList = new ArrayList<>();
+		addAllowedProjectReportExtensions(fileExtList, "12");
+		addAllowedProjectReportExtensions(fileExtList, "42");
+		addAllowedProjectReportExtensions(fileExtList, "43");
+		return fileExtList.stream().distinct().collect(Collectors.toList());
+	}
+
+	@Override
+	public boolean isAllowedProjectReportExtension(String fileExtension) {
+		if (isEmpty(fileExtension)) {
+			return false;
+		}
+		return getAllowedProjectReportExtensions().contains(fileExtension.trim().toLowerCase(Locale.ROOT));
+	}
+
+	private void addAllowedProjectReportExtensions(List<String> fileExtList, String codeDetail) {
+		String codeExp = CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, codeDetail);
+		if (isEmpty(codeExp)) {
+			return;
+		}
+		fileExtList.addAll(Arrays.stream(codeExp.split(","))
+				.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.map(s -> s.toLowerCase(Locale.ROOT))
+				.collect(Collectors.toList()));
+	}
 }
