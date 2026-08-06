@@ -33,6 +33,11 @@ repositories {
 test {
 	maxHeapSize="2048m"
 	useJUnitPlatform()
+	testLogging {
+		// Needed so PURL result table (System.out in @AfterAll) appears in the console.
+		showStandardStreams = true
+		events "failed", "skipped", "standard_out", "standard_error"
+	}
 }
 
 processResources {

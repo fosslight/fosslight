@@ -1,0 +1,471 @@
+{
+  "unimplementedTypes": [
+    "bitbucket",
+    "composer",
+    "cpan",
+    "cran",
+    "docker",
+    "hackage",
+    "huggingface",
+    "yocto",
+    "git"
+  ],
+  "cases": [
+    {
+      "type": "github",
+      "downloadLocation": "https://github.com/package-url/purl-spec",
+      "ossName": "purl-spec",
+      "expectedPurl": "pkg:github/package-url/purl-spec"
+    },
+    {
+      "type": "github",
+      "downloadLocation": "https://github.com/fosslight/fosslight",
+      "ossName": "fosslight",
+      "expectedPurl": "pkg:github/fosslight/fosslight"
+    },
+    {
+      "type": "github",
+      "downloadLocation": "https://github.com/fosslight/fosslight.git",
+      "ossName": "fosslight",
+      "expectedPurl": "pkg:github/fosslight/fosslight"
+    },
+    {
+      "type": "github",
+      "downloadLocation": "http://www.github.com/apache/tomcat",
+      "ossName": "tomcat",
+      "expectedPurl": "pkg:github/apache/tomcat"
+    },
+    {
+      "type": "github",
+      "downloadLocation": "https://github.com:443/package-url/purl-spec",
+      "ossName": "purl-spec",
+      "expectedPurl": "pkg:github/package-url/purl-spec"
+    },
+    {
+      "type": "npm",
+      "downloadLocation": "https://www.npmjs.com/package/foobar",
+      "ossName": "foobar",
+      "expectedPurl": "pkg:npm/foobar"
+    },
+    {
+      "type": "npm",
+      "downloadLocation": "https://www.npmjs.com/package/lodash",
+      "ossName": "lodash",
+      "expectedPurl": "pkg:npm/lodash"
+    },
+    {
+      "type": "npm",
+      "downloadLocation": "https://npmjs.com/package/express",
+      "ossName": "express",
+      "expectedPurl": "pkg:npm/express"
+    },
+    {
+      "type": "npm",
+      "downloadLocation": "https://www.npmjs.com/package/@angular/core",
+      "ossName": "@angular/core",
+      "expectedPurl": "pkg:npm/%40angular/core"
+    },
+    {
+      "type": "npm",
+      "downloadLocation": "https://www.npmjs.com/package/@angular/animation",
+      "ossName": "@angular/animation",
+      "expectedPurl": "pkg:npm/%40angular/animation"
+    },
+    {
+      "type": "npm",
+      "downloadLocation": "https://registry.npmjs.org/lodash",
+      "ossName": "lodash",
+      "expectedPurl": "pkg:npm/lodash"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.org/project/requests",
+      "ossName": "requests",
+      "expectedPurl": "pkg:pypi/requests"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.python.org/project/Django",
+      "ossName": "Django",
+      "expectedPurl": "pkg:pypi/django"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.org/project/django",
+      "ossName": "django",
+      "expectedPurl": "pkg:pypi/django"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.org/project/django-allauth",
+      "ossName": "django-allauth",
+      "expectedPurl": "pkg:pypi/django-allauth"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.org/project/django_allauth",
+      "ossName": "django-allauth",
+      "expectedPurl": "pkg:pypi/django-allauth"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.org/project/PyYAML",
+      "ossName": "PyYAML",
+      "expectedPurl": "pkg:pypi/pyyaml"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.python.org/pypi/requests",
+      "ossName": "requests",
+      "expectedPurl": "pkg:pypi/requests"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://pypi.org/pypi/requests",
+      "ossName": "requests",
+      "expectedPurl": "pkg:pypi/requests"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://files.pythonhosted.org/packages/source/r/requests/requests-2.31.0.tar.gz",
+      "ossName": "requests",
+      "expectedPurl": "pkg:pypi/requests"
+    },
+    {
+      "type": "pypi",
+      "downloadLocation": "https://files.pythonhosted.org/packages/source/m/mcp/mcp-1.20.0.tar.gz",
+      "ossName": "mcp",
+      "expectedPurl": "pkg:pypi/mcp"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-anim",
+      "ossName": "batik-anim",
+      "expectedPurl": "pkg:maven/org.apache.xmlgraphics/batik-anim"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://mvnrepository.com/artifact/net.sf.jacob-projec/jacob",
+      "ossName": "jacob",
+      "expectedPurl": "pkg:maven/net.sf.jacob-projec/jacob"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://mvnrepository.com/artifact/org.apache.commons/commons-lang3",
+      "ossName": "commons-lang3",
+      "expectedPurl": "pkg:maven/org.apache.commons/commons-lang3"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar",
+      "ossName": "commons-lang3",
+      "expectedPurl": "pkg:maven/org.apache.commons/commons-lang3"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://maven.google.com/web/index.html#androidx.test.ext:junit",
+      "ossName": "junit",
+      "expectedPurl": "pkg:maven/androidx.test.ext/junit?repository_url=https:%2F%2Fmaven.google.com"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://maven.google.com/web/index.html#com.google.android.material:material:1.11.0",
+      "ossName": "material",
+      "expectedPurl": "pkg:maven/com.google.android.material/material?repository_url=https:%2F%2Fmaven.google.com"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://repo.spring.io/milestone/org/springframework/data/spring-data-r2dbc/1.5.0-M1/spring-data-r2dbc-1.5.0-M1-sources.jar",
+      "ossName": "spring-data-r2dbc",
+      "expectedPurl": "pkg:maven/org.springframework.data/spring-data-r2dbc?repository_url=https:%2F%2Frepo.spring.io"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://dl.google.com/android/maven2/androidx/test/ext/junit/1.2.0/junit-1.2.0.pom",
+      "ossName": "junit",
+      "expectedPurl": "pkg:maven/androidx.test.ext/junit?repository_url=https:%2F%2Fmaven.google.com"
+    },
+    {
+      "type": "maven",
+      "downloadLocation": "https://dl.google.com/dl/android/maven2/androidx/core/core/1.12.0/core-1.12.0.aar",
+      "ossName": "core",
+      "expectedPurl": "pkg:maven/androidx.core/core?repository_url=https:%2F%2Fmaven.google.com"
+    },
+    {
+      "type": "golang",
+      "downloadLocation": "https://pkg.go.dev/github.com/gorilla/context",
+      "ossName": "context",
+      "expectedPurl": "pkg:golang/github.com/gorilla/context"
+    },
+    {
+      "type": "golang",
+      "downloadLocation": "https://pkg.go.dev/golang.org/x/text",
+      "ossName": "text",
+      "expectedPurl": "pkg:golang/golang.org/x/text"
+    },
+    {
+      "type": "golang",
+      "downloadLocation": "https://pkg.go.dev/google.golang.org/genproto",
+      "ossName": "genproto",
+      "expectedPurl": "pkg:golang/google.golang.org/genproto"
+    },
+    {
+      "type": "golang",
+      "downloadLocation": "https://pkg.go.dev/google.golang.org/genproto#googleapis/api/annotations",
+      "ossName": "genproto",
+      "expectedPurl": "pkg:golang/google.golang.org/genproto#googleapis/api/annotations"
+    },
+    {
+      "type": "cocoapods",
+      "downloadLocation": "https://cocoapods.org/pods/Alamofire",
+      "ossName": "Alamofire",
+      "expectedPurl": "pkg:cocoapods/Alamofire"
+    },
+    {
+      "type": "cocoapods",
+      "downloadLocation": "https://cocoapods.org/pods/Alamofire#installation",
+      "ossName": "Alamofire",
+      "expectedPurl": "pkg:cocoapods/Alamofire"
+    },
+    {
+      "type": "cocoapods",
+      "downloadLocation": "https://cocoapods.org/pods/MapsIndoors",
+      "ossName": "MapsIndoors",
+      "expectedPurl": "pkg:cocoapods/MapsIndoors"
+    },
+    {
+      "type": "gem",
+      "downloadLocation": "https://rubygems.org/gems/rails",
+      "ossName": "rails",
+      "expectedPurl": "pkg:gem/rails"
+    },
+    {
+      "type": "gem",
+      "downloadLocation": "https://rubygems.org/gems/ropencv",
+      "ossName": "ropencv",
+      "expectedPurl": "pkg:gem/ropencv"
+    },
+    {
+      "type": "gem",
+      "downloadLocation": "https://rubygems.org/gems/ruby-advisory-db-check",
+      "ossName": "ruby-advisory-db-check",
+      "expectedPurl": "pkg:gem/ruby-advisory-db-check"
+    },
+    {
+      "type": "gem",
+      "downloadLocation": "https://rubygems.org/gems/jruby-launcher",
+      "ossName": "jruby-launcher",
+      "expectedPurl": "pkg:gem/jruby-launcher"
+    },
+    {
+      "type": "cargo",
+      "downloadLocation": "https://crates.io/crates/serde",
+      "ossName": "serde",
+      "expectedPurl": "pkg:cargo/serde"
+    },
+    {
+      "type": "cargo",
+      "downloadLocation": "https://crates.io/crates/rand",
+      "ossName": "rand",
+      "expectedPurl": "pkg:cargo/rand"
+    },
+    {
+      "type": "cargo",
+      "downloadLocation": "https://crates.io/crates/clap",
+      "ossName": "clap",
+      "expectedPurl": "pkg:cargo/clap"
+    },
+    {
+      "type": "nuget",
+      "downloadLocation": "https://www.nuget.org/packages/Newtonsoft.Json",
+      "ossName": "Newtonsoft.Json",
+      "expectedPurl": "pkg:nuget/Newtonsoft.Json"
+    },
+    {
+      "type": "nuget",
+      "downloadLocation": "https://www.nuget.org/packages/Honoo.Net.UPnP",
+      "ossName": "Honoo.Net.UPnP",
+      "expectedPurl": "pkg:nuget/Honoo.Net.UPnP"
+    },
+    {
+      "type": "nuget",
+      "downloadLocation": "https://nuget.org/packages/SocketIO.Serializer.Core",
+      "ossName": "SocketIO.Serializer.Core",
+      "expectedPurl": "pkg:nuget/SocketIO.Serializer.Core"
+    },
+    {
+      "type": "android",
+      "downloadLocation": "https://android.googlesource.com/platform/external/alsa-lib",
+      "ossName": "alsa-lib",
+      "expectedPurl": "pkg:git/android.googlesource.com/platform/external/alsa-lib"
+    },
+    {
+      "type": "android",
+      "downloadLocation": "https://android.googlesource.com/platform/bionic",
+      "ossName": "bionic",
+      "expectedPurl": "pkg:git/android.googlesource.com/platform/bionic"
+    },
+    {
+      "type": "android",
+      "downloadLocation": "https://android.googlesource.com/platform/bionic/+/refs/tags/aml_tz3_312511020",
+      "ossName": "bionic",
+      "expectedPurl": "pkg:git/android.googlesource.com/platform/bionic"
+    },
+    {
+      "type": "android",
+      "downloadLocation": "https://android.googlesource.com/platform/external/sqlite",
+      "ossName": "sqlite",
+      "expectedPurl": "pkg:git/android.googlesource.com/platform/external/sqlite"
+    },
+    {
+      "type": "bitbucket",
+      "downloadLocation": "https://bitbucket.org/birkenfeld/pygments-main",
+      "ossName": "pygments-main",
+      "expectedPurl": "pkg:bitbucket/birkenfeld/pygments-main"
+    },
+    {
+      "type": "bitbucket",
+      "downloadLocation": "https://bitbucket.org/blackteckel/job-board-tails-njs/get/v0.1.5.zip",
+      "ossName": "job-board-tails-njs",
+      "expectedPurl": "pkg:bitbucket/blackteckel/job-board-tails-njs"
+    },
+    {
+      "type": "composer",
+      "downloadLocation": "https://packagist.org/packages/laravel/laravel",
+      "ossName": "laravel",
+      "expectedPurl": "pkg:composer/laravel/laravel"
+    },
+    {
+      "type": "composer",
+      "downloadLocation": "https://packagist.org/packages/geerlingguy/ping",
+      "ossName": "ping",
+      "expectedPurl": "pkg:composer/geerlingguy/ping"
+    },
+    {
+      "type": "cpan",
+      "downloadLocation": "https://www.cpan.org/authors/id/O/OA/OALDERS/libwww-perl-6.18.tar.gz",
+      "ossName": "libwww-perl",
+      "expectedPurl": "pkg:cpan/libwww-perl"
+    },
+    {
+      "type": "cpan",
+      "downloadLocation": "https://www.cpan.org/authors/id/I/IN/INA/Jacode4e/RoundTrip/Jacode4e-RoundTrip-2.13.81.6.tar.gz",
+      "ossName": "Jacode4e-RoundTrip",
+      "expectedPurl": "pkg:cpan/Jacode4e-RoundTrip"
+    },
+    {
+      "type": "cran",
+      "downloadLocation": "https://cran.r-project.org/web/packages/rJava/index.html",
+      "ossName": "rJava",
+      "expectedPurl": "pkg:cran/rJava"
+    },
+    {
+      "type": "cran",
+      "downloadLocation": "https://cran.r-project.org/web/packages/ECharts2Shiny/index.html",
+      "ossName": "ECharts2Shiny",
+      "expectedPurl": "pkg:cran/ECharts2Shiny"
+    },
+    {
+      "type": "docker",
+      "downloadLocation": "https://hub.docker.com/_/cassandra",
+      "ossName": "cassandra",
+      "expectedPurl": "pkg:docker/cassandra"
+    },
+    {
+      "type": "docker",
+      "downloadLocation": "https://hub.docker.com/r/bitnami/mariadb-galera",
+      "ossName": "mariadb-galera",
+      "expectedPurl": "pkg:docker/bitnami/mariadb-galera"
+    },
+    {
+      "type": "docker",
+      "downloadLocation": "https://hub.docker.com/hardened-images/catalog/dhi/python",
+      "ossName": "python",
+      "expectedPurl": "pkg:docker/python?repository_url=dhi.io"
+    },
+    {
+      "type": "hackage",
+      "downloadLocation": "https://hackage.haskell.org/package/AC-HalfInteger",
+      "ossName": "AC-HalfInteger",
+      "expectedPurl": "pkg:hackage/AC-HalfInteger"
+    },
+    {
+      "type": "hackage",
+      "downloadLocation": "https://hackage.haskell.org/package/csg",
+      "ossName": "csg",
+      "expectedPurl": "pkg:hackage/csg"
+    },
+    {
+      "type": "huggingface",
+      "downloadLocation": "https://huggingface.co/openai/whisper-small",
+      "ossName": "whisper-small",
+      "expectedPurl": "pkg:huggingface/openai/whisper-small"
+    },
+    {
+      "type": "huggingface",
+      "downloadLocation": "https://huggingface.co/datasets/stanfordnlp/snli",
+      "ossName": "snli",
+      "expectedPurl": "pkg:huggingface/datasets/stanfordnlp/snli"
+    },
+    {
+      "type": "yocto",
+      "downloadLocation": "https://git.openembedded.org/openembedded-core/tree/meta/recipes-core/gettext/gettext_1.0.bb",
+      "ossName": "gettext",
+      "expectedPurl": "pkg:yocto/core/gettext?repository_url=https:%2F%2Fgit.openembedded.org%2Fopenembedded-core"
+    },
+    {
+      "type": "git",
+      "downloadLocation": "https://codeberg.org/forgejo/forgejo",
+      "ossName": "forgejo",
+      "expectedPurl": "pkg:git/codeberg.org/forgejo/forgejo"
+    },
+    {
+      "type": "git",
+      "downloadLocation": "https://cygwin.com/cgit/newlib-cygwin",
+      "ossName": "newlib-cygwin",
+      "expectedPurl": "pkg:git/cygwin.com/cgit/newlib-cygwin"
+    },
+    {
+      "type": "git",
+      "downloadLocation": "https://projects.blender.org/blender/blender",
+      "ossName": "blender",
+      "expectedPurl": "pkg:git/projects.blender.org/blender/blender"
+    },
+    {
+      "type": "git",
+      "downloadLocation": "https://gitlab.gnome.org/GNOME/adwaita-fonts",
+      "ossName": "adwaita-fonts",
+      "expectedPurl": "pkg:git/gitlab.gnome.org/GNOME/adwaita-fonts"
+    },
+    {
+      "type": "git",
+      "downloadLocation": "https://git.codelinaro.org/clo/la/platform/external/volley",
+      "ossName": "volley",
+      "expectedPurl": "pkg:git/git.codelinaro.org/clo/la/platform/external/volley"
+    },
+    {
+      "type": "git",
+      "downloadLocation": "https://source.codeaurora.org/external/imx/weston-imx/",
+      "ossName": "weston-imx",
+      "expectedPurl": "pkg:git/source.codeaurora.org/external/imx/weston-imx"
+    },
+    {
+      "type": "pub",
+      "downloadLocation": "https://pub.dev/packages/http",
+      "ossName": "http",
+      "expectedPurl": "pkg:pub/http"
+    },
+    {
+      "type": "generic",
+      "downloadLocation": "https://openssl.org/source/openssl-1.1.0g.tar.gz",
+      "ossName": "openssl",
+      "expectedPurl": "pkg:generic/openssl?download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz"
+    },
+    {
+      "type": "generic",
+      "downloadLocation": "https://example.com/downloads/sample-1.0.tar.gz",
+      "ossName": "Sample OSS",
+      "expectedPurl": "pkg:generic/sample%20oss?download_url=https:%2F%2Fexample.com%2Fdownloads%2Fsample-1.0.tar.gz"
+    }
+  ]
+}
