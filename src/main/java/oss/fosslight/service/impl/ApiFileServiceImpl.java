@@ -23,6 +23,7 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.service.ApiFileService;
+import oss.fosslight.service.FileService;
 import oss.fosslight.util.CompressUtil;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
@@ -32,6 +33,7 @@ import oss.fosslight.util.StringUtil;
 @Slf4j
 public class ApiFileServiceImpl implements ApiFileService {
 	@Autowired FileMapper fileMapper;
+	@Autowired FileService fileService;
 	
 	@Override
 	public UploadFile uploadFile(MultipartFile mFile){
@@ -45,131 +47,12 @@ public class ApiFileServiceImpl implements ApiFileService {
 	
 	@Override
 	public UploadFile uploadFile(MultipartFile mFile, String filePath, String oldFileId) {
-		boolean uploadSucc = false;
-		String fileId = "";
-		if (oldFileId != null) {
-			fileId = oldFileId;
-		} else {
-			fileId = StringUtil.avoidNull(fileMapper.getFileId(), "1");//max+1 file Id 가져옴 20160524 ms-kwon
-		}
-
-		int indexNum = 0;
-		UploadFile upFile = new UploadFile();
-		T2File registFile = new T2File();
-		
-		if (StringUtil.isEmpty(mFile.getOriginalFilename())) {
-			throw new RuntimeException("File Name is empty");
-		}
-		
-		if (mFile.getSize() <= 0) {
-			throw new RuntimeException("File Size is 0");
-		}
-		
-		String originalFileName = mFile.getOriginalFilename();	//Original File name
-
-		// originalFileName에 경로가 포함되어 있는 경우 처리
-		log.debug("File upload OriginalFileName : " + originalFileName);
-		
-		if (originalFileName.indexOf("/") > -1) {
-			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
-			
-			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
-		}
-		if (originalFileName.indexOf("\\") > -1) {
-			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
-			
-			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
-		}
-		
-		String fileExt = FilenameUtils.getExtension(originalFileName);
-		
-		if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
-			fileExt = "tgz.gz";
-		} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
-			fileExt = "tar.bz2";
-		} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
-			fileExt = "tar.gz";
-		}
-		
-		String uploadFilePath = "";
-		String uploadThumbFilePath = "";
-		
-		try {
-			if (StringUtil.isEmpty(filePath)) {
-				uploadFilePath = CommonFunction.emptyCheckProperty("upload.path", "/upload");
-				uploadThumbFilePath = CommonFunction.emptyCheckProperty("image.path", "/image");
-			} else {
-				uploadFilePath = filePath;
-				uploadThumbFilePath = filePath + "/" + "thumb";
-				
-				File packagingFile = new File(filePath);
-				
-				if (!packagingFile.exists()) {
-					packagingFile.mkdirs();
-				}
-			}
-		} catch(Exception e) {
-			log.error("file upload path(get properties) : " + e.getMessage());
-		}
-		
-		UUID randomUUID = UUID.randomUUID();
-		File file = new File(uploadFilePath+"/"+randomUUID+"."+fileExt);
-
-		/** Return Setting **/
-		upFile.setOriginalFilename(originalFileName);
-		upFile.setInputName("");
-		upFile.setSize(mFile.getSize());
-		upFile.setFilePath(uploadFilePath);
-		upFile.setFileName(randomUUID+"."+fileExt);
-		upFile.setFileExt(fileExt);
-		upFile.setIndexNum(indexNum);
-		upFile.setRegistFileId(fileId);
-		
-		try {
-			upFile.setContentType(mFile.getContentType());
-		} catch (Exception e) {}
-		
-		/** DB Regist Setting **/
-		registFile.setFileId(fileId);
-		registFile.setOrigNm(originalFileName);
-		registFile.setLogiNm(randomUUID+"."+fileExt);
-		registFile.setLogiPath(uploadFilePath);
-		registFile.setLogiThumbNm(randomUUID+"_thumb."+fileExt);
-		registFile.setLogiThumbPath(uploadThumbFilePath);
-		registFile.setExt(fileExt);
-		registFile.setSize(mFile.getSize()+"");
-		
-		try {
-			registFile.setContentType(mFile.getContentType());
-		} catch (Exception e) {}
-		
-		upFile.setRegistSeq(registFile(registFile));
-		upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
-		
-		if (mFile.getSize()!=0) { //File Null Check
-			if (! file.exists()) { //경로상에 파일이 존재하지 않을 경우
-				try {
-					if (file.getParentFile() != null && file.getParentFile().mkdirs()) { //경로에 해당하는 디렉토리들을 생성
-						boolean upSucc = file.createNewFile(); //이후 파일 생성
-						
-						if (!upSucc) {
-							uploadSucc=false;
-						}
-					}
-				}
-				catch (IOException e) {
-					log.error("file upload create error : " + e.getMessage());
-					
-					uploadSucc=false;
-				}
-			}
-			
-			uploadSucc = FileUtil.transferTo(mFile, file);
-			
-			upFile.setUploadSucc(uploadSucc);
-		}
-		
-		return upFile;
+		return fileService.uploadFile(mFile, filePath, oldFileId);
+	}
+	
+	@Override
+	public UploadFile uploadFileWithCreator(MultipartFile mFile, String creator, String fileId) {
+		return fileService.uploadFileWithCreator(mFile, creator, fileId);
 	}
 	
 	@Override

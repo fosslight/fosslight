@@ -69,6 +69,8 @@ import javax.naming.directory.Attributes;
 @Service
 @Slf4j
 public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectService {
+	private static final String KEY_ERROR_MESSAGE = "errorMessage";
+
 	@Autowired ApiProjectMapper apiProjectMapper;
 	@Autowired ProjectMapper projectMapper;
 	@Autowired ApiFileMapper apiFileMapper;
@@ -281,6 +283,58 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet) {
 		return getSheetData(ufile, prjId, readType, sheet, false);
 	}
+
+	public Map<String, Object> getSheetOriginalData(UploadFile ufile, String readType, String[] sheet, boolean exactMatchFlag) {
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		String errMsg = "";
+		List<OssComponents> reportData = new ArrayList<OssComponents>();
+		List<String> errMsgList = new ArrayList<>();
+		Map<String, String> emptyErrMsg = new HashMap<>();
+		try {
+			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList, emptyErrMsg, exactMatchFlag)) {
+				for (String s : errMsgList) { // error 처리
+					if (isEmpty(s)) {
+						continue;
+					}
+
+					if (!isEmpty(errMsg)) {
+						errMsg += "<br/>";
+					}
+
+					errMsg += s;
+				}
+			}
+			else {
+				for (String s : errMsgList) {
+					if (isEmpty(s)) {
+						continue;
+					}
+
+					if (!isEmpty(errMsg)) {
+						errMsg += "<br/>";
+					}
+
+					errMsg += s;
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			errMsg = e.getMessage();
+		}
+
+		String emptyErrStr = (String) emptyErrMsg.get("emptyErrMsg");
+		if (errMsg.isEmpty() && (emptyErrStr == null || emptyErrStr.isEmpty())) {
+			result.put("reportData", reportData);
+			result.put(KEY_ERROR_MESSAGE, errMsg);
+			result.putAll(emptyErrMsg);
+		} else {
+			result.put(KEY_ERROR_MESSAGE, errMsg);
+			result.putAll(emptyErrMsg);
+		}
+
+		return result;
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -333,7 +387,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			result.put("ossComponents", (List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
 			result.put("ossComponentLicense", (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
 		} else {
-			result.put("errorMsg", errMsg);
+			result.put(KEY_ERROR_MESSAGE, errMsg);
 		}
 		
 		return result;
@@ -473,7 +527,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			result.put("ossComponentLicense", ossComponentsLicense);
 			result.put("systemChangeHisStr", systemChangeHisStr);
 		}  else {
-			result.put("errorMsg", errMsg);
+			result.put(KEY_ERROR_MESSAGE, errMsg);
 		}
 		
 		return result;
@@ -1148,23 +1202,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		// packaging File comment
 		try {
-			Map<String, Object> project = apiProjectMapper.selectProjectMaster(prjParam);
+			Project project = projectMapper.selectProjectMaster(prjId);
 			ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
-			if (project.containsKey("packageFileId")) {
-				if (project.get("packageFileId") != null && !("").equals(Integer.toString((int) project.get("packageFileId")))){
-					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId")));
-				}
-			}
-			if (project.containsKey("packageFileId2")) {
-				if (project.get("packageFileId2") != null && !("").equals(Integer.toString((int) project.get("packageFileId2")))){
-					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId2")));
-				}
-			}
-			if (project.containsKey("packageFileId3")) {
-				if (project.get("packageFileId3") != null && !("").equals(Integer.toString((int) project.get("packageFileId3")))){
-					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId3")));
-				}
-			}
+			if (!isEmpty(project.getPackageFileId())) origPackagingFileIdList.add(project.getPackageFileId());
+			if (!isEmpty(project.getPackageFileId2())) origPackagingFileIdList.add(project.getPackageFileId2());
+			if (!isEmpty(project.getPackageFileId3())) origPackagingFileIdList.add(project.getPackageFileId3());
 						
 			int idx = 0;
 			
@@ -1318,7 +1360,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<String> checkExceptionWordsList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_EXCEPTION_WORDS);
 		List<String> checkExceptionIgnoreWorksList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_IGNORE_WORDS);
 		
-		Map<String, Object> prjInfo = null;
+		Project prjInfo = null;
 		boolean doUpdate = true;
 		
 		try {
@@ -1326,7 +1368,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			{
 				prjInfo = getProjectBasicInfo(prjId);
 				
-				if (prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals((String) prjInfo.get("verificationStatus"))) {
+				if (prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(prjInfo.getVerificationStatus())) {
 					doUpdate = false;
 				}
 			}
@@ -1360,12 +1402,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				}
 			}
 			
-			log.info("[API] VERIFY prjName : " + prjInfo.get("prjName"));
+			log.info("[API] VERIFY prjName : " + prjInfo.getPrjName());
 			log.info("[API] VERIFY OrigNm : " + file.get("origNm"));
-			String projectNm = ((String) prjInfo.get("prjName")).replace(" ", "@@");
+			String projectNm = avoidNull(prjInfo.getPrjName()).replace(" ", "@@");
 			
-			if (prjInfo.containsKey("prjVersion") && prjInfo.get("prjVersion") != null && !("").equals((String) prjInfo.get("prjVersion"))){
-				projectNm +="_"+((String) prjInfo.get("prjVersion")).replace(" ", "@@");
+			if (!isEmpty(prjInfo.getPrjVersion())) {
+				projectNm +="_"+prjInfo.getPrjVersion().replace(" ", "@@");
 			}
 			
 			projectNm +="_"+Integer.toString(packagingFileIdx)+"("+((String) file.get("origNm")).replace(" ", "@@")+")";
@@ -1898,7 +1940,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					prjParam.put("prjId", prjId);
 					prjParam.put("packageFileId", fileSeqs.get(0));
 					
-					if (prjInfo.containsKey("distributionStatus") && prjInfo.get("distributionStatus") != null && !("").equals(prjInfo.get("distributionStatus"))){
+					if (!isEmpty(prjInfo.getDistributionStatus())) {
 						prjParam.put("statusVerifyYn", "C");
 					} else {
 						prjParam.put("statusVerifyYn", CoConstDef.FLAG_YES);
@@ -1949,11 +1991,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 
 	@Override
-	public Map<String, Object> getProjectBasicInfo(String prjId) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("prjId", prjId);
-		
-		return apiProjectMapper.selectProjectMaster2(param);
+	public Project getProjectBasicInfo(String prjId) {
+		return projectMapper.selectProjectMaster2(prjId);
 	}
 
 	@Override
@@ -2923,10 +2962,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 
 	@Override
-	public Map<String, Object> selectProjectMaster(String prjId) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("prjId", prjId);
-		return apiProjectMapper.selectProjectMaster(param);
+	public Project selectProjectMaster(String prjId) {
+		return projectMapper.selectProjectMaster(prjId);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -3230,55 +3267,108 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
-			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId,
+	                                               String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx, boolean lastSheet) {
+		return getProcessSheetData(result, prjId, resetFlag, registFileId, userId, comment, tabName, sheetName, sheetNamesEmptyFlag, loopFlag, sheetIdx, lastSheet, 0);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId,
+	                                               String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx, boolean lastSheet, int prevAddedCount) {
 		Map<String, Object> rtnMap = new HashMap<>();
-		
-		String errorMsg = (String) result.get("errorMessage");
+
+		String errorMsg = (String) result.get(KEY_ERROR_MESSAGE);
+		if (!isEmpty(errorMsg)) {
+			rtnMap.put(KEY_ERROR_MESSAGE, errorMsg);
+			return rtnMap;
+		}
 
 		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 		ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>());
 		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+		ossComponentsLicense = (ossComponentsLicense != null ? ossComponentsLicense : new ArrayList<>());
 
-		if (!isEmpty(errorMsg)) {
-			rtnMap.put("errorMessage", errorMsg);
+		T2File uploadFile = fileService.selectFileInfoById(registFileId);
+		if (uploadFile == null) {
+			rtnMap.put(KEY_ERROR_MESSAGE, "File information not found.");
+			return rtnMap;
 		}
-		
+
+		for (ProjectIdentification oc : ossComponents) {
+			String comments = oc.getComments();
+			if (!isEmpty(comments)) {
+				comments = comments + "\n";
+			}
+			comments += "(From " + uploadFile.getOrigNm() + ")";
+			oc.setComments(comments);
+			oc.setRefLoadedVal(uploadFile.getFileSeq());
+		}
+
+
 //		T2CoProjectValidator pv = new T2CoProjectValidator();
 //		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
 //		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
 //		pv.setAppendix("mainList", ossComponents); // sub grid
 //		pv.setAppendix("subList", ossComponentsLicense);
 //		T2CoValidationResult vr = pv.validate(new HashMap<>());
-//		
+//
 //		if (!vr.isValid()) {
 //			rtnMap.put("validError", "validError");
 //			return rtnMap;
 //		} else {
-			List<ProjectIdentification> ossComponentList = new ArrayList<>();
-			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
-			
-			if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
-				getIdentificationGridList(prjId, tabName.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
-			}
-			
-			ossComponentList.addAll(ossComponents);
-			ossComponentsLicenseList.addAll(ossComponentsLicense);
-			
-			Project project = new Project();
-			project.setPrjId(prjId);
-			
+		List<ProjectIdentification> ossComponentList = new ArrayList<>();
+		List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+
+		if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
+			getIdentificationGridList(prjId, tabName.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
+		}
+
+		ossComponentList.addAll(ossComponents);
+		ossComponentsLicenseList.addAll(ossComponentsLicense);
+
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setLoginUserName(userId);
+		project.setModifier(userId);
+
+		boolean isDepLoaded = false;
+		boolean isSrcLoaded = false;
+		boolean isBinLoaded = false;
+
+		int depComponentCount = 0;
+		int srcComponentCount = 0;
+		int binComponentCount = 0;
+
+		if (tabName.equals("DEP")) {
+			projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
+		} else if (tabName.equals("SRC")){
+			projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+		} else if (tabName.equals("BIN")){
+			projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
+		}
+
+		int currentSheetAddedCount = ossComponents.size();
+		rtnMap.put("addedCount", currentSheetAddedCount);
+
+		if (lastSheet) {
 			if (tabName.equals("DEP")) {
-				project.setDepCsvFileId(registFileId); // set file id
+				isDepLoaded = true;
+				depComponentCount = prevAddedCount + currentSheetAddedCount;
 				projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
 			} else if (tabName.equals("SRC")){
-				project.setSrcCsvFileId(registFileId); // set file id
+				isSrcLoaded = true;
+				srcComponentCount = prevAddedCount + currentSheetAddedCount;
 				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
 			} else if (tabName.equals("BIN")){
-				project.setBinCsvFileId(registFileId); // set file id
+				isBinLoaded = true;
+				binComponentCount = prevAddedCount + currentSheetAddedCount;
 				projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
 			}
-			
+
+			projectService.setFileAddList(uploadFile, project, CoConstDef.CD_DTL_COMPONENT_ID_BOM,
+					depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
+
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
 			try {
 				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
@@ -3296,17 +3386,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
-			
-			if (comment != null) {
-				CommentsHistory commentHisBean = new CommentsHistory();
-				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-				commentHisBean.setReferenceId(prjId);
-				commentHisBean.setExpansion1(tabName);
-				commentHisBean.setContents(comment);
-				commentHisBean.setLoginUserName(userId);
-				commentService.registComment(commentHisBean, false);
-			}
-			
+
+			String uploadLogComment = "OSS Report Uploaded (by legacy API)";
+
+			CommentsHistory commentHisBean = new CommentsHistory();
+			commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+			commentHisBean.setReferenceId(prjId);
+			commentHisBean.setContents((comment == null ? "" : comment + "<br>") + uploadLogComment);
+			commentHisBean.setLoginUserName(userId);
+			commentService.registComment(commentHisBean, false);
+
 			try {
 				History h = new History();
 				h = projectService.work(project);
@@ -3317,10 +3406,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
-			
-//		} 
-		
+		}
 		return rtnMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
+			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+		return getProcessSheetData(result, prjId, resetFlag, registFileId, userId, comment, tabName, sheetName, sheetNamesEmptyFlag, loopFlag, sheetIdx, false, 0);
 	}
 
 	@Override

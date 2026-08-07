@@ -49,6 +49,20 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
                 "A 'file' parameter is mandatory, though its name may differ depending on the API.");
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected ResponseEntity<Map<String, Object>> handleRuntimeException(HttpServletRequest request, RuntimeException e) {
+        log.error("Runtime exception during file upload", e);
+        // Check if this is a file ID generation error
+        if (e.getMessage() != null && e.getMessage().contains("Failed to generate new file ID")) {
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+        return responseService.errorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE)
+        );
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Map<String, Object>> constraintViolationException(HttpServletRequest request, ConstraintViolationException e) {
