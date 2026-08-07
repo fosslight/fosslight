@@ -3346,6 +3346,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 		Project project = new Project();
 		project.setPrjId(prjId);
+		project.setLoginUserName(userId);
+		project.setModifier(userId);
 
 		boolean isDepLoaded = false;
 		boolean isSrcLoaded = false;
@@ -3383,50 +3385,45 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 			projectService.setFileAddList(uploadFile, project, CoConstDef.CD_DTL_COMPONENT_ID_BOM,
 					depComponentCount, srcComponentCount, binComponentCount, isDepLoaded, isSrcLoaded, isBinLoaded);
-		}
 
-
-		// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
-		try {
-			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
-				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
-				if (!isEmpty(changedLicenseName)) {
-					CommentsHistory commentHisBean = new CommentsHistory();
-					commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-					commentHisBean.setReferenceId(prjId);
-					commentHisBean.setExpansion1(tabName);
-					commentHisBean.setContents(changedLicenseName);
-					commentHisBean.setLoginUserName(userId);
-					commentService.registComment(commentHisBean, false);
+			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
+			try {
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
+					if (!isEmpty(changedLicenseName)) {
+						CommentsHistory commentHisBean = new CommentsHistory();
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+						commentHisBean.setReferenceId(prjId);
+						commentHisBean.setExpansion1(tabName);
+						commentHisBean.setContents(changedLicenseName);
+						commentHisBean.setLoginUserName(userId);
+						commentService.registComment(commentHisBean, false);
+					}
 				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
 			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
 
-		if (comment != null) {
+			String uploadLogComment = "OSS Report Uploaded (by legacy API)";
+
 			CommentsHistory commentHisBean = new CommentsHistory();
 			commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 			commentHisBean.setReferenceId(prjId);
-			commentHisBean.setExpansion1(tabName);
-			commentHisBean.setContents(comment);
+			commentHisBean.setContents((comment == null ? "" : comment + "<br>") + uploadLogComment);
 			commentHisBean.setLoginUserName(userId);
 			commentService.registComment(commentHisBean, false);
+
+			try {
+				History h = new History();
+				h = projectService.work(project);
+				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+				project = (Project) h.gethData();
+				h.sethEtc(project.etcStr());
+				historyService.storeData(h);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
 		}
-
-		try {
-			History h = new History();
-			h = projectService.work(project);
-			h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-			project = (Project) h.gethData();
-			h.sethEtc(project.etcStr());
-			historyService.storeData(h);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-
-//		}
-
 		return rtnMap;
 	}
 
