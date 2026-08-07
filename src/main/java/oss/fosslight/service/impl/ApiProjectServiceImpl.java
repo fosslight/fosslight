@@ -3291,7 +3291,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 		T2File uploadFile = fileService.selectFileInfoById(registFileId);
 		if (uploadFile == null) {
-			rtnMap.put("errorMessage", "File information not found.");
+			rtnMap.put(KEY_ERROR_MESSAGE, "File information not found.");
 			return rtnMap;
 		}
 
