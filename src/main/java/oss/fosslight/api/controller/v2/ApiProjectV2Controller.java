@@ -950,15 +950,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             // 4. Upload file (reuse old file id if any)
+            // UI와 동일하게: 프로젝트의 현재 FILE_ID를 재사용하거나 새로 생성
             String oldFileId = "";
             Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
-            // check any of the target tabs' csv file id
-            for (String tab : tabSheetMap.keySet()) {
-                String key = tab.toLowerCase() + "CsvFileId";
-                if (prjInfo.get(key) != null) {
-                    oldFileId = String.valueOf((int) prjInfo.get(key));
-                    break;
-                }
+            
+            // UI와 동일한 방식: IDENTIFICATION_CSV_FILE_ID (모든 탭이 공유하는 FILE_ID)
+            Object identificationCsvFileId = prjInfo.get("identificationCsvFileId");
+            if (identificationCsvFileId != null && !isEmpty(String.valueOf(identificationCsvFileId))) {
+                oldFileId = String.valueOf(identificationCsvFileId);
             }
 
             UploadFile uploadFile;
