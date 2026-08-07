@@ -94,6 +94,63 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	@Autowired VerificationMapper verificationMapper;
 	@Autowired ProjectMapper projectMapper;
 	
+	/**
+	 * Context object for single file upload processing.
+	 * Encapsulates upload metadata to simplify method parameters.
+	 */
+	public static class FileUploadContext {
+		private final String fileId;
+		private final String filePath;
+		private final String inputName;
+		private final int indexNum;
+		private final String creator;
+		
+		/**
+		 * Create a new file upload context.
+		 * 
+		 * @param fileId File ID to group related files (may reuse existing or generate new)
+		 * @param filePath Physical path to save files (null uses default upload.path)
+		 * @param inputName Form input name (used for metadata tracking, defaults to empty)
+		 * @param indexNum Index number in multi-file upload (used for metadata tracking, defaults to 0)
+		 * @param creator User ID of file creator (null for anonymous upload)
+		 */
+		public FileUploadContext(String fileId, String filePath, String inputName, int indexNum, String creator) {
+			this.fileId = fileId;
+			this.filePath = filePath;
+			this.inputName = inputName;
+			this.indexNum = indexNum;
+			this.creator = creator;
+		}
+		
+		/**
+		 * Convenience builder: fileId + creator (for UI uploads)
+		 */
+		public static FileUploadContext forUiUpload(String fileId, String creator, String inputName, int indexNum) {
+			return new FileUploadContext(fileId, null, inputName, indexNum, creator);
+		}
+		
+		/**
+		 * Convenience builder: fileId + creator (for API uploads)
+		 * Uses default upload path (no custom filePath)
+		 */
+		public static FileUploadContext forApiUpload(String fileId, String creator) {
+			return new FileUploadContext(fileId, null, "", 0, creator);
+		}
+		
+		/**
+		 * Convenience builder: fileId + filePath (for API/non-default uploads)
+		 */
+		public static FileUploadContext forCustomPath(String fileId, String filePath) {
+			return new FileUploadContext(fileId, filePath, "", 0, null);
+		}
+		
+		public String getFileId() { return fileId; }
+		public String getFilePath() { return filePath; }
+		public String getInputName() { return inputName; }
+		public int getIndexNum() { return indexNum; }
+		public String getCreator() { return creator; }
+	}
+	
 	
 	@Override
 	public List<UploadFile> uploadFile(HttpServletRequest req, T2File registFile) {
@@ -158,7 +215,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			sw=false;
 			
 			MultipartFile mFile = multipartRequest.getFile(fileName);
-			UploadProcessResult uploadResult = processSingleUploadFile(mFile, fileId, fileName, indexNum, null, registFile.getCreator());
+			FileUploadContext context = FileUploadContext.forUiUpload(fileId, registFile.getCreator(), fileName, indexNum);
+			UploadProcessResult uploadResult = processSingleUploadFile(mFile, context);
 			result.add(uploadResult.uploadFile);
 			if (uploadResult.abort) {
 				return result;
@@ -174,15 +232,37 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	@Override
 	public UploadFile uploadFile(MultipartFile mFile, String filePath, String oldFileId) {
-		String fileId = isEmpty(oldFileId) ? avoidNull(fileMapper.getFileId(), "1") : oldFileId;
-		UploadProcessResult uploadResult = processSingleUploadFile(mFile, fileId, "", 0, filePath, null);
+		String fileId;
+		if (isEmpty(oldFileId)) {
+			fileId = fileMapper.getFileId();
+			if (isEmpty(fileId)) {
+				throw new RuntimeException("Failed to generate new file ID. Please contact the administrator.");
+			}
+		} else {
+			fileId = oldFileId;
+		}
+		FileUploadContext context = FileUploadContext.forApiUpload(fileId, null);
+		UploadProcessResult uploadResult = processSingleUploadFile(mFile, context);
 		return uploadResult.uploadFile;
 	}
 
-	private UploadProcessResult processSingleUploadFile(MultipartFile mFile, String fileId, String inputName, int indexNum, String filePath, String creator) {
+	@Override
+	public UploadFile uploadFileWithCreator(MultipartFile mFile, String creator, String fileId) {
+		if (isEmpty(fileId)) {
+			fileId = fileMapper.getFileId();
+			if (isEmpty(fileId)) {
+				throw new RuntimeException("Failed to generate new file ID. Please contact the administrator.");
+			}
+		}
+		FileUploadContext context = FileUploadContext.forApiUpload(fileId, creator);
+		UploadProcessResult uploadResult = processSingleUploadFile(mFile, context);
+		return uploadResult.uploadFile;
+	}
+
+	private UploadProcessResult processSingleUploadFile(MultipartFile mFile, FileUploadContext uploadContext) {
 		UploadFile upFile = new UploadFile();
 		T2File registFile = new T2File();
-		registFile.setCreator(creator);
+		registFile.setCreator(uploadContext.getCreator());
 		
 		if (isEmpty(mFile.getOriginalFilename())) {
 			throw new RuntimeException("File Name is empty");
@@ -219,13 +299,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String uploadThumbFilePath = "";
 		
 		try {
-			if (StringUtil.isEmpty(filePath)) {
+			if (StringUtil.isEmpty(uploadContext.getFilePath())) {
 				uploadFilePath = appEnv.getProperty("upload.path", "/upload");
 				uploadThumbFilePath = appEnv.getProperty("image.path", "/image");
 			} else {
-				uploadFilePath = filePath;
-				uploadThumbFilePath = filePath + "/" + "thumb";
-				File targetPath = new File(filePath);
+				uploadFilePath = uploadContext.getFilePath();
+				uploadThumbFilePath = uploadContext.getFilePath() + "/" + "thumb";
+				File targetPath = new File(uploadContext.getFilePath());
 				if (!targetPath.exists()) {
 					targetPath.mkdirs();
 				}
@@ -345,10 +425,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		upFile.setOriginalFilename(originalFileName);
 		upFile.setFileName(randomUUID + "." + fileExt);
 		upFile.setFileExt(fileExt);
-		upFile.setInputName(inputName);
+		upFile.setInputName(uploadContext.getInputName());
 		upFile.setFilePath(uploadFilePath);
-		upFile.setIndexNum(indexNum);
-		upFile.setRegistFileId(fileId);
+		upFile.setIndexNum(uploadContext.getIndexNum());
+		upFile.setRegistFileId(uploadContext.getFileId());
 		upFile.setUploadSucc(uploadSucc);
 		
 		try {
@@ -364,7 +444,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		if (isConverted) {
 			T2File originFile = new T2File();
 			String originLogiNm = UUID.randomUUID() + "." + originalFileExt;
-			originFile.setFileId(fileId);
+			originFile.setFileId(uploadContext.getFileId());
 			originFile.setOrigNm(mFile.getOriginalFilename());
 			originFile.setLogiNm(originLogiNm);
 			originFile.setLogiPath(uploadFilePath);
@@ -390,7 +470,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		}
 		
-		registFile.setFileId(fileId);
+		registFile.setFileId(uploadContext.getFileId());
 		registFile.setOrigNm(originalFileName);
 		registFile.setLogiNm(randomUUID + "." + fileExt);
 		registFile.setLogiPath(uploadFilePath);

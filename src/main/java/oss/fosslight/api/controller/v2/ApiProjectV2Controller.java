@@ -962,9 +962,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             UploadFile uploadFile;
             if (!isEmpty(oldFileId)) {
-                uploadFile = apiFileService.uploadFile(ossReport, null, oldFileId);
+                uploadFile = apiFileService.uploadFileWithCreator(ossReport, userInfo.getUserId(), oldFileId);
             } else {
-                uploadFile = apiFileService.uploadFile(ossReport);
+                uploadFile = apiFileService.uploadFileWithCreator(ossReport, userInfo.getUserId(), null);
             }
 
             if (uploadFile == null) {

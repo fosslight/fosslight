@@ -51,6 +51,11 @@ public class ApiFileServiceImpl implements ApiFileService {
 	}
 	
 	@Override
+	public UploadFile uploadFileWithCreator(MultipartFile mFile, String creator, String fileId) {
+		return fileService.uploadFileWithCreator(mFile, creator, fileId);
+	}
+	
+	@Override
 	public Map<String, UploadFile> uploadNoticeXMLFile(MultipartFile mFile, String prjId) {
 		Map<String, UploadFile> result = new HashMap<String, UploadFile>();
 		String fileId = StringUtil.avoidNull(fileMapper.getFileId(), "1");		
