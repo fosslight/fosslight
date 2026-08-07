@@ -36,6 +36,8 @@ public interface ApiProjectService {
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet);
 	
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet, boolean exactMatchFlag);
+
+	public Map<String, Object> getSheetOriginalData(UploadFile ufile, String readType, String[] sheet, boolean exactMatchFlag);
 	
 	public Map<String, Object> readAndroidBuildImage(UploadFile ossReportBean, UploadFile noticeHtmlBean, UploadFile resultTxtBean);
 	
@@ -87,13 +89,19 @@ public interface ApiProjectService {
 
 	public void insertWatcher(Map<String, Object> paramMap);
 
-	public Map<String, Object> selectProjectMaster(String prjId);
+	public Project selectProjectMaster(String prjId);
 
 	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList, List<Map<String, Object>> gridDataList);
 
 	public void updateSubStatus(Map<String, Object> param);
 	
-	public Map<String, Object> getProjectBasicInfo(String prjId);
+	public Project getProjectBasicInfo(String prjId);
+
+
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId,
+	                                        String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx, boolean lastSheet);
+
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, String comment, String tabGubn, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx, boolean lastSheet, int prevAddedCount);
 
 	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, String comment, String tabGubn, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx);
 

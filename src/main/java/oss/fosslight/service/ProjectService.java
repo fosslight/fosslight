@@ -288,4 +288,10 @@ public interface ProjectService extends HistoryConfig{
 	public String exportDependencyTreeToTxt(String prjId, List<ProjectIdentification> ossComponents);
 
 	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv);
+
+	public void registCommentWithNickNameValid(String prjId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, String referenceDiv, String userId);
+
+	List<String> getAllowedProjectReportExtensions();
+
+	boolean isAllowedProjectReportExtension(String fileExtension);
 }
