@@ -729,12 +729,21 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         try {
             String oldFileId = "";
-            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-                Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
-                if (prjInfo.get(tabName.toLowerCase() + "CsvFileId") != null) {
-                    oldFileId = String.valueOf((int) prjInfo.get(tabName.toLowerCase() + "CsvFileId"));
-                }
+//            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+//                Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+//                if (prjInfo.get(tabName.toLowerCase() + "CsvFileId") != null) {
+//                    oldFileId = String.valueOf((int) prjInfo.get(tabName.toLowerCase() + "CsvFileId"));
+//                }
+//            }
+
+            Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+
+            // UI와 동일한 방식: IDENTIFICATION_CSV_FILE_ID (모든 탭이 공유하는 FILE_ID)
+            Object identificationCsvFileId = prjInfo.get("identificationCsvFileId");
+            if (identificationCsvFileId != null && !isEmpty(String.valueOf(identificationCsvFileId))) {
+                oldFileId = String.valueOf(identificationCsvFileId);
             }
+
 
             List<ProjectIdentification> ossComponents = new ArrayList<>();
             List<List<ProjectIdentification>> ossComponentsLicense = null;
@@ -776,9 +785,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             UploadFile bean = null;
             if (!isEmpty(oldFileId)) {
-                bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+                bean = apiFileService.uploadFileWithCreator(ossReport, userInfo.getUserId(), oldFileId);
             } else {
-                bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+                bean = apiFileService.uploadFileWithCreator(ossReport, userInfo.getUserId(), null); // file 등록 처리 이후 upload된 file정보를 return함.
             }
 
             // get Excel Sheet name starts with SRC
