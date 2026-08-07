@@ -34,6 +34,8 @@ public interface FileService {
 
 	public UploadFile uploadFile(MultipartFile mFile, String filePath, String oldFileId);
 
+	public UploadFile uploadFileWithCreator(MultipartFile mFile, String creator, String fileId);
+
 	public T2File selectFileInfo(String fileSeq);
 
 	public String registFileWithFileName(String filePath, String fileName);
