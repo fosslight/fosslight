@@ -611,16 +611,16 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 List<Map<String, Object>> beforeBomList = new ArrayList<>();
                 List<Map<String, Object>> afterBomList = new ArrayList<>();
 
-                Map<String, Object> beforePrjInfo = apiProjectService.getProjectBasicInfo(beforePrjId);
-                if (!((String) beforePrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                Project beforePrjInfo = apiProjectService.getProjectBasicInfo(beforePrjId);
+                if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(beforePrjInfo.getNoticeType())) {
                     beforeBomList = apiProjectService.getBomList(beforePrjId);
                 } else {
                     apiProjectService.getIdentificationGridList(beforePrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, beforeBomList);
                     beforeBomList = apiProjectService.setMergeGridData(beforeBomList);
                 }
 
-                Map<String, Object> afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
-                if (!((String) afterPrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                Project afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
+                if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(afterPrjInfo.getNoticeType())) {
                     afterBomList = apiProjectService.getBomList(afterPrjId);
                 } else {
                     apiProjectService.getIdentificationGridList(afterPrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, afterBomList);
@@ -736,12 +736,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
 //                }
 //            }
 
-            Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+            Project prjInfo = apiProjectService.selectProjectMaster(prjId);
 
             // UI와 동일한 방식: IDENTIFICATION_CSV_FILE_ID (모든 탭이 공유하는 FILE_ID)
-            Object identificationCsvFileId = prjInfo.get("identificationCsvFileId");
-            if (identificationCsvFileId != null && !isEmpty(String.valueOf(identificationCsvFileId))) {
-                oldFileId = String.valueOf(identificationCsvFileId);
+            String identificationCsvFileId = prjInfo.getIdentificationCsvFileId();
+            if (!isEmpty(identificationCsvFileId)) {
+                oldFileId = identificationCsvFileId;
             }
 
 
@@ -961,12 +961,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
             // 4. Upload file (reuse old file id if any)
             // UI와 동일하게: 프로젝트의 현재 FILE_ID를 재사용하거나 새로 생성
             String oldFileId = "";
-            Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+            Project prjInfo = apiProjectService.selectProjectMaster(prjId);
             
             // UI와 동일한 방식: IDENTIFICATION_CSV_FILE_ID (모든 탭이 공유하는 FILE_ID)
-            Object identificationCsvFileId = prjInfo.get("identificationCsvFileId");
-            if (identificationCsvFileId != null && !isEmpty(String.valueOf(identificationCsvFileId))) {
-                oldFileId = String.valueOf(identificationCsvFileId);
+            String identificationCsvFileId = prjInfo.getIdentificationCsvFileId();
+            if (!isEmpty(identificationCsvFileId)) {
+                oldFileId = identificationCsvFileId;
             }
 
             UploadFile uploadFile;

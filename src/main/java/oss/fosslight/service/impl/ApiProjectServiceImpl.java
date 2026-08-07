@@ -1202,23 +1202,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		// packaging File comment
 		try {
-			Map<String, Object> project = apiProjectMapper.selectProjectMaster(prjParam);
+			Project project = projectMapper.selectProjectMaster(prjId);
 			ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
-			if (project.containsKey("packageFileId")) {
-				if (project.get("packageFileId") != null && !("").equals(Integer.toString((int) project.get("packageFileId")))){
-					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId")));
-				}
-			}
-			if (project.containsKey("packageFileId2")) {
-				if (project.get("packageFileId2") != null && !("").equals(Integer.toString((int) project.get("packageFileId2")))){
-					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId2")));
-				}
-			}
-			if (project.containsKey("packageFileId3")) {
-				if (project.get("packageFileId3") != null && !("").equals(Integer.toString((int) project.get("packageFileId3")))){
-					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId3")));
-				}
-			}
+			if (!isEmpty(project.getPackageFileId())) origPackagingFileIdList.add(project.getPackageFileId());
+			if (!isEmpty(project.getPackageFileId2())) origPackagingFileIdList.add(project.getPackageFileId2());
+			if (!isEmpty(project.getPackageFileId3())) origPackagingFileIdList.add(project.getPackageFileId3());
 						
 			int idx = 0;
 			
@@ -1372,7 +1360,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<String> checkExceptionWordsList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_EXCEPTION_WORDS);
 		List<String> checkExceptionIgnoreWorksList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_IGNORE_WORDS);
 		
-		Map<String, Object> prjInfo = null;
+		Project prjInfo = null;
 		boolean doUpdate = true;
 		
 		try {
@@ -1380,7 +1368,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			{
 				prjInfo = getProjectBasicInfo(prjId);
 				
-				if (prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals((String) prjInfo.get("verificationStatus"))) {
+				if (prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(prjInfo.getVerificationStatus())) {
 					doUpdate = false;
 				}
 			}
@@ -1414,12 +1402,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				}
 			}
 			
-			log.info("[API] VERIFY prjName : " + prjInfo.get("prjName"));
+			log.info("[API] VERIFY prjName : " + prjInfo.getPrjName());
 			log.info("[API] VERIFY OrigNm : " + file.get("origNm"));
-			String projectNm = ((String) prjInfo.get("prjName")).replace(" ", "@@");
+			String projectNm = avoidNull(prjInfo.getPrjName()).replace(" ", "@@");
 			
-			if (prjInfo.containsKey("prjVersion") && prjInfo.get("prjVersion") != null && !("").equals((String) prjInfo.get("prjVersion"))){
-				projectNm +="_"+((String) prjInfo.get("prjVersion")).replace(" ", "@@");
+			if (!isEmpty(prjInfo.getPrjVersion())) {
+				projectNm +="_"+prjInfo.getPrjVersion().replace(" ", "@@");
 			}
 			
 			projectNm +="_"+Integer.toString(packagingFileIdx)+"("+((String) file.get("origNm")).replace(" ", "@@")+")";
@@ -1952,7 +1940,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					prjParam.put("prjId", prjId);
 					prjParam.put("packageFileId", fileSeqs.get(0));
 					
-					if (prjInfo.containsKey("distributionStatus") && prjInfo.get("distributionStatus") != null && !("").equals(prjInfo.get("distributionStatus"))){
+					if (!isEmpty(prjInfo.getDistributionStatus())) {
 						prjParam.put("statusVerifyYn", "C");
 					} else {
 						prjParam.put("statusVerifyYn", CoConstDef.FLAG_YES);
@@ -2003,11 +1991,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 
 	@Override
-	public Map<String, Object> getProjectBasicInfo(String prjId) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("prjId", prjId);
-		
-		return apiProjectMapper.selectProjectMaster2(param);
+	public Project getProjectBasicInfo(String prjId) {
+		return projectMapper.selectProjectMaster2(prjId);
 	}
 
 	@Override
@@ -2977,10 +2962,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 
 	@Override
-	public Map<String, Object> selectProjectMaster(String prjId) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("prjId", prjId);
-		return apiProjectMapper.selectProjectMaster(param);
+	public Project selectProjectMaster(String prjId) {
+		return projectMapper.selectProjectMaster(prjId);
 	}
 
 	@SuppressWarnings("unchecked")
