@@ -4,7 +4,7 @@
 	<springProperty scope="context" name="LOG_PATH" source="logging.path"/>
 	<springProperty scope="context" name="LOG_FILE_NAME" source="logging.file"/>
 	<property name="ERR_LOG_FILE_NAME" value="${LOG_FILE_NAME}_err"/>
-	<property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss}[%thread] [%logger{36}:%line] - %msg%n"/>
+	<property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss}[%thread] [projectId:%X{projectId}] [%logger{36}:%line] - %msg%n"/>
 	<!-- Console Appender -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">

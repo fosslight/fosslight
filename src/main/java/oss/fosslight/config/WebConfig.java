@@ -39,6 +39,7 @@ import com.google.gson.JsonSerializer;
 
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.interceptor.AjaxInterceptor;
+import oss.fosslight.interceptor.ProjectMdcInterceptor;
 import springfox.documentation.spring.web.json.Json;
 
 @Configuration
@@ -70,6 +71,7 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(localeChangeInterceptor());
+		registry.addInterceptor(new ProjectMdcInterceptor()).addPathPatterns("/api/v2/**");
 		registry.addInterceptor(new AjaxInterceptor()).excludePathPatterns("/error", "/error/**","/viewer","/viewer/**");
 	}
 
