@@ -32,6 +32,8 @@ public interface FileService {
 	
 	public List<UploadFile> uploadFile(HttpServletRequest req, T2File registFile, String inputFileName, String fileId, boolean randomNm, String filePath, boolean isOrigFile);
 
+	public UploadFile uploadFile(MultipartFile mFile, String filePath, String oldFileId);
+
 	public T2File selectFileInfo(String fileSeq);
 
 	public String registFileWithFileName(String filePath, String fileName);

@@ -135,8 +135,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		int indexNum = 0;
 		
 		while (fileNames.hasNext()){
-			UploadFile upFile = new UploadFile();					
-			boolean uploadSucc = true;
 			String fileName = fileNames.next();		//input name
 			
 			if (inputFileName != null){
@@ -160,241 +158,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			sw=false;
 			
 			MultipartFile mFile = multipartRequest.getFile(fileName);
-			
-			if (isEmpty(mFile.getOriginalFilename())) {
-				throw new RuntimeException("File Name is empty");
+			UploadProcessResult uploadResult = processSingleUploadFile(mFile, fileId, fileName, indexNum, null, registFile.getCreator());
+			result.add(uploadResult.uploadFile);
+			if (uploadResult.abort) {
+				return result;
 			}
-			
-			if (mFile.getSize() <= 0) {
-				throw new RuntimeException("File Size is 0");
-			}
-			
-			String originalFileName = mFile.getOriginalFilename();	//Original File name
-
-			// originalFileName에 경로가 포함되어 있는 경우 처리
-			log.debug("File upload OriginalFileName : " + originalFileName);
-			
-			if (originalFileName.indexOf("/") > -1) {
-				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
-				
-				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
-			}
-			if (originalFileName.indexOf("\\") > -1) {
-				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
-				
-				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
-			}
-			
-			String fileExt = FilenameUtils.getExtension(originalFileName);
-			String originalFileExt = fileExt; 
-			
-			if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
-				fileExt = "tgz.gz";
-			} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
-				fileExt = "tar.bz2";
-			} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
-				fileExt = "tar.gz";
-			}
-			
-			String uploadFilePath = "";
-			String uploadThumbFilePath = "";
-			
-			try {
-				uploadFilePath = appEnv.getProperty("upload.path", "/upload");
-				uploadThumbFilePath = appEnv.getProperty("image.path", "/image");
-			} catch(Exception e) {
-				log.error("file upload path(get properties) : " + e.getMessage());
-			}
-			
-			UUID randomUUID = UUID.randomUUID();
-			boolean isConverted = false;
-			long finalFileSize = mFile.getSize();
-			
-			try {
-				byte[] content = mFile.getBytes();
-				String contentStr = new String(content, StandardCharsets.UTF_8).trim();
-				
-				boolean isCycloneDxFile = isCycloneDX(contentStr);
-				boolean isSpdxFile = isSPDX(contentStr);
-				boolean isNotExcel = !fileExt.equalsIgnoreCase("xls");
-				
-				if (isCycloneDxFile || (isSpdxFile && isNotExcel)) {
-					String tempId = "temp_" + UUID.randomUUID().toString().substring(0, 8);
-					File tempFile = null;
-					
-					try {
-						File tempDir = new File(uploadFilePath);
-						if (!tempDir.exists()) {
-							tempDir.mkdirs();
-						}
-						
-						tempFile = File.createTempFile("spdx_origin_" + tempId, "." + fileExt, tempDir);
-						try (InputStream is = mFile.getInputStream()) {
-						    Files.copy(is, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-						} catch (IOException e) {
-						    log.error("An error occurred while copying files: {}", e.getMessage());
-						    
-						    upFile.setUploadSucc(false);
-		                	result.add(upFile);
-		                	return result;
-						}
-						
-						boolean isConvert = false;
-						String uploadFileName = "";
-						String convertFullStrPath = "";
-						
-			            if (isSpdxFile && isNotExcel) {
-			            	fileExt = "xlsx";
-							originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
-							uploadFileName = randomUUID + "." + fileExt;
-				            convertFullStrPath = uploadFilePath + "/" + uploadFileName;
-			            	
-			            	try {
-			            		if (("yaml").equalsIgnoreCase(originalFileExt.toLowerCase())) {
-			            			isConvert = convertYamlToXls(tempFile.toPath(), Paths.get(convertFullStrPath));
-			            		} else if (("rdf").equalsIgnoreCase(originalFileExt.toLowerCase()) || ("spdx").equalsIgnoreCase(originalFileExt.toLowerCase())) {
-			            			SPDXUtil2.convert2(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
-			            		} else {
-			            			tempFile = getCleanedSpdxFile(tempId, tempFile);
-			            			if (tempFile == null) {
-					            		upFile.setUploadSucc(false);
-					            		upFile.setComments("parsing error.");
-					            		result.add(upFile);
-					                	return result;
-					            	}
-		            				SPDXUtil2.convert(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
-			            		}
-			            	} catch (Exception e) {
-			            		log.error("SPDXUtil2.convert error : {}", e.getMessage());
-			            		upFile.setUploadSucc(false);
-			            		upFile.setComments(e.getMessage());
-			            		result.add(upFile);
-			                	return result;
-			            	}
-			            	isConvert = new File(convertFullStrPath).exists();
-			            } else {
-			            	fileExt = "xls";
-			            	originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
-							uploadFileName = randomUUID + "." + fileExt;
-				            convertFullStrPath = uploadFilePath + "/" + uploadFileName;
-			            	isConvert = convertCdxToExcel(tempFile, contentStr, convertFullStrPath);
-			            }
-			            
-			            if ((isCycloneDxFile && !isConvert) || !isConvert) {
-			            	upFile.setUploadSucc(false);
-			            	upFile.setComments("parsing error.");
-		                	result.add(upFile);
-		                	return result;
-			            }
-			            
-			            File convertedFile = new File(convertFullStrPath);
-			            finalFileSize = convertedFile.length();
-	                    isConverted = true;
-	                    log.info("SPDX conversion successful : " + convertFullStrPath);
-					} catch (Exception e) {
-						log.error(e.getMessage());
-					} finally {
-						if (tempFile != null && tempFile.exists()) {
-				            tempFile.delete();
-				        }
-					}
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				
-				upFile.setUploadSucc(false);
-				upFile.setComments("conversion error.");
-            	result.add(upFile);
-            	return result;
-			}
-			
-			File file = new File(uploadFilePath + "/" + randomUUID + "." + fileExt);
-			if (mFile.getSize() != 0) {
-		        if (!isConverted) {
-		            if (!file.getParentFile().exists()) {
-		                file.getParentFile().mkdirs();
-		            }
-		            uploadSucc = FileUtil.transferTo(mFile, file);
-		        } else {
-		            uploadSucc = file.exists();
-		        }
-		    }
-			
-			/** Return Setting **/
-			upFile.setOriginalFilename(originalFileName);
-			upFile.setFileName(randomUUID+"."+fileExt);
-			upFile.setFileExt(fileExt);
-			upFile.setInputName(fileName);
-			upFile.setFilePath(uploadFilePath);
-			upFile.setIndexNum(indexNum);
-			upFile.setRegistFileId(fileId);
-			upFile.setUploadSucc(uploadSucc);
-			
-			try {
-				if (isConverted) {
-					upFile.setContentType("application/vnd.ms-excel");
-					upFile.setSize(finalFileSize);
-				} else {
-					upFile.setContentType(mFile.getContentType());
-					upFile.setSize(mFile.getSize());
-				}
-			} catch (Exception e) {}
-			
-			if (isConverted) {
-				T2File originFile = new T2File(); 
-			    String originLogiNm = UUID.randomUUID() + "." + originalFileExt; 
-			    originFile.setFileId(fileId);
-			    originFile.setOrigNm(mFile.getOriginalFilename());
-			    originFile.setLogiNm(originLogiNm);
-			    originFile.setLogiPath(uploadFilePath);
-			    originFile.setExt(originalFileExt);
-			    originFile.setContentType(mFile.getContentType());
-			    originFile.setSize(String.valueOf(mFile.getSize()));
-			    originFile.setCreator(registFile.getCreator());
-			    
-			    try {
-			    	Path destination = Paths.get(uploadFilePath).resolve(originLogiNm).toAbsolutePath();
-			    	File originFileDest = destination.toFile();
-			    	
-			        if (!originFileDest.getParentFile().exists()) {
-			            originFileDest.getParentFile().mkdirs();
-			        }
-			        mFile.transferTo(originFileDest);
-			        
-			        registFile(originFile); 
-			        registFile.setRefFileSeq(originFile.getFileSeq()); 
-			        log.info("Original file saved successfully. SEQ: {}", originFile.getFileSeq());
-			    } catch (IOException e) {
-			        log.error("Failed to save original physical file: {}", e.getMessage());
-			    } catch (Exception e) {
-			        log.error("DB Error while registering original file: {}", e.getMessage());
-			    }
-			}
-			
-			/** DB Regist Setting **/
-			registFile.setFileId(fileId);
-			registFile.setOrigNm(originalFileName);
-			registFile.setLogiNm(randomUUID+"."+fileExt);
-			registFile.setLogiPath(uploadFilePath);
-			registFile.setLogiThumbNm(randomUUID+"_thumb."+fileExt);
-			registFile.setLogiThumbPath(uploadThumbFilePath);
-			registFile.setExt(fileExt);
-			
-			try {
-				if (isConverted) {
-					registFile.setGubn("CV");
-					registFile.setContentType("application/vnd.ms-excel");
-					registFile.setSize(String.valueOf(finalFileSize));
-				} else {
-					registFile.setContentType(mFile.getContentType());
-					registFile.setSize(String.valueOf(mFile.getSize()));
-				}
-			} catch (Exception e) {}
-			
-			upFile.setRegistSeq(registFile(registFile));
-			upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
-			
-			result.add(upFile);
 		}
 		
 		if (sw){
@@ -402,6 +170,258 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		}
 		
 		return result;
+	}
+
+	@Override
+	public UploadFile uploadFile(MultipartFile mFile, String filePath, String oldFileId) {
+		String fileId = isEmpty(oldFileId) ? avoidNull(fileMapper.getFileId(), "1") : oldFileId;
+		UploadProcessResult uploadResult = processSingleUploadFile(mFile, fileId, "", 0, filePath, null);
+		return uploadResult.uploadFile;
+	}
+
+	private UploadProcessResult processSingleUploadFile(MultipartFile mFile, String fileId, String inputName, int indexNum, String filePath, String creator) {
+		UploadFile upFile = new UploadFile();
+		T2File registFile = new T2File();
+		registFile.setCreator(creator);
+		
+		if (isEmpty(mFile.getOriginalFilename())) {
+			throw new RuntimeException("File Name is empty");
+		}
+		
+		if (mFile.getSize() <= 0) {
+			throw new RuntimeException("File Size is 0");
+		}
+		
+		String originalFileName = mFile.getOriginalFilename();	// Original File name
+		log.debug("File upload OriginalFileName : " + originalFileName);
+		
+		if (originalFileName.indexOf("/") > -1) {
+			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
+			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
+		}
+		if (originalFileName.indexOf("\\") > -1) {
+			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
+			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
+		}
+		
+		String fileExt = FilenameUtils.getExtension(originalFileName);
+		String originalFileExt = fileExt;
+		
+		if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
+			fileExt = "tgz.gz";
+		} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
+			fileExt = "tar.bz2";
+		} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
+			fileExt = "tar.gz";
+		}
+		
+		String uploadFilePath = "";
+		String uploadThumbFilePath = "";
+		
+		try {
+			if (StringUtil.isEmpty(filePath)) {
+				uploadFilePath = appEnv.getProperty("upload.path", "/upload");
+				uploadThumbFilePath = appEnv.getProperty("image.path", "/image");
+			} else {
+				uploadFilePath = filePath;
+				uploadThumbFilePath = filePath + "/" + "thumb";
+				File targetPath = new File(filePath);
+				if (!targetPath.exists()) {
+					targetPath.mkdirs();
+				}
+			}
+		} catch(Exception e) {
+			log.error("file upload path(get properties) : " + e.getMessage());
+		}
+		
+		UUID randomUUID = UUID.randomUUID();
+		boolean isConverted = false;
+		long finalFileSize = mFile.getSize();
+		
+		try {
+			byte[] content = mFile.getBytes();
+			String contentStr = new String(content, StandardCharsets.UTF_8).trim();
+			
+			boolean isCycloneDxFile = isCycloneDX(contentStr);
+			boolean isSpdxFile = isSPDX(contentStr);
+			boolean isNotExcel = !fileExt.equalsIgnoreCase("xls");
+			
+			if (isCycloneDxFile || (isSpdxFile && isNotExcel)) {
+				String tempId = "temp_" + UUID.randomUUID().toString().substring(0, 8);
+				File tempFile = null;
+				
+				try {
+					File tempDir = new File(uploadFilePath);
+					if (!tempDir.exists()) {
+						tempDir.mkdirs();
+					}
+					
+					tempFile = File.createTempFile("spdx_origin_" + tempId, "." + fileExt, tempDir);
+					try (InputStream is = mFile.getInputStream()) {
+						Files.copy(is, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						log.error("An error occurred while copying files: {}", e.getMessage());
+						upFile.setUploadSucc(false);
+						return new UploadProcessResult(upFile, true);
+					}
+					
+					boolean isConvert = false;
+					String uploadFileName = "";
+					String convertFullStrPath = "";
+					
+					if (isSpdxFile && isNotExcel) {
+						fileExt = "xlsx";
+						originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
+						uploadFileName = randomUUID + "." + fileExt;
+						convertFullStrPath = uploadFilePath + "/" + uploadFileName;
+						
+						try {
+							if (("yaml").equalsIgnoreCase(originalFileExt.toLowerCase())) {
+								isConvert = convertYamlToXls(tempFile.toPath(), Paths.get(convertFullStrPath));
+							} else if (("rdf").equalsIgnoreCase(originalFileExt.toLowerCase()) || ("spdx").equalsIgnoreCase(originalFileExt.toLowerCase())) {
+								SPDXUtil2.convert2(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
+							} else {
+								tempFile = getCleanedSpdxFile(tempId, tempFile);
+								if (tempFile == null) {
+									upFile.setUploadSucc(false);
+									upFile.setComments("parsing error.");
+									return new UploadProcessResult(upFile, true);
+								}
+								SPDXUtil2.convert(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
+							}
+						} catch (Exception e) {
+							log.error("SPDXUtil2.convert error : {}", e.getMessage());
+							upFile.setUploadSucc(false);
+							upFile.setComments(e.getMessage());
+							return new UploadProcessResult(upFile, true);
+						}
+						isConvert = new File(convertFullStrPath).exists();
+					} else {
+						fileExt = "xls";
+						originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
+						uploadFileName = randomUUID + "." + fileExt;
+						convertFullStrPath = uploadFilePath + "/" + uploadFileName;
+						isConvert = convertCdxToExcel(tempFile, contentStr, convertFullStrPath);
+					}
+					
+					if ((isCycloneDxFile && !isConvert) || !isConvert) {
+						upFile.setUploadSucc(false);
+						upFile.setComments("parsing error.");
+						return new UploadProcessResult(upFile, true);
+					}
+					
+					File convertedFile = new File(convertFullStrPath);
+					finalFileSize = convertedFile.length();
+					isConverted = true;
+					log.info("SPDX conversion successful : " + convertFullStrPath);
+				} catch (Exception e) {
+					log.error(e.getMessage());
+				} finally {
+					if (tempFile != null && tempFile.exists()) {
+						tempFile.delete();
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			upFile.setUploadSucc(false);
+			upFile.setComments("conversion error.");
+			return new UploadProcessResult(upFile, true);
+		}
+		
+		File file = new File(uploadFilePath + "/" + randomUUID + "." + fileExt);
+		boolean uploadSucc = true;
+		if (mFile.getSize() != 0) {
+			if (!isConverted) {
+				if (!file.getParentFile().exists()) {
+					file.getParentFile().mkdirs();
+				}
+				uploadSucc = FileUtil.transferTo(mFile, file);
+			} else {
+				uploadSucc = file.exists();
+			}
+		}
+		
+		upFile.setOriginalFilename(originalFileName);
+		upFile.setFileName(randomUUID + "." + fileExt);
+		upFile.setFileExt(fileExt);
+		upFile.setInputName(inputName);
+		upFile.setFilePath(uploadFilePath);
+		upFile.setIndexNum(indexNum);
+		upFile.setRegistFileId(fileId);
+		upFile.setUploadSucc(uploadSucc);
+		
+		try {
+			if (isConverted) {
+				upFile.setContentType("application/vnd.ms-excel");
+				upFile.setSize(finalFileSize);
+			} else {
+				upFile.setContentType(mFile.getContentType());
+				upFile.setSize(mFile.getSize());
+			}
+		} catch (Exception e) {}
+		
+		if (isConverted) {
+			T2File originFile = new T2File();
+			String originLogiNm = UUID.randomUUID() + "." + originalFileExt;
+			originFile.setFileId(fileId);
+			originFile.setOrigNm(mFile.getOriginalFilename());
+			originFile.setLogiNm(originLogiNm);
+			originFile.setLogiPath(uploadFilePath);
+			originFile.setExt(originalFileExt);
+			originFile.setContentType(mFile.getContentType());
+			originFile.setSize(String.valueOf(mFile.getSize()));
+			originFile.setCreator(registFile.getCreator());
+			
+			try {
+				Path destination = Paths.get(uploadFilePath).resolve(originLogiNm).toAbsolutePath();
+				File originFileDest = destination.toFile();
+				if (!originFileDest.getParentFile().exists()) {
+					originFileDest.getParentFile().mkdirs();
+				}
+				mFile.transferTo(originFileDest);
+				registFile(originFile);
+				registFile.setRefFileSeq(originFile.getFileSeq());
+				log.info("Original file saved successfully. SEQ: {}", originFile.getFileSeq());
+			} catch (IOException e) {
+				log.error("Failed to save original physical file: {}", e.getMessage());
+			} catch (Exception e) {
+				log.error("DB Error while registering original file: {}", e.getMessage());
+			}
+		}
+		
+		registFile.setFileId(fileId);
+		registFile.setOrigNm(originalFileName);
+		registFile.setLogiNm(randomUUID + "." + fileExt);
+		registFile.setLogiPath(uploadFilePath);
+		registFile.setLogiThumbNm(randomUUID + "_thumb." + fileExt);
+		registFile.setLogiThumbPath(uploadThumbFilePath);
+		registFile.setExt(fileExt);
+		
+		try {
+			if (isConverted) {
+				registFile.setGubn("CV");
+				registFile.setContentType("application/vnd.ms-excel");
+				registFile.setSize(String.valueOf(finalFileSize));
+			} else {
+				registFile.setContentType(mFile.getContentType());
+				registFile.setSize(String.valueOf(mFile.getSize()));
+			}
+		} catch (Exception e) {}
+		
+		upFile.setRegistSeq(registFile(registFile));
+		upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
+		return new UploadProcessResult(upFile, false);
+	}
+
+	private static class UploadProcessResult {
+		private final UploadFile uploadFile;
+		private final boolean abort;
+		
+		private UploadProcessResult(UploadFile uploadFile, boolean abort) {
+			this.uploadFile = uploadFile;
+			this.abort = abort;
+		}
 	}
 	
 	private File getCleanedSpdxFile(String tempId, File tempFile) throws IOException {
