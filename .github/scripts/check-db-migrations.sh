@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Apply migration/migration/scripts on top of the latest release schema and fail on errors.
+# Initialize DB with the schema from before the first mybatis migration
+# (20230322085317), then apply every script in migration/migration/scripts
+# in order via `migrate up`. Fail the job if any script errors.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -11,6 +13,10 @@ MYSQL_DATABASE="${MYSQL_DATABASE:-fosslight}"
 MYSQL_USER="${MYSQL_USER:-root}"
 MYSQL_PASSWORD="${MYSQL_PASSWORD:-fosslight}"
 
+# Schema baseline: last release before migration scripts started (v1.6.0).
+# First tracked script is 20230322085317_create_changelog.sql.
+BASELINE_TAG="${BASELINE_TAG:-v1.5.0}"
+
 MIGRATION_HOME="$ROOT_DIR/migration/migration"
 MIGRATE_BIN="$ROOT_DIR/migration/mybatis-migrations-3.3.11/bin/migrate"
 SCRIPTS_DIR="$MIGRATION_HOME/scripts"
@@ -19,21 +25,14 @@ mysql_cli() {
   mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" "$@"
 }
 
-echo "==> Resolving baseline release tag"
-git fetch --tags --force 2>/dev/null || true
-BASELINE_TAG="$(git tag -l 'v2.*' --sort=-v:refname | head -n 1 || true)"
-if [[ -z "${BASELINE_TAG}" ]]; then
-  echo "No v2.* git tags found; cannot determine baseline schema." >&2
-  exit 1
-fi
-echo "Baseline tag: ${BASELINE_TAG}"
-
 echo "==> Validating migration script file names"
 shopt -s nullglob
 missing_undo=0
+script_count=0
 for script in "$SCRIPTS_DIR"/*.sql; do
   base="$(basename "$script")"
   [[ "$base" == "bootstrap.sql" ]] && continue
+  script_count=$((script_count + 1))
   if [[ ! "$base" =~ ^[0-9]{14}_.+\.sql$ ]]; then
     echo "Invalid migration file name (expected YYYYMMDDHHMMSS_description.sql): $base" >&2
     exit 1
@@ -43,8 +42,16 @@ for script in "$SCRIPTS_DIR"/*.sql; do
     missing_undo=$((missing_undo + 1))
   fi
 done
+echo "Found ${script_count} migration script(s) to apply."
 if [[ "$missing_undo" -gt 0 ]]; then
   echo "Note: ${missing_undo} script(s) have no //@UNDO section (allowed for legacy scripts)."
+fi
+
+echo "==> Fetching tags (need ${BASELINE_TAG})"
+git fetch --tags --force 2>/dev/null || true
+if ! git rev-parse -q --verify "refs/tags/${BASELINE_TAG}" >/dev/null; then
+  echo "Baseline tag ${BASELINE_TAG} not found." >&2
+  exit 1
 fi
 
 echo "==> Waiting for MariaDB at ${MYSQL_HOST}:${MYSQL_PORT}"
@@ -56,32 +63,13 @@ for _ in $(seq 1 60); do
 done
 mysqladmin ping -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent
 
-echo "==> Applying baseline schema from ${BASELINE_TAG}:db/initdb.d/fosslight_create.sql"
+echo "==> Resetting database ${MYSQL_DATABASE}"
+mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e \
+  "DROP DATABASE IF EXISTS \`${MYSQL_DATABASE}\`; CREATE DATABASE \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+
+echo "==> Applying pre-migration schema from ${BASELINE_TAG}:db/initdb.d/fosslight_create.sql"
 git show "${BASELINE_TAG}:db/initdb.d/fosslight_create.sql" > /tmp/fosslight_baseline_create.sql
 mysql_cli < /tmp/fosslight_baseline_create.sql
-
-echo "==> Creating CHANGELOG table"
-mysql_cli <<'SQL'
-CREATE TABLE IF NOT EXISTS CHANGELOG (
-  ID NUMERIC(20,0) NOT NULL,
-  APPLIED_AT VARCHAR(25) NOT NULL,
-  DESCRIPTION VARCHAR(255) NOT NULL,
-  PRIMARY KEY (ID)
-);
-SQL
-
-echo "==> Marking migrations present in ${BASELINE_TAG} as already applied"
-while IFS= read -r path; do
-  base="$(basename "$path")"
-  [[ "$base" == "bootstrap.sql" ]] && continue
-  id="${base%%_*}"
-  [[ "$id" =~ ^[0-9]{14}$ ]] || continue
-  desc="${base#*_}"
-  desc="${desc%.sql}"
-  # Escape single quotes for SQL string literal
-  desc_sql="${desc//\'/\'\'}"
-  mysql_cli -e "INSERT IGNORE INTO CHANGELOG (ID, APPLIED_AT, DESCRIPTION) VALUES (${id}, DATE_FORMAT(UTC_TIMESTAMP(), '%Y-%m-%d %H:%i:%s'), '${desc_sql}');"
-done < <(git ls-tree -r --name-only "${BASELINE_TAG}" -- migration/migration/scripts/)
 
 echo "==> Configuring migration environment for CI"
 ENV_FILE="$MIGRATION_HOME/environments/development.properties"
@@ -101,22 +89,29 @@ trap cleanup EXIT
 
 chmod +x "$MIGRATE_BIN"
 
-echo "==> Migration status (before up)"
+echo "==> Migration status (before up) — all scripts should be pending"
 (
   cd "$MIGRATION_HOME"
   "$MIGRATE_BIN" --path=. status
 )
 
-echo "==> Running migrate up"
+echo "==> Running migrate up (apply every script in order)"
 (
   cd "$MIGRATION_HOME"
   "$MIGRATE_BIN" --path=. up
 )
 
-echo "==> Migration status (after up)"
+echo "==> Migration status (after up) — all scripts should be applied"
 (
   cd "$MIGRATION_HOME"
   "$MIGRATE_BIN" --path=. status
 )
 
-echo "==> DB migration check passed"
+applied_count="$(mysql_cli -N -e 'SELECT COUNT(*) FROM CHANGELOG;')"
+echo "CHANGELOG applied count: ${applied_count} / expected ${script_count}"
+if [[ "${applied_count}" -ne "${script_count}" ]]; then
+  echo "ERROR: expected ${script_count} applied migrations, found ${applied_count} in CHANGELOG." >&2
+  exit 1
+fi
+
+echo "==> DB migration check passed (baseline ${BASELINE_TAG} → all scripts)"

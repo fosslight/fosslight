@@ -24,7 +24,7 @@ on:
 
 jobs:
   check-migrations:
-    name: Apply migration scripts
+    name: Apply all migration scripts from pre-v1.6.0 schema
     runs-on: ubuntu-latest
 
     services:
@@ -70,6 +70,8 @@ jobs:
           MYSQL_DATABASE: fosslight
           MYSQL_USER: root
           MYSQL_PASSWORD: fosslight
+          # Schema before 20230322085317_create_changelog.sql / v1.6.0 migrations
+          BASELINE_TAG: v1.5.0
         run: |
           chmod +x .github/scripts/check-db-migrations.sh
           .github/scripts/check-db-migrations.sh
