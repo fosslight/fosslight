@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.dto.SecurityExportItemDto;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -784,6 +785,49 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 
 		return resultMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getPrjSecurityExportJson(String prjId, String tabName) {
+		Map<String, Object> resultMap = new LinkedHashMap<>();
+
+		Project project = new Project();
+		project.setPrjId(prjId);
+
+		Map<String, Object> securityData = projectService.getSecurityGridList(project);
+		List<OssComponents> needToResolveList = securityData.containsKey("totalList")
+				? (List<OssComponents>) securityData.get("totalList")
+				: new ArrayList<>();
+		List<OssComponents> fullDiscoveredList = securityData.containsKey("fullDiscoveredList")
+				? (List<OssComponents>) securityData.get("fullDiscoveredList")
+				: new ArrayList<>();
+		List<SecurityExportItemDto> needToResolveItems = toSecurityExportItems(needToResolveList);
+		List<SecurityExportItemDto> fullDiscoveredItems = toSecurityExportItems(fullDiscoveredList);
+
+		String normalizedTabName = isEmpty(tabName) ? "all" : tabName.trim();
+		boolean isVulnerable = CollectionUtils.isNotEmpty(needToResolveList);
+		resultMap.put("isVulnerable", isVulnerable);
+
+		if ("needToResolve".equalsIgnoreCase(normalizedTabName)) {
+			resultMap.put("needToResolve", needToResolveItems);
+		} else if ("fullDiscovered".equalsIgnoreCase(normalizedTabName)) {
+			resultMap.put("fullDiscovered", fullDiscoveredItems);
+		} else {
+			resultMap.put("needToResolve", needToResolveItems);
+			resultMap.put("fullDiscovered", fullDiscoveredItems);
+		}
+
+		return resultMap;
+	}
+
+	private List<SecurityExportItemDto> toSecurityExportItems(List<OssComponents> items) {
+		if (CollectionUtils.isEmpty(items)) {
+			return new ArrayList<>();
+		}
+		return items.stream()
+				.map(SecurityExportItemDto::from)
+				.collect(Collectors.toList());
 	}
 	
 	@Override
