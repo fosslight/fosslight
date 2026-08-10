@@ -1014,13 +1014,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         List<Object> excelSheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
                         for (Object obj : excelSheets) {
                             Map<String, Object> sheetMap = (Map<String, Object>) obj;
-                            if (sheetMap.containsKey("name") && targetSheetName.trim().equals((String) sheetMap.get("name"))) {
+                            if (sheetMap.containsKey("name")
+                                    && sheetMap.get("name") instanceof String
+                                    && targetSheetName.trim().equalsIgnoreCase(((String) sheetMap.get("name")).trim())) {
                                 sheetNumberArray = new String[]{(String) sheetMap.get("no")};
                                 break;
                             }
                         }
                         if (sheetNumberArray.length == 0) {
-                            errMsgListMap.put(targetSheetName, "'" + targetSheetName.trim() + "' sheet not found in the uploaded file. Note that sheet names are case-sensitive.");
+                            errMsgListMap.put(targetSheetName, "'" + targetSheetName.trim() + "' sheet not found in the uploaded file.");
                             continue;
                         }
                         Map<String, Object> sheetDataResult = apiProjectService.getSheetOriginalData(uploadFile, tabName, sheetNumberArray, true);
