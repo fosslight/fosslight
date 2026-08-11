@@ -10,12 +10,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## 공통 사항
 
-- protocol을 제거한다 (`git+`, `sum:`, `com:`, `ssh:` 등) 또는 `://` 이전 문자열 모두 제거
-- 호스트 문자열 변경
-  - `www.github.com` → `github.com`
-  - 다른 pkg들에 대해서 호스트 문자열 변경이 필요할까? (PURL의 default repository 형태?)
-    - 예) `pypi.org/project/fosslight-android` → `pypi.python.org/project/fosslight-android` (`pypi.python.org`는 `pypi.org`로 리다이렉트 처리됨)
-    - 각 pkg 타입별로 로직이 추가되어야 함
+- protocol을 제거한다 (`git+`, `sum:`, `com:`, `ssh:` 등) 또는 `://` 이전 문자열 모두 제거. leading `www.`도 제거한다.
+  - 예) `https://www.github.com/org/repo` → `github.com/org/repo`
 - Port number를 제거한다.
   - 예) `github.com:443/{org}/{repo}` → `github.com/{org}/{repo}`
 - 제거된 URL의 호스트 타입이 Package Type 별 표준화 방식에 정의된 기본 repository url에 해당하는 지 확인한다
