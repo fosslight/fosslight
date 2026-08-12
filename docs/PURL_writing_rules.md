@@ -319,17 +319,23 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Yocto
 
-- namespace: name of the layer which provides the recipe
+- namespace: 생략 (optional). `layer.conf`의 `BBFILE_COLLECTIONS`를 읽지 않음. 경로의 `meta-*` 폴더명으로 추정하면 잘못된 값이 될 수 있음
 - name: BPN (https://docs.yoctoproject.org/ref-manual/variables.html#term-BPN) in a yocto recipe (대소문자 구별해야 함)
-- Purl 예) `pkg:yocto/<namespace>/<name>`
+- Purl 예) `pkg:yocto/<name>`
 - ex. `https://git.openembedded.org/openembedded-core/tree/meta/recipes-core/gettext/gettext_1.0.bb`
-  - `pkg:yocto/core/gettext?repository_url=https:%2F%2Fgit.openembedded.org%2Fopenembedded-core`
+  - `pkg:yocto/gettext?repository_url=https:%2F%2Fgit.openembedded.org%2Fopenembedded-core`
 - URL에서 추출 방법
-  1. url에 `/meta*/`가 존재하고 맨 끝이 `.bb`인 경우
-  2. url에서 가장 뒤에 있는 `/meta*/` 하위 `conf/layer.conf`로 이동 (ex. `https://git.openembedded.org/openembedded-core/tree/meta/conf/layer.conf`)하여 `BBFILE_COLLECTIONS` 값을 읽어 소문자로 변경하고 namespace로 저장
-  3. URL에서 파일명만 추출. ex. `gettext_1.0.bb`
-  4. `_` 앞을 PN으로 추출 (`_` 없을 수도 있음)
-  5. PN에서 접미/접두 제거 → BPN으로 변경 (대소문자 구별해야 함)
+  1. 아래 중 하나이고 맨 끝이 `.bb`인 경우
+     - url path에 `/meta*/`가 존재
+     - 또는 기본으로 yocto로 보는 repository
+       - `https://git.openembedded.org/openembedded-core`
+       - `https://github.com/akuster/meta-odroid`
+       - `https://github.com/openembedded/openembedded/`
+         - ex. `https://github.com/openembedded/openembedded/blob/master/recipes/ncurses/ncurses_5.9.bb`
+           → `pkg:yocto/ncurses?repository_url=https:%2F%2Fgithub.com%2Fopenembedded%2Fopenembedded`
+  2. URL에서 파일명만 추출. ex. `gettext_1.0.bb`
+  3. `_` 앞을 PN으로 추출 (`_` 없을 수도 있음)
+  4. PN에서 접미/접두 제거 → BPN으로 변경 (대소문자 구별해야 함)
      - suffix 제거:
        - `-native`
        - `-cross`
@@ -343,8 +349,8 @@ SPDX-License-Identifier: AGPL-3.0-only
        - `libx32-`
        - `nativesdk-`
      - ex. `binutils-cross` → `binutils`
-  6. `repo_url`은 `tree`/`blob` 제거하고, layer의 git repository url로 추출 (인코딩 필요)
-  7. `pkg:yocto/{namespace}/{BPN}`으로 하고 `repository_url={repo_url}`을 붙임.
+  5. `repo_url`을 정제 (ex. `tree`, `blob` 이후 제거)하여 layer의 git repository url로 추출 (인코딩 필요)
+  6. `pkg:yocto/{BPN}`으로 하고 `repository_url={repo_url}`을 붙임.
 
 ### Git
 
