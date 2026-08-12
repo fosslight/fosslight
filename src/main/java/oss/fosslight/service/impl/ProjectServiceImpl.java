@@ -418,15 +418,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 		// file
 		if (!isEmpty(project.getSrcCsvFileId())) {
-			project.setCsvFile(projectMapper.selectCsvFile(project.getSrcCsvFileId()));
+			project.setCsvFile(projectMapper.selectCsvFile(project.getPrjId(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, project.getSrcCsvFileId()));
 		}
 		
 		if (!isEmpty(project.getDepCsvFileId())) {
-			project.setDepCsvFile(projectMapper.selectCsvFile(project.getDepCsvFileId()));
+			project.setDepCsvFile(projectMapper.selectCsvFile(project.getPrjId(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, project.getDepCsvFileId()));
 		}
 		
 		if (!isEmpty(project.getBinCsvFileId())) {
-			project.setBinCsvFile(projectMapper.selectCsvFile(project.getBinCsvFileId()));
+			project.setBinCsvFile(projectMapper.selectCsvFile(project.getPrjId(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, project.getBinCsvFileId()));
 		}
 		
 		if (!isEmpty(project.getBinBinaryFileId())) {
@@ -441,7 +441,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		if (!isEmpty(project.getScrtCsvFileId())) {
-			project.setScrtCsvFile(projectMapper.selectCsvFile(project.getScrtCsvFileId()));
+			project.setScrtCsvFile(projectMapper.selectCsvFile(project.getPrjId(), null, project.getScrtCsvFileId()));
 		}
 		
 		//  button(삭제/복사/저장) view 여부
