@@ -327,9 +327,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 - URL에서 추출 방법
   1. 아래 중 하나이고 맨 끝이 `.bb`인 경우
      - url path에 `/meta*/`가 존재
-     - 또는 OE-Classic repo: `https://github.com/openembedded/openembedded/`
-       - ex. `https://github.com/openembedded/openembedded/blob/master/recipes/ncurses/ncurses_5.9.bb`
-         → `pkg:yocto/ncurses?repository_url=https:%2F%2Fgithub.com%2Fopenembedded%2Fopenembedded`
+     - 또는 기본으로 yocto로 보는 repository
+       - `https://git.openembedded.org/openembedded-core`
+       - `https://github.com/akuster/meta-odroid`
+       - `https://github.com/openembedded/openembedded/`
+         - ex. `https://github.com/openembedded/openembedded/blob/master/recipes/ncurses/ncurses_5.9.bb`
+           → `pkg:yocto/ncurses?repository_url=https:%2F%2Fgithub.com%2Fopenembedded%2Fopenembedded`
   2. URL에서 파일명만 추출. ex. `gettext_1.0.bb`
   3. `_` 앞을 PN으로 추출 (`_` 없을 수도 있음)
   4. PN에서 접미/접두 제거 → BPN으로 변경 (대소문자 구별해야 함)
