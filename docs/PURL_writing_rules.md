@@ -342,7 +342,7 @@ SPDX-License-Identifier: AGPL-3.0-only
        - `libx32-`
        - `nativesdk-`
      - ex. `binutils-cross` → `binutils`
-  5. `repo_url`은 `tree`/`blob` 제거하고, layer의 git repository url로 추출 (인코딩 필요)
+  5. `repo_url`을 정제 (ex. `tree`, `blob` 이후 제거)하여 layer의 git repository url로 추출 (인코딩 필요)
   6. `pkg:yocto/{BPN}`으로 하고 `repository_url={repo_url}`을 붙임.
 
 ### Git
