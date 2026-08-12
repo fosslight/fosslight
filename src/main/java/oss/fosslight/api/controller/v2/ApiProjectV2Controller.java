@@ -883,14 +883,69 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @SuppressWarnings("unchecked")
-    @ApiOperation(value = "Identification OSS Report (Multi-sheet)", notes = "Identification > upload one oss report file that contains sheets for dep/src/bin tabs at once. Map each tab to the sheet names to load via tabSheetMapping.")
+    @ApiOperation(
+            value = "Identification OSS Report (Multi-sheet)",
+            notes = "### Multi-sheet OSS Report Upload\n\n" +
+                    "단일 엑셀 파일에서 여러 시트를 읽어 dep/src/bin 탭의 OSS 컴포넌트를 한번에 등록합니다.\n\n" +
+                    "#### 요청 파라미터\n\n" +
+                    "* **ossReport** - 업로드할 엑셀 파일 (dep, src, bin 시트 포함)\n" +
+                    "  - 지원 형식: .xlsx, .xls, .csv 등 리포트 파일 및 CycloneDX, SPDX 양식\n" +
+                    "  - 최대 용량: 15MB\n" +
+                    "  - 각 시트에는 OSS 이름, 버전, 라이선스 등의 컬럼 포함\n\n" +
+                    "* **tabSheetMapping** - 탭과 시트명 매핑 JSON (필수)\n" +
+                    "  - 형식: `{\"탭명\": [\"시트명1\", \"시트명2\", ...]}`\n" +
+                    "  - 탭명 허용값: `src`, `dep`, `bin` (소문자)\n" +
+                    "  - 로드하지 않을 탭은 JSON에서 생략하면 됨 (예: src만 로드 → `{\"src\":[\"시트명\"]}`)\n" +
+                    "  - 예시: `{\"src\":[\"SRC_FL_Source\"],\"dep\":[\"DEP_FL_Dependency\"],\"bin\":[\"BIN_FL_Binary\"]}`\n\n" +
+                    "* **comment** - 업로드 시 추가 설명 (선택)\n\n" +
+                    "* **id** - Report파일을 업로드할 Project ID\n\n"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\": true}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청\n\n" +
+                            "**가능한 오류 메시지:**\n\n" +
+                            "* `ossReport is required.` - 파일이 업로드되지 않음\n" +
+                            "* `Invalid file extension` - 지원하지 않는 파일 형식 (.xlsx, .xls, .csv만 지원)\n" +
+                            "* `File size exceeds limit` - 파일 크기 초과 (최대 15MB)\n" +
+                            "* `Invalid tabSheetMapping JSON format.` - JSON 형식이 잘못됨\n" +
+                            "* `tabSheetMapping is required and must not be empty.` - tabSheetMapping이 비어있음\n" +
+                            "* `Invalid tab name in tabSheetMapping: {tab} (allowed: dep, src, bin)` - 지원하지 않는 탭명\n" +
+                            "* `Tab cannot have an empty sheet list.` - 탭에 시트명이 없음. 해당 탭을 생략하거나 시트명을 입력하세요.\n" +
+                            "* `File information not found.` - 파일 저장 실패\n" +
+                            "* `Data validation error` - 시트의 OSS 데이터 검증 실패\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"success\": false, \"message\": \"ossReport is required.\"}"))
+            ),
+            @ApiResponse(
+                    code = 413,
+                    message = "페이로드 너무 큼 - 파일 크기 초과 (최대 15MB)\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"success\": false, \"message\": \"File size exceeds limit\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\": false, \"message\": \"Internal server error\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_UPLOAD_OSS_REPORT}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> uploadReport(
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "OSS Report (one excel file containing dep/src/bin sheets)", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "Comment") @RequestParam(name = "comment", required = false) String comment,
-            @ApiParam(value = "Tab to Sheet Names mapping JSON, e.g. {\"src\":[\"SRC_LIST\"],\"dep\":[\"DEP_LIST\"],\"bin\":[\"BIN_LIST\"]}", required = true)
+            @ApiParam(
+                    value = "Tab to Sheet Names mapping JSON\n" +
+                            "(Example: {\"src\":[\"SRC_FL_Source\"],\"dep\":[\"DEP_FL_Dependency\"],\"bin\":[\"BIN_FL_Binary\"]})",
+                    required = true
+            )
             @RequestParam(required = true) String tabSheetMapping) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -922,7 +977,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tab name in tabSheetMapping: " + tab + " (allowed: dep, src, bin)");
                 }
                 if (CollectionUtils.isEmpty(tabSheetMap.get(tab))) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Sheet names for tab '" + tab + "' must not be empty.");
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                            "Tab '" + tab + "' cannot have an empty sheet list. Either provide sheet names or omit this tab from the request.");
                 }
             }
 
