@@ -39,8 +39,8 @@ public class SecurityExportItemDto {
                 .securityPatchLink(toEmpty(item.getSecurityPatchLink()))
                 .cpeName(toEmpty(item.getCpeName()))
                 .verStartEndRange(toEmpty(item.getVerStartEndRange()))
-                .source("")
-                .aliasIds("")
+                .source(toEmpty(item.getSource()))
+                .aliasIds(toEmpty(item.getAliasIds()))
                 .gridId(toEmpty(item.getGridId()))
                 .build();
     }
