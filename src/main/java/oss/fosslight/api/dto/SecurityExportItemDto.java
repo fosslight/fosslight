@@ -9,8 +9,8 @@ import oss.fosslight.domain.OssComponents;
 public class SecurityExportItemDto {
     private String ossName;
     private String ossVersion;
-    private String cvssScore;
-    private String cveId;
+    private String score;
+    private String vulnerabilityId;
     private String publDate;
     private String modiDate;
     private String vulnSummary;
@@ -20,24 +20,32 @@ public class SecurityExportItemDto {
     private String securityPatchLink;
     private String cpeName;
     private String verStartEndRange;
+    private String source;
+    private String aliasIds;
     private String gridId;
 
     public static SecurityExportItemDto from(OssComponents item) {
         return SecurityExportItemDto.builder()
-                .ossName(item.getOssName())
-                .ossVersion(item.getOssVersion())
-                .cvssScore(item.getCvssScore())
-                .cveId(item.getCveId())
-                .publDate(item.getPublDate())
-                .modiDate(item.getModiDate())
-                .vulnSummary(item.getVulnSummary())
-                .vulnerabilityResolution(item.getVulnerabilityResolution())
-                .vulnerabilityLink(item.getVulnerabilityLink())
-                .officialPatchLink(item.getOfficialPatchLink())
-                .securityPatchLink(item.getSecurityPatchLink())
-                .cpeName(item.getCpeName())
-                .verStartEndRange(item.getVerStartEndRange())
-                .gridId(item.getGridId())
+                .ossName(toEmpty(item.getOssName()))
+                .ossVersion(toEmpty(item.getOssVersion()))
+                .score(toEmpty(item.getCvssScore()))
+                .vulnerabilityId(toEmpty(item.getCveId()))
+                .publDate(toEmpty(item.getPublDate()))
+                .modiDate(toEmpty(item.getModiDate()))
+                .vulnSummary(toEmpty(item.getVulnSummary()))
+                .vulnerabilityResolution(toEmpty(item.getVulnerabilityResolution()))
+                .vulnerabilityLink(toEmpty(item.getVulnerabilityLink()))
+                .officialPatchLink(toEmpty(item.getOfficialPatchLink()))
+                .securityPatchLink(toEmpty(item.getSecurityPatchLink()))
+                .cpeName(toEmpty(item.getCpeName()))
+                .verStartEndRange(toEmpty(item.getVerStartEndRange()))
+                .source("")
+                .aliasIds("")
+                .gridId(toEmpty(item.getGridId()))
                 .build();
+    }
+
+    private static String toEmpty(String value) {
+        return value == null ? "" : value;
     }
 }

@@ -1731,12 +1731,47 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
+    @ApiOperation(value = "Export Security Tab as Json", notes = "Project > Security tab Export")
+    @GetMapping(value = {Url.APIV2.FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON})
+    public ResponseEntity<Map<String, Object>> getPrjSecurityExportJson(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Security filter tab", allowableValues = "all,fullDiscovered,needToResolve")
+            @ValuesAllowed(propName = "tabName", values = {"all", "fullDiscovered", "needToResolve"})
+            @RequestParam(required = false, defaultValue = "all") String tabName) {
+
+        log.info("/api/v2/prj_security_export_json called:" + prjId);
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        List<String> prjIdList = new ArrayList<String>();
+        prjIdList.add(prjId);
+
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("prjId", prjIdList);
+        paramMap.put("distributionType", "normal");
+
+        boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
+
+        if (!searchFlag) {
+            return responseService.errorResponse(HttpStatus.NOT_FOUND,
+                    String.format("Project %s not exist or User doesn't have permission for the project", prjId));
+        }
+
+        resultMap = apiProjectService.getPrjSecurityExportJson(prjId, tabName);
+
+        return ResponseEntity.ok(resultMap);
+    }
+
     @ApiOperation(value = "프로젝트 Notice 다운로드", notes = "발행된 프로젝트 Notice HTML 파일을 다운로드합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "파일 다운로드 성공", response = FileSystemResource.class),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
             @ApiResponse(code = 404, message = "발행된 Notice 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Notice has not been published for given project.\"}"))),
-            
+
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
     public ResponseEntity getProjectNotice(
