@@ -1769,7 +1769,11 @@
 		AND NOT EXISTS (
 			SELECT 1
 			FROM OSS_COMPONENTS
-			WHERE REF_LOADED_VAL = #{csvFileId}
+			WHERE REFERENCE_ID = #{referenceId}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+				AND REFERENCE_DIV = #{referenceDiv}
+			</if>
+			AND REF_LOADED_VAL IN (SELECT FILE_SEQ FROM T2_FILE WHERE FILE_ID = #{csvFileId})
 		)
 	</select>
 
@@ -7497,12 +7501,5 @@
 	
 	<select id="selectRefFileSeq" parameterType="string" resultType="string">
 		SELECT FILE_SEQ FROM T2_FILE WHERE REF_FILE_SEQ = #{fileSeq}
-	</select>
-	
-	<select id="selectMaxProjectVersion" parameterType="string" resultType="java.lang.Double">
-		SELECT MAX(CAST(PRJ_VERSION AS DECIMAL(10,1)))
-    	FROM PROJECT_MASTER
-    	WHERE PRJ_NAME = #{prjName}
-      	AND IFNULL(PRJ_VERSION, '') != ''
 	</select>
 </mapper>

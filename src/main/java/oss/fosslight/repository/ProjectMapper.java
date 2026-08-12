@@ -96,7 +96,7 @@ public interface ProjectMapper {
 
 	void updateFileId(Project project);
 
-	List<T2File> selectCsvFile(@Param("csvFileId") String csvFileId);
+	List<T2File> selectCsvFile(@Param("referenceId") String referenceId, @Param("referenceDiv") String referenceDiv, @Param("csvFileId") String csvFileId);
 	
 	void deleteFileBySeq(T2File file);
 
