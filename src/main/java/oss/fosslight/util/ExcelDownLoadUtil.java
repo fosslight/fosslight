@@ -510,7 +510,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, String> errCodeMap = vr.getErrorCodeMap();
 				boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 				for (ProjectIdentification bean : list) {
-					if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+					if ( CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 						continue;
 					}
 					setExcelDataForOssComponents(idx, type, isSelfCheck, validMsgMap, diffMsgMap, errCodeMap, bean, distributionFlag, SEP);
@@ -616,29 +616,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			sb.append(SEP).append(isMainRow ? (!isEmpty(bean.getDownloadLocation()) ? bean.getDownloadLocation() : " ") : " "); // download url
 			sb.append(SEP).append(isMainRow ? (!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " ") : " "); // home page url
 			sb.append(SEP).append(isMainRow ? (!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ") : " ");
-			
-			String licenseTextUrl = "";
-			
-			for (String licenseName : bean.getLicenseName().split(",")) {
-				String licenseUrl = CommonFunction.getLicenseUrlByName(licenseName.trim());
-				
-				if (isEmpty(licenseUrl)) {
-					boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-					
-					licenseUrl = CommonFunction.makeLicenseInternalUrl(CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase()), distributionFlag);
-				}
-				
-				if (!isEmpty(licenseUrl)) {
-					if (!isEmpty(licenseTextUrl)) {
-						licenseTextUrl += ", ";
-					}
-					
-					licenseTextUrl += licenseUrl;
-				}
-			}
-			
-			sb.append(SEP).append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " "); //license text => license homepage
-			
+
 			String refSrcTab = "";
 			String thirdKey = "3rd";
 			
@@ -794,8 +772,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		sb.append(SEP).append(!isEmpty(bean.getHomepage()) ? bean.getHomepage() : " "); // home page url
 		sb.append(SEP).append(!isEmpty(bean.getCopyrightText()) ? bean.getCopyrightText() : " ");
 		
-		if (!(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type))
-			|| isSelfCheck) {
+		if (isSelfCheck) {
 			String licenseTextUrl = "";
 			
 			for (String licenseName : licenseNameList.split(",")) {
@@ -817,11 +794,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			sb.append(SEP).append(!isEmpty(licenseTextUrl) ? licenseTextUrl : " ");
 		}
 		
-		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
-			sb.append(SEP).append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
-		}
-		
-		if (!CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && !isSelfCheck) { // selfcheck에서는 출력하지 않음.
+		if (!isSelfCheck) { // selfcheck에서는 출력하지 않음.
 			if (CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 				sb.append(SEP).append("Exclude");
 			} else {
@@ -835,12 +808,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		if (!isSelfCheck && (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type))) {
 			_comm = avoidNull(bean.getComments().trim());
 			sb.append(SEP).append(!isEmpty(_comm) ? _comm : " "); 
-		}
-		
-		// Vulnerability
-		if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-			sb.append(SEP).append(isEmpty(bean.getCvssScore()) ? " " : bean.getCvssScore()); // Vuln
-			sb.append(SEP).append(isEmpty(bean.getRestriction()) ? " " : bean.getRestriction());
 		}
 		
 		if (isSelfCheck){
