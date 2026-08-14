@@ -20,8 +20,6 @@ public class SecurityExportItemDto {
     private String securityPatchLink;
     private String cpeName;
     private String verStartEndRange;
-    private String source;
-    private String aliasIds;
     private String gridId;
 
     public static SecurityExportItemDto from(OssComponents item) {
@@ -39,8 +37,6 @@ public class SecurityExportItemDto {
                 .securityPatchLink(toEmpty(item.getSecurityPatchLink()))
                 .cpeName(toEmpty(item.getCpeName()))
                 .verStartEndRange(toEmpty(item.getVerStartEndRange()))
-                .source(toEmpty(item.getSource()))
-                .aliasIds(toEmpty(item.getAliasIds()))
                 .gridId(toEmpty(item.getGridId()))
                 .build();
     }
