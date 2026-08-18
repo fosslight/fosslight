@@ -630,6 +630,10 @@ public final class Url {
 		public static final String VULN_POPUP_JSP = TILES_ROOT + PATH + "/vulnpopup";
 		
 		public static final String VULN_LIST = PATH + "/getVulnList";
+		
+		public static final String LIST_TEST = PATH + "/listTest";
+		public static final String LIST_TEST_JSP = TILES_ROOT + PATH + "/listTest";
+		public static final String LIST_AJAX_TEST = PATH + "/listAjaxTest";
 	}
 	
 	public static final class SELF_CHECK {

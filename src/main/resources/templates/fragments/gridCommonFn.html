@@ -406,6 +406,8 @@
                     display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">MEDIUM</span>";
                 } else if (parseInt(cellvalue) > 0) {
                     display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">LOW</span>";
+                } else if (typeof rowObject.cvssScore !== "undefined" && !$.isNumeric(rowObject.cvssScore)) {
+                	display = "<span class=\"badge badge-gray pointer\" style=\"width: 30px;\" title=\"?\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">?</span>";
                 } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
                     display = "<span style=\"font-size:0;\"></span>";
                 } else {
@@ -1162,6 +1164,9 @@
                                         copyright: row['copyrightText']
                                     };
 
+                                    var jobSeq = row['jobSeq'];
+                                    var jobSeqNum = Number(jobSeq);
+                                    
                                     $.ajax({
                                         url: '/oss/saveSessionOssInfo',
                                         type: 'POST',
@@ -1170,20 +1175,23 @@
                                         data: ossData,
                                         success: function (data) {
                                             if (data.isValid == 'true') {
+                                            	var url = "";
                                                 if (data.validMsg && data.validMsg != "") {
-                                                    _popupOss = window.open('/oss/copy/' + data.validMsg + '?ossVersion=' + encodeURIComponent(row['ossVersion']), '', 'width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
-
-                                                    if (!_popupOss || _popupOss.closed || typeof _popupOss.closed == 'undefined') {
-                                                        alertify.alert([[#{msg.common.window.allowpopup}]], function () {
-                                                        });
+                                                	url = '/oss/copy/' + data.validMsg + '?ossVersion=' + encodeURIComponent(row['ossVersion']);
+                                                	if (!isNaN(jobSeqNum) && jobSeqNum >= 1) {
+                                                		url += "&jobSeq=" + jobSeqNum;
                                                     }
                                                 } else {
-                                                    _popupOss = window.open("/oss/edit", "", "width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
-
-                                                    if (!_popupOss || _popupOss.closed || typeof _popupOss.closed == 'undefined') {
-                                                        alertify.alert([[#{msg.common.window.allowpopup}]], function () {
-                                                        });
+                                                	url = "/oss/edit";
+                                                	if (!isNaN(jobSeqNum) && jobSeqNum >= 1) {
+                                                		url += "?jobSeq=" + jobSeqNum;
                                                     }
+                                                }
+                                                
+                                                _popupOss = window.open(url, "", "width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+                                                if (!_popupOss || _popupOss.closed || typeof _popupOss.closed == 'undefined') {
+                                                    alertify.alert([[#{msg.common.window.allowpopup}]], function () {});
                                                 }
                                             } else {
                                                 alertify.error([[#{msg.common.valid2}]], 0);

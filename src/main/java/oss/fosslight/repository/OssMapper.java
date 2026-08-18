@@ -322,4 +322,8 @@ public interface OssMapper {
 	void updateAnalysisComments(@Param("componentId") String componentId, @Param("prjId") String prjId, @Param("comments") String comments, @Param("commentsFlag") String commentsFlag);
 
 	void insertOrUpdateLicenseScanResult(@Param("ossAnalysis") OssAnalysis bean, @Param("loginUserName") String loginUserName);
+	
+	OssAnalysis selectOssAnalysisOne(@Param("componentId") String componentId);
+	
+	void updateEntAnalysisJobDetails(@Param("ossId") String ossId, @Param("ossName") String ossName, @Param("ossVersion") String ossVersion, @Param("jobSeq") String jobSeq);
 }

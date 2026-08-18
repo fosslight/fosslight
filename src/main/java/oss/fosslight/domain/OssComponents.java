@@ -125,6 +125,10 @@ public class OssComponents extends ComBean implements Serializable {
 	private String restriction;
 	private String refLoadedVal;
 	
+	private String groupKeyId;
+	private String source;
+	private String aliasIds;
+	
 	public String getModiDate() {
 		return modiDate;
 	}
@@ -765,5 +769,29 @@ public class OssComponents extends ComBean implements Serializable {
 
 	public void setRefLoadedVal(String refLoadedVal) {
 		this.refLoadedVal = refLoadedVal;
+	}
+
+	public String getGroupKeyId() {
+		return groupKeyId;
+	}
+
+	public void setGroupKeyId(String groupKeyId) {
+		this.groupKeyId = groupKeyId;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getAliasIds() {
+		return aliasIds;
+	}
+
+	public void setAliasIds(String aliasIds) {
+		this.aliasIds = aliasIds;
 	}
 }

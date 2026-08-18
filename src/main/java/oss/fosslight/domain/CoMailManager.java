@@ -3526,7 +3526,10 @@ public class CoMailManager extends CoTopComponent {
 			
 			String customCveId = "";
 			String cveId = getValue(dataMap, "CVE_ID");
+			String type = getValue(dataMap, "TYPE");
+			
 			if (!isEmpty(cveId)) {
+				boolean isNvdType = isEmpty(type) || (!isEmpty(type) && "NVD".equals(type));
 				if (cveId.contains("->")) {
 					String[] splitCveIds = cveId.split("\\->");
 					int idx = 1;
@@ -3537,12 +3540,18 @@ public class CoMailManager extends CoTopComponent {
 						} else {
 							customCveId += "<a href='https://nvd.nist.gov/vuln/detail/" + splitCveId.trim() + "' target='_blank'>" + splitCveId.trim() + "</a>";
 						}
-						if (idx < splitCveIds.length) customCveId += " -> ";
+						if (idx < splitCveIds.length) {
+							customCveId += " -> ";
+						}
 						idx++;
 					}
 				} else {
 					if (!cveId.equalsIgnoreCase("NONE")) {
-						customCveId = "<a href='https://nvd.nist.gov/vuln/detail/" + cveId.trim() + "' target='_blank'>" + cveId.trim() + "</a>";
+						if (isNvdType) {
+							customCveId = "<a href='https://nvd.nist.gov/vuln/detail/" + cveId.trim() + "' target='_blank'>" + cveId.trim() + "</a>";
+						} else {
+							customCveId = "<a href='https://osv.dev/vulnerability/" + cveId.trim() + "' target='_blank'>" + cveId.trim() + "</a>";
+						}
 					} else {
 						customCveId = cveId;
 					}

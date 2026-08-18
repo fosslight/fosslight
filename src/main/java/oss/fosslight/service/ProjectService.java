@@ -259,7 +259,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void updateSecurityPerson(Project project);
 
-	public boolean initAutoReview(String prjId);
+	public boolean initAutoReview(String prjId, String userId, Integer jobSeq);
 
 	public void updateProjectNotification(Project project, Map<String, Object> param);
 
@@ -294,4 +294,8 @@ public interface ProjectService extends HistoryConfig{
 	List<String> getAllowedProjectReportExtensions();
 
 	boolean isAllowedProjectReportExtension(String fileExtension);
+
+	public Double selectMaxProjectVersion(String prjName);
+
+	public List<OssComponents> filterMaxScoreWithoutVersion(List<OssComponents> list);
 }

@@ -95,4 +95,17 @@ public interface NvdDataMapper {
 	
 	void streamDistinctProductList(ResultHandler<String> resultHandler);
 	void insertNvdDataScoreV3TempList(@Param("productList") List<String> productList);
+	
+	void setGroupConcatMaxLen();
+	void dropTmpNvdGrouped();
+	void createTmpNvdGrouped();
+	void createIdxTmpNvdGrouped();
+	void dropNvdSearchMasterTemp();
+	void createNvdSearchMasterTemp();
+	void insertNvdSearchMasterTemp();
+	void createIdxNvdSearchMasterTemp();
+	void createIdxNvdSearchMasterTemp2();
+	void createIdxNvdSearchMasterTemp3();
+	void dropNvdSearchMaster();
+	void renameNvdSearchMaster();
 }

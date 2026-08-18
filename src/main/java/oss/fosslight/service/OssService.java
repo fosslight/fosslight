@@ -135,6 +135,8 @@ public interface OssService extends HistoryConfig{
 	OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster);
 	
 	List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster);
+	
+	List<Vulnerability> getMergedVulnerabilityList(OssMaster ossMaster);
 
 	List<String> getOssNicknameListWithoutOwn(OssMaster ossMaster, List<String> checkList, List<String> duplicatedList);
 
@@ -169,6 +171,8 @@ public interface OssService extends HistoryConfig{
 	String getPurlByDownloadLocation(OssMaster ossMaster);
 	
 	void setOssAnalysisStatus(String prjId);
+	
+	void setOssAnalysisStatus(String prjId, String userId, Integer jobSeq);
 
 	void setExistedOssInfo(OssMaster ossMaster);
 
@@ -185,4 +189,8 @@ public interface OssService extends HistoryConfig{
 	void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag);
 
 	void saveLicenseScanResult(OssAnalysis ossAnalysis, String loginUserName);
+
+	OssAnalysis selectOssAnalysisOne(String componentId);
+
+	void updateOssAnalysis(String ossName, String ossVersion, String jobSeq, String ossId);
 }

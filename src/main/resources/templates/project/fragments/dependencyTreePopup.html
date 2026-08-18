@@ -24,10 +24,13 @@
         		<label for="inputName" class="ml-3" th:text="'The Dependency Tree supports a maximum depth of 5 levels.'"></label>
             	<div class="col-md-12">
                 	<table class="table table-bordered collaptable" id="collaptable">
+                		<input type="hidden" id="rows" name="rows" th:value="${mainDataString}"/>
+                		<input type="hidden" id="prjId" name="prjId" th:value="${prjId}"/>
                     	<thead>
                         	<tr>
                          		<th class="b-right" style="width: 60px;"></th>
                          		<th class="b-left text-center">Dependency Tree (Package Url)
+                         			<button type="button" class="btn btn-light-blue btn-sm float-right mr-2 px-2" th:onclick="|dep_tree_fn.exportAll()|">Export All</button>
                          			<button type="button" class="btn btn-light-blue btn-sm float-right mr-2 px-2" th:onclick="|dep_tree_fn.dependencyTreeCollapseAll()|"><i class="fas fa-minus mr-2"></i>Collapse All</button>
                          			<button type="button" class="btn btn-light-blue btn-sm float-right mr-2 px-2" th:onclick="|dep_tree_fn.dependencyTreeExpandAll()|"><i class="fas fa-plus mr-2"></i>Expand All</button>
                          		</th>
@@ -47,65 +50,162 @@
 		$(function() {
 			dep_tree.load();
 		});
-	
+		
 		var dep_tree = {
-			load : function () {
-				let treeData = [[${dependencyTreeMap}]];
-				if (typeof treeData.maxLvl !== "undefined") {
-					$("#collaptableBody").empty();
+			    load: function () {
+			        let treeData = [[${dependencyTreeMap}]];
+			        if (!treeData || typeof treeData.maxLvl === "undefined") {
+			            $("#loading_wrap").hide();
+			            return;
+			        }
+
+			        $("#collaptableBody").empty();
+			        let htmlBuffer = [];
+			        let maxLvl = parseInt(treeData.maxLvl);
+
+			        // 1. 모든 노드를 하나의 Map에 정리 (조회 속도 향상 및 데이터 유실 방지)
+			        let nodeMap = {};
+					let rootNodes = [];
 					
-					let maxLvl = parseInt(treeData.maxLvl);
-					for (let i=0; i<=maxLvl; i++) {
-						let key = "lvl_" + i;
-						let tree = treeData[key];
-						
-						tree.forEach(function(item) {
-							let appendTreeHtml = "";
-							let id = item.treeId;
-				    		let parentId = item.parentTreeId;
-				    		let packageUrl = item.packageUrl;
-				    		let level = item.level;
-				    		let isExist = item.existDependency;
-				    		let style = 'style="padding-left : ';
-				    		if (typeof parentId === "undefined" || parentId == null || "" == parentId) {
-				    			parentId = "";
-				    			style += '3rem!important"';
-				    		} else {
-				    			style += parseInt(level)*3+3 + 'rem!important"';
-				    			if (isExist) {
-				    				packageUrl = '<i class="fas fa-angle-right mr-2" style="color: #6c757d;"></i>' + packageUrl;
-				    			}
-				    		}
-				    		if ("Y" == item.excludeYn) {
-				    			previousId = id;
-				    		}
-				    		appendTreeHtml += '<tr class="collapTr" id="' + id + '" data-id="' + id + '" data-parent="' + parentId + '" data-level="' + level;
-				    		if ("Y" == item.excludeYn) {
-				    			appendTreeHtml += '" style="background-color:#ada9a9; cursor: pointer;">';
-				    		} else {
-				    			appendTreeHtml += '" style="cursor: pointer;">';
-				    		}
-				    		appendTreeHtml += '<td class="b-right text-center"></td>';
-				    		appendTreeHtml += '<td class="b-left" ' + style + ' onclick="dep_tree_fn.displayDependencyTree(this)">' + packageUrl + '</td></tr>';
-				    		if ("" == parentId) {
-				    			$("#collaptableBody").append(appendTreeHtml);
-				    		} else {
-				    			$("#collaptableBody").find("#" + parentId).after(appendTreeHtml);
-				    		}
-						});
+					for (let i = 0; i <= maxLvl; i++) {
+					    let nodes = treeData["lvl_" + i];
+					    if (nodes && Array.isArray(nodes)) {
+					        nodes.forEach(node => {
+					            let pId = node.parentTreeId || "";
+					            if (pId === "" || pId === "0") {
+					                rootNodes.push(node);
+					            } else {
+					                if (!nodeMap[pId]) {
+					                	nodeMap[pId] = [];
+					                }
+					                nodeMap[pId].push(node);
+					            }
+					        });
+					    }
 					}
 					
+					// 2. 재귀적으로 트리 순서 정렬 (visitedIds로 무한 재귀 방지)
+					let treeOrderedList = [];
+					let visitedIds = new Set();
+					
+					function buildOrder(pId) {
+					    let children = nodeMap[pId];
+					    if (children) {
+					        children.forEach(child => {
+					            if (visitedIds.has(child.treeId)) return;
+					            visitedIds.add(child.treeId);
+					            
+					            treeOrderedList.push(child);
+					            buildOrder(child.treeId);
+					        });
+					    }
+					}
+					
+					// 루트부터 탐색 시작
+					rootNodes.forEach(root => {
+					    if (!visitedIds.has(root.treeId)) {
+					        visitedIds.add(root.treeId);
+					        treeOrderedList.push(root);
+					        buildOrder(root.treeId);
+					    }
+					});
+					
+					// 3. HTML 생성 및 렌더링
+					treeOrderedList.forEach(function(item) {
+					    let id = item.treeId;
+					    let parentId = item.parentTreeId || "";
+					    let level = parseInt(item.level);
+					    
+					    // 들여쓰기: 레벨에 따른 패딩 계산
+					    let padding = (parentId === "" || parentId === "0") ? 1.5 : (level * 1.5 + 1.5);
+					    let styleStr = `style="padding-left: ${padding}rem !important"`;
+					    
+					    let iconHtml = (parentId !== "" && parentId !== "0") ? '<i class="fas fa-angle-right mr-2" style="color: #6c757d;"></i>' : '';
+					    let bgColor = (item.excludeYn === "Y") ? 'background-color:#ada9a9;' : '';
+					    
+					    let trHtml = `
+					        <tr class="collapTr" id="${id}" data-id="${id}" data-parent="${parentId}" data-level="${level}" 
+					            style="${bgColor} cursor: pointer;">
+					            <td class="b-right text-center"></td>
+					            <td class="b-left" ${styleStr} onclick="dep_tree_fn.displayDependencyTree(this)">
+					                ${iconHtml}${item.packageUrl}
+					            </td>
+					        </tr>`;
+					    htmlBuffer.push(trHtml);
+					});
+					
+					$("#collaptableBody").empty().append(htmlBuffer.join(''));
+					
+					// 4. aCollapTable 실행
 					$('#collaptable').aCollapTable({
-			    		startCollapsed: true,
-			    	    addColumn: false,
-			    	    plusButton: '<i class="fas fa-plus" style="color:#6c757d;"></i>',
-			    	    minusButton: '<i class="fas fa-minus" style="color:#6c757d;"></i>'
-			  		});
-				}
-				
-				$("#loading_wrap").hide();
+					    startCollapsed: true,
+					    addColumn: false,
+					    plusButton: '<i class="fas fa-plus" style="color:#6c757d;"></i>',
+					    minusButton: '<i class="fas fa-minus" style="color:#6c757d;"></i>'
+					});
+
+			        $("#loading_wrap").hide();
+			    }
 			}
-		}
+		
+// 		var dep_tree = {
+// 			load : function () {
+// 				let treeData = [[${dependencyTreeMap}]];
+// 				if (typeof treeData.maxLvl !== "undefined") {
+// 					$("#collaptableBody").empty();
+					
+// 					let maxLvl = parseInt(treeData.maxLvl);
+// 					for (let i=0; i<=maxLvl; i++) {
+// 						let key = "lvl_" + i;
+// 						let tree = treeData[key];
+						
+// 						tree.forEach(function(item) {
+// 							let appendTreeHtml = "";
+// 							let id = item.treeId;
+// 				    		let parentId = item.parentTreeId;
+// 				    		let packageUrl = item.packageUrl;
+// 				    		let level = item.level;
+// 				    		let isExist = item.existDependency;
+// 				    		let style = 'style="padding-left : ';
+// 				    		if (typeof parentId === "undefined" || parentId == null || "" == parentId) {
+// 				    			parentId = "";
+// 				    			style += '3rem!important"';
+// 				    		} else {
+// 				    			style += parseInt(level)*3+3 + 'rem!important"';
+// 				    			if (isExist) {
+// 				    				packageUrl = '<i class="fas fa-angle-right mr-2" style="color: #6c757d;"></i>' + packageUrl;
+// 				    			}
+// 				    		}
+// 				    		if ("Y" == item.excludeYn) {
+// 				    			previousId = id;
+// 				    		}
+// 				    		appendTreeHtml += '<tr class="collapTr" id="' + id + '" data-id="' + id + '" data-parent="' + parentId + '" data-level="' + level;
+// 				    		if ("Y" == item.excludeYn) {
+// 				    			appendTreeHtml += '" style="background-color:#ada9a9; cursor: pointer;">';
+// 				    		} else {
+// 				    			appendTreeHtml += '" style="cursor: pointer;">';
+// 				    		}
+// 				    		appendTreeHtml += '<td class="b-right text-center"></td>';
+// 				    		appendTreeHtml += '<td class="b-left" ' + style + ' onclick="dep_tree_fn.displayDependencyTree(this)">' + packageUrl + '</td></tr>';
+// 				    		if ("" == parentId) {
+// 				    			$("#collaptableBody").append(appendTreeHtml);
+// 				    		} else {
+// 				    			$("#collaptableBody").find("#" + parentId).after(appendTreeHtml);
+// 				    		}
+// 						});
+// 					}
+					
+// 					$('#collaptable').aCollapTable({
+// 			    		startCollapsed: true,
+// 			    	    addColumn: false,
+// 			    	    plusButton: '<i class="fas fa-plus" style="color:#6c757d;"></i>',
+// 			    	    minusButton: '<i class="fas fa-minus" style="color:#6c757d;"></i>'
+// 			  		});
+// 				}
+				
+// 				$("#loading_wrap").hide();
+// 			}
+// 		}
 		
 		var dep_tree_fn = {
 			dependencyTreeExpandAll : function() {
@@ -116,6 +216,40 @@
 			},
 			displayDependencyTree : function(obj) {
 				$(obj).parent().find("a").trigger("click");
+			},
+			exportAll : function() {
+				$("#loading_wrap").show();
+				
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', '/project/dependency/export', true);
+				xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+				xhr.responseType = 'blob';
+
+				xhr.onload = function() {
+					$("#loading_wrap").hide();
+				    if (this.status === 200) {
+				        var blob = new Blob([this.response], { type: 'text/plain' });
+				        var url = window.URL.createObjectURL(blob);
+				        
+				        var a = document.createElement('a');
+				        a.href = url;
+				        a.download = "dependency_tree.txt";
+				        document.body.appendChild(a);
+				        a.click();
+				        
+				        window.URL.revokeObjectURL(url);
+				        document.body.removeChild(a);
+				    } else {
+				        alert("다운로드 실패 (상태 코드: " + this.status + ")");
+				    }
+				};
+
+				xhr.onerror = function() {
+					$("#loading_wrap").hide();
+				    alert("서버 연결 오류");
+				};
+
+				xhr.send(JSON.stringify({ "prjId" : $("#prjId").val(), "rows": $("#rows").val() }));
 			}
 		}
 	</script>

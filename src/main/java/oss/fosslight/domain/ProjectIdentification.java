@@ -370,6 +370,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private int urlSearchSeq;
 	
+	private int jobSeq;
+	
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
@@ -2254,5 +2256,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setSkipVulnerabilityResolution(String skipVulnerabilityResolution) {
 		this.skipVulnerabilityResolution = skipVulnerabilityResolution;
+	}
+
+	public int getJobSeq() {
+		return jobSeq;
+	}
+
+	public void setJobSeq(int jobSeq) {
+		this.jobSeq = jobSeq;
 	}
 }

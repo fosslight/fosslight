@@ -892,4 +892,133 @@
     	FROM NVD_DATA_RUNNING_ON_WITH T1
     	WHERE EXISTS (SELECT 1 FROM NVD_DATA_RUNNING_ON_WITH_TEMP TMP WHERE TMP.CVE_ID = T1.CVE_ID) 
     </delete>
+ 
+ 	<update id="setGroupConcatMaxLen">
+		SET SESSION group_concat_max_len = 104857600
+	</update>
+	
+	<update id="dropTmpNvdGrouped">
+		DROP TEMPORARY TABLE IF EXISTS TMP_NVD_GROUPED
+	</update>
+	
+	<update id="createTmpNvdGrouped">
+		CREATE TEMPORARY TABLE TMP_NVD_GROUPED AS
+		SELECT
+		    T.CVE_ID,
+		    T.VENDOR,
+		    T.PRODUCT,
+		    GROUP_CONCAT(
+		        DISTINCT T.VERSION_TEXT
+		        ORDER BY
+		            CASE WHEN T.SORT_VERSION REGEXP '^[0-9]' THEN 1 ELSE 2 END ASC,
+		            LPAD(SUBSTRING_INDEX(SUBSTRING_INDEX(T.SORT_VERSION, '.', 1), '.', -1), 10, '0') ASC,
+		            LPAD(CASE WHEN T.SORT_VERSION LIKE '%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(T.SORT_VERSION, '.', 2), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            LPAD(CASE WHEN T.SORT_VERSION LIKE '%.%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(T.SORT_VERSION, '.', 3), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            LPAD(CASE WHEN T.SORT_VERSION LIKE '%.%.%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(T.SORT_VERSION, '.', 4), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            T.SORT_VERSION ASC
+		        SEPARATOR ','
+		    ) AS AFFECTED_VERSION
+		FROM
+		(
+		    SELECT
+		        C.CVE_ID,
+		        C.VENDOR,
+		        C.PRODUCT,
+		        CASE
+		            WHEN C.VER_START_INC IS NOT NULL
+		              OR C.VER_START_EXC IS NOT NULL
+		              OR C.VER_END_INC IS NOT NULL
+		              OR C.VER_END_EXC IS NOT NULL
+		            THEN CONCAT(
+		                    CASE 
+		                        WHEN C.VER_START_INC IS NOT NULL THEN CONCAT('[', REPLACE(C.VER_START_INC, '\\', '')) 
+		                        WHEN C.VER_START_EXC IS NOT NULL THEN CONCAT('(', REPLACE(C.VER_START_EXC, '\\', ''))
+		                        ELSE '' 
+		                    END,
+		                    
+		                    CASE 
+		                        WHEN (C.VER_START_INC IS NOT NULL OR C.VER_START_EXC IS NOT NULL)
+		                         AND (C.VER_END_INC IS NOT NULL OR C.VER_END_EXC IS NOT NULL) 
+		                        THEN ', '
+		                        ELSE '' 
+		                    END,
+		                    
+		                    CASE 
+		                        WHEN C.VER_END_EXC IS NOT NULL THEN CONCAT(REPLACE(C.VER_END_EXC, '\\', ''), ')')
+		                        WHEN C.VER_END_INC IS NOT NULL THEN CONCAT(REPLACE(C.VER_END_INC, '\\', ''), ']')
+		                        ELSE '' 
+		                    END
+		                 )
+		            ELSE REPLACE(C.VERSION, '\\', '')
+		        END AS VERSION_TEXT,
+		        CASE
+		            WHEN C.VER_START_INC IS NOT NULL THEN REPLACE(C.VER_START_INC, '\\', '')
+		            WHEN C.VER_START_EXC IS NOT NULL THEN REPLACE(C.VER_START_EXC, '\\', '')
+		            WHEN C.VERSION IS NOT NULL AND C.VERSION <![CDATA[<>]]> '*' THEN REPLACE(C.VERSION, '\\', '')
+		            WHEN C.VER_END_INC IS NOT NULL THEN REPLACE(C.VER_END_INC, '\\', '')
+		            ELSE REPLACE(C.VER_END_EXC, '\\', '')
+		        END AS SORT_VERSION
+		    FROM NVD_DATA_CONFIGURATIONS C
+		    WHERE C.VENDOR IS NOT NULL AND C.PRODUCT IS NOT NULL
+		) T
+		GROUP BY T.CVE_ID, T.VENDOR, T.PRODUCT
+	</update>
+	
+	<update id="createIdxTmpNvdGrouped">
+		CREATE INDEX IDX_TMP_NVD_G ON TMP_NVD_GROUPED(CVE_ID)
+	</update>
+	
+	<update id="dropNvdSearchMasterTemp">
+		DROP TABLE IF EXISTS NVD_SEARCH_MASTER_TEMP
+	</update>
+	
+	<update id="createNvdSearchMasterTemp">
+		CREATE TABLE NVD_SEARCH_MASTER_TEMP (
+		    ID VARCHAR(50), 
+		    SOURCE VARCHAR(10) DEFAULT 'NVD',
+		    COMPONENT TEXT,
+		    AFFECTED_VERSION LONGTEXT,
+		    SEVERITY VARCHAR(100),
+			 MODI_DATE DATETIME COMMENT 'Vulnerability last modification date'
+		)
+	</update>
+	
+	<update id="insertNvdSearchMasterTemp">
+		INSERT INTO NVD_SEARCH_MASTER_TEMP (ID, SOURCE, COMPONENT, AFFECTED_VERSION, SEVERITY, MODI_DATE)
+		SELECT 
+		    V.CVE_ID AS ID,
+		    'NVD' AS SOURCE,
+		    CASE 
+		        WHEN G.VENDOR IS NOT NULL AND G.PRODUCT IS NOT NULL THEN CONCAT(G.VENDOR, ':', G.PRODUCT)
+		        ELSE ''
+		    END AS COMPONENT,
+		    G.AFFECTED_VERSION,
+		    CASE 
+		        WHEN V.CVSS_SCORE IS NULL THEN '-' 
+		        ELSE CONCAT(V.CVSS_SCORE, ' (CVSS_', V.BASE_METRIC, ')') 
+		    END AS SEVERITY,
+		    V.MODI_DATE
+		FROM NVD_CVE_V3 V
+		LEFT JOIN TMP_NVD_GROUPED G ON V.CVE_ID = G.CVE_ID
+	</update>
+	
+	<update id="createIdxNvdSearchMasterTemp">
+		CREATE INDEX IDX_NVD_MASTER_ID ON NVD_SEARCH_MASTER_TEMP(ID)
+	</update>
+	
+	<update id="createIdxNvdSearchMasterTemp2">
+		CREATE INDEX IDX_NVD_MASTER_COMP ON NVD_SEARCH_MASTER_TEMP(COMPONENT(255))
+	</update>
+	
+	<update id="createIdxNvdSearchMasterTemp3">
+		CREATE INDEX IDX_NVD_MASTER_SEV ON NVD_SEARCH_MASTER_TEMP(SEVERITY)
+	</update>
+	
+	<update id="dropNvdSearchMaster">
+		DROP TABLE IF EXISTS NVD_SEARCH_MASTER
+	</update>
+	
+	<update id="renameNvdSearchMaster">
+		RENAME TABLE NVD_SEARCH_MASTER_TEMP TO NVD_SEARCH_MASTER
+	</update>
 </mapper>
