@@ -379,6 +379,10 @@ public class OssMaster extends ComBean implements Serializable{
 	private String range;
 	
 	private String skipMergeYn;
+	
+	private String jobSeq;
+	
+	private String syncFlag;
 		
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -2480,5 +2484,21 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setPatchLink(String patchLink) {
 		this.patchLink = patchLink;
+	}
+
+	public String getJobSeq() {
+		return jobSeq;
+	}
+
+	public void setJobSeq(String jobSeq) {
+		this.jobSeq = jobSeq;
+	}
+
+	public String getSyncFlag() {
+		return syncFlag;
+	}
+
+	public void setSyncFlag(String syncFlag) {
+		this.syncFlag = syncFlag;
 	}
 }

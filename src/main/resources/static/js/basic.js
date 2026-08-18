@@ -2276,6 +2276,16 @@ function openNVD2(_ossName, _url) {
     }
 }
 
+function openOSV(id) {
+	if (typeof id == "undefined" || id == undefined || id.trim() == "undefined") {
+        return false;
+    }
+
+    if (id != "") {
+        window.open("https://osv.dev/vulnerability/" + id.trim(), "_blank");
+    }
+}
+
 function openCommentHistory(_url) {
     if (_popupComment == null || _popupComment.closed) {
         _popupComment = window.open(_url, "commentPopup", "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
@@ -2737,7 +2747,8 @@ const CHART_COLORS = {
   green: 'rgb(75, 192, 192)',
   blue: 'rgb(54, 162, 235)',
   purple: 'rgb(153, 102, 255)',
-  grey: 'rgb(201, 203, 207)'
+  grey: 'rgb(201, 203, 207)',
+  darkGrey: 'rgb(108, 117, 125)'
 };
 
 function getBarChart(target, obj) {
@@ -4408,8 +4419,6 @@ function alertifyWithoutButtons(target) {
 
 function basicAlertifyDialog(target) {
 	alertify.dialog(target, function() {
-		var settings;
-
 		return {
 			setup: function() {
 				var settings = alertify.confirm().settings;
@@ -4430,8 +4439,6 @@ function basicAlertifyDialog(target) {
 
 function alertifyUploadDialog(target, width, id) {
 	alertify.dialog(target, function() {
-		var settings;
-
 		return {
 			setup: function() {
 				var settings = alertify.confirm().settings;

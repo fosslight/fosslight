@@ -487,4 +487,6 @@ public interface ProjectMapper {
 	List<ProjectIdentification> selectOssComponentsSnapshot(ProjectIdentification bean);
 	
 	String selectRefFileSeq(@Param("fileSeq") String fileSeq);
+	
+	Double selectMaxProjectVersion(@Param("prjName") String prjName);
 }

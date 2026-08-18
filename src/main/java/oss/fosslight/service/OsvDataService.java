@@ -1,0 +1,1351 @@
+package oss.fosslight.service;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+import java.util.Enumeration;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.OssComponents;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.repository.OsvDataMapper;
+import us.springett.cvss.Cvss;
+import us.springett.cvss.Score;
+
+@Service("OsvDataService")
+@Slf4j
+public class OsvDataService extends CoTopComponent {
+	static final Logger schlog = LoggerFactory.getLogger("SCHEDULER_LOG");
+
+	@Autowired
+	CodeMapper codeMapper;
+	@Autowired
+	OsvDataMapper osvDataMapper;
+	@Autowired
+	SqlSessionFactory sqlSessionFactory;
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	private final RestTemplate osvDataApiRestTemplate;
+	private static final int BATCH_SIZE = 1000;
+
+	private static final List<String> SEVERITY_KEYS = Arrays.asList("severity", "score", "base_score", "cvss_score", "cvss", "urgency", "raw_severity", "priority");
+
+	private static final Pattern REVISION_PATTERN = Pattern.compile("-r\\d+");
+
+	public OsvDataService(@Qualifier("osvDataApiRestTemplate") RestTemplate osvDataApiRestTemplate) {
+		this.osvDataApiRestTemplate = osvDataApiRestTemplate;
+	}
+
+	public String executeOsvDataSync() throws IOException {
+		boolean initializeFlag = false;
+		if (CoConstDef.FLAG_YES.equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100"))) {
+			initializeFlag = true;
+		}
+		try {
+			schlog.info("[OSV] Start Total/Full Data Synchronization.");
+			osvDataTotalBulkJob(initializeFlag, osvDataApiRestTemplate, BATCH_SIZE);
+		} catch (Exception e) {
+			schlog.error(e.getMessage(), e);
+			return "99";
+		}
+		return "00";
+	}
+
+	/**
+	 * [TOTAL SYNC] Process full database reload via intermediate staging tables
+	 * (_TEMP)
+	 */
+	private void osvDataTotalBulkJob(boolean initializeFlag, RestTemplate restTemplate, int batchSize) {
+		schlog.info("[OSV] Starting full OSV snapshot download.");
+
+		String downloadUrl = "https://storage.googleapis.com/osv-vulnerabilities/all.zip";
+
+		final int MAX_RETRY = 5;
+		int retryCount = 0;
+		boolean success = false;
+
+		while (!success && retryCount < MAX_RETRY) {
+			Path tempZipFile = null;
+			try {
+				// Create a temporary zip file in the system temp directory
+		        tempZipFile = Files.createTempFile("osv_snapshot_", ".zip");
+
+		        // Download and save the stream directly to the temp file
+		        schlog.info("[OSV] Download attempt {}/{} started.", retryCount + 1, MAX_RETRY);
+		        
+		        Path targetPath = tempZipFile;
+		        restTemplate.execute(downloadUrl, HttpMethod.GET, null, response -> {
+		            if (!response.getStatusCode().is2xxSuccessful()) {
+		                throw new IOException("HTTP Status : " + response.getStatusCode());
+		            }
+		            schlog.info("[OSV] Download connection established. Saving snapshot to temp file: {}", targetPath);
+		            try (InputStream is = response.getBody()) {
+		                Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
+		            }
+		            return null;
+		        });
+
+		        // Open SqlSession and process the downloaded zip file locally
+		        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+		            int count = 0;
+		            
+		            try (ZipFile zipFile = new ZipFile(tempZipFile.toFile())) {
+		                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+		                while (entries.hasMoreElements()) {
+		                    ZipEntry entry = entries.nextElement();
+		                    if (!entry.isDirectory() && entry.getName().endsWith(".json")) {
+		                        
+		                        // Compatible with Java 8: Read InputStream into String using buffer
+		                        String jsonContent;
+		                        try (InputStream is = zipFile.getInputStream(entry);
+		                             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+		                            byte[] buffer = new byte[4096];
+		                            int len;
+		                            while ((len = is.read(buffer)) != -1) {
+		                                bos.write(buffer, 0, len);
+		                            }
+		                            jsonContent = bos.toString("UTF-8");
+		                        }
+
+		                        try {
+		                            boolean isProcess = processAndQueueOsvRecord(sqlSession, jsonContent, entry.getName(), initializeFlag);
+		                            if (isProcess) {
+		                                count++;
+		                            }
+		                        } catch (Exception ex) {
+		                            log.error("[OSV] Failed to process JSON file [{}]: {}", entry.getName(), ex.getMessage(), ex);
+		                        }
+
+		                        if (count > 0 && count % batchSize == 0) {
+		                            sqlSession.flushStatements();
+		                            schlog.info("[OSV] Batch flushed. Processed {} records.", count);
+		                        }
+		                    }
+		                }
+		                
+		                sqlSession.flushStatements();
+		                sqlSession.commit();
+		                schlog.info("[OSV] Snapshot processing completed successfully. Total records processed: {}", count);
+		            }
+		            
+		            success = true;
+		            schlog.info("[OSV] Full OSV snapshot download completed successfully.");
+		        }
+			}  catch (Exception e) {
+				retryCount++;
+				schlog.error("[OSV] Download attempt {}/{} failed.", retryCount, MAX_RETRY, e);
+
+				if (retryCount >= MAX_RETRY) {
+					schlog.error("[OSV] Maximum retry count ({}) exceeded. OSV snapshot download aborted.", MAX_RETRY, e);
+					break;
+				}
+
+				try {
+					schlog.warn("[OSV] Retrying download in 30 seconds...");
+					Thread.sleep(1000 * 30);
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					schlog.warn("[OSV] Retry wait interrupted. Job terminated.");
+					return;
+				}
+			} finally {
+		        // Ensure the temporary file is deleted after each attempt (success or failure)
+		        if (tempZipFile != null) {
+		            try {
+		                Files.deleteIfExists(tempZipFile);
+		            } catch (IOException e) {
+		                log.warn("[OSV] Failed to delete temporary file: {}", tempZipFile, e);
+		            }
+		        }
+		    }
+		}
+
+		if (success) {
+			try {
+				refreshOsvSearchMaster();
+			} catch (Exception e) {
+				log.error("[OSV] Failed to refresh OSV search master.", e);
+			}
+		} else {
+			schlog.error("[OSV] OSV snapshot processing failed. Search master refresh skipped.");
+		}
+
+		schlog.info("[OSV] OSV bulk download job finished.");
+	}
+
+	private void refreshOsvSearchMaster() {
+		schlog.info("[OSV] Refresh Osv Search Master");
+
+		osvDataMapper.setGroupConcatMaxLen();
+
+		// Range Temp
+		osvDataMapper.dropOsvRangeTemp();
+		osvDataMapper.createOsvRangeTemp();
+		osvDataMapper.createIndexOsvRangeTemp();
+
+		// Version Temp
+		osvDataMapper.dropOsvVersionTemp();
+		osvDataMapper.createOsvVersionTemp();
+		osvDataMapper.createIndexOsvVersionTemp();
+
+		// Severity Temp
+		osvDataMapper.dropOsvSeverityTemp();
+		osvDataMapper.createOsvSeverityTemp();
+		osvDataMapper.createIndexOsvSeverityTemp();
+
+		// Pre Merge Temp
+		osvDataMapper.dropOsvPreMergeTemp();
+		osvDataMapper.createOsvPreMergeTemp();
+		osvDataMapper.createIndexOsvPreMergeTemp();
+
+		// Search Master Temp
+		osvDataMapper.dropOsvSearchMasterTemp();
+		osvDataMapper.createOsvSearchMasterTemp();
+		osvDataMapper.insertOsvSearchMasterData();
+		osvDataMapper.updateOsvSearchMasterSeverityDefault();
+
+		// Indexes
+		osvDataMapper.createIndexMasterId();
+		osvDataMapper.createIndexMasterWithdrawn();
+		osvDataMapper.createIndexMasterNameP1();
+		osvDataMapper.createIndexMasterNameP2();
+		osvDataMapper.createIndexMasterNameP3();
+		osvDataMapper.createIndexMasterVersionP1Yn();
+		osvDataMapper.createIndexMasterVersionP2Yn();
+		osvDataMapper.createIndexMasterVersionP3Yn();
+		osvDataMapper.createIndexMasterSevType();
+		osvDataMapper.createIndexMasterAffectedVersion();
+
+		// Swap & Cleanup
+		osvDataMapper.dropOsvSearchMaster();
+		osvDataMapper.renameOsvSearchMasterTemp();
+		osvDataMapper.dropOsvRangeTemp();
+		osvDataMapper.dropOsvVersionTemp();
+		osvDataMapper.dropOsvSeverityTemp();
+		osvDataMapper.dropOsvPreMergeTemp();
+
+		schlog.info("[OSV] OSV search master refresh completed.");
+	}
+
+	private boolean processAndQueueOsvRecord(SqlSession sqlSession, String jsonContent, String fileName, boolean initializeFlag) throws Exception {
+		JsonNode root = objectMapper.readTree(jsonContent);
+		String osvId = root.get("id").asText();
+		Instant jsonModiInstant = root.has("modified") ? Instant.parse(root.get("modified").asText()) : null;
+
+		boolean isUpdate = false;
+		Vulnerability bean = sqlSession.selectOne("oss.fosslight.repository.OsvDataMapper.selectOsvVulnerabilityInfo", osvId);
+		if (bean != null) {
+			Timestamp dbModiDate = Timestamp.valueOf(bean.getModiDate());
+			Instant dbModiInstant = dbModiDate != null ? dbModiDate.toInstant() : null;
+			if (jsonModiInstant != null) {
+				if (!jsonModiInstant.equals(dbModiInstant)) {
+					isUpdate = true;
+				} else {
+					return true;
+				}
+			}
+		}
+
+		Set<String> insertedOsvSeveritySet = new HashSet<>();
+		Set<String> versionSet = new HashSet<>();
+
+		// Parse and Map Main Vulnerability Properties (OSV_VULNERABILITIES)
+		Map<String, Object> vulnParam = new HashMap<>();
+		vulnParam.put("osvId", osvId);
+		vulnParam.put("schemaVersion", root.path("schema_version").asText(null));
+		vulnParam.put("summary", root.path("summary").asText(null));
+		vulnParam.put("details", root.path("details").asText(null));
+		vulnParam.put("publDate", root.has("published") ? Timestamp.from(Instant.parse(root.get("published").asText())) : null);
+		vulnParam.put("modiDate", root.has("modified") ? Timestamp.from(jsonModiInstant) : null);
+		vulnParam.put("withdrawn", root.has("withdrawn") ? Timestamp.from(Instant.parse(root.get("withdrawn").asText())) : null);
+		vulnParam.put("rawJson", jsonContent);
+
+		if (!isUpdate) {
+			sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvVulnerability", vulnParam);
+		} else {
+			vulnParam.put("id", bean.getId());
+			sqlSession.update("oss.fosslight.repository.OsvDataMapper.updateOsvVulnerability", vulnParam);
+		}
+		sqlSession.flushStatements();
+
+		int id;
+		if (isUpdate) {
+			id = Integer.parseInt(bean.getId());
+		} else {
+			Object idObj = vulnParam.get("id");
+			if (!(idObj instanceof Number)) {
+				schlog.info("[insertOsvVulnerability failed] {} | {}", osvId, fileName);
+				return false;
+			}
+			id = ((Number) idObj).intValue();
+		}
+
+		if (isUpdate) {
+			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvReferences", osvId);
+			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvAffectedPackageRange", id);
+			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvAffectedPackageVersion", id);
+			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvAffectedPackage", id);
+			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvAlias", id);
+			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvSeverity", id);
+		}
+
+		// Map and Queue Alternate IDs (OSV_ALIASES)
+		if (root.has("aliases")) {
+			for (JsonNode aliasNode : root.get("aliases")) {
+				if (aliasNode == null) {
+					continue;
+				}
+				Map<String, Object> aliasParam = Map.of("id", id, "aliasId", aliasNode.asText());
+				sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvAlias", aliasParam);
+			}
+		}
+
+		// Map and Queue Severity Vectors (OSV_SEVERITIES)
+		if (root.has("severity")) {
+			for (JsonNode sevNode : root.get("severity")) {
+				if (sevNode == null) {
+					continue;
+				}
+				insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, "*", "*", "GLOBAL",
+						sevNode.path("type").asText(), sevNode.path("score").asText());
+			}
+		}
+
+		if (root.has("database_specific")) {
+			JsonNode db = root.get("database_specific");
+			if (db != null) {
+				String severify = extractSeverityFromSpecific(db);
+				if (severify != null) {
+					insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, "*", "*", "GLOBAL_DB", "N/A", severify);
+				}
+			}
+		}
+
+		// Map and Queue Affected Packages along with Nested Metadata
+		if (root.has("affected")) {
+			int packageIdx = 1;
+
+			for (JsonNode affectedNode : root.get("affected")) {
+				String ecosystem = "";
+				String packageName = "";
+				String purl = "";
+
+				if (affectedNode.has("package")) {
+					JsonNode pkgNode = affectedNode.get("package");
+					ecosystem = pkgNode.path("ecosystem").asText();
+					packageName = pkgNode.path("name").asText();
+					purl = pkgNode.has("purl") ? pkgNode.path("purl").asText() : "";
+				}
+
+				Map<String, Object> pkgParam = new HashMap<>();
+				pkgParam.put("id", id);
+				pkgParam.put("packageIdx", packageIdx);
+				pkgParam.put("ecosystem", ecosystem);
+				pkgParam.put("packageName", packageName);
+				pkgParam.put("purl", purl);
+
+				sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvAffectedPackage", pkgParam);
+
+				if (affectedNode.has("severity")) {
+					for (JsonNode sevNode : affectedNode.get("severity")) {
+						if (sevNode == null) {
+							continue;
+						}
+						insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, packageName, ecosystem, "PACKAGE", sevNode.path("type").asText(), sevNode.path("score").asText());
+					}
+				}
+
+				// Fallback Mechanism: Store Ecosystem-Specific Severity if standard top-level
+				// score is missing
+				if (affectedNode.has("ecosystem_specific")) {
+					JsonNode ecoSpec = affectedNode.get("ecosystem_specific");
+					if (ecoSpec != null) {
+						String severify = extractSeverityFromSpecific(ecoSpec);
+						if (severify != null) {
+							insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, packageName, ecosystem, "PACKAGE_ECO", "N/A", severify);
+						}
+					}
+				}
+
+				if (affectedNode.has("database_specific")) {
+					JsonNode db = affectedNode.get("database_specific");
+					if (db != null) {
+						String severify = extractSeverityFromSpecific(db);
+						if (severify != null) {
+							insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, packageName, ecosystem, "PACKAGE_DB", "N/A", severify);
+						}
+					}
+				}
+
+				// Map and Queue Exact-Match Versions (OSV_AFFECTED_PACKAGES_VERSIONS)
+				if (affectedNode.has("versions")) {
+					int versionIdx = 1;
+					for (JsonNode verNode : affectedNode.get("versions")) {
+						String version = verNode.asText();
+						String key = String.valueOf(id) + "|" + String.valueOf(packageIdx) + "|" + String.valueOf(versionIdx);
+
+						if (!versionSet.add(key)) {
+							continue;
+						}
+
+						Map<String, Object> verParam = Map.of("id", id, "packageIdx", packageIdx, "versionIdx", versionIdx, "version", version);
+						sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvAffectedPackageVersion", verParam);
+						versionIdx++;
+					}
+				}
+
+				// Map and Queue State Interval Ranges (OSV_PACKAGE_RANGES)
+				if (affectedNode.has("ranges")) {
+					int rangeIdx = 1;
+					for (JsonNode rangeNode : affectedNode.get("ranges")) {
+						Map<String, Object> rangeParam = new HashMap<>();
+						rangeParam.put("id", id);
+						rangeParam.put("packageIdx", packageIdx);
+						rangeParam.put("rangeIdx", rangeIdx);
+						rangeParam.put("rangeType", rangeNode.get("type").asText());
+						rangeParam.put("repo", rangeNode.has("repo") ? rangeNode.get("repo").asText() : null);
+
+						String introduced = "0";
+						String fixed = null;
+						String lastAffected = null;
+						String limitVersion = "*";
+
+						// Track internal state change events
+						if (rangeNode.has("events")) {
+							for (JsonNode eventNode : rangeNode.get("events")) {
+								if (eventNode.has("introduced")) {
+									introduced = eventNode.get("introduced").asText();
+								}
+								if (eventNode.has("fixed")) {
+									fixed = eventNode.get("fixed").asText();
+								}
+								if (eventNode.has("last_affected")) {
+									lastAffected = eventNode.get("last_affected").asText();
+								}
+								if (eventNode.has("limit")) {
+									limitVersion = eventNode.get("limit").asText();
+								}
+							}
+						}
+
+						rangeParam.put("introduced", introduced);
+						rangeParam.put("fixed", fixed);
+						rangeParam.put("lastAffected", lastAffected);
+						rangeParam.put("limitVersion", limitVersion);
+
+						sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvAffectedPackageRange", rangeParam);
+						rangeIdx++;
+
+						if (rangeNode.has("database_specific")) {
+							JsonNode db = rangeNode.get("database_specific");
+							if (db != null) {
+								String severify = extractSeverityFromSpecific(db);
+								if (severify != null) {
+									insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, packageName, ecosystem, "PACKAGE_RANGE_DB", "N/A", severify);
+								}
+							}
+						}
+					}
+				}
+
+				packageIdx++;
+			}
+		}
+
+		if (root.has("references")) {
+			int referenceIdx = 1;
+			for (JsonNode refNode : root.get("references")) {
+				String type = refNode.path("type").asText(null);
+				if (!"FIX".equalsIgnoreCase(type)) {
+					continue;
+				}
+
+				String patchLink = refNode.path("url").asText(null);
+				Map<String, Object> verParam = Map.of("osvId", osvId, "refIdx", referenceIdx++, "type", type, "patchLink", patchLink);
+
+				sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvReferences", verParam);
+			}
+		}
+
+		return true;
+	}
+
+	private String extractSeverityFromSpecific(JsonNode node) {
+		for (String key : SEVERITY_KEYS) {
+			JsonNode value = node.get(key);
+
+			if (value == null || value.isNull()) {
+				continue;
+			}
+
+			if (value.isValueNode()) {
+				return value.asText();
+			}
+
+			if (value.has("score")) {
+				return value.get("score").asText();
+			}
+
+			if (value.has("value")) {
+				return value.get("value").asText();
+			}
+		}
+		return null;
+	}
+
+	private void insertOsvSeverity(SqlSession sqlSession, Set<String> insertedOsvSeveritySet, int id, String packageName, String ecosystem, String source, String type, String score) {
+		if (isEmpty(type) || isEmpty(score)) {
+			return;
+		}
+
+		String key = String.valueOf(id) + "|" + avoidNull(packageName) + "|" + avoidNull(ecosystem) + "|" + source + "|" + type;
+		if (!insertedOsvSeveritySet.add(key)) {
+			return;
+		}
+
+		String finalScore = score;
+		if (isCvssType(type, score)) {
+			try {
+				finalScore = calculateCvssScore(score);
+			} catch (Exception e) {
+		        // Log the exception and exit the flow when calculation fails
+		        schlog.error("Failed to calculate CVSS score for vector: {}", score, e);
+		        return;
+		    }
+		} else {
+			return;
+		}
+
+		Map<String, Object> param = new HashMap<>();
+		param.put("id", id);
+		param.put("packageName", packageName);
+		param.put("ecosystem", ecosystem);
+		param.put("source", source);
+		param.put("type", type);
+		param.put("score", finalScore);
+
+		sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvSeverity", param);
+	}
+
+	private boolean isCvssType(String type, String score) {
+		if (type == null || score == null) {
+			return false;
+		}
+		String upperType = type.toUpperCase();
+		return upperType.contains("CVSS") || score.toUpperCase().startsWith("CVSS:");
+	}
+
+	private String calculateCvssScore(String vectorString) {
+		Cvss cvss = Cvss.fromVector(vectorString);
+	    if (cvss != null) {
+	        Score cvssScore = cvss.calculateScore();
+	        return String.valueOf(cvssScore.getBaseScore());
+	    }
+	    throw new IllegalArgumentException("Failed to parse CVSS vector: " + vectorString);
+	}
+
+	public List<OssComponents> getSecurityVulnerabilityList(Map<String, Object> securityGridMap, ProjectIdentification identification, String prjId, int securityIdx) {
+		List<OssComponents> osvVulnerabilityList = new ArrayList<>();
+		List<Vulnerability> osvVulnList = osvDataMapper.selectOsvSecurityListForProject(identification);
+		if (CollectionUtils.isNotEmpty(osvVulnList)) {
+			// Initial duplicate removal from the raw OSV list
+			Map<String, Vulnerability> uniqueMap = osvVulnList.stream()
+													    .filter(v -> v != null && !isEmpty(v.getCveId()))
+													    .collect(Collectors.toMap(
+													        item -> String.format("%s_%s_%s", 
+													            !isEmpty(item.getOssName()) ? item.getOssName().trim() : "", 
+													            !isEmpty(item.getOssVersion()) ? item.getOssVersion().trim() : "", 
+													            item.getCveId().toUpperCase().trim()
+													        ),
+													        item -> item,
+													        (existing, replacement) -> existing
+													    ));
+
+			List<Vulnerability> rawFilteredList = new ArrayList<>(uniqueMap.values());
+			OssComponents ossComponents = null;
+			Pattern pattern = Pattern.compile("([\\[\\(])([^,\\])]+),\\s*([^,\\])]+)([\\]\\)])");
+
+			// Temporary list to store items that pass version validation
+			Map<String, Vulnerability> mergedOsvMap = new LinkedHashMap<>();
+			OssMaster ossInfo = null;
+			if (!isEmpty(identification.getOssName())) {
+				ossInfo = CoCodeManager.OSS_INFO_UPPER.get((identification.getOssName() + "_" + avoidNull(identification.getOssVersion())).toUpperCase());
+			}
+
+			mergedOsvMap = CommonFunction.filterAndMergeOsvVulnerabilities(ossInfo, rawFilteredList);
+			mergedOsvMap.replaceAll((key, value) -> uniqueMap.getOrDefault(key, value));
+			
+			List<Vulnerability> mergedFilteredVulnList = new ArrayList<>(mergedOsvMap.values());
+			Map<String, Vulnerability> finalMap = mergedFilteredVulnList.stream()
+															.filter(v -> v != null && !isEmpty(v.getCveId()))
+														    .collect(Collectors.groupingBy(
+														        item -> String.format("%s_%s_%s", 
+														            !isEmpty(item.getOssName()) ? item.getOssName().toUpperCase().trim() : "", 
+														            !isEmpty(item.getOssVersion()) ? item.getOssVersion().toUpperCase().trim() : "", 
+														            item.getCveId().toUpperCase().trim()
+														        ),
+														        LinkedHashMap::new,
+														        Collectors.collectingAndThen(
+														            Collectors.toList(),
+														            itemList -> {
+														                // If there is only 1 item in the group, return it as-is
+														                if (itemList.size() == 1) {
+														                    return itemList.get(0);
+														                }
+														                
+														                // Sort the entire group:
+														                // Valid CVSS scores come first, sorted in descending order (highest score first)
+														                // If scores are invalid or equal, sort by priority in ascending order
+														                return itemList.stream()
+														                    .sorted((a, b) -> {
+														                    	boolean validA = CommonFunction.isBigDecimal(a.getCvssScore());
+														                        boolean validB = CommonFunction.isBigDecimal(b.getCvssScore());
+														                        
+														                        // Both have valid scores: compare scores descending (Max first)
+														                        if (validA && validB) {
+														                            int scoreCompare = new java.math.BigDecimal(b.getCvssScore()).compareTo(new java.math.BigDecimal(a.getCvssScore()));
+														                            if (scoreCompare != 0) {
+														                                return scoreCompare;
+														                            }
+														                        }
+														                        
+														                        // Only A has a valid score -> A comes first (-1)
+														                        if (validA && !validB) {
+														                            return -1;
+														                        }
+														                        // Only B has a valid score -> B comes first (1)
+														                        if (!validA && validB) {
+														                            return 1;
+														                        }
+														                        
+														                        // Neither has a valid score (or both invalid): compare by priority
+														                        return Integer.compare(a.getPriority(), b.getPriority());
+														                    })
+														                    .findFirst()
+														                    .orElse(itemList.get(0));
+														            }
+														        )
+														    ));
+			List<Vulnerability> finalFilteredVulnList = new ArrayList<>(finalMap.values());
+			
+			// Populate OssComponents objects using the finalized list and add them to the
+			// result list
+			for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
+				boolean activateFlag = isEmpty(osvVulnInfo.getOssVersion());
+				String securityGridMapKey = "";
+				if (!activateFlag) {
+					securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore());
+				} else {
+					securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null);
+				}
+
+				String osvVulnerabilityMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), null);
+				Vulnerability vulnerability = uniqueMap.get(osvVulnerabilityMapKey);
+				if (vulnerability != null) {
+					osvVulnInfo = vulnerability;
+				}
+
+				ossComponents = new OssComponents();
+				ossComponents.setGridId("jqg_sec_" + prjId + "_" + String.valueOf(securityIdx++));
+				ossComponents.setOssName(osvVulnInfo.getOssName());
+				ossComponents.setOssVersion(osvVulnInfo.getOssVersion());
+				ossComponents.setCvssScore(osvVulnInfo.getCvssScore());
+				ossComponents.setCveId(osvVulnInfo.getCveId());
+				ossComponents.setPublDate(osvVulnInfo.getPublDate());
+				ossComponents.setModiDate(osvVulnInfo.getModiDate());
+				ossComponents.setVulnSummary(osvVulnInfo.getVulnSummary());
+				ossComponents.setActivateFlag(CoConstDef.FLAG_NO);
+				ossComponents.setVulnerabilityLink("https://osv.dev/vulnerability/" + osvVulnInfo.getCveId());
+				ossComponents.setGroupKeyId(osvVulnInfo.getGroupKeyId());
+
+				if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
+					String verStartEndRange = convertOsvToSimpleFormat(osvVulnInfo.getAffectedVersion(), pattern);
+					if (!isEmpty(verStartEndRange)) {
+						ossComponents.setVerStartEndRange(verStartEndRange);
+					}
+				}
+
+				if (!activateFlag) {
+					if (!isEmpty(osvVulnInfo.getPatchLink())) {
+						ossComponents.setOfficialPatchLink(osvVulnInfo.getPatchLink());
+						if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
+							ossComponents.setVulnerabilityResolution("Unresolved");
+						} else {
+							ossComponents.setVulnerabilityResolution("");
+						}
+					} else {
+						ossComponents.setOfficialPatchLink("N/A");
+						if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
+							ossComponents.setVulnerabilityResolution("Deferred (Not Available)");
+						} else {
+							ossComponents.setVulnerabilityResolution("");
+						}
+					}
+					ossComponents.setSecurityPatchLink("N/A");
+				} else {
+					ossComponents.setVulnerabilityResolution("");
+				}
+
+				if (MapUtils.isNotEmpty(securityGridMap)) {
+					OssComponents bean = (OssComponents) securityGridMap.get(securityGridMapKey);
+					if (bean != null) {
+						ossComponents.setSecurityComments(bean.getSecurityComments());
+						if (!activateFlag) {
+							ossComponents.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+							if (!isEmpty(bean.getSecurityPatchLink()) || (ossComponents.getVulnerabilityResolution().equals("Fixed") && isEmpty(bean.getSecurityPatchLink()))) {
+								ossComponents.setSecurityPatchLink(bean.getSecurityPatchLink());
+							}
+						}
+					}
+				} else {
+					if (!isEmpty(osvVulnInfo.getVulnerabilityResolution())) {
+						ossComponents.setVulnerabilityResolution(osvVulnInfo.getVulnerabilityResolution());
+					}
+				}
+
+				if (!isEmpty(osvVulnInfo.getAliasId())) {
+					ossComponents.setAliasIds(osvVulnInfo.getAliasId());
+				}
+
+				osvVulnerabilityList.add(ossComponents);
+			}
+		}
+		return osvVulnerabilityList;
+	}
+
+	private String generateKey(String ossName, String ossVersion, String cveId, String cvssScore) {
+		if (!isEmpty(cvssScore)) {
+			return String.format("%s_%s_%s_%s", String.valueOf(ossName), String.valueOf(ossVersion), String.valueOf(cveId), String.valueOf(cvssScore));
+		} else {
+			return String.format("%s_%s_%s", String.valueOf(ossName), String.valueOf(ossVersion), String.valueOf(cveId));
+		}
+	}
+
+	private String convertOsvToSimpleFormat(String inputRanges, Pattern pattern) {
+		Matcher matcher = pattern.matcher(inputRanges);
+		StringBuilder result = new StringBuilder();
+
+		while (matcher.find()) {
+			String startBracket = matcher.group(1);
+			String startVal = matcher.group(2).trim();
+			String endVal = matcher.group(3).trim();
+			String endBracket = matcher.group(4);
+
+			if ("[".equals(startBracket)) {
+				result.append("#").append("From (including) : ").append(startVal).append("|");
+			}
+
+			if (")".equals(endBracket)) {
+				result.append("Up to (excluding) : ").append(endVal).append("|");
+			}
+		}
+
+		return result.toString();
+	}
+
+	public List<Vulnerability> fetchOsvVulnerabilityData(OssMaster ossMaster, List<Vulnerability> combinedList) {
+		if (CollectionUtils.isEmpty(combinedList)) {
+			combinedList = new ArrayList<>();
+		}
+		
+		List<Vulnerability> fetchOsvVulnerabilityList = new ArrayList<>();
+		Map<String, Object> paramMap = prepareParamMap(ossMaster);
+		List<Vulnerability> osvVulnerabilityList = findByNamePriority(ossMaster, paramMap);
+		Map<String, Vulnerability> osvVulnerabilityMap = osvVulnerabilityList.stream().collect(Collectors.toMap(Vulnerability::getCveId, vulnerability -> vulnerability, (existing, replacement) -> replacement));
+		List<Vulnerability> processedVulnerabilityList = filterByNamePriority(ossMaster, osvVulnerabilityList);
+		List<Vulnerability> osvResultList = filterByVersionPriority(processedVulnerabilityList, ossMaster.getOssVersion(), ossMaster.getOssVersionAliases());
+		boolean emptyVersion = isEmpty(ossMaster.getOssVersion()) ? true : false;
+
+		if (CollectionUtils.isNotEmpty(osvResultList)) {
+			for (Vulnerability osv : osvResultList) {
+				Vulnerability match = null;
+				for (Vulnerability existing : combinedList) {
+					if (isIdMatched(existing.getId(), osv.getId())) {
+						match = existing;
+						break;
+					}
+				}
+
+				if (match != null) {
+					match.setSource(match.getSource() + "," + osv.getSource());
+					String mergedId = mergeAndFormatIds(match.getId(), osv.getId(), osv.getAliasId());
+					match.setId(mergedId);
+					if (mergedId.contains("(")) {
+						int openIdx = mergedId.indexOf('(');
+						int closeIdx = mergedId.lastIndexOf(')');
+
+						if (openIdx != -1 && closeIdx != -1 && closeIdx > openIdx) {
+							String mainId = mergedId.substring(0, openIdx).trim();
+							String aliasValue = mergedId.substring(openIdx + 1, closeIdx).trim();
+
+							match.setId(mainId);
+							match.setAliasId(aliasValue);
+						}
+					} else {
+						match.setAliasId(null);
+					}
+					if (emptyVersion && CoConstDef.FLAG_YES.equals(match.getSearchVersionP3Yn())) {
+						continue;
+					}
+					fetchOsvVulnerabilityList.add(match);
+				} else {
+					String rawId = osv.getId();
+					if (rawId.contains("(")) {
+						int openIdx = rawId.indexOf('(');
+						int closeIdx = rawId.lastIndexOf(')');
+
+						if (openIdx != -1 && closeIdx != -1 && closeIdx > openIdx) {
+							String mainId = rawId.substring(0, openIdx).trim();
+							String aliasValue = rawId.substring(openIdx + 1, closeIdx).trim();
+
+							osv.setId(mainId);
+							osv.setAliasId(aliasValue);
+						}
+
+						String key = rawId.split("\\(")[0].trim();
+						Vulnerability bean = osvVulnerabilityMap.get(key);
+						if (bean != null) {
+							copyVulnerabilityFields(bean, osv);
+						}
+					}
+					if (emptyVersion && CoConstDef.FLAG_YES.equals(osv.getSearchVersionP3Yn())) {
+						continue;
+					}
+					fetchOsvVulnerabilityList.add(osv);
+				}
+			}
+		}
+
+		if (CollectionUtils.isNotEmpty(fetchOsvVulnerabilityList)) {
+			Map<String, Vulnerability> existingMap = combinedList.stream()
+														.filter(v -> v != null && !isEmpty(v.getCveId()))
+														.collect(Collectors.toMap(
+																item -> String.format("%s_%s_%s",
+																		!isEmpty(item.getOssName()) ? item.getOssName().toUpperCase().trim() : "",
+																		!isEmpty(item.getOssVersion()) ? item.getOssVersion().toUpperCase().trim() : "",
+																		item.getCveId().toUpperCase().trim()),
+																item -> item, (existing, replacement) -> existing
+														));
+
+			// Iterate through fetchOsvVulnerabilityList and process accordingly
+			for (var osvItem : fetchOsvVulnerabilityList) {
+				if (osvItem == null || isEmpty(osvItem.getCveId())) {
+					continue;
+				}
+
+				// Generate a unique key for the OSV item
+				String key = String.format("%s_%s_%s",
+						!isEmpty(osvItem.getOssName()) ? osvItem.getOssName().toUpperCase().trim() : "",
+						!isEmpty(osvItem.getOssVersion()) ? osvItem.getOssVersion().toUpperCase().trim() : "",
+						osvItem.getCveId().toUpperCase().trim());
+
+				// Check if the same key exists in combinedList (via the map)
+				if (existingMap.containsKey(key)) {
+					// If it matches, set the aliasId into the existing object in combinedList
+					existingMap.get(key).setAliasId(osvItem.getAliasId());
+				} else {
+					// If it does not exist, add the OSV item to combinedList and register it in the
+					combinedList.add(osvItem);
+					existingMap.put(key, osvItem);
+				}
+			}
+		}
+		
+		if (CollectionUtils.isNotEmpty(combinedList)) {
+			combinedList = combinedList.stream()
+							    .filter(v -> v != null && !isEmpty(v.getCveId()))
+							    .collect(Collectors.groupingBy(
+							        item -> String.format("%s_%s_%s", 
+							            !isEmpty(item.getProduct()) ? item.getProduct().toUpperCase().trim() : "", 
+							            !isEmpty(item.getVersion()) ? item.getVersion().toUpperCase().trim() : "", 
+							            item.getCveId().toUpperCase().trim()
+							        ),
+							        LinkedHashMap::new,
+							        Collectors.collectingAndThen(
+							            Collectors.toList(),
+							            itemList -> {
+							                // If there is only 1 item in the group, return it as-is
+							                if (itemList.size() == 1) {
+							                    return itemList.get(0);
+							                }
+							                
+							                // Sort the entire group:
+							                // Valid CVSS scores come first, sorted in descending order (highest score first)
+							                // If scores are invalid or equal, sort by priority in ascending order
+							                return itemList.stream()
+							                    .sorted((a, b) -> {
+							                    	boolean validA = CommonFunction.isBigDecimal(a.getCvssScore());
+							                        boolean validB = CommonFunction.isBigDecimal(b.getCvssScore());
+							                        
+							                        // Both have valid scores: compare scores descending (Max first)
+							                        if (validA && validB) {
+							                            int scoreCompare = new java.math.BigDecimal(b.getCvssScore()).compareTo(new java.math.BigDecimal(a.getCvssScore()));
+							                            if (scoreCompare != 0) {
+							                                return scoreCompare;
+							                            }
+							                        }
+							                        
+							                        // Only A has a valid score -> A comes first (-1)
+							                        if (validA && !validB) {
+							                            return -1;
+							                        }
+							                        // Only B has a valid score -> B comes first (1)
+							                        if (!validA && validB) {
+							                            return 1;
+							                        }
+							                        
+							                        // Neither has a valid score (or both invalid): compare by priority
+							                        return Integer.compare(a.getPriority(), b.getPriority());
+							                    })
+							                    .findFirst()
+							                    .orElse(itemList.get(0));
+							            }
+							        )
+							    ))
+							    .values()
+							    .stream()
+							    .collect(Collectors.toList());
+		}
+		
+		return combinedList;
+	}
+
+	private boolean isIdMatched(String id1, String id2) {
+		if (id1 == null || id2 == null) {
+			return false;
+		}
+		if (id1.equals(id2)) {
+			return true;
+		}
+		return id2.contains(id1) || id1.contains(id2);
+	}
+
+	private String mergeAndFormatIds(String id1, String id2, String aliasId) {
+		if (isEmpty(id1) && isEmpty(id2) && isEmpty(aliasId)) {
+			return id1 != null ? id1 : (id2 != null ? id2 : "");
+		}
+
+		Set<String> allTokens = new LinkedHashSet<>();
+
+		extractTokens(id1, allTokens);
+		extractTokens(id2, allTokens);
+
+		if (aliasId != null && !aliasId.trim().isEmpty()) {
+			for (String alias : aliasId.split(",")) {
+				String trimmedAlias = alias.trim();
+				if (!trimmedAlias.isEmpty()) {
+					allTokens.add(trimmedAlias);
+				}
+			}
+		}
+
+		if (allTokens.isEmpty()) {
+			return "";
+		}
+
+		List<String> sortedTokens = new ArrayList<>(allTokens);
+		sortedTokens.sort((a, b) -> {
+			int r1 = getPriorityScore(a);
+			int r2 = getPriorityScore(b);
+			if (r1 != r2) {
+				return Integer.compare(r1, r2);
+			}
+			return a.compareTo(b);
+		});
+
+		String mainId = sortedTokens.get(0);
+		if (sortedTokens.size() > 1) {
+			String subIds = String.join(", ", sortedTokens.subList(1, sortedTokens.size()));
+			return mainId + " (" + subIds + ")";
+		}
+		return mainId;
+	}
+
+	private int getPriorityScore(String id) {
+		if (id == null) {
+			return 3;
+		}
+		String upperId = id.toUpperCase();
+		if (upperId.startsWith("CVE-")) {
+			return 1;
+		} else if (upperId.startsWith("GHSA-")) {
+			return 2;
+		}
+		return 3;
+	}
+
+	private List<Vulnerability> filterByNamePriority(OssMaster ossMaster, List<Vulnerability> osvVulnerabilityList) {
+		if (CollectionUtils.isEmpty(osvVulnerabilityList)) {
+			return Collections.emptyList();
+		}
+
+		// Initial duplicate removal from the raw OSV list
+		Map<String, Vulnerability> uniqueMap = osvVulnerabilityList.stream()
+				.collect(Collectors.groupingBy(
+						item -> String.format("%s_%s_%s", !isEmpty(item.getOssName()) ? item.getOssName() : "", !isEmpty(item.getOssVersion()) ? item.getOssVersion() : "", item.getCveId()),
+						LinkedHashMap::new, Collectors.collectingAndThen(Collectors.toList(), list -> {
+							if (list.size() == 1) {
+								return list.get(0);
+							}
+
+							return list.stream().sorted((a, b) -> {
+								boolean validA = CommonFunction.isBigDecimal(a.getCvssScore());
+								boolean validB = CommonFunction.isBigDecimal(b.getCvssScore());
+
+								if (validA && !validB) {
+									return -1;
+								}
+								if (!validA && validB) {
+									return 1;
+								}
+
+								return Integer.compare(a.getPriority(), b.getPriority());
+							}).findFirst().orElse(list.get(0));
+						})));
+
+		List<Vulnerability> rawFilteredList = new ArrayList<>(uniqueMap.values());
+		// Temporary list to store items that pass version validation
+		Map<String, Vulnerability> mergedOsvMap = new LinkedHashMap<>();
+		mergedOsvMap = CommonFunction.filterAndMergeOsvVulnerabilities(ossMaster, rawFilteredList);
+		List<Vulnerability> finalFilteredVulnList = new ArrayList<>(mergedOsvMap.values());
+
+		Map<String, Vulnerability> mergedMap = new LinkedHashMap<>();
+		for (Vulnerability v : finalFilteredVulnList) {
+			Set<String> currentTokens = new LinkedHashSet<>();
+			if (v.getId() != null) {
+				extractTokens(v.getId(), currentTokens);
+			}
+			if (v.getAliasId() != null) {
+				for (String alias : v.getAliasId().split(",")) {
+					if (!alias.trim().isEmpty()) {
+						currentTokens.add(alias.trim());
+					}
+				}
+			}
+
+			if (currentTokens.isEmpty()) {
+				continue;
+			}
+
+			// Sort by priority (CVE -> GHSA -> Others)
+			List<String> sortedTokens = new ArrayList<>(currentTokens);
+			sortedTokens.sort((a, b) -> {
+				int r1 = getPriorityScore(a);
+				int r2 = getPriorityScore(b);
+				if (r1 != r2) {
+					return Integer.compare(r1, r2);
+				}
+				return a.compareTo(b);
+			});
+
+			String bestId = sortedTokens.get(0);
+
+			// Merge items within OSV if their tokens intersect
+			boolean merged = false;
+			for (Map.Entry<String, Vulnerability> entry : mergedMap.entrySet()) {
+				Vulnerability existing = entry.getValue();
+				Set<String> existingTokens = new LinkedHashSet<>();
+				extractTokens(existing.getId(), existingTokens);
+				if (existing.getAliasId() != null) {
+					for (String a : existing.getAliasId().split(",")) {
+						if (!a.trim().isEmpty()) {
+							existingTokens.add(a.trim());
+						}
+					}
+				}
+
+				boolean hasIntersection = currentTokens.stream().anyMatch(existingTokens::contains);
+				if (hasIntersection) {
+					String combinedFormattedId = mergeAndFormatIds(existing.getId(), v.getId(), v.getAliasId());
+					existing.setId(combinedFormattedId);
+
+					if (v.getSource() != null && !existing.getSource().contains(v.getSource())) {
+						existing.setSource(existing.getSource() + "," + v.getSource());
+					}
+
+					merged = true;
+					break;
+				}
+			}
+
+			if (!merged) {
+				v.setId(mergeAndFormatIds(v.getId(), null, v.getAliasId()));
+				mergedMap.put(bestId, v);
+			}
+		}
+
+		return new ArrayList<>(mergedMap.values());
+	}
+
+	private void extractTokens(String rawId, Set<String> tokenSet) {
+		if (rawId == null) {
+			return;
+		}
+
+		int openIdx = rawId.indexOf('(');
+		int closeIdx = rawId.lastIndexOf(')');
+
+		if (openIdx != -1 && closeIdx != -1 && closeIdx > openIdx) {
+			String main = rawId.substring(0, openIdx).trim();
+			if (!main.isEmpty()) {
+				tokenSet.add(main);
+			}
+
+			String inside = rawId.substring(openIdx + 1, closeIdx);
+			for (String sub : inside.split(",")) {
+				String trimmed = sub.trim();
+				if (!trimmed.isEmpty()) {
+					tokenSet.add(trimmed);
+				}
+			}
+		} else {
+			String trimmed = rawId.trim();
+			if (!trimmed.isEmpty()) {
+				tokenSet.add(trimmed);
+			}
+		}
+	}
+
+	private Map<String, Object> prepareParamMap(OssMaster ossMaster) {
+		Map<String, Object> param = new HashMap<>();
+		String[] purls = ossMaster.getPurls();
+		param.put("ossName", ossMaster.getOssName());
+
+		if (ossMaster.getOssNicknames() != null && ossMaster.getOssNicknames().length > 0) {
+			param.put("ossNicknames", ossMaster.getOssNicknames());
+		}
+
+		if (purls != null && purls.length > 0 && purls[0] != null) {
+			param.put("purls", purls);
+		}
+
+		if (ossMaster.getOssVersionAliases() != null) {
+			param.put("ossVersionAliases", ossMaster.getOssVersionAliases());
+		}
+
+		return param;
+	}
+
+	private List<Vulnerability> findByNamePriority(OssMaster ossMaster, Map<String, Object> paramMap) {
+		List<Vulnerability> result = new ArrayList<>();
+		if (paramMap.containsKey("ossName")) {
+			List<Vulnerability> priority1List = osvDataMapper.selectOsvVulnerabilityListByUniqueNick(paramMap);
+			if (CollectionUtils.isNotEmpty(priority1List)) {
+				result.addAll(priority1List);
+			}
+		}
+
+		if (paramMap.containsKey("purls")) {
+			List<Vulnerability> priority2List = osvDataMapper.selectOsvVulnerabilityListByPurl(paramMap);
+			if (CollectionUtils.isNotEmpty(priority2List)) {
+				result.addAll(priority2List);
+			}
+		}
+
+		if (paramMap.containsKey("ossName")) {
+			List<Vulnerability> priority3List = osvDataMapper.selectOsvVulnerabilityListByPackageName(paramMap);
+			if (CollectionUtils.isNotEmpty(priority3List)) {
+				result.addAll(priority3List);
+			}
+		}
+
+		if (CollectionUtils.isNotEmpty(result)) {
+			String ossName = ossMaster.getOssName();
+			String ossVersion = avoidNull(ossMaster.getOssVersion(), "");
+			result.forEach(v -> {
+				v.setOssName(ossName);
+				v.setProduct(ossName);
+				v.setOssVersion(ossVersion);
+				v.setVersion(ossVersion);
+				v.setCvssScore(v.getSeverity());
+			});
+		}
+		return result;
+	}
+
+	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, String targetVersion, String[] aliases) {
+		List<Vulnerability> versionP1 = new ArrayList<>();
+		List<Vulnerability> versionP2 = new ArrayList<>();
+		List<Vulnerability> versionP3 = new ArrayList<>();
+
+		for (Vulnerability osvVulnerability : osvVulnerabilityList) {
+			osvVulnerability.setCvssScore(osvVulnerability.getSeverity());
+
+			if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP1Yn())) {
+				if (isExactVersionMatch(targetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
+					versionP1.add(osvVulnerability);
+					continue;
+				}
+			}
+
+			if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP2Yn())) {
+				boolean matched = isVersionInRange(targetVersion, osvVulnerability.getSearchVersionP2());
+				if (!matched && aliases != null) {
+					for (String alias : aliases) {
+						if (isVersionInRange(alias, osvVulnerability.getSearchVersionP2())) {
+							matched = true;
+							break;
+						}
+					}
+				}
+
+				if (matched) {
+					versionP2.add(osvVulnerability);
+					continue;
+				}
+			}
+
+			if (isEmpty(targetVersion) && CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP3Yn())) {
+				versionP3.add(osvVulnerability);
+			}
+		}
+
+		if (!versionP1.isEmpty()) {
+			return versionP1;
+		}
+
+		if (!versionP2.isEmpty()) {
+			return versionP2;
+		}
+
+		if (!versionP3.isEmpty()) {
+			return versionP3;
+		}
+
+		return Collections.emptyList();
+	}
+
+	private boolean isExactVersionMatch(String targetVersion, String[] aliases, String csvVersions) {
+		Set<String> versionSet = new HashSet<>(Arrays.asList(csvVersions.split(",")));
+		if (versionSet.contains(targetVersion)) {
+			return true;
+		}
+		if (aliases != null) {
+			for (String alias : aliases) {
+				if (versionSet.contains(alias)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isVersionInRange(String targetVersion, String rangeRaw) {
+		if (rangeRaw == null || rangeRaw.isEmpty() || "-".equals(rangeRaw))
+			return false;
+
+		String[] orRanges = rangeRaw.split("\\|");
+		for (String range : orRanges) {
+			String[] parts = range.split("~");
+			if (parts.length < 2)
+				continue;
+
+			String start = parts[0].trim();
+			String end = parts[1].trim();
+
+			if (compareVersion(targetVersion, start) >= 0 && compareVersion(targetVersion, end) <= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private int compareVersion(String v1, String v2) {
+		if ("0".equals(v1) || "0".equals(v2)) {
+			if ("0".equals(v1) && "0".equals(v2)) {
+				return 0;
+			}
+			return "0".equals(v1) ? -1 : 1;
+		}
+
+		String cleanV1 = REVISION_PATTERN.matcher(v1).replaceAll("");
+		String cleanV2 = REVISION_PATTERN.matcher(v2).replaceAll("");
+
+		String[] vals1 = cleanV1.split("\\.");
+		String[] vals2 = cleanV2.split("\\.");
+		int i = 0;
+
+		while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
+			i++;
+		}
+
+		if (i < vals1.length && i < vals2.length) {
+			try {
+				int num1 = Integer.parseInt(vals1[i].replaceAll("[^0-9]", ""));
+				int num2 = Integer.parseInt(vals2[i].replaceAll("[^0-9]", ""));
+				return Integer.compare(num1, num2);
+			} catch (NumberFormatException e) {
+				return vals1[i].compareTo(vals2[i]);
+			}
+		}
+		return Integer.compare(vals1.length, vals2.length);
+	}
+
+	private void copyVulnerabilityFields(Vulnerability source, Vulnerability target) {
+		target.setSource(source.getSource());
+		target.setComponent(source.getComponent());
+		target.setAffectedVersion(source.getAffectedVersion());
+		target.setCvssScore(isEmpty(source.getCvssScore()) ? source.getSeverity() : source.getCvssScore());
+		target.setSeverity(isEmpty(source.getSeverity()) ? source.getCvssScore() : source.getSeverity());
+		target.setModiDate(source.getModiDate());
+		target.setPublDate(source.getPublDate());
+		target.setSummary(source.getSummary());
+		target.setWithdrawnYn(source.getWithdrawnYn());
+		target.setSearchNameP1(source.getSearchNameP1());
+		target.setSearchNameP2(source.getSearchNameP2());
+		target.setSearchNameP3(source.getSearchNameP3());
+		target.setSearchVersionP1Yn(source.getSearchVersionP1Yn());
+		target.setSearchVersionP1(source.getSearchVersionP1());
+		target.setSearchVersionP2Yn(source.getSearchVersionP2Yn());
+		target.setSearchVersionP2(source.getSearchVersionP2());
+		target.setSearchVersionP3Yn(source.getSearchVersionP3Yn());
+		target.setPriority(source.getPriority());
+	}
+}

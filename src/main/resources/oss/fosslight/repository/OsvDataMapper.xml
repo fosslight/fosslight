@@ -1,0 +1,843 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.OsvDataMapper">
+	<insert id="insertOsvVulnerability" useGeneratedKeys="true" keyProperty="id" keyColumn="ID">
+		INSERT INTO OSV_VULNERABILITIES (OSV_ID, SCHEMA_VERSION, SUMMARY, DETAILS, PUBL_DATE, MODI_DATE, WITHDRAWN, RAW_JSON)
+        VALUES (#{osvId}, #{schemaVersion}, #{summary}, #{details}, #{publDate}, #{modiDate}, #{withdrawn}, #{rawJson})
+	</insert>
+
+	<update id="updateOsvVulnerability">
+		UPDATE OSV_VULNERABILITIES
+	    SET SCHEMA_VERSION = #{schemaVersion},
+	        SUMMARY = #{summary},
+	        DETAILS = #{details},
+	        PUBL_DATE = #{publDate},
+	        MODI_DATE = #{modiDate},
+	        WITHDRAWN = #{withdrawn},
+	        RAW_JSON = #{rawJson}
+	    WHERE ID = #{id}
+	    AND OSV_ID = #{osvId}
+	</update>
+
+    <insert id="insertOsvAlias">
+        INSERT INTO OSV_ALIASES (ID, ALIAS_ID) VALUES (#{id}, #{aliasId})
+    </insert>
+    
+    <insert id="insertOsvSeverity">
+        INSERT INTO OSV_SEVERITIES (ID, PACKAGE_NAME, ECOSYSTEM, SOURCE, TYPE, SCORE) VALUES (#{id}, #{packageName}, #{ecosystem}, #{source}, #{type}, #{score})
+    </insert>
+    
+    <insert id="insertOsvAffectedPackage">
+        INSERT INTO OSV_AFFECTED_PACKAGES (ID, PACKAGE_IDX, ECOSYSTEM, PACKAGE_NAME, PURL)
+        VALUES (#{id}, #{packageIdx}, #{ecosystem}, #{packageName}, #{purl})
+    </insert>
+
+    <insert id="insertOsvAffectedPackageVersion">
+        INSERT IGNORE INTO OSV_AFFECTED_PACKAGES_VERSIONS (ID, PACKAGE_IDX, VERSION_IDX, VERSION)
+        VALUES (#{id}, #{packageIdx}, #{versionIdx}, #{version})
+    </insert>
+
+    <insert id="insertOsvAffectedPackageRange">
+        INSERT INTO OSV_AFFECTED_PACKAGE_RANGES (ID, PACKAGE_IDX, RANGE_IDX, RANGE_TYPE, REPO, INTRODUCED, FIXED, LAST_AFFECTED, LIMIT_VERSION)
+        VALUES (#{id}, #{packageIdx}, #{rangeIdx}, #{rangeType}, #{repo}, #{introduced}, #{fixed}, #{lastAffected}, #{limitVersion})
+    </insert>
+    
+    <insert id="insertOsvReferences">
+        INSERT INTO OSV_REFERENCES (OSV_ID, REF_IDX, TYPE, PATCH_LINK)
+        VALUES (#{osvId}, #{refIdx}, #{type}, #{patchLink})
+    </insert>
+
+	<select id="selectOsvVulnerabilityInfo" resultType="oss.fosslight.domain.Vulnerability">
+        SELECT ID, OSV_ID, MODI_DATE FROM OSV_VULNERABILITIES WHERE OSV_ID = #{osvId}
+    </select>
+
+    <select id="getOsvAffectedPackageId" resultType="int">
+        SELECT COALESCE(MAX(AFFECTED_PKG_ID), 0) FROM OSV_AFFECTED_PACKAGES WHERE OSV_ID = #{osvId} AND ECOSYSTEM = #{ecosystem} AND PACKAGE_NAME = #{packageName}
+    </select>
+    
+    <select id="getOsvAffectedPackageRangeIndex" resultType="int">
+        SELECT COALESCE(MAX(RANGE_INDEX) + 1, 0) AS RANGE_INDEX FROM OSV_AFFECTED_PACKAGE_RANGES WHERE AFFECTED_PKG_ID = #{affectedPkgId}
+    </select>
+    
+    <delete id="deleteOsvAlias">
+    	DELETE FROM OSV_ALIASES WHERE ID = #{id}
+    </delete>
+    
+    <delete id="deleteOsvSeverity">
+    	DELETE FROM OSV_SEVERITIES WHERE ID = #{id}
+    </delete>
+    
+    <delete id="deleteOsvAffectedPackage">
+    	DELETE FROM OSV_AFFECTED_PACKAGES WHERE ID = #{id}
+    </delete>
+    
+    <delete id="deleteOsvAffectedPackageVersion">
+    	DELETE FROM OSV_AFFECTED_PACKAGES_VERSIONS WHERE ID = #{id}
+    </delete>
+    
+    <delete id="deleteOsvAffectedPackageRange">
+    	DELETE FROM OSV_AFFECTED_PACKAGE_RANGES WHERE ID = #{id}
+    </delete>
+    
+    <delete id="deleteOsvReferences">
+    	DELETE FROM OSV_REFERENCES WHERE OSV_ID = #{osvId}
+    </delete>
+    
+    <select id="selectOsvSecurityListForProject" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.Vulnerability">
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
+			SELECT DISTINCT TBL.*
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
+			SELECT TBL1.*
+					, IFNULL((SELECT VULNERABILITY_RESOLUTION FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = #{referenceId} AND OSS_NAME = TBL1.OSS_NAME AND OSS_VERSION = TBL1.OSS_VERSION AND CVE_ID = TBL1.CVE_ID LIMIT 1), 'Unresolved') AS VULNERABILITY_RESOLUTION
+			FROM
+			(
+				SELECT DISTINCT TBL.*
+		</if>
+		    	FROM 
+		    	(
+		    		<!-- Matching Priority 1 -->
+		    		SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    			1 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME
+					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+					
+					UNION ALL
+			
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID AS CVE_ID, M_ALIAS.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M_ALIAS.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M_ALIAS.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M_ALIAS.AFFECTED_VERSION,
+							GROUP_CONCAT(NULLIF(M_ALIAS.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+							GROUP_CONCAT(NULLIF(M_ALIAS.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+							M_ALIAS.SEARCH_VERSION_P3_YN,
+							M_ALIAS.SUMMARY AS VULN_SUMMARY,
+							(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M_ALIAS.ID) AS PATCH_LINK,
+							M.ID AS GROUP_KEY_ID,
+							'' AS ALIAS_ID,
+			    			1 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME
+					INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+					INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID, M_ALIAS.SEVERITY, M_ALIAS.PUBL_DATE, M_ALIAS.MODI_DATE, M_ALIAS.SEARCH_VERSION_P3_YN
+					
+					UNION ALL
+			
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			'' AS ALIAS_ID,
+			    			1 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_COMMON COM
+					ON OC.OSS_NAME = COM.OSS_NAME
+					INNER JOIN OSS_NICKNAME NICK
+					ON COM.OSS_COMMON_ID = NICK.OSS_COMMON_ID
+					INNER JOIN OSV_SEARCH_MASTER M
+					ON M.SEARCH_NAME_P1 = NICK.OSS_NICKNAME
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+					
+					<!-- Matching Priority 2 -->
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    			2 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
+					INNER JOIN OSS_DOWNLOADLOCATION DOWN ON COM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL
+					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND (IFNULL(M.SEARCH_NAME_P2, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+					
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID AS CVE_ID, M_ALIAS.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M_ALIAS.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M_ALIAS.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M_ALIAS.AFFECTED_VERSION,
+							GROUP_CONCAT(NULLIF(M_ALIAS.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+							GROUP_CONCAT(NULLIF(M_ALIAS.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+							M_ALIAS.SEARCH_VERSION_P3_YN,
+							M_ALIAS.SUMMARY AS VULN_SUMMARY,
+							(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M_ALIAS.ID) AS PATCH_LINK,
+							M.ID AS GROUP_KEY_ID,
+							'' AS ALIAS_ID,
+			    			2 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
+					INNER JOIN OSS_DOWNLOADLOCATION DOWN ON COM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL
+					INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+					INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID, M_ALIAS.SEVERITY, M_ALIAS.PUBL_DATE, M_ALIAS.MODI_DATE, M_ALIAS.SEARCH_VERSION_P3_YN
+					
+					<!-- Matching Priority 3 -->
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    			3 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME
+					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+					
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID AS CVE_ID, M_ALIAS.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M_ALIAS.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M_ALIAS.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M_ALIAS.AFFECTED_VERSION,
+							GROUP_CONCAT(NULLIF(M_ALIAS.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+							GROUP_CONCAT(NULLIF(M_ALIAS.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+							M_ALIAS.SEARCH_VERSION_P3_YN,
+							M_ALIAS.SUMMARY AS VULN_SUMMARY,
+							(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M_ALIAS.ID) AS PATCH_LINK,
+							M.ID AS GROUP_KEY_ID,
+							'' AS ALIAS_ID,
+			    			3 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME
+					INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+					INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID, M_ALIAS.SEVERITY, M_ALIAS.PUBL_DATE, M_ALIAS.MODI_DATE, M_ALIAS.SEARCH_VERSION_P3_YN
+					
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    			3 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
+					INNER JOIN OSS_NICKNAME NICK ON COM.OSS_COMMON_ID = NICK.OSS_COMMON_ID
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = NICK.OSS_NICKNAME
+					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+					
+					<!-- Extracts top 1 record with MAX CVSS_SCORE where oss_version is empty and SEARCH_VERSION_P3_YN is 'Y' -->
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, MAX(M.SEVERITY) AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    			1 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME
+					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND IFNULL(OC.OSS_VERSION, '') = ''
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+			
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, MAX(M.SEVERITY) AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			'' AS ALIAS_ID,
+			    			1 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_COMMON COM
+					ON OC.OSS_NAME = COM.OSS_NAME
+					INNER JOIN OSS_NICKNAME NICK
+					ON COM.OSS_COMMON_ID = NICK.OSS_COMMON_ID
+					INNER JOIN OSV_SEARCH_MASTER M
+					ON M.SEARCH_NAME_P1 = NICK.OSS_NICKNAME
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND IFNULL(OC.OSS_VERSION, '') = ''
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+					
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, MAX(M.SEVERITY) AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    			2 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
+					INNER JOIN OSS_DOWNLOADLOCATION DOWN ON COM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL
+					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND IFNULL(OC.OSS_VERSION, '') = ''
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+					
+					UNION ALL
+					
+					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, MAX(M.SEVERITY) AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
+			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
+			    			M.SEARCH_VERSION_P3_YN,
+			    			M.SUMMARY AS VULN_SUMMARY,
+			    			(SELECT GROUP_CONCAT(PATCH_LINK) FROM OSV_REFERENCES WHERE OSV_ID = M.ID) AS PATCH_LINK,
+			    			M.ID AS GROUP_KEY_ID,
+			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    			3 AS PRIORITY
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME
+					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+					</if>
+					AND IFNULL(OC.OSS_VERSION, '') = ''
+					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					AND M.WITHDRAWN_YN = 'N'
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
+				) TBL
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
+				ORDER BY TBL.OSS_NAME ASC, TBL.OSS_VERSION ASC, TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
+			) TBL1
+			ORDER BY TBL1.OSS_NAME ASC, TBL1.OSS_VERSION ASC, TBL1.GROUP_KEY_ID ASC, CASE WHEN TBL1.CVE_ID = TBL1.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL1.CVE_ID ASC
+		</if>
+    </select>
+    
+    <select id="selectOsvVulnerabilityListByUniqueNick" parameterType="map" resultType="oss.fosslight.domain.Vulnerability">
+		SELECT
+			M.ID,
+		    M.ID AS CVE_ID,
+		    GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+		    M.SOURCE,
+		    M.COMPONENT,
+		    M.AFFECTED_VERSION,
+		    M.SEVERITY,
+		    M.SEVERITY_TYPE,
+		    M.MODI_DATE,
+		    M.PUBL_DATE,
+		    M.SUMMARY,
+		    M.WITHDRAWN_YN,
+		    M.SEARCH_NAME_P1,
+		    M.SEARCH_NAME_P2,
+		    M.SEARCH_NAME_P3,
+		    M.SEARCH_VERSION_P1_YN,
+		    M.SEARCH_VERSION_P1,
+		    M.SEARCH_VERSION_P2_YN,
+		    M.SEARCH_VERSION_P2,
+		    M.SEARCH_VERSION_P3_YN,
+		    1 AS PRIORITY
+		FROM OSV_SEARCH_MASTER M
+		LEFT JOIN OSV_VULNERABILITIES V
+		ON M.ID = V.OSV_ID
+		LEFT JOIN OSV_ALIASES A
+		ON V.ID = A.ID
+		WHERE M.WITHDRAWN_YN = 'N'
+		AND M.SEARCH_VERSION_P1_YN = 'Y'
+		AND (
+			M.SEARCH_NAME_P1 = #{ossName}
+		    <if test="ossNicknames != null and ossNicknames.length > 0">
+		    	OR M.SEARCH_NAME_P1 IN
+		    	<foreach collection="ossNicknames" item="nick" open="(" separator="," close=")">
+			        #{nick}
+			    </foreach>
+		    </if>
+		)
+		GROUP BY M.ID
+		ORDER BY M.ID ASC, M.MODI_DATE DESC
+	</select>
+	
+	<select id="selectOsvVulnerabilityListByPurl" parameterType="map" resultType="oss.fosslight.domain.Vulnerability">
+		SELECT
+			M.ID,
+		    M.ID AS CVE_ID,
+		    GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+		    M.SOURCE,
+		    M.COMPONENT,
+		    M.AFFECTED_VERSION,
+		    M.SEVERITY,
+		    M.SEVERITY_TYPE,
+		    M.MODI_DATE,
+		    M.PUBL_DATE,
+		    M.SUMMARY,
+		    M.WITHDRAWN_YN,
+		    M.SEARCH_NAME_P1,
+		    M.SEARCH_NAME_P2,
+		    M.SEARCH_NAME_P3,
+		    M.SEARCH_VERSION_P1_YN,
+		    M.SEARCH_VERSION_P1,
+		    M.SEARCH_VERSION_P2_YN,
+		    M.SEARCH_VERSION_P2,
+		    M.SEARCH_VERSION_P3_YN,
+		    2 AS PRIORITY
+		FROM OSV_SEARCH_MASTER M
+		LEFT JOIN OSV_VULNERABILITIES V
+		ON M.ID = V.OSV_ID
+		LEFT JOIN OSV_ALIASES A
+		ON V.ID = A.ID
+		WHERE M.WITHDRAWN_YN = 'N'
+		AND M.SEARCH_VERSION_P2_YN = 'Y'
+		AND M.SEARCH_NAME_P2 IN
+		<foreach collection="purls" item="purl" open="(" separator="," close=")">
+		    #{purl}
+		</foreach>
+		GROUP BY M.ID
+		ORDER BY M.ID ASC, M.MODI_DATE DESC
+	</select>
+	
+	<select id="selectOsvVulnerabilityListByPackageName" parameterType="map" resultType="oss.fosslight.domain.Vulnerability">
+		SELECT TBL.*
+		FROM
+		(
+			SELECT M.*, M.ID AS CVE_ID, GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID, M.ID AS GROUP_KEY_ID, 3 AS PRIORITY
+			FROM OSV_SEARCH_MASTER M
+			LEFT JOIN OSV_VULNERABILITIES V
+			ON M.ID = V.OSV_ID
+			LEFT JOIN OSV_ALIASES A
+			ON V.ID = A.ID
+			WHERE M.WITHDRAWN_YN = 'N'
+			AND (M.SEARCH_NAME_P3 = #{ossName}
+			    <if test="ossNicknames != null and ossNicknames.length > 0">
+			    	OR M.SEARCH_NAME_P3 IN
+				    <foreach collection="ossNicknames" item="nick" open="(" separator="," close=")">
+				        #{nick}
+				    </foreach>
+			    </if>
+			)
+			GROUP BY M.ID
+			
+			UNION ALL
+			
+			SELECT M_ALIAS.*, M_ALIAS.ID AS CVE_ID, '' AS ALIAS_ID, M.ID AS GROUP_KEY_ID, 3 AS PRIORITY
+			FROM OSV_SEARCH_MASTER M
+			INNER JOIN OSV_VULNERABILITIES V ON M.ID = V.OSV_ID
+			INNER JOIN OSV_ALIASES A ON V.ID = A.ID
+			INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+			WHERE M.WITHDRAWN_YN = 'N'
+			AND (M.SEARCH_NAME_P3 = #{ossName}
+			    <if test="ossNicknames != null and ossNicknames.length > 0">
+			    	OR M.SEARCH_NAME_P3 IN
+				    <foreach collection="ossNicknames" item="nick" open="(" separator="," close=")">
+				        #{nick}
+				    </foreach>
+			    </if>
+			)
+			AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+			GROUP BY M.ID, M_ALIAS.ID
+		) TBL
+		ORDER BY TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC, TBL.MODI_DATE DESC
+	</select>
+
+	<update id="setGroupConcatMaxLen">
+		SET SESSION group_concat_max_len = 104857600
+	</update>
+	
+	<update id="dropOsvRangeTemp">
+		DROP TEMPORARY TABLE IF EXISTS OSV_RANGE_TEMP
+	</update>
+	
+	<update id="createOsvRangeTemp">
+		CREATE TEMPORARY TABLE OSV_RANGE_TEMP AS
+		SELECT
+		    ID AS INT_ID,
+		    PACKAGE_IDX,
+		    GROUP_CONCAT(
+		        CONCAT(
+		            CASE WHEN IFNULL(INTRODUCED, '') <![CDATA[<>]]> '' THEN CONCAT('[', INTRODUCED) ELSE '' END,
+		            CASE WHEN IFNULL(INTRODUCED, '') <![CDATA[<>]]> '' AND (IFNULL(FIXED, '') <![CDATA[<>]]> '' OR IFNULL(LAST_AFFECTED, '') <![CDATA[<>]]> '') THEN ', ' ELSE '' END,
+		            CASE 
+		                WHEN IFNULL(FIXED, '') <![CDATA[<>]]> '' THEN CONCAT(FIXED, ')')
+		                WHEN IFNULL(LAST_AFFECTED, '') <![CDATA[<>]]> '' THEN CONCAT(LAST_AFFECTED, ']')
+		                ELSE '' 
+		            END
+		        )
+		        ORDER BY RANGE_IDX ASC SEPARATOR ','
+		    ) AS RANGE_VERSION_TEXT,
+		    MAX(CASE WHEN RANGE_TYPE = 'SEMVER' THEN 'Y' END) AS IS_SEMVER_TYPE,
+		    GROUP_CONCAT(
+		        CASE WHEN RANGE_TYPE = 'SEMVER' THEN 
+		            CONCAT(
+		                IFNULL(INTRODUCED, ''),
+		                '~',
+		                IFNULL(FIXED, IFNULL(LAST_AFFECTED, ''))
+		            )
+		        END ORDER BY RANGE_IDX ASC SEPARATOR '|'
+		    ) AS SEMVER_RANGE_RAW,
+		    MIN(CASE WHEN INTRODUCED = '0' OR INTRODUCED = '' THEN IFNULL(FIXED, LAST_AFFECTED) ELSE INTRODUCED END) AS SORT_VERSION
+		FROM OSV_AFFECTED_PACKAGE_RANGES
+		GROUP BY ID, PACKAGE_IDX
+	</update>
+	
+	<update id="createIndexOsvRangeTemp">
+		CREATE INDEX IDX_TMP_RANGE ON OSV_RANGE_TEMP(INT_ID, PACKAGE_IDX)
+	</update>
+	
+	<update id="dropOsvVersionTemp">
+		DROP TEMPORARY TABLE IF EXISTS OSV_VERSION_TEMP
+	</update>
+	
+	<update id="createOsvVersionTemp">
+		CREATE TEMPORARY TABLE OSV_VERSION_TEMP AS
+		SELECT
+		    ID AS INT_ID,
+		    PACKAGE_IDX,
+		    CASE WHEN COUNT(VERSION) > 0 THEN 'Y' ELSE 'N' END AS HAS_VERSIONS_LIST,
+		    GROUP_CONCAT(VERSION 
+		        ORDER BY 
+		            CASE WHEN VERSION REGEXP '^[0-9]' THEN 1 ELSE 2 END ASC,
+		            LPAD(SUBSTRING_INDEX(SUBSTRING_INDEX(VERSION, '.', 1), '.', -1), 10, '0') ASC,
+		            LPAD(CASE WHEN VERSION LIKE '%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(VERSION, '.', 2), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            LPAD(CASE WHEN VERSION LIKE '%.%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(VERSION, '.', 3), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            LPAD(CASE WHEN VERSION LIKE '%.%.%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(VERSION, '.', 4), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            VERSION ASC 
+		        SEPARATOR ','
+		    ) AS VERSION_TEXT,
+		    MIN(VERSION) AS SORT_VERSION
+		FROM OSV_AFFECTED_PACKAGES_VERSIONS
+		GROUP BY ID, PACKAGE_IDX
+	</update>
+	
+	<update id="createIndexOsvVersionTemp">
+		CREATE INDEX IDX_TMP_VERSION ON OSV_VERSION_TEMP(INT_ID, PACKAGE_IDX)
+	</update>
+	
+	<update id="dropOsvSeverityTemp">
+		DROP TEMPORARY TABLE IF EXISTS OSV_SEVERITY_TEMP
+	</update>
+	
+	<update id="createOsvSeverityTemp">
+		CREATE TEMPORARY TABLE OSV_SEVERITY_TEMP AS
+		SELECT INT_ID, TYPE, SCORE
+		FROM (
+		    SELECT
+		        ID AS INT_ID,
+		        TYPE, SCORE,
+		        ROW_NUMBER() OVER(
+		            PARTITION BY ID
+		            ORDER BY
+		                CASE WHEN PACKAGE_NAME = '*' THEN 2 ELSE 1 END ASC,
+		                CASE SOURCE WHEN 'PACKAGE' THEN 1 WHEN 'GLOBAL' THEN 2 WHEN 'PACKAGE_DB' THEN 3 WHEN 'GLOBAL_DB' THEN 4 WHEN 'PACKAGE_ECO' THEN 5 ELSE 99 END,
+		                CASE TYPE WHEN 'CVSS_V4' THEN 1 WHEN 'CVSS_V3' THEN 2 WHEN 'CVSS_V2' THEN 3 WHEN 'Ubuntu' THEN 4 WHEN 'N/A' THEN 5 ELSE 99 END
+		        ) AS RN
+		    FROM OSV_SEVERITIES
+		) X WHERE RN = 1
+	</update>
+	
+	<update id="createIndexOsvSeverityTemp">
+		CREATE INDEX IDX_TMP_SEV_INT_ID ON OSV_SEVERITY_TEMP(INT_ID)
+	</update>
+	
+	<update id="dropOsvPreMergeTemp">
+		DROP TEMPORARY TABLE IF EXISTS OSV_PRE_MERGE_TEMP
+	</update>
+	
+	<update id="createOsvPreMergeTemp">
+		CREATE TEMPORARY TABLE OSV_PRE_MERGE_TEMP AS
+		SELECT
+		    V.OSV_ID,
+		    V.ID AS INT_ID,
+		    V.MODI_DATE,
+		    V.PUBL_DATE,
+		    V.SUMMARY,
+		    CASE WHEN V.WITHDRAWN IS NOT NULL THEN 'Y' ELSE 'N' END AS WITHDRAWN_YN,
+		    P.PACKAGE_NAME,
+		    P.ECOSYSTEM,
+		    CASE
+		        WHEN IFNULL(P.ECOSYSTEM, '') <![CDATA[<>]]> '' AND IFNULL(P.PACKAGE_NAME, '') <![CDATA[<>]]> '' THEN CONCAT(P.ECOSYSTEM, ':', P.PACKAGE_NAME)
+		        WHEN IFNULL(P.PURL, '') <![CDATA[<>]]> '' THEN P.PURL
+		        WHEN IFNULL(G.REPO, '') <![CDATA[<>]]> '' THEN G.REPO
+		        ELSE ''
+		    END AS COMPONENT,
+		    CASE 
+		        WHEN G_TYPE.RANGE_TYPE = 'GIT' THEN V_TXT.VERSION_TEXT
+		        ELSE IFNULL(R_TXT.RANGE_VERSION_TEXT, V_TXT.VERSION_TEXT)
+		    END AS AFFECTED_VERSION,
+		    CASE 
+		        WHEN G_TYPE.RANGE_TYPE = 'GIT' THEN V_TXT.SORT_VERSION
+		        ELSE IFNULL(R_TXT.SORT_VERSION, V_TXT.SORT_VERSION)
+		    END AS SORT_VERSION,
+		    CASE
+		        WHEN IFNULL(P.PURL, '') LIKE 'pkg:github/%' THEN 
+		            CONCAT(
+		                SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(P.PURL, 'pkg:github/', -1), '@', 1), '/', 1),
+		                '-',
+		                SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(P.PURL, 'pkg:github/', -1), '@', 1), '?', 1), '/', -1)
+		            )
+		        WHEN (P.PURL IS NULL OR P.PURL = '') AND IFNULL(G.REPO, '') LIKE '%github.com/%' THEN 
+		            CONCAT(
+		                SUBSTRING_INDEX(SUBSTRING_INDEX(G.REPO, 'github.com/', -1), '/', 1),
+		                '-',
+		                SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(G.REPO, 'github.com/', -1), '.git', 1), '/', -1)
+		            )
+		        ELSE NULL
+		    END AS SEARCH_NAME_P1,
+		    P.PURL AS SEARCH_NAME_P2,
+		    P.PACKAGE_NAME AS SEARCH_NAME_P3,
+		    IFNULL(V_TXT.HAS_VERSIONS_LIST, 'N') AS SEARCH_VERSION_P1_YN,
+		    V_TXT.VERSION_TEXT AS SEARCH_VERSION_P1,
+		    IFNULL(R_TXT.IS_SEMVER_TYPE, 'N') AS SEARCH_VERSION_P2_YN,
+		    R_TXT.SEMVER_RANGE_RAW AS SEARCH_VERSION_P2
+		FROM OSV_VULNERABILITIES V
+		LEFT JOIN OSV_AFFECTED_PACKAGES P ON V.ID = P.ID
+		LEFT JOIN OSV_VERSION_TEMP V_TXT ON P.ID = V_TXT.INT_ID AND P.PACKAGE_IDX = V_TXT.PACKAGE_IDX
+		LEFT JOIN OSV_RANGE_TEMP R_TXT ON P.ID = R_TXT.INT_ID AND P.PACKAGE_IDX = R_TXT.PACKAGE_IDX
+		LEFT JOIN (
+		    SELECT ID, PACKAGE_IDX, MAX(RANGE_TYPE) AS RANGE_TYPE FROM OSV_AFFECTED_PACKAGE_RANGES GROUP BY ID, PACKAGE_IDX
+		) G_TYPE ON P.ID = G_TYPE.ID AND P.PACKAGE_IDX = G_TYPE.PACKAGE_IDX
+		LEFT JOIN (
+		    SELECT ID, PACKAGE_IDX, MAX(REPO) AS REPO FROM OSV_AFFECTED_PACKAGE_RANGES WHERE RANGE_TYPE = 'GIT' GROUP BY ID, PACKAGE_IDX
+		) G ON P.ID = G.ID AND P.PACKAGE_IDX = G.PACKAGE_IDX
+	</update>
+	
+	<update id="createIndexOsvPreMergeTemp">
+		CREATE INDEX IDX_TMP_PRE_MERGE ON OSV_PRE_MERGE_TEMP(INT_ID)
+	</update>
+	
+	<update id="dropOsvSearchMasterTemp">
+		DROP TABLE IF EXISTS OSV_SEARCH_MASTER_TEMP
+	</update>
+	
+	<update id="createOsvSearchMasterTemp">
+		CREATE TABLE OSV_SEARCH_MASTER_TEMP (
+		    ID VARCHAR(50),
+		    SOURCE VARCHAR(20) DEFAULT 'OSV',
+		    COMPONENT TEXT,
+		    AFFECTED_VERSION LONGTEXT,
+		    SEVERITY VARCHAR(100) COMMENT 'Calculated numeric score string or raw text rating (Score Only)',
+		    SEVERITY_TYPE VARCHAR(30) COMMENT 'Metrics system type (e.g., CVSS_V3, CVSS_V4, Ubuntu)',
+		    MODI_DATE DATETIME COMMENT 'Vulnerability last modification date',
+		    PUBL_DATE DATETIME COMMENT 'Vulnerability publication date',
+		    SUMMARY TEXT COMMENT 'Vulnerability summary description',
+		    
+		    WITHDRAWN_YN CHAR(1) DEFAULT 'N' COMMENT 'Withdrawal status (Y: Withdrawn, N: Active)',
+		    
+		    SEARCH_NAME_P1 VARCHAR(255) COMMENT 'Priority 1: Unique nickname derived from PURL or Git repo',
+		    SEARCH_NAME_P2 VARCHAR(255) COMMENT 'Priority 2: Original PURL string from affected package',
+		    SEARCH_NAME_P3 VARCHAR(255) COMMENT 'Priority 3: Original package name string',
+		    
+		    SEARCH_VERSION_P1_YN CHAR(1) DEFAULT 'N' COMMENT 'Target Priority 1 flag: Indicates whether exact versions list exists',
+		    SEARCH_VERSION_P1 LONGTEXT COMMENT 'Priority 1 matching data: Comma-separated exact version list',
+		    SEARCH_VERSION_P2_YN CHAR(1) DEFAULT 'N' COMMENT 'Target Priority 2 flag: Indicates whether SemVer range exists',
+		    SEARCH_VERSION_P2 LONGTEXT COMMENT 'Priority 2 matching data: Pipe-separated raw SemVer range criteria',
+		    SEARCH_VERSION_P3_YN CHAR(1) DEFAULT 'N' COMMENT 'Target Priority 3 flag: Indicates N/A version matching (Name-only matching)'
+		)
+	</update>
+	
+	<update id="insertOsvSearchMasterData">
+		INSERT INTO OSV_SEARCH_MASTER_TEMP (
+		    ID, SOURCE, COMPONENT, AFFECTED_VERSION, SEVERITY, SEVERITY_TYPE, MODI_DATE, PUBL_DATE, SUMMARY, WITHDRAWN_YN,
+		    SEARCH_NAME_P1, SEARCH_NAME_P2, SEARCH_NAME_P3,
+		    SEARCH_VERSION_P1_YN, SEARCH_VERSION_P1,
+		    SEARCH_VERSION_P2_YN, SEARCH_VERSION_P2,
+		    SEARCH_VERSION_P3_YN
+		)
+		SELECT
+		    M.OSV_ID AS ID,
+		    'OSV' AS SOURCE,
+		    M.COMPONENT,
+		    GROUP_CONCAT(M.AFFECTED_VERSION 
+		        ORDER BY 
+		            CASE WHEN M.SORT_VERSION REGEXP '^[0-9]' THEN 1 ELSE 2 END ASC,
+		            LPAD(SUBSTRING_INDEX(SUBSTRING_INDEX(M.SORT_VERSION, '.', 1), '.', -1), 10, '0') ASC,
+		            LPAD(CASE WHEN M.SORT_VERSION LIKE '%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(M.SORT_VERSION, '.', 2), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            LPAD(CASE WHEN M.SORT_VERSION LIKE '%.%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(M.SORT_VERSION, '.', 3), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            LPAD(CASE WHEN M.SORT_VERSION LIKE '%.%.%.%' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(M.SORT_VERSION, '.', 4), '.', -1) ELSE '0' END, 10, '0') ASC,
+		            M.SORT_VERSION ASC
+		        SEPARATOR ', '
+		    ) AS AFFECTED_VERSION,
+		    
+		    MAX(S.SCORE) AS SEVERITY,
+		    MAX(S.TYPE) AS SEVERITY_TYPE,
+		    MAX(M.MODI_DATE) AS MODI_DATE,
+		    MAX(M.PUBL_DATE) AS PUBL_DATE,
+		    MAX(M.SUMMARY) AS SUMMARY,
+		    MAX(M.WITHDRAWN_YN) AS WITHDRAWN_YN,
+		    
+		    MAX(M.SEARCH_NAME_P1) AS SEARCH_NAME_P1,
+		    MAX(M.SEARCH_NAME_P2) AS SEARCH_NAME_P2,
+		    MAX(M.SEARCH_NAME_P3) AS SEARCH_NAME_P3,
+		    
+		    MAX(M.SEARCH_VERSION_P1_YN) AS SEARCH_VERSION_P1_YN,
+		    GROUP_CONCAT(M.SEARCH_VERSION_P1 ORDER BY M.SEARCH_VERSION_P1 ASC SEPARATOR ',') AS SEARCH_VERSION_P1,
+		    MAX(M.SEARCH_VERSION_P2_YN) AS SEARCH_VERSION_P2_YN,
+		    GROUP_CONCAT(M.SEARCH_VERSION_P2 ORDER BY M.SEARCH_VERSION_P2 ASC SEPARATOR '|') AS SEARCH_VERSION_P2,
+		    CASE 
+		        WHEN (IFNULL(MAX(M.SEARCH_NAME_P1), '') <![CDATA[<>]]> '' OR IFNULL(MAX(M.SEARCH_NAME_P2), '') <![CDATA[<>]]> '' OR IFNULL(MAX(M.SEARCH_NAME_P3), '') <![CDATA[<>]]> '') 
+		        THEN 'Y' 
+		        ELSE 'N' 
+		    END AS SEARCH_VERSION_P3_YN
+		FROM OSV_PRE_MERGE_TEMP M
+		LEFT JOIN OSV_SEVERITY_TEMP S ON M.INT_ID = S.INT_ID
+		GROUP BY M.OSV_ID, M.COMPONENT
+	</update>
+	
+	<update id="updateOsvSearchMasterSeverityDefault">
+		UPDATE OSV_SEARCH_MASTER_TEMP SET SEVERITY = '-' WHERE IFNULL(SEVERITY, '') = ''
+	</update>
+	
+	<update id="createIndexMasterId">CREATE INDEX IDX_MASTER_ID ON OSV_SEARCH_MASTER_TEMP(ID)</update>
+	<update id="createIndexMasterWithdrawn">CREATE INDEX IDX_MASTER_WITHDRAWN ON OSV_SEARCH_MASTER_TEMP(WITHDRAWN_YN)</update>
+	<update id="createIndexMasterNameP1">CREATE INDEX IDX_MASTER_NAME_P1 ON OSV_SEARCH_MASTER_TEMP(SEARCH_NAME_P1)</update>
+	<update id="createIndexMasterNameP2">CREATE INDEX IDX_MASTER_NAME_P2 ON OSV_SEARCH_MASTER_TEMP(SEARCH_NAME_P2)</update>
+	<update id="createIndexMasterNameP3">CREATE INDEX IDX_MASTER_NAME_P3 ON OSV_SEARCH_MASTER_TEMP(SEARCH_NAME_P3)</update>
+	<update id="createIndexMasterVersionP1Yn">CREATE INDEX IDX_MASTER_VERSION_P1_YN ON OSV_SEARCH_MASTER_TEMP(SEARCH_VERSION_P1_YN)</update>
+	<update id="createIndexMasterVersionP2Yn">CREATE INDEX IDX_MASTER_VERSION_P2_YN ON OSV_SEARCH_MASTER_TEMP(SEARCH_VERSION_P2_YN)</update>
+	<update id="createIndexMasterVersionP3Yn">CREATE INDEX IDX_MASTER_VERSION_P3_YN ON OSV_SEARCH_MASTER_TEMP(SEARCH_VERSION_P3_YN)</update>
+	<update id="createIndexMasterSevType">CREATE INDEX IDX_MASTER_SEV_TYPE ON OSV_SEARCH_MASTER_TEMP(SEVERITY_TYPE)</update>
+	<update id="createIndexMasterAffectedVersion">CREATE INDEX IDX_MASTER_AFFECTED_VERSION ON OSV_SEARCH_MASTER_TEMP(AFFECTED_VERSION)</update>
+	
+	<update id="dropOsvSearchMaster">DROP TABLE IF EXISTS OSV_SEARCH_MASTER</update>
+	<update id="renameOsvSearchMasterTemp">RENAME TABLE OSV_SEARCH_MASTER_TEMP TO OSV_SEARCH_MASTER</update>
+</mapper>

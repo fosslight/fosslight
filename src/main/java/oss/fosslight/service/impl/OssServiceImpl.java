@@ -101,8 +101,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Autowired PartnerService partnerService;
 	@Autowired VerificationService verificationService;
 	@Autowired SelfCheckService selfCheckService;
+	@Autowired VulnerabilityService vulnerabilityService;
 	@Autowired AutoFillOssInfoService autoFillOssInfoService;
 	@Autowired ApiRequestService apiRequestService;
+	@Autowired EnterpriseIntegrationService enterpriseIntegrationService;
 
 	// Mapper
 	@Autowired OssMapper ossMapper;
@@ -112,6 +114,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Autowired PartnerMapper partnerMapper;
 	@Autowired VulnerabilityMapper vulnerabilityMapper;
 	@Autowired CodeMapper codeMapper;
+	
+	@Autowired OsvDataService osvDataService;
 	
 	@Override
 	public Map<String,Object> getOssMasterList(OssMaster ossMaster) {
@@ -345,17 +349,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		StringBuilder sb = new StringBuilder();
 		
-		for (OssMaster ossNickname : ossNicknameList){
-			sb.append(ossNickname.getOssNickname()).append(",");
+		List<String> ossNicknames = new ArrayList<>();
+		if (CollectionUtils.isNotEmpty(ossNicknameList)) {
+			for (OssMaster ossNickname : ossNicknameList) {
+				ossNicknames.add(ossNickname.getOssNickname());
+			}
 		}
-		
-		String[] ossNicknames = new String(sb).split("[,]");
 		
 		sb = new StringBuilder(); // 초기화
 		
-		if (ossDownloadLocation != null && !ossDownloadLocation.isEmpty()) {
+		List<String> purls = new ArrayList<>();
+		if (CollectionUtils.isNotEmpty(ossDownloadLocation)) {
 			for (OssMaster location : ossDownloadLocation) {
 				if (!isEmpty(location.getPurl())) {
+					purls.add(location.getPurl());
 					sb.append(location.getDownloadLocation() + "|" + location.getPurl()).append(",");
 				} else {
 					sb.append(location.getDownloadLocation());
@@ -377,8 +384,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		String[] detectedLicenses = new String(sb).split("[,]");
 		
-		ossMaster.setOssNicknames(ossNicknames);
+		ossMaster.setOssNicknames(ossNicknames.toArray(String[]::new));
 		ossMaster.setDownloadLocations(ossDownloadLocations);
+		ossMaster.setPurls(purls.toArray(String[]::new));
 		ossMaster.setOssLicenses(ossLicenses);
 		ossMaster.setDetectedLicenses(Arrays.asList(detectedLicenses));
 		
@@ -3466,6 +3474,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			resCd = "10";
+			
+			if (!isEmpty(ossMaster.getJobSeq()) && Integer.parseInt(ossMaster.getJobSeq()) >= 1) {
+				enterpriseIntegrationService.executeAnalysisUpdate(ossMaster.getJobSeq(), ossId, null, false);
+			}
 		} catch (RuntimeException ex) {
 			log.error(ex.getMessage(), ex);
 			throw ex;
@@ -4864,14 +4876,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					list = checkVulnData(list, ossMaster.getOssNicknames());
 				}
 				list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
-				int idx = 1;
-				for (Vulnerability vuln : list) {
-					if (idx > 5) {
-						break;
-					}
-					convertList.add(vuln);
-					idx++;
-				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -4886,7 +4890,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setOssVersion("");
 		}
 		
-		return convertList;
+		return list;
 	}
 
 	private List<Vulnerability> vulnDataForNotIncludeCpeMatch(Boolean convertFlag, OssMaster ossMaster, String[] nicknameList, List<String> convertNameList, List<String> dashOssNameList, OssMaster param) {
@@ -4991,17 +4995,34 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
+	public List<Vulnerability> getMergedVulnerabilityList(OssMaster ossMaster) {
+		List<Vulnerability> combinedList = new ArrayList<>();
+	    
+		// 1. Fetch NVD vulnerabilities and set the initial source
+	    List<Vulnerability> nvdList = getOssVulnerabilityList2(ossMaster);
+	    if (CollectionUtils.isNotEmpty(nvdList)) {
+	        for (Vulnerability v : nvdList) {
+	        	v.setId(v.getCveId());
+	            v.setSource("NVD");
+	            v.setOssName(ossMaster.getOssName());
+	            v.setOssVersion(ossMaster.getOssVersion());
+	        }
+	        combinedList.addAll(nvdList);
+	    }
+		
+	    // 2. Fetch OSV vulnerabilities and merge them with the existing list
+	    List<Vulnerability> finalFilteredVulnList = osvDataService.fetchOsvVulnerabilityData(ossMaster, combinedList);
+	    return finalFilteredVulnList;
+	}
+	
+	@Override
 	public List<String> getOssNicknameListWithoutOwn(OssMaster ossMaster, List<String> checkList, List<String> duplicatedList) {
 		if (checkList != null && checkList.size() > 0) {
 			List<OssMaster> ossNameCheckList = ossMapper.selectOssNameList();
-			ossNameCheckList = ossNameCheckList.stream()
-							.filter(e -> checkList.stream().anyMatch(Predicate.isEqual(e.getOssName())))
-							.collect(Collectors.toList());
+			ossNameCheckList = ossNameCheckList.stream().filter(e -> checkList.stream().anyMatch(Predicate.isEqual(e.getOssName()))).collect(Collectors.toList());
 						
 			List<OssMaster> ossNicknameCheckList = ossMapper.selectOssNicknameListWithoutOwn(ossMaster);
-			ossNicknameCheckList = ossNicknameCheckList.stream()
-								.filter(e -> checkList.stream().anyMatch(Predicate.isEqual(e.getOssNickname())))
-								.collect(Collectors.toList());
+			ossNicknameCheckList = ossNicknameCheckList.stream().filter(e -> checkList.stream().anyMatch(Predicate.isEqual(e.getOssNickname()))).collect(Collectors.toList());
 			
 			if (ossNameCheckList != null && ossNameCheckList.size() > 0) {
 				for (OssMaster om : ossNameCheckList) {
@@ -5829,9 +5850,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public void setOssAnalysisStatus(String prjId) {
+		setOssAnalysisStatus(prjId, loginUserName(), null);
+	}
+
+	@Override
+	public void setOssAnalysisStatus(String prjId, String userId, Integer jobSeq) {
 		OssMaster ossBean = new OssMaster();
 		ossBean.setPrjId(prjId);
-		ossBean.setCreator(loginUserName());
+		ossBean.setCreator(userId);
+		if (jobSeq != null) {
+			ossBean.setJobSeq(String.valueOf(jobSeq));
+		}
 		ossMapper.setOssAnalysisStatus(ossBean);
 	}
 
@@ -5945,5 +5974,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public void updateAnalysisComments(String componentId, String prjId, String comments, String commentsFlag) {
 		ossMapper.updateAnalysisComments(componentId, prjId, comments, commentsFlag);
+	}
+
+	@Override
+	public OssAnalysis selectOssAnalysisOne(String componentId) {
+		return ossMapper.selectOssAnalysisOne(componentId);
+	}
+
+	@Override
+	public void updateOssAnalysis(String ossName, String ossVersion, String jobSeq, String ossId) {
+		// UPDATE ENT_ANALYSIS_JOB_DETAILS
+		ossMapper.updateEntAnalysisJobDetails(ossId, ossName, ossVersion, jobSeq);
 	}
 }

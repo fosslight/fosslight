@@ -276,6 +276,11 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		}
 		
+		String jobSeq = req.getParameter("jobSeq");
+		if (!isEmpty(jobSeq)) {
+			model.addAttribute("jobSeq", jobSeq);
+		}
+		
 		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 
@@ -292,7 +297,7 @@ public class OssController extends CoTopComponent{
 			ossMaster.setOssVersion("");
 		}
 		//getDetectedLicenses()는 detectedLicenses가 null이면 비어있는 ArrayList객체를 생성해서 반환함.
-		if (!ossMaster.getDetectedLicenses().get(0).isEmpty()) {
+		if (!CollectionUtils.isEmpty(ossMaster.getDetectedLicenses()) && !ossMaster.getDetectedLicenses().get(0).isEmpty()) {
 			List<String> detectedLicenseNames = ossMaster.getDetectedLicenses();
 			Map<String, String> detectedLicenseIdByName = new HashMap<>();
 			for (String name : detectedLicenseNames) {
@@ -333,14 +338,8 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("projectListFlag", projectListFlag);
 		
-		List<Vulnerability> vulnInfoList = ossService.getOssVulnerabilityList2(ossMaster);
-		
-		if (vulnInfoList != null && !vulnInfoList.isEmpty()) {
-			if (vulnInfoList.size() == 5) {
-				model.addAttribute("vulnListMore", "vulnListMore");
-			}
-			model.addAttribute("vulnInfoList", vulnInfoList);
-		}
+		List<Vulnerability> vulnInfoList = ossService.getMergedVulnerabilityList(ossMaster);
+		model.addAttribute("vulnInfoList", vulnInfoList);
 		
 		List<String> nickList = new ArrayList<>();
 		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
@@ -348,7 +347,7 @@ public class OssController extends CoTopComponent{
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 
-		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
+		return CommonFunction.isAdmin() ? "oss/edit_dev" : "oss/view_vuln";
 	}
 	
 	@GetMapping(value={OSS.POPUPLIST_ID}, produces = "text/html; charset=utf-8")
@@ -373,6 +372,7 @@ public class OssController extends CoTopComponent{
 	public String copy(@PathVariable String ossId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		OssMaster ossMaster = new OssMaster(ossId);
 		String _version = req.getParameter("ossVersion");
+		String jobSeq = req.getParameter("jobSeq");
 		boolean isVersionup = false;
 		
 		if (_version != null) {
@@ -398,6 +398,9 @@ public class OssController extends CoTopComponent{
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		
+		if (!isEmpty(jobSeq)) {
+			model.addAttribute("jobSeq", jobSeq);
+		}
 		return "oss/edit";
 	}
 	

@@ -418,7 +418,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			Map<String, Object> ossInfo = requestClearlyDefinedLicense(requestUri);
 			if (ossInfo != null && ossInfo.containsKey("licensed")) {
 				Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
-				checkedLicense = licenseInfo.get("declared");
+				if (licenseInfo != null) {
+					checkedLicense = licenseInfo.get("declared");
+				} else {
+					checkedLicense = "NONE";
+				}
 			}
 		} catch (Exception e) {
 			log.error("Clearly Defined -> " + requestUri + " : " + e.getMessage());

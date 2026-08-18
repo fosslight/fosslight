@@ -2970,7 +2970,11 @@
 		    OC.IMPORTANT_NOTES,
 		    (SELECT GROUP_CONCAT(VA.OSS_VERSION_ALIAS SEPARATOR ',') FROM OSS_VERSION_ALIAS VA WHERE VA.OSS_ID = OV.OSS_ID) AS OSS_VERSION_ALIAS,
 		    (SELECT GROUP_CONCAT(IC.CPE23URI SEPARATOR ',') FROM OSS_INCLUDE_CPE IC WHERE IC.OSS_COMMON_ID = OV.OSS_COMMON_ID) AS INCLUDE_CPE,
-		    (SELECT GROUP_CONCAT(EC.CPE23URI SEPARATOR ',') FROM OSS_EXCLUDE_CPE EC WHERE EC.OSS_COMMON_ID = OV.OSS_COMMON_ID) AS EXCLUDE_CPE
+		    (SELECT GROUP_CONCAT(EC.CPE23URI SEPARATOR ',') FROM OSS_EXCLUDE_CPE EC WHERE EC.OSS_COMMON_ID = OV.OSS_COMMON_ID) AS EXCLUDE_CPE,
+		    OV.CREATOR,
+		    OV.CREATED_DATE,
+		    OV.MODIFIER,
+		    OV.MODIFIED_DATE
 		FROM OSS_VERSION OV
 		INNER JOIN OSS_COMMON OC ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T2.OSS_ID = OV.OSS_ID
@@ -3071,6 +3075,10 @@
 		    , (SELECT GROUP_CONCAT(OSS_VERSION_ALIAS) FROM OSS_VERSION_ALIAS WHERE OSS_ID = T1.OSS_ID) AS OSS_VERSION_ALIAS
 			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS INCLUDE_CPE
 			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS EXCLUDE_CPE
+			, T1.CREATOR
+		    , T1.CREATED_DATE
+		    , T1.MODIFIER
+		    , T1.MODIFIED_DATE
 		FROM 
 			(
 				SELECT
@@ -3835,6 +3843,7 @@
 		  	 , COMPLETE_YN
 		  	 , REFERENCE_OSS_ID
 			 , REFERENCE_DIV
+			 , JOB_SEQ
 		  FROM OSS_ANALYSIS_MAP
 		 WHERE REFERENCE_ID = #{prjId}
 		 <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(startAnalysisFlag,'Y')">
@@ -3875,6 +3884,9 @@
 		  , ANALYSIS_END_DATE
 		  , MODIFIED_DATE
 		  , MODIFIER
+		  <if test="!@oss.fosslight.util.StringUtil@isEmpty(jobSeq)">
+		  	, JOB_SEQ
+		  </if>
 		) VALUES (
 			#{prjId}
 		  , 'PROGRESS'
@@ -3890,20 +3902,23 @@
 		  , now()
 		  , null
 		  , now()
-		  <choose>
-			  <when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			  , 'oscAdmin'
-			  </when>
-			  <otherwise>
-			  , #{creator}
-			  </otherwise>
-		  </choose>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
+				, 'oscAdmin'
+			</when>
+			<otherwise>
+				, #{creator}
+			</otherwise>
+		</choose>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(jobSeq)">
+			, #{jobSeq}
+		</if>
 		) ON DUPLICATE KEY UPDATE
 			STATUS					= 'PROGRESS'
 		  , ANALYSIS_START_DATE 	= now()
 		  , ANALYSIS_END_DATE		= null
 		  , MODIFIED_DATE 			= now()
-		  <choose>
+		<choose>
 			<when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
 		    	, MODIFIER			= 'oscAdmin'
 		    </when>
@@ -3912,6 +3927,9 @@
 		    </otherwise>
 		</choose>
 		  , SEND_MAIL_FLAG			= 'N'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(jobSeq)">
+			, JOB_SEQ				= #{jobSeq}
+		</if>
 	</insert>
 	
 	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
@@ -4312,7 +4330,6 @@
 		INNER JOIN NVD_CVE_V3 CVE
 		ON NVD.CVE_ID = CVE.CVE_ID
 		ORDER BY CVE.CVSS_SCORE DESC, CVE.MODI_DATE DESC
-		LIMIT 20
 	</select>
 	
 	<select id="getDeactivateOssList" resultType="string">
@@ -4787,5 +4804,16 @@
 		    MODIFIED_DATE = NOW(),
 		    MODIFIER = #{loginUserName}
 	</insert>
-
+	
+	<select id="selectOssAnalysisOne" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssAnalysis">
+		SELECT * FROM OSS_ANALYSIS_MAP WHERE COMPONENT_ID = #{componentId}
+	</select>
+	
+	<select id="updateEntAnalysisJobDetails" parameterType="string">
+		UPDATE ENT_ANALYSIS_JOB_DETAILS
+    	SET REFERENCE_OSS_ID = #{ossId}
+		WHERE JOB_SEQ = #{jobSeq}
+	    AND OSS_NAME = #{ossName}
+	    AND OSS_VERSION = #{ossVersion}
+	</select>
 </mapper>

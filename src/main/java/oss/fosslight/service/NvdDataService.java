@@ -1063,9 +1063,32 @@ public class NvdDataService extends CoTopComponent {
 			nvdDataMapper.updateVendorProductNvdDataScoreV3();
 		}
 
+		refreshNvdSearchMaster();
+		
 		return resCd;
 	}
 	
+	private void refreshNvdSearchMaster() {
+		nvdDataMapper.setGroupConcatMaxLen();
+		
+		nvdDataMapper.dropTmpNvdGrouped();
+		nvdDataMapper.createTmpNvdGrouped();
+		nvdDataMapper.createIdxTmpNvdGrouped();
+		
+		nvdDataMapper.dropNvdSearchMasterTemp();
+		nvdDataMapper.createNvdSearchMasterTemp();
+		nvdDataMapper.insertNvdSearchMasterTemp();
+		
+		nvdDataMapper.createIdxNvdSearchMasterTemp();
+		nvdDataMapper.createIdxNvdSearchMasterTemp2();
+		nvdDataMapper.createIdxNvdSearchMasterTemp3();
+		
+		nvdDataMapper.dropNvdSearchMaster();
+		nvdDataMapper.renameNvdSearchMaster();
+		
+		nvdDataMapper.dropTmpNvdGrouped();
+	}
+
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
     public void insertInBatch(List<String> chunkList) {
         if (!CollectionUtils.isEmpty(chunkList)) {

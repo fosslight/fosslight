@@ -5468,7 +5468,7 @@ public class ProjectController extends CoTopComponent {
 
 	@PostMapping(value = PROJECT.INIT_AUTO_REVIEW)
     public @ResponseBody ResponseEntity<Object> initAutoReview(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) throws SchedulerException {
-        return makeJsonResponseHeader(projectService.initAutoReview(project.getPrjId()), null);
+        return makeJsonResponseHeader(projectService.initAutoReview(project.getPrjId(), null, null), null);
     }
 
 	@PostMapping(value = PROJECT.REVIEW_REPORT)

@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -43,6 +44,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -107,6 +109,7 @@ import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
+import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
@@ -120,6 +123,8 @@ import oss.fosslight.validation.custom.T2CoOssValidator;
 @Component("CommonFunction")
 @Slf4j
 public class CommonFunction extends CoTopComponent {
+	
+	private static final Pattern REVISION_PATTERN = Pattern.compile("-r\\d+");
 	
 	private static T2UserService t2UserService;
 	
@@ -4284,6 +4289,9 @@ public class CommonFunction extends CoTopComponent {
 			
 			userData.setGroupId(userData.getGridId()); // groupId는 user가 입력한 row의 grid Id임.
 			
+			String jobSeq = bean.getJobSeq();
+			userData.setJobSeq(jobSeq);
+			
 			if (CoConstDef.FLAG_YES.equals(userData.getCompleteYn()) && !isEmpty(userData.getReferenceOssId())) {
 				
 				OssAnalysis successOssInfo = ossService.getAutoAnalysisSuccessOssInfo(userData.getReferenceOssId());
@@ -4299,6 +4307,7 @@ public class CommonFunction extends CoTopComponent {
 					successOssInfo.setResult("true");
 					successOssInfo.setCompleteYn(userData.getCompleteYn());
 					successOssInfo.setReferenceOssId(userData.getReferenceOssId());
+					successOssInfo.setJobSeq(jobSeq);
 					changeAnalysisResultList.add(successOssInfo);
 					
 					continue;
@@ -4433,12 +4442,15 @@ public class CommonFunction extends CoTopComponent {
 				totalAnalysis.setAskalonoLicense(bean.getAskalonoLicense());
 				totalAnalysis.setScancodeLicense(bean.getScancodeLicense());
 				totalAnalysis.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
+				totalAnalysis.setJobSeq(jobSeq);
 				askalono.setAskalonoLicense(bean.getAskalonoLicense());
 				askalono.setScancodeLicense(bean.getScancodeLicense());
 				askalono.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
+				askalono.setJobSeq(jobSeq);
 				scancode.setAskalonoLicense(bean.getAskalonoLicense());
 				scancode.setScancodeLicense(bean.getScancodeLicense());
 				scancode.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
+				scancode.setJobSeq(jobSeq);
 				List<OssAnalysis> ossAnalysisByNickList = new ArrayList<>();
 				OssAnalysis ossInfoByNick = null;
 				int idx = 1;
@@ -4498,6 +4510,7 @@ public class CommonFunction extends CoTopComponent {
 							ossInfoByNick.setAskalonoLicense(bean.getAskalonoLicense());
 							ossInfoByNick.setScancodeLicense(bean.getScancodeLicense());
 							ossInfoByNick.setNeedReviewLicenseScanode(bean.getNeedReviewLicenseScanode());
+							ossInfoByNick.setJobSeq(jobSeq);
 							
 							ossAnalysisByNickList.add(ossInfoByNick);
 						}
@@ -4529,6 +4542,7 @@ public class CommonFunction extends CoTopComponent {
 							newestOssInfo.setGridId(""+gridSeq++);
 							newestOssInfo.setOssVersion(bean.getOssVersion());
 							newestOssInfo.setComment(comment);
+							newestOssInfo.setJobSeq(jobSeq);
 						}
 						
 						if (userData.getOssName().toUpperCase().equals(totalAnalysis.getOssName().toUpperCase())) {
@@ -4553,6 +4567,7 @@ public class CommonFunction extends CoTopComponent {
 								totalNewestOssInfo.setOssVersion(userData.getOssVersion());
 								totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
 								totalNewestOssInfo.setOssNickname(totalNewestMergeNickName);
+								totalNewestOssInfo.setJobSeq(jobSeq);
 							}else {
 								totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, null);
 							} 
@@ -4645,6 +4660,7 @@ public class CommonFunction extends CoTopComponent {
 						totalNewestOssInfo.setGridId(""+gridSeq++);
 						totalNewestOssInfo.setOssVersion(bean.getOssVersion());
 						totalNewestOssInfo.setComment(comment);
+						totalNewestOssInfo.setJobSeq(jobSeq);
 						
 						String totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
 						
@@ -4736,6 +4752,7 @@ public class CommonFunction extends CoTopComponent {
 							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
 							newestOssInfo.setGridId(""+gridSeq++);
 							newestOssInfo.setComment(comment);
+							newestOssInfo.setJobSeq(jobSeq);
 							
 							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
 						}
@@ -6534,6 +6551,288 @@ public class CommonFunction extends CoTopComponent {
 			}
 		}
 		return null;
+	}
+
+	public static Map<String, Vulnerability> filterAndMergeOsvVulnerabilities(OssMaster bean, List<Vulnerability> rawFilteredList) {
+		List<Vulnerability> versionPassedList = new ArrayList<>();
+		Set<String> existingKeys = new HashSet<>();
+		
+		for (Vulnerability osvVulnInfo : rawFilteredList) {
+			if (isEmpty(osvVulnInfo.getOssName()) && isEmpty(osvVulnInfo.getProduct())) {
+				if (bean != null && !isEmpty(bean.getOssName())) {
+					osvVulnInfo.setOssName(bean.getOssName());
+				}
+			} else if (isEmpty(osvVulnInfo.getOssName()) && !isEmpty(osvVulnInfo.getProduct())) {
+				osvVulnInfo.setOssName(osvVulnInfo.getProduct());
+			}
+			if (isEmpty(osvVulnInfo.getOssVersion()) && isEmpty(osvVulnInfo.getVersion())) {
+				if (bean != null) {
+					osvVulnInfo.setOssVersion(bean.getOssVersion());
+				}
+			} else if (isEmpty(osvVulnInfo.getOssVersion()) && !isEmpty(osvVulnInfo.getVersion())) {
+				osvVulnInfo.setOssVersion(osvVulnInfo.getVersion());
+			}
+		    // Version validation logic
+		    String uniqueKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getGroupKeyId(), null);
+		    
+		    String ossVersion = osvVulnInfo.getOssVersion();
+		    String searchVersionP1 = osvVulnInfo.getSearchVersionP1();
+		    String searchVersionP2 = osvVulnInfo.getSearchVersionP2();
+		    String searchVersionP3Yn = osvVulnInfo.getSearchVersionP3Yn();
+		    
+		    if (!existingKeys.contains(uniqueKey)) {
+		        if (!isEmpty(ossVersion)) {
+		            if (isEmpty(searchVersionP1) && isEmpty(searchVersionP2)) {
+		                continue;
+		            }
+		        } else {
+		            if (CoConstDef.FLAG_NO.equals(searchVersionP3Yn)) {
+		                continue;
+		            }
+		        }
+		        
+		        boolean isMatched = false;
+		        if (!isEmpty(ossVersion)) {
+		            if (!isEmpty(searchVersionP1)) {
+		            	List<String> versions = new ArrayList<>();
+		            	if (searchVersionP1.contains("|")) {
+		            		versions = Arrays.asList(searchVersionP1.split("\\|"));
+		            	} else {
+		            		versions = Arrays.asList(searchVersionP1.split(","));
+		            	}
+		                for (String version : versions) {
+		                    if (version.trim().equals(ossVersion.trim())) {
+		                        isMatched = true;
+		                        break;
+		                    }
+		                }
+		            }
+		            
+		            if (!isMatched) {
+		                boolean isMatchedInRange = false;
+		                if (!isEmpty(searchVersionP2)) {
+		                	isMatchedInRange = isVersionInRange(ossVersion, searchVersionP2);
+		                	if (bean != null) {
+		                		if (!isMatchedInRange && bean.getOssVersionAliases() != null) {
+			                		for (String alias : bean.getOssVersionAliases()) {
+			    	                    if (isVersionInRange(alias, searchVersionP2)) {
+			    	                    	isMatchedInRange = true;
+			    	                        break;
+			    	                    }
+			    	                }
+			                	}
+		                	}
+		                }
+		                if (!isMatchedInRange) {
+		                    continue;
+		                }
+		            }
+		        }
+		    }
+		    
+		    // Add items that successfully passed version validation
+		    versionPassedList.add(osvVulnInfo);
+		    existingKeys.add(uniqueKey);
+		}
+
+		// Cross-match and merge OSV IDs / Alias IDs within the same OSS Name & Version, then sort by priority
+		Map<String, Vulnerability> mergedOsvMap = new LinkedHashMap<>();
+		for (Vulnerability item : versionPassedList) {
+		    String ossName = !isEmpty(item.getOssName()) ? item.getOssName().trim() : "";
+		    String ossVersion = !isEmpty(item.getOssVersion()) ? item.getOssVersion().trim() : "";
+		    
+		    Set<String> currentIds = new HashSet<>();
+		    if (!isEmpty(item.getCveId())) {
+		    	currentIds.add(item.getCveId().trim());
+		    }
+		    if (!isEmpty(item.getAliasId())) {
+		        for (String alias : item.getAliasId().split(",")) {
+		            if (!isEmpty(alias)) {
+		            	currentIds.add(alias.trim());
+		            }
+		        }
+		    }
+		    
+		    String foundExistingKey = null;
+		    for (Map.Entry<String, Vulnerability> entry : mergedOsvMap.entrySet()) {
+		        Vulnerability existingItem = entry.getValue();
+		        String exOssName = !isEmpty(existingItem.getOssName()) ? existingItem.getOssName().trim() : "";
+		        String exOssVersion = !isEmpty(existingItem.getOssVersion()) ? existingItem.getOssVersion().trim() : "";
+		        
+		        // Check for ID overlap (including alias) only if OSS name and version are identical
+		        if (exOssName.equals(ossName) && exOssVersion.equals(ossVersion)) {
+		            Set<String> existingIds = new HashSet<>();
+		            if (!isEmpty(existingItem.getCveId())) {
+		            	existingIds.add(existingItem.getCveId().trim());
+		            }
+		            if (!isEmpty(existingItem.getAliasId())) {
+		                for (String alias : existingItem.getAliasId().split(",")) {
+		                    if (!isEmpty(alias)) {
+		                    	existingIds.add(alias.trim());
+		                    }
+		                }
+		            }
+		            
+		            boolean hasIntersection = false;
+		            for (String id : currentIds) {
+		                if (existingIds.contains(id)) {
+		                    hasIntersection = true;
+		                    break;
+		                }
+		            }
+		            
+		            if (hasIntersection) {
+		                foundExistingKey = entry.getKey();
+		                break;
+		            }
+		        }
+		    }
+		    
+		    if (foundExistingKey != null) {
+		        // If overlap exists, merge IDs with the existing item and re-determine the representative ID based on priority
+		        Vulnerability existingItem = mergedOsvMap.get(foundExistingKey);
+		        
+		        Set<String> combinedIds = new HashSet<>(currentIds);
+		        if (!isEmpty(existingItem.getCveId())) {
+		        	combinedIds.add(existingItem.getCveId().trim());
+		        }
+		        if (!isEmpty(existingItem.getAliasId())) {
+		            for (String a : existingItem.getAliasId().split(",")) {
+		            	if(!isEmpty(a)) {
+		            		combinedIds.add(a.trim());
+		            	}
+		            }
+		        }
+		        
+		        String bestId = getPriorityRepresentativeId(combinedIds);
+		        existingItem.setId(bestId);
+		        existingItem.setCveId(bestId);
+		        
+		        combinedIds.remove(bestId);
+		        existingItem.setAliasId(!combinedIds.isEmpty() ? String.join(",", combinedIds) : "");
+		        
+		        if (isEmpty(existingItem.getPatchLink()) && !isEmpty(item.getPatchLink())) {
+		            existingItem.setPatchLink(item.getPatchLink());
+		        }
+		    } else {
+		        // If no overlap, register as a single item and organize representative ID
+		        String bestId = getPriorityRepresentativeId(currentIds);
+		        item.setId(bestId);
+		        item.setCveId(bestId);
+		        
+		        currentIds.remove(bestId);
+		        item.setAliasId(!currentIds.isEmpty() ? String.join(",", currentIds) : "");
+		        
+		        String mapKey = String.format("%s_%s_%s", ossName, ossVersion, bestId);
+		        mergedOsvMap.put(mapKey, item);
+		    }
+		}
+		
+		return mergedOsvMap;
+	}
+	
+	private static String generateKey(String ossName, String ossVersion, String cveId, String cvssScore) {
+		if (!isEmpty(cvssScore)) {
+			return String.format("%s_%s_%s_%s", String.valueOf(ossName), String.valueOf(ossVersion), String.valueOf(cveId), String.valueOf(cvssScore));
+		} else {
+			return String.format("%s_%s_%s", String.valueOf(ossName), String.valueOf(ossVersion), String.valueOf(cveId));
+		}
+	}
+	
+	private static boolean isVersionInRange(String targetVersion, String rangeRaw) {
+        if (rangeRaw == null || rangeRaw.isEmpty() || "-".equals(rangeRaw)) {
+        	return false;
+        }
+        
+        String[] orRanges = rangeRaw.split("\\|");
+        for (String range : orRanges) {
+            String[] parts = range.split("~");
+            if (parts.length < 2) {
+            	continue;
+            }
+            
+            String start = parts[0].trim();
+            String end = parts[1].trim();
+            
+            if (compareVersion(targetVersion, start) >= 0 && compareVersion(targetVersion, end) <= 0) {
+                return true; 
+            }
+        }
+        return false;
+    }
+	
+	private static int compareVersion(String v1, String v2) {
+        if ("0".equals(v1) || "0".equals(v2)) {
+            if ("0".equals(v1) && "0".equals(v2)) {
+            	return 0;
+            }
+            return "0".equals(v1) ? -1 : 1;
+        }
+
+        String cleanV1 = REVISION_PATTERN.matcher(v1).replaceAll("");
+        String cleanV2 = REVISION_PATTERN.matcher(v2).replaceAll("");
+
+        String[] vals1 = cleanV1.split("\\.");
+        String[] vals2 = cleanV2.split("\\.");
+        int i = 0;
+
+        while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
+            i++;
+        }
+
+        if (i < vals1.length && i < vals2.length) {
+            try {
+                int num1 = Integer.parseInt(vals1[i].replaceAll("[^0-9]", ""));
+                int num2 = Integer.parseInt(vals2[i].replaceAll("[^0-9]", ""));
+                return Integer.compare(num1, num2);
+            } catch (NumberFormatException e) {
+                return vals1[i].compareTo(vals2[i]);
+            }
+        }
+        return Integer.compare(vals1.length, vals2.length);
+    }
+	
+	private static String getPriorityRepresentativeId(Set<String> idSet) {
+		if (idSet == null || idSet.isEmpty()) {
+			return null;
+		}
+	    
+	    List<String> sortedList = new ArrayList<>(idSet);
+	    sortedList.sort((id1, id2) -> {
+	        int p1 = getPriorityScore(id1);
+	        int p2 = getPriorityScore(id2);
+	        if (p1 != p2) {
+	            return Integer.compare(p1, p2);
+	        }
+	        return id1.compareToIgnoreCase(id2);
+	    });
+	    
+	    return sortedList.get(0);
+	}
+
+	private static int getPriorityScore(String id) {
+	    if (id == null) {
+	    	return 3;
+	    }
+	    String upperId = id.toUpperCase();
+	    if (upperId.startsWith("CVE-")) {
+	        return 1;
+	    } else if (upperId.startsWith("GHSA-")) {
+	        return 2;
+	    }
+	    return 3;
+	}
+	
+	public static boolean isBigDecimal(String cvssScore) {
+		if (isEmpty(cvssScore) || cvssScore.trim().isEmpty() || ("-").equals(cvssScore)) {
+	        return false;
+	    }
+		try {
+			new BigDecimal(cvssScore);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 }
 

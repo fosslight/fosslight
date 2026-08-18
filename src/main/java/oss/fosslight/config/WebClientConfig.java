@@ -59,9 +59,18 @@ public class WebClientConfig {
 	@Bean
 	public RestTemplate internalApiRestTemplate() {
 		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-		factory.setConnectTimeout(5000);
-		factory.setReadTimeout(10000);
+		factory.setConnectTimeout(30000);
+		factory.setReadTimeout(60000);
 		factory.setHttpClient(HttpClientBuilder.create().setMaxConnTotal(200).setMaxConnPerRoute(100).build());
 		return new RestTemplate(factory);
+	}
+	
+	@Bean
+	public RestTemplate osvDataApiRestTemplate() {
+		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setConnectTimeout(30000);
+        factory.setReadTimeout(60000);
+        factory.setHttpClient(HttpClientBuilder.create().setMaxConnTotal(200).setMaxConnPerRoute(100).build());
+        return new RestTemplate(factory);
 	}
 }

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.EnterpriseIntegrationMapper">
+	<insert id="insertEnterpriseIntegrationJob" parameterType="oss.fosslight.domain.EntAnalysis" useGeneratedKeys="true" keyProperty="jobSeq">
+		INSERT INTO	ENT_ANALYSIS_JOB
+		(
+			REFERENCE_ID
+			, DIVISION
+			, ANALYSIS_START_DATE
+			, TOTAL_COUNT
+		)
+		VALUES
+		(
+			#{referenceId}
+			, #{division}
+			, now()
+			, #{totalCount}
+		)
+	</insert>
+	
+	<insert id="insertEnterpriseIntegrationJobDetails" parameterType="list">
+		INSERT INTO	ENT_ANALYSIS_JOB_DETAILS
+		(
+			JOB_SEQ
+			, REFERENCE_ID
+			, OSS_NAME
+			, OSS_VERSION
+			, LICENSE_NAME
+			, DOWNLOAD_LOCATION
+			, HOMEPAGE
+		)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+	    (
+	        #{item.jobSeq},
+	        #{item.referenceId},
+	        #{item.ossName},
+	        #{item.ossVersion},
+	        #{item.licenseName},
+	        #{item.downloadLocation},
+	        #{item.homepage}
+	    )
+	    </foreach>
+	</insert>
+	
+	<update id="updateEnterpriseIntegrationJob">
+		UPDATE ENT_ANALYSIS_JOB EAJ
+		INNER JOIN (
+		    SELECT 
+		        REFERENCE_ID,
+		        JOB_SEQ AS MAX_JOB_SEQ,
+		        SUM(CASE WHEN REFERENCE_OSS_ID IS NOT NULL AND REFERENCE_OSS_ID != '' THEN 1 ELSE 0 END) AS CALC_SUCCESS,
+    			SUM(CASE WHEN REFERENCE_OSS_ID IS NULL OR REFERENCE_OSS_ID = '' THEN 1 ELSE 0 END) AS CALC_FAILURE
+		    FROM ENT_ANALYSIS_JOB_DETAILS
+		    WHERE JOB_SEQ = #{jobSeq}
+		    GROUP BY JOB_SEQ
+		) CAL 
+		ON EAJ.JOB_SEQ = CAL.MAX_JOB_SEQ
+		SET EAJ.SUCCESS_COUNT = CAL.CALC_SUCCESS, EAJ.FAILURE_COUNT = CAL.CALC_FAILURE
+	</update>
+	
+	<select id="getUpdatedEnterpriseIntegrationJobs" resultType="oss.fosslight.domain.EnterpriseIntegrationBean">
+	    SELECT *
+	    FROM ENT_ANALYSIS_JOB
+	    WHERE JOB_SEQ = #{jobSeq}
+	</select>
+	
+	<select id="getEnterpriseIntegrationJobs" resultType="oss.fosslight.domain.EnterpriseIntegrationBean">
+		SELECT * FROM ENT_ANALYSIS_JOB
+	</select>
+	
+	<select id="getEnterpriseAnalysisInfo" resultType="string">
+		SELECT JOB_SEQ
+		FROM OSS_ANALYSIS_STATUS
+		WHERE PRJ_ID = #{prjId}
+	</select>
+	
+	<update id="updateEnterpriseIntegrationJobCount" parameterType="int">
+		UPDATE ENT_ANALYSIS_JOB
+		SET SUCCESS_COUNT = SUCCESS_COUNT + 1,
+			FAILURE_COUNT = GREATEST(FAILURE_COUNT - 1, 0)
+		WHERE JOB_SEQ = #{jobSeq}
+		AND (SUCCESS_COUNT + 1) <![CDATA[<=]]> TOTAL_COUNT
+	</update>
+	
+	<select id="getEnterpriseIntegrationJob" parameterType="int" resultType="oss.fosslight.domain.EnterpriseIntegrationBean">
+		SELECT *
+		FROM ENT_ANALYSIS_JOB
+		WHERE JOB_SEQ = #{jobSeq}
+	</select>
+	
+	<select id="getEnterpriseAnalysisCountByDivision" parameterType="string" resultType="int">
+		SELECT IFNULL(SUM(SUCCESS_COUNT), 0) AS CNT
+		FROM ENT_ANALYSIS_JOB
+		WHERE DIVISION = #{division}
+	</select>
+	
+	<update id="updateEnterpriseIntegrationJobOssId">
+		UPDATE ENT_ANALYSIS_JOB T1
+		INNER JOIN ENT_ANALYSIS_JOB_DETAILS T2
+		SET T1.SUCCESS_COUNT = SUCCESS_COUNT + 1, T1.FAILURE_COUNT = GREATEST(FAILURE_COUNT - 1, 0), T2.REFERENCE_OSS_ID = #{ossId}
+		WHERE T1.JOB_SEQ = #{jobSeq}
+		AND (T1.SUCCESS_COUNT + 1) <![CDATA[<=]]> T1.TOTAL_COUNT
+		AND T2.OSS_NAME = #{ossName}
+		AND IFNULL(T2.OSS_VERSION, '') = IFNULL(#{ossVersion}, '')
+	</update>
+</mapper>

@@ -2091,18 +2091,20 @@ var fn = {
 			fn.closeAlertifyView();
 		},
 		activateCommentArea : function () {
-			// change tab area
-			if (!$(".comment-area").is(":visible")) {
-				$(".contents-area").removeClass("col-12");
-				$(".contents-area").addClass("col-lg-9");
-				
-				fn_comment.getCommentList(commentsParam);
-				$(".comment-area").show();
-			} else {
-	 			$(".contents-area").removeClass("col-lg-9");
-	 			$(".contents-area").addClass("col-12");
-	 			$(".comment-area").hide();
-			}
+			var $commentArea = $(".comment-area");
+		    var $contentsArea = $(".contents-area");
+		    
+		    if (!$commentArea.is(":visible")) {
+		        $contentsArea.removeClass("col-12").addClass("col-lg-9");
+		        $commentArea.show();
+		    } else {
+		        $contentsArea.removeClass("col-lg-9 col-9").addClass("col-12");
+		        $commentArea.hide();
+		    }
+		    
+		    setTimeout(function() {
+		        $(window).trigger('resize');
+		    }, 100);
 		},
 		showCommentHistory : function () {
 			fn_comment.activateCommentArea();

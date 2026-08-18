@@ -84,6 +84,7 @@ import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.OsvDataService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
@@ -108,6 +109,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private PartnerService partnerService;
 	@Autowired private ProjectService projectService;
 	@Autowired private HistoryService historyService;
+	@Autowired private OsvDataService osvDataService;
 	
 	// Mapper
 	@Autowired private ProjectMapper projectMapper;
@@ -325,9 +327,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (CollectionUtils.isNotEmpty(securityList)) {
 			int emptyVersionCnt = securityList.stream().filter(e -> isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
-			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
+			int invalidScoreCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && !CommonFunction.isBigDecimal(e.getCvssScore())).collect(Collectors.toList()).size();;
+			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && CommonFunction.isBigDecimal(e.getCvssScore()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
 			
 			for (OssComponents oc : securityList) {
+				if (!CommonFunction.isBigDecimal(oc.getCvssScore())) {
+					continue;
+				}
 				if (avoidNull(oc.getVulnerabilityResolution()).equalsIgnoreCase("Fixed")) {
 					fixedCheckCnt++;
 					continue;
@@ -356,11 +362,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			
-			if (emptyVersionCnt == securityList.size()) {
+			if (emptyVersionCnt == (securityList.size() - invalidScoreCnt)) {
 				project.setSecCode("notFixed");
 				project.setCvssScore(notFixedCvssScore);
 			} else {
-				if (fixedCheckCnt > 0 && fixedCheckCnt == securityListCnt) {
+				if (fixedCheckCnt > 0 && fixedCheckCnt == (securityListCnt - invalidScoreCnt)) {
 					project.setSecCode("Fixed");
 					project.setCvssScore(fixedCvssScore);
 				} else {
@@ -574,16 +580,67 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(identification);
+//		List<OssComponents> osvDataList = osvDataService.getSecurityVulnerabilityList(null, identification, identification.getReferenceId(), 1);
+		List<Vulnerability> osvSecurityDataList = null;
+		
+//		if (CollectionUtils.isNotEmpty(osvDataList)) {
+//			osvSecurityDataList = CollectionUtils.isEmpty(osvDataList) ? new ArrayList<>() :
+//								    osvDataList.stream()
+//								        .map(osvData -> {
+//								            Vulnerability vuln = new Vulnerability();
+//								            vuln.setOssName(osvData.getOssName());
+//								            vuln.setOssVersion(osvData.getOssVersion());
+//								            vuln.setCveId(osvData.getCveId());
+//								            vuln.setCvssScore(osvData.getCvssScore());
+//								            vuln.setVulnerabilityResolution(osvData.getVulnerabilityResolution());
+//								            vuln.setGroupKeyId(osvData.getGroupKeyId());
+//								            return vuln;
+//								        })
+//								        .collect(Collectors.toList());
+//		}
+		
 		Map<String, Vulnerability> securityDataMap = new HashMap<>();
-		if (CollectionUtils.isNotEmpty(securityDataList)) {
+		if (CollectionUtils.isNotEmpty(securityDataList) || CollectionUtils.isNotEmpty(osvSecurityDataList)) {
+			if (CollectionUtils.isEmpty(securityDataList)) {
+				securityDataList = new ArrayList<>();
+				securityDataList.addAll(osvSecurityDataList);
+			} else {
+				if (CollectionUtils.isNotEmpty(osvSecurityDataList)) {
+					Set<String> existingKeys = new HashSet<>();
+					for (Vulnerability item : securityDataList) {
+						item.setGroupKeyId(item.getCveId());
+					    String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
+					    existingKeys.add(uniqueKey);
+					}
+//					for (Vulnerability item : osvSecurityDataList) {
+//						String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
+//						if (existingKeys.add(uniqueKey)) {
+//							securityDataList.add(item);
+//						}
+//					}
+					securityDataList.sort(Comparator
+							.comparing(Vulnerability::getOssName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+							.thenComparing(Vulnerability::getOssVersion, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+							.thenComparing(Vulnerability::getGroupKeyId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+							.thenComparing(item -> {
+						        String cveId = item.getCveId();
+						        String groupKeyId = item.getGroupKeyId();
+						        return (!isEmpty(cveId) && !isEmpty(groupKeyId) && cveId.trim().equalsIgnoreCase(groupKeyId.trim())) ? 0 : 1;
+							})
+							.thenComparing(Vulnerability::getCveId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+						);
+				}
+			}
+			
 			securityDataMap = securityDataList.stream()
 							        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
+							        .filter(v -> !isEmpty(v.getCvssScore()))
 							        .collect(Collectors.toMap(
 							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
 							            v -> v,
 							            (existing, replacement) -> {
-							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
-							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+							            	double score1 = CommonFunction.isBigDecimal(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+							                double score2 = CommonFunction.isBigDecimal(replacement.getCvssScore()) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
 							                return score1 >= score2 ? existing : replacement;
 							            }
 							        ));
@@ -2068,6 +2125,37 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								                return score1 >= score2 ? existing : replacement;
 								            }
 								        ));
+				
+				List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1);
+	            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
+	                for (OssComponents osvComp : osvVulnerabilityDataList) {
+	                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
+	                        continue;
+	                    }
+	                    
+	                    String mapKey = (osvComp.getOssName() + "_" + avoidNull(osvComp.getOssVersion())).toUpperCase();
+	                    
+	                    Vulnerability osvVuln = new Vulnerability();
+	                    osvVuln.setOssName(osvComp.getOssName());
+	                    osvVuln.setOssVersion(osvComp.getOssVersion());
+	                    osvVuln.setVersion(osvComp.getOssVersion());
+	                    osvVuln.setCveId(osvComp.getCveId());
+	                    osvVuln.setCvssScore(osvComp.getCvssScore());
+	                    osvVuln.setVulnerabilityResolution(osvComp.getVulnerabilityResolution());
+	                    
+	                    if (securityDataMap.containsKey(mapKey)) {
+	                        Vulnerability existing = securityDataMap.get(mapKey);
+	                        double score1 = CommonFunction.isBigDecimal(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+	                        double score2 = CommonFunction.isBigDecimal(osvVuln.getCvssScore()) ? Double.parseDouble(String.valueOf(osvVuln.getCvssScore())) : 0.0;
+	                        
+	                        if (score2 > score1) {
+	                            securityDataMap.put(mapKey, osvVuln);
+	                        }
+	                    } else {
+	                        securityDataMap.put(mapKey, osvVuln);
+	                    }
+	                }
+	            }
 			}
 		}
 		
@@ -3884,12 +3972,43 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
     							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
     							            v -> v,
     							            (existing, replacement) -> {
-    							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
-    							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+    							            	double score1 = CommonFunction.isBigDecimal(existing.getCvssScore()) && !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+    							                double score2 = CommonFunction.isBigDecimal(replacement.getCvssScore()) && !isEmpty(replacement.getCvssScore()) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
     							                return score1 >= score2 ? existing : replacement;
     							            }
     							        ));
     		}
+            
+            List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1);
+            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
+                for (OssComponents osvComp : osvVulnerabilityDataList) {
+                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
+                        continue;
+                    }
+                    
+                    String mapKey = (osvComp.getOssName() + "_" + avoidNull(osvComp.getOssVersion())).toUpperCase();
+                    
+                    Vulnerability osvVuln = new Vulnerability();
+                    osvVuln.setOssName(osvComp.getOssName());
+                    osvVuln.setOssVersion(osvComp.getOssVersion());
+                    osvVuln.setVersion(osvComp.getOssVersion());
+                    osvVuln.setCveId(osvComp.getCveId());
+                    osvVuln.setCvssScore(osvComp.getCvssScore());
+                    osvVuln.setVulnerabilityResolution(osvComp.getVulnerabilityResolution());
+                    
+                    if (securityDataMap.containsKey(mapKey)) {
+                        Vulnerability existing = securityDataMap.get(mapKey);
+                        double score1 = !isEmpty(existing.getCvssScore()) && CommonFunction.isBigDecimal(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+                        double score2 = !isEmpty(osvVuln.getCvssScore()) && CommonFunction.isBigDecimal(osvVuln.getCvssScore()) ? Double.parseDouble(String.valueOf(osvVuln.getCvssScore())) : 0.0;
+                        
+                        if (score2 > score1) {
+                            securityDataMap.put(mapKey, osvVuln);
+                        }
+                    } else {
+                        securityDataMap.put(mapKey, osvVuln);
+                    }
+                }
+            }
         }
         
         List<String> removeAdminCheckComponentIds = new ArrayList<>();
@@ -4034,12 +4153,43 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
     							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
     							            v -> v,
     							            (existing, replacement) -> {
-    							            	double score1 = !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
-    							                double score2 = (replacement.getCvssScore() != null) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
+    							            	double score1 = CommonFunction.isBigDecimal(existing.getCvssScore()) && !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+    							                double score2 = CommonFunction.isBigDecimal(replacement.getCvssScore()) && !isEmpty(replacement.getCvssScore()) ? Double.parseDouble(String.valueOf(replacement.getCvssScore())) : 0.0;
     							                return score1 >= score2 ? existing : replacement;
     							            }
     							        ));
     		}
+    		
+    		List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1);
+            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
+                for (OssComponents osvComp : osvVulnerabilityDataList) {
+                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
+                        continue;
+                    }
+                    
+                    String mapKey = (osvComp.getOssName() + "_" + avoidNull(osvComp.getOssVersion())).toUpperCase();
+                    
+                    Vulnerability osvVuln = new Vulnerability();
+                    osvVuln.setOssName(osvComp.getOssName());
+                    osvVuln.setOssVersion(osvComp.getOssVersion());
+                    osvVuln.setVersion(osvComp.getOssVersion());
+                    osvVuln.setCveId(osvComp.getCveId());
+                    osvVuln.setCvssScore(osvComp.getCvssScore());
+                    osvVuln.setVulnerabilityResolution(osvComp.getVulnerabilityResolution());
+                    
+                    if (targetSecurityDataMap.containsKey(mapKey)) {
+                        Vulnerability existing = targetSecurityDataMap.get(mapKey);
+                        double score1 = CommonFunction.isBigDecimal(existing.getCvssScore()) && !isEmpty(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+                        double score2 = CommonFunction.isBigDecimal(osvVuln.getCvssScore()) && !isEmpty(osvVuln.getCvssScore()) ? Double.parseDouble(String.valueOf(osvVuln.getCvssScore())) : 0.0;
+                        
+                        if (score2 > score1) {
+                        	targetSecurityDataMap.put(mapKey, osvVuln);
+                        }
+                    } else {
+                    	targetSecurityDataMap.put(mapKey, osvVuln);
+                    }
+                }
+            }
         }
         
         String securityComment = "";
@@ -7855,20 +8005,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		identification.setSkipVulnerabilityResolution(CoConstDef.FLAG_YES);
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
-		if (fullList != null && !fullList.isEmpty()) {
-			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
-			if (securityDatalist != null && !securityDatalist.isEmpty()) {
-				for (OssComponents oss : securityDatalist) {
-					String key = "";
-					if (!isEmpty(oss.getOssVersion())) {
-						key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
-					} else {
-						key = (oss.getOssName() + "_" + avoidNull(oss.getOssVersion()) + "_" + oss.getCvssScore()).toUpperCase();
-					}
-					securityGridMap.put(key, oss);
+		List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
+		if (securityDatalist != null && !securityDatalist.isEmpty()) {
+			for (OssComponents oss : securityDatalist) {
+				String key = "";
+				if (!isEmpty(oss.getOssVersion())) {
+					key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+				} else {
+					key = (oss.getOssName() + "_" + avoidNull(oss.getOssVersion()) + "_" + oss.getCvssScore()).toUpperCase();
 				}
+				securityGridMap.put(key, oss);
 			}
-			
+		}
+		
+		int gridIdx = 1;
+		if (CollectionUtils.isNotEmpty(fullList)) {
 			Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
 			Map<String, String> patchLinkMap = new HashMap<>();
 			Map<String, String> runningOnWithMap = new HashMap<>();
@@ -7923,7 +8074,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			
-			int gridIdx = 1;
 			for (Vulnerability pi : fullList) {
 				activateFlag = false;
 				if (isEmpty(pi.getOssVersion())) {
@@ -8113,6 +8263,39 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			versionsForCpeNames.clear();
 		}
 		
+		List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(securityGridMap, identification, project.getPrjId(), gridIdx);
+		if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
+			Set<String> existingKeys = new HashSet<>();
+			for (OssComponents item : fullDiscoveredList) {
+			    String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
+			    existingKeys.add(uniqueKey);
+			}
+			for (OssComponents item : osvVulnerabilityDataList) {
+				if (isEmpty(item.getOssVersion())) {
+					checkOssNameList.add(item.getOssName());
+				}
+			    String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
+			    if (existingKeys.add(uniqueKey)) {
+			    	if (CommonFunction.isBigDecimal(item.getCvssScore()) && !isEmpty(item.getOssVersion()) && !isEmpty(item.getOssVersion()) && !("Fixed").equals(avoidNull(item.getVulnerabilityResolution()))) {
+			    		generateDataToDisplayOverView(item, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
+			    	}
+			        fullDiscoveredList.add(item);
+			    }
+			}
+			
+			fullDiscoveredList.sort(Comparator
+					.comparing(OssComponents::getOssName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+					.thenComparing(OssComponents::getOssVersion, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+					.thenComparing(OssComponents::getGroupKeyId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+					.thenComparing(item -> {
+				        String cveId = item.getCveId();
+				        String groupKeyId = item.getGroupKeyId();
+				        return (!isEmpty(cveId) && !isEmpty(groupKeyId) && cveId.trim().equalsIgnoreCase(groupKeyId.trim())) ? 0 : 1;
+					})
+					.thenComparing(OssComponents::getCveId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+				);
+		}
+		
 		if (!isResolveDataEnabled) {
 			if (CollectionUtils.isNotEmpty(fullDiscoveredList)) {
 				totalList = fullDiscoveredList.stream()
@@ -8161,6 +8344,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return rtnMap;
 	}
 
+	private String generateKey(String ossName, String ossVersion, String cveId, String cvssScore) {
+		return String.format("%s_%s_%s_%s", String.valueOf(ossName), String.valueOf(ossVersion), String.valueOf(cveId), String.valueOf(cvssScore));
+	}
+	
 	private void generateDataToDisplayOverView(OssComponents oc, List<String> checkVulnScore, Map<String, Object> vulnScore, Map<String, Object> vulnScoreResolution, Map<String, Map<String, Object>> vulnScoreByOssVersion) {
 		// Count graph by vulnerability score range for all CVE IDs
 		String cveId = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
@@ -9333,11 +9520,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	@Override
-	public boolean initAutoReview(String prjId) {
+	public boolean initAutoReview(String prjId, String userId, Integer jobSeq) {
 		log.info("[CoReviewer][PRJ-" + prjId + "] Click CoReviewer");
-		ossService.setOssAnalysisStatus(prjId);
+		if (isEmpty(userId)) {
+			ossService.setOssAnalysisStatus(prjId);
+		} else {
+			ossService.setOssAnalysisStatus(prjId, userId, jobSeq);
+		}
 		
-        String userName = loginUserName();
+        String userName = !isEmpty(userId) ? userId : loginUserName();
         String targetName = CoConstDef.CD_CHECK_OSS_IDENTIFICATION;
         
         if (prjId.contains("3rd_")){
@@ -10344,10 +10535,71 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (isEmpty(codeExp)) {
 			return;
 		}
-		fileExtList.addAll(Arrays.stream(codeExp.split(","))
-				.map(String::trim)
-				.filter(s -> !s.isEmpty())
-				.map(s -> s.toLowerCase(Locale.ROOT))
-				.collect(Collectors.toList()));
+		fileExtList.addAll(Arrays.stream(codeExp.split(",")).map(String::trim).filter(s -> !s.isEmpty()).map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toList()));
+	}
+
+	@Override
+	public Double selectMaxProjectVersion(String prjName) {
+		return projectMapper.selectMaxProjectVersion(prjName);
+	}
+
+	@Override
+	public List<OssComponents> filterMaxScoreWithoutVersion(List<OssComponents> list) {
+		if (CollectionUtils.isEmpty(list)) {
+	        return new ArrayList<>();
+	    }
+
+		// Group items without an ossVersion by ossName
+	    Map<String, List<OssComponents>> groupWithoutVersion = list.stream().filter(vo -> isEmpty(vo.getOssVersion())).collect(Collectors.groupingBy(OssComponents::getOssName));
+												            
+	    // Set to store items that should be kept from the non-version group
+	    Set<OssComponents> keepWithoutVersionSet = new HashSet<>();
+		
+	    for (Map.Entry<String, List<OssComponents>> entry : groupWithoutVersion.entrySet()) {
+	        List<OssComponents> groupList = entry.getValue();
+	        
+	        // Case 1: If there is only one item, keep it as is (whether it's numeric or non-numeric)
+	        if (groupList.size() == 1) {
+	            keepWithoutVersionSet.add(groupList.get(0));
+	            continue;
+	        }
+
+	        // Separate items into numeric (valid BigDecimal) and non-numeric
+	        List<OssComponents> numericList = new ArrayList<>();
+	        List<OssComponents> nonNumericList = new ArrayList<>();
+
+	        for (OssComponents vo : groupList) {
+	            if (CommonFunction.isBigDecimal(vo.getCvssScore())) {
+	                numericList.add(vo);
+	            } else {
+	                nonNumericList.add(vo);
+	            }
+	        }
+
+	        // Case 2: If there are numeric items, pick the one with the maximum cvssScore among them
+	        if (!numericList.isEmpty()) {
+	            OssComponents maxNumeric = numericList.stream().max(Comparator.comparing(vo -> new BigDecimal(vo.getCvssScore()))).orElse(null);
+	            if (maxNumeric != null) {
+	                keepWithoutVersionSet.add(maxNumeric);
+	            }
+	        } 
+	        // Case 3: If only non-numeric items exist (and size > 1), keep only the first item
+	        else if (!nonNumericList.isEmpty()) {
+	            keepWithoutVersionSet.add(nonNumericList.get(0));
+	        }
+	    }
+
+	    // 2. Iterate through the original list to preserve the initial order while filtering
+	    return list.stream()
+	            .filter(vo -> {
+	                // Condition A: Keep items that have an ossVersion as they are
+	                if (!isEmpty(vo.getOssVersion())) {
+	                    return true;
+	                }
+	                
+	                // Condition B: For items without an ossVersion, keep only if they are selected in the logic above
+	                return keepWithoutVersionSet.contains(vo);
+	            })
+	            .collect(Collectors.toList());
 	}
 }

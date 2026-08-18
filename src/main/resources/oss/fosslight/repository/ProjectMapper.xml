@@ -3108,6 +3108,7 @@
 			M.OBLIGATION_TYPE,
 			M.DEPENDENCIES,
 			M.REF_OSS_NAME,
+   			M.JOB_SEQ,
 			M.REF_LOADED_VAL
 			<if test="@oss.fosslight.util.StringUtil@equals('30', referenceDiv)">
 				, BAR.GUIREPORT_FLAG
@@ -3935,6 +3936,9 @@
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refLoadedVal)">
 							, REF_LOADED_VAL
 						</if>
+						<if test="jobSeq != null and jobSeq != 0">
+							, JOB_SEQ
+						</if>
 					)
 			VALUES
 					(
@@ -4010,6 +4014,9 @@
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refLoadedVal)">
 							, #{refLoadedVal}
+						</if>
+						<if test="jobSeq != null and jobSeq != 0">
+							, #{jobSeq}
 						</if>
 					)
 	</insert>
@@ -6242,7 +6249,7 @@
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
 			SELECT TBL1.*
-					, IFNULL((SELECT VULNERABILITY_RESOLUTION FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = #{referenceId} AND OSS_NAME = TBL1.OSS_NAME AND OSS_VERSION = TBL1.OSS_VERSION AND CVE_ID = TBL1.CVE_ID AND CVSS_SCORE = TBL1.CVSS_SCORE LIMIT 1), 'Unresolved') AS VULNERABILITY_RESOLUTION
+					, IFNULL((SELECT VULNERABILITY_RESOLUTION FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = #{referenceId} AND OSS_NAME = TBL1.OSS_NAME AND OSS_VERSION = TBL1.OSS_VERSION AND CVE_ID = TBL1.CVE_ID LIMIT 1), 'Unresolved') AS VULNERABILITY_RESOLUTION
 			FROM
 			(
 				SELECT DISTINCT TBL.*
@@ -6594,7 +6601,7 @@
 					
 					UNION ALL
 					
-					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, CVE.CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
+					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, MAX(CVE.CVSS_SCORE) AS CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
 					FROM
 					(
 						SELECT OC.OSS_NAME
@@ -6642,10 +6649,11 @@
 					<if test="standardScore != null">
 						WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 					</if>
+					GROUP BY TBL.OSS_NAME, TBL.OSS_VERSION
 					
 					UNION ALL
 					
-					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, CVE.CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
+					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, MAX(CVE.CVSS_SCORE) AS CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
 					FROM
 					(
 						SELECT OC.OSS_NAME
@@ -6700,6 +6708,7 @@
 					<if test="standardScore != null">
 						WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 					</if>
+					GROUP BY TBL.OSS_NAME, TBL.OSS_VERSION
 					
 					UNION ALL
 					
@@ -6757,7 +6766,7 @@
 					
 					UNION ALL
 					
-					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, CVE.CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
+					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, MAX(CVE.CVSS_SCORE) AS CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
 					FROM
 					(
 						SELECT OC.OSS_NAME
@@ -6815,6 +6824,7 @@
 					<if test="standardScore != null">
 						WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 					</if>
+					GROUP BY TBL.OSS_NAME, TBL.OSS_VERSION
 					
 					UNION ALL
 					
@@ -6872,7 +6882,7 @@
 					
 					UNION ALL
 					
-					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, CVE.CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
+					SELECT STRAIGHT_JOIN TBL.OSS_NAME, TBL.OSS_VERSION AS VERSION, TBL.OSS_VERSION, MAX(CVE.CVSS_SCORE) AS CVSS_SCORE, CVE.CVE_ID, DATE_FORMAT(CVE.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(CVE.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, CVE.VULN_SUMMARY, #{referenceId} AS REFERENCE_ID
 					FROM
 					(
 						SELECT OC.OSS_NAME
@@ -6930,6 +6940,7 @@
 					<if test="standardScore != null">
 						WHERE CVE.CVSS_SCORE <![CDATA[>=]]> #{standardScore}
 					</if>
+					GROUP BY TBL.OSS_NAME, TBL.OSS_VERSION
 				) TBL
 		<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
 			) TBL1
@@ -7501,5 +7512,12 @@
 	
 	<select id="selectRefFileSeq" parameterType="string" resultType="string">
 		SELECT FILE_SEQ FROM T2_FILE WHERE REF_FILE_SEQ = #{fileSeq}
+	</select>
+	
+	<select id="selectMaxProjectVersion" parameterType="string" resultType="java.lang.Double">
+		SELECT MAX(CAST(PRJ_VERSION AS DECIMAL(10,1)))
+    	FROM PROJECT_MASTER
+    	WHERE PRJ_NAME = #{prjName}
+      	AND IFNULL(PRJ_VERSION, '') != ''
 	</select>
 </mapper>

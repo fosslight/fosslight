@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'oss.fosslight'
-version = '2.5.0'
+version = '2.6.0'
 
 sourceCompatibility = '11'
 
@@ -114,6 +114,7 @@ dependencies {
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 	implementation group: 'net.sf.sociaal', name: 'xmlpull-xpp3', version: '3.0.0.20130526'
 	implementation group: 'org.spdx', name: 'tools-java', version: '1.1.8'
+	implementation 'org.yaml:snakeyaml:2.2'
 	implementation group: 'com.navercorp.lucy', name: 'lucy-xss', version: '1.6.3'
 	implementation 'com.itextpdf:html2pdf:4.0.3'
 
@@ -128,6 +129,8 @@ dependencies {
 	implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.3'
 
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	implementation 'us.springett:cvss-calculator:1.5.1'
 	
 	implementation files('libs/tlsh-4.6.0.jar')
 }

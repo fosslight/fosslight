@@ -37,6 +37,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired MailService mailService;
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
+	@Autowired OsvDataService osvDataService;
 	@Autowired ProjectService projectService;
 	@Autowired PartnerService partnerService;
 	@Autowired SelfCheckService selfcheckService;
@@ -80,6 +81,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 		String resCd = "";
 		try {
 			resCd = nvdService.executeNvdDataSync();
+			osvDataService.executeOsvDataSync();
 			
 			if (resCd == "00") {
 				vulnerabilityService.doSyncOSSNvdInfo();
