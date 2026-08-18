@@ -674,7 +674,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			// main 정보 (license 정보 후처리)
 //			params.add(isMainRow ? bean.getFilePath() : ""); // path
 			// vulnerability
-			sb.append(SEP).append(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? " " : bean.getCvssScore()) : " ");
+			if (CommonFunction.isBigDecimal(bean.getCvssScore())) {
+				sb.append(SEP).append(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? " " : bean.getCvssScore()) : " ");
+			} else {
+				sb.append(SEP).append(" ");
+			}
 			// dependencies
 //			params.add(isMainRow ? (isEmpty(bean.getDependencies()) ? "" : bean.getDependencies()) : "");
 			// notice
@@ -2313,7 +2317,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				vulnerability.setSidx("cveId");
 				vulnerability.setPageListSize(MAX_RECORD_CNT_LIST);
 				
-				Map<String, Object> vulnerabilityMap =	vulnerabilityService.getVulnerabilityList(vulnerability, true);
+				Map<String, Object> vulnerabilityMap = vulnerabilityService.getVulnerabilityListTest(vulnerability, true);
 				
 				if (isMaximumRowCheck((int) vulnerabilityMap.get("records"))){
 					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityMap.get("rows"), false);
@@ -4889,10 +4893,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Workbook wb = null;
 		Sheet sheet = null;
 		String fileName = "VulnerabilityList";
+		FileInputStream inFile = null;
 		
-		try (
-			FileInputStream inFile= new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
-		) {
+		try {
+			if (isPopup) {
+				inFile = new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
+			} else {
+				inFile = new FileInputStream(new File(downloadpath+"/VulnerabilityList.xlsx"));
+			}
+			
 			try {
 				wb = new XSSFWorkbook(inFile);
 			} catch (IOException e) {
@@ -4905,18 +4914,29 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			Set<String> ossName = new HashSet<>();
 
 			for (Vulnerability param : vulnerabilityList){
-				String[] rowParam = {
-					param.getProduct()
-					, param.getVersion()
-					, param.getCveId()
-					, param.getCvssScore()
-					, convertPipeToLineSeparator(param.getVulnSummary())
-					, param.getPublDate()
-					, param.getModiDate()
-					, param.getVendor()
-				};
-				ossName.add(param.getProduct());
-				rows.add(rowParam);
+				if (isPopup) {
+					String[] rowParam = {
+							param.getProduct()
+							, param.getVersion()
+							, param.getCveId()
+							, param.getCvssScore()
+							, convertPipeToLineSeparator(param.getVulnSummary())
+							, param.getPublDate()
+							, param.getModiDate()
+							, param.getVendor()
+						};
+						ossName.add(param.getProduct());
+						rows.add(rowParam);
+				} else {
+					String[] rowParam = {
+							param.getId()
+							, param.getSource()
+							, param.getComponent()
+							, param.getAffectedVersion()
+							, param.getSeverity()
+						};
+						rows.add(rowParam);
+				}
 			}
 			//시트 만들기
 			if (isPopup) {
