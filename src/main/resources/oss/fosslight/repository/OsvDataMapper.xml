@@ -764,8 +764,8 @@
 		    WITHDRAWN_YN CHAR(1) DEFAULT 'N' COMMENT 'Withdrawal status (Y: Withdrawn, N: Active)',
 		    
 		    SEARCH_NAME_P1 VARCHAR(255) COMMENT 'Priority 1: Unique nickname derived from PURL or Git repo',
-		    SEARCH_NAME_P2 VARCHAR(255) COMMENT 'Priority 2: Original PURL string from affected package',
-		    SEARCH_NAME_P3 VARCHAR(255) COMMENT 'Priority 3: Original package name string',
+		    SEARCH_NAME_P2 MEDIUMTEXT COMMENT 'Priority 2: Original PURL string from affected package',
+		    SEARCH_NAME_P3 MEDIUMTEXT COMMENT 'Priority 3: Original package name string',
 		    
 		    SEARCH_VERSION_P1_YN CHAR(1) DEFAULT 'N' COMMENT 'Target Priority 1 flag: Indicates whether exact versions list exists',
 		    SEARCH_VERSION_P1 LONGTEXT COMMENT 'Priority 1 matching data: Comma-separated exact version list',

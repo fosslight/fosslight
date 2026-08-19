@@ -111,101 +111,108 @@ public class OsvDataService extends CoTopComponent {
 		boolean success = false;
 
 		while (!success && retryCount < MAX_RETRY) {
-			Path tempZipFile = null;
-			try {
-				// Create a temporary zip file in the system temp directory
-		        tempZipFile = Files.createTempFile("osv_snapshot_", ".zip");
+	        try {
+	            schlog.info("[OSV] Download attempt {}/{} started.", retryCount + 1, MAX_RETRY);
 
-		        // Download and save the stream directly to the temp file
-		        schlog.info("[OSV] Download attempt {}/{} started.", retryCount + 1, MAX_RETRY);
-		        
-		        Path targetPath = tempZipFile;
-		        restTemplate.execute(downloadUrl, HttpMethod.GET, null, response -> {
-		            if (!response.getStatusCode().is2xxSuccessful()) {
-		                throw new IOException("HTTP Status : " + response.getStatusCode());
-		            }
-		            schlog.info("[OSV] Download connection established. Saving snapshot to temp file: {}", targetPath);
-		            try (InputStream is = response.getBody()) {
-		                Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
-		            }
-		            return null;
-		        });
+	            restTemplate.execute(downloadUrl, HttpMethod.GET,
+	                request -> {
+	                    request.getHeaders().set("Accept-Encoding", "identity");
+	                    request.getHeaders().set("Connection", "keep-alive");
+	                },
+	                response -> {
+	                    if (!response.getStatusCode().is2xxSuccessful()) {
+	                        throw new IOException("HTTP Status : " + response.getStatusCode());
+	                    }
 
-		        // Open SqlSession and process the downloaded zip file locally
-		        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-		            int count = 0;
-		            
-		            try (ZipFile zipFile = new ZipFile(tempZipFile.toFile())) {
-		                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+	                    schlog.info("[OSV] Download connection established. Processing snapshot stream directly.");
 
-		                while (entries.hasMoreElements()) {
-		                    ZipEntry entry = entries.nextElement();
-		                    if (!entry.isDirectory() && entry.getName().endsWith(".json")) {
-		                        
-		                        // Compatible with Java 8: Read InputStream into String using buffer
-		                        String jsonContent;
-		                        try (InputStream is = zipFile.getInputStream(entry);
-		                             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-		                            byte[] buffer = new byte[4096];
-		                            int len;
-		                            while ((len = is.read(buffer)) != -1) {
-		                                bos.write(buffer, 0, len);
-		                            }
-		                            jsonContent = bos.toString("UTF-8");
-		                        }
+	                    try (
+	                        InputStream is = response.getBody();
+	                        ZipInputStream zis = new ZipInputStream(is, StandardCharsets.UTF_8);
+	                        SqlSession sqlSession =
+	                            sqlSessionFactory.openSession(ExecutorType.BATCH)
+	                    ) {
 
-		                        try {
-		                            boolean isProcess = processAndQueueOsvRecord(sqlSession, jsonContent, entry.getName(), initializeFlag);
-		                            if (isProcess) {
-		                                count++;
-		                            }
-		                        } catch (Exception ex) {
-		                            log.error("[OSV] Failed to process JSON file [{}]: {}", entry.getName(), ex.getMessage(), ex);
-		                        }
+	                        int count = 0;
+	                        int jsonCount = 0;
 
-		                        if (count > 0 && count % batchSize == 0) {
-		                            sqlSession.flushStatements();
-		                            schlog.info("[OSV] Batch flushed. Processed {} records.", count);
-		                        }
-		                    }
-		                }
-		                
-		                sqlSession.flushStatements();
-		                sqlSession.commit();
-		                schlog.info("[OSV] Snapshot processing completed successfully. Total records processed: {}", count);
-		            }
-		            
-		            success = true;
-		            schlog.info("[OSV] Full OSV snapshot download completed successfully.");
-		        }
-			}  catch (Exception e) {
-				retryCount++;
-				schlog.error("[OSV] Download attempt {}/{} failed.", retryCount, MAX_RETRY, e);
+	                        ZipEntry entry;
 
-				if (retryCount >= MAX_RETRY) {
-					schlog.error("[OSV] Maximum retry count ({}) exceeded. OSV snapshot download aborted.", MAX_RETRY, e);
-					break;
-				}
+	                        byte[] buffer = new byte[1024 * 1024];
 
-				try {
-					schlog.warn("[OSV] Retrying download in 30 seconds...");
-					Thread.sleep(1000 * 30);
-				} catch (InterruptedException ie) {
-					Thread.currentThread().interrupt();
-					schlog.warn("[OSV] Retry wait interrupted. Job terminated.");
-					return;
-				}
-			} finally {
-		        // Ensure the temporary file is deleted after each attempt (success or failure)
-		        if (tempZipFile != null) {
-		            try {
-		                Files.deleteIfExists(tempZipFile);
-		            } catch (IOException e) {
-		                log.warn("[OSV] Failed to delete temporary file: {}", tempZipFile, e);
-		            }
-		        }
-		    }
-		}
+	                        while ((entry = zis.getNextEntry()) != null) {
+
+	                            try {
+	                                if (entry.isDirectory() || !entry.getName().endsWith(".json")) {
+	                                    continue;
+	                                }
+
+	                                jsonCount++;
+
+	                                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+	                                int len;
+	                                while ((len = zis.read(buffer)) != -1) {
+	                                    bos.write(buffer, 0, len);
+	                                }
+
+	                                String jsonContent = bos.toString("UTF-8");
+
+	                                try {
+	                                    boolean isProcess = processAndQueueOsvRecord(sqlSession, jsonContent, entry.getName(), initializeFlag);
+	                                    if (isProcess) {
+	                                        count++;
+	                                    }
+	                                } catch (Exception ex) {
+	                                    log.error("[OSV] Failed to process JSON file [{}]: {}", entry.getName(), ex.getMessage(), ex);
+	                                }
+
+	                                jsonContent = null;
+	                                bos = null;
+
+	                                if (count > 0 && count % batchSize == 0) {
+	                                    sqlSession.flushStatements();
+	                                    schlog.info("[OSV] Batch flushed. Processed {} records.", count);
+	                                }
+
+	                            } finally {
+	                                zis.closeEntry();
+	                            }
+	                        }
+
+	                        sqlSession.flushStatements();
+	                        schlog.info("[OSV] Final batch flushed. Total JSON files: {}, processed records: {}", jsonCount, count);
+
+	                        sqlSession.commit();
+	                        schlog.info("[OSV] Snapshot processing completed successfully. Total records processed: {}", count);
+	                    }
+
+	                    return null;
+	                }
+	            );
+
+	            success = true;
+	            schlog.info("[OSV] Full OSV snapshot processing completed successfully.");
+	        } catch (Exception e) {
+	            retryCount++;
+	            schlog.error("[OSV] Download attempt {}/{} failed.", retryCount, MAX_RETRY, e);
+
+	            if (retryCount >= MAX_RETRY) {
+	                schlog.error("[OSV] Maximum retry count ({}) exceeded. OSV snapshot processing aborted.", MAX_RETRY, e);
+	                break;
+	            }
+
+	            try {
+	                schlog.warn("[OSV] Retrying download in 30 seconds...");
+	                Thread.sleep(1000L * 30);
+	            } catch (InterruptedException ie) {
+	                Thread.currentThread().interrupt();
+	                schlog.warn("[OSV] Retry wait interrupted. Job terminated.");
+
+	                return;
+	            }
+	        }
+	    }
 
 		if (success) {
 			try {
@@ -583,14 +590,52 @@ public class OsvDataService extends CoTopComponent {
 	}
 
 	private String calculateCvssScore(String vectorString) {
-		Cvss cvss = Cvss.fromVector(vectorString);
-	    if (cvss != null) {
-	        Score cvssScore = cvss.calculateScore();
-	        return String.valueOf(cvssScore.getBaseScore());
+		String trimmed = vectorString.trim();
+		
+		try {
+			// Try parsing with the standard vector string
+	        Cvss cvss = Cvss.fromVector(trimmed);
+	        if (cvss != null) {
+	            Score cvssScore = cvss.calculateScore();
+	            return String.valueOf(cvssScore.getBaseScore());
+	        }
+	    } catch (Exception e) {
+	    	// Attempt to fix malformed or mislabeled vectors (e.g., CVSS:3.x prefix with v2 'Au' metric)
+	        String fixedVector = fixMalformedVector(trimmed);
+	        if (fixedVector != null) {
+	            try {
+	                Cvss fixedCvss = Cvss.fromVector(fixedVector);
+	                if (fixedCvss != null) {
+	                    Score cvssScore = fixedCvss.calculateScore();
+	                    schlog.warn("Successfully recovered malformed CVSS vector from [{}] to [{}]", trimmed, fixedVector);
+	                    return String.valueOf(cvssScore.getBaseScore());
+	                }
+	            } catch (Exception innerEx) {
+	            	// Ignore and proceed to throw the original exception if fallback also fails
+	            }
+	        }
+	        
+	        // Re-throw the exception to be caught by the outer try-catch block
+	        if (e instanceof RuntimeException) {
+	            throw (RuntimeException) e;
+	        }
+	        throw new IllegalArgumentException("Failed to parse CVSS vector: " + vectorString, e);
 	    }
 	    throw new IllegalArgumentException("Failed to parse CVSS vector: " + vectorString);
 	}
 
+	private String fixMalformedVector(String vector) {
+	    // Case: Declared as CVSS:3.x but contains v2 specific metric (Au:)
+	    if (vector.startsWith("CVSS:3.") && vector.contains("Au:")) {
+	        return vector.replace("CVSS:3.1", "CVSS:2.0").replace("CVSS:3.0", "CVSS:2.0");
+	    }
+	    // Case: Missing CVSS prefix entirely
+	    if (!vector.startsWith("CVSS:")) {
+	        return "CVSS:2.0/" + vector;
+	    }
+	    return null;
+	}
+	
 	public List<OssComponents> getSecurityVulnerabilityList(Map<String, Object> securityGridMap, ProjectIdentification identification, String prjId, int securityIdx) {
 		List<OssComponents> osvVulnerabilityList = new ArrayList<>();
 		List<Vulnerability> osvVulnList = osvDataMapper.selectOsvSecurityListForProject(identification);
@@ -800,7 +845,7 @@ public class OsvDataService extends CoTopComponent {
 		List<Vulnerability> osvVulnerabilityList = findByNamePriority(ossMaster, paramMap);
 		Map<String, Vulnerability> osvVulnerabilityMap = osvVulnerabilityList.stream().collect(Collectors.toMap(Vulnerability::getCveId, vulnerability -> vulnerability, (existing, replacement) -> replacement));
 		List<Vulnerability> processedVulnerabilityList = filterByNamePriority(ossMaster, osvVulnerabilityList);
-		List<Vulnerability> osvResultList = filterByVersionPriority(processedVulnerabilityList, ossMaster.getOssVersion(), ossMaster.getOssVersionAliases());
+		List<Vulnerability> osvResultList = filterByVersionPriority(processedVulnerabilityList, osvVulnerabilityMap, ossMaster.getOssVersion(), ossMaster.getOssVersionAliases());
 		boolean emptyVersion = isEmpty(ossMaster.getOssVersion()) ? true : false;
 
 		if (CollectionUtils.isNotEmpty(osvResultList)) {
@@ -847,12 +892,6 @@ public class OsvDataService extends CoTopComponent {
 
 							osv.setId(mainId);
 							osv.setAliasId(aliasValue);
-						}
-
-						String key = rawId.split("\\(")[0].trim();
-						Vulnerability bean = osvVulnerabilityMap.get(key);
-						if (bean != null) {
-							copyVulnerabilityFields(bean, osv);
 						}
 					}
 					if (emptyVersion && CoConstDef.FLAG_YES.equals(osv.getSearchVersionP3Yn())) {
@@ -1210,12 +1249,17 @@ public class OsvDataService extends CoTopComponent {
 		return result;
 	}
 
-	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, String targetVersion, String[] aliases) {
+	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, Map<String, Vulnerability> osvVulnerabilityMap, String targetVersion, String[] aliases) {
 		List<Vulnerability> versionP1 = new ArrayList<>();
 		List<Vulnerability> versionP2 = new ArrayList<>();
 		List<Vulnerability> versionP3 = new ArrayList<>();
 
 		for (Vulnerability osvVulnerability : osvVulnerabilityList) {
+			Vulnerability bean = osvVulnerabilityMap.get(osvVulnerability.getCveId());
+			if (bean != null) {
+				copyVulnerabilityFields(bean, osvVulnerability);
+			}
+			
 			osvVulnerability.setCvssScore(osvVulnerability.getSeverity());
 
 			if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP1Yn())) {
