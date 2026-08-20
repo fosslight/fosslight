@@ -360,8 +360,7 @@ public class OsvDataService extends CoTopComponent {
 				if (sevNode == null) {
 					continue;
 				}
-				insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, "*", "*", "GLOBAL",
-						sevNode.path("type").asText(), sevNode.path("score").asText());
+				insertOsvSeverity(sqlSession, insertedOsvSeveritySet, id, "*", "*", "GLOBAL", sevNode.path("type").asText(), sevNode.path("score").asText());
 			}
 		}
 
@@ -561,6 +560,10 @@ public class OsvDataService extends CoTopComponent {
 		if (isCvssType(type, score)) {
 			try {
 				finalScore = calculateCvssScore(score);
+				// Skip insertion if calculation fails or returns null for unparseable vectors
+	            if (finalScore == null) {
+	                return;
+	            }
 			} catch (Exception e) {
 		        // Log the exception and exit the flow when calculation fails
 		        schlog.error("Failed to calculate CVSS score for vector: {}", score, e);
@@ -590,85 +593,86 @@ public class OsvDataService extends CoTopComponent {
 	}
 
 	private String calculateCvssScore(String vectorString) {
+		if (isEmpty(vectorString)) {
+	        return null;
+	    }
+		
 		String trimmed = vectorString.trim();
+		
+		// Pre-check and fix malformed vectors BEFORE calling the external parser
+	    String targetVector = fixMalformedVector(trimmed);
+	    if (targetVector == null) {
+	        schlog.warn("Skipping unparseable or invalid CVSS vector string: [{}]", trimmed);
+	        return null;
+	    }
 		
 		try {
 			// Try parsing with the standard vector string
 	        Cvss cvss = Cvss.fromVector(trimmed);
 	        if (cvss != null) {
 	            Score cvssScore = cvss.calculateScore();
+	            if (!targetVector.equals(trimmed)) {
+	                schlog.warn("Successfully recovered malformed CVSS vector from [{}] to [{}]", trimmed, targetVector);
+	            }
 	            return String.valueOf(cvssScore.getBaseScore());
 	        }
 	    } catch (Exception e) {
-	    	// Attempt to fix malformed or mislabeled vectors (e.g., CVSS:3.x prefix with v2 'Au' metric)
-	        String fixedVector = fixMalformedVector(trimmed);
-	        if (fixedVector != null) {
-	            try {
-	                Cvss fixedCvss = Cvss.fromVector(fixedVector);
-	                if (fixedCvss != null) {
-	                    Score cvssScore = fixedCvss.calculateScore();
-	                    schlog.warn("Successfully recovered malformed CVSS vector from [{}] to [{}]", trimmed, fixedVector);
-	                    return String.valueOf(cvssScore.getBaseScore());
-	                }
-	            } catch (Exception innerEx) {
-	            	// Ignore and proceed to throw the original exception if fallback also fails
-	            }
-	        }
-	        
-	        // Re-throw the exception to be caught by the outer try-catch block
-	        if (e instanceof RuntimeException) {
-	            throw (RuntimeException) e;
-	        }
-	        throw new IllegalArgumentException("Failed to parse CVSS vector: " + vectorString, e);
+	    	// Catch any remaining unexpected parsing exceptions to prevent batch interruption
+	        schlog.warn("Failed to parse CVSS vector even after correction: [{}]. Error: {}", trimmed, e.getMessage());
+	        return null;
 	    }
-	    throw new IllegalArgumentException("Failed to parse CVSS vector: " + vectorString);
+		
+	    return null;
 	}
 
 	private String fixMalformedVector(String vector) {
-	    // Case: Declared as CVSS:3.x but contains v2 specific metric (Au:)
-	    if (vector.startsWith("CVSS:3.") && vector.contains("Au:")) {
-	        return vector.replace("CVSS:3.1", "CVSS:2.0").replace("CVSS:3.0", "CVSS:2.0");
+		if (isEmpty(vector)) {
+	        return null;
 	    }
+	    
+		String trimmed = vector.trim();
+		
+	    // Filter out invalid or non-standard vector formats (e.g., "None", too short strings)
+		if (trimmed.toUpperCase().contains("NONE") || trimmed.length() < 5) {
+	        return null;
+	    }
+	    
+	    // Case: Declared as CVSS:3.x but contains v2 specific metric ('Au:'), convert to CVSS 2.0
+		if (trimmed.toUpperCase().startsWith("CVSS:3") && trimmed.contains("Au:")) {
+	        return trimmed.replaceFirst("(?i)CVSS:3\\.[01]", "CVSS:2.0");
+	    }
+		// Case: CVSS v3.x vector containing 'Au:' without strict prefix or mixed format
+	    if (trimmed.contains("Au:") && !trimmed.toUpperCase().startsWith("CVSS:2")) {
+	        // If it has a wrong prefix or missing prefix, ensure it's treated as CVSS 2.0
+	        int slashIdx = trimmed.indexOf('/');
+	        if (slashIdx != -1) {
+	            return "CVSS:2.0" + trimmed.substring(slashIdx);
+	        } else {
+	            return "CVSS:2.0/" + trimmed;
+	        }
+	    }
+	    
 	    // Case: Missing CVSS prefix entirely
-	    if (!vector.startsWith("CVSS:")) {
-	        return "CVSS:2.0/" + vector;
+	    if (!trimmed.toUpperCase().startsWith("CVSS:")) {
+	        if (trimmed.contains("Au:")) {
+	            return "CVSS:2.0/" + trimmed;
+	        } else {
+	            return "CVSS:3.1/" + trimmed;
+	        }
 	    }
-	    return null;
+	    
+	    return trimmed;
 	}
 	
 	public List<OssComponents> getSecurityVulnerabilityList(Map<String, Object> securityGridMap, ProjectIdentification identification, String prjId, int securityIdx) {
 		List<OssComponents> osvVulnerabilityList = new ArrayList<>();
 		List<Vulnerability> osvVulnList = osvDataMapper.selectOsvSecurityListForProject(identification);
 		if (CollectionUtils.isNotEmpty(osvVulnList)) {
-			// Initial duplicate removal from the raw OSV list
-			Map<String, Vulnerability> uniqueMap = osvVulnList.stream()
-													    .filter(v -> v != null && !isEmpty(v.getCveId()))
-													    .collect(Collectors.toMap(
-													        item -> String.format("%s_%s_%s", 
-													            !isEmpty(item.getOssName()) ? item.getOssName().trim() : "", 
-													            !isEmpty(item.getOssVersion()) ? item.getOssVersion().trim() : "", 
-													            item.getCveId().toUpperCase().trim()
-													        ),
-													        item -> item,
-													        (existing, replacement) -> existing
-													    ));
+			Map<String, Vulnerability> osvVulnerabilityMap = osvVulnList.stream().collect(Collectors.toMap(Vulnerability::getCveId, vulnerability -> vulnerability, (existing, replacement) -> replacement));
+			List<Vulnerability> processedVulnerabilityList = filterByNamePriority(null, osvVulnList);
+			List<Vulnerability> osvResultList = filterByVersionPriority(processedVulnerabilityList, osvVulnerabilityMap, null, null, true);
 
-			List<Vulnerability> rawFilteredList = new ArrayList<>(uniqueMap.values());
-			OssComponents ossComponents = null;
-			Pattern pattern = Pattern.compile("([\\[\\(])([^,\\])]+),\\s*([^,\\])]+)([\\]\\)])");
-
-			// Temporary list to store items that pass version validation
-			Map<String, Vulnerability> mergedOsvMap = new LinkedHashMap<>();
-			OssMaster ossInfo = null;
-			if (!isEmpty(identification.getOssName())) {
-				ossInfo = CoCodeManager.OSS_INFO_UPPER.get((identification.getOssName() + "_" + avoidNull(identification.getOssVersion())).toUpperCase());
-			}
-
-			mergedOsvMap = CommonFunction.filterAndMergeOsvVulnerabilities(ossInfo, rawFilteredList);
-			mergedOsvMap.replaceAll((key, value) -> uniqueMap.getOrDefault(key, value));
-			
-			List<Vulnerability> mergedFilteredVulnList = new ArrayList<>(mergedOsvMap.values());
-			Map<String, Vulnerability> finalMap = mergedFilteredVulnList.stream()
+			Map<String, Vulnerability> finalMap = osvResultList.stream()
 															.filter(v -> v != null && !isEmpty(v.getCveId()))
 														    .collect(Collectors.groupingBy(
 														        item -> String.format("%s_%s_%s", 
@@ -720,6 +724,9 @@ public class OsvDataService extends CoTopComponent {
 														    ));
 			List<Vulnerability> finalFilteredVulnList = new ArrayList<>(finalMap.values());
 			
+			OssComponents ossComponents = null;
+			Pattern pattern = Pattern.compile("([\\[\\(])([^,\\])]+),\\s*([^,\\])]+)([\\]\\)])");
+			
 			// Populate OssComponents objects using the finalized list and add them to the
 			// result list
 			for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
@@ -729,12 +736,6 @@ public class OsvDataService extends CoTopComponent {
 					securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore());
 				} else {
 					securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null);
-				}
-
-				String osvVulnerabilityMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), null);
-				Vulnerability vulnerability = uniqueMap.get(osvVulnerabilityMapKey);
-				if (vulnerability != null) {
-					osvVulnInfo = vulnerability;
 				}
 
 				ossComponents = new OssComponents();
@@ -845,7 +846,7 @@ public class OsvDataService extends CoTopComponent {
 		List<Vulnerability> osvVulnerabilityList = findByNamePriority(ossMaster, paramMap);
 		Map<String, Vulnerability> osvVulnerabilityMap = osvVulnerabilityList.stream().collect(Collectors.toMap(Vulnerability::getCveId, vulnerability -> vulnerability, (existing, replacement) -> replacement));
 		List<Vulnerability> processedVulnerabilityList = filterByNamePriority(ossMaster, osvVulnerabilityList);
-		List<Vulnerability> osvResultList = filterByVersionPriority(processedVulnerabilityList, osvVulnerabilityMap, ossMaster.getOssVersion(), ossMaster.getOssVersionAliases());
+		List<Vulnerability> osvResultList = filterByVersionPriority(processedVulnerabilityList, osvVulnerabilityMap, ossMaster.getOssVersion(), ossMaster.getOssVersionAliases(), false);
 		boolean emptyVersion = isEmpty(ossMaster.getOssVersion()) ? true : false;
 
 		if (CollectionUtils.isNotEmpty(osvResultList)) {
@@ -1249,12 +1250,16 @@ public class OsvDataService extends CoTopComponent {
 		return result;
 	}
 
-	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, Map<String, Vulnerability> osvVulnerabilityMap, String targetVersion, String[] aliases) {
+	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, Map<String, Vulnerability> osvVulnerabilityMap, String targetVersion, String[] aliases, boolean isSecurity) {
 		List<Vulnerability> versionP1 = new ArrayList<>();
 		List<Vulnerability> versionP2 = new ArrayList<>();
 		List<Vulnerability> versionP3 = new ArrayList<>();
 
 		for (Vulnerability osvVulnerability : osvVulnerabilityList) {
+			if (isSecurity) {
+				targetVersion = osvVulnerability.getOssVersion();
+			}
+			
 			Vulnerability bean = osvVulnerabilityMap.get(osvVulnerability.getCveId());
 			if (bean != null) {
 				copyVulnerabilityFields(bean, osvVulnerability);
