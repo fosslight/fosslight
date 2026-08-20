@@ -83,6 +83,9 @@ public class NvdDataService extends CoTopComponent {
 	@Autowired Environment env;
 	@Autowired SqlSessionFactory sqlSessionFactory;
 	
+	@Autowired
+    private NvdDataService self;
+	
 	public String executeNvdDataSync() throws IOException {
 		
 		// check initialize flag
@@ -144,10 +147,16 @@ public class NvdDataService extends CoTopComponent {
 		}
 		
 		try {
-			nvdCveDataSyncJob(true);
+			self.nvdCveDataSyncJob(true);
 		} catch (Exception e) {
 			schlog.error(e.getMessage(), e);
 			return "93";
+		}
+		
+		try {
+			self.refreshNvdSearchMaster();
+		} catch (Exception e) {
+			schlog.error(e.getMessage(), e);
 		}
 		
 		return "00";
@@ -1062,13 +1071,12 @@ public class NvdDataService extends CoTopComponent {
 			schlog.info("Vendor Product NVD Data Score V3 Update Count : " + vendorProductNvdDataScoreV3Cnt);
 			nvdDataMapper.updateVendorProductNvdDataScoreV3();
 		}
-
-		refreshNvdSearchMaster();
 		
 		return resCd;
 	}
 	
-	private void refreshNvdSearchMaster() {
+	@Transactional(rollbackFor = Exception.class)
+	public void refreshNvdSearchMaster() {
 		nvdDataMapper.setGroupConcatMaxLen();
 		
 		nvdDataMapper.dropTmpNvdGrouped();
