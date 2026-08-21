@@ -4764,12 +4764,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster) {
-		if (avoidNull(ossMaster.getCveId()).isEmpty() && avoidNull(ossMaster.getCvssScore()).isEmpty()) {
-			return null;
-		}
-		
 		List<Vulnerability> list = null;
-		List<Vulnerability> convertList = new ArrayList<>();
 		boolean inCpeMatchFlag = CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag())) ? true : false;
 		
 		String[] nicknameList = null;
