@@ -92,28 +92,23 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> result = new HashMap<String, Object>();
 
-        try {
-            int createCnt = apiSelfCheckService.getCreateProjectCnt(userInfo.getUserId());
+        int createCnt = apiSelfCheckService.getCreateProjectCnt(userInfo.getUserId());
 
-            if (CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT <= createCnt) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_CREATE_OVERFLOW_MESSAGE));
-            }
-            Map<String, Object> paramMap = new HashMap<String, Object>();
+        if (CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT <= createCnt) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_CREATE_OVERFLOW_MESSAGE));
+        }
+        Map<String, Object> paramMap = new HashMap<String, Object>();
 
-            paramMap.put("prjName", prjName);
-            paramMap.put("prjVersion", avoidNull(prjVersion, ""));
-            paramMap.put("loginUserName", userInfo.getUserId());
+        paramMap.put("prjName", prjName);
+        paramMap.put("prjVersion", avoidNull(prjVersion, ""));
+        paramMap.put("loginUserName", userInfo.getUserId());
 
-            result = apiSelfCheckService.createSelfCheck(paramMap);
-            String prjId = (String) result.get("prjId");
+        result = apiSelfCheckService.createSelfCheck(paramMap);
+        String prjId = (String) result.get("prjId");
 
-            if (isEmpty(prjId)) {
-                throw new Exception(); // parameter Error -> create Failure
-            }
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        if (isEmpty(prjId)) {
+            throw new IllegalStateException("Failed to create self check project.");
         }
 
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -127,141 +122,134 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '") @RequestPart(required = false) MultipartFile ossReport,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N") @RequestParam(required = false, defaultValue="Y") String resetFlag,
-            @ApiParam(value = "Sheet Names") @RequestParam(required = false) String sheetNames) {
+            @ApiParam(value = "Sheet Names") @RequestParam(required = false) String sheetNames) throws Exception {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
-        try {
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjId);
-            boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("prjId", prjId);
+        boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 
-            if (!searchFlag) {
+        if (!searchFlag) {
 
-                return responseService.errorResponse(HttpStatus.FORBIDDEN,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+            return responseService.errorResponse(HttpStatus.FORBIDDEN,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+        }
+        String oldFileId = "";
+        if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+            Map<String, Object> prjInfo = apiSelfCheckService.selectProjectMaster(prjId);
+            if (prjInfo.get("srcCsvFileId") != null) {
+                oldFileId = String.valueOf((int) prjInfo.get("srcCsvFileId"));
             }
-            String oldFileId = "";
-            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-                Map<String, Object> prjInfo = apiSelfCheckService.selectProjectMaster(prjId);
-                if (prjInfo.get("srcCsvFileId") != null) {
-                    oldFileId = String.valueOf((int) prjInfo.get("srcCsvFileId"));
-                }
-            }
+        }
 
-            if (ossReport == null) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-            }
-            UploadFile bean = null;
-            if (!isEmpty(oldFileId)) {
-                bean = apiFileService.uploadFile(ossReport, null, oldFileId);
-            } else {
-                bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-            }
+        if (ossReport == null) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        }
+        UploadFile bean = null;
+        if (!isEmpty(oldFileId)) {
+            bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+        } else {
+            bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+        }
 
-            List<UploadFile> list = new ArrayList<UploadFile>();
-            list.add(bean);
-            ArrayList<Object> checkFileLimit = null;
-            if (bean.getFileExt().contains("csv")) {
-                checkFileLimit = CommonFunction.checkCsvFileLimit(list);
-            } else {
-                checkFileLimit = CommonFunction.checkXlsxFileLimit(list);
-            }
+        List<UploadFile> list = new ArrayList<UploadFile>();
+        list.add(bean);
+        ArrayList<Object> checkFileLimit = null;
+        if (bean.getFileExt().contains("csv")) {
+            checkFileLimit = CommonFunction.checkCsvFileLimit(list);
+        } else {
+            checkFileLimit = CommonFunction.checkXlsxFileLimit(list);
+        }
 
-            if (checkFileLimit != null && checkFileLimit.contains("FILE_SIZE_LIMIT_OVER")) {
-                return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
-            }
+        if (checkFileLimit != null && checkFileLimit.contains("FILE_SIZE_LIMIT_OVER")) {
+            return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+        }
 
 //					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
 //							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > bean.getSize()) { // file size 5MB 이하만 허용.
 
-            if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= bean.getSize()) {
-                return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
-            }
+        if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= bean.getSize()) {
+            return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+        }
 //					UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
 
-            List<String> sheetList = new ArrayList<>();
-            boolean sheetNamesEmptyFlag = isEmpty(sheetNames) ? true : false;
+        List<String> sheetList = new ArrayList<>();
+        boolean sheetNamesEmptyFlag = isEmpty(sheetNames) ? true : false;
 
-            if (sheetNamesEmptyFlag) {
-                List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-                for (Object obj : sheets) {
-                    Map<String, Object> sheetMap = (Map<String, Object>) obj;
-                    if (sheetMap.containsKey("name")) {
-                        sheetList.add((String) sheetMap.get("name"));
-                    }
+        if (sheetNamesEmptyFlag) {
+            List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+            for (Object obj : sheets) {
+                Map<String, Object> sheetMap = (Map<String, Object>) obj;
+                if (sheetMap.containsKey("name")) {
+                    sheetList.add((String) sheetMap.get("name"));
+                }
+            }
+        } else {
+            if (sheetNames.contains(",")) {
+                for (String sheetName : sheetNames.split(",")) {
+                    if (!isEmpty(sheetName.trim())) sheetList.add(sheetName.trim());
                 }
             } else {
-                if (sheetNames.contains(",")) {
-                    for (String sheetName : sheetNames.split(",")) {
-                        if (!isEmpty(sheetName.trim())) sheetList.add(sheetName.trim());
+                sheetList.add(sheetNames);
+            }
+        }
+
+        String[] sheet = sheetList.toArray(new String[sheetList.size()]);
+        Map<String, Object> rtnMap = null;
+        List<ProjectIdentification> ossComponentList = new ArrayList<>();
+        List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+
+        for (String sheetNm : sheetList) {
+            Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm, sheet, sheetNamesEmptyFlag);
+            resultMap = getSheetDataResult(result);
+
+            if (!resultMap.isEmpty()) {
+                rtnMap = resultMap;
+                if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE) ||
+                        rtnMap.containsKey(KEY_ERROR_MESSAGE)) {
+                    rtnMap = null;
+                    continue;
+                } else if (rtnMap.containsKey("ossComponents")) {
+                    ossComponentList.addAll((List<ProjectIdentification>) rtnMap.get("ossComponents"));
+                    List<List<ProjectIdentification>> ossComponentsLicenses = (List<List<ProjectIdentification>>) rtnMap.get("ossComponentsLicense");
+                    if (!ossComponentsLicenses.isEmpty()) {
+                        ossComponentsLicenseList.addAll(ossComponentsLicenses);
                     }
                 } else {
-                    sheetList.add(sheetNames);
+                    break;
                 }
             }
-
-            String[] sheet = sheetList.toArray(new String[sheetList.size()]);
-            Map<String, Object> rtnMap = null;
-            List<ProjectIdentification> ossComponentList = new ArrayList<>();
-            List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
-
-            for (String sheetNm : sheetList) {
-                Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm, sheet, sheetNamesEmptyFlag);
-                resultMap = getSheetDataResult(result);
-
-                if (!resultMap.isEmpty()) {
-                    rtnMap = resultMap;
-                    if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE) ||
-                            rtnMap.containsKey(KEY_ERROR_MESSAGE)) {
-                        rtnMap = null;
-                        continue;
-                    } else if (rtnMap.containsKey("ossComponents")) {
-                        ossComponentList.addAll((List<ProjectIdentification>) rtnMap.get("ossComponents"));
-                        List<List<ProjectIdentification>> ossComponentsLicenses = (List<List<ProjectIdentification>>) rtnMap.get("ossComponentsLicense");
-                        if (!ossComponentsLicenses.isEmpty()) {
-                            ossComponentsLicenseList.addAll(ossComponentsLicenses);
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            }
-
-            if (rtnMap != null && rtnMap.containsKey(KEY_VALID_ERROR)) {
-                return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, getMessage("api.dataValidationError.msg")); // data validation error
-            }
-
-            if (!ossComponentList.isEmpty()) {
-                rtnMap = null;
-
-                if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-                    apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
-                }
-
-                Project project = new Project();
-                project.setPrjId(prjId);
-                project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
-                selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
-
-                // 정상처리된 경우 세션 삭제
-                deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
-                deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-            }
-
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
         }
+
+        if (rtnMap != null && rtnMap.containsKey(KEY_VALID_ERROR)) {
+            return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, getMessage("api.dataValidationError.msg")); // data validation error
+        }
+
+        if (!ossComponentList.isEmpty()) {
+            rtnMap = null;
+
+            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+                apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
+            }
+
+            Project project = new Project();
+            project.setPrjId(prjId);
+            project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
+            selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+
+            // 정상처리된 경우 세션 삭제
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
+            deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+        }
+
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @SuppressWarnings("unchecked")
@@ -315,28 +303,23 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format
-    ) {
+    ) throws Exception {
         String downloadId = "";
         T2File fileInfo = new T2File();
 
-        try {
-            T2Users userInfo = userService.checkApiUserAuth(authorization);
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjId);
-            boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
-            if (searchFlag) {
-                downloadId = ExcelDownLoadUtil.getExcelDownloadId("selfReport", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
-                fileInfo = fileService.selectFileInfo(downloadId);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("prjId", prjId);
+        boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+        if (searchFlag) {
+            downloadId = ExcelDownLoadUtil.getExcelDownloadId("selfReport", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+            fileInfo = fileService.selectFileInfo(downloadId);
 
-                return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -350,46 +333,41 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<>();
         String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
 
-        try {
-            T2Users userInfo = userService.checkApiUserAuth(authorization);
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjId);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("prjId", prjId);
 
-            boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap);
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+        boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap);
+        if (!searchFlag) {
+            return responseService.errorResponse(HttpStatus.FORBIDDEN, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+        }
+        if (emailList == null) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        }
+
+        for (String email : emailList) {
+            boolean ldapCheck = true;
+            if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
+                ldapCheck = apiProjectService.existLdapUserToEmail(email);
             }
-            if (emailList == null) {
+            if (!ldapCheck) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
+            }
+            boolean watcherFlag = apiSelfCheckService.existsWatcherByEmail(prjId, email);
+            if (!watcherFlag) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
             }
-
-            for (String email : emailList) {
-                boolean ldapCheck = true;
-                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
-                    ldapCheck = apiProjectService.existLdapUserToEmail(email);
-                }
-                if (!ldapCheck) {
-                    return responseService.errorResponse(HttpStatus.NOT_FOUND, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
-                }
-                boolean watcherFlag = apiSelfCheckService.existsWatcherByEmail(prjId, email);
-                if (!watcherFlag) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-                }
-                Map<String, Object> param = new HashMap<>();
-                param.put("prjId", prjId);
-                param.put("division", "");
-                param.put("userId", "");
-                param.put("email", email);
-                apiSelfCheckService.insertWatcher(param);
-            }
-
-            return ResponseEntity.ok(resultMap);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+            Map<String, Object> param = new HashMap<>();
+            param.put("prjId", prjId);
+            param.put("division", "");
+            param.put("userId", "");
+            param.put("email", email);
+            apiSelfCheckService.insertWatcher(param);
         }
+
+        return ResponseEntity.ok(resultMap);
     }
 
     @ApiOperation(value = "SelfCheck Get", notes = "SelfCheck Get")
@@ -400,23 +378,18 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
         Map<String, Object> resultMap = new HashMap<>();
 
-        try {
-            T2Users userInfo = userService.checkApiUserAuth(authorization);
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjId);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("prjId", prjId);
 
-            boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap);
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
-            }
-            var selfCheck = apiSelfCheckService.selectProjectMaster(prjId);
-            resultMap.put("content", selfCheck);
-            return ResponseEntity.ok(resultMap);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap);
+        if (!searchFlag) {
+            return responseService.errorResponse(HttpStatus.FORBIDDEN, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
         }
+        var selfCheck = apiSelfCheckService.selectProjectMaster(prjId);
+        resultMap.put("content", selfCheck);
+        return ResponseEntity.ok(resultMap);
     }
 }

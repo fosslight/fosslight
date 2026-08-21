@@ -35,7 +35,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     protected ResponseEntity<Map<String, Object>> handleInternalServerError(
             HttpServletRequest request, Exception e) {
-        log.error("Unhandled exception", e);
+        log.error("Unhandled exception [{} {}]", request.getMethod(), request.getRequestURI(), e);
         return responseService.errorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE)
@@ -74,6 +74,18 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Map<String, Object>> handleCInvalidProjectTypeException(HttpServletRequest request, CInvalidProjectTypeException e){
         return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
                 "Project Type is invalid. " + e.getMessage());
+    }
+
+    @ExceptionHandler(CProjectNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ResponseEntity<Map<String, Object>> handleProjectNotFound(HttpServletRequest request, CProjectNotFoundException e) {
+        return responseService.errorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(CSupplementNoticeGenerationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    protected ResponseEntity<Map<String, Object>> handleSupplementNoticeGenerationFailure(HttpServletRequest request, CSupplementNoticeGenerationException e) {
+        return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
     }
 
     @ExceptionHandler(CProjectNotAvailableException.class)
