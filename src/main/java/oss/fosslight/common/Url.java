@@ -709,6 +709,7 @@ public final class Url {
 		
 		public static final String PAGE = PATH + "/external";
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/external";
+		public static final String MAKE_DISTRIBUTION_SITE = PATH + "/makeDistributeSiteUrl";
 		
 		public static final String REQUEST_FL_SCAN = PATH + "/request-fl-scan";
 		public static final String REQUEST_FL_SCAN_FILE = PATH + "/request-fl-scan-file";
