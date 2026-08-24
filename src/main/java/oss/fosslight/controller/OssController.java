@@ -347,7 +347,7 @@ public class OssController extends CoTopComponent{
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 
-		return CommonFunction.isAdmin() ? "oss/edit_dev" : "oss/view_vuln";
+		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 	
 	@GetMapping(value={OSS.POPUPLIST_ID}, produces = "text/html; charset=utf-8")
