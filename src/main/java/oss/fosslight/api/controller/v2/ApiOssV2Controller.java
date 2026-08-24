@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.annotation.InternalApi;
 import oss.fosslight.api.dto.ListLicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.service.RestResponseService;
@@ -181,6 +182,7 @@ public class ApiOssV2Controller extends CoTopComponent {
 //        }
 //    }
 
+    @InternalApi
     @ApiOperation(value = "Register New OSS", notes = "Register New OSS")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REGISTER})
     public ResponseEntity<Map<String, Object>> registerOss(
@@ -197,6 +199,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
     }
     
+    @InternalApi
     @ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL is processed in the following order. <ol><li>UPDATE DOWNLOAD LOCATION FORMAT</li><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* If doUpdateFlag is N, the database will not be updated.")
 	@GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION})
     public ResponseEntity<Map<String, Object>> refineOssDownloadLocation(
