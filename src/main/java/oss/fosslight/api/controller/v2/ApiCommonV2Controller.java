@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.annotation.InternalApi;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.T2Users;
@@ -38,6 +39,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
+    @InternalApi
     @ApiOperation(value = "Merge division", notes = "Merge division (from -> to)")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_MERGE_DIVISION})
     public ResponseEntity<Map<String, Object>> mergeDivision(
@@ -60,6 +62,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
         }
     }
 
+    @InternalApi
     @ApiOperation(value = "Add division", notes = "Add a user division (T2_CODE_DTL, CD_NO=200). Detail Name maps to CD_DTL_NM, Detail Description to CD_DTL_EXP.")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
     public ResponseEntity<Map<String, Object>> addDivision(
@@ -83,6 +86,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
         }
     }
 
+    @InternalApi
     @ApiOperation(value = "Update division", notes = "Update CD_DTL_NM and/or CD_DTL_EXP for a user division (T2_CODE_DTL, CD_NO=200) by CD_DTL_NO. Omit a field to leave it unchanged; at least one of cdDtlNm or cdDtlExp must be sent.")
     @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_UPDATE_DIVISION})
     public ResponseEntity<Map<String, Object>> updateDivision(
@@ -114,6 +118,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
         }
     }
 
+    @InternalApi
     @ApiOperation(value = "Get division list", notes = "Get division list (T2_CODE_DTL, CD_NO=200)")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
     public ResponseEntity<Map<String, Object>> getDivisionList(
@@ -131,6 +136,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
         }
     }
 
+    @InternalApi
     @ApiOperation(value = "Get all users (basic)", notes = "Returns all rows from T2_USERS with user_id, user_name, email, division, use_yn")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USERS})
     public ResponseEntity<Map<String, Object>> getAllUsersBasic(
@@ -161,6 +167,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
         }
     }
 
+    @InternalApi
     @ApiOperation(value = "Update user division", notes = "Admin only. Update T2_USERS.DIVISION by USER_ID.")
     @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USER_DIVISION})
     public ResponseEntity<Map<String, Object>> updateUserDivision(

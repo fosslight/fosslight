@@ -76,29 +76,22 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
-        try {
-            CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
-            CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
+        CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
+        CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 
 //			paramMap.put("userRole", userInfo.getAuthority());
-            paramMap.put("creator", creator);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("division", division);
-            paramMap.put("status", status);
-            paramMap.put("partnerIdList", partnerIdList);
-            paramMap.put("countPerPage", countPerPage);
-            paramMap.put("offset", (page - 1) * countPerPage);
+        paramMap.put("creator", creator);
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("division", division);
+        paramMap.put("status", status);
+        paramMap.put("partnerIdList", partnerIdList);
+        paramMap.put("countPerPage", countPerPage);
+        paramMap.put("offset", (page - 1) * countPerPage);
 
-            resultMap = apiPartnerService.getPartnerMasterList(paramMap);
+        resultMap = apiPartnerService.getPartnerMasterList(paramMap);
 
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-        }
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
 
     }
 
@@ -116,34 +109,29 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(partnerId);
         }
 
-        try {
-            for (String email : emailList) {
-                boolean ldapCheck = true;
-                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
-                    ldapCheck = apiPartnerService.existLdapUserToEmail(email);
-                }
-                if (!ldapCheck) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-                }
-                boolean watcherFlag = apiPartnerService.existsWatcherByEmail(partnerId, email);
-                if (watcherFlag) {
-                    Map<String, Object> param = new HashMap<>();
-                    param.put("partnerId", partnerId);
-                    param.put("division", "");
-                    param.put("userId", "");
-                    param.put("partnerEmail", email);
-                    apiPartnerService.insertWatcher(param);
-                } else {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-                }
+        for (String email : emailList) {
+            boolean ldapCheck = true;
+            if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
+                ldapCheck = apiPartnerService.existLdapUserToEmail(email);
             }
-            return new ResponseEntity(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+            if (!ldapCheck) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+            }
+            boolean watcherFlag = apiPartnerService.existsWatcherByEmail(partnerId, email);
+            if (watcherFlag) {
+                Map<String, Object> param = new HashMap<>();
+                param.put("partnerId", partnerId);
+                param.put("division", "");
+                param.put("userId", "");
+                param.put("partnerEmail", email);
+                apiPartnerService.insertWatcher(param);
+            } else {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+            }
         }
+        return new ResponseEntity(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
@@ -215,12 +203,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(partnerId);
         }
 
-        try {
-            resultMap = apiPartnerService.getExportJson(partnerId);
-
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
-        }
+        resultMap = apiPartnerService.getExportJson(partnerId);
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 }

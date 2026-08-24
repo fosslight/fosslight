@@ -47,15 +47,11 @@ public class ApiCodeV2Controller extends CoTopComponent {
         userService.checkApiUserAuth(authorization);
         Map<String, Object> result = new HashMap<>();
 
-        try {
-            List<Map<String, Object>> contents = apiCodeService.getCodeList(codeType, detailValue);
-            if (contents.size() == 0) {
-                return ResponseEntity.notFound().build();
-            }
-            result.put("content", contents);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        List<Map<String, Object>> contents = apiCodeService.getCodeList(codeType, detailValue);
+        if (contents.size() == 0) {
+            return ResponseEntity.notFound().build();
         }
+        result.put("content", contents);
+        return ResponseEntity.ok(result);
     }
 }

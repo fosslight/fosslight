@@ -71,6 +71,8 @@ import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.advice.CProjectNotFoundException;
+import oss.fosslight.api.advice.CSupplementNoticeGenerationException;
 import oss.fosslight.util.OssComponentUtil;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -7028,7 +7030,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 		Project projectDetail = getProjectDetail(project);
 		if (projectDetail == null) {
-			throw new IllegalStateException("Project not found.");
+			throw new CProjectNotFoundException("Project not found.");
 		}
 
 		ProjectIdentification identification = new ProjectIdentification();
@@ -7052,7 +7054,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		if (isEmpty(fileId)) {
-			throw new IllegalStateException("Failed to generate supplement notice file. Please verify that the project contains valid binary components.");
+			throw new CSupplementNoticeGenerationException("Failed to generate supplement notice file. Please verify that the project contains valid binary components.");
 		}
 
 		return fileId;

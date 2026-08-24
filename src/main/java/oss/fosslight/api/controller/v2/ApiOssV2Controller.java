@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.annotation.InternalApi;
 import oss.fosslight.api.dto.ListLicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.service.RestResponseService;
@@ -70,33 +71,26 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(value = "Page", required = false)
             @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page
     ) {
-        try {
-            // 사용자 인증
-            userService.checkApiUserAuth(authorization);
+        // 사용자 인증
+        userService.checkApiUserAuth(authorization);
 
-            ListOssDto.Request ossQuery =
-                    ListOssDto.Request.builder()
-                            .ossName(ossName)
-                            .url(downloadLocation)
-                            .ossVersion(ossVersion)
-                            .ossNameExact(Objects.equals(ossNameExact, "Y"))
-                            .urlExact(Objects.equals(downloadLocationExact, "Y"))
-                            .cveId(cveId != null ? cveId.trim() : null)
-                            .build();
-            ossQuery.setPage(page);
-            ossQuery.setCountPerPage(countPerPage);
+        ListOssDto.Request ossQuery =
+                ListOssDto.Request.builder()
+                        .ossName(ossName)
+                        .url(downloadLocation)
+                        .ossVersion(ossVersion)
+                        .ossNameExact(Objects.equals(ossNameExact, "Y"))
+                        .urlExact(Objects.equals(downloadLocationExact, "Y"))
+                        .cveId(cveId != null ? cveId.trim() : null)
+                        .build();
+        ossQuery.setPage(page);
+        ossQuery.setCountPerPage(countPerPage);
 
-            var map = apiOssService.listOss(ossQuery);
-            if (!userService.isApiAdmin(authorization) && map.list != null) {
-                map.list.forEach(oss -> oss.setExclude(null));
-            }
-            return ResponseEntity.ok(map);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+        var map = apiOssService.listOss(ossQuery);
+        if (!userService.isApiAdmin(authorization) && map.list != null) {
+            map.list.forEach(oss -> oss.setExclude(null));
         }
+        return ResponseEntity.ok(map);
     }
 
 
@@ -115,23 +109,16 @@ public class ApiOssV2Controller extends CoTopComponent {
         userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        try {
-            ListLicenseDto.Request licenseQuery =
-                    ListLicenseDto.Request.builder()
-                            .licenseName(licenseName)
-                            .licenseNameExact(Objects.equals(licenseNameExact, "Y"))
-                            .build();
-            licenseQuery.setPage(page);
-            licenseQuery.setCountPerPage(countPerPage);
+        ListLicenseDto.Request licenseQuery =
+                ListLicenseDto.Request.builder()
+                        .licenseName(licenseName)
+                        .licenseNameExact(Objects.equals(licenseNameExact, "Y"))
+                        .build();
+        licenseQuery.setPage(page);
+        licenseQuery.setCountPerPage(countPerPage);
 
-            var map = apiLicenseService.listLicenses(licenseQuery);
-            return ResponseEntity.ok(map);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        var map = apiLicenseService.listLicenses(licenseQuery);
+        return ResponseEntity.ok(map);
     }
 
 //
@@ -195,6 +182,7 @@ public class ApiOssV2Controller extends CoTopComponent {
 //        }
 //    }
 
+    @InternalApi
     @ApiOperation(value = "Register New OSS", notes = "Register New OSS")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REGISTER})
     public ResponseEntity<Map<String, Object>> registerOss(
@@ -203,19 +191,15 @@ public class ApiOssV2Controller extends CoTopComponent {
 
         if (userService.isAdmin(authorization)) {
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            try {
-                resultMap = ossService.saveOss(ossMaster);
-                resultMap = ossService.sendMailForSaveOss(resultMap);
-                return ResponseEntity.ok(resultMap);
-            } catch (Exception e) {
-                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR
-                        , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
-            }
+            resultMap = ossService.saveOss(ossMaster);
+            resultMap = ossService.sendMailForSaveOss(resultMap);
+            return ResponseEntity.ok(resultMap);
         }
         return responseService.errorResponse(HttpStatus.FORBIDDEN,
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
     }
     
+    @InternalApi
     @ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL is processed in the following order. <ol><li>UPDATE DOWNLOAD LOCATION FORMAT</li><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* If doUpdateFlag is N, the database will not be updated.")
 	@GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION})
     public ResponseEntity<Map<String, Object>> refineOssDownloadLocation(
@@ -225,16 +209,10 @@ public class ApiOssV2Controller extends CoTopComponent {
     		@ApiParam(value = "Refine Type", required = true, allowableValues = "0.UPDATE DOWNLOAD LOCATION FORMAT,1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
 		
 		// 사용자 인증
-		try {
-			if (!userService.isAdmin(authorization)) {
-				return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-						CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
-			}
-			return ResponseEntity.ok(refineOssService.refineDownloadLocation(ossName, refineType, "Y".equalsIgnoreCase(doUpdateFlag)));
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			return responseService.errorResponse(HttpStatus.FORBIDDEN,
-					CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+		if (!userService.isAdmin(authorization)) {
+			return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+					CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
 		}
+		return ResponseEntity.ok(refineOssService.refineDownloadLocation(ossName, refineType, "Y".equalsIgnoreCase(doUpdateFlag)));
     }
 }
