@@ -317,6 +317,10 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             downloadId = ExcelDownLoadUtil.getExcelDownloadId("selfReport", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
             fileInfo = fileService.selectFileInfo(downloadId);
 
+            if (fileInfo == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "File not found.");
+            }
+
             return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
