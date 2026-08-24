@@ -52,6 +52,8 @@ import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.advice.CProjectNotFoundException;
+import oss.fosslight.api.advice.CSupplementNoticeGenerationException;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -4650,6 +4652,9 @@ public class ProjectController extends CoTopComponent {
 			String localizedMessage = getMessage(messageCode);
 			log.error("Validation failed for supplement notice: {}", messageCode);
 			return makeJsonResponseHeader(false, localizedMessage);
+		} catch (CProjectNotFoundException | CSupplementNoticeGenerationException e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, e.getMessage());
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return makeJsonResponseHeader(false, e.getMessage());

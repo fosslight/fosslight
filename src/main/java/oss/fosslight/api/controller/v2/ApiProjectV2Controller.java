@@ -120,40 +120,32 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
-        try {
-            CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
-            CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
+        CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
+        CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 
 //			paramMap.put("userRole", userInfo.getAuthority());
-            paramMap.put("creator", creator);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("division", division);
-            paramMap.put("modelName", modelName);
-            paramMap.put("modelNameExactYn", modelNameExactYn);
-            paramMap.put("status", status);
-            paramMap.put("prjIdList", prjIdList);
-            paramMap.put("prjName", prjName);
-            paramMap.put("prjNameExactYn", prjNameExactYn);
-            paramMap.put("countPerPage", countPerPage);
-            paramMap.put("offset", (page - 1) * countPerPage);
-            if (!isEmpty(ossName)) {
-                paramMap.put("ossName", ossName);
-            }
-            if (!isEmpty(ossVersion)) {
-                paramMap.put("ossVersion", ossVersion);
-            }
-
-            try {
-                resultMap = apiProjectService.selectProjectList(paramMap);
-            } catch (Exception e) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST);
-            }
-
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        paramMap.put("creator", creator);
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("division", division);
+        paramMap.put("modelName", modelName);
+        paramMap.put("modelNameExactYn", modelNameExactYn);
+        paramMap.put("status", status);
+        paramMap.put("prjIdList", prjIdList);
+        paramMap.put("prjName", prjName);
+        paramMap.put("prjNameExactYn", prjNameExactYn);
+        paramMap.put("countPerPage", countPerPage);
+        paramMap.put("offset", (page - 1) * countPerPage);
+        if (!isEmpty(ossName)) {
+            paramMap.put("ossName", ossName);
         }
+        if (!isEmpty(ossVersion)) {
+            paramMap.put("ossVersion", ossVersion);
+        }
+
+        resultMap = apiProjectService.selectProjectList(paramMap);
+
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Retrieve the model list of the project", notes = "Retrieve Project Model Information")
@@ -166,20 +158,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
         userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        try {
-            try {
-                Map<String, Object> paramMap = new HashMap<String, Object>();
-                paramMap.put("prjIdList", prjIdList);
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("prjIdList", prjIdList);
+        resultMap = apiProjectService.selectModelList(paramMap);
 
-                resultMap = apiProjectService.selectModelList(paramMap);
-            } catch (Exception e) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST);
-            }
-
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
@@ -203,31 +186,24 @@ public class ApiProjectV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(prjId);
         }
 
-        try {
-            Project project = projectService.getProjectBasicInfo(prjId);
-            if (modelListToUpdate != null) {
-                List<String[]> models = new ArrayList<>();
-                for (String strModel : modelListToUpdate) {
-                    String[] model = strModel.replaceAll("\"", "").split("\\|");
-                    if (model.length > 2) {
-                        models.add(model);
-                    }
-                }
-                if (models.size() > 0) {
-                    modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
+        Project project = projectService.getProjectBasicInfo(prjId);
+        if (modelListToUpdate != null) {
+            List<String[]> models = new ArrayList<>();
+            for (String strModel : modelListToUpdate) {
+                String[] model = strModel.replaceAll("\"", "").split("\\|");
+                if (model.length > 2) {
+                    models.add(model);
                 }
             }
-
-            if (modelList != null) {
-                project.setModelList(modelList.get("currentModelList"));
-                projectService.insertProjectModel(project);
-                return new ResponseEntity<>(resultMap, HttpStatus.OK);
+            if (models.size() > 0) {
+                modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
             }
+        }
 
-        } catch (Exception e) {
-            log.error(e.getMessage());
-//			errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (modelList != null) {
+            project.setModelList(modelList.get("currentModelList"));
+            projectService.insertProjectModel(project);
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -269,9 +245,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
             } catch (IndexOutOfBoundsException e) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Error while parsing given file");
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -301,8 +274,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> result = new HashMap<String, Object>();
 
-        try {
-            Map<String, Object> paramMap = new HashMap<String, Object>();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
 
             String osTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, osType);
 
@@ -443,10 +415,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 log.error(e.getMessage(), e);
             }
 
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 
@@ -458,7 +427,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
-            @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) {
+            @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) throws Exception {
         return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
     }
 
@@ -470,11 +439,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
-            @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) {
+            @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) throws Exception {
         return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
     }
 
-    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(String authorization, String prjId, String saveFlag, String format) {
+    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(String authorization, String prjId, String saveFlag, String format) throws Exception {
         log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
         // 사용자 인증
@@ -483,33 +452,28 @@ public class ApiProjectV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(prjId);
         }
 
-        try {
-            String downloadId = "";
-            T2File fileInfo = new T2File();
-            String type = "";
+        String downloadId = "";
+        T2File fileInfo = new T2File();
+        String type = "";
 
-            if (CoConstDef.FLAG_YES.equals(saveFlag)) {
-                apiProjectService.registBom(prjId, saveFlag, userInfo.getUserId());
-                projectService.updateSecurityDataForProject(prjId);
-            }
-
-            Project project = new Project();
-            project.setPrjId(prjId);
-            Project projectMaster = projectService.getProjectDetail(project);
-
-            if (projectMaster.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-                type = "binAndroidBom";
-            } else {
-                type = "bom";
-            }
-            downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
-            fileInfo = fileService.selectFileInfo(downloadId);
-
-            return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
+        if (CoConstDef.FLAG_YES.equals(saveFlag)) {
+            apiProjectService.registBom(prjId, saveFlag, userInfo.getUserId());
+            projectService.updateSecurityDataForProject(prjId);
         }
+
+        Project project = new Project();
+        project.setPrjId(prjId);
+        Project projectMaster = projectService.getProjectDetail(project);
+
+        if (projectMaster.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+            type = "binAndroidBom";
+        } else {
+            type = "bom";
+        }
+        downloadId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+        fileInfo = fileService.selectFileInfo(downloadId);
+
+        return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
     }
 
     @ApiOperation(value = "Get Project Bom Tab As Json", notes = "Project > Get Bom tab data as json")
@@ -540,29 +504,25 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        try {
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(prjId);
+        List<String> prjIdList = new ArrayList<String>();
+        prjIdList.add(prjId);
 
-            Map<String, Object> paramMap = new HashMap<String, Object>();
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("distributionType", "normal");
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("prjId", prjIdList);
+        paramMap.put("distributionType", "normal");
 
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
+        boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 
-            if (searchFlag) {
-                resultMap = apiProjectService.getBomExportJson(prjId);
-                if (CoConstDef.FLAG_YES.equals(saveFlag)) {
-                    apiProjectService.registBom(prjId, saveFlag, userInfo.getUserId());
-                    projectService.updateSecurityDataForProject(prjId);
-                }
+        if (searchFlag) {
+            resultMap = apiProjectService.getBomExportJson(prjId);
+            if (CoConstDef.FLAG_YES.equals(saveFlag)) {
+                apiProjectService.registBom(prjId, saveFlag, userInfo.getUserId());
+                projectService.updateSecurityDataForProject(prjId);
             }
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Project Bom Compare", notes = "Project > Bom tab Compare")
@@ -587,9 +547,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
-        try {
-
-            Map<String, Object> paramMap = new HashMap<>();
+        Map<String, Object> paramMap = new HashMap<>();
 
             if (!isEmpty(beforePrjId) && beforePrjId.equals(afterPrjId)) {
                 paramMap.put("status", "same");
@@ -628,7 +586,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 }
 
                 if (beforeBomList.isEmpty() || afterBomList.isEmpty()) {
-                    throw new Exception();
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST);
                 }
 
                 resultMap.put("contents", apiProjectService.getBomCompare(beforeBomList, afterBomList));
@@ -640,9 +598,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 resultMap.put("contents", paramMap);
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             }
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
-        }
     }
 
     @ApiOperation(value = "Reset specific identification tab", notes = "Identification > reset")
@@ -727,8 +682,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
-        try {
-            String oldFileId = "";
+        String oldFileId = "";
 //            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
 //                Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
 //                if (prjInfo.get(tabName.toLowerCase() + "CsvFileId") != null) {
@@ -847,7 +801,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 projectService.updateSecurityDataForProject(prjId);
             }
 
-            if (!resultMap.containsKey(KEY_ERROR_MESSAGE) && !resultMap.containsKey(KEY_VALID_ERROR)) {
+        if (!resultMap.containsKey(KEY_ERROR_MESSAGE) && !resultMap.containsKey(KEY_VALID_ERROR)) {
                 // 정상처리된 경우 세션 삭제
                 switch (tabName) {
                     case "DEP":
@@ -866,19 +820,16 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
                 resultMap.put("success", true);
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } else {
+            if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+            } else if (resultMap.containsKey(KEY_VALID_ERROR)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+            } else if (resultMap.containsKey(KEY_ERROR_MESSAGE)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get(KEY_ERROR_MESSAGE));
             } else {
-                if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
-                } else if (resultMap.containsKey(KEY_VALID_ERROR)) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
-                } else if (resultMap.containsKey(KEY_ERROR_MESSAGE)) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get(KEY_ERROR_MESSAGE));
-                } else {
-                    return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
-                }
+                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
             }
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -956,9 +907,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
-        try {
-            // 1. Parse tabSheetMapping JSON
-            Map<String, List<String>> tabSheetMap = null;
+        // 1. Parse tabSheetMapping JSON
+        Map<String, List<String>> tabSheetMap = null;
             try {
                 Type mapType = new TypeToken<Map<String, List<String>>>() {
                 }.getType();
@@ -1335,11 +1285,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             resultMap.put("uploaded", uploadedList);
             resultMap.put("error", errorList);
 
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @SuppressWarnings("unchecked")
@@ -1495,29 +1441,24 @@ public class ApiProjectV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
-        try {
-            if (idList == null) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Editor ID list is required.");
-            }
-
-            for (String id : idList) {
-                T2Users targetUser = new T2Users();
-                targetUser.setUserId(id);
-                T2Users existingUser = userService.getUser(targetUser);
-                if (existingUser == null) {
-                    return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in FOSSLight Hub. User ID: " + id);
-                }
-                Map<String, Object> param = new HashMap<>();
-                param.put("prjId", prjId);
-                param.put("division", existingUser.getDivision());
-                param.put("userId", existingUser.getUserId());
-                apiProjectService.insertWatcher(param);
-            }
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        if (idList == null) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Editor ID list is required.");
         }
+
+        for (String id : idList) {
+            T2Users targetUser = new T2Users();
+            targetUser.setUserId(id);
+            T2Users existingUser = userService.getUser(targetUser);
+            if (existingUser == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "User not found in FOSSLight Hub. User ID: " + id);
+            }
+            Map<String, Object> param = new HashMap<>();
+            param.put("prjId", prjId);
+            param.put("division", existingUser.getDivision());
+            param.put("userId", existingUser.getUserId());
+            apiProjectService.insertWatcher(param);
+        }
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Project Add Security Responsible Person", notes = "Project Add Security Responsible Person")
@@ -1692,35 +1633,31 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
             HttpServletRequest req
-    ) {
+    ) throws Exception {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
 
-        try {
-            OssNotice ossNotice = verificationService.selectOssNoticeOne(prjId);
+        OssNotice ossNotice = verificationService.selectOssNoticeOne(prjId);
 
-            if (ossNotice == null) {
-                return responseService.errorResponse(HttpStatus.NOT_FOUND, "Notice has not been published for given project.");
-            }
-
-            var downloadId = verificationService.getNoticeHtmlFileForPreview(ossNotice);
-
-            T2File fileInfo = fileService.selectFileInfo(downloadId);
-            String filePath = fileInfo.getLogiPath();
-
-            if (!filePath.endsWith("/")) {
-                filePath += "/";
-            }
-
-            filePath += fileInfo.getLogiNm();
-
-            return excelToResponseEntity(filePath, fileInfo.getOrigNm());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+        if (ossNotice == null) {
+            return responseService.errorResponse(HttpStatus.NOT_FOUND, "Notice has not been published for given project.");
         }
+
+        var downloadId = verificationService.getNoticeHtmlFileForPreview(ossNotice);
+
+        T2File fileInfo = fileService.selectFileInfo(downloadId);
+        String filePath = fileInfo.getLogiPath();
+
+        if (!filePath.endsWith("/")) {
+            filePath += "/";
+        }
+
+        filePath += fileInfo.getLogiNm();
+
+        return excelToResponseEntity(filePath, fileInfo.getOrigNm());
     }
 
 
@@ -1750,8 +1687,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", targetPrjId));
         }
 
-        try {
-            Map<String, Object> paramMap = new HashMap<>();
+        Map<String, Object> paramMap = new HashMap<>();
 
             // Parameter validation check:
             if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
@@ -1810,12 +1746,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get("msg"));
             }
 
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Delete Target Project", notes = "Delete Project'")
