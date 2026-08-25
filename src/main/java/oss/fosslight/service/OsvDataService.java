@@ -664,7 +664,7 @@ public class OsvDataService extends CoTopComponent {
 	    return trimmed;
 	}
 	
-	public List<OssComponents> getSecurityVulnerabilityList(Map<String, Object> securityGridMap, ProjectIdentification identification, String prjId, int securityIdx) {
+	public List<OssComponents> getSecurityVulnerabilityList(Map<String, Object> securityGridMap, ProjectIdentification identification, String prjId, int securityIdx, boolean isSecurity) {
 		List<OssComponents> osvVulnerabilityList = new ArrayList<>();
 		List<Vulnerability> osvVulnList = osvDataMapper.selectOsvSecurityListForProject(identification);
 		if (CollectionUtils.isNotEmpty(osvVulnList)) {
@@ -729,78 +729,133 @@ public class OsvDataService extends CoTopComponent {
 			
 			// Populate OssComponents objects using the finalized list and add them to the
 			// result list
-			for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
-				boolean activateFlag = isEmpty(osvVulnInfo.getOssVersion());
-				String securityGridMapKey = "";
-				if (!activateFlag) {
-					securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore());
-				} else {
-					securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null);
-				}
-
-				ossComponents = new OssComponents();
-				ossComponents.setGridId("jqg_sec_" + prjId + "_" + String.valueOf(securityIdx++));
-				ossComponents.setOssName(osvVulnInfo.getOssName());
-				ossComponents.setOssVersion(osvVulnInfo.getOssVersion());
-				ossComponents.setCvssScore(osvVulnInfo.getCvssScore());
-				ossComponents.setCveId(osvVulnInfo.getCveId());
-				ossComponents.setPublDate(osvVulnInfo.getPublDate());
-				ossComponents.setModiDate(osvVulnInfo.getModiDate());
-				ossComponents.setVulnSummary(osvVulnInfo.getVulnSummary());
-				ossComponents.setActivateFlag(CoConstDef.FLAG_NO);
-				ossComponents.setVulnerabilityLink("https://osv.dev/vulnerability/" + osvVulnInfo.getCveId());
-				ossComponents.setGroupKeyId(osvVulnInfo.getGroupKeyId());
-
-				if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
-					String verStartEndRange = convertOsvToSimpleFormat(osvVulnInfo.getAffectedVersion(), pattern);
-					if (!isEmpty(verStartEndRange)) {
-						ossComponents.setVerStartEndRange(verStartEndRange);
-					}
-				}
-
-				if (!activateFlag) {
-					if (!isEmpty(osvVulnInfo.getPatchLink())) {
-						ossComponents.setOfficialPatchLink(osvVulnInfo.getPatchLink());
-						if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
-							ossComponents.setVulnerabilityResolution("Unresolved");
-						} else {
-							ossComponents.setVulnerabilityResolution("");
-						}
+			if (isSecurity) {
+				for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
+					boolean activateFlag = isEmpty(osvVulnInfo.getOssVersion());
+					String securityGridMapKey = "";
+					if (!activateFlag) {
+						securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore());
 					} else {
-						ossComponents.setOfficialPatchLink("N/A");
-						if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
-							ossComponents.setVulnerabilityResolution("Deferred (Not Available)");
-						} else {
-							ossComponents.setVulnerabilityResolution("");
+						securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null);
+					}
+
+					ossComponents = new OssComponents();
+					ossComponents.setGridId("jqg_sec_" + prjId + "_" + String.valueOf(securityIdx++));
+					ossComponents.setOssName(osvVulnInfo.getOssName());
+					ossComponents.setOssVersion(osvVulnInfo.getOssVersion());
+					ossComponents.setCvssScore(osvVulnInfo.getCvssScore());
+					ossComponents.setCveId(osvVulnInfo.getCveId());
+					ossComponents.setPublDate(osvVulnInfo.getPublDate());
+					ossComponents.setModiDate(osvVulnInfo.getModiDate());
+					ossComponents.setVulnSummary(osvVulnInfo.getVulnSummary());
+					ossComponents.setActivateFlag(CoConstDef.FLAG_NO);
+					ossComponents.setVulnerabilityLink("https://osv.dev/vulnerability/" + osvVulnInfo.getCveId());
+					ossComponents.setGroupKeyId(osvVulnInfo.getGroupKeyId());
+
+					if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
+						String verStartEndRange = convertOsvToSimpleFormat(osvVulnInfo.getAffectedVersion(), pattern);
+						if (!isEmpty(verStartEndRange)) {
+							ossComponents.setVerStartEndRange(verStartEndRange);
 						}
 					}
-					ossComponents.setSecurityPatchLink("N/A");
-				} else {
-					ossComponents.setVulnerabilityResolution("");
-				}
 
-				if (MapUtils.isNotEmpty(securityGridMap)) {
-					OssComponents bean = (OssComponents) securityGridMap.get(securityGridMapKey);
-					if (bean != null) {
-						ossComponents.setSecurityComments(bean.getSecurityComments());
-						if (!activateFlag) {
-							ossComponents.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-							if (!isEmpty(bean.getSecurityPatchLink()) || (ossComponents.getVulnerabilityResolution().equals("Fixed") && isEmpty(bean.getSecurityPatchLink()))) {
-								ossComponents.setSecurityPatchLink(bean.getSecurityPatchLink());
+					if (!activateFlag) {
+						if (!isEmpty(osvVulnInfo.getPatchLink())) {
+							ossComponents.setOfficialPatchLink(osvVulnInfo.getPatchLink());
+							if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
+								ossComponents.setVulnerabilityResolution("Unresolved");
+							} else {
+								ossComponents.setVulnerabilityResolution("");
+							}
+						} else {
+							ossComponents.setOfficialPatchLink("N/A");
+							if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
+								ossComponents.setVulnerabilityResolution("Deferred (Not Available)");
+							} else {
+								ossComponents.setVulnerabilityResolution("");
 							}
 						}
+						ossComponents.setSecurityPatchLink("N/A");
+					} else {
+						ossComponents.setVulnerabilityResolution("");
 					}
-				} else {
-					if (!isEmpty(osvVulnInfo.getVulnerabilityResolution())) {
-						ossComponents.setVulnerabilityResolution(osvVulnInfo.getVulnerabilityResolution());
+
+					if (MapUtils.isNotEmpty(securityGridMap)) {
+						OssComponents bean = (OssComponents) securityGridMap.get(securityGridMapKey);
+						if (bean != null) {
+							ossComponents.setSecurityComments(bean.getSecurityComments());
+							if (!activateFlag) {
+								ossComponents.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+								if (!isEmpty(bean.getSecurityPatchLink()) || (ossComponents.getVulnerabilityResolution().equals("Fixed") && isEmpty(bean.getSecurityPatchLink()))) {
+									ossComponents.setSecurityPatchLink(bean.getSecurityPatchLink());
+								}
+							}
+						}
+					} else {
+						if (!isEmpty(osvVulnInfo.getVulnerabilityResolution())) {
+							ossComponents.setVulnerabilityResolution(osvVulnInfo.getVulnerabilityResolution());
+						}
 					}
-				}
 
-				if (!isEmpty(osvVulnInfo.getAliasId())) {
-					ossComponents.setAliasIds(osvVulnInfo.getAliasId());
-				}
+					if (!isEmpty(osvVulnInfo.getAliasId())) {
+						ossComponents.setAliasIds(osvVulnInfo.getAliasId());
+					}
 
-				osvVulnerabilityList.add(ossComponents);
+					osvVulnerabilityList.add(ossComponents);
+				}
+			} else {
+				for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
+					boolean activateFlag = isEmpty(osvVulnInfo.getOssVersion());
+					if (activateFlag) {
+						continue;
+					}
+					
+					String securityGridMapKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore());
+					
+					ossComponents = new OssComponents();
+					ossComponents.setGridId("jqg_sec_" + prjId + "_" + String.valueOf(securityIdx++));
+					ossComponents.setOssName(osvVulnInfo.getOssName());
+					ossComponents.setOssVersion(osvVulnInfo.getOssVersion());
+					ossComponents.setCvssScore(osvVulnInfo.getCvssScore());
+					ossComponents.setCveId(osvVulnInfo.getCveId());
+					ossComponents.setPublDate(osvVulnInfo.getPublDate());
+					ossComponents.setModiDate(osvVulnInfo.getModiDate());
+					ossComponents.setVulnSummary(osvVulnInfo.getVulnSummary());
+					ossComponents.setActivateFlag(CoConstDef.FLAG_NO);
+					ossComponents.setGroupKeyId(osvVulnInfo.getGroupKeyId());
+					
+					if (!activateFlag) {
+						if (!isEmpty(osvVulnInfo.getPatchLink())) {
+							if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
+								ossComponents.setVulnerabilityResolution("Unresolved");
+							} else {
+								ossComponents.setVulnerabilityResolution("");
+							}
+						} else {
+							if (CommonFunction.isBigDecimal(ossComponents.getCvssScore())) {
+								ossComponents.setVulnerabilityResolution("Deferred (Not Available)");
+							} else {
+								ossComponents.setVulnerabilityResolution("");
+							}
+						}
+					} else {
+						ossComponents.setVulnerabilityResolution("");
+					}
+
+					if (MapUtils.isNotEmpty(securityGridMap)) {
+						OssComponents bean = (OssComponents) securityGridMap.get(securityGridMapKey);
+						if (bean != null) {
+							if (!activateFlag) {
+								ossComponents.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+							}
+						}
+					} else {
+						if (!isEmpty(osvVulnInfo.getVulnerabilityResolution())) {
+							ossComponents.setVulnerabilityResolution(osvVulnInfo.getVulnerabilityResolution());
+						}
+					}
+					osvVulnerabilityList.add(ossComponents);
+				}
 			}
 		}
 		return osvVulnerabilityList;

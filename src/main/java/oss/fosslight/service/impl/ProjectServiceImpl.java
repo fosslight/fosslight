@@ -316,7 +316,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Project checkIfVulnerabilityResolutionIsFixed(Project bean) {
 		Project project = new Project();
 		project.setPrjId(bean.getPrjId());
@@ -324,15 +323,55 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String fixedCvssScore = "";
 		String notFixedCvssScore = "";
 		int fixedCheckCnt = 0;
-		Map<String, Object> result = getSecurityGridList(bean, true);
-		List<OssComponents> securityList = (List<OssComponents>) result.get("fullDiscoveredList");
+//		Map<String, Object> result = getSecurityGridList(bean, true);
+//		List<OssComponents> securityList = (List<OssComponents>) result.get("fullDiscoveredList");
+		
+		Map<String, Object> securityGridMap = new HashMap<>();
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(bean.getPrjId());
+		
+		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
+		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		} else {
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+		}
+		identification.setSkipVulnerabilityResolution(CoConstDef.FLAG_YES);
+		
+		List<Vulnerability> securityList = projectMapper.selectSecurityListForProject(identification);
+		List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
+		
+		if (CollectionUtils.isNotEmpty(securityDatalist)) {
+			for (OssComponents oss : securityDatalist) {
+				String key = "";
+				if (!isEmpty(oss.getOssVersion())) {
+					key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+				} else {
+					key = (oss.getOssName() + "_" + avoidNull(oss.getOssVersion()) + "_" + oss.getCvssScore()).toUpperCase();
+				}
+				securityGridMap.put(key, oss);
+			}
+		}
+		
+		OssComponents ossComponents = null;
+		for (Vulnerability pi : securityList) {
+			boolean hasEmpty = isEmpty(pi.getOssVersion()) ? true : false;
+			String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
+			if (!hasEmpty) {
+				ossComponents = (OssComponents) securityGridMap.get(key);
+				if (ossComponents != null) {
+					pi.setVulnerabilityResolution(ossComponents.getVulnerabilityResolution());
+				}
+				ossComponents = null;
+			}
+		}
 		
 		if (CollectionUtils.isNotEmpty(securityList)) {
 			int emptyVersionCnt = securityList.stream().filter(e -> isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
 			int invalidScoreCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && !CommonFunction.isBigDecimal(e.getCvssScore())).collect(Collectors.toList()).size();;
 			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && CommonFunction.isBigDecimal(e.getCvssScore()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
 			
-			for (OssComponents oc : securityList) {
+			for (Vulnerability oc : securityList) {
 				if (!CommonFunction.isBigDecimal(oc.getCvssScore())) {
 					continue;
 				}
@@ -376,6 +415,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					project.setCvssScore(notFixedCvssScore);
 				}
 			}
+		} else {
+			
 		}
 		
 		project.setCvssScore(avoidNull(project.getCvssScore(), CoConstDef.FLAG_NO));
@@ -581,25 +622,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			identification.setReferenceId(identification.getRefBatId());
 		}
 
-		List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(identification);
-//		List<OssComponents> osvDataList = osvDataService.getSecurityVulnerabilityList(null, identification, identification.getReferenceId(), 1);
+		List<Vulnerability> securityDataList = projectMapper.selectMaxScoreSecurityListForProject(identification);
+		List<OssComponents> osvDataList = osvDataService.getSecurityVulnerabilityList(null, identification, identification.getReferenceId(), 1, false);
 		List<Vulnerability> osvSecurityDataList = null;
 		
-//		if (CollectionUtils.isNotEmpty(osvDataList)) {
-//			osvSecurityDataList = CollectionUtils.isEmpty(osvDataList) ? new ArrayList<>() :
-//								    osvDataList.stream()
-//								        .map(osvData -> {
-//								            Vulnerability vuln = new Vulnerability();
-//								            vuln.setOssName(osvData.getOssName());
-//								            vuln.setOssVersion(osvData.getOssVersion());
-//								            vuln.setCveId(osvData.getCveId());
-//								            vuln.setCvssScore(osvData.getCvssScore());
-//								            vuln.setVulnerabilityResolution(osvData.getVulnerabilityResolution());
-//								            vuln.setGroupKeyId(osvData.getGroupKeyId());
-//								            return vuln;
-//								        })
-//								        .collect(Collectors.toList());
-//		}
+		if (CollectionUtils.isNotEmpty(osvDataList)) {
+			osvSecurityDataList = CollectionUtils.isEmpty(osvDataList) ? new ArrayList<>() :
+								    osvDataList.stream()
+								        .map(osvData -> {
+								            Vulnerability vuln = new Vulnerability();
+								            vuln.setOssName(osvData.getOssName());
+								            vuln.setOssVersion(osvData.getOssVersion());
+								            vuln.setCveId(osvData.getCveId());
+								            vuln.setCvssScore(osvData.getCvssScore());
+								            vuln.setVulnerabilityResolution(osvData.getVulnerabilityResolution());
+								            vuln.setGroupKeyId(osvData.getGroupKeyId());
+								            return vuln;
+								        })
+								        .collect(Collectors.toList());
+		}
 		
 		Map<String, Vulnerability> securityDataMap = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(securityDataList) || CollectionUtils.isNotEmpty(osvSecurityDataList)) {
@@ -614,12 +655,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					    String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
 					    existingKeys.add(uniqueKey);
 					}
-//					for (Vulnerability item : osvSecurityDataList) {
-//						String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
-//						if (existingKeys.add(uniqueKey)) {
-//							securityDataList.add(item);
-//						}
-//					}
+					for (Vulnerability item : osvSecurityDataList) {
+						String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
+						if (existingKeys.add(uniqueKey)) {
+							securityDataList.add(item);
+						}
+					}
 					securityDataList.sort(Comparator
 							.comparing(Vulnerability::getOssName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
 							.thenComparing(Vulnerability::getOssVersion, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
@@ -2114,10 +2155,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			identification.setReferenceDiv(project.getReferenceDiv());
 			identification.setStandardScore(Float.valueOf(String.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD))));
 			
-			List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(identification);
+			List<Vulnerability> securityDataList = projectMapper.selectMaxScoreSecurityListForProject(identification);
 			if (CollectionUtils.isNotEmpty(securityDataList)) {
 				securityDataMap = securityDataList.stream()
-								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
 								        .collect(Collectors.toMap(
 								            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
 								            v -> v,
@@ -2128,7 +2168,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								            }
 								        ));
 				
-				List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1);
+				List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1, false);
 	            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
 	                for (OssComponents osvComp : osvVulnerabilityDataList) {
 	                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
@@ -3966,10 +4006,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             }
             
             paramBean.setStandardScore(Float.valueOf(standardCvssScore));
-            List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(paramBean);
+            List<Vulnerability> securityDataList = projectMapper.selectMaxScoreSecurityListForProject(paramBean);
     		if (CollectionUtils.isNotEmpty(securityDataList)) {
 				securityDataMap = securityDataList.stream()
-								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
 								        .collect(Collectors.toMap(
     							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
     							            v -> v,
@@ -3981,7 +4020,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
     							        ));
     		}
             
-            List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1);
+            List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1, false);
             if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
                 for (OssComponents osvComp : osvVulnerabilityDataList) {
                     if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
@@ -4147,10 +4186,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
         Map<String, Vulnerability> targetSecurityDataMap = new HashMap<>();
         if (hasNewBomData) {
         	paramBean.setStandardScore(Float.valueOf(standardCvssScore));
-            List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(paramBean);
+            List<Vulnerability> securityDataList = projectMapper.selectMaxScoreSecurityListForProject(paramBean);
     		if (CollectionUtils.isNotEmpty(securityDataList)) {
 				targetSecurityDataMap = securityDataList.stream()
-								        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
 								        .collect(Collectors.toMap(
     							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
     							            v -> v,
@@ -4162,7 +4200,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
     							        ));
     		}
     		
-    		List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1);
+    		List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1, false);
             if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
                 for (OssComponents osvComp : osvVulnerabilityDataList) {
                     if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
@@ -8265,7 +8303,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			versionsForCpeNames.clear();
 		}
 		
-		List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(securityGridMap, identification, project.getPrjId(), gridIdx);
+		List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(securityGridMap, identification, project.getPrjId(), gridIdx, true);
 		if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
 			Set<String> existingKeys = new HashSet<>();
 			for (OssComponents item : fullDiscoveredList) {
