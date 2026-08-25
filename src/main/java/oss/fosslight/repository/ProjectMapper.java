@@ -489,4 +489,6 @@ public interface ProjectMapper {
 	String selectRefFileSeq(@Param("fileSeq") String fileSeq);
 	
 	Double selectMaxProjectVersion(@Param("prjName") String prjName);
+	
+	List<Vulnerability> selectMaxScoreSecurityListForProject(ProjectIdentification identification);
 }
