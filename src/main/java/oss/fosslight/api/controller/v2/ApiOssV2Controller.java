@@ -56,7 +56,31 @@ public class ApiOssV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
 
-    @ApiOperation(value = "Search OSS List", notes = "Search OSS Information")
+    @ApiOperation(value = "OSS 목록 조회", notes = "OSS 이름, 버전, Download URL 또는 CVE ID로 OSS를 검색합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = ListOssDto.Result.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"list\":[{\"ossId\":\"1\",\"ossName\":\"sample-oss\",\"ossVersion\":\"1.0\",\"licenseName\":\"Apache-2.0\",\"downloadUrl\":\"https://example.org/sample-oss\",\"downloadUrls\":[\"https://example.org/sample-oss\"]}],\"totalCount\":1}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - countPerPage/page 검증 실패\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Input value=0. countPerPage must be larger than 1\"}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_SEARCH})
     public @ResponseBody ResponseEntity<ListOssDto.Result> getOssInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -94,7 +118,31 @@ public class ApiOssV2Controller extends CoTopComponent {
     }
 
 
-    @ApiOperation(value = "Search License Info", notes = "Search License Information")
+    @ApiOperation(value = "License 목록 조회", notes = "License 이름으로 License 정보를 검색합니다. 이름의 완전 일치 여부와 페이지 정보를 지정할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = ListLicenseDto.Result.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"list\":[{\"licenseId\":\"1\",\"licenseName\":\"Apache-2.0\",\"licenseType\":\"Permissive\"}],\"totalCount\":1}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - countPerPage/page 검증 실패\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Input value=0. countPerPage must be larger than 1\"}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
     public @ResponseBody ResponseEntity<ListLicenseDto.Result> getLicenseInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -183,7 +231,30 @@ public class ApiOssV2Controller extends CoTopComponent {
 //    }
 
     @InternalApi
-    @ApiOperation(value = "Register New OSS", notes = "Register New OSS")
+    @ApiOperation(value = "OSS 등록 또는 수정", notes = "관리자 전용 API입니다. OSS Master를 등록하거나 ossId가 있으면 기존 OSS를 수정합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"ossId\":\"1\",\"isNew\":true,\"isNewVersion\":false,\"isChangedName\":false,\"isDeactivateFlag\":false,\"isActivateFlag\":false}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음 - 관리자 아님\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REGISTER})
     public ResponseEntity<Map<String, Object>> registerOss(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -200,7 +271,22 @@ public class ApiOssV2Controller extends CoTopComponent {
     }
     
     @InternalApi
-    @ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL is processed in the following order. <ol><li>UPDATE DOWNLOAD LOCATION FORMAT</li><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* If doUpdateFlag is N, the database will not be updated.")
+    @ApiOperation(value = "OSS Download Location 정제", notes = "관리자 전용 API입니다. URL 형식 정리, 중복 제거, PURL 생성, GitHub 우선순위 재정렬 중 선택한 작업을 실행합니다. doUpdateFlag=N이면 결과만 확인합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"UPDATE-DOWNLOAD-LOCATION-FORMAT\":{\"reFineTotalCnt\":0,\"reFineItems\":{}}}"))
+            ),
+            @ApiResponse(code = 400, message = "필수 doUpdateFlag 또는 refineType 누락", examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'refineType' parameter is missing or misspelled\"}"))),
+            @ApiResponse(code = 401, message = "인증 실패", examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(
+                    code = 500,
+                    message = "권한 없음 / 서버 내부 오류 - 관리자 아님 ⚠️\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+            )
+    })
 	@GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION})
     public ResponseEntity<Map<String, Object>> refineOssDownloadLocation(
             @ApiParam(hidden=true) @RequestHeader String authorization,

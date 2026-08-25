@@ -56,7 +56,31 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-    @ApiOperation(value = "3rd Party Search", notes = "Search 3rd Party Information")
+    @ApiOperation(value = "3rd Party 목록 조회", notes = "조회 권한이 있는 3rd Party 프로젝트를 조건과 페이지 정보로 검색합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"list\":[{\"partnerId\":\"1\",\"partnerName\":\"sample\",\"status\":\"CONF\"}],\"totalCount\":1}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - countPerPage/page 검증 실패\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Input value=0. countPerPage must be larger than 1\"}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_SEARCH})
     public ResponseEntity<Map<String, Object>> getPartners(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -95,7 +119,35 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     }
 
-    @ApiOperation(value = "3rd Party Add Editor", notes = "3rd Party Add Editor")
+    @ApiOperation(value = "3rd Party Editor 추가", notes = "3rd Party 프로젝트에 이메일 기준 Editor를 추가합니다. LDAP 사용 환경에서는 등록된 사용자만 추가할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - LDAP 사용자 없음 / 중복 watcher\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The parameter is invalid.\"}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "프로젝트 접근 권한 없음 (EDIT)\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_EDITOR})
     public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -134,7 +186,34 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         return new ResponseEntity(resultMap, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
+    @ApiOperation(value = "3rd Party Report 다운로드", notes = "3rd Party 프로젝트의 Check List를 스프레드시트 파일로 다운로드합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공 - Spreadsheet 파일 다운로드",
+                    response = FileSystemResource.class
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "필수 format 누락",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'format' parameter is missing or misspelled\"}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "프로젝트 접근 권한 없음 (EDIT)\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
             @ApiParam(hidden = true) @RequestHeader String authorization,
@@ -143,7 +222,14 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         return get3rdDownloadInternal(authorization, partnerId, format);
     }
 
-    @ApiOperation(value = "3rd Party Export report (Deprecated)", notes = "3rd Party > Export report", hidden = true)
+    @ApiOperation(value = "3rd Party Report 다운로드 (Deprecated)", notes = "이전 경로입니다. /partners/{id}/sbom/file 사용을 권장합니다.", hidden = true)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "파일 다운로드 성공", response = FileSystemResource.class),
+            @ApiResponse(code = 400, message = "필수 format 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'format' parameter is missing or misspelled\"}"))),
+            @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "3rd Party 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+    })
     @GetMapping(value = {"/partners/{id}/bom/file"})
     public ResponseEntity<FileSystemResource> get3rdDownloadDeprecated(
             @ApiParam(hidden = true) @RequestHeader String authorization,
@@ -176,7 +262,31 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "3rd Party Export Json", notes = "3rd Party > Export Json")
+    @ApiOperation(value = "3rd Party SBOM JSON 조회", notes = "3rd Party 프로젝트의 SBOM 데이터를 JSON으로 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"sample-oss\":[{\"version\":\"1.0\",\"license\":\"Apache-2.0\"}]}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "프로젝트 접근 권한 없음 (EDIT)\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON})
     public ResponseEntity<Map<String, Object>> get3rdAsJson(
             @ApiParam(hidden = true) @RequestHeader String authorization,
@@ -184,7 +294,13 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         return get3rdAsJsonInternal(authorization, partnerId);
     }
 
-    @ApiOperation(value = "3rd Party Export Json (Deprecated)", notes = "3rd Party > Export Json", hidden = true)
+    @ApiOperation(value = "3rd Party SBOM JSON 조회 (Deprecated)", notes = "이전 경로입니다. /partners/{id}/sbom/json-data 사용을 권장합니다.", hidden = true)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "3rd Party 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+    })
     @GetMapping(value = {"/partners/{id}/bom/json-data"})
     public ResponseEntity<Map<String, Object>> get3rdAsJsonDeprecated(
             @ApiParam(hidden = true) @RequestHeader String authorization,

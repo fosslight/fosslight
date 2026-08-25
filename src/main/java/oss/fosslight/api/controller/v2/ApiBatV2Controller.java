@@ -38,7 +38,31 @@ public class ApiBatV2Controller extends CoTopComponent {
 
     private final ApiBatService apibatService;
 
-    @ApiOperation(value = "Search Binary List", notes = "Search Binary Information")
+    @ApiOperation(value = "Binary 정보 조회", notes = "fileName, tlsh, checksum 중 하나 이상을 사용하여 Binary 매칭 정보를 조회합니다. platformName, platformVersion, sourcePath는 추가 필터입니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"content\":[{\"binaryFileName\":\"bash\",\"path\":\"/bin\",\"ossName\":\"bash\",\"ossVersion\":\"5.0\",\"license\":\"GPL-3.0-or-later\",\"projectName\":\"sample\",\"checksum\":\"abc123\",\"tlsh\":\"T1A2B3\",\"updateDate\":\"2024-01-01\"}]}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - fileName, tlsh, checksum 중 하나 이상 필수\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The parameter is invalid.\"}"))
+            ),
+            @ApiResponse(
+                    code = 401,
+                    message = "인증 실패",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+            ),
+            @ApiResponse(
+                    code = 500,
+                    message = "서버 내부 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_BINARY_SEARCH})
     public ResponseEntity<Map<String, Object>> getBinaryInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,
