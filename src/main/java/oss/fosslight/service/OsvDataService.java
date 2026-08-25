@@ -877,7 +877,7 @@ public class OsvDataService extends CoTopComponent {
 					} else {
 						match.setAliasId(null);
 					}
-					if (emptyVersion && CoConstDef.FLAG_YES.equals(match.getSearchVersionP3Yn())) {
+					if (emptyVersion && CoConstDef.FLAG_NO.equals(match.getSearchVersionP3Yn())) {
 						continue;
 					}
 					fetchOsvVulnerabilityList.add(match);
@@ -895,7 +895,7 @@ public class OsvDataService extends CoTopComponent {
 							osv.setAliasId(aliasValue);
 						}
 					}
-					if (emptyVersion && CoConstDef.FLAG_YES.equals(osv.getSearchVersionP3Yn())) {
+					if (emptyVersion && CoConstDef.FLAG_NO.equals(osv.getSearchVersionP3Yn())) {
 						continue;
 					}
 					fetchOsvVulnerabilityList.add(osv);

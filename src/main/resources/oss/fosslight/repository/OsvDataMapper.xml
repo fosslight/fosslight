@@ -85,19 +85,12 @@
     </delete>
     
     <select id="selectOsvSecurityListForProject" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.Vulnerability">
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
-			SELECT DISTINCT TBL.*
-		</if>
-		<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
-			SELECT TBL1.*
-					, IFNULL((SELECT VULNERABILITY_RESOLUTION FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = #{referenceId} AND OSS_NAME = TBL1.OSS_NAME AND OSS_VERSION = TBL1.OSS_VERSION AND CVE_ID = TBL1.CVE_ID LIMIT 1), 'Unresolved') AS VULNERABILITY_RESOLUTION
-			FROM
-			(
-				SELECT DISTINCT TBL.*
-		</if>
+				SELECT TBL.*
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
+				, IFNULL(SEC.VULNERABILITY_RESOLUTION, 'Unresolved') AS VULNERABILITY_RESOLUTION
+			</if>
 		    	FROM 
 		    	(
-		    		<!-- Matching Priority 1 -->
 		    		SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
 			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P1, '') SEPARATOR '|') AS SEARCH_VERSION_P1,
 			    			GROUP_CONCAT(NULLIF(M.SEARCH_VERSION_P2, '') SEPARATOR '|') AS SEARCH_VERSION_P2,
@@ -108,19 +101,21 @@
 			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
 			    			1 AS PRIORITY
 					FROM OSS_COMPONENTS OC
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME AND M.WITHDRAWN_YN = 'N'
 					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
+					AND OC.OSS_VERSION IS NOT NULL
+					AND OC.OSS_VERSION <![CDATA[<>]]> ''
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+						AND OC.OSS_VERSION = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 					
 					UNION ALL
@@ -135,21 +130,23 @@
 							'' AS ALIAS_ID,
 			    			1 AS PRIORITY
 					FROM OSS_COMPONENTS OC
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME AND M.WITHDRAWN_YN = 'N'
 					INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					INNER JOIN OSV_ALIASES A ON A.ID = V.ID
 					INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
+					AND OC.OSS_VERSION IS NOT NULL
+					AND OC.OSS_VERSION <![CDATA[<>]]> ''
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+						AND OC.OSS_VERSION = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
 					AND M.ID <![CDATA[<>]]> M_ALIAS.ID
-					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID, M_ALIAS.SEVERITY, M_ALIAS.PUBL_DATE, M_ALIAS.MODI_DATE, M_ALIAS.SEARCH_VERSION_P3_YN
 					
 					UNION ALL
@@ -169,20 +166,21 @@
 					INNER JOIN OSS_NICKNAME NICK
 					ON COM.OSS_COMMON_ID = NICK.OSS_COMMON_ID
 					INNER JOIN OSV_SEARCH_MASTER M
-					ON M.SEARCH_NAME_P1 = NICK.OSS_NICKNAME
+					ON M.SEARCH_NAME_P1 = NICK.OSS_NICKNAME AND M.WITHDRAWN_YN = 'N'
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
+					AND OC.OSS_VERSION IS NOT NULL
+					AND OC.OSS_VERSION <![CDATA[<>]]> ''
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+						AND OC.OSS_VERSION = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 					
-					<!-- Matching Priority 2 -->
 					UNION ALL
 					
 					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
@@ -197,19 +195,21 @@
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
 					INNER JOIN OSS_DOWNLOADLOCATION DOWN ON COM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL AND IFNULL(DOWN.PURL, '') <![CDATA[<>]]> ''
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL AND IFNULL(DOWN.PURL, '') <![CDATA[<>]]> '' AND M.WITHDRAWN_YN = 'N'
 					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
+					AND OC.OSS_VERSION IS NOT NULL
+					AND OC.OSS_VERSION <![CDATA[<>]]> ''
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+						AND OC.OSS_VERSION = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND (IFNULL(M.SEARCH_NAME_P2, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 					
 					UNION ALL
@@ -226,24 +226,25 @@
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
 					INNER JOIN OSS_DOWNLOADLOCATION DOWN ON COM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL AND IFNULL(DOWN.PURL, '') <![CDATA[<>]]> ''
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL AND IFNULL(DOWN.PURL, '') <![CDATA[<>]]> '' AND M.WITHDRAWN_YN = 'N'
 					INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					INNER JOIN OSV_ALIASES A ON A.ID = V.ID
 					INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
+					AND OC.OSS_VERSION IS NOT NULL
+					AND OC.OSS_VERSION <![CDATA[<>]]> ''
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+						AND OC.OSS_VERSION = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
 					AND M.ID <![CDATA[<>]]> M_ALIAS.ID
-					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID, M_ALIAS.SEVERITY, M_ALIAS.PUBL_DATE, M_ALIAS.MODI_DATE, M_ALIAS.SEARCH_VERSION_P3_YN
 					
-					<!-- Matching Priority 3 -->
 					UNION ALL
 					
 					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, M.SEVERITY AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
@@ -256,19 +257,21 @@
 			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
 			    			3 AS PRIORITY
 					FROM OSS_COMPONENTS OC
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME AND M.WITHDRAWN_YN = 'N'
 					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
+					AND OC.OSS_VERSION IS NOT NULL
+					AND OC.OSS_VERSION <![CDATA[<>]]> ''
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+						AND OC.OSS_VERSION = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 					
 					UNION ALL
@@ -283,21 +286,23 @@
 							'' AS ALIAS_ID,
 			    			3 AS PRIORITY
 					FROM OSS_COMPONENTS OC
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME AND M.WITHDRAWN_YN = 'N'
 					INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					INNER JOIN OSV_ALIASES A ON A.ID = V.ID
 					INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
+					AND OC.OSS_VERSION IS NOT NULL
+					AND OC.OSS_VERSION <![CDATA[<>]]> ''
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+						AND OC.OSS_VERSION = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
 					AND M.ID <![CDATA[<>]]> M_ALIAS.ID
-					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M_ALIAS.ID, M_ALIAS.SEVERITY, M_ALIAS.PUBL_DATE, M_ALIAS.MODI_DATE, M_ALIAS.SEARCH_VERSION_P3_YN
 					
 					UNION ALL
@@ -314,22 +319,21 @@
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
 					INNER JOIN OSS_NICKNAME NICK ON COM.OSS_COMMON_ID = NICK.OSS_COMMON_ID
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = NICK.OSS_NICKNAME
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = NICK.OSS_NICKNAME AND M.WITHDRAWN_YN = 'N'
 					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
 						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
 					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND (IFNULL(M.SEARCH_NAME_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P1, '') <![CDATA[<>]]> '' OR IFNULL(M.SEARCH_VERSION_P2, '') <![CDATA[<>]]> '')
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 					
-					<!-- Extracts top 1 record with MAX CVSS_SCORE where oss_version is empty and SEARCH_VERSION_P3_YN is 'Y' -->
 					UNION ALL
 					
 					SELECT STRAIGHT_JOIN OC.OSS_NAME, OC.OSS_VERSION, M.ID AS CVE_ID, MAX(M.SEVERITY) AS CVSS_SCORE, DATE_FORMAT(M.PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE, DATE_FORMAT(M.MODI_DATE, '%Y-%m-%d') AS MODI_DATE, M.AFFECTED_VERSION,
@@ -342,20 +346,19 @@
 			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
 			    			1 AS PRIORITY
 					FROM OSS_COMPONENTS OC
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P1 = OC.OSS_NAME AND M.WITHDRAWN_YN = 'N' AND M.SEARCH_VERSION_P3_YN = 'Y'
 					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
 					</if>
 					AND IFNULL(OC.OSS_VERSION, '') = ''
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND M.SEARCH_VERSION_P3_YN = 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 			
 					UNION ALL
@@ -375,18 +378,17 @@
 					INNER JOIN OSS_NICKNAME NICK
 					ON COM.OSS_COMMON_ID = NICK.OSS_COMMON_ID
 					INNER JOIN OSV_SEARCH_MASTER M
-					ON M.SEARCH_NAME_P1 = NICK.OSS_NICKNAME
+					ON M.SEARCH_NAME_P1 = NICK.OSS_NICKNAME AND M.WITHDRAWN_YN = 'N' AND M.SEARCH_VERSION_P3_YN = 'Y'
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
 					</if>
 					AND IFNULL(OC.OSS_VERSION, '') = ''
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND M.SEARCH_VERSION_P3_YN = 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 					
 					UNION ALL
@@ -403,20 +405,19 @@
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_COMMON COM ON OC.OSS_NAME = COM.OSS_NAME
 					INNER JOIN OSS_DOWNLOADLOCATION DOWN ON COM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL AND IFNULL(DOWN.PURL, '') <![CDATA[<>]]> ''
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P2 = DOWN.PURL AND IFNULL(DOWN.PURL, '') <![CDATA[<>]]> '' AND M.WITHDRAWN_YN = 'N' AND M.SEARCH_VERSION_P3_YN = 'Y'
 					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
 					</if>
 					AND IFNULL(OC.OSS_VERSION, '') = ''
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND M.SEARCH_VERSION_P3_YN = 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 					
 					UNION ALL
@@ -431,29 +432,29 @@
 			    			GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
 			    			3 AS PRIORITY
 					FROM OSS_COMPONENTS OC
-					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME
+					INNER JOIN OSV_SEARCH_MASTER M ON M.SEARCH_NAME_P3 = OC.OSS_NAME AND M.WITHDRAWN_YN = 'N' AND M.SEARCH_VERSION_P3_YN = 'Y'
 					LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 					LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 					WHERE OC.REFERENCE_ID = #{referenceId}
 					AND OC.REFERENCE_DIV = #{referenceDiv}
-					AND (IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '' AND IFNULL(OC.OSS_NAME, '') <![CDATA[<>]]> '-')
-					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-						AND (IFNULL(OC.OSS_NAME, '') = #{ossName} OR IFNULL(OC.OSS_NAME, '') = REPLACE(#{ossName}, '_', ' '))
-						AND IFNULL(OC.OSS_VERSION, '') = #{ossVersion}
-					</if>
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME <![CDATA[<>]]> ''
+					AND OC.OSS_NAME <![CDATA[<>]]> '-'
 					AND IFNULL(OC.OSS_VERSION, '') = ''
+					<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+						AND (OC.OSS_NAME = #{ossName} OR OC.OSS_NAME = REPLACE(#{ossName}, '_', ' '))
+					</if>
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
-					AND M.WITHDRAWN_YN = 'N'
-					AND M.SEARCH_VERSION_P3_YN = 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID, M.SEVERITY, M.PUBL_DATE, M.MODI_DATE, M.SEARCH_VERSION_P3_YN
 				) TBL
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
-				ORDER BY TBL.OSS_NAME ASC, TBL.OSS_VERSION ASC, TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC
-		</if>
-		<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
-			) TBL1
-			ORDER BY TBL1.OSS_NAME ASC, TBL1.OSS_VERSION ASC, TBL1.GROUP_KEY_ID ASC, CASE WHEN TBL1.CVE_ID = TBL1.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL1.CVE_ID ASC
-		</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
+				LEFT JOIN NVD_DATA_SECURITY SEC
+  				ON SEC.REFERENCE_ID = #{referenceId} 
+ 				AND SEC.OSS_NAME = TBL.OSS_NAME 
+				AND SEC.OSS_VERSION = TBL.OSS_VERSION 
+				AND SEC.CVE_ID = TBL.CVE_ID
+			</if>
+			ORDER BY TBL.OSS_NAME ASC, TBL.OSS_VERSION ASC, TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC
     </select>
     
     <select id="selectOsvVulnerabilityListByUniqueNick" parameterType="map" resultType="oss.fosslight.domain.Vulnerability">
