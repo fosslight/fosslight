@@ -107,6 +107,14 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
                 , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
     }
 
+    @ExceptionHandler(CUserAuthFailedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    protected ResponseEntity<Map<String, Object>> userAuthFailed(HttpServletRequest request, CUserAuthFailedException e) {
+        // Do not expose token state (missing/expired/invalid) to the client.
+        return responseService.errorResponse(HttpStatus.UNAUTHORIZED,
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE));
+    }
+
     @ExceptionHandler(CSigninFailedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     protected ResponseEntity<Map<String, Object>> emailSignInFailed(HttpServletRequest request, CSigninFailedException e) {
