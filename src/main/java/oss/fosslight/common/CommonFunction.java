@@ -6552,184 +6552,389 @@ public class CommonFunction extends CoTopComponent {
 		}
 		return null;
 	}
+	
+	// 매모리 이슈 대응
+	private static final class OsvMatchKey {
+	    private final String ossName;
+	    private final String ossVersion;
+	    private final String id;
 
-	public static Map<String, Vulnerability> filterAndMergeOsvVulnerabilities(OssMaster bean, List<Vulnerability> rawFilteredList) {
-		List<Vulnerability> versionPassedList = new ArrayList<>();
-		Set<String> existingKeys = new HashSet<>();
-		
-		for (Vulnerability osvVulnInfo : rawFilteredList) {
-			if (isEmpty(osvVulnInfo.getOssName()) && isEmpty(osvVulnInfo.getProduct())) {
-				if (bean != null && !isEmpty(bean.getOssName())) {
-					osvVulnInfo.setOssName(bean.getOssName());
-				}
-			} else if (isEmpty(osvVulnInfo.getOssName()) && !isEmpty(osvVulnInfo.getProduct())) {
-				osvVulnInfo.setOssName(osvVulnInfo.getProduct());
-			}
-			if (isEmpty(osvVulnInfo.getOssVersion()) && isEmpty(osvVulnInfo.getVersion())) {
-				if (bean != null) {
-					osvVulnInfo.setOssVersion(bean.getOssVersion());
-				}
-			} else if (isEmpty(osvVulnInfo.getOssVersion()) && !isEmpty(osvVulnInfo.getVersion())) {
-				osvVulnInfo.setOssVersion(osvVulnInfo.getVersion());
-			}
-		    // Version validation logic
-		    String uniqueKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getGroupKeyId(), null);
-		    
-		    String ossVersion = osvVulnInfo.getOssVersion();
-		    String searchVersionP1 = osvVulnInfo.getSearchVersionP1();
-		    String searchVersionP2 = osvVulnInfo.getSearchVersionP2();
-		    String searchVersionP3Yn = osvVulnInfo.getSearchVersionP3Yn();
-		    
-		    if (!existingKeys.contains(uniqueKey)) {
-		        if (!isEmpty(ossVersion)) {
-		            if (isEmpty(searchVersionP1) && isEmpty(searchVersionP2)) {
-		                continue;
-		            }
-		        } else {
-		            if (CoConstDef.FLAG_NO.equals(searchVersionP3Yn)) {
-		                continue;
-		            }
-		        }
-		        
-		        boolean isMatched = false;
-		        if (!isEmpty(ossVersion)) {
-		            if (!isEmpty(searchVersionP1)) {
-		            	List<String> versions = new ArrayList<>();
-		            	if (searchVersionP1.contains("|")) {
-		            		versions = Arrays.asList(searchVersionP1.split("\\|"));
-		            	} else {
-		            		versions = Arrays.asList(searchVersionP1.split(","));
-		            	}
-		                for (String version : versions) {
-		                    if (version.trim().equals(ossVersion.trim())) {
-		                        isMatched = true;
-		                        break;
-		                    }
-		                }
-		            }
-		            
-		            if (!isMatched) {
-		                boolean isMatchedInRange = false;
-		                if (!isEmpty(searchVersionP2)) {
-		                	isMatchedInRange = isVersionInRange(ossVersion, searchVersionP2);
-		                	if (bean != null) {
-		                		if (!isMatchedInRange && bean.getOssVersionAliases() != null) {
-			                		for (String alias : bean.getOssVersionAliases()) {
-			    	                    if (isVersionInRange(alias, searchVersionP2)) {
-			    	                    	isMatchedInRange = true;
-			    	                        break;
-			    	                    }
-			    	                }
-			                	}
-		                	}
-		                }
-		                if (!isMatchedInRange) {
-		                    continue;
-		                }
-		            }
-		        }
-		    }
-		    
-		    // Add items that successfully passed version validation
-		    versionPassedList.add(osvVulnInfo);
-		    existingKeys.add(uniqueKey);
-		}
+	    public OsvMatchKey(String ossName, String ossVersion, String id) {
+	        this.ossName = ossName;
+	        this.ossVersion = ossVersion;
+	        this.id = id;
+	    }
 
-		// Cross-match and merge OSV IDs / Alias IDs within the same OSS Name & Version, then sort by priority
-		Map<String, Vulnerability> mergedOsvMap = new LinkedHashMap<>();
-		for (Vulnerability item : versionPassedList) {
-		    String ossName = !isEmpty(item.getOssName()) ? item.getOssName().trim() : "";
-		    String ossVersion = !isEmpty(item.getOssVersion()) ? item.getOssVersion().trim() : "";
-		    
-		    Set<String> currentIds = new HashSet<>();
-		    if (!isEmpty(item.getCveId())) {
-		    	currentIds.add(item.getCveId().trim());
-		    }
-		    if (!isEmpty(item.getAliasId())) {
-		        for (String alias : item.getAliasId().split(",")) {
-		            if (!isEmpty(alias)) {
-		            	currentIds.add(alias.trim());
-		            }
-		        }
-		    }
-		    
-		    String foundExistingKey = null;
-		    for (Map.Entry<String, Vulnerability> entry : mergedOsvMap.entrySet()) {
-		        Vulnerability existingItem = entry.getValue();
-		        String exOssName = !isEmpty(existingItem.getOssName()) ? existingItem.getOssName().trim() : "";
-		        String exOssVersion = !isEmpty(existingItem.getOssVersion()) ? existingItem.getOssVersion().trim() : "";
-		        
-		        // Check for ID overlap (including alias) only if OSS name and version are identical
-		        if (exOssName.equals(ossName) && exOssVersion.equals(ossVersion)) {
-		            Set<String> existingIds = new HashSet<>();
-		            if (!isEmpty(existingItem.getCveId())) {
-		            	existingIds.add(existingItem.getCveId().trim());
-		            }
-		            if (!isEmpty(existingItem.getAliasId())) {
-		                for (String alias : existingItem.getAliasId().split(",")) {
-		                    if (!isEmpty(alias)) {
-		                    	existingIds.add(alias.trim());
-		                    }
-		                }
-		            }
-		            
-		            boolean hasIntersection = false;
-		            for (String id : currentIds) {
-		                if (existingIds.contains(id)) {
-		                    hasIntersection = true;
-		                    break;
-		                }
-		            }
-		            
-		            if (hasIntersection) {
-		                foundExistingKey = entry.getKey();
-		                break;
-		            }
-		        }
-		    }
-		    
-		    if (foundExistingKey != null) {
-		        // If overlap exists, merge IDs with the existing item and re-determine the representative ID based on priority
-		        Vulnerability existingItem = mergedOsvMap.get(foundExistingKey);
-		        
-		        Set<String> combinedIds = new HashSet<>(currentIds);
-		        if (!isEmpty(existingItem.getCveId())) {
-		        	combinedIds.add(existingItem.getCveId().trim());
-		        }
-		        if (!isEmpty(existingItem.getAliasId())) {
-		            for (String a : existingItem.getAliasId().split(",")) {
-		            	if(!isEmpty(a)) {
-		            		combinedIds.add(a.trim());
-		            	}
-		            }
-		        }
-		        
-		        String bestId = getPriorityRepresentativeId(combinedIds);
-		        existingItem.setId(bestId);
-		        existingItem.setCveId(bestId);
-		        
-		        combinedIds.remove(bestId);
-		        existingItem.setAliasId(!combinedIds.isEmpty() ? String.join(",", combinedIds) : "");
-		        
-		        if (isEmpty(existingItem.getPatchLink()) && !isEmpty(item.getPatchLink())) {
-		            existingItem.setPatchLink(item.getPatchLink());
-		        }
-		    } else {
-		        // If no overlap, register as a single item and organize representative ID
-		        String bestId = getPriorityRepresentativeId(currentIds);
-		        item.setId(bestId);
-		        item.setCveId(bestId);
-		        
-		        currentIds.remove(bestId);
-		        item.setAliasId(!currentIds.isEmpty() ? String.join(",", currentIds) : "");
-		        
-		        String mapKey = String.format("%s_%s_%s", ossName, ossVersion, bestId);
-		        mergedOsvMap.put(mapKey, item);
-		    }
-		}
-		
-		return mergedOsvMap;
+	    @Override
+	    public boolean equals(Object o) {
+	        if (this == o) return true;
+	        if (o == null || getClass() != o.getClass()) return false;
+	        OsvMatchKey that = (OsvMatchKey) o;
+	        return Objects.equals(ossName, that.ossName) &&
+	               Objects.equals(ossVersion, that.ossVersion) &&
+	               Objects.equals(id, that.id);
+	    }
+
+	    @Override
+	    public int hashCode() {
+	        return Objects.hash(ossName, ossVersion, id);
+	    }
 	}
+	
+	public static Map<String, Vulnerability> filterAndMergeOsvVulnerabilities(OssMaster bean, List<Vulnerability> rawFilteredList) {
+	    if (CollectionUtils.isEmpty(rawFilteredList)) {
+	        return Collections.emptyMap();
+	    }
+
+	    List<Vulnerability> versionPassedList = new ArrayList<>();
+	    Set<String> existingKeys = new HashSet<>();
+	    
+	    String uniqueKey;
+	    
+	    // 버전 검증 및 데이터 정제 단계 (메모리 가비지 생성 최소화)
+	    for (Vulnerability osvVulnInfo : rawFilteredList) {
+	        if (isEmpty(osvVulnInfo.getOssName()) && isEmpty(osvVulnInfo.getProduct())) {
+	            if (bean != null && !isEmpty(bean.getOssName())) {
+	                osvVulnInfo.setOssName(bean.getOssName());
+	            }
+	        } else if (isEmpty(osvVulnInfo.getOssName()) && !isEmpty(osvVulnInfo.getProduct())) {
+	            osvVulnInfo.setOssName(osvVulnInfo.getProduct());
+	        }
+	        
+	        if (isEmpty(osvVulnInfo.getOssVersion()) && isEmpty(osvVulnInfo.getVersion())) {
+	            if (bean != null) {
+	                osvVulnInfo.setOssVersion(bean.getOssVersion());
+	            }
+	        } else if (isEmpty(osvVulnInfo.getOssVersion()) && !isEmpty(osvVulnInfo.getVersion())) {
+	            osvVulnInfo.setOssVersion(osvVulnInfo.getVersion());
+	        }
+	        
+	        uniqueKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getGroupKeyId(), null);
+	        
+	        String ossVersion = osvVulnInfo.getOssVersion();
+	        String searchVersionP1 = osvVulnInfo.getSearchVersionP1();
+	        String searchVersionP2 = osvVulnInfo.getSearchVersionP2();
+	        String searchVersionP3Yn = osvVulnInfo.getSearchVersionP3Yn();
+	        
+	        if (!existingKeys.contains(uniqueKey)) {
+	            if (!isEmpty(ossVersion)) {
+	                if (isEmpty(searchVersionP1) && isEmpty(searchVersionP2)) {
+	                    continue;
+	                }
+	            } else {
+	                if (CoConstDef.FLAG_NO.equals(searchVersionP3Yn)) {
+	                    continue;
+	                }
+	            }
+	            
+	            boolean isMatched = false;
+	            if (!isEmpty(ossVersion)) {
+	                if (!isEmpty(searchVersionP1)) {
+	                    // [개선] 불필요한 new ArrayList 생성 및 래핑 제거. 배열 상태로 직접 스트리밍/루프 처리
+	                    String[] versionArray = searchVersionP1.contains("|") 
+	                        ? searchVersionP1.split("\\|") 
+	                        : searchVersionP1.split(",");
+	                        
+	                    String trimmedOssVer = ossVersion.trim();
+	                    for (String version : versionArray) {
+	                        if (version != null && version.trim().equals(trimmedOssVer)) {
+	                            isMatched = true;
+	                            break;
+	                        }
+	                    }
+	                }
+	                
+	                if (!isMatched) {
+	                    boolean isMatchedInRange = false;
+	                    if (!isEmpty(searchVersionP2)) {
+	                        isMatchedInRange = isVersionInRange(ossVersion, searchVersionP2);
+	                        if (bean != null && !isMatchedInRange && bean.getOssVersionAliases() != null) {
+	                            for (String alias : bean.getOssVersionAliases()) {
+	                                if (isVersionInRange(alias, searchVersionP2)) {
+	                                    isMatchedInRange = true;
+	                                    break;
+	                                }
+	                            }
+	                        }
+	                    }
+	                    if (!isMatchedInRange) {
+	                        continue;
+	                    }
+	                }
+	            }
+	        }
+	        
+	        versionPassedList.add(osvVulnInfo);
+	        existingKeys.add(uniqueKey);
+	    }
+
+	    // 크로스 매칭 매지 단계 (O(N^2) 전수조사 로직 제거)
+	    Map<String, Vulnerability> mergedOsvMap = new LinkedHashMap<>();
+	    
+	    // 동일 OSS명 + 버전 내에서 ID 혹은 Alias가 하나라도 겹치면 매핑하기 위한 역색인 인덱스 맵
+	    Map<OsvMatchKey, Vulnerability> indexMap = new HashMap<>();
+
+	    for (Vulnerability item : versionPassedList) {
+	        String ossName = !isEmpty(item.getOssName()) ? item.getOssName().trim() : "";
+	        String ossVersion = !isEmpty(item.getOssVersion()) ? item.getOssVersion().trim() : "";
+	        
+	        // 현재 아이템이 가진 모든 ID 후보군 모으기
+	        Set<String> currentIds = new HashSet<>();
+	        if (!isEmpty(item.getCveId())) {
+	            currentIds.add(item.getCveId().trim());
+	        }
+	        if (!isEmpty(item.getAliasId())) {
+	            for (String alias : item.getAliasId().split(",")) {
+	                if (!isEmpty(alias)) {
+	                    currentIds.add(alias.trim());
+	                }
+	            }
+	        }
+	        
+	        // 역색인 맵 조회를 통해 겹치는 기존 데이터가 있는지 O(1) 속도로 역추적
+	        Vulnerability existingItem = null;
+	        for (String id : currentIds) {
+	            OsvMatchKey searchKey = new OsvMatchKey(ossName, ossVersion, id);
+	            existingItem = indexMap.get(searchKey);
+	            if (existingItem != null) {
+	                break; // 겹치는 대상을 찾았으므로 즉시 탈출
+	            }
+	        }
+	        
+	        if (existingItem != null) {
+	            // [병합 처리] 기존 객체에 식별자 통합
+	            Set<String> combinedIds = new HashSet<>(currentIds);
+	            if (!isEmpty(existingItem.getCveId())) {
+	                combinedIds.add(existingItem.getCveId().trim());
+	            }
+	            if (!isEmpty(existingItem.getAliasId())) {
+	                for (String a : existingItem.getAliasId().split(",")) {
+	                    if (!isEmpty(a)) {
+	                        combinedIds.add(a.trim());
+	                    }
+	                }
+	            }
+	            
+	            String bestId = getPriorityRepresentativeId(combinedIds);
+	            existingItem.setId(bestId);
+	            existingItem.setCveId(bestId);
+	            
+	            combinedIds.remove(bestId);
+	            existingItem.setAliasId(!combinedIds.isEmpty() ? String.join(",", combinedIds) : "");
+	            
+	            if (isEmpty(existingItem.getPatchLink()) && !isEmpty(item.getPatchLink())) {
+	                existingItem.setPatchLink(item.getPatchLink());
+	            }
+	            
+	            // 병합 과정에서 추가되었을 수 있는 식별자들도 기존 객체를 가리키도록 인덱스 관계망 업데이트
+	            for (String id : currentIds) {
+	                indexMap.putIfAbsent(new OsvMatchKey(ossName, ossVersion, id), existingItem);
+	            }
+	        } else {
+	            // [신규 처리] 겹치는 식별자가 없다면 대표 ID 선정 후 등록
+	            String bestId = getPriorityRepresentativeId(currentIds);
+	            item.setId(bestId);
+	            item.setCveId(bestId);
+	            
+	            currentIds.remove(bestId);
+	            item.setAliasId(!currentIds.isEmpty() ? String.join(",", currentIds) : "");
+	            
+	            // 최종 결과 맵에 바인딩 (포맷팅 1회 제한)
+	            String mapKey = ossName + "_" + ossVersion + "_" + bestId;
+	            mergedOsvMap.put(mapKey, item);
+	            
+	            // 새로운 관계망을 역색인 인덱스에 보관 (이후 들어올 아이템들이 참조할 수 있도록)
+	            indexMap.put(new OsvMatchKey(ossName, ossVersion, bestId), item);
+	            if (!isEmpty(item.getAliasId())) {
+	                for (String alias : item.getAliasId().split(",")) {
+	                    if (!isEmpty(alias)) {
+	                        indexMap.put(new OsvMatchKey(ossName, ossVersion, alias.trim()), item);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	    return mergedOsvMap;
+	}
+
+//	public static Map<String, Vulnerability> filterAndMergeOsvVulnerabilities(OssMaster bean, List<Vulnerability> rawFilteredList) {
+//		List<Vulnerability> versionPassedList = new ArrayList<>();
+//		Set<String> existingKeys = new HashSet<>();
+//		
+//		for (Vulnerability osvVulnInfo : rawFilteredList) {
+//			if (isEmpty(osvVulnInfo.getOssName()) && isEmpty(osvVulnInfo.getProduct())) {
+//				if (bean != null && !isEmpty(bean.getOssName())) {
+//					osvVulnInfo.setOssName(bean.getOssName());
+//				}
+//			} else if (isEmpty(osvVulnInfo.getOssName()) && !isEmpty(osvVulnInfo.getProduct())) {
+//				osvVulnInfo.setOssName(osvVulnInfo.getProduct());
+//			}
+//			if (isEmpty(osvVulnInfo.getOssVersion()) && isEmpty(osvVulnInfo.getVersion())) {
+//				if (bean != null) {
+//					osvVulnInfo.setOssVersion(bean.getOssVersion());
+//				}
+//			} else if (isEmpty(osvVulnInfo.getOssVersion()) && !isEmpty(osvVulnInfo.getVersion())) {
+//				osvVulnInfo.setOssVersion(osvVulnInfo.getVersion());
+//			}
+//		    // Version validation logic
+//		    String uniqueKey = generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getGroupKeyId(), null);
+//		    
+//		    String ossVersion = osvVulnInfo.getOssVersion();
+//		    String searchVersionP1 = osvVulnInfo.getSearchVersionP1();
+//		    String searchVersionP2 = osvVulnInfo.getSearchVersionP2();
+//		    String searchVersionP3Yn = osvVulnInfo.getSearchVersionP3Yn();
+//		    
+//		    if (!existingKeys.contains(uniqueKey)) {
+//		        if (!isEmpty(ossVersion)) {
+//		            if (isEmpty(searchVersionP1) && isEmpty(searchVersionP2)) {
+//		                continue;
+//		            }
+//		        } else {
+//		            if (CoConstDef.FLAG_NO.equals(searchVersionP3Yn)) {
+//		                continue;
+//		            }
+//		        }
+//		        
+//		        boolean isMatched = false;
+//		        if (!isEmpty(ossVersion)) {
+//		            if (!isEmpty(searchVersionP1)) {
+//		            	List<String> versions = new ArrayList<>();
+//		            	if (searchVersionP1.contains("|")) {
+//		            		versions = Arrays.asList(searchVersionP1.split("\\|"));
+//		            	} else {
+//		            		versions = Arrays.asList(searchVersionP1.split(","));
+//		            	}
+//		                for (String version : versions) {
+//		                    if (version.trim().equals(ossVersion.trim())) {
+//		                        isMatched = true;
+//		                        break;
+//		                    }
+//		                }
+//		            }
+//		            
+//		            if (!isMatched) {
+//		                boolean isMatchedInRange = false;
+//		                if (!isEmpty(searchVersionP2)) {
+//		                	isMatchedInRange = isVersionInRange(ossVersion, searchVersionP2);
+//		                	if (bean != null) {
+//		                		if (!isMatchedInRange && bean.getOssVersionAliases() != null) {
+//			                		for (String alias : bean.getOssVersionAliases()) {
+//			    	                    if (isVersionInRange(alias, searchVersionP2)) {
+//			    	                    	isMatchedInRange = true;
+//			    	                        break;
+//			    	                    }
+//			    	                }
+//			                	}
+//		                	}
+//		                }
+//		                if (!isMatchedInRange) {
+//		                    continue;
+//		                }
+//		            }
+//		        }
+//		    }
+//		    
+//		    // Add items that successfully passed version validation
+//		    versionPassedList.add(osvVulnInfo);
+//		    existingKeys.add(uniqueKey);
+//		}
+//
+//		// Cross-match and merge OSV IDs / Alias IDs within the same OSS Name & Version, then sort by priority
+//		Map<String, Vulnerability> mergedOsvMap = new LinkedHashMap<>();
+//		for (Vulnerability item : versionPassedList) {
+//		    String ossName = !isEmpty(item.getOssName()) ? item.getOssName().trim() : "";
+//		    String ossVersion = !isEmpty(item.getOssVersion()) ? item.getOssVersion().trim() : "";
+//		    
+//		    Set<String> currentIds = new HashSet<>();
+//		    if (!isEmpty(item.getCveId())) {
+//		    	currentIds.add(item.getCveId().trim());
+//		    }
+//		    if (!isEmpty(item.getAliasId())) {
+//		        for (String alias : item.getAliasId().split(",")) {
+//		            if (!isEmpty(alias)) {
+//		            	currentIds.add(alias.trim());
+//		            }
+//		        }
+//		    }
+//		    
+//		    String foundExistingKey = null;
+//		    for (Map.Entry<String, Vulnerability> entry : mergedOsvMap.entrySet()) {
+//		        Vulnerability existingItem = entry.getValue();
+//		        String exOssName = !isEmpty(existingItem.getOssName()) ? existingItem.getOssName().trim() : "";
+//		        String exOssVersion = !isEmpty(existingItem.getOssVersion()) ? existingItem.getOssVersion().trim() : "";
+//		        
+//		        // Check for ID overlap (including alias) only if OSS name and version are identical
+//		        if (exOssName.equals(ossName) && exOssVersion.equals(ossVersion)) {
+//		            Set<String> existingIds = new HashSet<>();
+//		            if (!isEmpty(existingItem.getCveId())) {
+//		            	existingIds.add(existingItem.getCveId().trim());
+//		            }
+//		            if (!isEmpty(existingItem.getAliasId())) {
+//		                for (String alias : existingItem.getAliasId().split(",")) {
+//		                    if (!isEmpty(alias)) {
+//		                    	existingIds.add(alias.trim());
+//		                    }
+//		                }
+//		            }
+//		            
+//		            boolean hasIntersection = false;
+//		            for (String id : currentIds) {
+//		                if (existingIds.contains(id)) {
+//		                    hasIntersection = true;
+//		                    break;
+//		                }
+//		            }
+//		            
+//		            if (hasIntersection) {
+//		                foundExistingKey = entry.getKey();
+//		                break;
+//		            }
+//		        }
+//		    }
+//		    
+//		    if (foundExistingKey != null) {
+//		        // If overlap exists, merge IDs with the existing item and re-determine the representative ID based on priority
+//		        Vulnerability existingItem = mergedOsvMap.get(foundExistingKey);
+//		        
+//		        Set<String> combinedIds = new HashSet<>(currentIds);
+//		        if (!isEmpty(existingItem.getCveId())) {
+//		        	combinedIds.add(existingItem.getCveId().trim());
+//		        }
+//		        if (!isEmpty(existingItem.getAliasId())) {
+//		            for (String a : existingItem.getAliasId().split(",")) {
+//		            	if(!isEmpty(a)) {
+//		            		combinedIds.add(a.trim());
+//		            	}
+//		            }
+//		        }
+//		        
+//		        String bestId = getPriorityRepresentativeId(combinedIds);
+//		        existingItem.setId(bestId);
+//		        existingItem.setCveId(bestId);
+//		        
+//		        combinedIds.remove(bestId);
+//		        existingItem.setAliasId(!combinedIds.isEmpty() ? String.join(",", combinedIds) : "");
+//		        
+//		        if (isEmpty(existingItem.getPatchLink()) && !isEmpty(item.getPatchLink())) {
+//		            existingItem.setPatchLink(item.getPatchLink());
+//		        }
+//		    } else {
+//		        // If no overlap, register as a single item and organize representative ID
+//		        String bestId = getPriorityRepresentativeId(currentIds);
+//		        item.setId(bestId);
+//		        item.setCveId(bestId);
+//		        
+//		        currentIds.remove(bestId);
+//		        item.setAliasId(!currentIds.isEmpty() ? String.join(",", currentIds) : "");
+//		        
+//		        String mapKey = String.format("%s_%s_%s", ossName, ossVersion, bestId);
+//		        mergedOsvMap.put(mapKey, item);
+//		    }
+//		}
+//		
+//		return mergedOsvMap;
+//	}
 	
 	private static String generateKey(String ossName, String ossVersion, String cveId, String cvssScore) {
 		if (!isEmpty(cvssScore)) {
