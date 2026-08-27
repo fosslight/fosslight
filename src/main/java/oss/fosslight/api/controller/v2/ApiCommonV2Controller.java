@@ -50,7 +50,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
                     code = 200,
                     message = "성공",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -84,6 +84,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
         if (userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             try {
                 apiCommonService.mergeDivision(from, to);
+                result.put("success", true);
                 return ResponseEntity.ok(result);
             } catch (Exception e) {
                 log.error("division merge error: from={}, to={}", from, to, e);

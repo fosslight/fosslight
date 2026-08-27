@@ -425,7 +425,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                     code = 200,
                     message = "성공",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -496,6 +496,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             apiSelfCheckService.insertWatcher(param);
         }
 
+        resultMap.put("success", true);
         return ResponseEntity.ok(resultMap);
     }
 

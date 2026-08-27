@@ -125,7 +125,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
                     code = 200,
                     message = "성공",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -183,6 +183,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
             }
         }
+        resultMap.put("success", true);
         return new ResponseEntity(resultMap, HttpStatus.OK);
     }
 

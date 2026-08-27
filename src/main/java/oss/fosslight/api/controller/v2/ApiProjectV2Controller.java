@@ -180,7 +180,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 모델 목록 수정", notes = "모델명|카테고리|출시일(yyyyMMdd) 형식의 목록으로 프로젝트 모델을 교체합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "수정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "수정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
             @ApiResponse(code = 400, message = "잘못된 요청 - modelListToUpdate 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'modelListToUpdate' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
@@ -223,6 +223,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         if (modelList != null) {
             project.setModelList(modelList.get("currentModelList"));
             projectService.insertProjectModel(project);
+            resultMap.put("success", true);
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         }
 
@@ -231,7 +232,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "파일로 프로젝트 모델 목록 수정", notes = "스프레드시트의 모델 목록으로 프로젝트 모델을 교체합니다. 파일명에 xls가 포함되어야 하며 최대 크기는 15MB입니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "수정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "수정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
             @ApiResponse(code = 400, message = "잘못된 요청 - 파일 누락 또는 파싱 실패\n\n* `The parameter is invalid.`\n* `Error while parsing given file`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Error while parsing given file\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
@@ -269,6 +270,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 if (modelList != null) {
                     project.setModelList(modelList.get("currentModelList"));
                     projectService.insertProjectModel(project);
+                    resultMap.put("success", true);
                     return ResponseEntity.ok(resultMap);
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -676,7 +678,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "Identification 탭 초기화", notes = "지정한 dep, src, bin 또는 전체(all) OSS 컴포넌트 데이터를 삭제합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "초기화 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "초기화 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
             @ApiResponse(code = 400, message = "잘못된 tab_name", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"identificationReset.tabName: Input value='invalid'. 'tabName' field value should be from list of [dep, src, bin, all]\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
@@ -726,6 +728,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 apiProjectService.processResetTab(tabName, projectMaster, ossComponents, ossComponentsLicense);
                 break;
         }
+        resultMap.put("success", true);
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
@@ -1390,7 +1393,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Packaging 파일 업로드", notes = "프로젝트 Verification에 Packaging 파일을 추가합니다. 프로젝트당 최대 3개이며 verifyFlag가 Y이면 업로드 후 검증도 실행합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "업로드 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "업로드 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
             @ApiResponse(code = 400, message = "파일 누락 또는 업로드 가능 개수 초과\n\n* Multipart 파일 파라미터 누락 메시지\n* `Up to 3 packaging files can be uploaded.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Up to 3 packaging files can be uploaded.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
@@ -1530,12 +1533,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
         }
 
+        resultMap.put("success", true);
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트 Editor 추가", notes = "프로젝트에 수정 권한을 가진 사용자를 한 명 이상 추가합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "추가 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "추가 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
             @ApiResponse(code = 400, message = "Editor ID 목록 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Editor ID list is required.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
@@ -1572,6 +1576,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             param.put("userId", existingUser.getUserId());
             apiProjectService.insertWatcher(param);
         }
+        resultMap.put("success", true);
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
@@ -1800,7 +1805,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "다른 프로젝트 OSS 불러오기", notes = "프로젝트 ID 또는 이름으로 원본 프로젝트를 찾아 대상 프로젝트의 dep, src 또는 bin 탭으로 OSS 컴포넌트를 불러옵니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "불러오기 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "불러오기 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
             @ApiResponse(code = 400, message = "ID·검색조건·탭 오류 또는 불러올 데이터 없음\n\n* `targetPrjId is not in the correct format`\n* `the prjIdToLoad is missing`\n* `prjIdToLoad is not in the correct format`\n* `Please enter other prjIdToLoad that is different from targetPrjId`\n* `the prjNameToLoad is missing`\n* 서비스에서 반환한 상세 오류 메시지", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"the prjIdToLoad is missing\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
@@ -1890,6 +1895,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get("msg"));
             }
 
+        resultMap.put("success", true);
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
