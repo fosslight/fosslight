@@ -1901,7 +1901,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 삭제", notes = "프로젝트 생성자, Editor 또는 관리자가 프로젝트를 삭제합니다. 일반 사용자는 배포 중이거나 배포 완료된 프로젝트를 삭제할 수 없습니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "삭제 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"123 is deleted\"}"))),
+            @ApiResponse(code = 200, message = "삭제 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"msg\":\"123 is deleted\"}"))),
             @ApiResponse(code = 400, message = "삭제 권한 없음 또는 배포 프로젝트\n\n* `Cannot delete project.`\n* `Cannot delete distributed project.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Cannot delete distributed project.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
@@ -1983,7 +1983,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             try {
                 // Delete project ref files
                 projectService.deleteProjectRefFiles(projectInfo);
-                resultMap.put("msg", prjId + " is deleted");
+                resultMap.put("success", true);
+                resultMap.put("msg", prjId + " is deleted. note: this key will be deprecated");
+                resultMap.put("message", prjId + " is deleted");
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } catch (Exception e) {
                 log.error(e.getMessage());
