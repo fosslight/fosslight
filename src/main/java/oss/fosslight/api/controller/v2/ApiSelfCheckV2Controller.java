@@ -144,7 +144,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                     code = 200,
                     message = "업로드 처리 성공. 유효한 데이터가 없으면 DB 상세 코드 440을 key로 반환",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"ossComponents\":[{\"componentId\":\"1\",\"referenceId\":\"123\",\"referenceDiv\":\"10\",\"ossId\":\"101\",\"ossName\":\"sample-oss\",\"checkName\":\"Y\",\"checkLicense\":\"Y\",\"checkedEvidence\":\"https://github.com/example/sample-oss\",\"checkedEvidenceType\":\"URL\",\"ossNameExistsYn\":\"Y\",\"ossVersion\":\"1.0.0\",\"versionDiffFlag\":\"N\",\"downloadLocation\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"filePath\":\"src/sample\",\"packageUrl\":\"pkg:github/example/sample-oss@1.0.0\",\"binaryName\":\"libsample.so\",\"binarySize\":\"102400\",\"binaryNotice\":\"Y\",\"customBinaryYn\":\"N\",\"excludeYn\":\"N\",\"obligationType\":\"10\",\"notify\":\"Y\",\"source\":\"OSS Report\",\"licenseId\":\"1\",\"licenseName\":\"Apache-2.0\",\"licenseNameExistsYn\":\"Y\",\"licenseText\":\"Apache License Version 2.0\",\"copyrightText\":\"Copyright 2026 Example Authors\",\"vulnYn\":\"Y\",\"cvssScore\":\"7.5\",\"cveId\":\"CVE-2026-1234\",\"licenseType\":\"PMS\",\"editable\":\"Y\",\"comments\":\"Imported from Self-Check sheet\",\"attribution\":\"This product includes sample-oss.\"}],\"ossComponentsLicense\":[[{\"componentLicenseId\":\"1\",\"componentId\":\"1\",\"licenseId\":\"1\",\"licenseName\":\"Apache-2.0\",\"licenseText\":\"Apache License Version 2.0\",\"copyrightText\":\"Copyright 2026 Example Authors\",\"excludeYn\":\"N\"}]]}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":\"true\"}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -310,6 +310,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
         }
 
+        resultMap.clear();
+        resultMap.put("success", true);
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
