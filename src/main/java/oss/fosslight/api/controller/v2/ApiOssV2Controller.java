@@ -63,7 +63,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     message = "성공",
                     response = ListOssDto.Result.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"list\":[{\"ossId\":\"1\",\"ossName\":\"sample-oss\",\"ossVersion\":\"1.0\",\"licenseName\":\"Apache-2.0\",\"downloadUrl\":\"https://example.org/sample-oss\",\"downloadUrls\":[\"https://example.org/sample-oss\"]}],\"totalCount\":1}"))
+                            value = "{\"list\":[{\"ossId\":\"1\",\"ossType\":\"100\",\"ossTypeMap\":{\"Multi\":\"Y\",\"Dual\":\"N\",\"V-Diff\":\"N\"},\"ossName\":\"sample-oss\",\"ossVersion\":\"1.0.0\",\"licenseName\":\"Apache-2.0\",\"licenseType\":\"PMS\",\"downloadUrl\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"downloadUrls\":[\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\"],\"homepageUrl\":\"https://example.org/sample-oss\",\"description\":\"Sample open source component\",\"cveId\":\"CVE-2026-1234\",\"cvssScore\":\"7.5\",\"creator\":\"user01\",\"created\":\"2026-08-01 09:00:00\",\"modifier\":\"user02\",\"modified\":\"2026-08-20 14:30:00\",\"obligations\":[\"Y\",\"N\"],\"obligationTypeMap\":{\"Notice\":\"Y\",\"Source\":\"N\"},\"copyright\":\"Copyright 2026 Example Authors\",\"nicknames\":\"sample|sample-lib\",\"nicknameList\":[\"sample\",\"sample-lib\"],\"attribution\":\"This product includes sample-oss.\",\"exclude\":false}],\"totalCount\":1}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -125,7 +125,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     message = "성공",
                     response = ListLicenseDto.Result.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"list\":[{\"licenseId\":\"1\",\"licenseName\":\"Apache-2.0\",\"licenseType\":\"Permissive\"}],\"totalCount\":1}"))
+                            value = "{\"list\":[{\"licenseId\":\"1\",\"licenseName\":\"Apache License 2.0\",\"licenseType\":\"PMS\",\"ossId\":\"101\",\"licenseText\":\"Apache License Version 2.0, January 2004\",\"licenseIdentifier\":\"Apache-2.0\",\"homepageUrl\":\"https://www.apache.org/licenses/LICENSE-2.0\",\"description\":\"A permissive open source license.\",\"creator\":\"admin\",\"modifier\":\"admin\",\"created\":\"2026-08-01 09:00:00\",\"modified\":\"2026-08-20 14:30:00\",\"restrictions\":[\"Include License\",\"Notice\"],\"licenseNickname\":\"Apache 2.0\",\"comb\":\"N\",\"obligations\":[\"Y\",\"N\"],\"attribution\":\"Licensed under the Apache License, Version 2.0.\"}],\"totalCount\":1}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -237,7 +237,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     code = 200,
                     message = "성공",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"ossId\":\"1\",\"isNew\":true,\"isNewVersion\":false,\"isChangedName\":false,\"isDeactivateFlag\":false,\"isActivateFlag\":false}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"ossMaster\":{\"ossId\":\"101\",\"ossCommonId\":\"51\",\"ossName\":\"sample-oss\",\"ossVersion\":\"1.0.0\",\"homepage\":\"https://example.org/sample-oss\",\"downloadLocation\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"licenseName\":\"Apache-2.0\",\"deactivateFlag\":\"N\",\"comment\":\"Registered through API\"},\"ossId\":\"101\",\"ossCommonId\":\"51\",\"isNew\":true,\"isNewVersion\":false,\"isChangedName\":false,\"isDeactivateFlag\":false,\"isActivateFlag\":false,\"resCd\":\"00\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -277,7 +277,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     code = 200,
                     message = "성공",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"UPDATE-DOWNLOAD-LOCATION-FORMAT\":{\"reFineTotalCnt\":0,\"reFineItems\":{}}}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"UPDATE-DOWNLOAD-LOCATION-FORMAT\":{\"reFineTotalCnt\":1,\"reFineItems\":{\"sample-oss_1.0.0\":[\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\"]}}}"))
             ),
             @ApiResponse(code = 400, message = "필수 doUpdateFlag 또는 refineType 누락", examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'refineType' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),

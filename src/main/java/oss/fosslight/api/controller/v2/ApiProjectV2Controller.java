@@ -97,7 +97,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 목록 조회", notes = "조회 권한이 있는 프로젝트를 조건과 페이지 정보로 검색합니다. 조회 결과가 없으면 빈 list와 totalCount 0을 반환합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "조회 성공", response = Map.class,
-                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"list\":[],\"totalCount\":0}"))),
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"list\":[{\"prjId\":\"6304\",\"prjName\":\"FOSSLight TV Platform\",\"prjVersion\":\"2026.08\",\"updateDate\":\"2026-08-20\",\"createDate\":\"2026-08-01\",\"identificationStatus\":\"Confirm\",\"verificationStatus\":\"Confirm\",\"distributionStatus\":\"Distributed\",\"distributionType\":\"General\",\"networkService\":\"NO\",\"notice\":\"General\",\"noticePlatform\":\"N/A\",\"priority\":\"High\",\"status\":\"Complete\",\"identificationCsvFileId\":\"10001\",\"srcCsvFileId\":\"10002\",\"binCsvFileId\":\"10003\",\"binBinaryFileId\":\"10004\",\"publicYn\":\"Y\",\"secperson\":\"security01\",\"secmailYn\":\"Y\",\"transferDivision\":\"200\",\"editors\":\"user01,user02\",\"statusRequestYn\":\"N\",\"cvssScoreMax\":\"7.5\",\"vulnerabilityScore\":\"7.5\"}],\"totalCount\":1}"))),
             @ApiResponse(code = 400, message = "잘못된 요청 - page 또는 countPerPage가 1 미만", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Input value=0. page must be larger than 1\"}"))),
             @ApiResponse(code = 401, message = "인증 실패 - 사용자 또는 TOKEN 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
@@ -157,7 +157,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 모델 목록 조회", notes = "prjIdList에 지정한 프로젝트별 모델 목록과 배포명을 조회합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"records\":0,\"contents\":[]}"))),
+            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"records\":1,\"contents\":[{\"modelList\":[{\"category\":\"TV/AV > TV\",\"modelName\":\"TVMODEL\",\"releaseDate\":\"20260831\",\"distributeName\":\"FOSSLight TV 2026\"},{\"category\":\"Appliances > Air Conditioner\",\"modelName\":\"AIRCON\",\"releaseDate\":\"20260831\",\"distributeName\":\"FOSSLight TV 2026\"}],\"prjId\":\"6304\",\"distributionName\":null}]}"))),
             @ApiResponse(code = 400, message = "잘못된 요청 - prjIdList 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'prjIdList' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
@@ -526,7 +526,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 SBOM JSON 조회", notes = "프로젝트 BOM을 OSS 이름별 JSON으로 반환합니다. saveFlag가 Y이면 생성 결과를 프로젝트에 저장합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "조회 성공. 프로젝트가 조회되지 않으면 빈 객체 반환", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "조회 성공. 프로젝트가 조회되지 않으면 빈 객체 반환", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by the TV platform\",\"Vulnerability\":\"7.5\"}]}"))),
             @ApiResponse(code = 400, message = "잘못된 요청 - saveFlag 허용값 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"getPrjBomAsJson.saveFlag: Input value='X'. 'saveFlag' field value should be from list of [Y, N]\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
@@ -543,7 +543,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 BOM JSON 조회 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/json-data 사용을 권장합니다.", hidden = true)
     @ApiResponses({
-            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by the TV platform\",\"Vulnerability\":\"7.5\"}]}"))),
             @ApiResponse(code = 400, message = "잘못된 요청", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
@@ -589,7 +589,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 SBOM 비교", notes = "두 프로젝트의 BOM을 비교하여 추가·삭제·변경 항목을 contents에 반환합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "비교 성공. 같은 프로젝트이면 status가 same", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"status\":\"same\"}}"))),
+            @ApiResponse(code = 200, message = "비교 성공. 같은 프로젝트이면 status가 same", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"add\":[{\"name\":\"new-oss\",\"version\":\"2.0.0\",\"license\":[\"MIT\"]}],\"delete\":[{\"name\":\"old-oss\",\"version\":\"1.0.0\",\"license\":[\"BSD-3-Clause\"]}],\"change\":[{\"name\":\"sample-oss\",\"prev\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"]}],\"now\":[{\"version\":\"1.1.0\",\"license\":[\"Apache-2.0\"]}]}]}}"))),
             @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
@@ -602,20 +602,20 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
     }
 
-    @ApiOperation(value = "프로젝트 BOM 비교 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/compare-with/{compareId} 사용을 권장합니다.", hidden = true)
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "비교 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"status\":\"same\"}}"))),
-            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
-            @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
-    })
-    @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
-    public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
-            @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
-            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
-        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
-    }
+//    @ApiOperation(value = "프로젝트 BOM 비교 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/compare-with/{compareId} 사용을 권장합니다.", hidden = true)
+//    @ApiResponses({
+//            @ApiResponse(code = 200, message = "비교 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"add\":[{\"name\":\"new-oss\",\"version\":\"2.0.0\",\"license\":[\"MIT\"]}],\"delete\":[{\"name\":\"old-oss\",\"version\":\"1.0.0\",\"license\":[\"BSD-3-Clause\"]}],\"change\":[{\"name\":\"sample-oss\",\"prev\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"]}],\"now\":[{\"version\":\"1.1.0\",\"license\":[\"Apache-2.0\"]}]}]}}"))),
+//            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
+//            @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
+//            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+//    })
+//    @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
+//    public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
+//            @ApiParam(hidden = true) @RequestHeader String authorization,
+//            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
+//            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
+//        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+//    }
 
     private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(String authorization, String beforePrjId, String afterPrjId) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -732,7 +732,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Identification OSS Report 업로드", notes = "지정한 dep, src 또는 bin 탭에 OSS Report를 업로드합니다. resetFlag로 기존 데이터 교체 여부를 정하고, sbomSave가 Y이면 SBOM도 갱신합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "업로드 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"addedCount\":1}"))),
+            @ApiResponse(code = 200, message = "업로드 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
             @ApiResponse(code = 400, message = "파일·탭·데이터 오류\n\n* `ossReport is required.`\n* 지원하지 않는 파일 확장자 메시지\n* `The tab you are trying to upload is not active. Check Project Distribution Type`\n* `There is no data to load.`\n* `There is an error in the data written in the file.`\n* 파일 분석 중 생성된 상세 오류 메시지", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is no data to load.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
@@ -945,7 +945,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     code = 200,
                     message = "성공",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"uploaded\":[],\"error\":[]}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"uploaded\":[{\"sheet_name\":\"SRC_FL_Source\",\"count\":2,\"tab\":\"SRC\"},{\"sheet_name\":\"DEP_FL_Dependency\",\"count\":1,\"tab\":\"DEP\"}],\"error\":[{\"name\":\"BIN_FL_Binary\",\"reason\":\"'BIN_FL_Binary' sheet not found in the uploaded file.\",\"tab\":\"BIN\"}]}"))
             ),
             @ApiResponse(
                     code = 400,

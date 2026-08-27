@@ -45,7 +45,7 @@ public class ApiBatV2Controller extends CoTopComponent {
                     message = "성공",
                     response = Map.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"content\":[{\"binaryFileName\":\"bash\",\"path\":\"/bin\",\"ossName\":\"bash\",\"ossVersion\":\"5.0\",\"license\":\"GPL-3.0-or-later\",\"projectName\":\"sample\",\"checksum\":\"abc123\",\"tlsh\":\"T1A2B3\",\"updateDate\":\"2024-01-01\"}]}"))
+                            value = "{\"content\":[{\"binaryFileName\":\"bash\",\"path\":\"/bin/bash\",\"ossName\":\"bash\",\"ossVersion\":\"5.2.21\",\"license\":\"GPL-3.0-or-later\",\"projectName\":\"sample-platform\",\"checksum\":\"a1b2c3d4e5f6\",\"tlsh\":\"T1A2B3C4D5E6F\",\"updateDate\":\"2026-08-20\",\"downloadlocation\":\"https://ftp.gnu.org/gnu/bash/bash-5.2.21.tar.gz\"}]}"))
             ),
             @ApiResponse(
                     code = 400,

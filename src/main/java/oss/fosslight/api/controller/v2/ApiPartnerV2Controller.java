@@ -63,7 +63,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
                     message = "성공",
                     response = Map.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"list\":[{\"partnerId\":\"1\",\"partnerName\":\"sample\",\"status\":\"CONF\"}],\"totalCount\":1}"))
+                            value = "{\"list\":[{\"partnerId\":\"1\",\"partnerName\":\"Example Supplier\",\"softwareName\":\"Example SDK\",\"softwareVersion\":\"2.5.0\",\"status\":\"Confirm\",\"modifiedDate\":\"2026-08-20\",\"createdDate\":\"2026-08-01\",\"deliveryForm\":\"Source Code\",\"description\":\"SDK supplied for the TV project\",\"creator\":\"user01\",\"reviewer\":\"reviewer01\",\"division\":\"Division\",\"prjId\":\"6304,6305\"}],\"totalCount\":1}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -140,7 +140,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 403,
                     message = "프로젝트 접근 권한 없음 (EDIT)\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))
             ),
             @ApiResponse(
                     code = 500,
@@ -206,7 +206,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 403,
                     message = "프로젝트 접근 권한 없음 (EDIT)\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))
             ),
             @ApiResponse(
                     code = 500,
@@ -227,7 +227,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiResponse(code = 200, message = "파일 다운로드 성공", response = FileSystemResource.class),
             @ApiResponse(code = 400, message = "필수 format 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'format' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "3rd Party 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))),
+            @ApiResponse(code = 403, message = "3rd Party 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
             @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {"/partners/{id}/bom/file"})
@@ -269,7 +269,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
                     message = "성공",
                     response = Map.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"sample-oss\":[{\"version\":\"1.0\",\"license\":\"Apache-2.0\"}]}"))
+                            value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by Example SDK\",\"Vulnerability\":\"7.5\"}]}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -279,7 +279,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 403,
                     message = "프로젝트 접근 권한 없음 (EDIT)\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))
             ),
             @ApiResponse(
                     code = 500,
@@ -296,9 +296,9 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "3rd Party SBOM JSON 조회 (Deprecated)", notes = "이전 경로입니다. /partners/{id}/sbom/json-data 사용을 권장합니다.", hidden = true)
     @ApiResponses({
-            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{}"))),
+            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by Example SDK\",\"Vulnerability\":\"7.5\"}]}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "3rd Party 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 3rd_123\"}"))),
+            @ApiResponse(code = 403, message = "3rd Party 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
             @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {"/partners/{id}/bom/json-data"})
