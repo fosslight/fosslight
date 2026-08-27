@@ -97,7 +97,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 목록 조회", notes = "조회 권한이 있는 프로젝트를 조건과 페이지 정보로 검색합니다. 조회 결과가 없으면 빈 list와 totalCount 0을 반환합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "조회 성공", response = Map.class,
-                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"list\":[{\"prjId\":\"6304\",\"prjName\":\"FOSSLight TV Platform\",\"prjVersion\":\"2026.08\",\"updateDate\":\"2026-08-20\",\"createDate\":\"2026-08-01\",\"identificationStatus\":\"Confirm\",\"verificationStatus\":\"Confirm\",\"distributionStatus\":\"Distributed\",\"distributionType\":\"General\",\"networkService\":\"NO\",\"notice\":\"General\",\"noticePlatform\":\"N/A\",\"priority\":\"High\",\"status\":\"Complete\",\"identificationCsvFileId\":\"10001\",\"srcCsvFileId\":\"10002\",\"binCsvFileId\":\"10003\",\"binBinaryFileId\":\"10004\",\"publicYn\":\"Y\",\"secperson\":\"security01\",\"secmailYn\":\"Y\",\"transferDivision\":\"200\",\"editors\":\"user01,user02\",\"statusRequestYn\":\"N\",\"cvssScoreMax\":\"7.5\",\"vulnerabilityScore\":\"7.5\"}],\"totalCount\":1}"))),
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"list\":[{\"prjId\":\"6304\",\"prjName\":\"FOSSLight TV Platform\",\"prjVersion\":\"2026.08\",\"updateDate\":\"2026-08-20\",\"createDate\":\"2026-08-01\",\"identificationStatus\":\"Confirm\",\"verificationStatus\":\"Confirm\",\"distributionStatus\":\"Distributed\",\"distributionType\":\"General\",\"networkService\":\"NO\",\"notice\":\"General\",\"noticePlatform\":\"\",\"priority\":\"High\",\"status\":\"Complete\",\"identificationCsvFileId\":\"10001\",\"publicYn\":\"Y\",\"secperson\":\"security01\",\"secmailYn\":\"Y\",\"editors\":\"user01,user02\",\"statusRequestYn\":\"N\",\"cvssScoreMax\":\"7.5\",\"vulnerabilityScore\":\"7.5\"}],\"totalCount\":1}"))),
             @ApiResponse(code = 400, message = "잘못된 요청 - page 또는 countPerPage가 1 미만", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Input value=0. page must be larger than 1\"}"))),
             @ApiResponse(code = 401, message = "인증 실패 - 사용자 또는 TOKEN 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
@@ -157,7 +157,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 모델 목록 조회", notes = "prjIdList에 지정한 프로젝트별 모델 목록과 배포명을 조회합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"records\":1,\"contents\":[{\"modelList\":[{\"category\":\"TV/AV > TV\",\"modelName\":\"TVMODEL\",\"releaseDate\":\"20260831\",\"distributeName\":\"FOSSLight TV 2026\"},{\"category\":\"Appliances > Air Conditioner\",\"modelName\":\"AIRCON\",\"releaseDate\":\"20260831\",\"distributeName\":\"FOSSLight TV 2026\"}],\"prjId\":\"6304\",\"distributionName\":null}]}"))),
+            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"records\":1,\"contents\":[{\"modelList\":[{\"category\":\"Appliances > Air Conditioner\",\"modelName\":\"AIRCON\",\"releaseDate\":\"20260831\",\"distributeName\":\"FOSSLight 2026\"}],\"prjId\":\"6304\",\"distributionName\":null}]}"))),
             @ApiResponse(code = 400, message = "잘못된 요청 - prjIdList 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'prjIdList' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
@@ -1751,7 +1751,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 log.error(e.getMessage(), e);
             }
 
-            resultMap.put("msg", "Security enable setting updated successfully");
+            resultMap.put("msg", "Security enable setting updated successfully.");
             resultMap.put("secMailYn", secMailYn);
             resultMap.put("secMailDesc", project.getSecMailDesc());
 
@@ -1984,8 +1984,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 // Delete project ref files
                 projectService.deleteProjectRefFiles(projectInfo);
                 resultMap.put("success", true);
-                resultMap.put("msg", prjId + " is deleted. note: this key will be deprecated");
-                resultMap.put("message", prjId + " is deleted");
+                resultMap.put("msg", prjId + " is deleted.");
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } catch (Exception e) {
                 log.error(e.getMessage());

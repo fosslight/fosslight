@@ -125,7 +125,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     message = "성공",
                     response = ListLicenseDto.Result.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"list\":[{\"licenseId\":\"1\",\"licenseName\":\"Apache License 2.0\",\"licenseType\":\"PMS\",\"ossId\":\"101\",\"licenseText\":\"Apache License Version 2.0, January 2004\",\"licenseIdentifier\":\"Apache-2.0\",\"homepageUrl\":\"https://www.apache.org/licenses/LICENSE-2.0\",\"description\":\"A permissive open source license.\",\"creator\":\"admin\",\"modifier\":\"admin\",\"created\":\"2026-08-01 09:00:00\",\"modified\":\"2026-08-20 14:30:00\",\"restrictions\":[\"Include License\",\"Notice\"],\"licenseNickname\":\"Apache 2.0\",\"comb\":\"N\",\"obligations\":[\"Y\",\"N\"],\"attribution\":\"Licensed under the Apache License, Version 2.0.\"}],\"totalCount\":1}"))
+                            value = "{\"list\":[{\"licenseId\":\"1\",\"licenseName\":\"Apache License 2.0\",\"licenseType\":\"Permissive\",\"licenseText\":\"Apache License Version 2.0, January 2004\",\"licenseIdentifier\":\"Apache-2.0\",\"homepageUrl\":\"https://www.apache.org/licenses/LICENSE-2.0\",\"description\":\"A permissive open source license.\",\"creator\":\"admin\",\"modifier\":\"admin\",\"created\":\"2026-08-01 09:00:00\",\"modified\":\"2026-08-20 14:30:00\",\"restrictions\":[\"Include License\",\"Notice\"],\"licenseNickname\":\"Apache 2.0\",\"obligations\":[\"Y\",\"N\"],\"attribution\":\"Licensed under the Apache License, Version 2.0.\"}],\"totalCount\":1}"))
             ),
             @ApiResponse(
                     code = 400,
