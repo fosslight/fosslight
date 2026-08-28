@@ -282,7 +282,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiResponse(code = 400, message = "필수 doUpdateFlag 또는 refineType 누락", examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'refineType' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패", examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))),
             @ApiResponse(
-                    code = 500,
+                    code = 403,
                     message = "권한 없음 / 서버 내부 오류 - 관리자 아님 ⚠️\n\n",
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
             )
@@ -296,7 +296,7 @@ public class ApiOssV2Controller extends CoTopComponent {
 		
 		// 사용자 인증
 		if (!userService.isAdmin(authorization)) {
-			return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+			return responseService.errorResponse(HttpStatus.FORBIDDEN,
 					CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
 		}
 		return ResponseEntity.ok(refineOssService.refineDownloadLocation(ossName, refineType, "Y".equalsIgnoreCase(doUpdateFlag)));
