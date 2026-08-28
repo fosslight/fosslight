@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@Api(tags = {"01. OSS & License"})
+@Api(tags = {"01. OSS & License"}, description = " ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")

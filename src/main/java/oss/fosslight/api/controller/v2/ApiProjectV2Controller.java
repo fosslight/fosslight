@@ -48,7 +48,7 @@ import javax.validation.constraints.Min;
 import java.lang.reflect.Type;
 import java.util.*;
 
-@Api(tags = {"03. Project"})
+@Api(tags = {"03. Project"}, description = " ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")

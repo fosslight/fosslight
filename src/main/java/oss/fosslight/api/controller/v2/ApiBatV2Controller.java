@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"07. Binary"})
+@Api(tags = {"07. Binary"}, description = " ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")

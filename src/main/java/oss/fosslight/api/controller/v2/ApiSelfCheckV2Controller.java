@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"05. SelfCheck"})
+@Api(tags = {"05. SelfCheck"}, description = " ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")

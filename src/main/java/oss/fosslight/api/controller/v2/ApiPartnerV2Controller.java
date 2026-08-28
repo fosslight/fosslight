@@ -33,7 +33,7 @@ import javax.validation.constraints.Min;
 import java.util.HashMap;
 import java.util.Map;
 
-@Api(tags = {"02. 3rd Party"})
+@Api(tags = {"02. 3rd Party"}, description = " ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
