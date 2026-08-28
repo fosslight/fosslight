@@ -19,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.annotation.ApiCommonResponses;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
@@ -43,8 +44,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"05. SelfCheck"})
+@Api(tags = {"05. SelfCheck"}, description = " ")
 @RequiredArgsConstructor
+@ApiCommonResponses
 @RestController
 @RequestMapping(value = "/api/v2")
 @Validated
@@ -81,7 +83,20 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
     private final ProjectService projectService;
 
-    @ApiOperation(value = "Create SelfCheck", notes = "Create New SelfCheck")
+    @ApiOperation(value = "Self Check 생성", notes = "사용자 소유의 Self Check 프로젝트를 생성하고 프로젝트 ID를 반환합니다. 프로젝트와 Self Check 생성은 하루 최대 3개입니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"prjId\":\"123\"}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - 생성 개수 초과 / 파라미터 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The number of projects and self-checks that can be created has been exceeded. (Up to 3 per day)\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_CREATE})
     public ResponseEntity<Map<String, Object>> createSelfCheck(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -115,7 +130,35 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     }
 
     @SuppressWarnings("unchecked")
-    @ApiOperation(value = "SelfCheck OSS Report", notes = "SelfCheck > oss report")
+    @ApiOperation(value = "Self Check OSS Report 업로드", notes = "Self-Check, SRC 또는 BIN 시트의 OSS Report를 업로드합니다. resetFlag=N이면 기존 데이터에 추가합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "업로드 처리 성공. 유효한 데이터가 없으면 DB 상세 코드 440을 key로 반환",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - ossReport 누락",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            ),
+            @ApiResponse(
+                    code = 413,
+                    message = "파일 크기 초과 (최대 15MB)",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))
+            ),
+            @ApiResponse(
+                    code = 422,
+                    message = "데이터 검증 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"api.dataValidationError.msg\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -172,7 +215,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         }
 
 //					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
-//							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > bean.getSize()) { // file size 5MB 이하만 허용.
+//							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > bean.getSize()) { // file size 15MB 이하만 허용.
 
         if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= bean.getSize()) {
             return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
@@ -249,6 +292,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
         }
 
+        resultMap.clear();
+        resultMap.put("success", true);
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
@@ -296,7 +341,28 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         return rtnMap;
     }
 
-    @ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
+    @ApiOperation(value = "Self Check Report 다운로드", notes = "Self Check 결과를 스프레드시트 파일로 다운로드합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공 - Spreadsheet 파일 다운로드",
+                    response = org.springframework.core.io.FileSystemResource.class
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - format 값 오류\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"selfCheckBomDownload.format: Input value='PDF'. 'format' field value should be from list of [Spreadsheet]\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음 - 응답 body 없음"
+            ),
+            @ApiResponse(
+                    code = 404,
+                    message = "파일 없음\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"File not found.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_DOWNLOAD})
     public ResponseEntity selfCheckBomDownload(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -327,7 +393,31 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "SelfCheck Add Editor", notes = "SelfCheck Add Editor")
+    @ApiOperation(value = "Self Check Editor 추가", notes = "Self Check 프로젝트에 이메일 기준 Editor를 추가합니다. LDAP 사용 환경에서는 등록된 사용자만 추가할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - emailList 누락 / 중복 watcher\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
+            ),
+           
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            ),
+            @ApiResponse(
+                    code = 404,
+                    message = "사용자 없음 - LDAP 사용자 없음\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"User does not exist.\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_EDITOR})
     public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -371,10 +461,26 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             apiSelfCheckService.insertWatcher(param);
         }
 
+        resultMap.put("success", true);
         return ResponseEntity.ok(resultMap);
     }
 
-    @ApiOperation(value = "SelfCheck Get", notes = "SelfCheck Get")
+    @ApiOperation(value = "Self Check 조회", notes = "조회 권한이 있는 Self Check 프로젝트의 기본 정보를 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"content\":{\"prjId\":\"123\",\"prjName\":\"Sample Self Check\",\"prjVersion\":\"1.0\",\"comment\":\"Initial self-check\",\"commentIdx\":\"501\",\"useYn\":\"Y\",\"srcCsvFileId\":\"10001\",\"creator\":\"user01\",\"createdDate\":\"2026-08-01 09:00:00\",\"modifier\":\"user02\",\"modifiedDate\":\"2026-08-20 14:30:00\",\"prjUserName\":\"홍길동\",\"prjDivisionName\":\"HE Division\"}}"))
+            ),
+           
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_GET})
     public ResponseEntity<Map<String, Object>> getSelfcheck(
             @ApiParam(hidden=true) @RequestHeader String authorization,

@@ -562,7 +562,7 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 		
 		if (params == null) {
 			// 미등록 token
-			throw new CUserAuthFailedException("Token not found");
+			throw new CUserAuthFailedException(CoConstDef.ERR_TOKEN_INVALID, "Token not found");
 		}
 		
 		if (!StringUtil.isEmpty(params.getExpireDate())) {
@@ -571,12 +571,12 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 			try {
 				dbDate = LocalDate.parse(params.getExpireDate(), formatter);
 			} catch (Exception e) {
-				throw new CUserAuthFailedException("Token expire date is invalid");
+				throw new CUserAuthFailedException(CoConstDef.ERR_TOKEN_INVALID, "Token expire date is invalid");
 			}
 			LocalDate today = LocalDate.now();
 			long diff = ChronoUnit.DAYS.between(dbDate, today);
 			if (diff > 0) {
-				throw new CUserAuthFailedException("Token expired");
+				throw new CUserAuthFailedException(CoConstDef.ERR_TOKEN_EXPIRED, "Token expired");
 			}
 		}
 
@@ -584,7 +584,8 @@ public class T2UserServiceImpl extends CoTopComponent implements T2UserService {
 		if (checkToken(params, _token)) { // 추출된 USER 정보로 동일한 token이 생성이 되는지 확인.
             return getUserAndAuthorities(params);
         } else {
-            throw new CUserAuthFailedException(CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE));
+            throw new CUserAuthFailedException(CoConstDef.ERR_TOKEN_INVALID,
+					CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE));
         }
 	}
 

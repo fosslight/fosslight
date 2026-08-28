@@ -8,6 +8,10 @@ package oss.fosslight.api.controller.v2;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Example;
+import io.swagger.annotations.ExampleProperty;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.annotation.ApiCommonResponses;
 import oss.fosslight.api.annotation.InternalApi;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.Url.APIV2;
@@ -27,8 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"10. Common"})
+@Api(tags = {"10. Common"}, description = " ")
 @RequiredArgsConstructor
+@ApiCommonResponses
 @RestController
 @RequestMapping(value = "/api/v2")
 public class ApiCommonV2Controller extends CoTopComponent {
@@ -40,7 +46,25 @@ public class ApiCommonV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
     @InternalApi
-    @ApiOperation(value = "Merge division", notes = "Merge division (from -> to)")
+    @ApiOperation(value = "Division 병합", notes = "관리자 전용 API입니다. from Division의 사용자와 프로젝트/3rd Party 정보를 to Division으로 이동합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "필수 from 또는 to 누락",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"message\":\"'from' parameter is missing or misspelled\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음 - 관리자 아님\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_MERGE_DIVISION})
     public ResponseEntity<Map<String, Object>> mergeDivision(
             @ApiParam(hidden = true) @RequestHeader String authorization,
@@ -52,6 +76,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
         if (userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             try {
                 apiCommonService.mergeDivision(from, to);
+                result.put("success", true);
                 return ResponseEntity.ok(result);
             } catch (Exception e) {
                 log.error("division merge error: from={}, to={}", from, to, e);
@@ -63,7 +88,25 @@ public class ApiCommonV2Controller extends CoTopComponent {
     }
 
     @InternalApi
-    @ApiOperation(value = "Add division", notes = "Add a user division (T2_CODE_DTL, CD_NO=200). Detail Name maps to CD_DTL_NM, Detail Description to CD_DTL_EXP.")
+    @ApiOperation(value = "Division 추가", notes = "관리자 전용 API입니다. 사용자 Division 코드에 이름과 설명을 추가합니다. 같은 이름이 있으면 success=false와 기존 코드 번호를 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"cdDtlNo\":\"201\"}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - cdDtlNm 누락\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음 - 관리자 아님\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            )
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
     public ResponseEntity<Map<String, Object>> addDivision(
             @ApiParam(hidden = true) @RequestHeader String authorization,
@@ -87,7 +130,30 @@ public class ApiCommonV2Controller extends CoTopComponent {
     }
 
     @InternalApi
-    @ApiOperation(value = "Update division", notes = "Update CD_DTL_NM and/or CD_DTL_EXP for a user division (T2_CODE_DTL, CD_NO=200) by CD_DTL_NO. Omit a field to leave it unchanged; at least one of cdDtlNm or cdDtlExp must be sent.")
+    @ApiOperation(value = "Division 수정", notes = "관리자 전용 API입니다. 코드 번호에 해당하는 Division 이름 또는 설명을 수정합니다. 생략한 값은 변경하지 않습니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"cdDtlNo\":\"201\",\"cdDtlNm\":\"Updated Division\",\"cdDtlExp\":\"Updated description\"}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - cdDtlNo 누락 또는 cdDtlNm/cdDtlExp 둘 다 누락\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"At least one of cdDtlNm or cdDtlExp is required.\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음 - 관리자 아님\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            ),
+            @ApiResponse(
+                    code = 404,
+                    message = "리소스 없음 - cdDtlNo not found\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The resource does not exist or User does not have permissions for the resource (resource example: project)\"}"))
+            )
+    })
     @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_UPDATE_DIVISION})
     public ResponseEntity<Map<String, Object>> updateDivision(
             @ApiParam(hidden = true) @RequestHeader String authorization,
@@ -119,7 +185,16 @@ public class ApiCommonV2Controller extends CoTopComponent {
     }
 
     @InternalApi
-    @ApiOperation(value = "Get division list", notes = "Get division list (T2_CODE_DTL, CD_NO=200)")
+    @ApiOperation(value = "Division 목록 조회", notes = "활성 사용자 Division 코드의 번호, 이름, 설명을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"content\":[{\"cdDtlNo\":\"101\",\"cdDtlNm\":\"LGE\",\"cdDtlExp\":\"LGE Division\"}]}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
     public ResponseEntity<Map<String, Object>> getDivisionList(
             @ApiParam(hidden = true) @RequestHeader String authorization) {
@@ -137,7 +212,21 @@ public class ApiCommonV2Controller extends CoTopComponent {
     }
 
     @InternalApi
-    @ApiOperation(value = "Get all users (basic)", notes = "Returns all rows from T2_USERS with user_id, user_name, email, division, use_yn")
+    @ApiOperation(value = "전체 사용자 기본 정보 조회", notes = "관리자 전용 API입니다. 전체 사용자의 ID, 이름, 이메일, Division, 사용 여부를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"content\":[{\"user_id\":\"admin\",\"user_name\":\"Administrator\",\"email\":\"admin@example.com\",\"division\":\"LGE\",\"use_yn\":\"Y\"}]}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음 - 관리자 아님\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USERS})
     public ResponseEntity<Map<String, Object>> getAllUsersBasic(
             @ApiParam(hidden = true) @RequestHeader String authorization) {
@@ -168,7 +257,30 @@ public class ApiCommonV2Controller extends CoTopComponent {
     }
 
     @InternalApi
-    @ApiOperation(value = "Update user division", notes = "Admin only. Update T2_USERS.DIVISION by USER_ID.")
+    @ApiOperation(value = "사용자 Division 수정", notes = "관리자 전용 API입니다. 사용자 ID에 활성 Division 코드를 지정합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"user_id\":\"user01\",\"division\":\"LGE\"}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - 유효하지 않은 division 코드\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Invalid division: 999\"}"))
+            ),
+            @ApiResponse(
+                    code = 403,
+                    message = "권한 없음 - 관리자 아님\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
+            ),
+            @ApiResponse(
+                    code = 404,
+                    message = "사용자 없음\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"User id not found: user01\"}"))
+            )
+    })
     @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USER_DIVISION})
     public ResponseEntity<Map<String, Object>> updateUserDivision(
             @ApiParam(hidden = true) @RequestHeader String authorization,
