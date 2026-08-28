@@ -1657,6 +1657,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             resultMap.put("msg", "Security responsible person added successfully");
+            resultMap.put("message", "Security responsible person added successfully");
             resultMap.put("userId", userId);
             resultMap.put("userName", existingUser.getUserName());
 
@@ -1752,6 +1753,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             resultMap.put("msg", "Security enable setting updated successfully.");
+            resultMap.put("message", "Security enable setting updated successfully.");
             resultMap.put("secMailYn", secMailYn);
             resultMap.put("secMailDesc", project.getSecMailDesc());
 
@@ -1985,15 +1987,18 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 projectService.deleteProjectRefFiles(projectInfo);
                 resultMap.put("success", true);
                 resultMap.put("msg", prjId + " is deleted.");
+                resultMap.put("message", prjId + " is deleted.");
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 resultMap.put("msg", "Error occurs during remove ref files. Please report this issue");
+                resultMap.put("message", "Error occurs during remove ref files. Please report this issue");
                 return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             resultMap.put("msg", "Error occurs during remove ref files. Please report this issue");
+            resultMap.put("message", "Error occurs during remove ref files. Please report this issue");
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

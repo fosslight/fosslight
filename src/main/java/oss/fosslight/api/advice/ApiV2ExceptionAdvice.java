@@ -130,6 +130,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Bad Request");
         errorResponse.put("msg", error);
+        errorResponse.put("message", error);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -142,6 +143,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Bad Request");
         errorResponse.put("msg", error);
+        errorResponse.put("message", error);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -153,6 +155,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Bad Request");
         errorResponse.put("msg", error);
+        errorResponse.put("message", error);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }

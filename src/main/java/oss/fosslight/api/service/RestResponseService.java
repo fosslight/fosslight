@@ -26,6 +26,7 @@ public class RestResponseService {
     public ResponseEntity<Map<String, Object>> errorResponse(HttpStatus status, String str) {
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("msg", str);
+        resultMap.put("message", str);
         return new ResponseEntity<>(resultMap, status);
     }
 
