@@ -147,7 +147,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                     code = 200,
                     message = "업로드 처리 성공. 유효한 데이터가 없으면 DB 상세 코드 440을 key로 반환",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":\"true\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))
             ),
             @ApiResponse(
                     code = 400,
