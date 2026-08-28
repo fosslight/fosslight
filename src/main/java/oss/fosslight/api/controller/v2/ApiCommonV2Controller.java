@@ -59,8 +59,11 @@ public class ApiCommonV2Controller extends CoTopComponent {
             ),
             @ApiResponse(
                     code = 401,
-                    message = "인증 실패",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    message = "인증 실패\n\n" +
+              "**에러 코드 (errorCode):**\n\n" +
+              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
@@ -111,8 +114,11 @@ public class ApiCommonV2Controller extends CoTopComponent {
             ),
             @ApiResponse(
                     code = 401,
-                    message = "인증 실패",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    message = "인증 실패\n\n" +
+              "**에러 코드 (errorCode):**\n\n" +
+              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
@@ -163,8 +169,11 @@ public class ApiCommonV2Controller extends CoTopComponent {
             ),
             @ApiResponse(
                     code = 401,
-                    message = "인증 실패",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    message = "인증 실패\n\n" +
+              "**에러 코드 (errorCode):**\n\n" +
+              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
@@ -224,8 +233,11 @@ public class ApiCommonV2Controller extends CoTopComponent {
             ),
             @ApiResponse(
                     code = 401,
-                    message = "인증 실패",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    message = "인증 실패\n\n" +
+              "**에러 코드 (errorCode):**\n\n" +
+              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 500,
@@ -261,8 +273,11 @@ public class ApiCommonV2Controller extends CoTopComponent {
             ),
             @ApiResponse(
                     code = 401,
-                    message = "인증 실패",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    message = "인증 실패\n\n" +
+              "**에러 코드 (errorCode):**\n\n" +
+              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
@@ -320,8 +335,11 @@ public class ApiCommonV2Controller extends CoTopComponent {
             ),
             @ApiResponse(
                     code = 401,
-                    message = "인증 실패",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    message = "인증 실패\n\n" +
+              "**에러 코드 (errorCode):**\n\n" +
+              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,

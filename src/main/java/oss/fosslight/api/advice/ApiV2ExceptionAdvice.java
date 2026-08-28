@@ -111,7 +111,13 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     protected ResponseEntity<Map<String, Object>> userAuthFailed(HttpServletRequest request, CUserAuthFailedException e) {
         // Do not expose token state (missing/expired/invalid) to the client.
+        String errorCode = (e.getErrorCode() != null) ? e.getErrorCode() : CoConstDef.ERR_TOKEN_INVALID;
+        String errorMsg = (e.getMessage() != null) ? e.getMessage() : CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE);
+
+        log.error("Authorization Error: errorCode = {} / errorMsg = {}", errorCode, errorMsg);
+
         return responseService.errorResponse(HttpStatus.UNAUTHORIZED,
+                errorCode,
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE));
     }
 
