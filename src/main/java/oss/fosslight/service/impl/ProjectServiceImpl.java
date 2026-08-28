@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -623,24 +624,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		List<Vulnerability> securityDataList = projectMapper.selectMaxScoreSecurityListForProject(identification);
-//		List<OssComponents> osvDataList = osvDataService.getSecurityVulnerabilityList(null, identification, identification.getReferenceId(), 1, false);
+		List<OssComponents> osvDataList = osvDataService.getSecurityVulnerabilityList(null, identification, identification.getReferenceId(), 1, false);
 		List<Vulnerability> osvSecurityDataList = null;
 		
-//		if (CollectionUtils.isNotEmpty(osvDataList)) {
-//			osvSecurityDataList = CollectionUtils.isEmpty(osvDataList) ? new ArrayList<>() :
-//								    osvDataList.stream()
-//								        .map(osvData -> {
-//								            Vulnerability vuln = new Vulnerability();
-//								            vuln.setOssName(osvData.getOssName());
-//								            vuln.setOssVersion(osvData.getOssVersion());
-//								            vuln.setCveId(osvData.getCveId());
-//								            vuln.setCvssScore(osvData.getCvssScore());
-//								            vuln.setVulnerabilityResolution(osvData.getVulnerabilityResolution());
-//								            vuln.setGroupKeyId(osvData.getGroupKeyId());
-//								            return vuln;
-//								        })
-//								        .collect(Collectors.toList());
-//		}
+		if (CollectionUtils.isNotEmpty(osvDataList)) {
+			osvSecurityDataList = CollectionUtils.isEmpty(osvDataList) ? new ArrayList<>() :
+								    osvDataList.stream()
+								        .map(osvData -> {
+								            Vulnerability vuln = new Vulnerability();
+								            vuln.setOssName(osvData.getOssName());
+								            vuln.setOssVersion(osvData.getOssVersion());
+								            vuln.setCveId(osvData.getCveId());
+								            vuln.setCvssScore(osvData.getCvssScore());
+								            vuln.setVulnerabilityResolution(osvData.getVulnerabilityResolution());
+								            vuln.setGroupKeyId(osvData.getGroupKeyId());
+								            return vuln;
+								        })
+								        .collect(Collectors.toList());
+		}
 		
 		Map<String, Vulnerability> securityDataMap = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(securityDataList) || CollectionUtils.isNotEmpty(osvSecurityDataList)) {
@@ -2168,36 +2169,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								            }
 								        ));
 				
-//				List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1, false);
-//	            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
-//	                for (OssComponents osvComp : osvVulnerabilityDataList) {
-//	                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
-//	                        continue;
-//	                    }
-//	                    
-//	                    String mapKey = (osvComp.getOssName() + "_" + avoidNull(osvComp.getOssVersion())).toUpperCase();
-//	                    
-//	                    Vulnerability osvVuln = new Vulnerability();
-//	                    osvVuln.setOssName(osvComp.getOssName());
-//	                    osvVuln.setOssVersion(osvComp.getOssVersion());
-//	                    osvVuln.setVersion(osvComp.getOssVersion());
-//	                    osvVuln.setCveId(osvComp.getCveId());
-//	                    osvVuln.setCvssScore(osvComp.getCvssScore());
-//	                    osvVuln.setVulnerabilityResolution(osvComp.getVulnerabilityResolution());
-//	                    
-//	                    if (securityDataMap.containsKey(mapKey)) {
-//	                        Vulnerability existing = securityDataMap.get(mapKey);
-//	                        double score1 = CommonFunction.isBigDecimal(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
-//	                        double score2 = CommonFunction.isBigDecimal(osvVuln.getCvssScore()) ? Double.parseDouble(String.valueOf(osvVuln.getCvssScore())) : 0.0;
-//	                        
-//	                        if (score2 > score1) {
-//	                            securityDataMap.put(mapKey, osvVuln);
-//	                        }
-//	                    } else {
-//	                        securityDataMap.put(mapKey, osvVuln);
-//	                    }
-//	                }
-//	            }
+				List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1, false);
+	            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
+	                for (OssComponents osvComp : osvVulnerabilityDataList) {
+	                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
+	                        continue;
+	                    }
+	                    
+	                    String mapKey = (osvComp.getOssName() + "_" + avoidNull(osvComp.getOssVersion())).toUpperCase();
+	                    
+	                    Vulnerability osvVuln = new Vulnerability();
+	                    osvVuln.setOssName(osvComp.getOssName());
+	                    osvVuln.setOssVersion(osvComp.getOssVersion());
+	                    osvVuln.setVersion(osvComp.getOssVersion());
+	                    osvVuln.setCveId(osvComp.getCveId());
+	                    osvVuln.setCvssScore(osvComp.getCvssScore());
+	                    osvVuln.setVulnerabilityResolution(osvComp.getVulnerabilityResolution());
+	                    
+	                    if (securityDataMap.containsKey(mapKey)) {
+	                        Vulnerability existing = securityDataMap.get(mapKey);
+	                        double score1 = CommonFunction.isBigDecimal(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+	                        double score2 = CommonFunction.isBigDecimal(osvVuln.getCvssScore()) ? Double.parseDouble(String.valueOf(osvVuln.getCvssScore())) : 0.0;
+	                        
+	                        if (score2 > score1) {
+	                            securityDataMap.put(mapKey, osvVuln);
+	                        }
+	                    } else {
+	                        securityDataMap.put(mapKey, osvVuln);
+	                    }
+	                }
+	            }
 			}
 		}
 		
@@ -4020,36 +4021,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
     							        ));
     		}
             
-//        	List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1, false);
-//            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
-//                for (OssComponents osvComp : osvVulnerabilityDataList) {
-//                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
-//                        continue;
-//                    }
-//                    
-//                    String mapKey = (osvComp.getOssName() + "_" + avoidNull(osvComp.getOssVersion())).toUpperCase();
-//                    
-//                    Vulnerability osvVuln = new Vulnerability();
-//                    osvVuln.setOssName(osvComp.getOssName());
-//                    osvVuln.setOssVersion(osvComp.getOssVersion());
-//                    osvVuln.setVersion(osvComp.getOssVersion());
-//                    osvVuln.setCveId(osvComp.getCveId());
-//                    osvVuln.setCvssScore(osvComp.getCvssScore());
-//                    osvVuln.setVulnerabilityResolution(osvComp.getVulnerabilityResolution());
-//                    
-//                    if (securityDataMap.containsKey(mapKey)) {
-//                        Vulnerability existing = securityDataMap.get(mapKey);
-//                        double score1 = !isEmpty(existing.getCvssScore()) && CommonFunction.isBigDecimal(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
-//                        double score2 = !isEmpty(osvVuln.getCvssScore()) && CommonFunction.isBigDecimal(osvVuln.getCvssScore()) ? Double.parseDouble(String.valueOf(osvVuln.getCvssScore())) : 0.0;
-//                        
-//                        if (score2 > score1) {
-//                            securityDataMap.put(mapKey, osvVuln);
-//                        }
-//                    } else {
-//                        securityDataMap.put(mapKey, osvVuln);
-//                    }
-//                }
-//            }
+        	List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(null, identification, prjId, 1, false);
+            if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
+                for (OssComponents osvComp : osvVulnerabilityDataList) {
+                    if ("Fixed".equalsIgnoreCase(osvComp.getVulnerabilityResolution())) {
+                        continue;
+                    }
+                    
+                    String mapKey = (osvComp.getOssName() + "_" + avoidNull(osvComp.getOssVersion())).toUpperCase();
+                    
+                    Vulnerability osvVuln = new Vulnerability();
+                    osvVuln.setOssName(osvComp.getOssName());
+                    osvVuln.setOssVersion(osvComp.getOssVersion());
+                    osvVuln.setVersion(osvComp.getOssVersion());
+                    osvVuln.setCveId(osvComp.getCveId());
+                    osvVuln.setCvssScore(osvComp.getCvssScore());
+                    osvVuln.setVulnerabilityResolution(osvComp.getVulnerabilityResolution());
+                    
+                    if (securityDataMap.containsKey(mapKey)) {
+                        Vulnerability existing = securityDataMap.get(mapKey);
+                        double score1 = !isEmpty(existing.getCvssScore()) && CommonFunction.isBigDecimal(existing.getCvssScore()) ? Double.parseDouble(String.valueOf(existing.getCvssScore())) : 0.0;
+                        double score2 = !isEmpty(osvVuln.getCvssScore()) && CommonFunction.isBigDecimal(osvVuln.getCvssScore()) ? Double.parseDouble(String.valueOf(osvVuln.getCvssScore())) : 0.0;
+                        
+                        if (score2 > score1) {
+                            securityDataMap.put(mapKey, osvVuln);
+                        }
+                    } else {
+                        securityDataMap.put(mapKey, osvVuln);
+                    }
+                }
+            }
         }
         
         List<String> removeAdminCheckComponentIds = new ArrayList<>();
@@ -8005,7 +8006,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> deduplicatedkey = new ArrayList<>();
 		List<String> caseWithoutVersionKey = new ArrayList<>();
 		List<String> checkOssNameList = new ArrayList<>();
-		List<Vulnerability> fullList = null;
 		
 		List<String> checkVulnScore = new ArrayList<>();
 		Map<String, Object> vulnScore = new LinkedHashMap<>();
@@ -8018,368 +8018,446 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		vulnScoreResolution.put("Unresolved", 0);
 		vulnScoreResolution.put("Fixed", 0);
 		Map<String, Map<String, Object>> vulnScoreByOssVersion = new HashMap<>();
-		
-		OssComponents oc = null;
-		OssComponents bean = null;
-		boolean activateFlag;
-		String ossVersion = "";
-		String vulnerabilityLink = "";
-		ProjectIdentification identification = new ProjectIdentification();
-		identification.setReferenceId(project.getPrjId());
-		if (!isEmpty(project.getOssName())) {
-			identification.setOssName(project.getOssName());
-		}
-		identification.setOssVersion(avoidNull(project.getOssVersion()));
-		
-		if (!isEmpty(project.getReferenceDiv())) {
-			identification.setReferenceDiv(project.getReferenceDiv());
-		} else {
-			Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
-			if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			} else {
-				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			}
-		}
-		
-		identification.setSkipVulnerabilityResolution(CoConstDef.FLAG_YES);
-		fullList = projectMapper.selectSecurityListForProject(identification);
-		
-		List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
-		if (securityDatalist != null && !securityDatalist.isEmpty()) {
-			for (OssComponents oss : securityDatalist) {
-				String key = "";
-				if (!isEmpty(oss.getOssVersion())) {
-					key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
-				} else {
-					key = (oss.getOssName() + "_" + avoidNull(oss.getOssVersion()) + "_" + oss.getCvssScore()).toUpperCase();
-				}
-				securityGridMap.put(key, oss);
-			}
-		}
-		
-		int gridIdx = 1;
-		if (CollectionUtils.isNotEmpty(fullList)) {
-			Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
-			Map<String, String> patchLinkMap = new HashMap<>();
-			Map<String, String> runningOnWithMap = new HashMap<>();
-			Map<String, List<String>> versionsForCpeNames = new HashMap<>();
-			
-			List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
-			if (CollectionUtils.isNotEmpty(cpeInfoList)) {
-				List<String> matchCriteriaIds = cpeInfoList.stream().map(m -> m.get("matchCriteriaId")).filter(Objects::nonNull).map(Object::toString).distinct().collect(Collectors.toList());
-				List<Map<String, Object>> versionsForMatchCriteriaIds = projectMapper.selectVersionsForCpeNames(matchCriteriaIds);
-				for (Map<String, Object> versionsMap : versionsForMatchCriteriaIds) {
-				    String matchCriteriaId = String.valueOf(versionsMap.get("matchCriteriaId"));
-				    String versionStr = String.valueOf(versionsMap.get("version"));
-				    versionsForCpeNames.put(matchCriteriaId, Arrays.asList(versionStr.split(",")));
-				}
-			}
-			
-			for (Map<String, Object> cpeInfo : cpeInfoList) {
-				String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
-				String key2 = (String) cpeInfo.get("cveId");
-				String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
-				String runningOnWith = (String) cpeInfo.getOrDefault("runningOnWith", "");
-				int cpeInfoCnt = Integer.parseInt(cpeInfo.get("cpeInfoCnt").toString()); 
-				if (cpeInfoCnt > 0) {
-					List<Map<String, Object>> cpeInfoMapList = null;
-					if (cpeInfoMap.containsKey(key)) {
-						cpeInfoMapList = cpeInfoMap.get(key);
-					} else {
-						cpeInfoMapList = new ArrayList<>();
-					}
-					cpeInfoMapList.add(cpeInfo);
-					cpeInfoMap.put(key, cpeInfoMapList);
-					
-					if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
-						patchLinkMap.put(key2, patchLink);
-					}
-					
-					if (!isEmpty(runningOnWith)) {
-						if (runningOnWithMap.containsKey(key)) {
-							String chkRunningOnWith = runningOnWithMap.get(key);
-							runningOnWith = runningOnWith + "@" + chkRunningOnWith;
-						}
-						runningOnWithMap.put(key, runningOnWith);
-					}
-				}
-			}
-			
-			if (!MapUtils.isEmpty(runningOnWithMap)) {
-				for (String key : runningOnWithMap.keySet()) {
-					String[] value = runningOnWithMap.get(key).split("@");
-					String[] distinctValue = Arrays.stream(value).distinct().toArray(String[]::new);
-					runningOnWithMap.replace(key, String.join(",", distinctValue));
-				}
-			}
-			
-			for (Vulnerability pi : fullList) {
-				activateFlag = false;
-				if (isEmpty(pi.getOssVersion())) {
-					activateFlag = true;
-					String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
-					if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
-						caseWithoutVersionKey.add(keyWithoutVersion);
-					} else {
-						continue;
-					}
-				} 
-					
-				String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
-				String key2 = (pi.getCveId() + "_" + pi.getOssName().replaceAll(" ", "_")).toUpperCase();
-				
-				if (!deduplicatedkey.contains(key)) {
-					deduplicatedkey.add(key);
-					
-					if (activateFlag) {
-						String key3 = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion()) + "_" + pi.getCvssScore()).toUpperCase();
-						bean = (OssComponents) securityGridMap.get(key3);
-					} else if (securityGridMap.containsKey(key)) {
-						bean = (OssComponents) securityGridMap.get(key);
-					}
-					
-					if (activateFlag) {
-						checkOssNameList.add(pi.getOssName());
-						vulnerabilityLink = CommonFunction.getProperty("server.domain");
-						vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
-					} else {
-						vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + pi.getCveId();
-					}
-					
-					oc = new OssComponents();
-					oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
-					oc.setOssName(pi.getOssName());
-					oc.setOssVersion(pi.getOssVersion());
-					oc.setCvssScore(pi.getCvssScore());
-					
-					if (!activateFlag) {
-						oc.setCveId(pi.getCveId());
-						oc.setPublDate(pi.getPublDate());
-					}
-					
-					oc.setModiDate(pi.getModiDate());
-					oc.setVulnSummary(pi.getVulnSummary());
-					oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-					oc.setVulnerabilityLink(vulnerabilityLink);
-					oc.setVulnerabilityResolution("Unresolved");
-					
-					if (bean != null) {
-						oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-						oc.setSecurityComments(bean.getSecurityComments());
-					}
-					
-					if (!activateFlag) {
-						if (cpeInfoMap.containsKey(key2)) {
-							List<Map<String, Object>> matchCpeInfoList = cpeInfoMap.get(key2);
-							String criteria = "";
-							String verStartEndRange = "";
-							String checkUrl = "";
-							
-							boolean emptyFlag = false;
-							for (Map<String, Object> cpeInfo : matchCpeInfoList) {
-								if (cpeInfo.containsKey("criteria")) {
-									String cpeInfoCriteria = (String) cpeInfo.get("criteria");
-									String[] url = cpeInfoCriteria.split(":");
-									if (!emptyFlag) {
-										checkUrl = cpeInfoCriteria;
-									}
-									if (!criteria.contains(cpeInfoCriteria) && url[5].equals("*") || url[5].equals(oc.getOssVersion())) {
-										criteria += cpeInfoCriteria + ",";
-									}
-								}
-								if (cpeInfo.containsKey("verStartInc")) {
-									verStartEndRange += "From (including) : " + (String) cpeInfo.get("verStartInc")+"|";
-								}
-								if (cpeInfo.containsKey("verEndInc")) {
-									verStartEndRange += "Up to (including) : " + (String) cpeInfo.get("verEndInc")+"|";
-								}
-								if (cpeInfo.containsKey("verStartExc")) {
-									verStartEndRange += "From (excluding) : " + (String) cpeInfo.get("verStartExc")+"|";
-								}
-								if (cpeInfo.containsKey("verEndExc")) {
-									verStartEndRange += "Up to (excluding) : " + (String) cpeInfo.get("verEndExc")+"|";
-								}
-								if (!isEmpty(verStartEndRange)) {
-									verStartEndRange += "#";
-								}
-								
-								emptyFlag = true;
-							}
-							
-							if (!isEmpty(criteria)) {
-								criteria = criteria.substring(0, criteria.length()-1);
-								oc.setCpeName(criteria);
-							} else {
-								if (!isEmpty(checkUrl)) {
-									String[] url = checkUrl.split(":");
-									String changeUrl = "";
-									int i = 0;
-									for (String urlData : url) {
-										if (i == 5) {
-											changeUrl += "*:";
-										} else {
-											changeUrl += urlData + ":";
-										}
-										i++;
-									}
-									changeUrl = changeUrl.substring(0, changeUrl.length()-1);
-									oc.setCpeName(changeUrl);
-								}
-							}
-							
-							if (!isEmpty(verStartEndRange)) {
-								verStartEndRange = verStartEndRange.substring(0, verStartEndRange.length()-1);
-								if (!MapUtils.isEmpty(runningOnWithMap) && runningOnWithMap.containsKey(key2)) {
-									String runningOnWith = "";
-									String[] rows = runningOnWithMap.get(key2).split(",");
-									List<String> deduplicateKey = new ArrayList<>();
-									
-									for (String row : rows) {
-										String[] rowArr = row.split("[|]");
-										String rowStr = rowArr[0];
-										String matchCriteriaId = rowArr[1];
-										
-//										List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-//										if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-										if (versionsForCpeNames.containsKey(matchCriteriaId)) {
-											List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
-											if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-												deduplicateKey.add(rowStr);
-												runningOnWith += rowStr + ",";
-											}
-										}
-									}
-									
-									if (!isEmpty(runningOnWith)) {
-										runningOnWith = runningOnWith.substring(0, runningOnWith.length()-1);
-										verStartEndRange += "|Running on/with " + runningOnWith;
-									}
-								}
-								oc.setVerStartEndRange(verStartEndRange);
-							} else {
-								if (!MapUtils.isEmpty(runningOnWithMap) && runningOnWithMap.containsKey(key2)) {
-									verStartEndRange = "N/A";
-									String runningOnWith = "";
-									String[] rows = runningOnWithMap.get(key2).split(",");
-									List<String> deduplicateKey = new ArrayList<>();
-									
-									for (String row : rows) {
-										String[] rowArr = row.split("[|]");
-										String rowStr = rowArr[0];
-										String matchCriteriaId = rowArr[1];
-										
-//										List<String> cpeNameInfos = projectMapper.getVersionsForCpeNames(matchCriteriaId);
-//										if (!CollectionUtils.isEmpty(cpeNameInfos) && cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-										if (versionsForCpeNames.containsKey(matchCriteriaId)) {
-											List<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
-											if (cpeNameInfos.contains(oc.getOssVersion()) && !deduplicateKey.contains(rowStr)) {
-												deduplicateKey.add(rowStr);
-												runningOnWith += rowStr + ",";
-											}
-										}
-									}
-									
-									if (!isEmpty(runningOnWith)) {
-										runningOnWith = runningOnWith.substring(0, runningOnWith.length()-1);
-										verStartEndRange += "|Running on/with " + runningOnWith;
-									}
-								}
-								oc.setVerStartEndRange(verStartEndRange);
-							}
-						}
-					}
-					
-					if (!activateFlag && !isResolveDataEnabled && !("Fixed").equals(avoidNull(oc.getVulnerabilityResolution()))) {
-						generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
-					}
-					fullDiscoveredList.add(oc);
-					
-					bean = null;
-					gridIdx++;
-				}
-			}
-			checkVulnScore.clear();
-			versionsForCpeNames.clear();
-		}
-		
-//		List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(securityGridMap, identification, project.getPrjId(), gridIdx, true);
-//		if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
-//			Set<String> existingKeys = new HashSet<>();
-//			for (OssComponents item : fullDiscoveredList) {
-//			    String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
-//			    existingKeys.add(uniqueKey);
-//			}
-//			for (OssComponents item : osvVulnerabilityDataList) {
-//				if (isEmpty(item.getOssVersion())) {
-//					checkOssNameList.add(item.getOssName());
-//				}
-//			    String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
-//			    if (existingKeys.add(uniqueKey)) {
-//			    	if (CommonFunction.isBigDecimal(item.getCvssScore()) && !isEmpty(item.getOssVersion()) && !isEmpty(item.getOssVersion()) && !("Fixed").equals(avoidNull(item.getVulnerabilityResolution()))) {
-//			    		generateDataToDisplayOverView(item, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
-//			    	}
-//			        fullDiscoveredList.add(item);
-//			    }
-//			}
-//			
-//			fullDiscoveredList.sort(Comparator
-//					.comparing(OssComponents::getOssName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
-//					.thenComparing(OssComponents::getOssVersion, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
-//					.thenComparing(OssComponents::getGroupKeyId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
-//					.thenComparing(item -> {
-//				        String cveId = item.getCveId();
-//				        String groupKeyId = item.getGroupKeyId();
-//				        return (!isEmpty(cveId) && !isEmpty(groupKeyId) && cveId.trim().equalsIgnoreCase(groupKeyId.trim())) ? 0 : 1;
-//					})
-//					.thenComparing(OssComponents::getCveId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
-//				);
-//		}
-		
-		if (!isResolveDataEnabled) {
-			if (CollectionUtils.isNotEmpty(fullDiscoveredList)) {
-				totalList = fullDiscoveredList.stream()
-								                .filter(oss -> {
-								                    String scoreStr = oss.getCvssScore();
-								                    if (scoreStr == null || scoreStr.isEmpty()) {
-								                        return false;
-								                    }
-								                    try {
-								                        double score = Double.parseDouble(scoreStr);
-								                        return score >= Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE));
-								                    } catch (NumberFormatException e) {
-								                        return false;
-								                    }
-								                })
-								                .collect(Collectors.toList());
-			}
-			
-			if (CollectionUtils.isNotEmpty(checkOssNameList)) {
-				checkOssNameList = checkOssNameList.stream().distinct().collect(Collectors.toList());
-				String warningMsg = getMessage("msg.project.security.check.version");
-				int size = checkOssNameList.size();
-				int idx = 0;
-				warningMsg += "<br/><br/>";
-				for (String key : checkOssNameList) {
-					String vulnLink = "<span style=\"cursor: pointer; color: blue;\" onclick=\"overview.vulnDetailPopup('" + key + "', '', '', 1);\">" + key + "</span>";
-					warningMsg += vulnLink;
-					if (idx < size-1) {
-						warningMsg += ", ";
-					}
-					idx++;
-				}
-				rtnMap.put("msg", warningMsg);
-			}
-			
-			Map<String, Object> overViewData = new HashMap<>();
-			overViewData.put("vulnScore", vulnScore);
-			overViewData.put("vulnScoreResolution", vulnScoreResolution);
-			overViewData.put("vulnScoreByOssVersion", vulnScoreByOssVersion);
-			
-			rtnMap.put("totalList", totalList);
-			rtnMap.put("overviewData", overViewData);
-		}
-		
+
+	    OssComponents oc = null;
+
+	    ProjectIdentification identification = new ProjectIdentification();
+	    identification.setReferenceId(project.getPrjId());
+
+	    if (!isEmpty(project.getOssName())) {
+	        identification.setOssName(project.getOssName());
+	    }
+
+	    identification.setOssVersion(avoidNull(project.getOssVersion()));
+
+	    Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
+	    if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+	        identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+	    } else {
+	        identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+	    }
+
+	    identification.setSkipVulnerabilityResolution(CoConstDef.FLAG_YES);
+	    List<Vulnerability> fullList = projectMapper.selectSecurityListForProject(identification);
+	    
+	    List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
+	    if (CollectionUtils.isNotEmpty(securityDatalist)) {
+	        for (OssComponents oss : securityDatalist) {
+	            String ossVersionVal = oss.getOssVersion();
+	            String key;
+	            if (!isEmpty(ossVersionVal)) {
+	                key = (oss.getOssName() + "_" + ossVersionVal + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+	            } else {
+	                key = (oss.getOssName() + "_" + avoidNull(ossVersionVal) + "_" + oss.getCvssScore()).toUpperCase();
+	            }
+	            securityGridMap.put(key, oss);
+	        }
+	    }
+
+	    int gridIdx = 1;
+	    if (CollectionUtils.isNotEmpty(fullList)) {
+	        Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
+	        Map<String, String> patchLinkMap = new HashMap<>();
+	        Map<String, Set<String>> runningOnWithMap = new HashMap<>();
+	        Map<String, Set<String>> versionsForCpeNames = new HashMap<>();
+
+	        List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
+	        if (CollectionUtils.isNotEmpty(cpeInfoList)) {
+	        	Set<String> matchCriteriaIdSet = new HashSet<>();
+	            for (Map<String, Object> cpeInfo : cpeInfoList) {
+	                Object matchCriteriaId = cpeInfo.get("matchCriteriaId");
+	                if (matchCriteriaId != null) {
+	                    matchCriteriaIdSet.add(matchCriteriaId.toString());
+	                }
+	            }
+
+	            if (!matchCriteriaIdSet.isEmpty()) {
+	                List<String> matchCriteriaIds = new ArrayList<>(matchCriteriaIdSet);
+	                int chunkSize = 500;
+
+	                for (int i = 0; i < matchCriteriaIds.size(); i += chunkSize) {
+	                    List<String> chunkedIds = matchCriteriaIds.subList(i, Math.min(i + chunkSize, matchCriteriaIds.size()));
+	                    List<Map<String, Object>> versionsForMatchCriteriaIds = projectMapper.selectVersionsForCpeNames(chunkedIds);
+
+	                    for (Map<String, Object> versionsMap : versionsForMatchCriteriaIds) {
+	                        Object matchCriteriaIdObj = versionsMap.get("matchCriteriaId");
+	                        Object versionObj = versionsMap.get("version");
+	                        if (matchCriteriaIdObj == null || versionObj == null) {
+	                            continue;
+	                        }
+
+	                        String matchCriteriaId = matchCriteriaIdObj.toString();
+	                        String versionStr = versionObj.toString();
+
+	                        Set<String> versionSet = new HashSet<>(Arrays.asList(versionStr.split(",")));
+	                        versionsForCpeNames.put(matchCriteriaId, versionSet);
+	                    }
+	                }
+	            }
+	        }
+
+	        for (Map<String, Object> cpeInfo : cpeInfoList) {
+	            String cveId = (String) cpeInfo.get("cveId");
+	            String product = (String) cpeInfo.get("product");
+
+	            if (cveId == null || product == null) {
+	                continue;
+	            }
+
+	            String key = (cveId + "_" + product).toUpperCase();
+	            String key2 = cveId;
+	            String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
+	            String runningOnWith = (String) cpeInfo.getOrDefault("runningOnWith", "");
+	            Object cntObj = cpeInfo.get("cpeInfoCnt");
+
+	            int cpeInfoCnt = (cntObj != null) ? Integer.parseInt(cntObj.toString()) : 0;
+	            if (cpeInfoCnt <= 0) {
+	                continue;
+	            }
+
+	            cpeInfoMap.computeIfAbsent(key, k -> new ArrayList<>()).add(cpeInfo);
+
+	            if (!isEmpty(patchLink)) {
+	                patchLinkMap.putIfAbsent(key2, patchLink);
+	            }
+
+	            if (!isEmpty(runningOnWith)) {
+	                Set<String> runningSet = runningOnWithMap.computeIfAbsent(key, k -> new LinkedHashSet<>());
+	                String[] runningValues = runningOnWith.split("@");
+	                Collections.addAll(runningSet, runningValues);
+	            }
+	        }
+
+	        Map<String, String> runningOnWithStringMap = new HashMap<>();
+	        if (!runningOnWithMap.isEmpty()) {
+	            for (Map.Entry<String, Set<String>> entry : runningOnWithMap.entrySet()) {
+	                Set<String> runningSet = entry.getValue();
+	                if (!runningSet.isEmpty()) {
+	                    runningOnWithStringMap.put(entry.getKey(), String.join(",", runningSet));
+	                }
+	            }
+	        }
+
+	        String serverDomain = CommonFunction.getProperty("server.domain");
+	        StringBuilder sbKey = new StringBuilder();
+	        StringBuilder sbKey2 = new StringBuilder();
+	        StringBuilder sbKey3 = new StringBuilder();
+	        StringBuilder sbCriteria = new StringBuilder();
+	        StringBuilder sbVerRange = new StringBuilder();
+	        StringBuilder sbRunning = new StringBuilder();
+
+	        for (Vulnerability pi : fullList) {
+	            boolean activateFlag = false;
+
+	            String ossName = pi.getOssName();
+	            String ossVersion = pi.getOssVersion();
+	            String cveId = pi.getCveId();
+	            String cvssScore = pi.getCvssScore();
+
+	            if (isEmpty(ossVersion)) {
+	                activateFlag = true;
+	                sbKey3.setLength(0);
+	                String keyWithoutVersion = sbKey3.append(ossName).append("_").append(ossVersion).toString().toUpperCase();
+	                if (!caseWithoutVersionKey.add(keyWithoutVersion)) {
+	                    continue;
+	                }
+	            }
+
+	            sbKey.setLength(0);
+	            
+	            String key = sbKey.append(ossName).append("_").append(ossVersion).append("_").append(cveId).append("_").append(cvssScore).toString().toUpperCase();
+
+	            if (!deduplicatedkey.add(key)) {
+	                continue;
+	            }
+
+	            sbKey2.setLength(0);
+
+	            String ossNameClean = (!isEmpty(ossName)) ? ossName.replace(' ', '_') : "";
+	            String key2 = sbKey2.append(cveId).append("_").append(ossNameClean).toString().toUpperCase();
+	            OssComponents bean = null;
+	            
+	            if (activateFlag) {
+	                sbKey3.setLength(0);
+	                String key3 = sbKey3.append(ossName).append("_").append(avoidNull(ossVersion)).append("_").append(cvssScore).toString().toUpperCase();
+	                bean = (OssComponents) securityGridMap.get(key3);
+	            } else {
+	            	bean = (OssComponents) securityGridMap.get(key);
+	            }
+
+	            String vulnerabilityLink;
+	            if (activateFlag) {
+	                checkOssNameList.add(ossName);
+	                vulnerabilityLink = serverDomain + "/vulnerability/vulnpopup?ossName=" + ossName + "&ossVersion=" + ossVersion;
+	            } else {
+	                vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + cveId;
+	            }
+
+	            oc = new OssComponents();
+	            oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + gridIdx);
+	            oc.setOssName(ossName);
+	            oc.setOssVersion(ossVersion);
+	            oc.setCvssScore(cvssScore);
+
+	            if (!activateFlag) {
+	                oc.setCveId(cveId);
+	                oc.setPublDate(pi.getPublDate());
+	            }
+
+	            oc.setModiDate(pi.getModiDate());
+	            oc.setVulnSummary(pi.getVulnSummary());
+
+	            oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+
+	            oc.setVulnerabilityLink(vulnerabilityLink);
+	            oc.setGroupKeyId(cveId);
+	            oc.setSource("NVD");
+
+	            if (!activateFlag) {
+	                List<Map<String, Object>> matchCpeInfoList = cpeInfoMap.get(key2);
+	                if (matchCpeInfoList != null) {
+	                    sbCriteria.setLength(0);
+	                    sbVerRange.setLength(0);
+
+	                    String checkUrl = "";
+	                    boolean emptyFlag = false;
+
+	                    Set<String> criteriaSet = new LinkedHashSet<>();
+	                    for (Map<String, Object> cpeInfo : matchCpeInfoList) {
+	                        Object criteriaObj = cpeInfo.get("criteria");
+	                        if (criteriaObj != null) {
+	                            String cpeInfoCriteria = criteriaObj.toString();
+	                            int firstIdx = cpeInfoCriteria.indexOf(':');
+	                            int secondIdx = cpeInfoCriteria.indexOf(':', firstIdx + 1);
+	                            int thirdIdx = cpeInfoCriteria.indexOf(':', secondIdx + 1);
+	                            int fourthIdx = cpeInfoCriteria.indexOf(':', thirdIdx + 1);
+	                            int fifthIdx = cpeInfoCriteria.indexOf(':', fourthIdx + 1);
+	                            if (fifthIdx != -1) {
+	                                int nextColonIdx = cpeInfoCriteria.indexOf(':', fifthIdx + 1);
+	                                String versionPart = cpeInfoCriteria.substring(fifthIdx + 1, nextColonIdx == -1 ? cpeInfoCriteria.length() : nextColonIdx);
+
+	                                if (!emptyFlag) {
+	                                    checkUrl = cpeInfoCriteria;
+	                                }
+
+	                                if ((versionPart.equals("*") || versionPart.equals(ossVersion)) && criteriaSet.add(cpeInfoCriteria)) {
+	                                    sbCriteria.append(cpeInfoCriteria).append(",");
+	                                }
+	                            }
+	                        }
+
+	                        boolean isFirstInRange = true;
+
+	                        Object verStartInc = cpeInfo.get("verStartInc");
+	                        if (verStartInc != null) {
+	                            sbVerRange.append(isFirstInRange? "#" : "").append("From (including) : ").append(verStartInc).append("|");
+	                            isFirstInRange = false;
+	                        }
+
+	                        Object verEndInc = cpeInfo.get("verEndInc");
+	                        if (verEndInc != null) {
+	                            sbVerRange.append(isFirstInRange ? "#" : "").append("Up to (including) : ").append(verEndInc).append("|");
+	                            isFirstInRange = false;
+	                        }
+
+	                        Object verStartExc = cpeInfo.get("verStartExc");
+	                        if (verStartExc != null) {
+	                            sbVerRange.append(isFirstInRange ? "#" : "").append("From (excluding) : ").append(verStartExc).append("|");
+	                            isFirstInRange = false;
+	                        }
+
+	                        Object verEndExc = cpeInfo.get("verEndExc");
+	                        if (verEndExc != null) {
+	                            sbVerRange.append(isFirstInRange ? "#" : "").append("Up to (excluding) : ").append(verEndExc).append("|");
+	                            isFirstInRange = false;
+	                        }
+
+	                        emptyFlag = true;
+	                    }
+
+	                    if (sbCriteria.length() > 0) {
+	                        oc.setCpeName(sbCriteria.substring(0, sbCriteria.length() - 1));
+	                    } else if (!isEmpty(checkUrl)) {
+	                        int firstColon = checkUrl.indexOf(':');
+	                        int secondColon = checkUrl.indexOf(':', firstColon + 1);
+	                        int thirdColon = checkUrl.indexOf(':', secondColon + 1);
+	                        int fourthColon = checkUrl.indexOf(':', thirdColon + 1);
+	                        int fifthColon = checkUrl.indexOf(':', fourthColon + 1);
+	                        if (fifthColon != -1) {
+	                            oc.setCpeName(checkUrl.substring(0, fifthColon) + ":*");
+	                        } else {
+	                            oc.setCpeName(checkUrl);
+	                        }
+	                    }
+
+	                    String runningOnWithStr = "";
+	                    String runningOnWith = runningOnWithStringMap.get(key2);
+	                    if (!isEmpty(runningOnWith)) {
+	                        sbRunning.setLength(0);
+	                        Set<String> deduplicateKey = new HashSet<>();
+	                        String[] rows = runningOnWith.split(",");
+	                        
+	                        for (String row : rows) {
+	                            int pipeIdx = row.indexOf('|');
+	                            if (pipeIdx == -1) {
+	                                continue;
+	                            }
+
+	                            String rowStr = row.substring(0, pipeIdx);
+	                            String matchCriteriaId = row.substring(pipeIdx + 1);
+
+	                            Set<String> cpeNameInfos = versionsForCpeNames.get(matchCriteriaId);
+	                            if (cpeNameInfos != null && cpeNameInfos.contains(ossVersion) && deduplicateKey.add(rowStr)) {
+	                                sbRunning.append(rowStr).append(",");
+	                            }
+	                        }
+
+	                        if (sbRunning.length() > 0) {
+	                            runningOnWithStr = sbRunning.substring(0, sbRunning.length() - 1);
+	                        }
+	                    }
+
+	                    if (sbVerRange.length() > 0) {
+	                        String verRangeFinal = sbVerRange.substring(0, sbVerRange.length() - 1);
+	                        if (!isEmpty(runningOnWithStr)) {
+	                            verRangeFinal += "|Running on/with " + runningOnWithStr;
+	                        }
+	                        oc.setVerStartEndRange(verRangeFinal);
+	                    } else {
+	                        String verRangeFinal = "N/A";
+	                        if (!isEmpty(runningOnWithStr)) {
+	                            verRangeFinal = "Running on/with " + runningOnWithStr;
+	                        }
+	                        oc.setVerStartEndRange(verRangeFinal);
+	                    }
+	                }
+
+	                String patchLink = patchLinkMap.get(cveId);
+	                if (!isEmpty(patchLink)) {
+	                    oc.setOfficialPatchLink(patchLink);
+	                    oc.setVulnerabilityResolution("Unresolved");
+	                } else {
+	                    oc.setOfficialPatchLink("N/A");
+	                }
+
+	                oc.setSecurityPatchLink("N/A");
+	            } else {
+	                oc.setVulnerabilityResolution("");
+	            }
+
+	            if (bean != null) {
+	                oc.setSecurityComments(bean.getSecurityComments());
+	                if (!activateFlag) {
+	                    oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+	                    if (!isEmpty(bean.getSecurityPatchLink()) || ("Fixed".equals(oc.getVulnerabilityResolution()) && isEmpty(bean.getSecurityPatchLink()))) {
+	                        oc.setSecurityPatchLink(bean.getSecurityPatchLink());
+	                    }
+	                }
+	            }
+
+	            if (!activateFlag && !isResolveDataEnabled) {
+	                generateDataToDisplayOverView(oc, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
+	            }
+
+	            fullDiscoveredList.add(oc);
+	            gridIdx++;
+	        }
+
+	        checkVulnScore.clear();
+	        caseWithoutVersionKey.clear();
+	        deduplicatedkey.clear();
+	        versionsForCpeNames.clear();
+	        fullList.clear();
+	    }
+
+	    List<OssComponents> osvVulnerabilityDataList = osvDataService.getSecurityVulnerabilityList(securityGridMap, identification, project.getPrjId(), gridIdx, true);
+	    if (CollectionUtils.isNotEmpty(osvVulnerabilityDataList)) {
+	        Set<String> existingKeys = new HashSet<>(fullDiscoveredList.size() + osvVulnerabilityDataList.size());
+	        for (OssComponents item : fullDiscoveredList) {
+	            existingKeys.add(generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null));
+	        }
+
+	        for (OssComponents item : osvVulnerabilityDataList) {
+	            item.setSource("OSV");
+
+	            String itemOssVersion = item.getOssVersion();
+	            if (isEmpty(itemOssVersion)) {
+	                checkOssNameList.add(item.getOssName());
+	            }
+
+	            String uniqueKey = generateKey(item.getOssName(), itemOssVersion, item.getCveId(), null);
+	            if (existingKeys.add(uniqueKey)) {
+	                if (!isEmpty(itemOssVersion) && !isResolveDataEnabled) {
+	                    generateDataToDisplayOverView(item, checkVulnScore, vulnScore, vulnScoreResolution, vulnScoreByOssVersion);
+	                }
+
+	                fullDiscoveredList.add(item);
+	            }
+	        }
+
+	        fullDiscoveredList.sort(Comparator
+	                        .comparing(OssComponents::getOssName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+	                        .thenComparing(OssComponents::getOssVersion, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+	                        .thenComparing(OssComponents::getGroupKeyId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+	                        .thenComparing(item -> {
+	                            String cveId = item.getCveId();
+	                            String groupKeyId = item.getGroupKeyId();
+	                            return (!isEmpty(cveId) && !isEmpty(groupKeyId) && cveId.trim().equalsIgnoreCase(groupKeyId.trim())) ? 0 : 1;
+	                        })
+	                        .thenComparing(OssComponents::getCveId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+	        );
+
+	        osvVulnerabilityDataList.clear();
+	    }
+
+	    if (!isResolveDataEnabled) {
+	        if (CollectionUtils.isNotEmpty(fullDiscoveredList)) {
+	            double thresholdScore = Double.parseDouble(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE));
+	            totalList = fullDiscoveredList.stream()
+	                            .filter(oss -> {
+	                                String scoreStr = oss.getCvssScore();
+	                                if (scoreStr == null || scoreStr.isEmpty()) {
+	                                    return false;
+	                                }
+	                                try {
+	                                    return Double.parseDouble(scoreStr) >= thresholdScore;
+	                                } catch (NumberFormatException e) {
+	                                    return false;
+	                                }
+	                            })
+	                            .collect(Collectors.toList());
+	        }
+
+	        if (CollectionUtils.isNotEmpty(checkOssNameList)) {
+	            List<String> distinctOssNames = new ArrayList<>(checkOssNameList);
+	            StringBuilder sbWarning = new StringBuilder(getMessage("msg.project.security.check.version"));
+	            sbWarning.append("<br/><br/>- ");
+
+	            int size = distinctOssNames.size();
+	            for (int i = 0; i < size; i++) {
+	                String key = distinctOssNames.get(i);
+	                sbWarning.append("<span style=\"cursor: pointer; color: blue;\" onclick=\"overview.vulnDetailPopup('")
+	                        .append(key)
+	                        .append("', '', '', 1);\">")
+	                        .append(key)
+	                        .append("</span>");
+	                if (i < size - 1) {
+	                    sbWarning.append(", ");
+	                }
+	            }
+
+	            rtnMap.put("msg", sbWarning.toString());
+	        }
+
+	        Map<String, Object> overViewData = new HashMap<>();
+	        overViewData.put("vulnScore", vulnScore);
+	        overViewData.put("vulnScoreResolution", vulnScoreResolution);
+	        overViewData.put("vulnScoreByOssVersion", vulnScoreByOssVersion);
+
+	        rtnMap.put("totalList", totalList);
+	        rtnMap.put("overviewData", overViewData);
+	    }
+
 		rtnMap.put("fullDiscoveredList", fullDiscoveredList);
 		return rtnMap;
 	}

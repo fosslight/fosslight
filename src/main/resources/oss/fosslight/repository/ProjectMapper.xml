@@ -6941,63 +6941,75 @@
 	
 	<select id="getCpeInfoAndRangeForProject" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.CamelMap">
 		SELECT
-	   		CONF.MATCH_CRITERIA_ID, 
-	    	CONF.CVE_ID, 
-	    	CONF.PRODUCT, 
-	    	CONF.VERSION, 
-	    	CONF.CRITERIA, 
-	    	CONF.VER_START_INC, 
-	    	CONF.VER_END_INC, 
-	    	CONF.VER_START_EXC, 
-	    	CONF.VER_END_EXC,
-	    	PL.PATCH_LINK,
-		   (SELECT COUNT(1) FROM NVD_CPE_MATCH 
-				WHERE MATCH_CRITERIA_ID = CONF.MATCH_CRITERIA_ID 
-				AND CPE23URI = CONF.CRITERIA
-				AND VER_START_INC <![CDATA[<=>]]> CONF.VER_START_INC
-				AND VER_END_INC <![CDATA[<=>]]> CONF.VER_END_INC
-				AND VER_START_EXC <![CDATA[<=>]]> CONF.VER_START_EXC
-				AND VER_END_EXC <![CDATA[<=>]]> CONF.VER_END_EXC
-			) AS CPE_INFO_CNT
-		FROM (
-	    	SELECT DISTINCT SEARCH_PROD, SEARCH_VER, OSS_NAME 
-	    	FROM (
-	        	SELECT REPLACE(OC.OSS_NAME, ' ', '_') AS SEARCH_PROD, IFNULL(NULLIF(OC.OSS_VERSION, ''), '-') AS SEARCH_VER, OC.OSS_NAME
-	        	FROM OSS_COMPONENTS OC
-	        	WHERE OC.REFERENCE_ID = #{referenceId} AND OC.REFERENCE_DIV = #{referenceDiv} AND OC.OSS_NAME != '-' AND OC.EXCLUDE_YN != 'Y'
-	        	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-			   		AND (OC.OSS_NAME = #{ossName} OR REPLACE(OC.OSS_NAME, '_', ' ') = REPLACE(#{ossName}, '_', ' '))
-			      	AND OC.OSS_VERSION = #{ossVersion}
-				</if>
-	        	UNION ALL
-	        	SELECT REPLACE(OC.OSS_NAME, ' ', '_'), A.OSS_VERSION_ALIAS, OC.OSS_NAME
-	        	FROM OSS_COMPONENTS OC
-	        	INNER JOIN OSS_VERSION_ALIAS A ON OC.OSS_ID = A.OSS_ID
-	        	WHERE OC.REFERENCE_ID = #{referenceId} AND OC.REFERENCE_DIV = #{referenceDiv} AND OC.EXCLUDE_YN != 'Y'
-	      		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-			   		AND (OC.OSS_NAME = #{ossName} OR REPLACE(OC.OSS_NAME, '_', ' ') = REPLACE(#{ossName}, '_', ' '))
-			      	AND OC.OSS_VERSION = #{ossVersion}
-				</if>
-	        	UNION ALL
-	        	SELECT REPLACE(NK.OSS_NICKNAME, ' ', '_'), IFNULL(NULLIF(OC.OSS_VERSION, ''), '-'), OC.OSS_NAME
-	        	FROM OSS_COMPONENTS OC
-	        	INNER JOIN OSS_COMMON C ON OC.OSS_NAME = C.OSS_NAME
-	        	INNER JOIN OSS_NICKNAME NK ON C.OSS_COMMON_ID = NK.OSS_COMMON_ID
-	        	WHERE OC.REFERENCE_ID = #{referenceId} AND OC.REFERENCE_DIV = #{referenceDiv} AND OC.EXCLUDE_YN != 'Y'
-	        	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-			   		AND (OC.OSS_NAME = #{ossName} OR REPLACE(OC.OSS_NAME, '_', ' ') = REPLACE(#{ossName}, '_', ' '))
-			      	AND OC.OSS_VERSION = #{ossVersion}
-				</if>
-	    	) U
-		) K
-		INNER JOIN NVD_DATA_V3 N ON N.PRODUCT = K.SEARCH_PROD AND N.VERSION = K.SEARCH_VER
-		INNER JOIN NVD_CVE_V3 CVE ON N.CVE_ID = CVE.CVE_ID
-		INNER JOIN NVD_DATA_CONFIGURATIONS CONF ON CONF.CVE_ID = N.CVE_ID AND CONF.PRODUCT = K.SEARCH_PROD
-		LEFT JOIN (
-		    SELECT CVE_ID, GROUP_CONCAT(DISTINCT PATCH_LINK) AS PATCH_LINK 
-		    FROM NVD_DATA_PATCH_LINK GROUP BY CVE_ID
-		) PL ON CONF.CVE_ID = PL.CVE_ID
-		GROUP BY CONF.MATCH_CRITERIA_ID, CONF.CVE_ID, CONF.PRODUCT, CONF.VERSION
+	        CONF.MATCH_CRITERIA_ID, 
+	        CONF.CVE_ID, 
+	        CONF.PRODUCT, 
+	        CONF.VERSION, 
+	        CONF.CRITERIA, 
+	        CONF.VER_START_INC, 
+	        CONF.VER_END_INC, 
+	        CONF.VER_START_EXC, 
+	        CONF.VER_END_EXC,
+	        PL.PATCH_LINK,
+	        (SELECT COUNT(1) 
+	         FROM NVD_CPE_MATCH 
+	         WHERE MATCH_CRITERIA_ID = CONF.MATCH_CRITERIA_ID 
+	           AND CPE23URI = CONF.CRITERIA
+	           AND VER_START_INC <![CDATA[<=>]]> CONF.VER_START_INC
+	           AND VER_END_INC <![CDATA[<=>]]> CONF.VER_END_INC
+	           AND VER_START_EXC <![CDATA[<=>]]> CONF.VER_START_EXC
+	           AND VER_END_EXC <![CDATA[<=>]]> CONF.VER_END_EXC) AS CPE_INFO_CNT
+	    FROM (
+	        SELECT DISTINCT SEARCH_PROD, SEARCH_VER 
+	        FROM (
+	            SELECT REPLACE(OC.OSS_NAME, ' ', '_') AS SEARCH_PROD, IFNULL(NULLIF(OC.OSS_VERSION, ''), '-') AS SEARCH_VER
+	            FROM OSS_COMPONENTS OC
+	            WHERE OC.REFERENCE_ID = #{referenceId} 
+	              AND OC.REFERENCE_DIV = #{referenceDiv} 
+	              AND OC.OSS_NAME != '-' 
+	              AND OC.EXCLUDE_YN != 'Y'
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+	                AND (OC.OSS_NAME = #{ossName} OR REPLACE(OC.OSS_NAME, '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+	                AND OC.OSS_VERSION = #{ossVersion}
+	            </if>
+	            
+	            UNION ALL
+	            
+	            SELECT REPLACE(OC.OSS_NAME, ' ', '_'), A.OSS_VERSION_ALIAS
+	            FROM OSS_COMPONENTS OC
+	            INNER JOIN OSS_VERSION_ALIAS A ON OC.OSS_ID = A.OSS_ID
+	            WHERE OC.REFERENCE_ID = #{referenceId} 
+	              AND OC.REFERENCE_DIV = #{referenceDiv} 
+	              AND OC.EXCLUDE_YN != 'Y'
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+	                AND (OC.OSS_NAME = #{ossName} OR REPLACE(OC.OSS_NAME, '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+	                AND OC.OSS_VERSION = #{ossVersion}
+	            </if>
+	            
+	            UNION ALL
+	            
+	            SELECT REPLACE(NK.OSS_NICKNAME, ' ', '_'), IFNULL(NULLIF(OC.OSS_VERSION, ''), '-')
+	            FROM OSS_COMPONENTS OC
+	            INNER JOIN OSS_COMMON C ON OC.OSS_NAME = C.OSS_NAME
+	            INNER JOIN OSS_NICKNAME NK ON C.OSS_COMMON_ID = NK.OSS_COMMON_ID
+	            WHERE OC.REFERENCE_ID = #{referenceId} 
+	              AND OC.REFERENCE_DIV = #{referenceDiv} 
+	              AND OC.EXCLUDE_YN != 'Y'
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+	                AND (OC.OSS_NAME = #{ossName} OR REPLACE(OC.OSS_NAME, '_', ' ') = REPLACE(#{ossName}, '_', ' '))
+	                AND OC.OSS_VERSION = #{ossVersion}
+	            </if>
+	        ) U
+	    ) K
+	    INNER JOIN NVD_DATA_V3 N ON N.PRODUCT = K.SEARCH_PROD AND N.VERSION = K.SEARCH_VER
+	    INNER JOIN NVD_DATA_CONFIGURATIONS CONF ON CONF.CVE_ID = N.CVE_ID AND CONF.PRODUCT = K.SEARCH_PROD
+	    LEFT JOIN (
+    		SELECT CVE_ID, GROUP_CONCAT(DISTINCT PATCH_LINK) AS PATCH_LINK
+    		FROM NVD_DATA_PATCH_LINK
+    		GROUP BY CVE_ID
+		) PL
+		ON PL.CVE_ID = CONF.CVE_ID
+	    GROUP BY CONF.MATCH_CRITERIA_ID, CONF.CVE_ID, CONF.PRODUCT, CONF.VERSION
 	</select>
 	
 	<select id="getVersionsForCpeNames" parameterType="string" resultType="string">
@@ -7006,8 +7018,8 @@
 		WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
 	</select>
 	
-	<select id="selectVersionsForCpeNames" parameterType="string" resultType="oss.fosslight.domain.CamelMap">
-		SELECT MATCH_CRITERIA_ID, GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 6), ':', -1)) AS VERSION
+	<select id="selectVersionsForCpeNames" parameterType="java.util.List" resultType="oss.fosslight.domain.CamelMap">
+		SELECT MATCH_CRITERIA_ID, GROUP_CONCAT(SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 6), ':', -1)) AS VERSION
 		FROM NVD_CPE_MATCH_NAMES
 		WHERE MATCH_CRITERIA_ID IN
 		<foreach collection="matchCriteriaIds" item="id" open="(" separator="," close=")">

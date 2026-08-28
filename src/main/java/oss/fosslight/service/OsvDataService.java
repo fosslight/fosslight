@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,6 +67,8 @@ public class OsvDataService extends CoTopComponent {
 	SqlSessionFactory sqlSessionFactory;
 	@Autowired
 	private ObjectMapper objectMapper;
+	@Autowired
+    private OsvDataService self;
 
 	private final RestTemplate osvDataApiRestTemplate;
 	private static final int BATCH_SIZE = 1000;
@@ -212,7 +215,7 @@ public class OsvDataService extends CoTopComponent {
 
 		if (success) {
 			try {
-				refreshOsvSearchMaster();
+				self.refreshOsvSearchMaster();
 			} catch (Exception e) {
 				log.error("[OSV] Failed to refresh OSV search master.", e);
 			}
@@ -223,7 +226,8 @@ public class OsvDataService extends CoTopComponent {
 		schlog.info("[OSV] OSV bulk download job finished.");
 	}
 
-	private void refreshOsvSearchMaster() {
+	@Transactional
+	public void refreshOsvSearchMaster() {
 		schlog.info("[OSV] Refresh Osv Search Master");
 
 		osvDataMapper.setGroupConcatMaxLen();
@@ -750,7 +754,9 @@ public class OsvDataService extends CoTopComponent {
 	        FinalGroupKey key = new FinalGroupKey(item.getOssName(), item.getOssVersion(), item.getCveId());
 
 	        finalMap.compute(key, (k, existing) -> {
-	            if (existing == null) return item;
+	            if (existing == null) {
+	            	return item;
+	            }
 
 	            // 기존 로직의 정렬(sorted) 기준을 1:1 비교 연산으로 완벽히 대체
 	            boolean validA = CommonFunction.isBigDecimal(existing.getCvssScore());
@@ -1605,14 +1611,15 @@ public class OsvDataService extends CoTopComponent {
 		String[] purls = ossMaster.getPurls();
 		param.put("ossName", ossMaster.getOssName());
 
+		if (!isEmpty(ossMaster.getOssVersion())) {
+			param.put("ossVersion", ossMaster.getOssVersion());
+		}
 		if (ossMaster.getOssNicknames() != null && ossMaster.getOssNicknames().length > 0) {
 			param.put("ossNicknames", ossMaster.getOssNicknames());
 		}
-
 		if (purls != null && purls.length > 0 && purls[0] != null) {
 			param.put("purls", purls);
 		}
-
 		if (ossMaster.getOssVersionAliases() != null) {
 			param.put("ossVersionAliases", ossMaster.getOssVersionAliases());
 		}
@@ -1681,43 +1688,27 @@ public class OsvDataService extends CoTopComponent {
 	    for (Vulnerability osvVulnerability : osvVulnerabilityList) {
 	        currentTargetVersion = isSecurity ? osvVulnerability.getOssVersion() : targetVersion;
 
-	        // 1순위 검증: Exact Match
-	        if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP1Yn())) {
-	            if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
-	                if (versionP1 == null) versionP1 = new ArrayList<>();
-	                
-	                // 매칭이 확정된 순간에만 필드 복사 및 가공 수행 (메모리 절약)
-	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-	                versionP1.add(osvVulnerability);
-	                continue;
-	            }
-	        }
-
-	        // 2순위 검증: Range Match
-	        if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP2Yn())) {
-	            boolean matched = isVersionInRange(currentTargetVersion, osvVulnerability.getSearchVersionP2());
-	            if (!matched && aliases != null) {
-	                for (String alias : aliases) {
-	                    if (isVersionInRange(alias, osvVulnerability.getSearchVersionP2())) {
-	                        matched = true;
-	                        break;
-	                    }
-	                }
-	            }
-
-	            if (matched) {
-	                if (versionP2 == null) {
-						versionP2 = new ArrayList<>();
-					}
-	                
-	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-	                versionP2.add(osvVulnerability);
-	                continue;
-	            }
-	        }
-
-	        // 3순위 검증: Empty Target Version
-	        if (isEmpty(currentTargetVersion) && CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP3Yn())) {
+	        if (!isEmpty(osvVulnerability.getSearchVersionP1())) {
+        		if (versionP1 == null) {
+                	versionP1 = new ArrayList<>();
+                }
+                
+                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+                versionP1.add(osvVulnerability);
+                continue;
+        	} 
+        	
+        	if (!isEmpty(osvVulnerability.getSearchVersionP2())) {
+        		if (versionP2 == null) {
+					versionP2 = new ArrayList<>();
+				}
+                
+                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+                versionP2.add(osvVulnerability);
+                continue;
+        	}
+        	
+        	if (isEmpty(currentTargetVersion) && CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP3Yn())) {
 	            if (versionP3 == null) {
 					versionP3 = new ArrayList<>();
 				}
@@ -1725,6 +1716,53 @@ public class OsvDataService extends CoTopComponent {
 	            processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
 	            versionP3.add(osvVulnerability);
 	        }
+	        
+//        	// 1순위 검증: Exact Match
+//	        if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP1Yn())) {
+//	            if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
+//	                if (versionP1 == null) {
+//	                	versionP1 = new ArrayList<>();
+//	                }
+//	                
+//	                // 매칭이 확정된 순간에만 필드 복사 및 가공 수행 (메모리 절약)
+//	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+//	                versionP1.add(osvVulnerability);
+//	                continue;
+//	            }
+//	        }
+//
+//	        // 2순위 검증: Range Match
+//	        if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP2Yn())) {
+//	            boolean matched = isVersionInRange(currentTargetVersion, osvVulnerability.getSearchVersionP2());
+//	            if (!matched && aliases != null) {
+//	                for (String alias : aliases) {
+//	                    if (isVersionInRange(alias, osvVulnerability.getSearchVersionP2())) {
+//	                        matched = true;
+//	                        break;
+//	                    }
+//	                }
+//	            }
+//
+//	            if (matched) {
+//	                if (versionP2 == null) {
+//						versionP2 = new ArrayList<>();
+//					}
+//	                
+//	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+//	                versionP2.add(osvVulnerability);
+//	                continue;
+//	            }
+//	        }
+//
+//	        // 3순위 검증: Empty Target Version
+//	        if (isEmpty(currentTargetVersion) && CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP3Yn())) {
+//	            if (versionP3 == null) {
+//					versionP3 = new ArrayList<>();
+//				}
+//	            
+//	            processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+//	            versionP3.add(osvVulnerability);
+//	        }
 	    }
 
 	    // 우선순위에 따른 최종 결과 반환
