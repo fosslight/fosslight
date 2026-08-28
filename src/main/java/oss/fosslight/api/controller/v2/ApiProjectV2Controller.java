@@ -98,9 +98,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiResponses({
             @ApiResponse(code = 200, message = "조회 성공", response = Map.class,
                     examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"list\":[{\"prjId\":\"6304\",\"prjName\":\"FOSSLight TV Platform\",\"prjVersion\":\"2026.08\",\"updateDate\":\"2026-08-20\",\"createDate\":\"2026-08-01\",\"identificationStatus\":\"Confirm\",\"verificationStatus\":\"Confirm\",\"distributionStatus\":\"Distributed\",\"distributionType\":\"General\",\"networkService\":\"NO\",\"notice\":\"General\",\"noticePlatform\":\"\",\"priority\":\"High\",\"status\":\"Complete\",\"identificationCsvFileId\":\"10001\",\"publicYn\":\"Y\",\"secperson\":\"security01\",\"secmailYn\":\"Y\",\"editors\":\"user01,user02\",\"statusRequestYn\":\"N\",\"cvssScoreMax\":\"7.5\",\"vulnerabilityScore\":\"7.5\"}],\"totalCount\":1}"))),
-            @ApiResponse(code = 400, message = "잘못된 요청 - page 또는 countPerPage가 1 미만", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Input value=0. page must be larger than 1\"}"))),
-            @ApiResponse(code = 401, message = "인증 실패 - 사용자 또는 TOKEN 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+            @ApiResponse(code = 400, message = "잘못된 요청 - page 또는 countPerPage가 1 미만", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Input value=0. page must be larger than 1\"}"))),
+            @ApiResponse(code = 401, message = "인증 실패 - 사용자 또는 TOKEN 오류", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
@@ -158,12 +159,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 모델 목록 조회", notes = "prjIdList에 지정한 프로젝트별 모델 목록과 배포명을 조회합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"records\":1,\"contents\":[{\"modelList\":[{\"category\":\"Appliances > Air Conditioner\",\"modelName\":\"AIRCON\",\"releaseDate\":\"20260831\",\"distributeName\":\"FOSSLight 2026\"}],\"prjId\":\"6304\",\"distributionName\":null}]}"))),
-            @ApiResponse(code = 400, message = "잘못된 요청 - prjIdList 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'prjIdList' parameter is missing or misspelled\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청 - prjIdList 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"message\":\"'prjIdList' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
@@ -184,13 +186,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 모델 목록 수정", notes = "모델명|카테고리|출시일(yyyyMMdd) 형식의 목록으로 프로젝트 모델을 교체합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "수정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
-            @ApiResponse(code = 400, message = "잘못된 요청 - modelListToUpdate 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'modelListToUpdate' parameter is missing or misspelled\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청 - modelListToUpdate 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"message\":\"'modelListToUpdate' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 500, message = "모델 데이터 생성 실패 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 500, message = "모델 데이터 생성 실패 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
     public ResponseEntity<Map<String, Object>> updateModelList(
@@ -239,14 +242,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "파일로 프로젝트 모델 목록 수정", notes = "스프레드시트의 모델 목록으로 프로젝트 모델을 교체합니다. 파일명에 xls가 포함되어야 하며 최대 크기는 15MB입니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "수정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
-            @ApiResponse(code = 400, message = "잘못된 요청 - 파일 누락 또는 파싱 실패\n\n* `The parameter is invalid.`\n* `Error while parsing given file`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Error while parsing given file\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청 - 파일 누락 또는 파싱 실패\n\n* `The parameter is invalid.`\n* `Error while parsing given file`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Error while parsing given file\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 413, message = "파일 형식 오류 또는 15MB 이상", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 413, message = "파일 형식 오류 또는 15MB 이상", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
@@ -294,12 +298,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 생성", notes = "프로젝트 기본 정보와 Notice 설정을 등록하고 생성된 프로젝트 ID를 반환합니다. 코드 값은 /api/v2/codes에서 확인할 수 있습니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "생성 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"prjId\":\"123\"}"))),
-            @ApiResponse(code = 400, message = "필수값 누락, 코드값 오류 또는 중복 프로젝트\n\n* `Valid OS type code is required.`\n* `Valid distribution type code is invalid.`\n* `Valid distribution site type code is invalid.`\n* `Network server type parameter must be either Y or N.`\n* `Notice type code is invalid.`\n* `Must select 'noticeTypeEtc' code for Platform-generated type`\n* `noticeTypeEtc code is invalid.`\n* `Priority code is invalid`\n* `Project '{name} ({version})' already exists`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Valid OS type code is required.\"}"))),
+            @ApiResponse(code = 400, message = "필수값 누락, 코드값 오류 또는 중복 프로젝트\n\n* `Valid OS type code is required.`\n* `Valid distribution type code is invalid.`\n* `Valid distribution site type code is invalid.`\n* `Network server type parameter must be either Y or N.`\n* `Notice type code is invalid.`\n* `Must select 'noticeTypeEtc' code for Platform-generated type`\n* `noticeTypeEtc code is invalid.`\n* `Priority code is invalid`\n* `Project '{name} ({version})' already exists`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Valid OS type code is required.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
@@ -470,13 +475,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 SBOM 파일 다운로드", notes = "프로젝트 BOM을 스프레드시트 파일로 생성하여 다운로드합니다. saveFlag가 Y이면 생성 결과를 프로젝트에 저장합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "파일 다운로드 성공", response = FileSystemResource.class),
-            @ApiResponse(code = 400, message = "잘못된 요청 - 필수 format 누락 또는 허용값 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'format' parameter is missing or misspelled\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청 - 필수 format 누락 또는 허용값 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"message\":\"'format' parameter is missing or misspelled\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 500, message = "파일 생성 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 500, message = "파일 생성 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD})
     public ResponseEntity<FileSystemResource> getPrjBomDownload(
@@ -492,13 +498,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 BOM 파일 다운로드 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/file 사용을 권장합니다.", hidden = true)
     @ApiResponses({
             @ApiResponse(code = 200, message = "파일 다운로드 성공", response = FileSystemResource.class),
-            @ApiResponse(code = 400, message = "잘못된 요청", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The parameter is invalid.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {"/projects/{id}/bom/file"})
     public ResponseEntity<FileSystemResource> getPrjBomDownloadDeprecated(
@@ -547,13 +554,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 SBOM JSON 조회", notes = "프로젝트 BOM을 OSS 이름별 JSON으로 반환합니다. saveFlag가 Y이면 생성 결과를 프로젝트에 저장합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "조회 성공. 프로젝트가 조회되지 않으면 빈 객체 반환", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by the TV platform\",\"Vulnerability\":\"7.5\"}]}"))),
-            @ApiResponse(code = 400, message = "잘못된 요청 - saveFlag 허용값 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"getPrjBomAsJson.saveFlag: Input value='X'. 'saveFlag' field value should be from list of [Y, N]\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청 - saveFlag 허용값 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"getPrjBomAsJson.saveFlag: Input value='X'. 'saveFlag' field value should be from list of [Y, N]\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
     public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
@@ -567,13 +575,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 BOM JSON 조회 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/json-data 사용을 권장합니다.", hidden = true)
     @ApiResponses({
             @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by the TV platform\",\"Vulnerability\":\"7.5\"}]}"))),
-            @ApiResponse(code = 400, message = "잘못된 요청", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The parameter is invalid.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {"/projects/{id}/bom/json-data"})
     public ResponseEntity<Map<String, Object>> getPrjBomAsJsonDeprecated(
@@ -616,13 +625,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 SBOM 비교", notes = "두 프로젝트의 BOM을 비교하여 추가·삭제·변경 항목을 contents에 반환합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "비교 성공. 같은 프로젝트이면 status가 same", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"add\":[{\"name\":\"new-oss\",\"version\":\"2.0.0\",\"license\":[\"MIT\"]}],\"delete\":[{\"name\":\"old-oss\",\"version\":\"1.0.0\",\"license\":[\"BSD-3-Clause\"]}],\"change\":[{\"name\":\"sample-oss\",\"prev\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"]}],\"now\":[{\"version\":\"1.1.0\",\"license\":[\"Apache-2.0\"]}]}]}}"))),
-            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
+            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The parameter is invalid.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
                     examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_COMPARE})
     public ResponseEntity<Map<String, Object>> getPrjBomCompare(
@@ -635,12 +644,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
 //    @ApiOperation(value = "프로젝트 BOM 비교 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/compare-with/{compareId} 사용을 권장합니다.", hidden = true)
 //    @ApiResponses({
 //            @ApiResponse(code = 200, message = "비교 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"add\":[{\"name\":\"new-oss\",\"version\":\"2.0.0\",\"license\":[\"MIT\"]}],\"delete\":[{\"name\":\"old-oss\",\"version\":\"1.0.0\",\"license\":[\"BSD-3-Clause\"]}],\"change\":[{\"name\":\"sample-oss\",\"prev\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"]}],\"now\":[{\"version\":\"1.1.0\",\"license\":[\"Apache-2.0\"]}]}]}}"))),
-//            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The parameter is invalid.\"}"))),
+//            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The parameter is invalid.\"}"))),
 //            @ApiResponse(code = 401, message = "인증 실패\n\n" +
 //              "**에러 코드 (errorCode):**\n\n" +
 //              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-//              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-//            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+//              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+//            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
 //    })
 //    @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
 //    public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
@@ -710,14 +719,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Identification 탭 초기화", notes = "지정한 dep, src, bin 또는 전체(all) OSS 컴포넌트 데이터를 삭제합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "초기화 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
-            @ApiResponse(code = 400, message = "잘못된 tab_name", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"identificationReset.tabName: Input value='invalid'. 'tabName' field value should be from list of [dep, src, bin, all]\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 tab_name", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"identificationReset.tabName: Input value='invalid'. 'tabName' field value should be from list of [dep, src, bin, all]\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
                     examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_IDENTIFICATION_RESET})
     public ResponseEntity<Map<String, Object>> identificationReset(
@@ -771,15 +780,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Identification OSS Report 업로드", notes = "지정한 dep, src 또는 bin 탭에 OSS Report를 업로드합니다. resetFlag로 기존 데이터 교체 여부를 정하고, sbomSave가 Y이면 SBOM도 갱신합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "업로드 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
-            @ApiResponse(code = 400, message = "파일·탭·데이터 오류\n\n* `ossReport is required.`\n* 지원하지 않는 파일 확장자 메시지\n* `The tab you are trying to upload is not active. Check Project Distribution Type`\n* `There is no data to load.`\n* `There is an error in the data written in the file.`\n* 파일 분석 중 생성된 상세 오류 메시지", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"There is no data to load.\"}"))),
+            @ApiResponse(code = 400, message = "파일·탭·데이터 오류\n\n* `ossReport is required.`\n* 지원하지 않는 파일 확장자 메시지\n* `The tab you are trying to upload is not active. Check Project Distribution Type`\n* `There is no data to load.`\n* `There is an error in the data written in the file.`\n* 파일 분석 중 생성된 상세 오류 메시지", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"There is no data to load.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
                     examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
-            @ApiResponse(code = 413, message = "파일 크기 초과 (15MB 이상)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))),
-            @ApiResponse(code = 500, message = "파일 처리 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
+            @ApiResponse(code = 413, message = "파일 크기 초과 (15MB 이상)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))),
+            @ApiResponse(code = 500, message = "파일 처리 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT})
     public ResponseEntity<Map<String, Object>> ossReportAll(
@@ -1003,13 +1012,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
                             "* `'{sheet}' sheet not found in the uploaded file.` - 시트를 찾을 수 없음\n" +
                             "* 시트 읽기 중 생성된 상세 오류 메시지\n",
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"msg\":\"ossReport is required.\"}"))
+                            value = "{\"message\":\"ossReport is required.\"}"))
             ),
             @ApiResponse(
                     code = 413,
                     message = "파일 크기 초과",
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"msg\":\"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))
+                            value = "{\"message\":\"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -1017,17 +1026,17 @@ public class ApiProjectV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "프로젝트 수정 권한 없음",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류 또는 파일 ID 생성 실패",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}"))
             )
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_UPLOAD_OSS_REPORT}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1436,13 +1445,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Packaging 파일 업로드", notes = "프로젝트 Verification에 Packaging 파일을 추가합니다. 프로젝트당 최대 3개이며 verifyFlag가 Y이면 업로드 후 검증도 실행합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "업로드 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
-            @ApiResponse(code = 400, message = "파일 누락 또는 업로드 가능 개수 초과\n\n* Multipart 파일 파라미터 누락 메시지\n* `Up to 3 packaging files can be uploaded.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Up to 3 packaging files can be uploaded.\"}"))),
+            @ApiResponse(code = 400, message = "파일 누락 또는 업로드 가능 개수 초과\n\n* Multipart 파일 파라미터 누락 메시지\n* `Up to 3 packaging files can be uploaded.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Up to 3 packaging files can be uploaded.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
-            @ApiResponse(code = 500, message = "업로드·검증 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
+            @ApiResponse(code = 500, message = "업로드·검증 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PACKAGE_UPLOAD})
     public ResponseEntity<Map<String, Object>> ossUploadPackage(
@@ -1585,14 +1595,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "프로젝트 Editor 추가", notes = "프로젝트에 수정 권한을 가진 사용자를 한 명 이상 추가합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "추가 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
-            @ApiResponse(code = 400, message = "Editor ID 목록 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Editor ID list is required.\"}"))),
+            @ApiResponse(code = 400, message = "Editor ID 목록 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Editor ID list is required.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
-            @ApiResponse(code = 404, message = "추가할 사용자 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"User not found in FOSSLight Hub. User ID: user01\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
+            @ApiResponse(code = 404, message = "추가할 사용자 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"User not found in FOSSLight Hub. User ID: user01\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_EDITOR})
     public ResponseEntity<Map<String, Object>> addPrjEditor(
@@ -1630,15 +1641,16 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "Security 담당자 지정", notes = "프로젝트의 Security responsible person을 사용자 ID로 지정합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "지정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Security responsible person added successfully\",\"userId\":\"user01\",\"userName\":\"홍길동\"}"))),
-            @ApiResponse(code = 400, message = "User ID 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"User ID is required.\"}"))),
+            @ApiResponse(code = 200, message = "지정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Security responsible person added successfully\",\"userId\":\"user01\",\"userName\":\"홍길동\"}"))),
+            @ApiResponse(code = 400, message = "User ID 누락", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"User ID is required.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
-            @ApiResponse(code = 404, message = "사용자 또는 프로젝트 없음\n\n* `User not found in FOSSLight Hub. User ID: {id}`\n* `Project not found. Project ID: {id}`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"User not found in FOSSLight Hub. User ID: user01\"}"))),
-            @ApiResponse(code = 500, message = "담당자 지정 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Failed to add security responsible person: database error\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
+            @ApiResponse(code = 404, message = "사용자 또는 프로젝트 없음\n\n* `User not found in FOSSLight Hub. User ID: {id}`\n* `Project not found. Project ID: {id}`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"User not found in FOSSLight Hub. User ID: user01\"}"))),
+            @ApiResponse(code = 500, message = "담당자 지정 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Failed to add security responsible person: database error\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_SECURITY_PERSON})
     public ResponseEntity<Map<String, Object>> addSecurityPerson(
@@ -1721,15 +1733,16 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "Security Mail 설정", notes = "프로젝트 Security Mail 사용 여부를 설정합니다. N인 경우 secMailDesc가 필수입니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "설정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Security enable setting updated successfully\",\"secMailYn\":\"Y\",\"secMailDesc\":\"Enable\"}"))),
-            @ApiResponse(code = 400, message = "Security Mail 파라미터 오류\n\n* `Security Enable (secMailYn) is required.`\n* `Security Enable (secMailYn) must be Y or N.`\n* `Security Description (secMailDesc) is required when Security Enable is N.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Security Enable (secMailYn) must be Y or N.\"}"))),
+            @ApiResponse(code = 200, message = "설정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Security enable setting updated successfully\",\"secMailYn\":\"Y\",\"secMailDesc\":\"Enable\"}"))),
+            @ApiResponse(code = 400, message = "Security Mail 파라미터 오류\n\n* `Security Enable (secMailYn) is required.`\n* `Security Enable (secMailYn) must be Y or N.`\n* `Security Description (secMailDesc) is required when Security Enable is N.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Security Enable (secMailYn) must be Y or N.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
-            @ApiResponse(code = 404, message = "프로젝트 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Project not found. Project ID: 123\"}"))),
-            @ApiResponse(code = 500, message = "설정 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Failed to set security enable: database error\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
+            @ApiResponse(code = 404, message = "프로젝트 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Project not found. Project ID: 123\"}"))),
+            @ApiResponse(code = 500, message = "설정 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Failed to set security enable: database error\"}")))
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SET_SECURITY_MAIL})
     public ResponseEntity<Map<String, Object>> setSecurityMail(
@@ -1824,10 +1837,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 404, message = "발행된 Notice 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Notice has not been published for given project.\"}"))),
-            @ApiResponse(code = 500, message = "파일 처리 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 404, message = "발행된 Notice 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Notice has not been published for given project.\"}"))),
+            @ApiResponse(code = 500, message = "파일 처리 또는 서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
     public ResponseEntity getProjectNotice(
@@ -1865,13 +1879,14 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "다른 프로젝트 OSS 불러오기", notes = "프로젝트 ID 또는 이름으로 원본 프로젝트를 찾아 대상 프로젝트의 dep, src 또는 bin 탭으로 OSS 컴포넌트를 불러옵니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "불러오기 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true}"))),
-            @ApiResponse(code = 400, message = "ID·검색조건·탭 오류 또는 불러올 데이터 없음\n\n* `targetPrjId is not in the correct format`\n* `the prjIdToLoad is missing`\n* `prjIdToLoad is not in the correct format`\n* `Please enter other prjIdToLoad that is different from targetPrjId`\n* `the prjNameToLoad is missing`\n* 서비스에서 반환한 상세 오류 메시지", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"the prjIdToLoad is missing\"}"))),
+            @ApiResponse(code = 400, message = "ID·검색조건·탭 오류 또는 불러올 데이터 없음\n\n* `targetPrjId is not in the correct format`\n* `the prjIdToLoad is missing`\n* `prjIdToLoad is not in the correct format`\n* `Please enter other prjIdToLoad that is different from targetPrjId`\n* `the prjNameToLoad is missing`\n* 서비스에서 반환한 상세 오류 메시지", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"the prjIdToLoad is missing\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
-            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @PostMapping(value = {Url.APIV2.FOSSLIGHT_API_OSS_LOAD})
     public ResponseEntity<Map<String, Object>> ossLoad(
@@ -1963,14 +1978,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "프로젝트 삭제", notes = "프로젝트 생성자, Editor 또는 관리자가 프로젝트를 삭제합니다. 일반 사용자는 배포 중이거나 배포 완료된 프로젝트를 삭제할 수 없습니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "삭제 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"msg\":\"123 is deleted\"}"))),
-            @ApiResponse(code = 400, message = "삭제 권한 없음 또는 배포 프로젝트\n\n* `Cannot delete project.`\n* `Cannot delete distributed project.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Cannot delete distributed project.\"}"))),
+            @ApiResponse(code = 200, message = "삭제 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"success\":true,\"message\":\"123 is deleted\"}"))),
+            @ApiResponse(code = 400, message = "삭제 권한 없음 또는 배포 프로젝트\n\n* `Cannot delete project.`\n* `Cannot delete distributed project.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Cannot delete distributed project.\"}"))),
             @ApiResponse(code = 401, message = "인증 실패\n\n" +
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))),
-            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"The user does not have edit permissions for Project 123\"}"))),
-            @ApiResponse(code = 500, message = "프로젝트 또는 참조 파일 삭제 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Unknown error.\"}")))
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", 
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 500, message = "프로젝트 또는 참조 파일 삭제 실패", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
     })
     @DeleteMapping(value = {Url.APIV2.FOSSLIGHT_API_PROJECT_BY_ID})
     public ResponseEntity<Map<String, Object>> deleteProject(

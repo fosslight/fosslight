@@ -50,7 +50,7 @@ public class ApiBatV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - fileName, tlsh, checksum 중 하나 이상 필수\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The parameter is invalid.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -58,12 +58,12 @@ public class ApiBatV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_BINARY_SEARCH})

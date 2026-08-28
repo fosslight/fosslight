@@ -92,7 +92,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - 생성 개수 초과 / 파라미터 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The number of projects and self-checks that can be created has been exceeded. (Up to 3 per day)\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The number of projects and self-checks that can be created has been exceeded. (Up to 3 per day)\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -100,12 +100,12 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_CREATE})
@@ -152,22 +152,22 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - ossReport 누락",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The parameter is invalid.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 413,
                     message = "파일 크기 초과 (최대 15MB)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"File size exceeded. (Max size: 15MB for oss report, 4GB for packaging file)\"}"))
             ),
             @ApiResponse(
                     code = 422,
                     message = "데이터 검증 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"api.dataValidationError.msg\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"api.dataValidationError.msg\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -175,12 +175,12 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
@@ -375,7 +375,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - format 값 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"selfCheckBomDownload.format: Input value='PDF'. 'format' field value should be from list of [Spreadsheet]\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"selfCheckBomDownload.format: Input value='PDF'. 'format' field value should be from list of [Spreadsheet]\"}"))
             ),
             @ApiResponse(
                     code = 403,
@@ -384,7 +384,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 404,
                     message = "파일 없음\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"File not found.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"File not found.\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -392,12 +392,12 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_DOWNLOAD})
@@ -441,7 +441,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - emailList 누락 / 중복 watcher\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The parameter is invalid.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -449,22 +449,22 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 404,
                     message = "사용자 없음 - LDAP 사용자 없음\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"User does not exist.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"User does not exist.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_EDITOR})
@@ -529,17 +529,17 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_GET})

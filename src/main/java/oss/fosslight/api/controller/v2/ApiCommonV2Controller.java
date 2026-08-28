@@ -55,7 +55,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "필수 from 또는 to 누락",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"msg\":\"'from' parameter is missing or misspelled\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"message\":\"'from' parameter is missing or misspelled\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -63,17 +63,17 @@ public class ApiCommonV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음 - 관리자 아님\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_MERGE_DIVISION})
@@ -110,7 +110,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - cdDtlNm 누락\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The parameter is invalid.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -118,17 +118,17 @@ public class ApiCommonV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음 - 관리자 아님\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
@@ -165,7 +165,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - cdDtlNo 누락 또는 cdDtlNm/cdDtlExp 둘 다 누락\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"At least one of cdDtlNm or cdDtlExp is required.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"At least one of cdDtlNm or cdDtlExp is required.\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -173,22 +173,22 @@ public class ApiCommonV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음 - 관리자 아님\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 404,
                     message = "리소스 없음 - cdDtlNo not found\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"The resource does not exist or User does not have permissions for the resource (resource example: project)\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The resource does not exist or User does not have permissions for the resource (resource example: project)\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_UPDATE_DIVISION})
@@ -237,12 +237,12 @@ public class ApiCommonV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_DIVISION})
@@ -277,17 +277,17 @@ public class ApiCommonV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음 - 관리자 아님\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USERS})
@@ -331,7 +331,7 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiResponse(
                     code = 400,
                     message = "잘못된 요청 - 유효하지 않은 division 코드\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"Invalid division: 999\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Invalid division: 999\"}"))
             ),
             @ApiResponse(
                     code = 401,
@@ -339,22 +339,22 @@ public class ApiCommonV2Controller extends CoTopComponent {
               "**에러 코드 (errorCode):**\n\n" +
               "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
               "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"msg\":\"There is an error in the TOKEN value.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))
             ),
             @ApiResponse(
                     code = 403,
                     message = "권한 없음 - 관리자 아님\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"You do not have permission.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"You do not have permission.\"}"))
             ),
             @ApiResponse(
                     code = 404,
                     message = "사용자 없음\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\":\"User id not found: user01\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\":\"User id not found: user01\"}"))
             ),
             @ApiResponse(
                     code = 500,
                     message = "서버 내부 오류\n\n",
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"msg\": \"Unknown error.\"}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"Unknown error.\"}"))
             )
     })
     @PutMapping(value = {APIV2.FOSSLIGHT_API_COMMON_USER_DIVISION})
