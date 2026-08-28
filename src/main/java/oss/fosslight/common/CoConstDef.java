@@ -269,6 +269,9 @@ public class CoConstDef {
 	public static final String SESSION_KEY_PREFIX_DEFAULT_SEARCHVALUE = "PREFIX_DEFAULT_SEARCHVALUE_";
 	public static final String SESSION_KEY_ANALYSIS_RESULT_DATA = "ANALYSIS_RESULT_DATA";
 
+	public static final String ERR_TOKEN_EXPIRED = "TOKEN_EXPIRED";
+	public static final String ERR_TOKEN_INVALID = "TOKEN_INVALID";
+
 	/**
 	 * Auto Fill OSS 기능에서 사용하는 Dependency 타입과 url 패턴 정의
 	 */

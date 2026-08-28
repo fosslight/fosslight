@@ -30,6 +30,14 @@ public class RestResponseService {
         return new ResponseEntity<>(resultMap, status);
     }
 
+    public ResponseEntity<Map<String, Object>> errorResponse(HttpStatus status, String errorCode, String str) {
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("errorCode", errorCode); // 에러 코드 추가
+        resultMap.put("msg", str);
+        resultMap.put("message", str);
+        return new ResponseEntity<>(resultMap, status);
+    }
+
     public <T> ResponseEntity<T> successResponse(T body) {
         return ResponseEntity.ok(body);
     }

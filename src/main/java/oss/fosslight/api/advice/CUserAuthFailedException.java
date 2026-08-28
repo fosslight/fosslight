@@ -6,18 +6,23 @@
 package oss.fosslight.api.advice;
 
 public class CUserAuthFailedException extends RuntimeException {
-	private final String message;
+    private String errorCode;
 	private static final long serialVersionUID = 1L;
     
     public CUserAuthFailedException(String msg, Throwable t) {
-        this.message = msg;
+        super(msg, t);
+    }
+
+    public CUserAuthFailedException(String errorCode, String msg) {
+        super(msg);
+        this.errorCode = errorCode;
     }
     
     public CUserAuthFailedException(String msg) {
-        this.message = msg;
+        super(msg);
     }
-    
-    public String getMessage() {
-    	return message;
+
+    public String getErrorCode() {
+        return errorCode;
     }
 }
