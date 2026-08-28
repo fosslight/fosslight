@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.annotation.ApiCommonResponses;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.service.ApiCodeService;
@@ -22,8 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"06. Code v2"})
+@Api(tags = {"06. Code v2"}, description = " ")
 @RequiredArgsConstructor
+@ApiCommonResponses
 @RestController()
 @RequestMapping(value = "/api/v2")
 public class ApiCodeV2Controller extends CoTopComponent {
@@ -36,7 +38,25 @@ public class ApiCodeV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-    @ApiOperation(value = "Search Code Info", notes = "Search Code Information")
+    @ApiOperation(value = "공통 코드 조회", notes = "codeType에 해당하는 활성 상세 코드를 조회합니다. detailValue를 지정하면 코드명에 포함된 값만 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"content\":[{\"cdDtlNo\":\"101\",\"cdDtlNm\":\"LGE\"}]}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - codeType 누락\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"message\":\"'codeType' parameter is missing or misspelled\"}"))
+            ),
+             @ApiResponse(
+                    code = 404,
+                    message = "조회 결과 없음 - 응답 body 없음"
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_CODE_SEARCH})
     public ResponseEntity<Map<String, Object>> getVulnerabilityData(
             @ApiParam(hidden=true) @RequestHeader String authorization,

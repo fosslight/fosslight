@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.annotation.ApiCommonResponses;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
@@ -25,8 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"07. Binary"})
+@Api(tags = {"07. Binary"}, description = " ")
 @RequiredArgsConstructor
+@ApiCommonResponses
 @RestController
 @RequestMapping(value = "/api/v2")
 @Profile(value = {"stage", "prod"})
@@ -38,7 +40,21 @@ public class ApiBatV2Controller extends CoTopComponent {
 
     private final ApiBatService apibatService;
 
-    @ApiOperation(value = "Search Binary List", notes = "Search Binary Information")
+    @ApiOperation(value = "Binary 정보 조회", notes = "fileName, tlsh, checksum 중 하나 이상을 사용하여 Binary 매칭 정보를 조회합니다. platformName, platformVersion, sourcePath는 추가 필터입니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    code = 200,
+                    message = "성공",
+                    response = Map.class,
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json",
+                            value = "{\"content\":[{\"binaryFileName\":\"bash\",\"path\":\"/bin/bash\",\"ossName\":\"bash\",\"ossVersion\":\"5.2.21\",\"license\":\"GPL-3.0-or-later\",\"projectName\":\"sample-platform\",\"checksum\":\"a1b2c3d4e5f6\",\"tlsh\":\"T1A2B3C4D5E6F\",\"updateDate\":\"2026-08-20\",\"downloadlocation\":\"https://ftp.gnu.org/gnu/bash/bash-5.2.21.tar.gz\"}]}"))
+            ),
+            @ApiResponse(
+                    code = 400,
+                    message = "잘못된 요청 - fileName, tlsh, checksum 중 하나 이상 필수\n\n",
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"message\": \"The parameter is invalid.\"}"))
+            )
+    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_BINARY_SEARCH})
     public ResponseEntity<Map<String, Object>> getBinaryInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,

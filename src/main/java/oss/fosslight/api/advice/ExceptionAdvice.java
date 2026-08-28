@@ -92,9 +92,10 @@ public class ExceptionAdvice {
     }
     
     @ExceptionHandler(CUserAuthFailedException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     protected CommonResult userAuthFailed(HttpServletRequest request, CUserAuthFailedException e) {
-        return responseService.getFailResult(CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE, e.getMessage());
+        return responseService.getFailResult(CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE,
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE));
     }
     
     private String getMessage(String code) {

@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -107,6 +108,20 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
                 , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
     }
 
+    @ExceptionHandler(CUserAuthFailedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    protected ResponseEntity<Map<String, Object>> userAuthFailed(HttpServletRequest request, CUserAuthFailedException e) {
+        // Do not expose token state (missing/expired/invalid) to the client.
+        String errorCode = (e.getErrorCode() != null) ? e.getErrorCode() : CoConstDef.ERR_TOKEN_INVALID;
+        String errorMsg = (e.getMessage() != null) ? e.getMessage() : CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE);
+
+        log.error("Authorization Error: errorCode = {} / errorMsg = {}", errorCode, errorMsg);
+
+        return responseService.errorResponse(HttpStatus.UNAUTHORIZED,
+                errorCode,
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_SIGNIN_FAILED_MESSAGE));
+    }
+
     @ExceptionHandler(CSigninFailedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     protected ResponseEntity<Map<String, Object>> emailSignInFailed(HttpServletRequest request, CSigninFailedException e) {
@@ -122,6 +137,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Bad Request");
         errorResponse.put("msg", error);
+        errorResponse.put("message", error);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -134,6 +150,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Bad Request");
         errorResponse.put("msg", error);
+        errorResponse.put("message", error);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -141,11 +158,30 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         String error = ex.getMessage();
-
         Map<String, Object> errorResponse = new HashMap<>();
+
+        if (ex instanceof MissingRequestHeaderException) {
+            MissingRequestHeaderException missingHeaderEx = (MissingRequestHeaderException) ex;
+
+            // 2. 누락된 헤더의 이름이 'Authorization'인지 확인 (대소문자 무시)
+            if ("Authorization".equalsIgnoreCase(missingHeaderEx.getHeaderName())) {
+                // 로그 기록 (선택 사항)
+                log.error("Missing Authorization Header: {}", ex.getMessage());
+
+                // 3. HTTP 401 (Unauthorized) 에러 반환
+                errorResponse.put("errorCode", CoConstDef.ERR_TOKEN_INVALID);
+                errorResponse.put("msg", "Missing Authorization header.");
+                errorResponse.put("message", "Missing Authorization header.");
+                return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+            }
+        }
+
+        // 4. 그 외의 파라미터나 다른 헤더 누락인 경우 기존처럼 HTTP 400 (Bad Request) 유지
         errorResponse.put("error", "Bad Request");
         errorResponse.put("msg", error);
+        errorResponse.put("message", error);
 
+        log.error("ServletRequestBindingException: {}", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
