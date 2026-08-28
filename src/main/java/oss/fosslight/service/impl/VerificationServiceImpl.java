@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -434,6 +436,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				basePath = CommonFunction.emptyCheckProperty("upload.path", "/upload") + "/" + baseFile.getLogiNm();
 			} else {
 				baseFile = fileMapper.selectFileInfoById(project.getSrcAndroidNoticeXmlId());
+				if (baseFile != null && baseFile.getLogiNm().endsWith(".zip")) {
+					if (!isEmpty(project.getSrcAndroidNoticeFileId())) {
+						baseFile = fileMapper.selectFileInfoById(project.getSrcAndroidNoticeFileId());
+					}
+				}
 				basePath = baseFile.getLogiPath() + "/" + baseFile.getLogiNm();
 			}
 			
@@ -452,7 +459,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					
 					if (returnSuccess > 0){
 						log.debug(filePath + "/" + _fName + " is delete success.");
-					}else{
+					} else {
 						log.debug(filePath + "/" + _fName + " is delete failed.");
 					}
 				}
@@ -460,20 +467,66 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "html");
 			
-			if (oss.fosslight.util.FileUtil.copyFile(basePath, filePath, fileName)) {
-				// 파일 등록
-				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
-				
-				// project 정보 업데이트
-				Project projectParam = new Project();
-				projectParam.setPrjId(project.getPrjId());
-				projectParam.setNoticeFileId(FileSeq);
-				projectParam.setUseCustomNoticeYn(StringUtil.nvl(project.getUseCustomNoticeYn(),CoConstDef.FLAG_NO));
-				
-				verificationMapper.updateNoticeFileInfo(projectParam);
-			} else {
-				procResult = false;
+			Path sourceFile = Paths.get(basePath);
+	        String contents = new String(Files.readAllBytes(sourceFile), java.nio.charset.StandardCharsets.UTF_8);
+			
+	        if (!isEmpty(contents)) {
+	        	String metaTag = "<meta charset=\"UTF-8\">";
+
+	            Pattern headPattern = Pattern.compile("<head\\b[^>]*>", Pattern.CASE_INSENSITIVE);
+	            Matcher headMatcher = headPattern.matcher(contents);
+
+	            if (headMatcher.find()) {
+	                int headStart = headMatcher.end();
+	                Pattern headEndPattern = Pattern.compile("</head\\s*>", Pattern.CASE_INSENSITIVE);
+	                Matcher headEndMatcher = headEndPattern.matcher(contents);
+	                headEndMatcher.region(headStart, contents.length());
+
+	                int headEnd = contents.length();
+
+	                if (headEndMatcher.find()) {
+	                    headEnd = headEndMatcher.start();
+	                }
+
+	                String headContent = contents.substring(headStart, headEnd);
+	                Pattern charsetPattern = Pattern.compile("<meta\\b[^>]*charset\\s*=", Pattern.CASE_INSENSITIVE);
+
+	                if (!charsetPattern.matcher(headContent).find()) {
+	                	contents = contents.substring(0, headStart)
+	                            + "\n"
+	                            + metaTag
+	                            + contents.substring(headStart);
+	                }
+	            } else {
+	                Pattern htmlPattern = Pattern.compile("<html\\b[^>]*>", Pattern.CASE_INSENSITIVE);
+	                Matcher htmlMatcher = htmlPattern.matcher(contents);
+	                if (htmlMatcher.find()) {
+	                	contents = contents.substring(0, htmlMatcher.end())
+	                            + "\n<head>\n"
+	                            + metaTag
+	                            + "\n</head>"
+	                            + contents.substring(htmlMatcher.end());
+	                } else {
+	                	contents = metaTag + "\n" + contents;
+	                }
+				}
 			}
+	        
+	        if (Files.notExists(rootPath)) {
+	            Files.createDirectories(rootPath);
+	        }
+	        
+	        Path targetFile = rootPath.resolve(fileName);
+	        Files.write(targetFile, contents.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+	        
+	        String FileSeq = fileService.registFileWithFileName(filePath, fileName);
+	        
+	        Project projectParam = new Project();
+	        projectParam.setPrjId(project.getPrjId());
+	        projectParam.setNoticeFileId(FileSeq);
+	        projectParam.setUseCustomNoticeYn(avoidNull(project.getUseCustomNoticeYn(), CoConstDef.FLAG_NO));
+
+	        verificationMapper.updateNoticeFileInfo(projectParam);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			procResult = false;
@@ -644,18 +697,47 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				&& !isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
 			T2File androidFile = fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId());
 			String htmlContent = CommonFunction.getStringFromFile(androidFile.getLogiPath() + "/" + androidFile.getLogiNm(), true);
-	        if (htmlContent != null) {
-	        	boolean hasCharsetInHead = htmlContent.matches("(?is).*<head>.*charset=.*</head>.*");
-	            if (!hasCharsetInHead) {
-	                if (htmlContent.contains("<head>")) {
-	                    htmlContent = htmlContent.replace("<head>", "<head>\n<meta charset=\"UTF-8\">");
-	                } else if (htmlContent.contains("<HEAD>")) {
-	                    htmlContent = htmlContent.replace("<HEAD>", "<HEAD>\n<meta charset=\"UTF-8\">");
-	                } else {
-	                    htmlContent = "<meta charset=\"UTF-8\">\n" + htmlContent;
+			if (!isEmpty(htmlContent)) {
+				String metaTag = "<meta charset=\"UTF-8\">";
+
+	            Pattern headPattern = Pattern.compile("<head\\b[^>]*>", Pattern.CASE_INSENSITIVE);
+	            Matcher headMatcher = headPattern.matcher(htmlContent);
+
+	            if (headMatcher.find()) {
+	                int headStart = headMatcher.end();
+	                Pattern headEndPattern = Pattern.compile("</head\\s*>", Pattern.CASE_INSENSITIVE);
+	                Matcher headEndMatcher = headEndPattern.matcher(htmlContent);
+	                headEndMatcher.region(headStart, htmlContent.length());
+
+	                int headEnd = htmlContent.length();
+
+	                if (headEndMatcher.find()) {
+	                    headEnd = headEndMatcher.start();
 	                }
-	            }
-	        }
+
+	                String headContent = htmlContent.substring(headStart, headEnd);
+	                Pattern charsetPattern = Pattern.compile("<meta\\b[^>]*charset\\s*=", Pattern.CASE_INSENSITIVE);
+
+	                if (!charsetPattern.matcher(headContent).find()) {
+	                    htmlContent = htmlContent.substring(0, headStart)
+	                            + "\n"
+	                            + metaTag
+	                            + htmlContent.substring(headStart);
+	                }
+	            } else {
+	                Pattern htmlPattern = Pattern.compile("<html\\b[^>]*>", Pattern.CASE_INSENSITIVE);
+	                Matcher htmlMatcher = htmlPattern.matcher(htmlContent);
+	                if (htmlMatcher.find()) {
+	                    htmlContent = htmlContent.substring(0, htmlMatcher.end())
+	                            + "\n<head>\n"
+	                            + metaTag
+	                            + "\n</head>"
+	                            + htmlContent.substring(htmlMatcher.end());
+	                } else {
+	                    htmlContent = metaTag + "\n" + htmlContent;
+	                }
+				}
+			}
 	        return htmlContent;
 		}
 		
