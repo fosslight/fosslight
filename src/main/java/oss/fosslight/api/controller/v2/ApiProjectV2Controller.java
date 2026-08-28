@@ -641,23 +641,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
     }
 
-//    @ApiOperation(value = "프로젝트 BOM 비교 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/compare-with/{compareId} 사용을 권장합니다.", hidden = true)
-//    @ApiResponses({
-//            @ApiResponse(code = 200, message = "비교 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"add\":[{\"name\":\"new-oss\",\"version\":\"2.0.0\",\"license\":[\"MIT\"]}],\"delete\":[{\"name\":\"old-oss\",\"version\":\"1.0.0\",\"license\":[\"BSD-3-Clause\"]}],\"change\":[{\"name\":\"sample-oss\",\"prev\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"]}],\"now\":[{\"version\":\"1.1.0\",\"license\":[\"Apache-2.0\"]}]}]}}"))),
-//            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The parameter is invalid.\"}"))),
-//            @ApiResponse(code = 401, message = "인증 실패\n\n" +
-//              "**에러 코드 (errorCode):**\n\n" +
-//              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
-//              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
-//            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
-//    })
-//    @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
-//    public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
-//            @ApiParam(hidden = true) @RequestHeader String authorization,
-//            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
-//            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
-//        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
-//    }
+    @ApiOperation(value = "프로젝트 BOM 비교 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/compare-with/{compareId} 사용을 권장합니다.", hidden = true)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "비교 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"contents\":{\"add\":[{\"name\":\"new-oss\",\"version\":\"2.0.0\",\"license\":[\"MIT\"]}],\"delete\":[{\"name\":\"old-oss\",\"version\":\"1.0.0\",\"license\":[\"BSD-3-Clause\"]}],\"change\":[{\"name\":\"sample-oss\",\"prev\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"]}],\"now\":[{\"version\":\"1.1.0\",\"license\":[\"Apache-2.0\"]}]}]}}"))),
+            @ApiResponse(code = 400, message = "비교할 BOM 데이터 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The parameter is invalid.\"}"))),
+            @ApiResponse(code = 401, message = "인증 실패\n\n" +
+              "**에러 코드 (errorCode):**\n\n" +
+              "* `TOKEN_INVALID` - 유효하지 않거나 변조된 토큰 (다시 로그인 필요)\n" +
+              "* `TOKEN_EXPIRED` - 토큰 만료 (Refresh Token으로 갱신 필요)", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"errorCode\": \"TOKEN_INVALID\",\"message\":\"There is an error in the TOKEN value.\"}"))),
+            @ApiResponse(code = 500, message = "서버 내부 오류", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Unknown error.\"}")))
+    })
+    @GetMapping(value = {"/projects/{id}/bom/compare-with/{compareId}"})
+    public ResponseEntity<Map<String, Object>> getPrjBomCompareDeprecated(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
+            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
+        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+    }
 
     private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(String authorization, String beforePrjId, String afterPrjId) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
