@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -157,12 +158,30 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         String error = ex.getMessage();
-
         Map<String, Object> errorResponse = new HashMap<>();
+
+        if (ex instanceof MissingRequestHeaderException) {
+            MissingRequestHeaderException missingHeaderEx = (MissingRequestHeaderException) ex;
+
+            // 2. 누락된 헤더의 이름이 'Authorization'인지 확인 (대소문자 무시)
+            if ("Authorization".equalsIgnoreCase(missingHeaderEx.getHeaderName())) {
+                // 로그 기록 (선택 사항)
+                log.error("Missing Authorization Header: {}", ex.getMessage());
+
+                // 3. HTTP 401 (Unauthorized) 에러 반환
+                errorResponse.put("errorCode", CoConstDef.ERR_TOKEN_INVALID);
+                errorResponse.put("msg", "Missing Authorization header.");
+                errorResponse.put("message", "Missing Authorization header.");
+                return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+            }
+        }
+
+        // 4. 그 외의 파라미터나 다른 헤더 누락인 경우 기존처럼 HTTP 400 (Bad Request) 유지
         errorResponse.put("error", "Bad Request");
         errorResponse.put("msg", error);
         errorResponse.put("message", error);
 
+        log.error("ServletRequestBindingException: {}", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
