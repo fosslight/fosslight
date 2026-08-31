@@ -1551,49 +1551,73 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				expParam.addPrjIdList(p.getPrjId());
 			}
 			
-			Map<String, Map<String, String>> projectExpandInfo = projectService.getProjectDownloadExpandInfo(expParam);
-			
 			List<String[]> rows = new ArrayList<>();
-			
-			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
-			Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 			
 			for (int i = 0; i < projectList.size(); i++){
 				Project param = projectList.get(i);
-				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
-				String nvdMaxScore = "";
-				String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(param.getPrjId(), null);
-				if (conversionCveInfo != null) {
-					String[] conversionCveData = conversionCveInfo.split("\\@");
-					nvdMaxScore = conversionCveData[3];
+				
+				String status = param.getStatus();
+				String statusRequestYn = param.getStatusRequestYn();
+				String identificationStatus = param.getIdentificationStatus();
+				String verificationStatus = param.getVerificationStatus();
+				String distributionStatus = param.getDistributionStatus();
+				
+				if (isEmpty(identificationStatus)) {
+					identificationStatus = "Progress";
+				}
+				if (identificationStatus.equalsIgnoreCase("Confirm")) {
+					if (isEmpty(verificationStatus) && (!CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE.equals(status.toUpperCase()) && !CoConstDef.FLAG_YES.equals(statusRequestYn))) {
+						verificationStatus = "Progress";
+					}
+				} else {
+					verificationStatus = "";
+				}
+				if (verificationStatus.equalsIgnoreCase("Confirm")) {
+					if (isEmpty(distributionStatus)) {
+						distributionStatus = "Progress";
+					}
+				} else {
+					distributionStatus = "";
+				}
+				
+				String fosslightReportFile = "X";
+				if ("Confirm".equalsIgnoreCase(param.getIdentificationStatus()) || !isEmpty(param.getReviewReportFileId())) {
+					fosslightReportFile = "O";
+				}
+				String ossNoticeFile = "";
+				if (!isEmpty(param.getNoticeFileId())) {
+					ossNoticeFile = "O";
+				} else if ("N/A".equalsIgnoreCase(avoidNull(param.getVerificationStatus()))) {
+					ossNoticeFile = "N/A";
+				} else {
+					ossNoticeFile = "X";
+				}
+				String ossPackagingFile = "";
+				if (!isEmpty(param.getPackageFileId())) {
+					ossPackagingFile = "O";
+				} else if ("N/A".equalsIgnoreCase(avoidNull(param.getVerificationStatus()))) {
+					ossPackagingFile = "N/A";
+				} else {
+					ossPackagingFile = "X";
 				}
 				
 				String[] rowParam = {
 					param.getPrjId()
-					, param.getStatus()
 					, param.getPrjName()
-					, param.getPrjVersion()
-					, CoConstDef.COMMON_SELECTED_ETC.equals(avoidNull(param.getOsType(), CoConstDef.COMMON_SELECTED_ETC)) ? param.getOsTypeEtc() : CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, param.getOsType())
+					, param.getStatus()
+					, identificationStatus
+					, verificationStatus
+					, distributionStatus
+					, fosslightReportFile
+					, ossNoticeFile
+					, ossPackagingFile
 					, param.getDistributionType()
-					, param.getIdentificationStatus()
-					, getExpandProjectInfo(expandInfo, "PARTNER_CNT")
-					, getExpandProjectInfo(expandInfo, "SRC_CNT")
-					, getExpandProjectInfo(expandInfo, "BAT_CNT")
-					, getExpandProjectInfo(expandInfo, "BOM_CNT") + "(" + getExpandProjectInfo(expandInfo, "DISCLOSE_CNT") + ")"
-					, param.getVerificationStatus()
-					, getExpandProjectInfo(expandInfo, "NOTICE_TYPE")
-					, getExpandProjectInfo(expandInfo, "NOTICE_FILE_NAME")
-					, getExpandProjectInfo(expandInfo, "PACKAGE_FILE_NAME")
-//					, param.getDistributionStatus()
-//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_TARGET")
-//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_NAME")
-//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_MASTER_CATEGORY")
-//					, getExpandProjectInfo(expandInfo, "MODEL_INFO")
-//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_DEPLOY_TIME")
-					, nvdMaxScore
+					, avoidNull(param.getCvssScoreMax(), "N/A")
 					, param.getDivision()
 					, param.getCreator()
-					, CommonFunction.formatDate(param.getCreatedDate())
+					, param.getPriority()
+					, CommonFunction.formatDateSimple(param.getCreatedDate())
+					, CommonFunction.formatDateSimple(param.getModifiedDate())
 					, param.getReviewer()
 				};
 				
@@ -2082,6 +2106,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						if (!isEmpty(statuses)){
 							String[] arrStatuses = statuses.split(",");
 							projectMap.put("arrStatuses", arrStatuses);
+						}
+					}
+					
+					String distributionType = String.valueOf(projectMap.getOrDefault("distributionType", ""));
+					if (!isEmpty(distributionType)) {
+						String[] distributionTypes = distributionType.split(",");
+						if (distributionTypes.length > 1) {
+							projectMap.put("distributionTypes", distributionTypes);
 						}
 					}
 					
