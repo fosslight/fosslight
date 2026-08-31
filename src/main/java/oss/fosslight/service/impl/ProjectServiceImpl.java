@@ -5101,7 +5101,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			        baseCopyright = avoidNull(oss.getCopyright());
 			        addedCopyright = findAddedOssCopyright(oss, bean.getLicenseId(), bean.getOssCopyright());
 			    } else {
-			        addedCopyright = bean.getOssCopyright();
+			        addedCopyright = bean.getCopyrightText();
 			    }
 
 			    if (!isEmpty(addedCopyright)) {
