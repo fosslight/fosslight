@@ -1639,7 +1639,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "Security Mail 설정", notes = "프로젝트 Security Mail 사용 여부를 설정합니다. N인 경우 secMailDesc가 필수입니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "설정 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Security enable setting updated successfully\",\"secMailYn\":\"Y\",\"secMailDesc\":\"Enable\"}"))),
+            @ApiResponse(code = 200, message = "설정 성공 (주의: secMailYn 값 및 상태에 따라 secMailDesc 반환 형태가 달라질 수 있습니다)\n* `secMailYN:N` 인 경우, secMailDesc가 프로젝트에 설정된 값으로 리턴됩니다", response = Map.class,
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Security enable setting updated successfully\",\"secMailYn\":\"Y\",\"secMailDesc\":\"Enable\"}"))),
             @ApiResponse(code = 400, message = "Security Mail 파라미터 오류\n\n* `Security Enable (secMailYn) is required.`\n* `Security Enable (secMailYn) must be Y or N.`\n* `Security Description (secMailDesc) is required when Security Enable is N.`", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Security Enable (secMailYn) must be Y or N.\"}"))),
             @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123. Check Permission or Project Status\"}"))),
             @ApiResponse(code = 404, message = "프로젝트 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Project not found. Project ID: 123\"}")))
