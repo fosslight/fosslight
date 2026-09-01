@@ -94,6 +94,24 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	@Autowired VerificationMapper verificationMapper;
 	@Autowired ProjectMapper projectMapper;
 	
+	private static final Map<String, Integer> EXTERNAL_REFERENCE_PRIORITY = new HashMap<String, Integer>(); 
+	static { 
+		EXTERNAL_REFERENCE_PRIORITY.put("vcs", 1);
+		EXTERNAL_REFERENCE_PRIORITY.put("source-distribution", 2);
+		EXTERNAL_REFERENCE_PRIORITY.put("distribution", 3);
+		EXTERNAL_REFERENCE_PRIORITY.put("website", 4);
+		EXTERNAL_REFERENCE_PRIORITY.put("distribution-intake", 5);
+	}
+	
+	private static final Map<String, Integer> HOMEPAGE_REFERENCE_PRIORITY = new HashMap<String, Integer>();
+	static {
+		HOMEPAGE_REFERENCE_PRIORITY.put("website", 1);
+		HOMEPAGE_REFERENCE_PRIORITY.put("vcs", 2);
+		HOMEPAGE_REFERENCE_PRIORITY.put("distribution", 3);
+		HOMEPAGE_REFERENCE_PRIORITY.put("source-distribution", 4);
+		HOMEPAGE_REFERENCE_PRIORITY.put("distribution-intake", 5);
+	}
+	
 	/**
 	 * Context object for single file upload processing.
 	 * Encapsulates upload metadata to simplify method parameters.
@@ -1046,20 +1064,51 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                // [F] Package Originator (5)
 	                row.createCell(5).setCellValue("");
 
-	                String targetUrl = "NOASSERTION";
+	                String downloadLocation = "NOASSERTION";
+	                String homepage = "";
+	                
 	                if (c.getExternalReferences() != null) {
-	                    for (ExternalReference ref : c.getExternalReferences()) {
-	                        if (ref.getType() != null && "website".equalsIgnoreCase(ref.getType().getTypeName())) {
-	                        	targetUrl = ref.getUrl();
-	                            break;
-	                        }
-	                    }
+	                	int bestPriority = Integer.MAX_VALUE;
+	                	for (ExternalReference ref : c.getExternalReferences()) {
+	                		if (ref.getType() == null || ref.getUrl() == null) {
+	                			continue;
+	                		}
+	                		
+	                		String typeName = ref.getType().getTypeName();
+	                		if (typeName == null) {
+	                			continue;
+	                		}
+	                		
+	                		Integer priority = EXTERNAL_REFERENCE_PRIORITY.get(typeName.toLowerCase());
+	                		if (priority != null && priority < bestPriority) {
+	                			bestPriority = priority;
+	                			downloadLocation = ref.getUrl();
+	                		}
+	                	}
+	                	
+	                	bestPriority = Integer.MAX_VALUE;
+	                	for (ExternalReference ref : c.getExternalReferences()) {
+	                		if (ref.getType() == null || ref.getUrl() == null) {
+	                			continue;
+	                		}
+	                		
+	                		String typeName = ref.getType().getTypeName();
+	                		if (typeName == null) {
+	                			continue;
+	                		}
+	                		
+	                		Integer priority = HOMEPAGE_REFERENCE_PRIORITY.get(typeName.toLowerCase());
+	                		if (priority != null && priority < bestPriority) {
+	                			bestPriority = priority;
+	                			homepage = ref.getUrl();
+	                		}
+	                	}
 	                }
 	                // [G] Home Page (6) - Website URL 추출
-	                row.createCell(6).setCellValue("");
+	                row.createCell(6).setCellValue(homepage);
 
 	                // [H] Package Download Location (7)
-	                row.createCell(7).setCellValue(targetUrl);
+	                row.createCell(7).setCellValue(downloadLocation);
 
 	                // [N] License Declared (13) - 첫 번째 라이선스 ID 추출
 	                String licenseStr = "NOASSERTION";
