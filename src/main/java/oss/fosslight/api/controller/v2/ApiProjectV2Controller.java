@@ -1731,7 +1731,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Export Security Tab as Json", notes = "Project > Security tab Export")
+    @ApiOperation(value = "프로젝트 Security JSON 조회", notes = "조회 권한이 있는 프로젝트의 Security 탭 데이터를 JSON으로 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"totalGridData\":[{\"gridId\":\"jqg_sec_6304_1\",\"ossName\":\"sample-oss\",\"ossVersion\":\"1.0.0\",\"cvssScore\":\"9.8\",\"cveId\":\"CVE-2026-1234\",\"publDate\":\"2026-08-01\",\"modiDate\":\"2026-08-20\",\"vulnSummary\":\"Example vulnerability summary\",\"activateFlag\":\"N\",\"vulnerabilityLink\":\"https://nvd.nist.gov/vuln/detail/CVE-2026-1234\",\"groupKeyId\":\"CVE-2026-1234\",\"source\":\"NVD\",\"cpeName\":\"cpe:2.3:a:example:sample-oss:1.0.0:*:*:*:*:*:*:*\",\"verStartEndRange\":\"From (including) : 1.0.0|Up to (excluding) : 1.0.1\",\"officialPatchLink\":\"https://github.com/example/sample-oss/commit/abcdef\",\"vulnerabilityResolution\":\"Unresolved\",\"securityPatchLink\":\"N/A\",\"securityComments\":\"Patch review is in progress\"}],\"message\":\"OSS entries without a version require manual review.\"}"))),
+            @ApiResponse(code = 404, message = "프로젝트가 없거나 조회 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Project 123 not exist or User doesn't have permission for the project\"}")))
+    })
     @GetMapping(value = {Url.APIV2.FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON})
     public ResponseEntity<Map<String, Object>> getPrjSecurityExportJson(
             @ApiParam(hidden = true) @RequestHeader String authorization,
