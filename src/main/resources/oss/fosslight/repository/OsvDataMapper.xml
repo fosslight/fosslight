@@ -454,106 +454,218 @@
     </select>
     
     <select id="selectOsvVulnerabilityListByUniqueNick" parameterType="map" resultType="oss.fosslight.domain.Vulnerability">
-		SELECT
-			M.ID,
-		    M.ID AS CVE_ID,
-		    GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
-		    M.SOURCE,
-		    M.COMPONENT,
-		    M.AFFECTED_VERSION,
-		    M.SEVERITY,
-		    M.SEVERITY_TYPE,
-		    M.MODI_DATE,
-		    M.PUBL_DATE,
-		    M.SUMMARY,
-		    M.WITHDRAWN_YN,
-		    M.SEARCH_NAME_P1,
-		    M.SEARCH_NAME_P2,
-		    M.SEARCH_NAME_P3,
-		    M.SEARCH_VERSION_P1_YN,
-		    M.SEARCH_VERSION_P1,
-		    M.SEARCH_VERSION_P2_YN,
-		    M.SEARCH_VERSION_P2,
-		    M.SEARCH_VERSION_P3_YN,
-		    1 AS PRIORITY
-		FROM OSV_SEARCH_MASTER M
-		LEFT JOIN OSV_VULNERABILITIES V
-		ON M.ID = V.OSV_ID
-		LEFT JOIN OSV_ALIASES A
-		ON V.ID = A.ID
-		WHERE M.WITHDRAWN_YN = 'N'
-		<choose>
-			<when test="ossVersion != null">
-				AND (
-					(M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(#{ossVersion}, M.SEARCH_VERSION_P1) > 0)
-					OR
-					(M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(#{ossVersion}, M.SEARCH_VERSION_P2) > 0)
-				)
-			</when>
-			<otherwise>
-				AND M.SEARCH_VERSION_P3_YN = 'Y'
-			</otherwise>
-		</choose>
-		AND (
-			M.SEARCH_NAME_P1 = #{ossName}
-		    <if test="ossNicknames != null and ossNicknames.length > 0">
-		    	OR M.SEARCH_NAME_P1 IN
-		    	<foreach collection="ossNicknames" item="nick" open="(" separator="," close=")">
-			        #{nick}
-			    </foreach>
-		    </if>
-		)
-		GROUP BY M.ID
-		ORDER BY M.ID ASC, M.MODI_DATE DESC
+    	SELECT TBL.*
+		FROM
+		(
+			SELECT
+				M.ID,
+			    M.ID AS CVE_ID,
+			    GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    M.SOURCE,
+			    M.COMPONENT,
+			    M.AFFECTED_VERSION,
+			    M.SEVERITY,
+			    M.SEVERITY_TYPE,
+			    M.MODI_DATE,
+			    M.PUBL_DATE,
+			    M.SUMMARY,
+			    M.WITHDRAWN_YN,
+			    M.SEARCH_NAME_P1,
+			    M.SEARCH_NAME_P2,
+			    M.SEARCH_NAME_P3,
+			    M.SEARCH_VERSION_P1_YN,
+			    M.SEARCH_VERSION_P1,
+			    M.SEARCH_VERSION_P2_YN,
+			    M.SEARCH_VERSION_P2,
+			    M.SEARCH_VERSION_P3_YN,
+			    M.ID AS GROUP_KEY_ID,
+			    1 AS PRIORITY
+			FROM OSV_SEARCH_MASTER M
+			LEFT JOIN OSV_VULNERABILITIES V
+			ON M.ID = V.OSV_ID
+			LEFT JOIN OSV_ALIASES A
+			ON V.ID = A.ID
+			WHERE M.WITHDRAWN_YN = 'N'
+			<choose>
+				<when test="ossVersion != null">
+					AND (
+						(M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(#{ossVersion}, M.SEARCH_VERSION_P1) > 0)
+						OR
+						(M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(#{ossVersion}, M.SEARCH_VERSION_P2) > 0)
+					)
+				</when>
+				<otherwise>
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+				</otherwise>
+			</choose>
+			AND (
+				M.SEARCH_NAME_P1 = #{ossName}
+			    <if test="ossNicknames != null and ossNicknames.length > 0">
+			    	OR M.SEARCH_NAME_P1 IN
+			    	<foreach collection="ossNicknames" item="nick" open="(" separator="," close=")">
+				        #{nick}
+				    </foreach>
+			    </if>
+			)
+			GROUP BY M.ID
+			
+			UNION ALL
+			
+			SELECT 
+				M_ALIAS.ID,
+		    	M_ALIAS.ID AS CVE_ID,
+		    	CAST('' AS CHAR(51200)) AS ALIAS_ID,
+		    	M_ALIAS.SOURCE,
+		    	M_ALIAS.COMPONENT,
+		    	M_ALIAS.AFFECTED_VERSION,
+		    	M_ALIAS.SEVERITY,
+		    	M_ALIAS.SEVERITY_TYPE,
+		    	M_ALIAS.MODI_DATE,
+		    	M_ALIAS.PUBL_DATE,
+		    	M_ALIAS.SUMMARY,
+		    	M_ALIAS.WITHDRAWN_YN,
+		    	M_ALIAS.SEARCH_NAME_P1,
+		    	M_ALIAS.SEARCH_NAME_P2,
+		    	M_ALIAS.SEARCH_NAME_P3,
+		    	M_ALIAS.SEARCH_VERSION_P1_YN,
+		    	M_ALIAS.SEARCH_VERSION_P1,
+		    	M_ALIAS.SEARCH_VERSION_P2_YN,
+		    	M_ALIAS.SEARCH_VERSION_P2,
+		    	M_ALIAS.SEARCH_VERSION_P3_YN,
+		    	M.ID AS GROUP_KEY_ID,
+		    	1 AS PRIORITY
+			FROM OSV_SEARCH_MASTER M
+			INNER JOIN OSV_VULNERABILITIES V ON M.ID = V.OSV_ID
+			INNER JOIN OSV_ALIASES A ON V.ID = A.ID
+			INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+			WHERE M.WITHDRAWN_YN = 'N'
+			<choose>
+				<when test="ossVersion != null">
+					AND (
+						(M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(#{ossVersion}, M.SEARCH_VERSION_P1) > 0)
+						OR
+						(M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(#{ossVersion}, M.SEARCH_VERSION_P2) > 0)
+					)
+				</when>
+				<otherwise>
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+				</otherwise>
+			</choose>
+			AND (M.SEARCH_NAME_P1 = #{ossName}
+			    <if test="ossNicknames != null and ossNicknames.length > 0">
+			    	OR M.SEARCH_NAME_P1 IN
+				    <foreach collection="ossNicknames" item="nick" open="(" separator="," close=")">
+				        #{nick}
+				    </foreach>
+			    </if>
+			)
+			AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+			GROUP BY M.ID, M_ALIAS.ID
+		) TBL
+		ORDER BY TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC, TBL.MODI_DATE DESC
 	</select>
 	
 	<select id="selectOsvVulnerabilityListByPurl" parameterType="map" resultType="oss.fosslight.domain.Vulnerability">
-		SELECT
-			M.ID,
-		    M.ID AS CVE_ID,
-		    GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
-		    M.SOURCE,
-		    M.COMPONENT,
-		    M.AFFECTED_VERSION,
-		    M.SEVERITY,
-		    M.SEVERITY_TYPE,
-		    M.MODI_DATE,
-		    M.PUBL_DATE,
-		    M.SUMMARY,
-		    M.WITHDRAWN_YN,
-		    M.SEARCH_NAME_P1,
-		    M.SEARCH_NAME_P2,
-		    M.SEARCH_NAME_P3,
-		    M.SEARCH_VERSION_P1_YN,
-		    M.SEARCH_VERSION_P1,
-		    M.SEARCH_VERSION_P2_YN,
-		    M.SEARCH_VERSION_P2,
-		    M.SEARCH_VERSION_P3_YN,
-		    2 AS PRIORITY
-		FROM OSV_SEARCH_MASTER M
-		LEFT JOIN OSV_VULNERABILITIES V
-		ON M.ID = V.OSV_ID
-		LEFT JOIN OSV_ALIASES A
-		ON V.ID = A.ID
-		WHERE M.WITHDRAWN_YN = 'N'
-		<choose>
-			<when test="ossVersion != null">
-				AND (
-					(M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(#{ossVersion}, M.SEARCH_VERSION_P1) > 0)
-					OR
-					(M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(#{ossVersion}, M.SEARCH_VERSION_P2) > 0)
-				)
-			</when>
-			<otherwise>
-				AND M.SEARCH_VERSION_P3_YN = 'Y'
-			</otherwise>
-		</choose>
-		AND M.SEARCH_NAME_P2 IN
-		<foreach collection="purls" item="purl" open="(" separator="," close=")">
-		    #{purl}
-		</foreach>
-		GROUP BY M.ID
-		ORDER BY M.ID ASC, M.MODI_DATE DESC
+		SELECT TBL.*
+		FROM
+		(
+			SELECT
+				M.ID,
+			    M.ID AS CVE_ID,
+			    GROUP_CONCAT(A.ALIAS_ID) AS ALIAS_ID,
+			    M.SOURCE,
+			    M.COMPONENT,
+			    M.AFFECTED_VERSION,
+			    M.SEVERITY,
+			    M.SEVERITY_TYPE,
+			    M.MODI_DATE,
+			    M.PUBL_DATE,
+			    M.SUMMARY,
+			    M.WITHDRAWN_YN,
+			    M.SEARCH_NAME_P1,
+			    M.SEARCH_NAME_P2,
+			    M.SEARCH_NAME_P3,
+			    M.SEARCH_VERSION_P1_YN,
+			    M.SEARCH_VERSION_P1,
+			    M.SEARCH_VERSION_P2_YN,
+			    M.SEARCH_VERSION_P2,
+			    M.SEARCH_VERSION_P3_YN,
+			    M.ID AS GROUP_KEY_ID,
+			    2 AS PRIORITY
+			FROM OSV_SEARCH_MASTER M
+			LEFT JOIN OSV_VULNERABILITIES V
+			ON M.ID = V.OSV_ID
+			LEFT JOIN OSV_ALIASES A
+			ON V.ID = A.ID
+			WHERE M.WITHDRAWN_YN = 'N'
+			<choose>
+				<when test="ossVersion != null">
+					AND (
+						(M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(#{ossVersion}, M.SEARCH_VERSION_P1) > 0)
+						OR
+						(M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(#{ossVersion}, M.SEARCH_VERSION_P2) > 0)
+					)
+				</when>
+				<otherwise>
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+				</otherwise>
+			</choose>
+			AND M.SEARCH_NAME_P2 IN
+			<foreach collection="purls" item="purl" open="(" separator="," close=")">
+			    #{purl}
+			</foreach>
+			GROUP BY M.ID
+			
+			UNION ALL
+			
+			SELECT 
+				M_ALIAS.ID,
+		    	M_ALIAS.ID AS CVE_ID,
+		    	CAST('' AS CHAR(51200)) AS ALIAS_ID,
+		    	M_ALIAS.SOURCE,
+		    	M_ALIAS.COMPONENT,
+		    	M_ALIAS.AFFECTED_VERSION,
+		    	M_ALIAS.SEVERITY,
+		    	M_ALIAS.SEVERITY_TYPE,
+		    	M_ALIAS.MODI_DATE,
+		    	M_ALIAS.PUBL_DATE,
+		    	M_ALIAS.SUMMARY,
+		    	M_ALIAS.WITHDRAWN_YN,
+		    	M_ALIAS.SEARCH_NAME_P1,
+		    	M_ALIAS.SEARCH_NAME_P2,
+		    	M_ALIAS.SEARCH_NAME_P3,
+		    	M_ALIAS.SEARCH_VERSION_P1_YN,
+		    	M_ALIAS.SEARCH_VERSION_P1,
+		    	M_ALIAS.SEARCH_VERSION_P2_YN,
+		    	M_ALIAS.SEARCH_VERSION_P2,
+		    	M_ALIAS.SEARCH_VERSION_P3_YN,
+		    	M.ID AS GROUP_KEY_ID,
+		    	2 AS PRIORITY
+			FROM OSV_SEARCH_MASTER M
+			INNER JOIN OSV_VULNERABILITIES V ON M.ID = V.OSV_ID
+			INNER JOIN OSV_ALIASES A ON V.ID = A.ID
+			INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+			WHERE M.WITHDRAWN_YN = 'N'
+			<choose>
+				<when test="ossVersion != null">
+					AND (
+						(M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(#{ossVersion}, M.SEARCH_VERSION_P1) > 0)
+						OR
+						(M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(#{ossVersion}, M.SEARCH_VERSION_P2) > 0)
+					)
+				</when>
+				<otherwise>
+					AND M.SEARCH_VERSION_P3_YN = 'Y'
+				</otherwise>
+			</choose>
+			AND M.SEARCH_NAME_P2 IN
+			<foreach collection="purls" item="purl" open="(" separator="," close=")">
+			    #{purl}
+			</foreach>
+			AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+			GROUP BY M.ID, M_ALIAS.ID
+		) TBL
+		ORDER BY TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC, TBL.MODI_DATE DESC
 	</select>
 	
 	<select id="selectOsvVulnerabilityListByPackageName" parameterType="map" resultType="oss.fosslight.domain.Vulnerability">
