@@ -5005,10 +5005,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	        combinedList.addAll(nvdList);
 	    }
 		
-	    return combinedList;
-	    // 2. Fetch OSV vulnerabilities and merge them with the existing list
-//	    List<Vulnerability> finalFilteredVulnList = osvDataService.fetchOsvVulnerabilityData(ossMaster, combinedList);
-//	    return finalFilteredVulnList;
+	    // Fetch OSV vulnerabilities and merge them with the existing list
+	    List<Vulnerability> finalFilteredVulnList = osvDataService.fetchOsvVulnerabilityData(ossMaster, combinedList);
+	    return finalFilteredVulnList;
 	}
 	
 	@Override
