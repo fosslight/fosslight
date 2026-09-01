@@ -1779,7 +1779,16 @@ public class OsvDataService extends CoTopComponent {
 				return versionP3;
 			}
 	    } else {
-	    	List<Vulnerability> allVersionList = Stream.of(versionP1, versionP2, versionP3).filter(Objects::nonNull).flatMap(Collection::stream).collect(Collectors.toList());
+	    	List<Vulnerability> allVersionList = new ArrayList<>();
+	    	if (versionP1 != null && !versionP1.isEmpty()) {
+	    		allVersionList.addAll(versionP1);
+			}
+		    if (versionP2 != null && !versionP2.isEmpty()) {
+		    	allVersionList.addAll(versionP2);
+			}
+		    if (versionP3 != null && !versionP3.isEmpty()) {
+		    	allVersionList.addAll(versionP3);
+			}
 	    	return allVersionList;
 	    }
 
