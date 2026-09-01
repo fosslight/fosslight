@@ -8473,15 +8473,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String scoreStr = "";
 		
 		if (!isEmpty(cvssScore)) {
-			BigDecimal score = new BigDecimal(cvssScore);
-			if (score.compareTo(new BigDecimal("9.0")) >= 0) {
-				scoreStr = "Critical";
-			} else if (score.compareTo(new BigDecimal("7.0")) >= 0) {
-				scoreStr = "High";
-			} else if (score.compareTo(new BigDecimal("4.0")) >= 0) {
-				scoreStr = "Medium";
-			} else if (score.compareTo(new BigDecimal("0.0")) >= 0) {
-				scoreStr = "Low";
+			if (CommonFunction.isBigDecimal(cvssScore)) {
+				BigDecimal score = new BigDecimal(cvssScore);
+				if (score.compareTo(new BigDecimal("9.0")) >= 0) {
+					scoreStr = "Critical";
+				} else if (score.compareTo(new BigDecimal("7.0")) >= 0) {
+					scoreStr = "High";
+				} else if (score.compareTo(new BigDecimal("4.0")) >= 0) {
+					scoreStr = "Medium";
+				} else if (score.compareTo(new BigDecimal("0.0")) >= 0) {
+					scoreStr = "Low";
+				}
+			} else {
+				scoreStr = "?";
 			}
 			if (!isEmpty(scoreStr) && !checkVulnScore.contains(cveId)) {
 				if (vulnScore.containsKey(scoreStr)) {
