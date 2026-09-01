@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -1766,15 +1768,20 @@ public class OsvDataService extends CoTopComponent {
 	    }
 
 	    // 우선순위에 따른 최종 결과 반환
-	    if (versionP1 != null && !versionP1.isEmpty()) {
-			return versionP1;
-		}
-	    if (versionP2 != null && !versionP2.isEmpty()) {
-			return versionP2;
-		}
-	    if (versionP3 != null && !versionP3.isEmpty()) {
-			return versionP3;
-		}
+	    if (isSecurity) {
+	    	if (versionP1 != null && !versionP1.isEmpty()) {
+				return versionP1;
+			}
+		    if (versionP2 != null && !versionP2.isEmpty()) {
+				return versionP2;
+			}
+		    if (versionP3 != null && !versionP3.isEmpty()) {
+				return versionP3;
+			}
+	    } else {
+	    	List<Vulnerability> allVersionList = Stream.of(versionP1, versionP2, versionP3).filter(Objects::nonNull).flatMap(Collection::stream).collect(Collectors.toList());
+	    	return allVersionList;
+	    }
 
 	    return Collections.emptyList();
 	}
