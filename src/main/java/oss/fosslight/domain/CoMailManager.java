@@ -800,9 +800,11 @@ public class CoMailManager extends CoTopComponent {
     		if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_VULNERABILITY_SUMMARY.equals(bean.getMsgType())) {
     			if (MapUtils.isNotEmpty(bean.getParamMap())) {
     				Map<String, Object> paramMap = bean.getParamMap();
-    				if (paramMap.containsKey("isVulnerable")) {
-    					convertDataMap.put("isVulnerable", (boolean) paramMap.get("isVulnerable"));
-    				}
+    				
+    				convertDataMap.put("isVulnerable", (boolean) paramMap.get("isVulnerable"));
+    				convertDataMap.put("isBelowThreshold", (boolean) paramMap.get("isBelowThreshold"));
+    				convertDataMap.put("isSafe", (boolean) paramMap.get("isSafe"));
+    				
     				if (paramMap.containsKey("message")) {
     					convertDataMap.put("message", (String) paramMap.get("message"));
     				}
