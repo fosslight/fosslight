@@ -8350,6 +8350,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	                    oc.setVulnerabilityResolution("Unresolved");
 	                } else {
 	                    oc.setOfficialPatchLink("N/A");
+	                    oc.setVulnerabilityResolution("Deferred (Not Available)");
 	                }
 
 	                oc.setSecurityPatchLink("N/A");
