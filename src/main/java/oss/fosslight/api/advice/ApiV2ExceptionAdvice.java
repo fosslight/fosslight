@@ -2,10 +2,12 @@ package oss.fosslight.api.advice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -22,7 +24,9 @@ import oss.fosslight.common.CoConstDef;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -36,7 +40,33 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     protected ResponseEntity<Map<String, Object>> handleInternalServerError(
             HttpServletRequest request, Exception e) {
+        if (isClientAbort(e)) {
+            logClientAbort(request);
+            return ResponseEntity.noContent().build();
+        }
         log.error("Unhandled exception [{} {}]", request.getMethod(), request.getRequestURI(), e);
+        return responseService.errorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE)
+        );
+    }
+
+    @ExceptionHandler(ClientAbortException.class)
+    protected ResponseEntity<Map<String, Object>> handleClientAbort(HttpServletRequest request, ClientAbortException e) {
+        logClientAbort(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler(HttpMessageNotWritableException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected ResponseEntity<Map<String, Object>> handleHttpMessageNotWritable(
+            HttpServletRequest request, HttpMessageNotWritableException e) {
+        if (isClientAbort(e)) {
+            logClientAbort(request);
+            return ResponseEntity.noContent().build();
+        }
+
+        log.error("Failed to write response body [{} {}]", request.getMethod(), request.getRequestURI(), e);
         return responseService.errorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE)
@@ -183,5 +213,37 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
 
         log.error("ServletRequestBindingException: {}", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    private void logClientAbort(HttpServletRequest request) {
+        final String message = "Client disconnected: request {} {} from remote address {} with X-FORWARDED-FOR {}";
+        final String headerXFF = request.getHeader("X-FORWARDED-FOR");
+        log.debug(message, request.getMethod(), request.getRequestURL(), request.getRemoteAddr(), headerXFF);
+    }
+
+    private boolean isClientAbort(Throwable throwable) {
+        Throwable current = throwable;
+
+        while (current != null) {
+            if (current instanceof ClientAbortException) {
+                return true;
+            }
+
+            if (current instanceof IOException) {
+                String message = current.getMessage();
+                if (message != null) {
+                    String normalized = message.toLowerCase(Locale.ROOT);
+                    if (normalized.contains("broken pipe")
+                            || normalized.contains("connection reset")
+                            || message.contains("파이프가 깨어짐")) {
+                        return true;
+                    }
+                }
+            }
+
+            current = current.getCause();
+        }
+
+        return false;
     }
 }
