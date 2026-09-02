@@ -5149,13 +5149,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> paramMap = new HashMap<>();
 		Map<String, Object> securityMap = getSecurityGridList(project);
 		
-		if (securityMap.containsKey("totalList")) {
-			boolean isVulnerable = false;
-			List<OssComponents> needToResolveList = (List<OssComponents>) securityMap.get("totalList");
-			if (CollectionUtils.isNotEmpty(needToResolveList)) {
-				isVulnerable = true;
+		List<OssComponents> needToResolveList = (List<OssComponents>) securityMap.get("totalList");
+		List<OssComponents> fullDiscoveredList = (List<OssComponents>) securityMap.get("fullDiscoveredList");
+		
+		paramMap.put("isVulnerable", false);
+		paramMap.put("isBelowThreshold", false);
+		paramMap.put("isSafe", false);
+		
+		if (CollectionUtils.isNotEmpty(needToResolveList)) {
+			boolean allFixed = needToResolveList.stream().allMatch(item -> "Fixed".equalsIgnoreCase(item.getVulnerabilityResolution()));
+			if (!allFixed) {
+				paramMap.put("isVulnerable", true);
+			} else {
+				paramMap.put("isBelowThreshold", true);
 			}
-			paramMap.put("isVulnerable", isVulnerable);
+		} else if (CollectionUtils.isNotEmpty(fullDiscoveredList)) {
+			paramMap.put("isBelowThreshold", true);
+		} else {
+			paramMap.put("isSafe", true);
 		}
 		
 		if (securityMap.containsKey("overviewData")) {
@@ -8003,9 +8014,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<OssComponents> totalList = new ArrayList<>();
 		List<OssComponents> fullDiscoveredList = new ArrayList<>();
 		Map<String, Object> securityGridMap = new HashMap<>();
-		List<String> deduplicatedkey = new ArrayList<>();
-		List<String> caseWithoutVersionKey = new ArrayList<>();
-		List<String> checkOssNameList = new ArrayList<>();
+		
+		Set<String> deduplicatedkey = new LinkedHashSet<>();
+	    Set<String> caseWithoutVersionKey = new LinkedHashSet<>();
+	    Set<String> checkOssNameList = new LinkedHashSet<>();
 		
 		List<String> checkVulnScore = new ArrayList<>();
 		Map<String, Object> vulnScore = new LinkedHashMap<>();
