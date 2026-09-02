@@ -1682,117 +1682,57 @@ public class OsvDataService extends CoTopComponent {
 	        return Collections.emptyList();
 	    }
 
-	    List<Vulnerability> versionP1 = null;
-	    List<Vulnerability> versionP2 = null;
-	    List<Vulnerability> versionP3 = null;
-
+	    List<Vulnerability> resultList = new ArrayList<>();
 	    String currentTargetVersion;
+	    Set<String> seenVulnerabilities = new HashSet<>();
+	    
 	    for (Vulnerability osvVulnerability : osvVulnerabilityList) {
-	        currentTargetVersion = isSecurity ? osvVulnerability.getOssVersion() : targetVersion;
-
-	        if (!isEmpty(osvVulnerability.getSearchVersionP1())) {
-        		if (versionP1 == null) {
-                	versionP1 = new ArrayList<>();
-                }
-                
-                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-                versionP1.add(osvVulnerability);
-                continue;
-        	} 
-        	
-        	if (!isEmpty(osvVulnerability.getSearchVersionP2())) {
-        		if (versionP2 == null) {
-					versionP2 = new ArrayList<>();
-				}
-                
-                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-                versionP2.add(osvVulnerability);
-                continue;
-        	}
-        	
-        	if (isEmpty(currentTargetVersion) && CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP3Yn())) {
-	            if (versionP3 == null) {
-					versionP3 = new ArrayList<>();
-				}
-	            
-	            processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-	            versionP3.add(osvVulnerability);
+	        String uniqueKey = osvVulnerability.getOssName() + "|" + osvVulnerability.getOssVersion() + "|" + osvVulnerability.getCveId();
+	        if (seenVulnerabilities.contains(uniqueKey)) {
+	            continue;
 	        }
 	        
-//        	// 1순위 검증: Exact Match
-//	        if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP1Yn())) {
-//	            if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
-//	                if (versionP1 == null) {
-//	                	versionP1 = new ArrayList<>();
-//	                }
-//	                
-//	                // 매칭이 확정된 순간에만 필드 복사 및 가공 수행 (메모리 절약)
-//	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-//	                versionP1.add(osvVulnerability);
-//	                continue;
-//	            }
-//	        }
-//
-//	        // 2순위 검증: Range Match
-//	        if (CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP2Yn())) {
-//	            boolean matched = isVersionInRange(currentTargetVersion, osvVulnerability.getSearchVersionP2());
-//	            if (!matched && aliases != null) {
-//	                for (String alias : aliases) {
-//	                    if (isVersionInRange(alias, osvVulnerability.getSearchVersionP2())) {
-//	                        matched = true;
-//	                        break;
-//	                    }
-//	                }
-//	            }
-//
-//	            if (matched) {
-//	                if (versionP2 == null) {
-//						versionP2 = new ArrayList<>();
-//					}
-//	                
-//	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-//	                versionP2.add(osvVulnerability);
-//	                continue;
-//	            }
-//	        }
-//
-//	        // 3순위 검증: Empty Target Version
-//	        if (isEmpty(currentTargetVersion) && CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP3Yn())) {
-//	            if (versionP3 == null) {
-//					versionP3 = new ArrayList<>();
-//				}
-//	            
-//	            processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
-//	            versionP3.add(osvVulnerability);
-//	        }
-	    }
+	        currentTargetVersion = isSecurity ? osvVulnerability.getOssVersion() : targetVersion;
+	        
+	        // 1순위 검증: Exact Match
+	        if (!isEmpty(osvVulnerability.getSearchVersionP1())) {
+	        	if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
+		        	seenVulnerabilities.add(uniqueKey);
+	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+	                resultList.add(osvVulnerability);
+	                continue;
+	            }
+	        }
 
-	    // 우선순위에 따른 최종 결과 반환
-	    if (isSecurity) {
-	    	if (versionP1 != null && !versionP1.isEmpty()) {
-				return versionP1;
-			}
-		    if (versionP2 != null && !versionP2.isEmpty()) {
-				return versionP2;
-			}
-		    if (versionP3 != null && !versionP3.isEmpty()) {
-				return versionP3;
-			}
-	    } else {
-	    	List<Vulnerability> allVersionList = new ArrayList<>();
-	    	if (versionP1 != null && !versionP1.isEmpty()) {
-	    		allVersionList.addAll(versionP1);
-			}
-		    if (versionP2 != null && !versionP2.isEmpty()) {
-		    	allVersionList.addAll(versionP2);
-			}
-		    if (versionP3 != null && !versionP3.isEmpty()) {
-		    	allVersionList.addAll(versionP3);
-			}
-	    	return allVersionList;
-	    }
+	        // 2순위 검증: Range Match
+	        if (!isEmpty(osvVulnerability.getSearchVersionP2())) {
+	        	boolean matched = isVersionInRange(currentTargetVersion, osvVulnerability.getSearchVersionP2(), osvVulnerability.getAffectedVersion());
+	            if (!matched && aliases != null) {
+	                for (String alias : aliases) {
+	                    if (isVersionInRange(alias, osvVulnerability.getSearchVersionP2(), osvVulnerability.getAffectedVersion())) {
+	                        matched = true;
+	                        break;
+	                    }
+	                }
+	            }
 
-	    return Collections.emptyList();
+	            if (matched) {
+	            	seenVulnerabilities.add(uniqueKey);
+	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+	                resultList.add(osvVulnerability);
+	                continue;
+	            }
+	        }
+
+	        // 3순위 검증: Empty Target Version
+	        if (isEmpty(currentTargetVersion) && CoConstDef.FLAG_YES.equals(osvVulnerability.getSearchVersionP3Yn())) {
+	        	seenVulnerabilities.add(uniqueKey);
+	            processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
+	            resultList.add(osvVulnerability);
+	        }
+	    }
+	    
+	    return resultList;
 	}
 //	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, Map<String, Vulnerability> osvVulnerabilityMap, String targetVersion, String[] aliases, boolean isSecurity) {
 //		List<Vulnerability> versionP1 = new ArrayList<>();
@@ -1870,24 +1810,35 @@ public class OsvDataService extends CoTopComponent {
 		return false;
 	}
 
-	private boolean isVersionInRange(String targetVersion, String rangeRaw) {
-		if (rangeRaw == null || rangeRaw.isEmpty() || "-".equals(rangeRaw))
+	private boolean isVersionInRange(String targetVersion, String rangeRaw, String affectedVersion) {
+		if (rangeRaw == null || rangeRaw.isEmpty() || "-".equals(rangeRaw)) {
 			return false;
-
-		String[] orRanges = rangeRaw.split("\\|");
-		for (String range : orRanges) {
-			String[] parts = range.split("~");
-			if (parts.length < 2)
-				continue;
-
-			String start = parts[0].trim();
-			String end = parts[1].trim();
-
-			if (compareVersion(targetVersion, start) >= 0 && compareVersion(targetVersion, end) <= 0) {
-				return true;
-			}
 		}
-		return false;
+
+	    String[] orRanges = rangeRaw.split("\\|");
+	    String[] affectedVersions = !isEmpty(affectedVersion) ? affectedVersion.split("\\s*,\\s*(?=\\[|\\()") : new String[0];
+
+	    for (int i = 0; i < orRanges.length; i++) {
+	        String[] parts = orRanges[i].split("~");
+	        if (parts.length < 2) {
+	        	continue;
+	        }
+
+	        String start = parts[0].trim();
+	        String end = parts[1].trim();
+
+	        int startCompare = compareVersion(targetVersion, start);
+	        int endCompare = compareVersion(targetVersion, end);
+
+	        boolean endExclusive = i < affectedVersions.length && affectedVersions[i].trim().endsWith(")");
+	        boolean endMatched = endExclusive ? endCompare < 0 : endCompare <= 0;
+
+	        if (startCompare >= 0 && endMatched) {
+	            return true;
+	        }
+	    }
+
+	    return false;
 	}
 
 	// TODO 메모리 이슈 가능성 검토 필요
