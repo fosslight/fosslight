@@ -1,23 +1,4 @@
-<!--
-Copyright (c) 2021 LG Electronics
-SPDX-License-Identifier: AGPL-3.0-only
- -->
-
-# PURL 작성 규칙
-
-- PURL SPEC: https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst
-- purl-spec v1.0.1 기준으로 작성
-
 ## 공통 사항
-
-- protocol을 제거한다 (`git+`, `sum:`, `com:`, `ssh:` 등) 또는 `://` 이전 문자열 모두 제거. leading `www.`도 제거한다.
-  - 예) `https://www.github.com/org/repo` → `github.com/org/repo`
-- Port number를 제거한다.
-  - 예) `github.com:443/{org}/{repo}` → `github.com/{org}/{repo}`
-- 제거된 URL의 호스트 타입이 Package Type 별 표준화 방식에 정의된 기본 repository url에 해당하는 지 확인한다
-  - 해당하면 PURL 규칙에 맞게 PURL 생성
-  - 해당하지 않으면 generic 타입으로 PURL 생성
-- 마지막 `/`는 제거
 - OSS name 및 download location에 separator character (purl > specification > Core specification) `:/@?=&#` 및 공백 포함된 경우, 퍼센트 인코딩되어야 하며 타입별로 대소문자 구분 여부 다름
   - 단, purl에서 qualifier (`?` 뒤에 `key=value`) 다음 규칙을 따름
     - **key**: 인코딩하지 않음, `a-z`, `0-9`, `.`, `-`, `_` 만 허용
@@ -48,14 +29,17 @@ SPDX-License-Identifier: AGPL-3.0-only
     - `&` → `%26`
     - `#` → `%23`
     - 공백 → `%20`
-- 대소문자 구별해야 함 → URL로부터 추출한 namespace 또는 name의 대소문자 유지
+ 
 
-## Package Type 별 표준화 방식
+## download location 생성
+- 각 type에 따라 qualifier에 download_url이 존재하지 않는 케이스에 대해서는 대표 url로 download location 생성해야 함
+ - 대표 url 지정되지 않은 경우, 각 패키지 매니저 스펙 내 작성된 download location 생성 방법 참조
+- 위 공통사항의 인코딩을 역으로 해야함
 
 ### Github
 
 - 기본 repository url
-  - `https://github.com/{organization}/{repository}`
+  - `https://github.com/{organization}/{repository}` **(대표 url)**
 - syntax: `pkg:github/<namespace>/<name>`
 - namespace
   - required
@@ -70,8 +54,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 - 기본 repository url
   - `https://registry.npmjs.org/{package_name}`
-  - `https://www.npmjs.com/package/{package_name}`
-  - `https://www.npmjs.com/package/{@organization}/{package_name}`
+  - `https://www.npmjs.com/package/{package_name}` **(대표 url)**
+  - `https://www.npmjs.com/package/{@organization}/{package_name}` **(대표 url)**
 - syntax: `pkg:npm/<namespace>/<name>`
 - namespace
   - optional, 대소문자 구별해야 함
@@ -87,7 +71,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 - 기본 repository url
   - `https://pypi.python.org/project/{package_name}`
-  - `https://pypi.org/project/{package_name}`
+  - `https://pypi.org/project/{package_name}` **(대표 url)**
   - `https://pypi.python.org/pypi/{package_name}`
   - `https://files.pythonhosted.org/packages/source/*/{package_name}/{package_name}-{version}.tar.gz`
 - syntax: `pkg:pypi/<name>@<version>`
@@ -104,9 +88,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Maven
 
+download location 생성: qualifier에 repository_url 포함된 경우, 해당 url 출력. 없는 경우 대표 url로 생성
+
 - 기본 repository url
   - `https://repo.maven.apache.org/maven2/{group id}/{artifact id}`
-  - `https://mvnrepository.com/artifact/{group id}/{artifact id}`
+  - `https://mvnrepository.com/artifact/{group id}/{artifact id}` (대표 url)
   - `https://repo.maven.apache.org/`
   - `https://repo1.maven.org/maven2/`
   - `https://maven.google.com/web/index.html#{group id}/{artifact id}`에 대한 purl
@@ -133,7 +119,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Cocoapods
 
 - 기본 repository url
-  - `https://cocoapods.org/pods/{pod name}`
+  - `https://cocoapods.org/pods/{pod name}` **(대표 url)**
   - `https://cdn.cocoapods.org/` → 형태 확인이 안됨. 일단 규칙에서 제외 필요.
 - syntax: `pkg:cocoapods/<name>`
 - name
@@ -148,7 +134,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Gem
 
 - 기본 repository url
-  - `https://rubygems.org/gems/{package name}`
+  - `https://rubygems.org/gems/{package name}` **(대표 url)**
 - syntax: `pkg:gem/<name>`
 - name
   - required
@@ -161,7 +147,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Golang
 
 - 기본 repository url
-  - `https://pkg.go.dev/{namespace&name}`
+  - `https://pkg.go.dev/{namespace&name}` **(대표 url)**
   - pkg.go.dev url의 경우, `pkg.go.dev` 이후 url에 대해 namespace 및 name 포함된 값으로 처리
 - syntax: `pkg:golang/<namespace>/<name>@<version>?<qualifiers>#<subpath>`
 - namespace
@@ -179,7 +165,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Android
 
-- purl-spec v1.0.1으로 정의되지 않음 → git url로 처리
+- purl-spec v1.0.1으로 정의되지 않음 → download location 생성: git url로 처리 (https:// 뒤에 namespace&name)
 - 기본 repository url
   - `https://android.googlesource.com/platform/{하위 URL 구성}`
   - `https://android.googlesource.com/platform/bionic/+/refs/tags/aml_tz3_312511020`와 같이 `+/` 제거
@@ -194,7 +180,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Cargo
 
 - 기본 repository url
-  - `https://crates.io/crates/{package name}`
+  - `https://crates.io/crates/{package name}` **(대표 url)**
 - syntax: `pkg:cargo/<name>`
 - name
   - required, 대소문자 구별해야 함
@@ -206,7 +192,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Nuget
 
 - 기본 repository url
-  - `https://nuget.org/packages/{package name}`
+  - `https://nuget.org/packages/{package name}` **(대표 url)**
   - `https://www.nuget.org/packages/{package name}`
 - syntax: `pkg:nuget/<name>`
 - name
@@ -219,7 +205,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Bitbucket
 
 - 기본 repository url
-  - `https://bitbucket.org/{user or organization}/{repository name}`
+  - `https://bitbucket.org/{user or organization}/{repository name}` **(대표 url)**
 - syntax: `pkg:bitbucket/<namespace>/<name>`
 - namespace
   - required, 소문자여야 함
@@ -234,7 +220,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Composer
 
 - 기본 repository url
-  - `https://packagist.org/packages/{vendor}/{name}`
+  - `https://packagist.org/packages/{vendor}/{name}` **(대표 url)**
 - syntax: `pkg:composer/<namespace>/<name>`
 - namespace
   - required, 소문자여야 함
@@ -247,6 +233,8 @@ SPDX-License-Identifier: AGPL-3.0-only
   - `https://packagist.org/packages/geerlingguy/ping` → `pkg:composer/geerlingguy/ping`
 
 ### CPAN
+
+download location 생성: purl만으로 download location 생성 어려워 생략
 
 - 기본 repository url
   - `https://www.cpan.org/`
@@ -264,7 +252,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### CRAN
 
 - 기본 repository url
-  - `https://cran.r-project.org`
+  - `https://cran.r-project.org/web/packages/{name}/index.html` (대표 url)
 - syntax: `pkg:cran/<name>`
 - name
   - required, 대소문자 구별해야 함
@@ -274,6 +262,8 @@ SPDX-License-Identifier: AGPL-3.0-only
   - `https://cran.r-project.org/web/packages/ECharts2Shiny/index.html` → `pkg:cran/ECharts2Shiny`
 
 ### Docker
+
+purl만으로 download location 생성 어려워 생략
 
 - 기본 repository url
   - `https://hub.docker.com`
@@ -293,7 +283,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Hackage
 
 - 기본 repository url
-  - `https://hackage.haskell.org/package/{package name}`
+  - `https://hackage.haskell.org/package/{package name}` **(대표 url)**
 - syntax: `pkg:hackage/<name>`
 - name
   - required, 대소문자 구별해야 함 (kebab-case normalization)
@@ -305,7 +295,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Huggingface
 
 - 기본 repository url
-  - `https://huggingface.co/{organization}/{repository name}`
+  - `https://huggingface.co/{organization}/{repository name}` **(대표 url)**
 - syntax: `pkg:huggingface/<namespace>/<name>`
 - namespace
   - required, 대소문자 구별해야 함
@@ -318,6 +308,8 @@ SPDX-License-Identifier: AGPL-3.0-only
   - `https://huggingface.co/datasets/stanfordnlp/snli` → `pkg:huggingface/datasets/stanfordnlp/snli` (dataset에 대한 정확한 spec은 없음, spec은 모델에 대해서만 표준화되어 있음, 이에 datasets 추가하여 표시하도록 함)
 
 ### Yocto
+
+download location 생성: qualitifer의 repository_url 존재하는 경우 출력, 존재하지 않으면 생성 불가
 
 - namespace: 생략 (optional). `layer.conf`의 `BBFILE_COLLECTIONS`를 읽지 않음. 경로의 `meta-*` 폴더명으로 추정하면 잘못된 값이 될 수 있음
 - name: BPN (https://docs.yoctoproject.org/ref-manual/variables.html#term-BPN) in a yocto recipe (대소문자 구별해야 함)
@@ -354,6 +346,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Git
 
+download location 생성: https:// 뒤에 namespace&name
+
 - 링크가 git 저장소인 경우
 - ex. `.git`으로 끝나거나 `git://` 그 외는 `git ls-remote <url>`를 이용하여 git인지 체크
 - namespace: The url path to the git host 대소문자 구별해야 함
@@ -368,6 +362,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 - 특이 사항. repo 끝 git을 허용하고 있음. (우리는 끝 `.git` 제거해야 함. 그래야 purl 일치 체크)
 
 ### Generic
+
+download location 생성: qualitifer의 download_url 존재하는 경우 출력, 존재하지 않으면 생성 불가
 
 - 위 사항이 아닌 경우 모두 generic type으로 PURL 생성
 - syntax: `pkg:generic/<namespace>/<name>@<version>?<qualifiers>#<subpath>`
