@@ -342,6 +342,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<Vulnerability> securityList = projectMapper.selectSecurityListForProject(identification);
 		List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
 		
+		int securityIdx = 1;
+		if (CollectionUtils.isNotEmpty(securityList)) {
+			securityIdx += securityList.size();
+		}
+		
 		if (CollectionUtils.isNotEmpty(securityDatalist)) {
 			for (OssComponents oss : securityDatalist) {
 				String key = "";
@@ -351,6 +356,54 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					key = (oss.getOssName() + "_" + avoidNull(oss.getOssVersion()) + "_" + oss.getCvssScore()).toUpperCase();
 				}
 				securityGridMap.put(key, oss);
+			}
+		}
+		
+		List<OssComponents> osvDataList = osvDataService.getSecurityVulnerabilityList(securityGridMap, identification, bean.getPrjId(), securityIdx, true);
+		List<Vulnerability> osvSecurityDataList = null;
+		if (CollectionUtils.isNotEmpty(osvDataList)) {
+			osvSecurityDataList = CollectionUtils.isEmpty(osvDataList) ? new ArrayList<>() :
+								    osvDataList.stream()
+								        .map(osvData -> {
+								            Vulnerability vuln = new Vulnerability();
+								            vuln.setOssName(osvData.getOssName());
+								            vuln.setOssVersion(osvData.getOssVersion());
+								            vuln.setCveId(osvData.getCveId());
+								            vuln.setCvssScore(osvData.getCvssScore());
+								            vuln.setVulnerabilityResolution(osvData.getVulnerabilityResolution());
+								            vuln.setGroupKeyId(osvData.getGroupKeyId());
+								            return vuln;
+								        })
+								        .collect(Collectors.toList());
+		}
+		if (osvSecurityDataList != null) {
+			if (CollectionUtils.isNotEmpty(securityList)) {
+				Set<String> existingKeys = new HashSet<>();
+				for (Vulnerability item : securityList) {
+					item.setGroupKeyId(item.getCveId());
+				    String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
+				    existingKeys.add(uniqueKey);
+				}
+				for (Vulnerability item : osvSecurityDataList) {
+					String uniqueKey = generateKey(item.getOssName(), item.getOssVersion(), item.getCveId(), null);
+					if (existingKeys.add(uniqueKey)) {
+						securityList.add(item);
+					}
+				}
+				securityList.sort(Comparator
+						.comparing(Vulnerability::getOssName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+						.thenComparing(Vulnerability::getOssVersion, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+						.thenComparing(Vulnerability::getGroupKeyId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+						.thenComparing(item -> {
+					        String cveId = item.getCveId();
+					        String groupKeyId = item.getGroupKeyId();
+					        return (!isEmpty(cveId) && !isEmpty(groupKeyId) && cveId.trim().equalsIgnoreCase(groupKeyId.trim())) ? 0 : 1;
+						})
+						.thenComparing(Vulnerability::getCveId, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+					);
+			} else {
+				securityList = new ArrayList<>();
+				securityList.addAll(osvSecurityDataList);
 			}
 		}
 		

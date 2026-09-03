@@ -819,8 +819,8 @@ public class OsvDataService extends CoTopComponent {
 
 	        // [개선 4] generateKey가 일으키는 문자열 폭탄을 제어하기 위해 맵 조회 키 생성 규칙 최적화
 	        String securityGridMapKey = (!activateFlag) 
-	            ? generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore())
-	            : generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null);
+	            ? generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore()).toUpperCase()
+	            : generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null).toUpperCase();
 
 	        // 해상도(Resolution) 판단 공통 비즈니스 로직
 	        if (!activateFlag) {
