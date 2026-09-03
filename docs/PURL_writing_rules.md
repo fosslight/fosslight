@@ -55,7 +55,7 @@
 - 기본 repository url
   - `https://registry.npmjs.org/{package_name}`
   - `https://www.npmjs.com/package/{package_name}` **(대표 url)**
-  - `https://www.npmjs.com/package/{@organization}/{package_name}` **(대표 url)**
+  - `https://www.npmjs.com/package/{@organization}/{package_name}` 
 - syntax: `pkg:npm/<namespace>/<name>`
 - namespace
   - optional, 대소문자 구별해야 함
@@ -165,7 +165,9 @@ download location 생성: qualifier에 repository_url 포함된 경우, 해당 u
 
 ### Android
 
-- purl-spec v1.0.1으로 정의되지 않음 → download location 생성: git url로 처리 (https:// 뒤에 namespace&name)
+download location 생성: git url로 처리 (https:// 뒤에 namespace&name)
+
+- purl-spec v1.0.1으로 정의되지 않음 (git하고 동일)
 - 기본 repository url
   - `https://android.googlesource.com/platform/{하위 URL 구성}`
   - `https://android.googlesource.com/platform/bionic/+/refs/tags/aml_tz3_312511020`와 같이 `+/` 제거
@@ -263,7 +265,7 @@ download location 생성: purl만으로 download location 생성 어려워 생�
 
 ### Docker
 
-purl만으로 download location 생성 어려워 생략
+download location 생성: 불가
 
 - 기본 repository url
   - `https://hub.docker.com`
@@ -309,7 +311,7 @@ purl만으로 download location 생성 어려워 생략
 
 ### Yocto
 
-생성 불가
+download location 생성: 불가
 
 - namespace: 생략 (optional). `layer.conf`의 `BBFILE_COLLECTIONS`를 읽지 않음. 경로의 `meta-*` 폴더명으로 추정하면 잘못된 값이 될 수 있음
 - name: BPN (https://docs.yoctoproject.org/ref-manual/variables.html#term-BPN) in a yocto recipe (대소문자 구별해야 함)
@@ -363,7 +365,7 @@ download location 생성: https:// 뒤에 namespace&name
 
 ### Generic
 
-download location 생성: qualitifer의 download_url 존재하는 경우 출력, 존재하지 않으면 생성 불가
+download location 생성: qualitifer의 download_url 값으로 생성, 존재하지 않으면 생성 불가
 
 - 위 사항이 아닌 경우 모두 generic type으로 PURL 생성
 - syntax: `pkg:generic/<namespace>/<name>@<version>?<qualifiers>#<subpath>`
