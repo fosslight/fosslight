@@ -309,7 +309,7 @@ purl만으로 download location 생성 어려워 생략
 
 ### Yocto
 
-download location 생성: qualitifer의 repository_url 존재하는 경우 출력, 존재하지 않으면 생성 불가
+생성 불가
 
 - namespace: 생략 (optional). `layer.conf`의 `BBFILE_COLLECTIONS`를 읽지 않음. 경로의 `meta-*` 폴더명으로 추정하면 잘못된 값이 될 수 있음
 - name: BPN (https://docs.yoctoproject.org/ref-manual/variables.html#term-BPN) in a yocto recipe (대소문자 구별해야 함)
