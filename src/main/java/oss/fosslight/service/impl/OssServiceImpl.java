@@ -3476,6 +3476,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			resCd = "10";
 			
 			if (!isEmpty(ossMaster.getJobSeq()) && Integer.parseInt(ossMaster.getJobSeq()) >= 1) {
+				updateOssAnalysis(ossMaster.getOssName(), ossMaster.getOssVersion(), ossMaster.getJobSeq(), ossId);
 				enterpriseIntegrationService.executeAnalysisUpdate(ossMaster.getJobSeq(), ossId, null, false);
 			}
 		} catch (RuntimeException ex) {
@@ -5980,5 +5981,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public void updateOssAnalysis(String ossName, String ossVersion, String jobSeq, String ossId) {
 		// UPDATE ENT_ANALYSIS_JOB_DETAILS
 		ossMapper.updateEntAnalysisJobDetails(ossId, ossName, ossVersion, jobSeq);
+		// UPDATE OSS_VERSION
+		ossMapper.updateDivisionOssVersion(ossId, jobSeq);
 	}
 }
