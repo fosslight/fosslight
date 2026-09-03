@@ -748,11 +748,10 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
 		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
 
-		List<Vulnerability> securityDataList = projectMapper.selectSecurityListForProject(_param);
+		List<Vulnerability> securityDataList = projectMapper.selectMaxScoreSecurityListForProject(_param);
 		Map<String, Vulnerability> securityDataMap = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(securityDataList)) {
 			securityDataMap = securityDataList.stream()
-							        .filter(v -> !"Fixed".equalsIgnoreCase(v.getVulnerabilityResolution()))
 							        .collect(Collectors.toMap(
 							            v -> (v.getOssName() + "_" + avoidNull(v.getOssVersion())).toUpperCase(),
 							            v -> v,

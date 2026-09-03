@@ -91,9 +91,14 @@
 	</select>
 	
 	<select id="getEnterpriseAnalysisCountByDivision" parameterType="string" resultType="int">
-		SELECT IFNULL(SUM(SUCCESS_COUNT), 0) AS CNT
-		FROM ENT_ANALYSIS_JOB
-		WHERE DIVISION = #{division}
+		SELECT IFNULL(SUM(CNT), 0) AS CNT
+		FROM (
+		    SELECT COUNT(*) AS CNT
+		    FROM OSS_VERSION
+		    WHERE DATE_FORMAT(CREATED_DATE, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+			AND IFNULL(DIVISION, '') = #{division}
+		    GROUP BY DIVISION
+		) TBL
 	</select>
 	
 	<update id="updateEnterpriseIntegrationJobOssId">

@@ -383,6 +383,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private String jobSeq;
 	
 	private String syncFlag;
+	
+	private String division;
 		
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -2500,5 +2502,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setSyncFlag(String syncFlag) {
 		this.syncFlag = syncFlag;
+	}
+
+	public String getDivision() {
+		return division;
+	}
+
+	public void setDivision(String division) {
+		this.division = division;
 	}
 }

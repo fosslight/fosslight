@@ -326,4 +326,6 @@ public interface OssMapper {
 	OssAnalysis selectOssAnalysisOne(@Param("componentId") String componentId);
 	
 	void updateEntAnalysisJobDetails(@Param("ossId") String ossId, @Param("ossName") String ossName, @Param("ossVersion") String ossVersion, @Param("jobSeq") String jobSeq);
+
+	void updateDivisionOssVersion(@Param("ossId") String ossId, @Param("jobSeq") String jobSeq);
 }

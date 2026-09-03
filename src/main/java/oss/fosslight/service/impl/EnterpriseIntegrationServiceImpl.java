@@ -409,7 +409,10 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
 			}
 			
 			if (!isEmpty(ossId)) {
-            	OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
+				OssMaster ossMaster = new OssMaster();
+				ossMaster.setOssId(ossId);
+				
+            	OssMaster bean = ossService.getOssMasterOne(ossMaster);
             	if (bean != null) {
             		if (!isEmpty(bean.getCreator()) && isEmpty(bean.getModifier())) {
             			bean.setModifier(bean.getCreator());
