@@ -807,8 +807,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<SecurityExportItemDto> fullDiscoveredItems = toSecurityExportItems(fullDiscoveredList);
 
 		String normalizedTabName = isEmpty(tabName) ? "all" : tabName.trim();
-		boolean isVulnerable = CollectionUtils.isNotEmpty(needToResolveList);
-		resultMap.put("isVulnerable", isVulnerable);
+
+		if (CollectionUtils.isNotEmpty(needToResolveList)) {
+			boolean allFixed = needToResolveList.stream().allMatch(item -> "Fixed".equalsIgnoreCase(item.getVulnerabilityResolution()));
+			if (!allFixed) {
+				resultMap.put("securityStatus","VULNERABLE");
+			} else {
+				resultMap.put("securityStatus","MODERATED");
+			}
+		} else if (CollectionUtils.isNotEmpty(fullDiscoveredList)) {
+			resultMap.put("securityStatus","MODERATED");
+		} else {
+			resultMap.put("securityStatus","SAFE");
+		}
 
 		if ("needToResolve".equalsIgnoreCase(normalizedTabName)) {
 			resultMap.put("needToResolve", needToResolveItems);
