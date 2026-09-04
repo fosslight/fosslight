@@ -2451,6 +2451,10 @@ public class ExcelUtil extends CoTopComponent {
 					sheet = wb.getSheetAt(StringUtil.string2integer(sheetIdx));
 				} catch (Exception e) {
 					sheetSeq = wb.getSheetIndex(readType);
+					if(sheetSeq == -1){
+						errMsgList.add("Cannot find sheet name : " + readType);
+						return false;
+					}
 					sheet = wb.getSheetAt(sheetSeq);
 				}
 				
