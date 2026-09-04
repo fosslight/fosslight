@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.annotation.ApiCommonResponses;
+import oss.fosslight.api.doc.example.SelfCheckApiExampleConstants;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
@@ -472,7 +473,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                     message = "성공",
                     response = Map.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"content\":{\"prjId\":\"123\",\"prjName\":\"Sample Self Check\",\"prjVersion\":\"1.0\",\"comment\":\"Initial self-check\",\"commentIdx\":\"501\",\"useYn\":\"Y\",\"srcCsvFileId\":\"10001\",\"creator\":\"user01\",\"createdDate\":\"2026-08-01 09:00:00\",\"modifier\":\"user02\",\"modifiedDate\":\"2026-08-20 14:30:00\",\"prjUserName\":\"홍길동\",\"prjDivisionName\":\"HE Division\"}}"))
+                            value = SelfCheckApiExampleConstants.SELF_CHECK_DETAIL_SUCCESS_EXAMPLE))
             ),
            
             @ApiResponse(
