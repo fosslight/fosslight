@@ -561,7 +561,6 @@ public class ExcelUtil extends CoTopComponent {
 			try {
 				Sheet sheet = wb.getSheetAt(Integer.parseInt(targetSheetNums[0]));
 			} catch (Exception e) {
-				
 				List<String> sheetNames = new ArrayList<String>();
 				for (int i=0; i<wb.getNumberOfSheets(); i++) {
 					sheetNames.add( wb.getSheetName(i) );
@@ -3033,10 +3032,12 @@ public class ExcelUtil extends CoTopComponent {
 		}
 		
 		List<String> errRow = new ArrayList<>();
-		List<String> analysisListIds = new ArrayList<String>();
+		Map<String, String> analysisMap = new HashMap<>();
+//		List<String> analysisListIds = new ArrayList<String>();
 		
 		for (OssAnalysis analysisBean : analysisList) {
-			analysisListIds.add(analysisBean.getGridId());
+//			analysisListIds.add(analysisBean.getGridId());
+			analysisMap.put(analysisBean.getGridId(), avoidNull(analysisBean.getJobSeq()));
 		}
 		
 		int rowSeq = 0;
@@ -3053,9 +3054,9 @@ public class ExcelUtil extends CoTopComponent {
 				
 				// 기본정보
 				String gridId = gridIdCol < 0 ? "" : avoidNull(row[gridIdCol]).trim().replaceAll("\t", "");
-				int checkLength = analysisListIds.stream().filter(a -> a.equals(gridId)).collect(Collectors.toList()).size();
+//				int checkLength = analysisListIds.stream().filter(a -> a.equals(gridId)).collect(Collectors.toList()).size();
 				
-				if (checkLength == 1) {
+				if (analysisMap.containsKey(gridId)) {
 					bean.setGridId(gridId);
 					bean.setResult(resultCol < 0 ? "" : avoidNull(row[resultCol]).trim().replaceAll("\t", ""));
 					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(row[ossNameCol]).trim().replaceAll("\t", ""));
@@ -3071,6 +3072,7 @@ public class ExcelUtil extends CoTopComponent {
 					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(row[homepageCol]).trim().replaceAll("\t", ""));
 					bean.setOssCopyright(copyrightTextCol < 0 ? "" : avoidNull(row[copyrightTextCol]).trim().replaceAll("\t", ""));
 					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\t", "").replaceAll("<b>", "").replaceAll("</b>", ""));
+					bean.setJobSeq(analysisMap.get(gridId));
 					
 					analysisResultList.add(bean);
 				}
