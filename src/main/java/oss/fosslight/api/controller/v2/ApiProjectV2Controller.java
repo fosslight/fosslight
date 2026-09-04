@@ -13,7 +13,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tools.ant.taskdefs.condition.Http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -1735,10 +1734,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "프로젝트 Security JSON 조회", notes = "조회 권한이 있는 프로젝트의 Security 탭 데이터를 JSON으로 반환합니다.")
+    @ApiOperation(
+            value = "프로젝트 Security JSON 조회",
+            notes = "조회 권한이 있는 프로젝트의 Security 탭 데이터를 JSON으로 반환합니다." +
+                    "\n\n* `tabName` 파라미터는 Security 탭의 필터를 지정합니다. 기본값은 `all`이며, `fullDiscovered` 또는 `needToResolve`를 선택할 수 있습니다." +
+                    "\n     * `fullDiscovered`: 모든 발견된 보안 이슈를 포함합니다." +
+                    "\n     * `needToResolve`: 해결이 필요한 보안 이슈만 포함합니다.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json",
-                    value = ProjectApiExampleConstants.PROJECT_SECURITY_JSON_SUCCESS_EXAMPLE))),
+            @ApiResponse(
+                    code = 200,
+                    message = "조회 성공" +
+                    "\n\n* `securityStatus`: SAFE, MODERATED, VULNERABLE 중 하나의 상태를 가짐." +
+                    "\n     * `SAFE`: 조치할 항목이 없는 상태" +
+                    "\n     * `MODERATED`: 발견된 취약점은 있으나 즉시 조치 필요한 취약점은 없는 상태" +
+                    "\n     * `VULNERABLE`: 치명/주요 취약점 또는 악용 가능한 보안 결함이 확인되어 우선 조치가 필요한 상태",
+                    response = Map.class,
+                    examples = @Example(@ExampleProperty(mediaType = "application/json",
+                            value = ProjectApiExampleConstants.PROJECT_SECURITY_JSON_SUCCESS_EXAMPLE))),
             @ApiResponse(code = 404, message = "프로젝트가 없거나 조회 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Project 123 not exist or User doesn't have permission for the project\"}")))
     })
     @GetMapping(value = {Url.APIV2.FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON})
