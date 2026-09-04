@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.advice.CProjectNotAvailableException;
 import oss.fosslight.api.annotation.ApiCommonResponses;
-import oss.fosslight.api.doc.example.PartnerApiExampleConstants;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -66,7 +65,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
                     message = "성공",
                     response = Map.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = PartnerApiExampleConstants.PARTNER_LIST_SEARCH_SUCCESS_EXAMPLE))
+                            value = "{\"list\":[{\"partnerId\":\"1\",\"partnerName\":\"Example Supplier\",\"softwareName\":\"Example SDK\",\"softwareVersion\":\"2.5.0\",\"status\":\"Confirm\",\"modifiedDate\":\"2026-08-20\",\"createdDate\":\"2026-08-01\",\"deliveryForm\":\"Source Code\",\"description\":\"SDK supplied for the TV project\",\"creator\":\"user01\",\"reviewer\":\"reviewer01\",\"division\":\"Division\",\"prjId\":\"6304,6305\"}],\"totalCount\":1}"))
             ),
             @ApiResponse(
                     code = 400,
@@ -244,7 +243,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
                     message = "성공",
                     response = Map.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = PartnerApiExampleConstants.PARTNER_SBOM_JSON_SUCCESS_EXAMPLE))
+                            value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by Example SDK\",\"Vulnerability\":\"7.5\"}]}"))
             ),
            
             @ApiResponse(
@@ -262,7 +261,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "3rd Party SBOM JSON 조회 (Deprecated)", notes = "이전 경로입니다. /partners/{id}/sbom/json-data 사용을 권장합니다.", hidden = true)
     @ApiResponses({
-            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = PartnerApiExampleConstants.PARTNER_SBOM_JSON_SUCCESS_EXAMPLE))),
+            @ApiResponse(code = 200, message = "조회 성공", response = Map.class, examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"sample-oss\":[{\"version\":\"1.0.0\",\"license\":[\"Apache-2.0\"],\"download location\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"homepage\":\"https://example.org/sample-oss\",\"copyright text\":[\"Copyright 2026 Example Authors\"],\"exclude\":false,\"comment\":\"Used by Example SDK\",\"Vulnerability\":\"7.5\"}]}"))),
             @ApiResponse(code = 403, message = "3rd Party 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
             
     })
