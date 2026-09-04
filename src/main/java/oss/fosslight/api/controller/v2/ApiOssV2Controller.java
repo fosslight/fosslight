@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.annotation.ApiCommonResponses;
 import oss.fosslight.api.annotation.InternalApi;
+import oss.fosslight.api.doc.example.OssApiExampleConstants;
 import oss.fosslight.api.dto.ListLicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.service.RestResponseService;
@@ -65,7 +66,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     message = "성공",
                     response = ListOssDto.Result.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"list\":[{\"ossId\":\"1\",\"ossType\":\"100\",\"ossTypeMap\":{\"Multi\":\"Y\",\"Dual\":\"N\",\"V-Diff\":\"N\"},\"ossName\":\"sample-oss\",\"ossVersion\":\"1.0.0\",\"licenseName\":\"Apache-2.0\",\"licenseType\":\"PMS\",\"downloadUrl\":\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\",\"downloadUrls\":[\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\"],\"homepageUrl\":\"https://example.org/sample-oss\",\"description\":\"Sample open source component\",\"cveId\":\"CVE-2026-1234\",\"cvssScore\":\"7.5\",\"creator\":\"user01\",\"created\":\"2026-08-01 09:00:00\",\"modifier\":\"user02\",\"modified\":\"2026-08-20 14:30:00\",\"obligations\":[\"Y\",\"N\"],\"obligationTypeMap\":{\"Notice\":\"Y\",\"Source\":\"N\"},\"copyright\":\"Copyright 2026 Example Authors\",\"nicknames\":\"sample|sample-lib\",\"nicknameList\":[\"sample\",\"sample-lib\"],\"attribution\":\"This product includes sample-oss.\",\"exclude\":false}],\"totalCount\":1}"))
+                            value = OssApiExampleConstants.OSS_LIST_SEARCH_SUCCESS_EXAMPLE))
             ),
             @ApiResponse(
                     code = 400,
@@ -117,7 +118,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     message = "성공",
                     response = ListLicenseDto.Result.class,
                     examples = @Example(value = @ExampleProperty(mediaType = "application/json",
-                            value = "{\"list\":[{\"licenseId\":\"1\",\"licenseName\":\"Apache License 2.0\",\"licenseType\":\"Permissive\",\"licenseText\":\"Apache License Version 2.0, January 2004\",\"licenseIdentifier\":\"Apache-2.0\",\"homepageUrl\":\"https://www.apache.org/licenses/LICENSE-2.0\",\"description\":\"A permissive open source license.\",\"creator\":\"admin\",\"modifier\":\"admin\",\"created\":\"2026-08-01 09:00:00\",\"modified\":\"2026-08-20 14:30:00\",\"restrictions\":[\"Include License\",\"Notice\"],\"licenseNickname\":\"Apache 2.0\",\"obligations\":[\"Y\",\"N\"],\"attribution\":\"Licensed under the Apache License, Version 2.0.\"}],\"totalCount\":1}"))
+                            value = OssApiExampleConstants.LICENSE_LIST_SEARCH_SUCCESS_EXAMPLE))
             ),
             @ApiResponse(
                     code = 400,
@@ -250,7 +251,7 @@ public class ApiOssV2Controller extends CoTopComponent {
                     code = 200,
                     message = "성공",
                     response = Map.class,
-                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"UPDATE-DOWNLOAD-LOCATION-FORMAT\":{\"reFineTotalCnt\":1,\"reFineItems\":{\"sample-oss_1.0.0\":[\"https://github.com/example/sample-oss/archive/v1.0.0.tar.gz\"]}}}"))
+                    examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = OssApiExampleConstants.OSS_DOWNLOAD_LOCATION_REFINE_SUCCESS_EXAMPLE))
             ),
             @ApiResponse(code = 400, message = "필수 doUpdateFlag 또는 refineType 누락", examples = @Example(value = @ExampleProperty(mediaType = "application/json", value = "{\"error\":\"Bad Request\",\"message\":\"'refineType' parameter is missing or misspelled\"}"))),
             @ApiResponse(
