@@ -804,6 +804,7 @@ public class CoMailManager extends CoTopComponent {
     				convertDataMap.put("isVulnerable", (boolean) paramMap.get("isVulnerable"));
     				convertDataMap.put("isBelowThreshold", (boolean) paramMap.get("isBelowThreshold"));
     				convertDataMap.put("isSafe", (boolean) paramMap.get("isSafe"));
+    				convertDataMap.put("standardScore", CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE));
     				
     				if (paramMap.containsKey("message")) {
     					convertDataMap.put("message", (String) paramMap.get("message"));
