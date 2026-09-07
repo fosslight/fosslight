@@ -174,7 +174,6 @@ public class NvdDataService extends CoTopComponent {
 		boolean httpsUrlConnectionFlag = false;
 
 		List<Map<String, Object>> vulnerabilities = null;
-		Map<String, Object> cveInfo = null;
 		List<Map<String, Object>> cpe_match_all = null;
 		List<String> cpe_match_running_on_with = null;
 		List<Map<String, Object>> cvePatchList = null;
@@ -214,7 +213,7 @@ public class NvdDataService extends CoTopComponent {
 						vulnerabilities = (List<Map<String, Object>>) responseMap.get("vulnerabilities");
 						if (vulnerabilities != null) {
 							for (Map<String, Object> vulnerability : vulnerabilities) {
-								cveInfo = restApiCveDatajsonReader(vulnerability);
+								Map<String, Object> cveInfo = restApiCveDatajsonReader(vulnerability);
 								if (cveInfo == null || cveInfo.isEmpty()) {
 									continue;
 								}
