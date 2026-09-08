@@ -18,8 +18,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -592,7 +595,7 @@ public class ExcelUtil extends CoTopComponent {
 				// 1. final list sheet data 취득
 				Sheet sheet = wb.getSheet("Final List");
 				Map<String, String> finalListErrMsg = new HashMap<>();
-				finalListErrMsg = readSheet(sheet, list, true, readType, errMsgList);
+				finalListErrMsg = readSheet(sheet, list, true, readType, errMsgList, wb);
 				if (!finalListErrMsg.isEmpty()) {
 					errList.add(finalListErrMsg);
 				}
@@ -608,7 +611,7 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						List<OssComponents> _list = new ArrayList<>();
 						Map<String, String> errMsg = new HashMap<>();
-						errMsg = readSheet(_sheet, _list, true, readType, errMsgList);
+						errMsg = readSheet(_sheet, _list, true, readType, errMsgList, wb);
 						if (!errMsg.isEmpty()) {
 							errList.add(errMsg);
 						}
@@ -665,7 +668,7 @@ public class ExcelUtil extends CoTopComponent {
 					// get target sheet
 					Sheet sheet = wb.getSheetAt(StringUtil.string2integer(sheetIdx));
 					Map<String, String> errMsg = new HashMap<>();
-					errMsg = readSheet(sheet, list, false, readType, errMsgList);
+					errMsg = readSheet(sheet, list, false, readType, errMsgList, wb);
 					if (!errMsg.isEmpty()) {
 						errList.add(errMsg);
 					}
@@ -774,6 +777,10 @@ public class ExcelUtil extends CoTopComponent {
 	}
 
 	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList) {
+		return readSheet(sheet, list, readNoCol, readType, errMsgList, sheet != null ? sheet.getWorkbook() : null);
+	}
+
+	public static Map<String, String> readSheet(Sheet sheet, List<OssComponents> list, boolean readNoCol, String readType, List<String> errMsgList, Workbook workbook) {
 		int DefaultHeaderRowIndex = 2; // header index
 		
 		int ossNameCol = -1;
@@ -822,6 +829,7 @@ public class ExcelUtil extends CoTopComponent {
 		Map<String, String> errMsg = new HashMap<>();
 		
 		DefaultHeaderRowIndex = findHeaderRowIndex(sheet);
+		Row headerRow = DefaultHeaderRowIndex >= 0 ? sheet.getRow(DefaultHeaderRowIndex) : null;
 		
 		if (DefaultHeaderRowIndex < 0) {
 			if (!readNoCol) {
@@ -830,7 +838,6 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		} else {
 			// set column index
-			Row headerRow = sheet.getRow(DefaultHeaderRowIndex);
 			Iterator<Cell> iter = headerRow.cellIterator();
 			int colIdx = 0;
 			List<String> dupColList = new ArrayList<>();
@@ -1232,6 +1239,7 @@ public class ExcelUtil extends CoTopComponent {
 			String lastFilePath = "";
 			String lastBinaryName = "";
 			String lastExcludeYn = "";
+			Map<String, String> spdxPurlMap = getSpdxExternalRefPurlMap(sheet, workbook);
 
 			List<String> duplicateCheckList = new ArrayList<>();
 			List<String> errRow = new ArrayList<>();
@@ -1305,22 +1313,23 @@ public class ExcelUtil extends CoTopComponent {
     						bean.setDownloadLocation("");
     					} else {
     						String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\\s", "");
-    						if (downloadLocation.equals("NONE") || downloadLocation.equals("NOASSERTION")) {
+    						if (isSpdxEmptyValue(downloadLocation)) {
     							bean.setDownloadLocation("");
         					} else {
         						bean.setDownloadLocation(downloadLocation);
         					}
     					}
     					
-    					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\\s", ""));
+    					String homepage = homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\\s", "");
+    					bean.setHomepage(isSpdxEmptyValue(homepage) ? "" : homepage);
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
-    
+     
     					if (downloadLocationCol < 0) {
     						bean.setCopyrightText("");
     					} else {
     						String copyrightText = getCellData(row.getCell(copyrightTextCol));
-        					if (copyrightText.equals("NONE") || copyrightText.equals("NOASSERTION")) {
+        					if (isSpdxEmptyValue(copyrightText)) {
         						bean.setCopyrightText("");
         					} else {
         						bean.setCopyrightText(copyrightText);
@@ -1342,8 +1351,13 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setReportKey(getCellData(row.getCell(noCol)));
     				}
 
+    				String licenseValue = "";
     				if (licenseCol > 0) {
-    					String licenseConcluded = getCellData(row.getCell(licenseCol));
+    					String licenseConcluded = normalizeSpdxValue(getCellData(row.getCell(licenseCol)));
+    					if (isSPDXSpreadsheet(sheet) && isSpdxEmptyValue(licenseConcluded)) {
+    						licenseConcluded = getSpdxDeclaredLicenseValue(headerRow, row);
+    					}
+    					licenseValue = licenseConcluded;
         				if (isSPDXSpreadsheet(sheet) && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
         					String licenseComment = getCellData(row.getCell(commentCol));
         					String comment = "";
@@ -1369,7 +1383,7 @@ public class ExcelUtil extends CoTopComponent {
     				// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단
     				OssComponentsLicense subBean = new OssComponentsLicense();
     				if (licenseCol > 0) {
-    					String licenseName = getCellData(row.getCell(licenseCol));
+    					String licenseName = licenseValue;
         				if (isSPDXSpreadsheet(sheet)){
         					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
         				} else if (licenseName.contains(",")) {
@@ -1420,7 +1434,11 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setFilePath(_replaceFilePath);
     				}
     				
-    				bean.setPackageUrl(packageUrlCol < 0 ? "" : getCellData(row.getCell(packageUrlCol)));
+    				String packageUrl = normalizeSpdxValue(packageUrlCol < 0 ? "" : getCellData(row.getCell(packageUrlCol)));
+    				if (isSPDXSpreadsheet(sheet) && isSpdxEmptyValue(packageUrl)) {
+    					packageUrl = normalizeSpdxValue(spdxPurlMap.get(bean.getSpdxIdentifier()));
+    				}
+    				bean.setPackageUrl(packageUrl);
     				
     				// empty row check
     				if (isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getBinaryName()) && isEmpty(bean.getFilePath())
@@ -1514,6 +1532,150 @@ public class ExcelUtil extends CoTopComponent {
 
 	private static boolean isSPDXSpreadsheet(Sheet sheet) {
 		return sheet.getSheetName().equals("Package Info") || sheet.getSheetName().equals("Per File Info");
+	}
+
+	private static String getSpdxDeclaredLicenseValue(Row headerRow, Row row) {
+		if (headerRow == null || row == null) {
+			return "";
+		}
+
+		Iterator<Cell> iter = headerRow.cellIterator();
+		while (iter.hasNext()) {
+			Cell cell = iter.next();
+			String value = avoidNull(getCellData(cell)).toUpperCase().trim();
+			if ("LICENSE DECLARED".equals(value)) {
+				return normalizeSpdxValue(getCellData(row.getCell(cell.getColumnIndex())));
+			}
+		}
+
+		return "";
+	}
+
+	private static Map<String, String> getSpdxExternalRefPurlMap(Sheet sheet, Workbook workbook) {
+		Map<String, String> purlByPackageId = new HashMap<>();
+		if (!isSPDXSpreadsheet(sheet) || workbook == null) {
+			return purlByPackageId;
+		}
+
+		Sheet externalRefsSheet = workbook.getSheet("External Refs");
+		if (externalRefsSheet == null) {
+			return purlByPackageId;
+		}
+
+		int headerRowIndex = findSpdxExternalRefsHeaderRowIndex(externalRefsSheet);
+		if (headerRowIndex < 0) {
+			return purlByPackageId;
+		}
+
+		Row headerRow = externalRefsSheet.getRow(headerRowIndex);
+		if (headerRow == null) {
+			return purlByPackageId;
+		}
+
+		int packageIdCol = -1;
+		int categoryCol = -1;
+		int typeCol = -1;
+		int locatorCol = -1;
+		Iterator<Cell> iter = headerRow.cellIterator();
+		while (iter.hasNext()) {
+			Cell cell = iter.next();
+			String value = avoidNull(getCellData(cell)).toUpperCase().trim();
+			switch (value) {
+				case "PACKAGE ID":
+					packageIdCol = cell.getColumnIndex();
+					break;
+				case "CATEGORY":
+					categoryCol = cell.getColumnIndex();
+					break;
+				case "TYPE":
+					typeCol = cell.getColumnIndex();
+					break;
+				case "LOCATOR":
+					locatorCol = cell.getColumnIndex();
+					break;
+				default:
+					break;
+			}
+		}
+
+		if (packageIdCol < 0 || categoryCol < 0 || typeCol < 0 || locatorCol < 0) {
+			return purlByPackageId;
+		}
+
+		for (int rowIdx = headerRowIndex + 1; rowIdx < externalRefsSheet.getPhysicalNumberOfRows(); rowIdx++) {
+			Row row = externalRefsSheet.getRow(rowIdx);
+			if (row == null) {
+				continue;
+			}
+
+			String packageId = normalizeSpdxValue(getCellData(row.getCell(packageIdCol)));
+			String category = normalizeSpdxValue(getCellData(row.getCell(categoryCol)));
+			String type = normalizeSpdxValue(getCellData(row.getCell(typeCol)));
+			String locator = normalizeSpdxValue(getCellData(row.getCell(locatorCol)));
+			if (isSpdxEmptyValue(packageId) || isSpdxEmptyValue(locator)) {
+				continue;
+			}
+			if ("PACKAGE_MANAGER".equalsIgnoreCase(category) && "purl".equalsIgnoreCase(type)) {
+				purlByPackageId.put(packageId, locator);
+			}
+		}
+
+		return purlByPackageId;
+	}
+
+	private static String normalizeSpdxValue(String value) {
+		String normalized = avoidNull(value).trim();
+		return isSpdxEmptyValue(normalized) ? "" : normalized;
+	}
+
+	private static boolean isSpdxEmptyValue(String value) {
+		String normalized = avoidNull(value).trim();
+		return normalized.isEmpty() || "NONE".equalsIgnoreCase(normalized) || "NOASSERTION".equalsIgnoreCase(normalized);
+	}
+
+	private static int findSpdxExternalRefsHeaderRowIndex(Sheet sheet) {
+		if (sheet == null) {
+			return -1;
+		}
+
+		int maxRow = Math.min(sheet.getLastRowNum(), 20);
+		for (int rowIdx = 0; rowIdx <= maxRow; rowIdx++) {
+			Row row = sheet.getRow(rowIdx);
+			if (row == null) {
+				continue;
+			}
+
+			boolean hasPackageId = false;
+			boolean hasCategory = false;
+			boolean hasType = false;
+			boolean hasLocator = false;
+
+			for (Cell cell : row) {
+				String value = avoidNull(getCellData(cell)).trim().toUpperCase();
+				switch (value) {
+					case "PACKAGE ID":
+						hasPackageId = true;
+						break;
+					case "CATEGORY":
+						hasCategory = true;
+						break;
+					case "TYPE":
+						hasType = true;
+						break;
+					case "LOCATOR":
+						hasLocator = true;
+						break;
+					default:
+						break;
+				}
+			}
+
+			if (hasPackageId && hasCategory && hasType && hasLocator) {
+				return rowIdx;
+			}
+		}
+
+		return -1;
 	}
 
 	private static boolean hasSameLicense(OssComponents ossComponents, OssComponentsLicense subBean) {

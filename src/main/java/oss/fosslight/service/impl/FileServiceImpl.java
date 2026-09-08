@@ -853,11 +853,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		            if (pkgNode.isObject()) {
 		                ObjectNode pkg = (ObjectNode) pkgNode;
 		                
-		                if (pkg.has("externalRefs")) {
-		                    pkg.remove("externalRefs");
-		                    log.debug("ExternalRefs removed from package: {}", pkg.path("name").asText());
-		                }
-
 		                pkg.remove("relationships");
 		                pkg.remove("annotations");
 		                pkg.remove("attributionText");
