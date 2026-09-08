@@ -630,6 +630,10 @@
 			AND M.ID <![CDATA[<>]]> M_ALIAS.ID
 			GROUP BY M.ID, M_ALIAS.ID
 		) TBL
+		<if test="filtersParam != null">
+			WHERE 1=1
+			<include refid="filters"/>
+		</if>
 		ORDER BY TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC, TBL.MODI_DATE DESC
 	</select>
 	
@@ -733,6 +737,10 @@
 			AND M.ID <![CDATA[<>]]> M_ALIAS.ID
 			GROUP BY M.ID, M_ALIAS.ID
 		) TBL
+		<if test="filtersParam != null">
+			WHERE 1=1
+			<include refid="filters"/>
+		</if>
 		ORDER BY TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC, TBL.MODI_DATE DESC
 	</select>
 	
@@ -844,6 +852,10 @@
 			AND M.ID <![CDATA[<>]]> M_ALIAS.ID
 			GROUP BY M.ID, M_ALIAS.ID
 		) TBL
+		<if test="filtersParam != null">
+			WHERE 1=1
+			<include refid="filters"/>
+		</if>
 		ORDER BY TBL.GROUP_KEY_ID ASC, CASE WHEN TBL.CVE_ID = TBL.GROUP_KEY_ID THEN 0 ELSE 1 END ASC, TBL.CVE_ID ASC, TBL.MODI_DATE DESC
 	</select>
 

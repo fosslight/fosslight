@@ -1625,7 +1625,9 @@ public class OsvDataService extends CoTopComponent {
 		if (ossMaster.getOssVersionAliases() != null) {
 			param.put("ossVersionAliases", ossMaster.getOssVersionAliases());
 		}
-
+		if (ossMaster.getFiltersParam() != null) {
+			param.put("filtersParam", ossMaster.getFiltersParam());
+		}
 		return param;
 	}
 
