@@ -3909,18 +3909,20 @@ public class CommonFunction extends CoTopComponent {
 					boolean isNumberFormat = numberFormatColumns.contains(StringUtil.convertToUnderScore(field).toUpperCase());
 					
 					if (!isEmpty(field) && !isEmpty(data)) {
-						for ( String key : exceptionMap.keySet() ){ 
-							if (field.equalsIgnoreCase(key)) {
-								field = exceptionMap.get(key);
-							}
-						}
-						
 						boolean dateB = false;
-						
 						for (String dateF : dateField) {
 							if (field.equalsIgnoreCase(dateF)) {
 								dateB = true;
 							}
+						}
+						
+						boolean exceptionField = false;
+						for (String key : exceptionMap.keySet()) {
+						    if (field.equalsIgnoreCase(key)) {
+						        field = exceptionMap.get(key);
+						        exceptionField = true;
+						        break;
+						    }
 						}
 						
 						switch(op) {
@@ -4030,7 +4032,7 @@ public class CommonFunction extends CoTopComponent {
 								break;
 						}
 						
-						if (!upperFlag){
+						if (!upperFlag && !exceptionField) {
 							field = StringUtil.convertToUnderScore(field).toUpperCase();
 						}
 						

@@ -8,6 +8,7 @@ package oss.fosslight.domain;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import oss.fosslight.common.CommonFunction;
 
@@ -371,6 +372,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private int urlSearchSeq;
 	
 	private int jobSeq;
+	
+	private Map<String, Object> filtersParam;
 	
 	public String getRedirectLocation() {
 		return redirectLocation;
@@ -2264,5 +2267,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setJobSeq(int jobSeq) {
 		this.jobSeq = jobSeq;
+	}
+
+	public Map<String, Object> getFiltersParam() {
+		return filtersParam;
+	}
+
+	public void setFiltersParam(Map<String, Object> filtersParam) {
+		this.filtersParam = filtersParam;
 	}
 }

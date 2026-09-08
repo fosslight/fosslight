@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.util.StringUtil;
@@ -385,7 +386,9 @@ public class OssMaster extends ComBean implements Serializable{
 	private String syncFlag;
 	
 	private String division;
-		
+	
+	private Map<String, Object> filtersParam;
+	
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
 	}
@@ -2510,5 +2513,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDivision(String division) {
 		this.division = division;
+	}
+
+	public Map<String, Object> getFiltersParam() {
+		return filtersParam;
+	}
+
+	public void setFiltersParam(Map<String, Object> filtersParam) {
+		this.filtersParam = filtersParam;
 	}
 }

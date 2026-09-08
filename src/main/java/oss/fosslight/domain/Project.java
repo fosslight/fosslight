@@ -883,6 +883,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String resetFlag;
 	
+	private Map<String, Object> filtersParam;
+	
 	/**
 	 * Gets the prj id.
 	 *
@@ -4960,5 +4962,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setDistributionTypes(String[] distributionTypes) {
 		this.distributionTypes = distributionTypes;
+	}
+
+	public Map<String, Object> getFiltersParam() {
+		return filtersParam;
+	}
+
+	public void setFiltersParam(Map<String, Object> filtersParam) {
+		this.filtersParam = filtersParam;
 	}
 }

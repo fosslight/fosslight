@@ -121,7 +121,69 @@
     		</if>
     	</if>
     </sql>
-	
+	<sql id="filters">
+		AND
+		<foreach collection="filtersParam.rules" item="item" separator="AND">
+			<choose>
+				<when test='item.field == "product"'>
+					TBL.OSS_NAME
+				</when>
+				<when test='item.field == "version"'>
+					TBL.OSS_VERSION
+				</when>
+				<when test='item.field == "cvssScore"'>
+					TBL.CVSS_SCORE
+				</when>
+				<when test='item.field == "cveId"'>
+					TBL.CVE_ID
+				</when>
+				<when test='item.field == "modiDate"'>
+					TBL.MODI_DATE
+				</when>
+			</choose>
+			<choose>
+				<when test='item.op == "eq"'>
+					= #{item.data}
+				</when>
+				<when test='item.op == "ne"'>
+					<![CDATA[<>]]> #{item.data}
+				</when>
+				<when test='item.op == "bw"'>
+					LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test='item.op == "bn"'>
+					NOT LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test='item.op == "ew"'>
+					LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test='item.op == "en"'>
+					NOT LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test='item.op == "cn"'>
+					LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test='item.op == "nc"'>
+					NOT LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test='item.op == "lt"'>
+					<![CDATA[<]]> #{item.data}
+				</when>
+				<when test='item.op == "le"'>
+					<![CDATA[<=]]> #{item.data}
+				</when>
+				<when test='item.op == "gt"'>
+					<![CDATA[>]]> #{item.data}
+				</when>
+				<when test='item.op == "ge"'>
+					<![CDATA[>=]]> #{item.data}
+				</when>
+				<otherwise>
+
+				</otherwise>
+			</choose>
+		</foreach>
+    </sql>
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
 		/* ProjectMapper.selectProjectTotalCount */
 		SELECT COUNT(*) FROM (
@@ -6934,6 +6996,10 @@
 					</if>
 					GROUP BY TBL.OSS_NAME, TBL.OSS_VERSION
 				) TBL
+				<if test="filtersParam != null">
+				    WHERE 1=1
+				    <include refid="filters"/>
+				</if>
 		<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
 			) TBL1
 		</if>

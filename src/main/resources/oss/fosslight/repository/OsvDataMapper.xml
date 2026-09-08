@@ -2,6 +2,70 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="oss.fosslight.repository.OsvDataMapper">
+	<sql id="filters">
+		AND
+		<foreach collection="filtersParam.rules" item="item" separator="AND">
+			<choose>
+				<when test='item.field == "product"'>
+					TBL.OSS_NAME
+				</when>
+				<when test='item.field == "version"'>
+					TBL.OSS_VERSION
+				</when>
+				<when test='item.field == "cvssScore"'>
+					TBL.CVSS_SCORE
+				</when>
+				<when test='item.field == "cveId"'>
+					TBL.CVE_ID
+				</when>
+				<when test='item.field == "modiDate"'>
+					TBL.MODI_DATE
+				</when>
+			</choose>
+			<choose>
+				<when test='item.op == "eq"'>
+					= #{item.data}
+				</when>
+				<when test='item.op == "ne"'>
+					<![CDATA[<>]]> #{item.data}
+				</when>
+				<when test='item.op == "bw"'>
+					LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test='item.op == "bn"'>
+					NOT LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test='item.op == "ew"'>
+					LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test='item.op == "en"'>
+					NOT LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test='item.op == "cn"'>
+					LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test='item.op == "nc"'>
+					NOT LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test='item.op == "lt"'>
+					<![CDATA[<]]> #{item.data}
+				</when>
+				<when test='item.op == "le"'>
+					<![CDATA[<=]]> #{item.data}
+				</when>
+				<when test='item.op == "gt"'>
+					<![CDATA[>]]> #{item.data}
+				</when>
+				<when test='item.op == "ge"'>
+					<![CDATA[>=]]> #{item.data}
+				</when>
+				<otherwise>
+
+				</otherwise>
+			</choose>
+		</foreach>
+    </sql>
+
 	<insert id="insertOsvVulnerability" useGeneratedKeys="true" keyProperty="id" keyColumn="ID">
 		INSERT INTO OSV_VULNERABILITIES (OSV_ID, SCHEMA_VERSION, SUMMARY, DETAILS, PUBL_DATE, MODI_DATE, WITHDRAWN, RAW_JSON)
         VALUES (#{osvId}, #{schemaVersion}, #{summary}, #{details}, #{publDate}, #{modiDate}, #{withdrawn}, #{rawJson})
@@ -443,6 +507,10 @@
 					AND OC.EXCLUDE_YN <![CDATA[<>]]> 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION, M.ID
 				) TBL
+				<if test="filtersParam != null">
+				    WHERE 1=1
+				    <include refid="filters"/>
+				</if>
 			<if test="@oss.fosslight.util.StringUtil@isEmpty(skipVulnerabilityResolution)">
 				LEFT JOIN NVD_DATA_SECURITY SEC
   				ON SEC.REFERENCE_ID = #{referenceId} 
