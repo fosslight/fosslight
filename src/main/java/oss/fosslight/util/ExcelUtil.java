@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.github.packageurl.PackageURL;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -1239,6 +1241,7 @@ public class ExcelUtil extends CoTopComponent {
 			String lastFilePath = "";
 			String lastBinaryName = "";
 			String lastExcludeYn = "";
+			boolean isSpdxSpreadsheet = isSPDXSpreadsheet(sheet);
 			Map<String, String> spdxPurlMap = getSpdxExternalRefPurlMap(sheet, workbook);
 			Map<String, Set<String>> spdxDependsOnMap = getSpdxDependsOnMap(sheet, workbook, spdxPurlMap);
 
@@ -1309,36 +1312,48 @@ public class ExcelUtil extends CoTopComponent {
     							bean.setOssVersion("");
     						}
     					}
+
+						bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
+						bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
     					
+    					String packageUrl = normalizeSpdxValue(packageUrlCol < 0 ? "" : getCellData(row.getCell(packageUrlCol)));
+    					if (isSpdxSpreadsheet && isSbomEmptyValue(packageUrl)) {
+    						packageUrl = normalizeSpdxValue(spdxPurlMap.get(bean.getSpdxIdentifier()));
+    					}
+    					bean.setPackageUrl(packageUrl);
+					
     					if (downloadLocationCol < 0) {
     						bean.setDownloadLocation("");
     					} else {
     						String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\\s", "");
-    						if (isSpdxEmptyValue(downloadLocation)) {
+    						if (isSbomEmptyValue(downloadLocation)) {
     							bean.setDownloadLocation("");
         					} else {
         						bean.setDownloadLocation(downloadLocation);
         					}
     					}
-    					
+    					if (isSpdxSpreadsheet && isSbomEmptyValue(bean.getDownloadLocation()) && !isSbomEmptyValue(bean.getPackageUrl())) {
+    						String generatedDownloadLocation = generateDownloadLocationFromPurl(bean.getPackageUrl());
+    						if (!isSbomEmptyValue(generatedDownloadLocation)) {
+    							bean.setDownloadLocation(generatedDownloadLocation);
+    						}
+    					}
+					
     					String homepage = homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\\s", "");
-    					bean.setHomepage(isSpdxEmptyValue(homepage) ? "" : homepage);
+    					bean.setHomepage(isSbomEmptyValue(homepage) ? "" : homepage);
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
-     
+					
     					if (downloadLocationCol < 0) {
     						bean.setCopyrightText("");
     					} else {
     						String copyrightText = getCellData(row.getCell(copyrightTextCol));
-        					if (isSpdxEmptyValue(copyrightText)) {
+        					if (isSbomEmptyValue(copyrightText)) {
         						bean.setCopyrightText("");
         					} else {
         						bean.setCopyrightText(copyrightText);
         					}
     					}
-    					
-    					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
-    					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
     				}
     				
     				duplicateCheckList.add(avoidNull(bean.getOssName()) + "-" + avoidNull(bean.getOssVersion()) + "-" + avoidNull(bean.getLicenseName()));
@@ -1355,11 +1370,11 @@ public class ExcelUtil extends CoTopComponent {
     				String licenseValue = "";
     				if (licenseCol > 0) {
     					String licenseConcluded = normalizeSpdxValue(getCellData(row.getCell(licenseCol)));
-    					if (isSPDXSpreadsheet(sheet) && isSpdxEmptyValue(licenseConcluded)) {
+    					if (isSpdxSpreadsheet && isSbomEmptyValue(licenseConcluded)) {
     						licenseConcluded = getSpdxDeclaredLicenseValue(headerRow, row);
     					}
     					licenseValue = licenseConcluded;
-        				if (isSPDXSpreadsheet(sheet) && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
+        				if (isSpdxSpreadsheet && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
         					String licenseComment = getCellData(row.getCell(commentCol));
         					String comment = "";
 
@@ -1385,7 +1400,7 @@ public class ExcelUtil extends CoTopComponent {
     				OssComponentsLicense subBean = new OssComponentsLicense();
     				if (licenseCol > 0) {
     					String licenseName = licenseValue;
-        				if (isSPDXSpreadsheet(sheet)){
+        				if (isSpdxSpreadsheet){
         					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
         				} else if (licenseName.contains(",")) {
         					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
@@ -1435,12 +1450,6 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setFilePath(_replaceFilePath);
     				}
     				
-    				String packageUrl = normalizeSpdxValue(packageUrlCol < 0 ? "" : getCellData(row.getCell(packageUrlCol)));
-    				if (isSPDXSpreadsheet(sheet) && isSpdxEmptyValue(packageUrl)) {
-    					packageUrl = normalizeSpdxValue(spdxPurlMap.get(bean.getSpdxIdentifier()));
-    				}
-    				bean.setPackageUrl(packageUrl);
-    				
     				// empty row check
     				if (isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getBinaryName()) && isEmpty(bean.getFilePath())
     						&& isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage()) && isEmpty(bean.getCopyrightText())) {
@@ -1458,7 +1467,7 @@ public class ExcelUtil extends CoTopComponent {
     				bean.setExcludeYn(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
     
 					String dependencies = "";
-					if (!isSPDXSpreadsheet(sheet)) {
+					if (!isSpdxSpreadsheet) {
     					dependencies = dependenciesCol < 0 ? "" : avoidNull(getCellData(row.getCell(dependenciesCol))).trim().replaceAll("\t", "");
 					} else {
     					Set<String> dependsOnUrls = spdxDependsOnMap.get(bean.getSpdxIdentifier());
@@ -1620,7 +1629,7 @@ public class ExcelUtil extends CoTopComponent {
 			String category = normalizeSpdxValue(getCellData(row.getCell(categoryCol)));
 			String type = normalizeSpdxValue(getCellData(row.getCell(typeCol)));
 			String locator = normalizeSpdxValue(getCellData(row.getCell(locatorCol)));
-			if (isSpdxEmptyValue(packageId) || isSpdxEmptyValue(locator)) {
+			if (isSbomEmptyValue(packageId) || isSbomEmptyValue(locator)) {
 				continue;
 			}
 			if ("PACKAGE_MANAGER".equalsIgnoreCase(category) && "purl".equalsIgnoreCase(type)) {
@@ -1633,12 +1642,101 @@ public class ExcelUtil extends CoTopComponent {
 
 	private static String normalizeSpdxValue(String value) {
 		String normalized = avoidNull(value).trim();
-		return isSpdxEmptyValue(normalized) ? "" : normalized;
+		return isSbomEmptyValue(normalized) ? "" : normalized;
 	}
 
-	private static boolean isSpdxEmptyValue(String value) {
+	private static boolean isSbomEmptyValue(String value) {
 		String normalized = avoidNull(value).trim();
 		return normalized.isEmpty() || "NONE".equalsIgnoreCase(normalized) || "NOASSERTION".equalsIgnoreCase(normalized);
+	}
+
+	private static String generateDownloadLocationFromPurl(String purlValue) {
+		if (StringUtils.isBlank(purlValue)) {
+			return "";
+		}
+
+		try {
+			PackageURL purl = new PackageURL(purlValue);
+			String type = purl.getType();
+			String namespace = purl.getNamespace();
+			String name = purl.getName();
+			if (StringUtils.isBlank(type) || StringUtils.isBlank(name)) {
+				return "";
+			}
+
+			Map<String, String> qualifiers = purl.getQualifiers();
+			String downloadUrl = qualifiers != null ? qualifiers.get("download_url") : null;
+			if (StringUtils.isNotBlank(downloadUrl)) {
+				return decodePurlValue(downloadUrl);
+			}
+
+			String repositoryUrl = qualifiers != null ? qualifiers.get("repository_url") : null;
+			String resolvedRepositoryUrl = StringUtils.isNotBlank(repositoryUrl) ? decodePurlValue(repositoryUrl) : "";
+			String normalizedRepositoryUrl = StringUtils.removeEnd(resolvedRepositoryUrl.trim(), "/");
+
+			switch (type) {
+				case "github":
+					return "https://github.com/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+				case "npm":
+					if (StringUtils.startsWith(namespace, "@")) {
+						return "https://www.npmjs.com/package/" + namespace + "/" + name;
+					}
+					return "https://www.npmjs.com/package/" + name;
+				case "pypi":
+					return "https://pypi.org/project/" + name;
+				case "maven":
+						if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
+							return normalizedRepositoryUrl;
+						}
+						if (StringUtils.isNotBlank(namespace)) {
+							return "https://mvnrepository.com/artifact/" + namespace + "/" + name;
+						}
+						return "https://mvnrepository.com/artifact/" + name;
+				case "cocoapods":
+					return "https://cocoapods.org/pods/" + name;
+				case "gem":
+					return "https://rubygems.org/gems/" + name;
+				case "golang":
+					return "https://pkg.go.dev/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+				case "cargo":
+					return "https://crates.io/crates/" + name;
+				case "nuget":
+					return "https://nuget.org/packages/" + name;
+				case "bitbucket":
+					return "https://bitbucket.org/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+				case "composer":
+					return "https://packagist.org/packages/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+				case "cran":
+					return "https://cran.r-project.org/web/packages/" + name + "/index.html";
+				case "hackage":
+					return "https://hackage.haskell.org/package/" + name;
+				case "huggingface":
+					return "https://huggingface.co/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+				case "git":
+					return "https://" + StringUtils.trimToEmpty(namespace) + "/" + name;
+				case "cpan":
+				case "docker":
+				case "yocto":
+				case "generic":
+				default:
+					return "";
+			}
+		} catch (Exception e) {
+			log.debug("Failed to generate download location from purl: {}", purlValue, e);
+			return "";
+		}
+	}
+
+	private static String decodePurlValue(String value) {
+		if (StringUtils.isBlank(value)) {
+			return "";
+		}
+
+		try {
+			return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
+		} catch (Exception e) {
+			return value;
+		}
 	}
 
 	private static Map<String, Set<String>> getSpdxDependsOnMap(Sheet sheet, Workbook workbook, Map<String, String> spdxPurlMap) {
@@ -1697,12 +1795,12 @@ public class ExcelUtil extends CoTopComponent {
 			String spdxIdA = normalizeSpdxValue(getCellData(row.getCell(spdxIdACol)));
 			String relation = normalizeSpdxValue(getCellData(row.getCell(relationshipCol)));
 			String spdxIdB = normalizeSpdxValue(getCellData(row.getCell(spdxIdBCol)));
-			if (isSpdxEmptyValue(spdxIdA) || isSpdxEmptyValue(spdxIdB) || !"DEPENDS_ON".equalsIgnoreCase(relation)) {
+			if (isSbomEmptyValue(spdxIdA) || isSbomEmptyValue(spdxIdB) || !"DEPENDS_ON".equalsIgnoreCase(relation)) {
 				continue;
 			}
 
 			String dependencyPurl = normalizeSpdxValue(spdxPurlMap.get(spdxIdB));
-			if (isSpdxEmptyValue(dependencyPurl)) {
+			if (isSbomEmptyValue(dependencyPurl)) {
 				continue;
 			}
 
