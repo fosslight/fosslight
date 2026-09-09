@@ -841,24 +841,68 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	            root = (ObjectNode) rootNode;
 	        }
 		    
-		    String[] globalFieldsToRemove = {"relationships", "snippets", "annotations", "externalDocumentRefs", "hasExtractedLicensingInfos", "reviewers"};
+		    String[] globalFieldsToRemove = {"snippets", "annotations", "externalDocumentRefs", "hasExtractedLicensingInfos", "reviewers"};
 		    for (String field : globalFieldsToRemove) {
 		    	root.remove(field);
 	    		log.info("Field '{}' removed to optimize Excel conversion and prevent row limits.", field);
 		    }
-		    
+		
+		    Set<String> validIds = new HashSet<>();
+		    if (root.has("SPDXID")) {
+		        validIds.add(root.path("SPDXID").asText());
+		    }
 		    if (root.has("packages") && root.get("packages").isArray()) {
-		        ArrayNode packages = (ArrayNode) root.get("packages");
-		        for (JsonNode pkgNode : packages) {
+		        for (JsonNode pkgNode : root.get("packages")) {
 		            if (pkgNode.isObject()) {
-		                ObjectNode pkg = (ObjectNode) pkgNode;
-		                
-		                pkg.remove("relationships");
-		                pkg.remove("annotations");
-		                pkg.remove("attributionText");
+		                JsonNode spdxIdNode = pkgNode.get("SPDXID");
+		                if (spdxIdNode != null && !spdxIdNode.isNull()) {
+		                    validIds.add(spdxIdNode.asText());
+		                }
+		                ((ObjectNode) pkgNode).remove("relationships");
+		                ((ObjectNode) pkgNode).remove("annotations");
+		                ((ObjectNode) pkgNode).remove("attributionText");
 		            }
 		        }
 		    }
+		    if (root.has("files") && root.get("files").isArray()) {
+		        for (JsonNode fileNode : root.get("files")) {
+		            if (fileNode.isObject()) {
+		            	JsonNode spdxIdNode = fileNode.get("SPDXID");
+		            	if (spdxIdNode != null && !spdxIdNode.isNull()) {
+		            		validIds.add(spdxIdNode.asText());
+		            	}
+		        }
+		    }
+		    }
+		    if (root.has("snippets") && root.get("snippets").isArray()) {
+		        for (JsonNode snippetNode : root.get("snippets")) {
+		            if (snippetNode.isObject()) {
+		            	JsonNode spdxIdNode = snippetNode.get("SPDXID");
+		            	if (spdxIdNode != null && !spdxIdNode.isNull()) {
+		            		validIds.add(spdxIdNode.asText());
+		            	}
+		        }
+		    }
+		    }
+		    if (root.has("relationships") && root.get("relationships").isArray()) {
+		        ArrayNode relationships = (ArrayNode) root.get("relationships");
+		        for (int i = relationships.size() - 1; i >= 0; i--) {
+		            JsonNode rel = relationships.get(i);
+		            String spdxElementId = rel.path("spdxElementId").asText();
+		            String relatedSpdxElement = rel.path("relatedSpdxElement").asText();
+		            boolean valid = validIds.contains(spdxElementId)
+		                    || "NONE".equalsIgnoreCase(spdxElementId)
+		                    || "NOASSERTION".equalsIgnoreCase(spdxElementId)
+		                    || spdxElementId.startsWith("DocumentRef-");
+		            valid = valid && (validIds.contains(relatedSpdxElement)
+		                    || "NONE".equalsIgnoreCase(relatedSpdxElement)
+		                    || "NOASSERTION".equalsIgnoreCase(relatedSpdxElement)
+		                    || relatedSpdxElement.startsWith("DocumentRef-"));
+		            if (!valid) {
+		            	relationships.remove(i);
+		            }
+		        }
+		}
 		    
 //		    Set<String> validIds = new HashSet<>();
 //		    

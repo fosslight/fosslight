@@ -1240,6 +1240,7 @@ public class ExcelUtil extends CoTopComponent {
 			String lastBinaryName = "";
 			String lastExcludeYn = "";
 			Map<String, String> spdxPurlMap = getSpdxExternalRefPurlMap(sheet, workbook);
+			Map<String, Set<String>> spdxDependsOnMap = getSpdxDependsOnMap(sheet, workbook, spdxPurlMap);
 
 			List<String> duplicateCheckList = new ArrayList<>();
 			List<String> errRow = new ArrayList<>();
@@ -1456,9 +1457,16 @@ public class ExcelUtil extends CoTopComponent {
     				// default
     				bean.setExcludeYn(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
     
-    				if (dependenciesCol > -1) {
-						bean.setDependencies(dependenciesCol < 0 ? "" : avoidNull(getCellData(row.getCell(dependenciesCol))).trim().replaceAll("\t", ""));
+					String dependencies = "";
+					if (!isSPDXSpreadsheet(sheet)) {
+    					dependencies = dependenciesCol < 0 ? "" : avoidNull(getCellData(row.getCell(dependenciesCol))).trim().replaceAll("\t", "");
+					} else {
+    					Set<String> dependsOnUrls = spdxDependsOnMap.get(bean.getSpdxIdentifier());
+    					if (dependsOnUrls != null && !dependsOnUrls.isEmpty()) {
+    						dependencies = StringUtil.join(new ArrayList<>(dependsOnUrls), ",");
+    					}
 					}
+					bean.setDependencies(dependencies);
     				
     				if (tlshCol > -1) {
 						bean.setTlsh(tlshCol < 0 ? "" : avoidNull(getCellData(row.getCell(tlshCol))).trim().replaceAll("\t", ""));
@@ -1633,6 +1641,77 @@ public class ExcelUtil extends CoTopComponent {
 		return normalized.isEmpty() || "NONE".equalsIgnoreCase(normalized) || "NOASSERTION".equalsIgnoreCase(normalized);
 	}
 
+	private static Map<String, Set<String>> getSpdxDependsOnMap(Sheet sheet, Workbook workbook, Map<String, String> spdxPurlMap) {
+		Map<String, Set<String>> dependsOnBySpdxId = new LinkedHashMap<>();
+		if (!isSPDXSpreadsheet(sheet) || workbook == null || spdxPurlMap == null || spdxPurlMap.isEmpty()) {
+			return dependsOnBySpdxId;
+		}
+
+		Sheet relationshipsSheet = workbook.getSheet("Relationships");
+		if (relationshipsSheet == null) {
+			return dependsOnBySpdxId;
+		}
+
+		int headerRowIndex = findSpdxRelationshipsHeaderRowIndex(relationshipsSheet);
+		if (headerRowIndex < 0) {
+			return dependsOnBySpdxId;
+		}
+
+		Row headerRow = relationshipsSheet.getRow(headerRowIndex);
+		if (headerRow == null) {
+			return dependsOnBySpdxId;
+		}
+
+		int spdxIdACol = -1;
+		int relationshipCol = -1;
+		int spdxIdBCol = -1;
+		Iterator<Cell> iter = headerRow.cellIterator();
+		while (iter.hasNext()) {
+			Cell cell = iter.next();
+			String value = avoidNull(getCellData(cell)).toUpperCase().trim();
+			switch (value) {
+				case "SPDX IDENTIFIER A":
+					spdxIdACol = cell.getColumnIndex();
+					break;
+				case "RELATIONSHIP":
+					relationshipCol = cell.getColumnIndex();
+					break;
+				case "SPDX IDENTIFIER B":
+					spdxIdBCol = cell.getColumnIndex();
+					break;
+				default:
+					break;
+			}
+		}
+
+		if (spdxIdACol < 0 || relationshipCol < 0 || spdxIdBCol < 0) {
+			return dependsOnBySpdxId;
+		}
+
+		for (int rowIdx = headerRowIndex + 1; rowIdx < relationshipsSheet.getPhysicalNumberOfRows(); rowIdx++) {
+			Row row = relationshipsSheet.getRow(rowIdx);
+			if (row == null) {
+				continue;
+			}
+
+			String spdxIdA = normalizeSpdxValue(getCellData(row.getCell(spdxIdACol)));
+			String relation = normalizeSpdxValue(getCellData(row.getCell(relationshipCol)));
+			String spdxIdB = normalizeSpdxValue(getCellData(row.getCell(spdxIdBCol)));
+			if (isSpdxEmptyValue(spdxIdA) || isSpdxEmptyValue(spdxIdB) || !"DEPENDS_ON".equalsIgnoreCase(relation)) {
+				continue;
+			}
+
+			String dependencyPurl = normalizeSpdxValue(spdxPurlMap.get(spdxIdB));
+			if (isSpdxEmptyValue(dependencyPurl)) {
+				continue;
+			}
+
+			dependsOnBySpdxId.computeIfAbsent(spdxIdA, k -> new LinkedHashSet<>()).add(dependencyPurl);
+		}
+
+		return dependsOnBySpdxId;
+	}
+
 	private static int findSpdxExternalRefsHeaderRowIndex(Sheet sheet) {
 		if (sheet == null) {
 			return -1;
@@ -1671,6 +1750,47 @@ public class ExcelUtil extends CoTopComponent {
 			}
 
 			if (hasPackageId && hasCategory && hasType && hasLocator) {
+				return rowIdx;
+			}
+		}
+
+		return -1;
+	}
+
+	private static int findSpdxRelationshipsHeaderRowIndex(Sheet sheet) {
+		if (sheet == null) {
+			return -1;
+		}
+
+		int maxRow = Math.min(sheet.getLastRowNum(), 20);
+		for (int rowIdx = 0; rowIdx <= maxRow; rowIdx++) {
+			Row row = sheet.getRow(rowIdx);
+			if (row == null) {
+				continue;
+			}
+
+			boolean hasSpdxIdA = false;
+			boolean hasRelationship = false;
+			boolean hasSpdxIdB = false;
+
+			for (Cell cell : row) {
+				String value = avoidNull(getCellData(cell)).trim().toUpperCase();
+				switch (value) {
+					case "SPDX IDENTIFIER A":
+						hasSpdxIdA = true;
+						break;
+					case "RELATIONSHIP":
+						hasRelationship = true;
+						break;
+					case "SPDX IDENTIFIER B":
+						hasSpdxIdB = true;
+						break;
+					default:
+						break;
+				}
+			}
+
+			if (hasSpdxIdA && hasRelationship && hasSpdxIdB) {
 				return rowIdx;
 			}
 		}
