@@ -3689,19 +3689,25 @@ var com_fn = {
   									if (checkFlag) {
   										checkFlag = false;
  										sheetTr += '<td><input type="checkbox" class="sheetRowCheckBox mr-2" name="sheetCheck">' + sheetName + '</td>';
+ 										var defaultTabNm = "SRC";
+ 										if (!isExcel && (sheetName.indexOf("PACKAGE INFO") > -1 || sheetName.indexOf("PER FILE INFO") > -1)) {
+ 											defaultTabNm = "DEP";
+ 										}
+										
  										for (var j = 0; j < checkTabNms.length; j++) {
+ 											var radioId = "sheet" + result[1][i].no + "_" + checkTabNms[j];
  											if (isExcel) {
  												if (sheetName.indexOf(checkTabNms[j]) > -1) {
  	 												checkFlag = true;
- 													sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
- 	 											} else {
- 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
- 	 											}
- 											} else {
- 												if ("SRC" == checkTabNms[j]) {
- 													sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
+ 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="' + radioId + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
  												} else {
- 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="sheet' + result[1][i].no + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
+ 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="' + radioId + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
+ 												}
+ 											} else {
+ 												if (defaultTabNm == checkTabNms[j]) {
+ 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="' + radioId + '" style="margin-left: -0.5rem !important;" class="form-check-input" checked></td>';
+ 												} else {
+ 	 												sheetTr += '<td class="text-center"><input type="radio" name="sheetNameSelect' + result[1][i].no + '" value="' + result[1][i].no + '_' + checkTabNms[j] + '" id="' + radioId + '" style="margin-left: -0.5rem !important;" class="form-check-input"></td>';
  												}
  											}
 										}
