@@ -2815,7 +2815,10 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
-		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
+		CSVParser parser = new CSVParserBuilder()
+				.withSeparator('|')
+				.withIgnoreQuotations(true)
+				.build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
 			CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
@@ -3585,7 +3588,10 @@ public class ExcelUtil extends CoTopComponent {
 		}
 
 
-		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
+		CSVParser parser = new CSVParserBuilder()
+				.withSeparator('|')
+				.withIgnoreQuotations(true)
+				.build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
 				CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
