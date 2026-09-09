@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -48,6 +49,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +61,7 @@ import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.FileUploadErrorCode;
 import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.common.CustomXssFilter;
 import oss.fosslight.domain.*;
@@ -3770,7 +3774,14 @@ public class ProjectController extends CoTopComponent {
 		log.info("tabNm ==> " + req.getParameter("tabNm"));
 
 		Map<String, MultipartFile> fileMap = req.getFileMap();
-		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
+		MultipartFile multipartFile = fileMap.get("myfile");
+		String fileExtension = multipartFile == null ? null
+				: StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
+
+		ArrayList<Object> uploadValidationResult = validateProjectReportUpload(multipartFile, fileExtension);
+		if (uploadValidationResult != null) {
+			return toJson(uploadValidationResult);
+		}
 		
 		// 파일 등록
 		try {
@@ -3793,10 +3804,16 @@ public class ProjectController extends CoTopComponent {
 				}
 				
 				if (CollectionUtils.isNotEmpty(list) && !list.get(0).isUploadSucc()) {
-					resultList.add("FILE_CONVERSION_FAILED");
+					resultList.add(StringUtil.isEmpty(list.get(0).getUploadErrorCode())
+							? FileUploadErrorCode.FILE_CONVERSION_FAILED.getCode()
+							: list.get(0).getUploadErrorCode());
 					resultList.add(list.get(0).getComments());
 					return toJson(resultList);
 				}
+			}
+
+			if (CollectionUtils.isEmpty(list)) {
+				return toJson(makeUploadError(FileUploadErrorCode.FILE_EMPTY, null));
 			}
 
 			if (fileExtension.equals("csv")) {
@@ -3809,7 +3826,8 @@ public class ProjectController extends CoTopComponent {
 				return toJson(resultList);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error("Project report upload failed.", e);
+			return toJson(makeUploadError(FileUploadErrorCode.FILE_CONVERSION_FAILED, e.getMessage()));
 		}
 
 		if (fileExtension.equals("csv")) {
@@ -3825,6 +3843,10 @@ public class ProjectController extends CoTopComponent {
 				sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 			} catch (Exception e) {
 				log.error(e.getMessage());
+			}
+
+			if (sheetNameList == null) {
+				return toJson(makeUploadError(FileUploadErrorCode.EXCEL_INVALID_FORMAT, null));
 			}
 
 			Boolean isSpdxSpreadsheet = false;
@@ -3873,7 +3895,14 @@ public class ProjectController extends CoTopComponent {
 		String fileId = req.getParameter("registFileId");
 
 		Map<String, MultipartFile> fileMap = req.getFileMap();
-		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
+		MultipartFile multipartFile = fileMap.get("myfile");
+		String fileExtension = multipartFile == null ? null
+				: StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
+
+		ArrayList<Object> uploadValidationResult = validateProjectReportUpload(multipartFile, fileExtension);
+		if (uploadValidationResult != null) {
+			return toJson(uploadValidationResult);
+		}
 		
 		// 파일 등록
 		try {
@@ -3886,6 +3915,17 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 
+			if (CollectionUtils.isNotEmpty(list) && !list.get(0).isUploadSucc()) {
+				String errorCode = StringUtil.isEmpty(list.get(0).getUploadErrorCode())
+						? FileUploadErrorCode.FILE_CONVERSION_FAILED.getCode()
+						: list.get(0).getUploadErrorCode();
+				return toJson(makeUploadError(errorCode, list.get(0).getComments()));
+			}
+
+			if (CollectionUtils.isEmpty(list)) {
+				return toJson(makeUploadError(FileUploadErrorCode.FILE_EMPTY, null));
+			}
+
 			if (fileExtension.equals("csv")) {
 				resultList = CommonFunction.checkCsvFileLimit(list);
 			} else {
@@ -3896,7 +3936,8 @@ public class ProjectController extends CoTopComponent {
 				return toJson(resultList);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error("Binary project report upload failed.", e);
+			return toJson(makeUploadError(FileUploadErrorCode.FILE_CONVERSION_FAILED, e.getMessage()));
 		}
 
 		if ("text".equals(fileType)) {
@@ -3920,7 +3961,11 @@ public class ProjectController extends CoTopComponent {
 			} catch (Exception e) {
 				log.error(e.getMessage());
 			}
-			
+
+			if (sheetNameList == null) {
+				return toJson(makeUploadError(FileUploadErrorCode.EXCEL_INVALID_FORMAT, null));
+			}
+
 			Boolean isSpdxSpreadsheet = false;
 			for (Object sheet : sheetNameList) {
 				String sheetName = sheet.toString();
@@ -3942,6 +3987,84 @@ public class ProjectController extends CoTopComponent {
 
 			return toJson(resultList);
 		}
+	}
+
+	private ArrayList<Object> validateProjectReportUpload(MultipartFile multipartFile, String fileExtension)
+			throws IOException {
+		if (multipartFile == null || isEmpty(multipartFile.getOriginalFilename())) {
+			return makeUploadError(FileUploadErrorCode.FILE_EMPTY, null);
+		}
+		if (multipartFile.getSize() <= 0) {
+			return makeUploadError(FileUploadErrorCode.FILE_SIZE_ZERO, null);
+		}
+		if (!isSbomTextExtension(fileExtension)) {
+			return null;
+		}
+
+		String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8).trim();
+		if (content.isEmpty()) {
+			return makeUploadError(FileUploadErrorCode.FILE_CONVERSION_FAILED,
+					"파일 내용이 비어 있습니다. SPDX 또는 CycloneDX 문서를 입력해 주세요.");
+		}
+
+		boolean isSpdx = content.contains("SPDXVersion:")
+				|| content.contains("\"spdxVersion\"")
+				|| content.contains("spdxVersion:")
+				|| content.contains("<spdx:SpdxDocument");
+		boolean isCycloneDx = (content.contains("\"bomFormat\"") && content.contains("\"CycloneDX\""))
+				|| (content.contains("<bom") && content.contains("cyclonedx"));
+
+		if (isSpdx || isCycloneDx) {
+			return null;
+		}
+
+		if ("json".equalsIgnoreCase(fileExtension)) {
+			try {
+				JsonNode rootNode = new ObjectMapper().readTree(content);
+				if (rootNode != null && rootNode.isObject() && rootNode.has("bomFormat")) {
+					return makeUploadError(FileUploadErrorCode.CDX_INVALID_FORMAT, null);
+				}
+				if (rootNode == null || !rootNode.isObject()) {
+					return makeUploadError(FileUploadErrorCode.FILE_CONVERSION_FAILED,
+							"JSON 문서가 객체 형식이 아닙니다. 중괄호와 JSON 구조를 확인해 주세요.");
+				}
+				return makeUploadError(FileUploadErrorCode.FILE_CONVERSION_FAILED,
+						"SPDX JSON은 spdxVersion, CycloneDX JSON은 bomFormat: CycloneDX 필드가 필요합니다.");
+			} catch (IOException | RuntimeException e) {
+				return makeUploadError(FileUploadErrorCode.FILE_CONVERSION_FAILED,
+						"JSON 문법이 올바르지 않습니다. 중괄호, 따옴표, 쉼표를 확인해 주세요.");
+			}
+		}
+
+		return makeUploadError(FileUploadErrorCode.FILE_CONVERSION_FAILED,
+				"파일에서 SPDX 또는 CycloneDX 형식을 확인할 수 없습니다. 지원되는 SBOM 형식으로 다시 생성해 주세요.");
+	}
+
+	private boolean isSbomTextExtension(String fileExtension) {
+		if (isEmpty(fileExtension)) {
+			return false;
+		}
+		return "json".equalsIgnoreCase(fileExtension)
+				|| "yaml".equalsIgnoreCase(fileExtension)
+				|| "yml".equalsIgnoreCase(fileExtension)
+				|| "xml".equalsIgnoreCase(fileExtension)
+				|| "rdf".equalsIgnoreCase(fileExtension)
+				|| "spdx".equalsIgnoreCase(fileExtension);
+	}
+
+	private ArrayList<Object> makeUploadError(FileUploadErrorCode errorCode, String detail) {
+		String message = getMessage(errorCode.getMessageKey());
+		if (!isEmpty(detail)) {
+			message += "<br/><br/>" + StringUtil.replaceHtmlEscape(detail);
+		}
+		return makeUploadError(errorCode.getCode(), message);
+	}
+
+	private ArrayList<Object> makeUploadError(String errorCode, String message) {
+		ArrayList<Object> result = new ArrayList<Object>();
+		result.add(errorCode);
+		result.add(isEmpty(message) ? getMessage("msg.common.upload.failed") : message);
+		return result;
 	}
 	
 	/**

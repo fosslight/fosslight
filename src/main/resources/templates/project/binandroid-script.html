@@ -125,7 +125,7 @@ var binAndroid_evt = {
 					$('.ajax-file-upload-statusbar').fadeOut('slow');
 					$('.ajax-file-upload-statusbar').remove();
 				} else {
-					if(result[0] == "FILE_SIZE_LIMIT_OVER"){
+					if(typeof result[0] === "string" && typeof result[1] === "string" && typeof result[2] === "undefined"){
 						alertify.alert(result[1], function() {
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();

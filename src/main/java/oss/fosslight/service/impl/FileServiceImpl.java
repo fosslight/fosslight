@@ -56,6 +56,7 @@ import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.FileUploadErrorCode;
 import oss.fosslight.config.AppConstBean;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2File;
@@ -111,7 +112,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		HOMEPAGE_REFERENCE_PRIORITY.put("source-distribution", 4);
 		HOMEPAGE_REFERENCE_PRIORITY.put("distribution-intake", 5);
 	}
-	
+
 	/**
 	 * Context object for single file upload processing.
 	 * Encapsulates upload metadata to simplify method parameters.
@@ -282,12 +283,14 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		T2File registFile = new T2File();
 		registFile.setCreator(uploadContext.getCreator());
 		
-		if (isEmpty(mFile.getOriginalFilename())) {
-			throw new RuntimeException("File Name is empty");
+		if (mFile == null || isEmpty(mFile.getOriginalFilename())) {
+			setUploadError(upFile, FileUploadErrorCode.FILE_EMPTY, null);
+			return new UploadProcessResult(upFile, true);
 		}
 		
 		if (mFile.getSize() <= 0) {
-			throw new RuntimeException("File Size is 0");
+			setUploadError(upFile, FileUploadErrorCode.FILE_SIZE_ZERO, null);
+			return new UploadProcessResult(upFile, true);
 		}
 		
 		String originalFileName = mFile.getOriginalFilename();	// Original File name
@@ -359,7 +362,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						Files.copy(is, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					} catch (IOException e) {
 						log.error("An error occurred while copying files: {}", e.getMessage());
-						upFile.setUploadSucc(false);
+						setUploadError(upFile, FileUploadErrorCode.FILE_COPY_FAILED, e.getMessage());
 						return new UploadProcessResult(upFile, true);
 					}
 					
@@ -374,6 +377,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						convertFullStrPath = uploadFilePath + "/" + uploadFileName;
 						
 						try {
+							FileUploadErrorCode validationError = validateSpdxContent(originalFileExt, contentStr);
+							if (validationError != null) {
+								setUploadError(upFile, validationError, null);
+								return new UploadProcessResult(upFile, true);
+							}
+
 							if (("yaml").equalsIgnoreCase(originalFileExt.toLowerCase())) {
 								isConvert = convertYamlToXls(tempFile.toPath(), Paths.get(convertFullStrPath));
 							} else if (("rdf").equalsIgnoreCase(originalFileExt.toLowerCase()) || ("spdx").equalsIgnoreCase(originalFileExt.toLowerCase())) {
@@ -381,16 +390,14 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 							} else {
 								tempFile = getCleanedSpdxFile(tempId, tempFile);
 								if (tempFile == null) {
-									upFile.setUploadSucc(false);
-									upFile.setComments("parsing error.");
+									setUploadError(upFile, getSpdxParseErrorCode(originalFileExt), null);
 									return new UploadProcessResult(upFile, true);
 								}
 								SPDXUtil2.convert(tempId, tempFile.getAbsolutePath(), convertFullStrPath);
 							}
 						} catch (Exception e) {
 							log.error("SPDXUtil2.convert error : {}", e.getMessage());
-							upFile.setUploadSucc(false);
-							upFile.setComments(e.getMessage());
+							setUploadError(upFile, FileUploadErrorCode.SPDX_CONVERSION_FAILED, e.getMessage());
 							return new UploadProcessResult(upFile, true);
 						}
 						isConvert = new File(convertFullStrPath).exists();
@@ -399,12 +406,16 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
 						uploadFileName = randomUUID + "." + fileExt;
 						convertFullStrPath = uploadFilePath + "/" + uploadFileName;
-						isConvert = convertCdxToExcel(tempFile, contentStr, convertFullStrPath);
+						isConvert = convertCdxToExcel(tempFile, contentStr, convertFullStrPath, upFile);
 					}
 					
-					if ((isCycloneDxFile && !isConvert) || !isConvert) {
-						upFile.setUploadSucc(false);
-						upFile.setComments("parsing error.");
+					if (!isConvert) {
+						if (isEmpty(upFile.getUploadErrorCode())) {
+							setUploadError(upFile,
+									isCycloneDxFile ? FileUploadErrorCode.CDX_CONVERSION_FAILED
+											: FileUploadErrorCode.SPDX_CONVERSION_FAILED,
+									null);
+						}
 						return new UploadProcessResult(upFile, true);
 					}
 					
@@ -422,8 +433,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			upFile.setUploadSucc(false);
-			upFile.setComments("conversion error.");
+			setUploadError(upFile, FileUploadErrorCode.FILE_CONVERSION_FAILED, e.getMessage());
 			return new UploadProcessResult(upFile, true);
 		}
 		
@@ -520,6 +530,98 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			this.uploadFile = uploadFile;
 			this.abort = abort;
 		}
+	}
+
+	private void setUploadError(UploadFile uploadFile, FileUploadErrorCode errorCode, String detail) {
+		uploadFile.setUploadSucc(false);
+		uploadFile.setUploadErrorCode(errorCode.getCode());
+
+		String message = errorCode.getDefaultMessage();
+		if (messageSource != null) {
+			message = getMessage(errorCode.getMessageKey());
+		}
+
+		if (!isEmpty(detail)) {
+			String escapedDetail = StringUtil.replaceHtmlEscape(detail.trim());
+			if (escapedDetail.length() > 500) {
+				escapedDetail = escapedDetail.substring(0, 500) + "...";
+			}
+			message += "<br/><br/><b>Error details:</b><br/>" + escapedDetail;
+		}
+
+		uploadFile.setComments(message);
+	}
+
+	private FileUploadErrorCode validateSpdxContent(String fileExtension, String content) {
+		if ("json".equalsIgnoreCase(fileExtension)) {
+			try {
+				JsonNode rootNode = new ObjectMapper().readTree(content);
+				JsonNode documentNode = findSpdxDocumentNode(rootNode);
+				if (documentNode == null || !documentNode.hasNonNull("spdxVersion")
+						|| isEmpty(documentNode.get("spdxVersion").asText())) {
+					return FileUploadErrorCode.SPDX_MISSING_VERSION;
+				}
+				JsonNode packagesNode = documentNode.get("packages");
+				if (packagesNode == null || !packagesNode.isArray() || packagesNode.size() == 0) {
+					return FileUploadErrorCode.SPDX_NO_PACKAGE_INFO;
+				}
+			} catch (IOException | RuntimeException e) {
+				return FileUploadErrorCode.SPDX_JSON_PARSE_ERROR;
+			}
+		} else if ("yaml".equalsIgnoreCase(fileExtension) || "yml".equalsIgnoreCase(fileExtension)) {
+			try {
+				JsonNode rootNode = new ObjectMapper(new com.fasterxml.jackson.dataformat.yaml.YAMLFactory())
+						.readTree(content);
+				if (rootNode == null || !rootNode.hasNonNull("spdxVersion")
+						|| isEmpty(rootNode.get("spdxVersion").asText())) {
+					return FileUploadErrorCode.SPDX_MISSING_VERSION;
+				}
+				JsonNode packagesNode = rootNode.get("packages");
+				if (packagesNode == null || !packagesNode.isArray() || packagesNode.size() == 0) {
+					return FileUploadErrorCode.SPDX_NO_PACKAGE_INFO;
+				}
+			} catch (IOException | RuntimeException e) {
+				return FileUploadErrorCode.SPDX_YAML_PARSE_ERROR;
+			}
+		}
+
+		return null;
+	}
+
+	private JsonNode findSpdxDocumentNode(JsonNode rootNode) {
+		if (rootNode == null) {
+			return null;
+		}
+		if (rootNode.isObject() && rootNode.has("spdxVersion")) {
+			return rootNode;
+		}
+		if (rootNode.isContainerNode()) {
+			Iterator<JsonNode> elements = rootNode.elements();
+			while (elements.hasNext()) {
+				JsonNode child = elements.next();
+				if (child.isObject() && child.has("spdxVersion")) {
+					return child;
+				}
+			}
+		}
+		return null;
+	}
+
+	private FileUploadErrorCode getSpdxParseErrorCode(String fileExtension) {
+		if ("yaml".equalsIgnoreCase(fileExtension) || "yml".equalsIgnoreCase(fileExtension)) {
+			return FileUploadErrorCode.SPDX_YAML_PARSE_ERROR;
+		}
+		if ("rdf".equalsIgnoreCase(fileExtension) || "rdf.xml".equalsIgnoreCase(fileExtension)
+				|| "xml".equalsIgnoreCase(fileExtension)) {
+			return FileUploadErrorCode.SPDX_RDF_PARSE_ERROR;
+		}
+		if ("spdx".equalsIgnoreCase(fileExtension)) {
+			return FileUploadErrorCode.SPDX_TAG_VALUE_PARSE_ERROR;
+		}
+		if ("json".equalsIgnoreCase(fileExtension)) {
+			return FileUploadErrorCode.SPDX_JSON_PARSE_ERROR;
+		}
+		return FileUploadErrorCode.SPDX_INVALID_FORMAT;
 	}
 	
 	private File getCleanedSpdxFile(String tempId, File tempFile) throws IOException {
@@ -995,17 +1097,20 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    return file;
 	}
 	
-	private boolean convertCdxToExcel(File tempFile, String contentStr, String convertFullStrPath) throws Exception {
+	private boolean convertCdxToExcel(File tempFile, String contentStr, String convertFullStrPath,
+			UploadFile uploadFile) throws Exception {
 		String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
 		
 	    Bom bom;
+	    boolean isXml = contentStr.trim().startsWith("<");
 	    try {
 	    	byte[] fileBytes = Files.readAllBytes(tempFile.toPath());
 	        if (fileBytes.length == 0) {
 	            log.error("The file contents are empty.");
+	            setUploadError(uploadFile, FileUploadErrorCode.CDX_INVALID_FORMAT, null);
 	            return false;
 	        }
-	        if (contentStr.trim().startsWith("<")) {
+	        if (isXml) {
 	        	bom = new org.cyclonedx.parsers.XmlParser().parse(fileBytes);
 	        } else {
 	            bom = new org.cyclonedx.parsers.JsonParser().parse(fileBytes);
@@ -1018,7 +1123,31 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        }
 
 	        log.error("Error Message: {}", e.getMessage());
+	        setUploadError(uploadFile,
+	        		isXml ? FileUploadErrorCode.CDX_XML_PARSE_ERROR : FileUploadErrorCode.CDX_JSON_PARSE_ERROR,
+	        		e.getMessage());
 	        return false;
+	    }
+
+	    if (bom == null) {
+	    	setUploadError(uploadFile, FileUploadErrorCode.CDX_INVALID_FORMAT, null);
+	    	return false;
+	    }
+
+	    if (!isXml) {
+	    	if (isEmpty(bom.getBomFormat())) {
+	    		setUploadError(uploadFile, FileUploadErrorCode.CDX_MISSING_BOM_FORMAT, null);
+	    		return false;
+	    	}
+	    	if (!"CycloneDX".equalsIgnoreCase(bom.getBomFormat())) {
+	    		setUploadError(uploadFile, FileUploadErrorCode.CDX_INVALID_FORMAT, null);
+	    		return false;
+	    	}
+	    }
+
+	    if (CollectionUtils.isEmpty(bom.getComponents())) {
+	    	setUploadError(uploadFile, FileUploadErrorCode.CDX_NO_COMPONENTS, null);
+	    	return false;
 	    }
 
 	    File resultFile = new File(convertFullStrPath);
@@ -1255,6 +1384,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        return true;
 	    } catch (Exception e) {
 	        log.error("convertCdxToExcel failed : " + e.getMessage());
+	        setUploadError(uploadFile, FileUploadErrorCode.CDX_CONVERSION_FAILED, e.getMessage());
 	        return false;
 	    }
 	}

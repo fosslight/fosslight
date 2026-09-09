@@ -4827,7 +4827,7 @@ public class CommonFunction extends CoTopComponent {
 		for (UploadFile f : list) {
 			if (f.getSize() > CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT && f.getFileExt().contains("xls")){
 				result.add("FILE_SIZE_LIMIT_OVER");
-				result.add("The excel file exceeded 5MB.<br>Please delete the blank row or unnecessary data, and then upload it.");
+				result.add(getMessage("msg.file.upload.size.limit"));
 				
 				break;
 			}
@@ -4843,7 +4843,7 @@ public class CommonFunction extends CoTopComponent {
 		for (UploadFile f : list) {
 			if (f.getSize() > CoConstDef.CD_CSV_UPLOAD_FILE_SIZE_LIMIT && f.getFileExt().contains("csv")){
 				result.add("FILE_SIZE_LIMIT_OVER");
-				result.add("The file exceeded 5MB.<br>Please delete the blank row or unnecessary data, and then upload it.");
+				result.add(getMessage("msg.file.upload.size.limit"));
 				nextCheck = true;
 				break;
 			}
@@ -7042,4 +7042,3 @@ public class CommonFunction extends CoTopComponent {
 		}
 	}
 }
-

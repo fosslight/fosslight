@@ -25,6 +25,7 @@ public class UploadFile extends ComBean implements Serializable{
 	private String fileExt;
 	private String actualFilename;
 	private String comments;
+	private transient String uploadErrorCode;
 	
 	public String getFileExt() {
 		return fileExt;
@@ -110,5 +111,13 @@ public class UploadFile extends ComBean implements Serializable{
 	}
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public String getUploadErrorCode() {
+		return uploadErrorCode;
+	}
+
+	public void setUploadErrorCode(String uploadErrorCode) {
+		this.uploadErrorCode = uploadErrorCode;
 	}
 }

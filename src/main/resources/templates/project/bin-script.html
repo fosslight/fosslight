@@ -937,6 +937,15 @@ var bin_fn = {
 			multiple:false,
 			dragDrop:true,
 			fileName:'myfile',
+			onSelect: function(files) {
+				for (var i = 0; i < files.length; i++) {
+					if (Number(files[i].size) === 0) {
+						alertify.alert([[#{msg.file.upload.size.zero}]], function(){});
+						return false;
+					}
+				}
+				return true;
+			},
 			allowedTypes:accept1,
 			sequential:true,
 			sequentialCount:1,
@@ -955,7 +964,7 @@ var bin_fn = {
 					$('.ajax-file-upload-statusbar').fadeOut('slow');
 					$('.ajax-file-upload-statusbar').remove();
 				} else {
-					if("FILE_SIZE_LIMIT_OVER" == result[0] || "UNSUPPORTED_FILE" == result[0] || "FILE_CONVERSION_FAILED" == result[0]) {
+					if(typeof result[0] === "string" && typeof result[1] === "string" && typeof result[2] === "undefined") {
 						alertify.alert(result[1], function() {
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();
