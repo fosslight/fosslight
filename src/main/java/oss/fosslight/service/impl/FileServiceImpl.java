@@ -864,26 +864,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		            }
 		        }
 		    }
-		    if (root.has("files") && root.get("files").isArray()) {
-		        for (JsonNode fileNode : root.get("files")) {
-		            if (fileNode.isObject()) {
-		            	JsonNode spdxIdNode = fileNode.get("SPDXID");
-		            	if (spdxIdNode != null && !spdxIdNode.isNull()) {
-		            		validIds.add(spdxIdNode.asText());
-		            	}
-		        }
-		    }
-		    }
-		    if (root.has("snippets") && root.get("snippets").isArray()) {
-		        for (JsonNode snippetNode : root.get("snippets")) {
-		            if (snippetNode.isObject()) {
-		            	JsonNode spdxIdNode = snippetNode.get("SPDXID");
-		            	if (spdxIdNode != null && !spdxIdNode.isNull()) {
-		            		validIds.add(spdxIdNode.asText());
-		            	}
-		        }
-		    }
-		    }
 		    if (root.has("relationships") && root.get("relationships").isArray()) {
 		        ArrayNode relationships = (ArrayNode) root.get("relationships");
 		        for (int i = relationships.size() - 1; i >= 0; i--) {
