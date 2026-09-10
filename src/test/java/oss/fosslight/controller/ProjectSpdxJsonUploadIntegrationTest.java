@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class ProjectSpdxJsonUploadIntegrationTest {
     private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.107 Safari/537.36";
-    private static final String SPDX_JSON_PATH = "/Users/hyeinlee/Documents/_WORK/FOSSLight_Hub_2.0_For_Dev/6. spdx_cyclonedx/short_17932_SPDXRdf-ThinQ2.0_Server-1.8.23.json";
+    private static final String SPDX_JSON_RESOURCE = "fixtures/spdx/short-SPDXRdf-FOSSLightHub.json";
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,12 +46,15 @@ class ProjectSpdxJsonUploadIntegrationTest {
     void spdxJsonUploadAndReadDepData() throws Exception {
         String prjId = createProject();
 
-        byte[] jsonBytes = Files.readAllBytes(new FileSystemResource(SPDX_JSON_PATH).getFile().toPath());
+        byte[] jsonBytes;
+        try (InputStream inputStream = new ClassPathResource(SPDX_JSON_RESOURCE).getInputStream()) {
+            jsonBytes = inputStream.readAllBytes();
+        }
 
         MockHttpServletResponse uploadResponse = mockMvc.perform(
                         multipart("/project/csvFile")
                                 .file("myfile", jsonBytes)
-                                .param("registFileId", "85853")
+                                .param("registFileId", "")
                                 .header("user-agent", USER_AGENT)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
