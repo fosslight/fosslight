@@ -1676,14 +1676,17 @@ public class ExcelUtil extends CoTopComponent {
 
 			switch (type) {
 				case "github":
-					return "https://github.com/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+						if (StringUtils.isBlank(namespace)) {
+							return "";
+						}
+						return "https://github.com/" + namespace + "/" + name;
 				case "npm":
-					if (StringUtils.startsWith(namespace, "@")) {
-						return "https://www.npmjs.com/package/" + namespace + "/" + name;
-					}
-					return "https://www.npmjs.com/package/" + name;
+						if (StringUtils.startsWith(namespace, "@")) {
+							return "https://www.npmjs.com/package/" + namespace + "/" + name;
+						}
+						return "https://www.npmjs.com/package/" + name;
 				case "pypi":
-					return "https://pypi.org/project/" + name;
+						return "https://pypi.org/project/" + name;
 				case "maven":
 						if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
 							return normalizedRepositoryUrl;
@@ -1693,27 +1696,42 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						return "https://mvnrepository.com/artifact/" + name;
 				case "cocoapods":
-					return "https://cocoapods.org/pods/" + name;
+						return "https://cocoapods.org/pods/" + name;
 				case "gem":
-					return "https://rubygems.org/gems/" + name;
+						return "https://rubygems.org/gems/" + name;
 				case "golang":
-					return "https://pkg.go.dev/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+						if (StringUtils.isBlank(namespace)) {
+							return "";
+						}
+						return "https://pkg.go.dev/" + namespace + "/" + name;
 				case "cargo":
-					return "https://crates.io/crates/" + name;
+						return "https://crates.io/crates/" + name;
 				case "nuget":
-					return "https://nuget.org/packages/" + name;
+						return "https://nuget.org/packages/" + name;
 				case "bitbucket":
-					return "https://bitbucket.org/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+						if (StringUtils.isBlank(namespace)) {
+							return "";
+						}
+						return "https://bitbucket.org/" + namespace + "/" + name;
 				case "composer":
-					return "https://packagist.org/packages/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+						if (StringUtils.isBlank(namespace)) {
+							return "";
+						}
+						return "https://packagist.org/packages/" + namespace + "/" + name;
 				case "cran":
-					return "https://cran.r-project.org/web/packages/" + name + "/index.html";
+						return "https://cran.r-project.org/web/packages/" + name + "/index.html";
 				case "hackage":
-					return "https://hackage.haskell.org/package/" + name;
+						return "https://hackage.haskell.org/package/" + name;
 				case "huggingface":
-					return "https://huggingface.co/" + StringUtils.trimToEmpty(namespace) + "/" + name;
+						if (StringUtils.isBlank(namespace)) {
+							return "";
+						}
+						return "https://huggingface.co/" + namespace + "/" + name;
 				case "git":
-					return "https://" + StringUtils.trimToEmpty(namespace) + "/" + name;
+						if (StringUtils.isBlank(namespace)) {
+							return "";
+						}
+						return "https://" + namespace + "/" + name;
 				case "cpan":
 				case "docker":
 				case "yocto":
