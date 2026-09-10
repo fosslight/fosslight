@@ -192,13 +192,29 @@
       "versionInfo": ""
     },
     {
-      "SPDXID": "SPDXRef-Package-MultiLicense",
-      "name": "dual-licensed-lib",
-      "downloadLocation": "https://github.com/example/dual-licensed-lib",
+      "SPDXID": "SPDXRef-Package-173827644",
+      "copyrightText": "Copyright (C) 1999- Shigeru Chiba.",
+      "downloadLocation": "https://github.com/jboss-javassist/javassist",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:maven/org.javassist/javassist@3.20.0-GA",
+          "referenceType": "purl"
+        }
+      ],
       "filesAnalyzed": false,
-      "licenseConcluded": "MIT AND Apache-2.0",
-      "licenseDeclared": "MIT AND Apache-2.0",
-      "copyrightText": "Copyright (c) 2024 Example Contributors"
+      "homepage": "http://www.javassist.org",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "(LGPL-2.1 OR MPL-1.1 OR Apache-2.0)",
+      "licenseInfoFromFiles": [
+        "LGPL-2.1",
+        "MPL-1.1",
+        "Apache-2.0"
+      ],
+      "name": "javassist",
+      "originator": "Organization: \"\"",
+      "supplier": "Person: \"\"",
+      "versionInfo": ""
     }
   ],
   "relationships": [
