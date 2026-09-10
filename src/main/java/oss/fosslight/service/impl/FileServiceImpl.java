@@ -841,29 +841,48 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	            root = (ObjectNode) rootNode;
 	        }
 		    
-		    String[] globalFieldsToRemove = {"relationships", "snippets", "annotations", "externalDocumentRefs", "hasExtractedLicensingInfos", "reviewers"};
+		    String[] globalFieldsToRemove = {"snippets", "annotations", "externalDocumentRefs", "hasExtractedLicensingInfos", "reviewers"};
 		    for (String field : globalFieldsToRemove) {
 		    	root.remove(field);
 	    		log.info("Field '{}' removed to optimize Excel conversion and prevent row limits.", field);
 		    }
-		    
+		
+		    Set<String> validIds = new HashSet<>();
+		    if (root.has("SPDXID")) {
+		        validIds.add(root.path("SPDXID").asText());
+		    }
 		    if (root.has("packages") && root.get("packages").isArray()) {
-		        ArrayNode packages = (ArrayNode) root.get("packages");
-		        for (JsonNode pkgNode : packages) {
+		        for (JsonNode pkgNode : root.get("packages")) {
 		            if (pkgNode.isObject()) {
-		                ObjectNode pkg = (ObjectNode) pkgNode;
-		                
-		                if (pkg.has("externalRefs")) {
-		                    pkg.remove("externalRefs");
-		                    log.debug("ExternalRefs removed from package: {}", pkg.path("name").asText());
+		                JsonNode spdxIdNode = pkgNode.get("SPDXID");
+		                if (spdxIdNode != null && !spdxIdNode.isNull()) {
+		                    validIds.add(spdxIdNode.asText());
 		                }
-
-		                pkg.remove("relationships");
-		                pkg.remove("annotations");
-		                pkg.remove("attributionText");
+		                ((ObjectNode) pkgNode).remove("relationships");
+		                ((ObjectNode) pkgNode).remove("annotations");
+		                ((ObjectNode) pkgNode).remove("attributionText");
 		            }
 		        }
 		    }
+		    if (root.has("relationships") && root.get("relationships").isArray()) {
+		        ArrayNode relationships = (ArrayNode) root.get("relationships");
+		        for (int i = relationships.size() - 1; i >= 0; i--) {
+		            JsonNode rel = relationships.get(i);
+		            String spdxElementId = rel.path("spdxElementId").asText();
+		            String relatedSpdxElement = rel.path("relatedSpdxElement").asText();
+		            boolean valid = validIds.contains(spdxElementId)
+		                    || "NONE".equalsIgnoreCase(spdxElementId)
+		                    || "NOASSERTION".equalsIgnoreCase(spdxElementId)
+		                    || spdxElementId.startsWith("DocumentRef-");
+		            valid = valid && (validIds.contains(relatedSpdxElement)
+		                    || "NONE".equalsIgnoreCase(relatedSpdxElement)
+		                    || "NOASSERTION".equalsIgnoreCase(relatedSpdxElement)
+		                    || relatedSpdxElement.startsWith("DocumentRef-"));
+		            if (!valid) {
+		            	relationships.remove(i);
+		            }
+		        }
+		}
 		    
 //		    Set<String> validIds = new HashSet<>();
 //		    
@@ -1167,7 +1186,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	        int rowIdx = 1;
 	        Map<String, String> externalRefsMap = new HashMap<>();
-	        Map<String, Object> relationshipsMap = new HashMap<>();
+	        Map<String, String> bomRefToSpdxIdMap = new HashMap<>();
 	        List<String> packageInfoidentifierList = new ArrayList<>();
 	        
 	        if (bom.getComponents() != null) {
@@ -1270,8 +1289,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                row.createCell(21).setCellValue("FALSE");
 	                
 	                packageInfoidentifierList.add(spdxId);
+	                if (!isEmpty(c.getBomRef())) {
+	                	bomRefToSpdxIdMap.put(c.getBomRef(), spdxId);
+	                }
 	                if (!isEmpty(c.getPurl())) {
-	                	relationshipsMap.put(c.getPurl(), spdxId);
 	                	externalRefsMap.put(spdxId, c.getPurl());
 	                }
 	            }
@@ -1346,12 +1367,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        	
 				for (org.cyclonedx.model.Dependency dep : bom.getDependencies()) {
 					String key = dep.getRef();
-					if (relationshipsMap.containsKey(key) && CollectionUtils.isNotEmpty(dep.getDependencies())) {
-						String spdxElementId = (String) relationshipsMap.get(key);
+					if (bomRefToSpdxIdMap.containsKey(key) && CollectionUtils.isNotEmpty(dep.getDependencies())) {
+						String spdxElementId = bomRefToSpdxIdMap.get(key);
 						for (org.cyclonedx.model.Dependency dependency : dep.getDependencies()) {
 							String relatedSpdxElementKey = dependency.getRef();
-							if (relationshipsMap.containsKey(relatedSpdxElementKey)) {
-								String relatedSpdxElement = String.valueOf(relationshipsMap.getOrDefault(relatedSpdxElementKey, ""));
+							if (bomRefToSpdxIdMap.containsKey(relatedSpdxElementKey)) {
+								String relatedSpdxElement = String.valueOf(bomRefToSpdxIdMap.getOrDefault(relatedSpdxElementKey, ""));
 								int cellIdx = 0;
 
 								Row row = sheetRelationships.getRow(rowIdx);
