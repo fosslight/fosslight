@@ -4973,7 +4973,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			// 안드로이드 모델인 경우 없을 수도 있음
-			if (!componentList.isEmpty()) {
+			if (!CoConstDef.FLAG_YES.equals(avoidNull(project.getSkipPackageFlag())) && !componentList.isEmpty()) {
 				List<ProjectIdentification> copyComponents = new ArrayList<>();
 				for (String refComponentId : componentList) {
 					ProjectIdentification copyParam = new ProjectIdentification();
