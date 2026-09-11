@@ -3652,6 +3652,7 @@ var com_fn = {
 							$('.ajax-file-upload-statusbar').remove();
 						} else if (result[2] == "EXCEL_FILE" || result[2] == "SPDX_SPREADSHEET_FILE") {
 							var isExcel = (result[2] == "EXCEL_FILE") ? true : false;
+							var defaultTabNm = isExcel ? "SRC" : "DEP";
 							
 							var checkSheetNms = [];
 							var checkTabNms = [];
@@ -3689,11 +3690,7 @@ var com_fn = {
   									if (checkFlag) {
   										checkFlag = false;
  										sheetTr += '<td><input type="checkbox" class="sheetRowCheckBox mr-2" name="sheetCheck">' + sheetName + '</td>';
- 										var defaultTabNm = "SRC";
- 										if (sheetName.indexOf("PACKAGE INFO") > -1 || sheetName.indexOf("PER FILE INFO") > -1) {
- 											defaultTabNm = "DEP";
- 										}
-										
+
  										for (var j = 0; j < checkTabNms.length; j++) {
  											if (isExcel) {
  												if (sheetName.indexOf(checkTabNms[j]) > -1) {

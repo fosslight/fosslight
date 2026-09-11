@@ -1318,7 +1318,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 									
 						// Category
 						Cell cellCategory = row.createCell(cellIdx); cellIdx++;
-						cellCategory.setCellValue("PACKAGE_MANAGER");
+						cellCategory.setCellValue("PACKAGE-MANAGER");
 									
 						// Type
 						Cell cellType = row.createCell(cellIdx); cellIdx++;

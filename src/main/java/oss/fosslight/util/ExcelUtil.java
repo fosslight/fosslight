@@ -1632,7 +1632,7 @@ public class ExcelUtil extends CoTopComponent {
 			if (isSbomEmptyValue(packageId) || isSbomEmptyValue(locator)) {
 				continue;
 			}
-			if ("PACKAGE_MANAGER".equalsIgnoreCase(category) && "purl".equalsIgnoreCase(type)) {
+			if (("PACKAGE_MANAGER".equalsIgnoreCase(category) || "PACKAGE-MANAGER".equalsIgnoreCase(category)) && "purl".equalsIgnoreCase(type)) {
 				purlByPackageId.put(packageId, locator);
 			}
 		}
@@ -1813,16 +1813,28 @@ public class ExcelUtil extends CoTopComponent {
 			String spdxIdA = normalizeSpdxValue(getCellData(row.getCell(spdxIdACol)));
 			String relation = normalizeSpdxValue(getCellData(row.getCell(relationshipCol)));
 			String spdxIdB = normalizeSpdxValue(getCellData(row.getCell(spdxIdBCol)));
-			if (isSbomEmptyValue(spdxIdA) || isSbomEmptyValue(spdxIdB) || !"DEPENDS_ON".equalsIgnoreCase(relation)) {
+			if (isSbomEmptyValue(spdxIdA) || isSbomEmptyValue(spdxIdB) || isSbomEmptyValue(relation)) {
 				continue;
 			}
 
-			String dependencyPurl = normalizeSpdxValue(spdxPurlMap.get(spdxIdB));
+			String dependsOnSubjectSpdxId = null;
+			String dependencyTargetSpdxId = null;
+			if ("DEPENDS_ON".equalsIgnoreCase(relation)) {
+				dependsOnSubjectSpdxId = spdxIdA;
+				dependencyTargetSpdxId = spdxIdB;
+			} else if ("DEPENDENCY_OF".equalsIgnoreCase(relation)) {
+				dependsOnSubjectSpdxId = spdxIdB;
+				dependencyTargetSpdxId = spdxIdA;
+			} else {
+				continue;
+			}
+
+			String dependencyPurl = normalizeSpdxValue(spdxPurlMap.get(dependencyTargetSpdxId));
 			if (isSbomEmptyValue(dependencyPurl)) {
 				continue;
 			}
 
-			dependsOnBySpdxId.computeIfAbsent(spdxIdA, k -> new LinkedHashSet<>()).add(dependencyPurl);
+			dependsOnBySpdxId.computeIfAbsent(dependsOnSubjectSpdxId, k -> new LinkedHashSet<>()).add(dependencyPurl);
 		}
 
 		return dependsOnBySpdxId;

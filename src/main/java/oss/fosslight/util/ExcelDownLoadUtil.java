@@ -3000,7 +3000,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 									
 						// Category
 						Cell cellCategory = getCell(row, cellIdx); cellIdx++;
-						cellCategory.setCellValue("PACKAGE_MANAGER");
+						cellCategory.setCellValue("PACKAGE-MANAGER");
 									
 						// Type
 						Cell cellType = getCell(row, cellIdx); cellIdx++;
@@ -3724,7 +3724,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 									
 						// Category
 						Cell cellCategory = getCell(row, cellIdx); cellIdx++;
-						cellCategory.setCellValue("PACKAGE_MANAGER");
+						cellCategory.setCellValue("PACKAGE-MANAGER");
 									
 						// Type
 						Cell cellType = getCell(row, cellIdx); cellIdx++;
