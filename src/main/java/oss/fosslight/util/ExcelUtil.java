@@ -1632,7 +1632,7 @@ public class ExcelUtil extends CoTopComponent {
 			if (isSbomEmptyValue(packageId) || isSbomEmptyValue(locator)) {
 				continue;
 			}
-			if ("PACKAGE_MANAGER".equalsIgnoreCase(category) && "purl".equalsIgnoreCase(type)) {
+			if (("PACKAGE_MANAGER".equalsIgnoreCase(category) || "PACKAGE-MANAGER".equalsIgnoreCase(category)) && "purl".equalsIgnoreCase(type)) {
 				purlByPackageId.put(packageId, locator);
 			}
 		}
