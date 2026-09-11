@@ -18,6 +18,7 @@ public class SecurityExportItemDto {
     private String vulnerabilityLink;
     private String officialPatchLink;
     private String securityPatchLink;
+    private String securityComments;
     private String cpeName;
     private String verStartEndRange;
     private String gridId;
@@ -35,6 +36,7 @@ public class SecurityExportItemDto {
                 .vulnerabilityLink(toEmpty(item.getVulnerabilityLink()))
                 .officialPatchLink(toEmpty(item.getOfficialPatchLink()))
                 .securityPatchLink(toEmpty(item.getSecurityPatchLink()))
+                .securityComments(toEmpty(item.getSecurityComments()))
                 .cpeName(toEmpty(item.getCpeName()))
                 .verStartEndRange(toEmpty(item.getVerStartEndRange()))
                 .gridId(toEmpty(item.getGridId()))
