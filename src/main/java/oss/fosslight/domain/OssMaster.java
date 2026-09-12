@@ -1072,12 +1072,18 @@ public class OssMaster extends ComBean implements Serializable{
 				convertCvssScore = convertCvssScore.split("->")[1].trim();
 			}
 			
-			if (Double.parseDouble(convertCvssScore) <= 3.9){
-				cvssScoreIcon = "L";
-			}else if (Double.parseDouble(convertCvssScore) <= 6.9){
-				cvssScoreIcon = "M";
-			}else if (Double.parseDouble(convertCvssScore) <= 10.0){
-				cvssScoreIcon = "H";
+			if (CommonFunction.isBigDecimal(convertCvssScore)) {
+				if (Double.parseDouble(convertCvssScore) <= 3.9){
+					cvssScoreIcon = "L";
+				} else if (Double.parseDouble(convertCvssScore) <= 6.9){
+					cvssScoreIcon = "M";
+				} else if (Double.parseDouble(convertCvssScore) <= 8.9){
+					cvssScoreIcon = "H";
+				} else {
+					cvssScoreIcon = "C";
+				}
+			} else {
+				cvssScoreIcon = convertCvssScore;
 			}
 		}
 	}
