@@ -1135,8 +1135,7 @@ public class OssController extends CoTopComponent{
 	}
 
 	@PostMapping(value = OSS.BULK_REG_AJAX)
-	public @ResponseBody
-	ResponseEntity<Object> saveAjaxJson(@RequestBody List<OssMaster> ossMasters, HttpServletRequest req, HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> saveAjaxJson(@RequestBody List<OssMaster> ossMasters, HttpServletRequest req, HttpServletResponse res, Model model) {
 		List<Map<String, Object>> ossDataMapList = new ArrayList<>();
 		Map<String, Object> resMap = new HashMap<>();
 

@@ -56,6 +56,8 @@ public interface OsvDataMapper {
 	List<Vulnerability> selectOsvVulnerabilityListByPurl(Map<String, Object> paramMap);
 	
 	List<Vulnerability> selectOsvVulnerabilityListByPackageName(Map<String, Object> paramMap);
+	
+	List<Vulnerability> selectOsvVulnerabilityListForOssInfo(Map<String, Object> paramMap);
 
 	void setGroupConcatMaxLen();
 	

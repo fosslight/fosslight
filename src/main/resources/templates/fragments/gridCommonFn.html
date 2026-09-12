@@ -1228,6 +1228,8 @@
 
                 var ossName = target.jqGrid('getCell', rowid, 'ossName');
                 var ossVersion = target.jqGrid('getCell', rowid, 'ossVersion');
+                var jobSeq = target.jqGrid('getCell', rowid, 'jobSeq');
+                
                 if (!restoreYn || restoreYn == undefined) target.jqGrid('editRow', rowid);
                 if (ossVersion == "N/A") ossVersion = "";
 

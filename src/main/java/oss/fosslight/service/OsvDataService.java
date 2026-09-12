@@ -672,11 +672,13 @@ public class OsvDataService extends CoTopComponent {
 	    private final String ossName;
 	    private final String ossVersion;
 	    private final String cveId;
+	    private final String groupKeyId;
 
-	    public VulnGroupKey(String ossName, String ossVersion, String cveId) {
+	    public VulnGroupKey(String ossName, String ossVersion, String cveId, String groupKeyId) {
 	        this.ossName = ossName;
 	        this.ossVersion = ossVersion;
 	        this.cveId = cveId;
+	        this.groupKeyId = groupKeyId;
 	    }
 
 	    @Override
@@ -686,12 +688,13 @@ public class OsvDataService extends CoTopComponent {
 	        VulnGroupKey that = (VulnGroupKey) o;
 	        return Objects.equals(ossName, that.ossName) &&
 	               Objects.equals(ossVersion, that.ossVersion) &&
-	               Objects.equals(cveId, that.cveId);
+	               Objects.equals(cveId, that.cveId) &&
+	               Objects.equals(groupKeyId, that.groupKeyId);
 	    }
 
 	    @Override
 	    public int hashCode() {
-	        return Objects.hash(ossName, ossVersion, cveId);
+	        return Objects.hash(ossName, ossVersion, cveId, groupKeyId);
 	    }
 	}
 
@@ -1378,7 +1381,8 @@ public class OsvDataService extends CoTopComponent {
 	        VulnGroupKey key = new VulnGroupKey(
 	            !isEmpty(item.getOssName()) ? item.getOssName() : "",
 	            !isEmpty(item.getOssVersion()) ? item.getOssVersion() : "",
-	            item.getCveId()
+	            item.getCveId(),
+	            !isEmpty(item.getGroupKeyId()) ? item.getGroupKeyId() : ""
 	        );
 	        
 	        uniqueMap.compute(key, (k, existing) -> {
@@ -1387,9 +1391,12 @@ public class OsvDataService extends CoTopComponent {
 	            // 우선순위 비교 (스트림 내부 정렬을 단일 비교 연산으로 변경하여 메모리 절약)
 	            boolean validA = CommonFunction.isBigDecimal(existing.getCvssScore());
 	            boolean validB = CommonFunction.isBigDecimal(item.getCvssScore());
-	            if (validA && !validB) return existing;
-	            if (!validA && validB) return item;
-	            
+	            if (validA && !validB) {
+	            	return existing;
+	            }
+	            if (!validA && validB) {
+	            	return item;
+	            }
 	            return existing.getPriority() <= item.getPriority() ? existing : item;
 	        });
 	    }
@@ -1632,27 +1639,27 @@ public class OsvDataService extends CoTopComponent {
 	}
 
 	private List<Vulnerability> findByNamePriority(OssMaster ossMaster, Map<String, Object> paramMap) {
-		List<Vulnerability> result = new ArrayList<>();
-		if (paramMap.containsKey("ossName")) {
-			List<Vulnerability> priority1List = osvDataMapper.selectOsvVulnerabilityListByUniqueNick(paramMap);
-			if (CollectionUtils.isNotEmpty(priority1List)) {
-				result.addAll(priority1List);
-			}
-		}
-
-		if (paramMap.containsKey("purls")) {
-			List<Vulnerability> priority2List = osvDataMapper.selectOsvVulnerabilityListByPurl(paramMap);
-			if (CollectionUtils.isNotEmpty(priority2List)) {
-				result.addAll(priority2List);
-			}
-		}
-
-		if (paramMap.containsKey("ossName")) {
-			List<Vulnerability> priority3List = osvDataMapper.selectOsvVulnerabilityListByPackageName(paramMap);
-			if (CollectionUtils.isNotEmpty(priority3List)) {
-				result.addAll(priority3List);
-			}
-		}
+		List<Vulnerability> result = osvDataMapper.selectOsvVulnerabilityListForOssInfo(paramMap);
+//		if (paramMap.containsKey("ossName")) {
+//			List<Vulnerability> priority1List = osvDataMapper.selectOsvVulnerabilityListByUniqueNick(paramMap);
+//			if (CollectionUtils.isNotEmpty(priority1List)) {
+//				result.addAll(priority1List);
+//			}
+//		}
+//
+//		if (paramMap.containsKey("purls")) {
+//			List<Vulnerability> priority2List = osvDataMapper.selectOsvVulnerabilityListByPurl(paramMap);
+//			if (CollectionUtils.isNotEmpty(priority2List)) {
+//				result.addAll(priority2List);
+//			}
+//		}
+//
+//		if (paramMap.containsKey("ossName")) {
+//			List<Vulnerability> priority3List = osvDataMapper.selectOsvVulnerabilityListByPackageName(paramMap);
+//			if (CollectionUtils.isNotEmpty(priority3List)) {
+//				result.addAll(priority3List);
+//			}
+//		}
 
 		if (CollectionUtils.isNotEmpty(result)) {
 			String ossName = ossMaster.getOssName();
@@ -1663,6 +1670,7 @@ public class OsvDataService extends CoTopComponent {
 				v.setOssVersion(ossVersion);
 				v.setVersion(ossVersion);
 				v.setCvssScore(v.getSeverity());
+				v.setPriority(v.getPriority());
 			});
 		}
 		return result;
@@ -1697,33 +1705,33 @@ public class OsvDataService extends CoTopComponent {
 	        currentTargetVersion = isSecurity ? osvVulnerability.getOssVersion() : targetVersion;
 	        
 	        // 1순위 검증: Exact Match
-	        if (!isEmpty(osvVulnerability.getSearchVersionP1())) {
-	        	if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
+	        if (osvVulnerability.getPriority() == 1) {
+//	        	if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
 		        	seenVulnerabilities.add(uniqueKey);
 	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
 	                resultList.add(osvVulnerability);
 	                continue;
-	            }
+//	            }
 	        }
 
 	        // 2순위 검증: Range Match
-	        if (!isEmpty(osvVulnerability.getSearchVersionP2())) {
-	        	boolean matched = isVersionInRange(currentTargetVersion, osvVulnerability.getSearchVersionP2(), osvVulnerability.getAffectedVersion());
-	            if (!matched && aliases != null) {
-	                for (String alias : aliases) {
-	                    if (isVersionInRange(alias, osvVulnerability.getSearchVersionP2(), osvVulnerability.getAffectedVersion())) {
-	                        matched = true;
-	                        break;
-	                    }
-	                }
-	            }
-
-	            if (matched) {
+	        if (osvVulnerability.getPriority() == 2) {
+//	        	boolean matched = isVersionInRange(currentTargetVersion, osvVulnerability.getSearchVersionP2(), osvVulnerability.getAffectedVersion());
+//	            if (!matched && aliases != null) {
+//	                for (String alias : aliases) {
+//	                    if (isVersionInRange(alias, osvVulnerability.getSearchVersionP2(), osvVulnerability.getAffectedVersion())) {
+//	                        matched = true;
+//	                        break;
+//	                    }
+//	                }
+//	            }
+//
+//	            if (matched) {
 	            	seenVulnerabilities.add(uniqueKey);
 	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
 	                resultList.add(osvVulnerability);
 	                continue;
-	            }
+//	            }
 	        }
 
 	        // 3순위 검증: Empty Target Version
