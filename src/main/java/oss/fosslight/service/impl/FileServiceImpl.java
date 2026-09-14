@@ -852,6 +852,20 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		    }
 		
 		    Set<String> validIds = new HashSet<>();
+		    Set<String> validExternalDocumentRefs = new HashSet<>();
+		    if (root.has("externalDocumentRefs") && root.get("externalDocumentRefs").isArray()) {
+		        for (JsonNode docRefNode : root.get("externalDocumentRefs")) {
+		            if (docRefNode.isObject()) {
+		                JsonNode externalDocumentIdNode = docRefNode.get("externalDocumentId");
+		                if (externalDocumentIdNode != null && !externalDocumentIdNode.isNull()) {
+		                    String externalDocumentId = externalDocumentIdNode.asText().trim();
+		                    if (!externalDocumentId.isEmpty() && externalDocumentId.startsWith("DocumentRef-")) {
+		                        validExternalDocumentRefs.add(externalDocumentId);
+		                    }
+		                }
+		            }
+		        }
+		    }
 		    if (root.has("SPDXID")) {
 		        validIds.add(root.path("SPDXID").asText());
 		    }
@@ -914,6 +928,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    try {
 	    	List<String> lines = Files.readAllLines(originalPath, StandardCharsets.UTF_8);
 	        Set<String> validIds = collectValidSpdxIds(lines);
+	        Set<String> validExternalDocumentRefs = collectValidExternalDocumentRefs(lines);
 
 	        List<String> result = new ArrayList<>();
 	        List<String> relBlock = new ArrayList<>();
@@ -935,7 +950,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	            if (insideRelationships) {
 	                if (currentIndent <= relationshipsIndent && !trimmed.startsWith("-")) {
-	                    processRelationshipBlock(relBlock, result, validIds);
+	                    processRelationshipBlock(relBlock, result, validIds, validExternalDocumentRefs);
 	                    relBlock.clear();
 	                    insideRelationships = false;
 	                    result.add(line);
@@ -943,7 +958,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                }
 
 	                if (trimmed.startsWith("-")) {
-	                    processRelationshipBlock(relBlock, result, validIds);
+	                    processRelationshipBlock(relBlock, result, validIds, validExternalDocumentRefs);
 	                    relBlock.clear();
 	                }
 
@@ -954,7 +969,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	            }
 	        }
 
-	        processRelationshipBlock(relBlock, result, validIds);
+	        processRelationshipBlock(relBlock, result, validIds, validExternalDocumentRefs);
 
 	        Files.write(originalPath, result, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
 
@@ -991,7 +1006,21 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    return validIds;
 	}
 	
-	private void processRelationshipBlock(List<String> block, List<String> result, Set<String> validIds) {
+	private Set<String> collectValidExternalDocumentRefs(List<String> lines) {
+		Set<String> validExternalDocumentRefs = new HashSet<>();
+		for (String line : lines) {
+			String trimmed = line.trim();
+			if (trimmed.startsWith("externalDocumentId:")) {
+				String value = extractValue(trimmed);
+				if (value != null && value.startsWith("DocumentRef-")) {
+					validExternalDocumentRefs.add(value);
+				}
+			}
+		}
+		return validExternalDocumentRefs;
+	}
+	
+	private void processRelationshipBlock(List<String> block, List<String> result, Set<String> validIds, Set<String> validExternalDocumentRefs) {
 		if (block.isEmpty()) {
 			return;
 		}
