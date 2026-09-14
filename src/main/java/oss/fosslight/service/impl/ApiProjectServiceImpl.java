@@ -71,6 +71,7 @@ import javax.naming.directory.Attributes;
 @Slf4j
 public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectService {
 	private static final String KEY_ERROR_MESSAGE = "errorMessage";
+	private static final String FILE_INFORMATION_NOT_FOUND_MESSAGE = "File information not found.";
 
 	@Autowired ApiProjectMapper apiProjectMapper;
 	@Autowired ProjectMapper projectMapper;
@@ -3345,7 +3346,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 		T2File uploadFile = fileService.selectFileInfoById(registFileId);
 		if (uploadFile == null) {
-			rtnMap.put(KEY_ERROR_MESSAGE, "File information not found.");
+			rtnMap.put(KEY_ERROR_MESSAGE, FILE_INFORMATION_NOT_FOUND_MESSAGE);
 			return rtnMap;
 		}
 

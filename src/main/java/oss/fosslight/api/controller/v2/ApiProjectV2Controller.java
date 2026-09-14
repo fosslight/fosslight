@@ -15,6 +15,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
@@ -59,6 +60,7 @@ import java.util.*;
 public class ApiProjectV2Controller extends CoTopComponent {
     private static final String KEY_ERROR_MESSAGE = "errorMessage";
     private static final String KEY_VALID_ERROR = "validError";
+    private static final String FILE_INFORMATION_NOT_FOUND_MESSAGE = "File information not found.";
 
 
     @Resource
@@ -1060,13 +1062,28 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
             if (uploadFile == null) {
-                resultMap.put(KEY_ERROR_MESSAGE, "File information not found.");
+                resultMap.put(KEY_ERROR_MESSAGE, FILE_INFORMATION_NOT_FOUND_MESSAGE);
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get(KEY_ERROR_MESSAGE));
             }
 
             String registFileId = uploadFile.getRegistFileId();
+            if (!uploadFile.isUploadSucc()) {
+                String uploadErrorMessage = isEmpty(uploadFile.getComments()) ? "Failed to upload report file." : uploadFile.getComments();
+                log.warn("Report upload failed before sheet processing. projectId={}, fileId={}, errorCode={}",
+                        prjId, registFileId, uploadFile.getUploadErrorCode());
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, uploadErrorMessage);
+            }
+            if (isEmpty(registFileId)) {
+                log.error("Report upload returned empty fileId. projectId={}, registSeq={}", prjId, uploadFile.getRegistSeq());
+                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, FILE_INFORMATION_NOT_FOUND_MESSAGE);
+            }
 
             T2File registFile = fileService.selectFileInfoById(registFileId);
+            if (registFile == null) {
+                log.error("Uploaded report metadata not found. projectId={}, fileId={}, registSeq={}, uploadSucc={}, uploadErrorCode={}",
+                        prjId, registFileId, uploadFile.getRegistSeq(), uploadFile.isUploadSucc(), uploadFile.getUploadErrorCode());
+                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, FILE_INFORMATION_NOT_FOUND_MESSAGE);
+            }
 
             String uploadFileSeq = registFile.getFileSeq();
             String uploadFileNm = registFile.getOrigNm();
@@ -1287,7 +1304,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 depOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
                 ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
                 projectService.registCommentWithNickNameValid(prjId, depOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_DEP, userInfo.getUserId());
-                projectService.registDepOss(depOssComponents, ossComponentsLicense, project, true);
+                try {
+                    projectService.registDepOss(depOssComponents, ossComponentsLicense, project, true);
+                } catch (CannotAcquireLockException e) {
+                    log.error("Lock timeout while saving DEP report data. projectId={}, fileId={}", prjId, registFileId, e);
+                    return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Report upload could not be completed because related OSS data is locked. Please retry the upload.");
+                }
             }
             if (isSrcLoaded) {
                 // Prepend existing SRC components from DB so new data is appended
@@ -1302,7 +1325,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 srcOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
                 ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
                 projectService.registCommentWithNickNameValid(prjId, srcOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_SRC, userInfo.getUserId());
-                projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, true);
+                try {
+                    projectService.registSrcOss(srcOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_SRC, true);
+                } catch (CannotAcquireLockException e) {
+                    log.error("Lock timeout while saving SRC report data. projectId={}, fileId={}", prjId, registFileId, e);
+                    return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Report upload could not be completed because related OSS data is locked. Please retry the upload.");
+                }
             }
             if (isBinLoaded) {
                 // Prepend existing BIN components from DB so new data is appended
@@ -1317,7 +1346,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 binOssComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
                 ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
                 projectService.registCommentWithNickNameValid(prjId, binOssComponents, ossComponentsLicense, CoConstDef.CD_DTL_COMPONENT_ID_BIN, userInfo.getUserId());
-                projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN, true);
+                try {
+                    projectService.registSrcOss(binOssComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN, true);
+                } catch (CannotAcquireLockException e) {
+                    log.error("Lock timeout while saving BIN report data. projectId={}, fileId={}", prjId, registFileId, e);
+                    return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Report upload could not be completed because related OSS data is locked. Please retry the upload.");
+                }
             }
             if (registFile != null) {
                 projectService.setFileAddList(registFile, project, CoConstDef.CD_DTL_COMPONENT_ID_BOM,
