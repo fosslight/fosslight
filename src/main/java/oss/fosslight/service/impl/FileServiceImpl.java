@@ -518,6 +518,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		} catch (Exception e) {}
 		
 		upFile.setRegistSeq(registFile(registFile));
+		if (isEmpty(upFile.getRegistSeq())) {
+			setUploadError(upFile, FileUploadErrorCode.FILE_SAVE_FAILED, "Failed to persist uploaded file metadata.");
+			return new UploadProcessResult(upFile, true);
+		}
 		upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
 		return new UploadProcessResult(upFile, false);
 	}
