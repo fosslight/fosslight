@@ -3424,13 +3424,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 				List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
 
-				boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
-				if (projectInfo != null) {
-					if (!CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(avoidNull(projectInfo.getIdentificationStatus()))) {
-						hideOssVersionFlag = false;
-					}
-				}
-				
+				boolean hideOssVersionFlag = false;
+
 				if (sourceList != null && !sourceList.isEmpty()) {
 					noticeList.addAll(sourceList);
 				}
@@ -6097,4 +6092,3 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return downloadId;
 	}
 }
-

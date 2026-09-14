@@ -874,14 +874,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		            JsonNode rel = relationships.get(i);
 		            String spdxElementId = rel.path("spdxElementId").asText();
 		            String relatedSpdxElement = rel.path("relatedSpdxElement").asText();
-		            boolean valid = validIds.contains(spdxElementId)
-		                    || "NONE".equalsIgnoreCase(spdxElementId)
-		                    || "NOASSERTION".equalsIgnoreCase(spdxElementId)
-		                    || spdxElementId.startsWith("DocumentRef-");
-		            valid = valid && (validIds.contains(relatedSpdxElement)
-		                    || "NONE".equalsIgnoreCase(relatedSpdxElement)
-		                    || "NOASSERTION".equalsIgnoreCase(relatedSpdxElement)
-		                    || relatedSpdxElement.startsWith("DocumentRef-"));
+		            boolean valid = isValidSpdxRelationshipId(spdxElementId, validIds, false)
+		                    && isValidSpdxRelationshipId(relatedSpdxElement, validIds, true);
 		            if (!valid) {
 		            	relationships.remove(i);
 		            }
@@ -916,7 +910,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	private File cleanYamlDirectly(File file) {
 	    Path originalPath = file.toPath();
-	    
+    	    
 	    try {
 	    	List<String> lines = Files.readAllLines(originalPath, StandardCharsets.UTF_8);
 	        Set<String> validIds = collectValidSpdxIds(lines);
@@ -1018,21 +1012,31 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		}
 
-		boolean isValid = true;
-
-		if (spdxElementId != null && !isSpecialId(spdxElementId) && !validIds.contains(spdxElementId)) {
-			isValid = false;
-		}
-
-		if (relatedSpdxElement != null && !isSpecialId(relatedSpdxElement) && !validIds.contains(relatedSpdxElement)) {
-			isValid = false;
-		}
+		boolean isValid = isValidSpdxRelationshipId(spdxElementId, validIds, false)
+				&& isValidSpdxRelationshipId(relatedSpdxElement, validIds, true);
 
 		if (isValid) {
 			result.addAll(block);
 		} else {
 			log.warn("제거된 잘못된 relationship: spdxElementId={}, relatedSpdxElement={}", spdxElementId, relatedSpdxElement);
 		}
+	}
+	
+	private boolean isValidSpdxRelationshipId(String value, Set<String> validIds, boolean allowSpecial) {
+		if (value == null) {
+			return false;
+		}
+		String normalized = value.trim();
+		if (normalized.isEmpty()) {
+			return false;
+		}
+		if (validIds.contains(normalized)) {
+			return true;
+		}
+		if (allowSpecial && ("NONE".equalsIgnoreCase(normalized) || "NOASSERTION".equalsIgnoreCase(normalized))) {
+			return true;
+		}
+		return false;
 	}
 	
 	private String extractValue(String line) {
@@ -1044,7 +1048,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	}
 
 	private boolean isSpecialId(String id) {
-	    return id.equals("NONE") || id.equals("NOASSERTION") || id.startsWith("DocumentRef-");
+	    return "NONE".equalsIgnoreCase(id) || "NOASSERTION".equalsIgnoreCase(id);
 	}
 
 	private int countIndent(String line) {
