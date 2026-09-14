@@ -852,20 +852,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		    }
 		
 		    Set<String> validIds = new HashSet<>();
-		    Set<String> validExternalDocumentRefs = new HashSet<>();
-		    if (root.has("externalDocumentRefs") && root.get("externalDocumentRefs").isArray()) {
-		        for (JsonNode docRefNode : root.get("externalDocumentRefs")) {
-		            if (docRefNode.isObject()) {
-		                JsonNode externalDocumentIdNode = docRefNode.get("externalDocumentId");
-		                if (externalDocumentIdNode != null && !externalDocumentIdNode.isNull()) {
-		                    String externalDocumentId = externalDocumentIdNode.asText().trim();
-		                    if (!externalDocumentId.isEmpty() && externalDocumentId.startsWith("DocumentRef-")) {
-		                        validExternalDocumentRefs.add(externalDocumentId);
-		                    }
-		                }
-		            }
-		        }
-		    }
 		    if (root.has("SPDXID")) {
 		        validIds.add(root.path("SPDXID").asText());
 		    }
@@ -888,8 +874,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		            JsonNode rel = relationships.get(i);
 		            String spdxElementId = rel.path("spdxElementId").asText();
 		            String relatedSpdxElement = rel.path("relatedSpdxElement").asText();
-		            boolean valid = isValidSpdxRelationshipId(spdxElementId, validIds, validExternalDocumentRefs, false)
-		                    && isValidSpdxRelationshipId(relatedSpdxElement, validIds, validExternalDocumentRefs, true);
+		            boolean valid = isValidSpdxRelationshipId(spdxElementId, validIds, false)
+		                    && isValidSpdxRelationshipId(relatedSpdxElement, validIds, true);
 		            if (!valid) {
 		            	relationships.remove(i);
 		            }
@@ -928,7 +914,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    try {
 	    	List<String> lines = Files.readAllLines(originalPath, StandardCharsets.UTF_8);
 	        Set<String> validIds = collectValidSpdxIds(lines);
-	        Set<String> validExternalDocumentRefs = collectValidExternalDocumentRefs(lines);
 
 	        List<String> result = new ArrayList<>();
 	        List<String> relBlock = new ArrayList<>();
@@ -950,7 +935,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	            if (insideRelationships) {
 	                if (currentIndent <= relationshipsIndent && !trimmed.startsWith("-")) {
-	                    processRelationshipBlock(relBlock, result, validIds, validExternalDocumentRefs);
+	                    processRelationshipBlock(relBlock, result, validIds);
 	                    relBlock.clear();
 	                    insideRelationships = false;
 	                    result.add(line);
@@ -958,7 +943,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                }
 
 	                if (trimmed.startsWith("-")) {
-	                    processRelationshipBlock(relBlock, result, validIds, validExternalDocumentRefs);
+	                    processRelationshipBlock(relBlock, result, validIds);
 	                    relBlock.clear();
 	                }
 
@@ -969,7 +954,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	            }
 	        }
 
-	        processRelationshipBlock(relBlock, result, validIds, validExternalDocumentRefs);
+	        processRelationshipBlock(relBlock, result, validIds);
 
 	        Files.write(originalPath, result, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
 
@@ -1006,21 +991,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    return validIds;
 	}
 	
-	private Set<String> collectValidExternalDocumentRefs(List<String> lines) {
-		Set<String> validExternalDocumentRefs = new HashSet<>();
-		for (String line : lines) {
-			String trimmed = line.trim();
-			if (trimmed.startsWith("externalDocumentId:")) {
-				String value = extractValue(trimmed);
-				if (value != null && value.startsWith("DocumentRef-")) {
-					validExternalDocumentRefs.add(value);
-				}
-			}
-		}
-		return validExternalDocumentRefs;
-	}
-	
-	private void processRelationshipBlock(List<String> block, List<String> result, Set<String> validIds, Set<String> validExternalDocumentRefs) {
+	private void processRelationshipBlock(List<String> block, List<String> result, Set<String> validIds) {
 		if (block.isEmpty()) {
 			return;
 		}
@@ -1041,8 +1012,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		}
 
-		boolean isValid = isValidSpdxRelationshipId(spdxElementId, validIds, validExternalDocumentRefs, false)
-				&& isValidSpdxRelationshipId(relatedSpdxElement, validIds, validExternalDocumentRefs, true);
+		boolean isValid = isValidSpdxRelationshipId(spdxElementId, validIds, false)
+				&& isValidSpdxRelationshipId(relatedSpdxElement, validIds, true);
 
 		if (isValid) {
 			result.addAll(block);
@@ -1051,7 +1022,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		}
 	}
 	
-	private boolean isValidSpdxRelationshipId(String value, Set<String> validIds, Set<String> validExternalDocumentRefs, boolean allowSpecial) {
+	private boolean isValidSpdxRelationshipId(String value, Set<String> validIds, boolean allowSpecial) {
 		if (value == null) {
 			return false;
 		}
@@ -1065,38 +1036,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		if (allowSpecial && ("NONE".equalsIgnoreCase(normalized) || "NOASSERTION".equalsIgnoreCase(normalized))) {
 			return true;
 		}
-		if (isValidExternalDocumentReference(normalized, validExternalDocumentRefs)) {
-			return true;
-		}
 		return false;
-	}
-	
-	private boolean isValidExternalDocumentReference(String value, Set<String> validExternalDocumentRefs) {
-		if (value == null || value.trim().isEmpty()) {
-			return false;
-		}
-		String normalized = value.trim();
-		int colonIndex = normalized.indexOf(':');
-		if (colonIndex <= 0 || colonIndex == normalized.length() - 1) {
-			return false;
-		}
-		String documentRef = normalized.substring(0, colonIndex);
-		String elementId = normalized.substring(colonIndex + 1).trim();
-		if (!documentRef.startsWith("DocumentRef-")) {
-			return false;
-		}
-		if (!elementId.startsWith("SPDXRef-")) {
-			return false;
-		}
-		String docId = documentRef.substring("DocumentRef-".length());
-		String localId = elementId.substring("SPDXRef-".length());
-		if (docId.isEmpty() || localId.isEmpty()) {
-			return false;
-		}
-		if (!docId.matches("[A-Za-z0-9.-]+") || !localId.matches("[A-Za-z0-9.-]+")) {
-			return false;
-		}
-		return validExternalDocumentRefs.isEmpty() || validExternalDocumentRefs.contains(documentRef);
 	}
 	
 	private String extractValue(String line) {
