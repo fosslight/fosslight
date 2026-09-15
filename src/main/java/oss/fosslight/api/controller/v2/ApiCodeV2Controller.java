@@ -16,6 +16,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.annotation.ApiCommonResponses;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.Url.APIV2;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.ApiCodeService;
 import oss.fosslight.service.T2UserService;
 
@@ -64,7 +65,9 @@ public class ApiCodeV2Controller extends CoTopComponent {
             @ApiParam(value = "detail Value", required = false) @RequestParam(required = false) String detailValue) {
 
         // 사용자 인증
-        userService.checkApiUserAuth(authorization);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_CODE_SEARCH, userInfo.getUserId());
         Map<String, Object> result = new HashMap<>();
 
         List<Map<String, Object>> contents = apiCodeService.getCodeList(codeType, detailValue);

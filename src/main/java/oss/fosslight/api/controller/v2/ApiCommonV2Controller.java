@@ -72,6 +72,8 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiParam(value = "to", required = true) @RequestParam(required = true) String to) {
 
         T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_COMMON_MERGE_DIVISION, userInfo.getUserId());
         Map<String, Object> result = new HashMap<>();
         if (userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             try {
@@ -114,6 +116,8 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiParam(value = "Detail description (CD_DTL_EXP)", required = false) @RequestParam(required = false) String cdDtlExp) {
 
         T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_COMMON_DIVISION, userInfo.getUserId());
         if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             return responseService.errorResponse(HttpStatus.FORBIDDEN);
         }
@@ -162,6 +166,8 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiParam(value = "Detail description (CD_DTL_EXP)", required = false) @RequestParam(required = false) String cdDtlExp) {
 
         T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_COMMON_UPDATE_DIVISION, userInfo.getUserId());
         if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             return responseService.errorResponse(HttpStatus.FORBIDDEN);
         }
@@ -199,7 +205,9 @@ public class ApiCommonV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> getDivisionList(
             @ApiParam(hidden = true) @RequestHeader String authorization) {
 
-        userService.checkApiUserAuth(authorization);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_COMMON_DIVISION, userInfo.getUserId());
         Map<String, Object> result = new HashMap<>();
         try {
             List<Map<String, Object>> contents = apiCommonService.getDivisionList();
@@ -232,6 +240,8 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiParam(hidden = true) @RequestHeader String authorization) {
 
         T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_COMMON_USERS, userInfo.getUserId());
         if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             return responseService.errorResponse(HttpStatus.FORBIDDEN);
         }
@@ -288,6 +298,8 @@ public class ApiCommonV2Controller extends CoTopComponent {
             @ApiParam(value = "Division code (DIVISION)", required = true) @RequestParam(required = true) String division) {
 
         T2Users userInfo = userService.checkApiUserAuthAndSetSession(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_COMMON_USER_DIVISION, userInfo.getUserId());
         if (!userInfo.getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
             return responseService.errorResponse(HttpStatus.FORBIDDEN);
         }

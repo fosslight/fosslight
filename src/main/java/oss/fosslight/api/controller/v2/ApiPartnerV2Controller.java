@@ -90,6 +90,9 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceIds={}",
+                APIV2.FOSSLIGHT_API_PARTNER_SEARCH, userInfo.getUserId(),
+                partnerIdList == null ? null : String.join(",", partnerIdList));
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -139,6 +142,8 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
+                APIV2.FOSSLIGHT_API_PARTNER_ADD_EDITOR, userInfo.getUserId(), partnerId);
         Map<String, Object> resultMap = new HashMap<>();
 
         if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
@@ -195,7 +200,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
-        return get3rdDownloadInternal(authorization, partnerId, format);
+        return get3rdDownloadInternal(authorization, partnerId, format, APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD);
     }
 
     @ApiOperation(value = "3rd Party Report 다운로드 (Deprecated)", notes = "이전 경로입니다. /partners/{id}/sbom/file 사용을 권장합니다.", hidden = true)
@@ -210,17 +215,20 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
-        return get3rdDownloadInternal(authorization, partnerId, format);
+        return get3rdDownloadInternal(authorization, partnerId, format, "/partners/{id}/bom/file");
     }
 
     private ResponseEntity<FileSystemResource> get3rdDownloadInternal(
             String authorization,
             String partnerId,
-            String format) throws Exception {
+            String format,
+            String apiPath) throws Exception {
 
         String downloadId = "";
         T2File fileInfo = new T2File();
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
+                apiPath, userInfo.getUserId(), partnerId);
 
         if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
             throw new CProjectNotAvailableException(partnerId);
@@ -257,7 +265,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> get3rdAsJson(
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
-        return get3rdAsJsonInternal(authorization, partnerId);
+        return get3rdAsJsonInternal(authorization, partnerId, APIV2.FOSSLIGHT_API_PARTNER_JSON);
     }
 
     @ApiOperation(value = "3rd Party SBOM JSON 조회 (Deprecated)", notes = "이전 경로입니다. /partners/{id}/sbom/json-data 사용을 권장합니다.", hidden = true)
@@ -270,14 +278,17 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> get3rdAsJsonDeprecated(
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
-        return get3rdAsJsonInternal(authorization, partnerId);
+        return get3rdAsJsonInternal(authorization, partnerId, "/partners/{id}/bom/json-data");
     }
 
     private ResponseEntity<Map<String, Object>> get3rdAsJsonInternal(
             String authorization,
-            String partnerId) {
+            String partnerId,
+            String apiPath) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
+                apiPath, userInfo.getUserId(), partnerId);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {

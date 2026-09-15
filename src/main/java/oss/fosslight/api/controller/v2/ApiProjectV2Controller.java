@@ -127,6 +127,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceIds={}",
+                APIV2.FOSSLIGHT_API_PROJECT_SEARCH, userInfo.getUserId(),
+                prjIdList == null ? null : String.join(",", prjIdList));
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -169,7 +172,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList) {
 
         // 사용자 인증
-        userService.checkApiUserAuth(authorization);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceIds={}",
+                APIV2.FOSSLIGHT_API_MODEL_SEARCH, userInfo.getUserId(), String.join(",", prjIdList));
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -198,6 +203,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
     ) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_MODEL_UPDATE, userInfo.getUserId(), prjId);
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, List<Project>> modelList = null;
 
@@ -244,6 +251,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE, userInfo.getUserId(), prjId);
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, List<Project>> modelList = null;
 
@@ -304,6 +313,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT",
+                APIV2.FOSSLIGHT_API_PROJECT_CREATE, userInfo.getUserId());
         Map<String, Object> result = new HashMap<String, Object>();
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -465,7 +476,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) throws Exception {
-        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
+        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format,
+                APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD);
     }
 
     @ApiOperation(value = "프로젝트 BOM 파일 다운로드 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/file 사용을 권장합니다.", hidden = true)
@@ -483,14 +495,17 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) throws Exception {
-        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format);
+        return getPrjBomDownloadInternal(authorization, prjId, saveFlag, format,
+                "/projects/{id}/bom/file");
     }
 
-    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(String authorization, String prjId, String saveFlag, String format) throws Exception {
-        log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
-
+    private ResponseEntity<FileSystemResource> getPrjBomDownloadInternal(String authorization, String prjId,
+                                                                          String saveFlag, String format,
+                                                                          String apiPath) throws Exception {
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                apiPath, userInfo.getUserId(), prjId);
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
@@ -532,7 +547,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false) String saveFlag) {
-        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
+        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag,
+                APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON);
     }
 
     @ApiOperation(value = "프로젝트 BOM JSON 조회 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/json-data 사용을 권장합니다.", hidden = true)
@@ -548,11 +564,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false) String saveFlag) {
-        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag);
+        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag,
+                "/projects/{id}/bom/json-data");
     }
 
-    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(String authorization, String prjId, String saveFlag) {
+    private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(String authorization, String prjId,
+                                                                         String saveFlag, String apiPath) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                apiPath, userInfo.getUserId(), prjId);
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
@@ -591,7 +611,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
-        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId,
+                APIV2.FOSSLIGHT_API_PROJECT_BOM_COMPARE);
     }
 
     @ApiOperation(value = "프로젝트 BOM 비교 (Deprecated)", notes = "이전 경로입니다. /projects/{id}/sbom/compare-with/{compareId} 사용을 권장합니다.", hidden = true)
@@ -604,11 +625,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
-        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId);
+        return getPrjBomCompareInternal(authorization, beforePrjId, afterPrjId,
+                "/projects/{id}/bom/compare-with/{compareId}");
     }
 
-    private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(String authorization, String beforePrjId, String afterPrjId) {
+    private ResponseEntity<Map<String, Object>> getPrjBomCompareInternal(String authorization, String beforePrjId,
+                                                                          String afterPrjId, String apiPath) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={} compareResourceId={}",
+                apiPath, userInfo.getUserId(), beforePrjId, afterPrjId);
         Map<String, Object> resultMap = new HashMap<>();
 
         Map<String, Object> paramMap = new HashMap<>();
@@ -679,7 +704,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin", "all"}) @PathVariable(name = "tab_name") String tabName
     ) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info(String.format("/api/v2/projects/%s/%s/reset called by %s", prjId, tabName, userInfo.getUserId()));
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={} contextTab={}",
+                APIV2.FOSSLIGHT_API_IDENTIFICATION_RESET, userInfo.getUserId(), prjId, tabName);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
@@ -744,9 +770,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "BOM save (YES : Y, NO : N)", allowableValues = "Y,N", hidden = true)
             @ValuesAllowed(propName = "BOM save", values = {"Y", "N"}) @RequestParam(required = false) String bomSave) {
 
-
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info(String.format("/api/v2/projects/%s/%s/reports called by %s", prjId, tabName, userInfo.getUserId()));
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={} contextTab={}",
+                APIV2.FOSSLIGHT_API_OSS_REPORT, userInfo.getUserId(), prjId, tabName);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         tabName = tabName.toUpperCase();
@@ -979,7 +1005,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @RequestParam(required = true) String tabSheetMapping) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info(String.format("/api/v2/projects/%s/reports (multi) called by %s", prjId, userInfo.getUserId()));
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_UPLOAD_OSS_REPORT, userInfo.getUserId(), prjId);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
@@ -1417,6 +1444,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         T2Users userInfo = userService.checkApiUserAuth(authorization); // token이 정상적인 값인지 확인
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_PACKAGE_UPLOAD, userInfo.getUserId(), prjId);
         if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
@@ -1561,6 +1590,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Editor Id", required = true) @RequestParam(required = true) String[] idList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_PROJECT_ADD_EDITOR, userInfo.getUserId(), prjId);
         Map<String, Object> resultMap = new HashMap<>();
 
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
@@ -1602,6 +1633,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "User ID", required = true) @RequestParam(required = true) String userId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_PROJECT_ADD_SECURITY_PERSON, userInfo.getUserId(), prjId);
         Map<String, Object> resultMap = new HashMap<>();
 
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
@@ -1690,6 +1723,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Security Description (Required when secMailYn is N)", required = false) @RequestParam(required = false) String secMailDesc) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_PROJECT_SET_SECURITY_MAIL, userInfo.getUserId(), prjId);
         Map<String, Object> resultMap = new HashMap<>();
 
         userService.changeSession(userInfo.getUserId());
@@ -1796,9 +1831,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ValuesAllowed(propName = "tabName", values = {"all", "fullDiscovered", "needToResolve"})
             @RequestParam(required = false, defaultValue = "all") String tabName) {
 
-        log.info("/api/v2/prj_security_export_json called:" + prjId);
-
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={} contextTab={}",
+                Url.APIV2.FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON, userInfo.getUserId(), prjId, tabName);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         List<String> prjIdList = new ArrayList<String>();
@@ -1837,6 +1872,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
     ) throws Exception {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE, userInfo.getUserId(), prjId);
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }
@@ -1883,9 +1920,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y, N")
             @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag) {
 
-        log.error("/api/v2/oss_load called:" + targetPrjId);
-
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                Url.APIV2.FOSSLIGHT_API_OSS_LOAD, userInfo.getUserId(), targetPrjId);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
@@ -1971,6 +2008,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                Url.APIV2.FOSSLIGHT_API_PROJECT_BY_ID, userInfo.getUserId(), prjId);
         if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(prjId);
         }

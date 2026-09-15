@@ -7,6 +7,8 @@ package oss.fosslight.api.controller.v2;
 
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.APIV2;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.ApiBatService;
 import oss.fosslight.service.T2UserService;
 
@@ -40,6 +43,8 @@ public class ApiBatV2Controller extends CoTopComponent {
     private final T2UserService userService;
 
     private final ApiBatService apibatService;
+
+    protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
     @ApiOperation(value = "Binary 정보 조회", notes = "fileName, tlsh, checksum 중 하나 이상을 사용하여 Binary 매칭 정보를 조회합니다. platformName, platformVersion, sourcePath는 추가 필터입니다.")
     @ApiResponses({
@@ -67,7 +72,9 @@ public class ApiBatV2Controller extends CoTopComponent {
             @ApiParam(value = "Source Path", required = false) @RequestParam(required = false) String sourcePath) {
 
         // 사용자 인증
-        userService.checkApiUserAuth(authorization);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_BINARY_SEARCH, userInfo.getUserId());
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 

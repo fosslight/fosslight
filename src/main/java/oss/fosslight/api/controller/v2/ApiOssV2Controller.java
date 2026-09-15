@@ -25,6 +25,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.ApiLicenseService;
 import oss.fosslight.service.ApiOssService;
 import oss.fosslight.service.OssService;
@@ -89,7 +90,9 @@ public class ApiOssV2Controller extends CoTopComponent {
             @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page
     ) {
         // 사용자 인증
-        userService.checkApiUserAuth(authorization);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_OSS_SEARCH, userInfo.getUserId());
 
         ListOssDto.Request ossQuery =
                 ListOssDto.Request.builder()
@@ -137,7 +140,9 @@ public class ApiOssV2Controller extends CoTopComponent {
             @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
-        userService.checkApiUserAuth(authorization);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_LICENSE_SEARCH, userInfo.getUserId());
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         ListLicenseDto.Request licenseQuery =
@@ -234,6 +239,9 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
 
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_OSS_REGISTER, userInfo.getUserId());
         if (userService.isAdmin(authorization)) {
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap = ossService.saveOss(ossMaster);
@@ -268,6 +276,9 @@ public class ApiOssV2Controller extends CoTopComponent {
     		@ApiParam(value = "Refine Type", required = true, allowableValues = "0.UPDATE DOWNLOAD LOCATION FORMAT,1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
 		
 		// 사용자 인증
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+                APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION, userInfo.getUserId());
 		if (!userService.isAdmin(authorization)) {
 			return responseService.errorResponse(HttpStatus.FORBIDDEN,
 					CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));

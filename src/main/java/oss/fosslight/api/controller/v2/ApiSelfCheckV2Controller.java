@@ -106,6 +106,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=SELF_CHECK",
+                APIV2.FOSSLIGHT_API_SELFCHECK_CREATE, userInfo.getUserId());
         Map<String, Object> result = new HashMap<String, Object>();
 
         int createCnt = apiSelfCheckService.getCreateProjectCnt(userInfo.getUserId());
@@ -169,6 +171,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiParam(value = "Sheet Names") @RequestParam(required = false) String sheetNames) throws Exception {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=SELF_CHECK resourceId={}",
+                APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK, userInfo.getUserId(), prjId);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         Map<String, Object> paramMap = new HashMap<>();
@@ -375,6 +379,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         T2File fileInfo = new T2File();
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=SELF_CHECK resourceId={}",
+                APIV2.FOSSLIGHT_API_SELFCHECK_DOWNLOAD, userInfo.getUserId(), prjId);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("userId", userInfo.getUserId());
         paramMap.put("userRole", userRole(userInfo));
@@ -429,6 +435,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=SELF_CHECK resourceId={}",
+                APIV2.FOSSLIGHT_API_SELFCHECK_ADD_EDITOR, userInfo.getUserId(), prjId);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("userId", userInfo.getUserId());
         paramMap.put("userRole", userRole(userInfo));
@@ -490,6 +498,8 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<>();
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=SELF_CHECK resourceId={}",
+                APIV2.FOSSLIGHT_API_SELFCHECK_GET, userInfo.getUserId(), prjId);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("userId", userInfo.getUserId());
         paramMap.put("userRole", userRole(userInfo));
