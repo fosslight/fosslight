@@ -4186,7 +4186,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Cell cellPackageDownloadLocation = getCell(row, cellIdx); cellIdx++;
 					String downloadLocation = bean.getDownloadLocation();
 
-					if (downloadLocation.isEmpty()) {
+					if (isEmpty(downloadLocation)) {
 						downloadLocation = "NONE";
 					}
 
