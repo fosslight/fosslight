@@ -4868,9 +4868,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			if (list != null) {
-				if (!CoConstDef.FLAG_YES.equals(avoidNull(param.getVulnerabilityCheckFlag()))) {
-					list = checkVulnData(list, ossMaster.getOssNicknames());
-				}
+//				if (!CoConstDef.FLAG_YES.equals(avoidNull(param.getVulnerabilityCheckFlag()))) {
+//					list = checkVulnData(list, ossMaster.getOssNicknames());
+//				}
 				list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
 			}
 		} catch (Exception e) {

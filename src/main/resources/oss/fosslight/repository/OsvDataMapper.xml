@@ -856,15 +856,28 @@
 		   	LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
 		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
 		   	WHERE M.WITHDRAWN_YN = 'N'
-			AND M.SEARCH_NAME_P1 = OC.OSS_NAME
+			AND
+			(
+				M.SEARCH_NAME_P1 = OC.OSS_NAME
+			<if test="ossNicknames != null">
+				<foreach item="item" collection="ossNicknames">
+					OR M.SEARCH_NAME_P1 = #{item}
+				</foreach>
+			</if>
+			)
 			AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
 				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
-				AND OV.OSS_VERSION IS NOT NULL
-				AND TRIM(OV.OSS_VERSION) <![CDATA[<>]]> ''
-				AND (
+			</if>
+			<if test="ossVersion == null">
+				AND (OV.OSS_VERSION IS NULL OR OV.OSS_VERSION = '')
+			</if>
+				AND
+				(
+				<if test="ossVersion != null">
 					(
 						M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
 					)
@@ -872,6 +885,10 @@
 					(
 						M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
 					)
+				</if>
+				<if test="ossVersion == null">
+					M.SEARCH_VERSION_P3_YN = 'Y'
+				</if>
 					OR
 					EXISTS (
 						SELECT 1
@@ -879,7 +896,8 @@
 						WHERE OVA.OSS_ID = OV.OSS_ID
 						AND OVA.OSS_VERSION_ALIAS IS NOT NULL
 						AND TRIM(OVA.OSS_VERSION_ALIAS) <![CDATA[<>]]> ''
-						AND (
+						AND
+						(
 							(
 								M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OVA.OSS_VERSION_ALIAS, M.SEARCH_VERSION_P1) > 0
 							)
@@ -927,15 +945,28 @@
 		   	INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
 		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
 			WHERE M.WITHDRAWN_YN = 'N'
-			AND M_ALIAS.SEARCH_NAME_P1 = OC.OSS_NAME
+			AND
+			(
+				M_ALIAS.SEARCH_NAME_P1 = OC.OSS_NAME
+				<if test="ossNicknames != null">
+					<foreach item="item" collection="ossNicknames">
+						OR M_ALIAS.SEARCH_NAME_P1 = #{item}
+					</foreach>
+				</if>
+			)
 			AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
 				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
-				AND OV.OSS_VERSION IS NOT NULL
-				AND TRIM(OV.OSS_VERSION) <![CDATA[<>]]> ''
-				AND (
+			</if>
+			<if test="ossVersion == null">
+				AND (OV.OSS_VERSION IS NULL OR OV.OSS_VERSION = '')
+			</if>
+				AND
+				(
+				<if test="ossVersion != null">
 					(
 						M_ALIAS.SEARCH_VERSION_P1 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M_ALIAS.SEARCH_VERSION_P1) > 0
 					)
@@ -943,6 +974,10 @@
 					(
 						M_ALIAS.SEARCH_VERSION_P2 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M_ALIAS.SEARCH_VERSION_P2) > 0
 					)
+				</if>
+				<if test="ossVersion == null">
+					M_ALIAS.SEARCH_VERSION_P3_YN = 'Y'
+				</if>
 					OR
 					EXISTS (
 						SELECT 1
@@ -950,7 +985,8 @@
 						WHERE OVA.OSS_ID = OV.OSS_ID
 						AND OVA.OSS_VERSION_ALIAS IS NOT NULL
 						AND TRIM(OVA.OSS_VERSION_ALIAS) <![CDATA[<>]]> ''
-						AND (
+						AND
+						(
 							(
 								M_ALIAS.SEARCH_VERSION_P1 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OVA.OSS_VERSION_ALIAS, M_ALIAS.SEARCH_VERSION_P1) > 0
 							)
@@ -1009,10 +1045,15 @@
 				SELECT 1
 				FROM OSS_VERSION OV
 				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
-				AND OV.OSS_VERSION IS NOT NULL
-				AND TRIM(OV.OSS_VERSION) <![CDATA[<>]]> ''
-				AND (
+			</if>
+			<if test="ossVersion == null">
+				AND (OV.OSS_VERSION IS NULL OR OV.OSS_VERSION = '')
+			</if>
+				AND
+				(
+				<if test="ossVersion != null">
 					(
 						M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
 					)
@@ -1020,6 +1061,10 @@
 					(
 						M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
 					)
+				</if>
+				<if test="ossVersion == null">
+					M.SEARCH_VERSION_P3_YN = 'Y'
+				</if>
 					OR
 					EXISTS (
 						SELECT 1
@@ -1027,7 +1072,8 @@
 						WHERE OVA.OSS_ID = OV.OSS_ID
 						AND OVA.OSS_VERSION_ALIAS IS NOT NULL
 						AND TRIM(OVA.OSS_VERSION_ALIAS) <![CDATA[<>]]> ''
-						AND (
+						AND
+						(
 							(
 								M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OVA.OSS_VERSION_ALIAS, M.SEARCH_VERSION_P1) > 0
 							)
@@ -1086,10 +1132,15 @@
 				SELECT 1
 				FROM OSS_VERSION OV
 				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
-				AND OV.OSS_VERSION IS NOT NULL
-				AND TRIM(OV.OSS_VERSION) <![CDATA[<>]]> ''
-				AND (
+			</if>
+			<if test="ossVersion == null">
+				AND (OV.OSS_VERSION IS NULL OR OV.OSS_VERSION = '')
+			</if>
+				AND
+				(
+				<if test="ossVersion != null">
 					(
 						M_ALIAS.SEARCH_VERSION_P1 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M_ALIAS.SEARCH_VERSION_P1) > 0
 					)
@@ -1097,6 +1148,10 @@
 					(
 						M_ALIAS.SEARCH_VERSION_P2 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M_ALIAS.SEARCH_VERSION_P2) > 0
 					)
+				</if>
+				<if test="ossVersion == null">
+					M_ALIAS.SEARCH_VERSION_P3_YN = 'Y'
+				</if>
 					OR
 					EXISTS (
 						SELECT 1
@@ -1104,7 +1159,8 @@
 						WHERE OVA.OSS_ID = OV.OSS_ID
 						AND OVA.OSS_VERSION_ALIAS IS NOT NULL
 						AND TRIM(OVA.OSS_VERSION_ALIAS) <![CDATA[<>]]> ''
-						AND (
+						AND
+						(
 							(
 								M_ALIAS.SEARCH_VERSION_P1 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OVA.OSS_VERSION_ALIAS, M_ALIAS.SEARCH_VERSION_P1) > 0
 							)
@@ -1150,7 +1206,7 @@
 			FROM OSV_SEARCH_MASTER M
 			LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 		   	LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
-		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName} AND M.SEARCH_NAME_P3 = OC.OSS_NAME
+		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
 			WHERE M.WITHDRAWN_YN = 'N'
 		   	AND (
 		   		M.SEARCH_NAME_P1 IS NULL
@@ -1164,14 +1220,27 @@
 		   			SELECT 1 FROM OSS_DOWNLOADLOCATION DL_P2 WHERE IFNULL(DL_P2.PURL, '') = M.SEARCH_NAME_P2
 		   		)
 		   	)
+		   	AND (
+		   		M.SEARCH_NAME_P3 = OC.OSS_NAME
+		   		<if test="ossNicknames != null">
+					<foreach item="item" collection="ossNicknames">
+						OR M.SEARCH_NAME_P3 = #{item}
+					</foreach>
+				</if>
+		   	)
 		   	AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
 				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
-				AND OV.OSS_VERSION IS NOT NULL
-				AND TRIM(OV.OSS_VERSION) <![CDATA[<>]]> ''
-				AND (
+			</if>
+			<if test="ossVersion == null">
+				AND (OV.OSS_VERSION IS NULL OR OV.OSS_VERSION = '')
+			</if>
+				AND
+				(
+				<if test="ossVersion != null">
 					(
 						M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
 					)
@@ -1179,6 +1248,10 @@
 					(
 						M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
 					)
+				</if>
+				<if test="ossVersion == null">
+					M.SEARCH_VERSION_P3_YN = 'Y'
+				</if>
 					OR
 					EXISTS (
 						SELECT 1
@@ -1186,7 +1259,8 @@
 						WHERE OVA.OSS_ID = OV.OSS_ID
 						AND OVA.OSS_VERSION_ALIAS IS NOT NULL
 						AND TRIM(OVA.OSS_VERSION_ALIAS) <![CDATA[<>]]> ''
-						AND (
+						AND
+						(
 							(
 								M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OVA.OSS_VERSION_ALIAS, M.SEARCH_VERSION_P1) > 0
 							)
@@ -1232,7 +1306,7 @@
 			INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
 			INNER JOIN OSV_ALIASES A ON A.ID = V.ID
 			INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
-			INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName} AND M_ALIAS.SEARCH_NAME_P3 = OC.OSS_NAME
+			INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
 		   	WHERE M.WITHDRAWN_YN = 'N'
 			AND (
 				M_ALIAS.SEARCH_NAME_P1 IS NULL
@@ -1246,14 +1320,27 @@
 		   			SELECT 1 FROM OSS_DOWNLOADLOCATION DL_P2 WHERE IFNULL(DL_P2.PURL, '') = M_ALIAS.SEARCH_NAME_P2
 		   		)
 		   	)
+		   	AND (
+		   		M_ALIAS.SEARCH_NAME_P3 = OC.OSS_NAME
+		   		<if test="ossNicknames != null">
+					<foreach item="item" collection="ossNicknames">
+						OR M_ALIAS.SEARCH_NAME_P3 = #{item}
+					</foreach>
+				</if>
+		   	)
 		   	AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
 				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
-				AND OV.OSS_VERSION IS NOT NULL
-				AND TRIM(OV.OSS_VERSION) <![CDATA[<>]]> ''
-				AND (
+			</if>
+			<if test="ossVersion == null">
+				AND (OV.OSS_VERSION IS NULL OR OV.OSS_VERSION = '')
+			</if>
+				AND
+				(
+				<if test="ossVersion != null">
 					(
 						M_ALIAS.SEARCH_VERSION_P1 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M_ALIAS.SEARCH_VERSION_P1) > 0
 					)
@@ -1261,6 +1348,10 @@
 					(
 						M_ALIAS.SEARCH_VERSION_P2 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M_ALIAS.SEARCH_VERSION_P2) > 0
 					)
+				</if>
+				<if test="ossVersion == null">
+					M_ALIAS.SEARCH_VERSION_P3_YN = 'Y'
+				</if>
 					OR
 					EXISTS (
 						SELECT 1
@@ -1268,7 +1359,8 @@
 						WHERE OVA.OSS_ID = OV.OSS_ID
 						AND OVA.OSS_VERSION_ALIAS IS NOT NULL
 						AND TRIM(OVA.OSS_VERSION_ALIAS) <![CDATA[<>]]> ''
-						AND (
+						AND
+						(
 							(
 								M_ALIAS.SEARCH_VERSION_P1 IS NOT NULL AND M_ALIAS.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OVA.OSS_VERSION_ALIAS, M_ALIAS.SEARCH_VERSION_P1) > 0
 							)

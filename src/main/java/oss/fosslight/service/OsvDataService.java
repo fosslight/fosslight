@@ -1617,7 +1617,6 @@ public class OsvDataService extends CoTopComponent {
 
 	private Map<String, Object> prepareParamMap(OssMaster ossMaster) {
 		Map<String, Object> param = new HashMap<>();
-		String[] purls = ossMaster.getPurls();
 		param.put("ossName", ossMaster.getOssName());
 
 		if (!isEmpty(ossMaster.getOssVersion())) {
@@ -1625,12 +1624,6 @@ public class OsvDataService extends CoTopComponent {
 		}
 		if (ossMaster.getOssNicknames() != null && ossMaster.getOssNicknames().length > 0) {
 			param.put("ossNicknames", ossMaster.getOssNicknames());
-		}
-		if (purls != null && purls.length > 0 && purls[0] != null) {
-			param.put("purls", purls);
-		}
-		if (ossMaster.getOssVersionAliases() != null) {
-			param.put("ossVersionAliases", ossMaster.getOssVersionAliases());
 		}
 		if (ossMaster.getFiltersParam() != null) {
 			param.put("filtersParam", ossMaster.getFiltersParam());
