@@ -4116,7 +4116,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
 				
-				boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
+				boolean hideOssVersionFlag = false;
 				
 				// permissive oss와 copyleft oss를 병합
 				if (sourceList != null && !sourceList.isEmpty()) {
