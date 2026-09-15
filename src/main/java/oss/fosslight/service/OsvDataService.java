@@ -28,6 +28,7 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -1188,6 +1189,9 @@ public class OsvDataService extends CoTopComponent {
 		}
 
 		if (CollectionUtils.isNotEmpty(fetchOsvVulnerabilityList)) {
+			Set<String> aliasIdSet = fetchOsvVulnerabilityList.stream().map(Vulnerability::getAliasId).filter(StringUtils::isNotEmpty).flatMap(aliasId -> Arrays.stream(aliasId.split(","))).map(String::trim).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
+			fetchOsvVulnerabilityList.removeIf(v -> StringUtils.isNotEmpty(v.getCveId()) && aliasIdSet.contains(v.getCveId()));
+			
 			Map<String, Vulnerability> existingMap = combinedList.stream()
 														.filter(v -> v != null && !isEmpty(v.getCveId()))
 														.collect(Collectors.toMap(
