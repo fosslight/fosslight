@@ -365,13 +365,13 @@ download location 생성: https:// 뒤에 namespace&name
 
 ### Generic
 
-download location 생성: qualifier의 1. `download_url`, 2. `repository_url`, 3. `vcs_url` 우선순위로 생성. 이 중 qualifier가 없으면 생성 불가
+download location 생성(purl → download location): qualifier의 1. `download_url`, 2. `repository_url`, 3. `vcs_url` 우선순위로 읽음. 이 중 qualifier가 없으면 생성 불가
 
 - 위 사항이 아닌 경우 모두 generic type으로 PURL 생성
 - syntax: `pkg:generic/<namespace>/<name>@<version>?<qualifiers>#<subpath>`
 - namespace: optional이므로 사용하지 않음
 - name: OSS name
-- qualifiers: `download_url` / `repository_url` / `vcs_url` 중 Download location 정보 (우선순위: download_url → repository_url → vcs_url)
+- qualifiers: `download_url` 선택 후, Download location 정보
 - Purl 예)
   - `pkg:generic/<OSS name>?download_url=<Download location>`
   - `pkg:generic/openssl?download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz`
