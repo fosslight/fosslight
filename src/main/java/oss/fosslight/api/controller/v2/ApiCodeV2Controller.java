@@ -38,6 +38,7 @@ public class ApiCodeV2Controller extends CoTopComponent {
     private final ApiCodeService apiCodeService;
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
+    protected static final Logger auditLog = LoggerFactory.getLogger("apiaudit");
 
     @ApiOperation(value = "공통 코드 조회", notes = "codeType에 해당하는 활성 상세 코드를 조회합니다. detailValue를 지정하면 코드명에 포함된 값만 조회합니다.")
     @ApiResponses({
@@ -66,7 +67,7 @@ public class ApiCodeV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={}",
                 APIV2.FOSSLIGHT_API_CODE_SEARCH, userInfo.getUserId());
         Map<String, Object> result = new HashMap<>();
 

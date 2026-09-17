@@ -58,6 +58,7 @@ public class ApiOssV2Controller extends CoTopComponent {
     private final RefineOssService refineOssService;
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
+    protected static final Logger auditLog = LoggerFactory.getLogger("apiaudit");
 
 
     @ApiOperation(value = "OSS 목록 조회", notes = "OSS 이름, 버전, Download URL 또는 CVE ID로 OSS를 검색합니다.")
@@ -91,7 +92,7 @@ public class ApiOssV2Controller extends CoTopComponent {
     ) {
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={}",
                 APIV2.FOSSLIGHT_API_OSS_SEARCH, userInfo.getUserId());
 
         ListOssDto.Request ossQuery =
@@ -141,7 +142,7 @@ public class ApiOssV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={}",
                 APIV2.FOSSLIGHT_API_LICENSE_SEARCH, userInfo.getUserId());
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -240,7 +241,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+        auditLog.info("AUDIT event=API_ACCESS method=POST api=/api/v2{} actor={}",
                 APIV2.FOSSLIGHT_API_OSS_REGISTER, userInfo.getUserId());
         if (userService.isAdmin(authorization)) {
             Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -277,7 +278,7 @@ public class ApiOssV2Controller extends CoTopComponent {
 		
 		// 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={}",
                 APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION, userInfo.getUserId());
 		if (!userService.isAdmin(authorization)) {
 			return responseService.errorResponse(HttpStatus.FORBIDDEN,

@@ -45,6 +45,7 @@ public class ApiBatV2Controller extends CoTopComponent {
     private final ApiBatService apibatService;
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
+    protected static final Logger auditLog = LoggerFactory.getLogger("apiaudit");
 
     @ApiOperation(value = "Binary 정보 조회", notes = "fileName, tlsh, checksum 중 하나 이상을 사용하여 Binary 매칭 정보를 조회합니다. platformName, platformVersion, sourcePath는 추가 필터입니다.")
     @ApiResponses({
@@ -73,7 +74,7 @@ public class ApiBatV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={}",
                 APIV2.FOSSLIGHT_API_BINARY_SEARCH, userInfo.getUserId());
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();

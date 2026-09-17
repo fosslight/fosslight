@@ -58,6 +58,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     private final FileService fileService;
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
+    protected static final Logger auditLog = LoggerFactory.getLogger("apiaudit");
 
     @ApiOperation(value = "3rd Party 목록 조회", notes = "조회 권한이 있는 3rd Party 프로젝트를 조건과 페이지 정보로 검색합니다.")
     @ApiResponses({
@@ -90,7 +91,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceIds={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceIds={}",
                 APIV2.FOSSLIGHT_API_PARTNER_SEARCH, userInfo.getUserId(),
                 partnerIdList == null ? null : String.join(",", partnerIdList));
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -142,7 +143,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
+        auditLog.info("AUDIT event=API_ACCESS method=POST api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
                 APIV2.FOSSLIGHT_API_PARTNER_ADD_EDITOR, userInfo.getUserId(), partnerId);
         Map<String, Object> resultMap = new HashMap<>();
 
@@ -227,7 +228,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         String downloadId = "";
         T2File fileInfo = new T2File();
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
                 apiPath, userInfo.getUserId(), partnerId);
 
         if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
@@ -287,7 +288,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             String apiPath) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        log.info("AUDIT event=API_ACCESS api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={} resourceType=THIRD_PARTY resourceId={}",
                 apiPath, userInfo.getUserId(), partnerId);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
