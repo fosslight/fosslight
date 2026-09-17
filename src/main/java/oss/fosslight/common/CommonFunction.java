@@ -5513,12 +5513,15 @@ public class CommonFunction extends CoTopComponent {
 		return distributionDuplicateMsg;
 	}
 
-	public static String convertCveIdToLink(String cveId) {
+	public static String convertCveIdToLink(String cveId, String type) {
 		if (StringUtil.isEmpty(cveId)) {
 			return "";
 		}
-		return cveId.replaceAll("((cve|CVE)-[0-9]{4}-[0-9]{4,})",
-				"<a href='https://nvd.nist.gov/vuln/detail/$1' target='_blank'>$1<a/>");
+		if (isEmpty(type) || type.equalsIgnoreCase("NVD")) {
+			return cveId.replaceAll("((cve|CVE)-[0-9]{4}-[0-9]{4,})", "<a href='https://nvd.nist.gov/vuln/detail/$1' target='_blank'>$1<a/>");
+		} else {
+			return "<a href='https://osv.dev/vulnerability/" + cveId.trim() + "' target='_blank'>" + cveId.trim() + "</a>";
+		}
 	}
 
 	public static List<ProjectIdentification> removeDuplicateLicense(List<ProjectIdentification> ossComponents) {

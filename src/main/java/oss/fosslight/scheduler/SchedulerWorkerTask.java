@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.OssNvdSyncResult;
 import oss.fosslight.service.*;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.FileUtil;
@@ -78,18 +79,38 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	public void nvdDataIfJob() {
 		log.info("nvdDataIfJob start");
 		
+		boolean hasError = false;
 		String resCd = "";
 		try {
 			resCd = nvdService.executeNvdDataSync();
-			osvDataService.executeOsvDataSync();
-			
-			if (resCd == "00") {
-				vulnerabilityService.doSyncOSSNvdInfo();
-			} else {
+			if (!resCd.equals("00")) {
+				hasError = true;
 				log.error("executeNvdDataSync - resCd : " + resCd);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage() + " (resCd : " + resCd + ")", e);
+		}
+		
+		if (!hasError) {
+			resCd = "";
+			try {
+				resCd = osvDataService.executeOsvDataSync();
+				if (!resCd.equals("00")) {
+					hasError = true;
+					log.error("executeNvdDataSync - resCd : " + resCd);
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage() + " (resCd : " + resCd + ")", e);
+			}
+		}
+		
+		if (!hasError) {
+			try {
+				OssNvdSyncResult syncResult = vulnerabilityService.doSyncOSSNvdInfo();
+				vulnerabilityService.doSyncOSSNvdSendMail(syncResult);
+			} catch (Exception e) {
+				log.error(e.getMessage() + " (resCd : " + resCd + ")", e);
+			}
 		}
 	}
 	

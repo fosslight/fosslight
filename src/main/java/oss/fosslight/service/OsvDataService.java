@@ -89,13 +89,11 @@ public class OsvDataService extends CoTopComponent {
 		if (CoConstDef.FLAG_YES.equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100"))) {
 			initializeFlag = true;
 		}
-		try {
-			schlog.info("[OSV] Start Total/Full Data Synchronization.");
-			osvDataTotalBulkJob(initializeFlag, osvDataApiRestTemplate, BATCH_SIZE);
-		} catch (Exception e) {
-			schlog.error(e.getMessage(), e);
-			return "99";
-		}
+		
+		schlog.info("[OSV] Start Total/Full Data Synchronization.");
+		osvDataTotalBulkJob(initializeFlag, osvDataApiRestTemplate, BATCH_SIZE);
+		schlog.info("[OSV] End Total/Full Data Synchronization.");
+		
 		return "00";
 	}
 

@@ -345,9 +345,13 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String includeCpe;
 	
+	private String searchIncludeCpe;
+	
 	private String[] includeCpes;
 	
 	private String excludeCpe;
+	
+	private String searchExcludeCpe;
 	
 	private String[] excludeCpes;
 	
@@ -388,6 +392,10 @@ public class OssMaster extends ComBean implements Serializable{
 	private String division;
 	
 	private Map<String, Object> filtersParam;
+	
+	private String source;
+	
+	private boolean skipIncludeCpe = false;
 	
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -2527,5 +2535,37 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setFiltersParam(Map<String, Object> filtersParam) {
 		this.filtersParam = filtersParam;
+	}
+
+	public String getSearchIncludeCpe() {
+		return searchIncludeCpe;
+	}
+
+	public void setSearchIncludeCpe(String searchIncludeCpe) {
+		this.searchIncludeCpe = searchIncludeCpe;
+	}
+
+	public String getSearchExcludeCpe() {
+		return searchExcludeCpe;
+	}
+
+	public void setSearchExcludeCpe(String searchExcludeCpe) {
+		this.searchExcludeCpe = searchExcludeCpe;
+	}
+
+	public boolean isSkipIncludeCpe() {
+		return skipIncludeCpe;
+	}
+
+	public void setSkipIncludeCpe(boolean skipIncludeCpe) {
+		this.skipIncludeCpe = skipIncludeCpe;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
 	}
 }
