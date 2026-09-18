@@ -29,13 +29,7 @@
     - `&` → `%26`
     - `#` → `%23`
     - 공백 → `%20`
- 
-
-## download location 생성
-- 각 type에 따라 qualifier에 download_url이 존재하지 않는 케이스에 대해서는 대표 url로 download location 생성해야 함
- - 대표 url 지정되지 않은 경우, 각 패키지 매니저 스펙 내 작성된 download location 생성 방법 참조
-- 위 공통사항의 인코딩을 역으로 해야함
-
+## Type별 PURL
 ### Github
 
 - 기본 repository url
@@ -88,8 +82,6 @@
 
 ### Maven
 
-download location 생성: qualifier에 repository_url 포함된 경우, 해당 url 출력. 없는 경우 대표 url로 생성
-
 - 기본 repository url
   - `https://repo.maven.apache.org/maven2/{group id}/{artifact id}`
   - `https://mvnrepository.com/artifact/{group id}/{artifact id}` (대표 url)
@@ -115,6 +107,7 @@ download location 생성: qualifier에 repository_url 포함된 경우, 해당 u
 - Purl 예)
   - `pkg:maven/org.apache.xmlgraphics/batik-anim`
   - `pkg:maven/net.sf.jacob-projec/jacob`
+- purl → download location 생성 방법: qualifier에 `repository_url` 포함된 경우, 해당 url 출력. 없는 경우 대표 url로 생성
 
 ### Cocoapods
 
@@ -165,8 +158,6 @@ download location 생성: qualifier에 repository_url 포함된 경우, 해당 u
 
 ### Android
 
-download location 생성: git url로 처리 (https:// 뒤에 namespace&name)
-
 - purl-spec v1.0.1으로 정의되지 않음 (git하고 동일)
 - 기본 repository url
   - `https://android.googlesource.com/platform/{하위 URL 구성}`
@@ -178,6 +169,7 @@ download location 생성: git url로 처리 (https:// 뒤에 namespace&name)
 - Purl 예)
   - `pkg:git/android.googlesource.com/platform/external/alsa-lib`
   - `pkg:git/android.googlesource.com/platform/bionic`
+- purl → download location 생성 방법: git url로 처리 (`https://` 뒤에 namespace&name)
 
 ### Cargo
 
@@ -236,8 +228,6 @@ download location 생성: git url로 처리 (https:// 뒤에 namespace&name)
 
 ### CPAN
 
-download location 생성: purl만으로 download location 생성 어려워 생략
-
 - 기본 repository url
   - `https://www.cpan.org/`
   - `https://metacpan.org/pod/{name}`
@@ -250,6 +240,7 @@ download location 생성: purl만으로 download location 생성 어려워 생�
 - Purl 예)
   - `https://www.cpan.org/authors/id/O/OA/OALDERS/libwww-perl-6.18.tar.gz` → `pkg:cpan/libwww-perl`
   - `https://www.cpan.org/authors/id/I/IN/INA/Jacode4e/RoundTrip/Jacode4e-RoundTrip-2.13.81.6.tar.gz` → `pkg:cpan/Jacode4e-RoundTrip`
+- purl → download location 생성 방법: purl만으로 download location 생성 어려워 생략
 
 ### CRAN
 
@@ -265,8 +256,6 @@ download location 생성: purl만으로 download location 생성 어려워 생�
 
 ### Docker
 
-download location 생성: 불가
-
 - 기본 repository url
   - `https://hub.docker.com`
 - syntax: `pkg:docker/<namespace>/<name>`
@@ -281,6 +270,7 @@ download location 생성: 불가
   - `https://hub.docker.com/r/bitnami/mariadb-galera` → `pkg:docker/bitnami/mariadb-galera`
   - `https://hub.docker.com/hardened-images/catalog/dhi/python` → `pkg:docker/python?repository_url=dhi.io`
     - `"^https?://hub\\.docker\\.com/hardened-images/catalog/dhi/([^/?#]+)/?$"` 인 경우, `repository_url=dhi.io`를 붙임
+- purl → download location 생성 방법: 불가
 
 ### Hackage
 
@@ -310,8 +300,6 @@ download location 생성: 불가
   - `https://huggingface.co/datasets/stanfordnlp/snli` → `pkg:huggingface/datasets/stanfordnlp/snli` (dataset에 대한 정확한 spec은 없음, spec은 모델에 대해서만 표준화되어 있음, 이에 datasets 추가하여 표시하도록 함)
 
 ### Yocto
-
-download location 생성: 불가
 
 - namespace: 생략 (optional). `layer.conf`의 `BBFILE_COLLECTIONS`를 읽지 않음. 경로의 `meta-*` 폴더명으로 추정하면 잘못된 값이 될 수 있음
 - name: BPN (https://docs.yoctoproject.org/ref-manual/variables.html#term-BPN) in a yocto recipe (대소문자 구별해야 함)
@@ -345,10 +333,9 @@ download location 생성: 불가
      - ex. `binutils-cross` → `binutils`
   5. `repo_url`을 정제 (ex. `tree`, `blob` 이후 제거)하여 layer의 git repository url로 추출 (인코딩 필요)
   6. `pkg:yocto/{BPN}`으로 하고 `repository_url={repo_url}`을 붙임.
+- purl → download location 생성 방법: 불가
 
 ### Git
-
-download location 생성: https:// 뒤에 namespace&name
 
 - 링크가 git 저장소인 경우
 - ex. `.git`으로 끝나거나 `git://` 그 외는 `git ls-remote <url>`를 이용하여 git인지 체크
@@ -362,10 +349,9 @@ download location 생성: https:// 뒤에 namespace&name
   - `https://git.codelinaro.org/clo/la/platform/external/volley` → `pkg:git/git.codelinaro.org/clo/la/platform/external/volley`
   - `https://source.codeaurora.org/external/imx/weston-imx/` → `pkg:git/source.codeaurora.org/external/imx/weston-imx`
 - 특이 사항. repo 끝 git을 허용하고 있음. (우리는 끝 `.git` 제거해야 함. 그래야 purl 일치 체크)
+- purl → download location 생성 방법: `https://` 뒤에 namespace&name
 
 ### Generic
-
-download location 생성(purl → download location): qualifier의 1. `download_url`, 2. `repository_url`, 3. `vcs_url` 우선순위로 읽음. 이 중 qualifier가 없으면 생성 불가
 
 - 위 사항이 아닌 경우 모두 generic type으로 PURL 생성
 - syntax: `pkg:generic/<namespace>/<name>@<version>?<qualifiers>#<subpath>`
@@ -375,3 +361,9 @@ download location 생성(purl → download location): qualifier의 1. `download_
 - Purl 예)
   - `pkg:generic/<OSS name>?download_url=<Download location>`
   - `pkg:generic/openssl?download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz`
+- purl → download location 생성 방법: qualifier의 1. `download_url`, 2. `repository_url`, 3. `vcs_url` 우선순위로 읽음. 이 중 qualifier가 없으면 생성 불가
+
+## purl 로 download location 생성 방법
+- 각 type에 따라 qualifier에 `download_url`, `repository_url`, `vcs_url`이 모두 존재하지 않는 경우에만 대표 url로 download location 생성해야 함
+ - 대표 url 지정되지 않은 경우, 각 Type 내 작성된 `purl → download location 생성 방법` 참조
+- 위 공통사항의 인코딩을 역으로 해야함
