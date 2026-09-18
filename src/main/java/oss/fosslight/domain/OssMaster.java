@@ -349,9 +349,13 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String[] includeCpes;
 	
+	private String[] searchIncludeCpes;
+	
 	private String excludeCpe;
 	
 	private String searchExcludeCpe;
+	
+	private String[] searchExcludeCpes;
 	
 	private String[] excludeCpes;
 	
@@ -2567,5 +2571,21 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setSource(String source) {
 		this.source = source;
+	}
+
+	public String[] getSearchIncludeCpes() {
+		return searchIncludeCpes;
+	}
+
+	public void setSearchIncludeCpes(String[] searchIncludeCpes) {
+		this.searchIncludeCpes = searchIncludeCpes;
+	}
+
+	public String[] getSearchExcludeCpes() {
+		return searchExcludeCpes;
+	}
+
+	public void setSearchExcludeCpes(String[] searchExcludeCpes) {
+		this.searchExcludeCpes = searchExcludeCpes;
 	}
 }

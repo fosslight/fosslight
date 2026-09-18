@@ -277,11 +277,11 @@ public interface OssMapper {
 
 	void insertOssExcludeCpe(OssMaster ossMaster);
 
-	List<String> selectOssIncludeCpeList(OssMaster ossMaster);
+	OssMaster selectOssIncludeCpeList(OssMaster ossMaster);
 	
-	List<String> notExistsOssIncludeCpeListByOssCommonId(OssMaster ossMaster);
+	OssMaster notExistsOssIncludeCpeListByOssCommonId(OssMaster ossMaster);
 
-	List<String> selectOssExcludeCpeList(OssMaster ossMaster);
+	OssMaster selectOssExcludeCpeList(OssMaster ossMaster);
 
 	int existsOssVersionAlias(OssMaster ossMaster);
 
@@ -328,4 +328,6 @@ public interface OssMapper {
 	void updateEntAnalysisJobDetails(@Param("ossId") String ossId, @Param("ossName") String ossName, @Param("ossVersion") String ossVersion, @Param("jobSeq") String jobSeq);
 
 	void updateDivisionOssVersion(@Param("ossId") String ossId, @Param("jobSeq") String jobSeq);
+
+	List<Vulnerability> getVulnerabilityInfoWithOutVer(OssMaster ossMaster);
 }

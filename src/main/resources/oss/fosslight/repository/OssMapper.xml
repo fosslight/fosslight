@@ -3370,15 +3370,16 @@
 		SELECT * FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = #{ossCommonId} ORDER BY OSS_DL_IDX
 	</select>
 	
-	<select id="selectOssIncludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
-		SELECT SEARCH_CPE23URI FROM OSS_INCLUDE_CPE
+	<select id="selectOssIncludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT GROUP_CONCAT(DISTINCT CPE23URI SEPARATOR ',') AS INCLUDE_CPE, GROUP_CONCAT(DISTINCT SEARCH_CPE23URI SEPARATOR ',') AS SEARCH_INCLUDE_CPE
+		FROM OSS_INCLUDE_CPE
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
 			WHERE OSS_COMMON_ID = #{ossCommonId}
 		</if>
 	</select>
 	
-	<select id="notExistsOssIncludeCpeListByOssCommonId" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
-		SELECT OIC.CPE23URI 
+	<select id="notExistsOssIncludeCpeListByOssCommonId" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT GROUP_CONCAT(OIC.CPE23URI) AS INCLUDE_CPE, GROUP_CONCAT(OIC.SEARCH_CPE23URI) AS SEARCH_INCLUDE_CPE
 		FROM OSS_INCLUDE_CPE OIC
 		INNER JOIN OSS_VERSION OV
 		ON OIC.OSS_COMMON_ID = OV.OSS_COMMON_ID
@@ -3386,8 +3387,9 @@
 		WHERE OIC.OSS_COMMON_ID != #{ossCommonId}
 	</select>
 	
-	<select id="selectOssExcludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
-		SELECT SEARCH_CPE23URI FROM OSS_EXCLUDE_CPE
+	<select id="selectOssExcludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT GROUP_CONCAT(DISTINCT CPE23URI SEPARATOR ',') AS EXCLUDE_CPE, GROUP_CONCAT(DISTINCT SEARCH_CPE23URI SEPARATOR ',') AS SEARCH_EXCLUDE_CPE
+		FROM OSS_EXCLUDE_CPE
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
 			WHERE OSS_COMMON_ID = #{ossCommonId}
 		</if>
@@ -4295,16 +4297,21 @@
 			SELECT REPLACE(NVD.PRODUCT, ' ', '_') AS PRODUCT
 				 	, NVD.VERSION
 				 	, NVD.CVE_ID
-					, CONCAT(NVD.VENDOR, ':', NVD.PRODUCT) AS CRITERIA
+					, NVD.VENDORPRODUCT AS CRITERIA
 			FROM NVD_DATA_V3 NVD
 			WHERE (
-				NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
+				NVD.PRODUCT = #{ossName}
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
-				 	OR NVD.PRODUCT = REPLACE(#{ossNameTemp}, ' ', '_')
+				 	OR NVD.PRODUCT = #{ossNameTemp}
 				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+				<if test="ossNicknames != null">
 			 		<foreach item="item" index="index" collection="ossNicknames">
-						OR NVD.PRODUCT = REPLACE(#{item}, ' ', '_')
+						OR NVD.PRODUCT = #{item}
+					</foreach>
+				</if>
+				<if test="dashOssNameList != null">
+			 		<foreach item="item" index="index" collection="dashOssNameList">
+						OR NVD.PRODUCT = #{item}
 					</foreach>
 				</if>
 			)
@@ -4821,4 +4828,59 @@
 		SET OV.DIVISION = EAJ.DIVISION
 		WHERE OV.OSS_ID = #{ossId}
 	</update>
+	
+	<select id="getVulnerabilityInfoWithOutVer" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
+    	SELECT NVD.PRODUCT, '-' AS VERSION, NVD.VENDOR, CVE.CVE_ID, CVE.CVSS_SCORE, CVE.MODI_DATE 
+		FROM NVD_DATA_V3 NVD
+		INNER JOIN (
+			SELECT MIN(NVD.PRODUCT) AS PRODUCT, NVD.CVE_ID, MIN(NVD.VERSION) AS VERSION
+	    	FROM NVD_DATA_V3 NVD
+	    	WHERE NVD.PRODUCT = #{ossName}
+	    	GROUP BY NVD.CVE_ID
+	    	
+	    	<if test="@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
+	    		UNION ALL
+	    	
+		    	SELECT MIN(NVD.PRODUCT) AS PRODUCT, NVD.CVE_ID, MIN(NVD.VERSION) AS VERSION
+		    	FROM NVD_DATA_V3 NVD
+		    	WHERE NVD.PRODUCT = #{ossNameTemp}
+		    	GROUP BY NVD.CVE_ID
+	    	</if>
+	    	
+	    	<if test="ossNicknames != null">
+	    		<foreach item="item" collection="ossNicknames">
+	    			UNION ALL
+	    			
+	    			SELECT MIN(NVD.PRODUCT) AS PRODUCT, NVD.CVE_ID, MIN(NVD.VERSION) AS VERSION
+			    	FROM NVD_DATA_V3 NVD
+			    	WHERE NVD.PRODUCT = #{item}
+			    	GROUP BY NVD.CVE_ID
+	    		</foreach>
+	    	</if>
+	    	
+	    	<if test="dashOssNameList != null">
+	    		<foreach item="item" collection="dashOssNameList">
+	    			UNION ALL
+	    			
+	    			SELECT MIN(NVD.PRODUCT) AS PRODUCT, NVD.CVE_ID, MIN(NVD.VERSION) AS VERSION
+			    	FROM NVD_DATA_V3 NVD
+			    	WHERE NVD.PRODUCT = #{item}
+			    	GROUP BY NVD.CVE_ID
+	    		</foreach>
+	    	</if>
+		)  NVD2
+		ON NVD.PRODUCT = NVD2.PRODUCT
+		AND NVD.VERSION = NVD2.VERSION
+		AND NVD.CVE_ID = NVD2.CVE_ID
+		INNER JOIN NVD_CVE_V3 CVE
+		ON NVD.CVE_ID = CVE.CVE_ID
+		WHERE 1=1
+		<if test="excludeCpes != null">
+			AND NVD.VENDORPRODUCT NOT IN
+			<foreach item="item" collection="excludeCpes" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY CVE.CVSS_SCORE DESC
+	</select>
 </mapper>
