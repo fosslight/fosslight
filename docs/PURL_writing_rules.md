@@ -364,6 +364,6 @@
 - purl → download location 생성 방법: qualifier의 1. `download_url`, 2. `repository_url`, 3. `vcs_url` 우선순위로 읽음. 이 중 qualifier가 없으면 생성 불가
 
 ## purl 로 download location 생성 방법
-- 각 type에 따라 qualifier에 `download_url` 또는 `repository_url` 또는 `vcs_url` 이 존재하지 않는 케이스에 대해서는 대표 url로 download location 생성해야 함
+- 각 type에 따라 qualifier에 `download_url`, `repository_url`, `vcs_url`이 모두 존재하지 않는 경우에만 대표 url로 download location 생성해야 함
  - 대표 url 지정되지 않은 경우, 각 Type 내 작성된 `purl → download location 생성 방법` 참조
 - 위 공통사항의 인코딩을 역으로 해야함
