@@ -4807,28 +4807,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossVersionAliasWithoutColon.add(isEmpty(ossMaster.getOssVersion()) ? "-" : ossMaster.getOssVersion());
 			param.setOssVersionAliases(ossVersionAliasWithoutColon.toArray(new String[ossVersionAliasWithoutColon.size()]));
 			
+			if (CollectionUtils.isNotEmpty(excludeCpeList)) {
+				generateExcludeCpeParam(param, excludeCpeList, excludeCpeEnvironmentList);
+			}
+			
 			if (inCpeMatchFlag) {
-				List<Map<String, Object>> includeVendorProductInfoList = null;
-				List<Map<String, Object>> excludeVendorProductInfoList = null;
-				
-				if (includeCpeList != null && !includeCpeList.isEmpty()) {
-					generateIncludeCpeParam(param, includeCpeList, includeCpeEnvironmentList);
-					includeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByIncludeCpeInfo(param);
-				}
-				
-				if (excludeCpeList != null && !excludeCpeList.isEmpty()) {
-					generateExcludeCpeParam(param, excludeCpeList, excludeCpeEnvironmentList);
-					excludeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByExcludeCpeInfo(param);
-				}
-				
 				List<Map<String, Object>> filteredVendorProductInfoList = new ArrayList<>();
 				
+				if (CollectionUtils.isNotEmpty(includeCpeList)) {
+					generateIncludeCpeParam(param, includeCpeList, includeCpeEnvironmentList);
+				}
+				List<Map<String, Object>> includeVendorProductInfoList = vulnerabilityMapper.selectVendorProductByIncludeCpeInfo(param);
+				
 				if (includeVendorProductInfoList != null && !includeVendorProductInfoList.isEmpty()) {
-					if (excludeVendorProductInfoList != null && !excludeVendorProductInfoList.isEmpty()) {
-						generateIncludeCpeMatchList(includeVendorProductInfoList, excludeVendorProductInfoList, includeCpeEnvironmentList, filteredVendorProductInfoList, isNoVersion);
-					} else {
-						generateIncludeCpeMatchList(includeVendorProductInfoList, null, includeCpeEnvironmentList, filteredVendorProductInfoList, isNoVersion);
-					}
+					generateIncludeCpeMatchList(includeVendorProductInfoList, null, includeCpeEnvironmentList, filteredVendorProductInfoList, isNoVersion);
 				}
 				
 				if (filteredVendorProductInfoList != null && !filteredVendorProductInfoList.isEmpty()) {
