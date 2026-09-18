@@ -60,7 +60,7 @@ public class ApiRequestServiceImpl extends CoTopComponent implements ApiRequestS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private RestTemplate sharedRestTemplate;
     private static final UriComponents OSORI_API_TEMPLATE = UriComponentsBuilder.fromHttpUrl(OSORI_API_URL)
-													            .queryParam("equalFlag", CoConstDef.FLAG_NO)
+													            .queryParam("equalFlag", CoConstDef.FLAG_YES)
 													            .queryParam("page", "0")
 													            .queryParam("size", "20")
 													            .queryParam("sort", "name")
