@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -223,6 +224,14 @@ public class NvdDataService extends CoTopComponent {
 								if (!MapUtils.isEmpty(existCveInfo)) {
 									String baseMetric = (String) cveInfo.get("baseMetric");
 									String existBaseMetric = (String) existCveInfo.get("baseMetric");
+									
+									Timestamp modiDate = (Timestamp) cveInfo.get("modiDate");
+									Timestamp existModiDate = (Timestamp) existCveInfo.get("modiDate");
+									
+									Timestamp truncatedModiDate = modiDate != null ? Timestamp.valueOf(modiDate.toLocalDateTime().withNano(0)) : null;
+									Timestamp truncatedExistModiDate = existModiDate != null ? Timestamp.valueOf(existModiDate.toLocalDateTime().withNano(0)) : null;
+									boolean modiDateChanged = truncatedModiDate != null && (truncatedExistModiDate == null || truncatedModiDate.after(truncatedExistModiDate));
+									
 									Map<String, Object> param = new HashMap<>();
 									param.put("cveId", cveInfo.get("cveId"));
 									boolean updateFlag = false;
@@ -249,6 +258,13 @@ public class NvdDataService extends CoTopComponent {
 											param.put("modiDate", cveInfo.get("modiDate"));
 											updateFlag = true;
 										}
+									}
+									if (!updateFlag && modiDateChanged) {
+										param.put("baseMetric", baseMetric);
+										param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+										param.put("summary", (String) cveInfo.get("summary"));
+										param.put("modiDate", cveInfo.get("modiDate"));
+										updateFlag = true;
 									}
 									if (updateFlag) {
 										mapper.updateCveInfoV3(param);
