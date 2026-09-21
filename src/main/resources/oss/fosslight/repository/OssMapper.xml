@@ -4543,7 +4543,7 @@
 		) VALUES (
 			#{ossCommonId},
 			#{excludeCpe},
-			CASE WHEN #{excludeCpe} LIKE 'cpe:2.3:%' THEN CONCAT(SUBSTRING_INDEX(SUBSTRING_INDEX(#{excludeCpe}, ':', 4), ':', -1 ), '-', SUBSTRING_INDEX(SUBSTRING_INDEX(#{excludeCpe}, ':', 5), ':', -1 )) ELSE REPLACE(#{includeCpe}, ':', '-') END
+			CASE WHEN #{excludeCpe} LIKE 'cpe:2.3:%' THEN CONCAT(SUBSTRING_INDEX(SUBSTRING_INDEX(#{excludeCpe}, ':', 4), ':', -1 ), '-', SUBSTRING_INDEX(SUBSTRING_INDEX(#{excludeCpe}, ':', 5), ':', -1 )) ELSE REPLACE(#{excludeCpe}, ':', '-') END
 		)
 	</insert>
 	

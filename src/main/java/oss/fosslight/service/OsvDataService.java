@@ -1680,7 +1680,9 @@ public class OsvDataService extends CoTopComponent {
 	    if (bean != null) {
 	        copyVulnerabilityFields(bean, osvVulnerability);
 	    }
-	    osvVulnerability.setCvssScore(osvVulnerability.getSeverity());
+	    if (!isEmpty(osvVulnerability.getSeverity())) {
+	    	osvVulnerability.setCvssScore(osvVulnerability.getSeverity());
+	    }
 	}
 	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, Map<String, Vulnerability> osvVulnerabilityMap, String targetVersion, String[] aliases, boolean isSecurity) {
 	    if (CollectionUtils.isEmpty(osvVulnerabilityList)) {
