@@ -270,6 +270,8 @@ public final class Url {
 		
 		public static final String FETCH_OSS_DETAIL = PATH + "/fetchOssDetail";
 		public static final String CHECK_OSS_ANALYSIS_STATUS = PATH + "/checkOssAnalysisStatus";
+		
+		public static final String OSS_VULNERABILITY_AJAX = PATH + "/getVulnerabilityGridAjax";
 	}
 	
 	public static final class PROJECT {
