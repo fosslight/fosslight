@@ -2894,7 +2894,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		List<List<String>> namePartitions = ListUtils.partition(new ArrayList<>(inputNames), 1000);
-		List<List<String>> urlPartitions = ListUtils.partition(new ArrayList<>(inputUrls), 1000);
+		// Expand scheme/www variants in Java so SQL can use indexed equality instead of per-row normalize.
+		List<List<String>> urlPartitions = ListUtils.partition(new ArrayList<>(expandDownloadLocationVariants(inputUrls)), 1000);
 		
 		for (List<String> names : namePartitions) {
 	        if (!names.isEmpty()) {
@@ -3148,6 +3149,45 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
         }
 
         return processed.trim();
+	}
+
+	/**
+	 * Build exact download-location strings that match the previous SQL normalize logic:
+	 * TRIM(LEADING 'www.' FROM strip-scheme(url)).
+	 * Callers pass already-normalized urls (no scheme / leading www); variants cover stored DB forms.
+	 */
+	Set<String> expandDownloadLocationVariants(Collection<String> normalizedUrls) {
+		Set<String> variants = new LinkedHashSet<>();
+		if (normalizedUrls == null || normalizedUrls.isEmpty()) {
+			return variants;
+		}
+
+		final String[] prefixes = {
+				"",
+				"www.",
+				"http://",
+				"https://",
+				"http://www.",
+				"https://www.",
+				"git://",
+				"git://www.",
+				"ftp://",
+				"ftp://www.",
+				"svn://",
+				"svn://www.",
+				"ssh://",
+				"ssh://www."
+		};
+
+		for (String url : normalizedUrls) {
+			if (isEmpty(url)) {
+				continue;
+			}
+			for (String prefix : prefixes) {
+				variants.add(prefix + url);
+			}
+		}
+		return variants;
 	}
 	
 	private String appendCheckOssName(Set<String> ossNameList, Map<String, String> ossInfoNames, String checkOssName) {
