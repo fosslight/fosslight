@@ -219,55 +219,59 @@ public class NvdDataService extends CoTopComponent {
 									continue;
 								}
                 
-								cveId = (String) cveInfo.get("cveId");
-								Map<String, Object> existCveInfo = mapper.selectOneCveInfoV3(cveInfo);
-								if (!MapUtils.isEmpty(existCveInfo)) {
-									String baseMetric = (String) cveInfo.get("baseMetric");
-									String existBaseMetric = (String) existCveInfo.get("baseMetric");
-									
-									Timestamp modiDate = (Timestamp) cveInfo.get("modiDate");
-									Timestamp existModiDate = (Timestamp) existCveInfo.get("modiDate");
-									
-									Timestamp truncatedModiDate = modiDate != null ? Timestamp.valueOf(modiDate.toLocalDateTime().withNano(0)) : null;
-									Timestamp truncatedExistModiDate = existModiDate != null ? Timestamp.valueOf(existModiDate.toLocalDateTime().withNano(0)) : null;
-									boolean modiDateChanged = truncatedModiDate != null && (truncatedExistModiDate == null || truncatedModiDate.after(truncatedExistModiDate));
-									
-									Map<String, Object> param = new HashMap<>();
-									param.put("cveId", cveInfo.get("cveId"));
-									boolean updateFlag = false;
-									if (StringUtil.isEmpty(existBaseMetric) && !StringUtil.isEmpty(baseMetric)) {
-										param.put("baseMetric", baseMetric);
-										param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
-										param.put("summary", (String) cveInfo.get("summary"));
-										param.put("modiDate", cveInfo.get("modiDate"));
-										updateFlag = true;
-									} else if (!StringUtil.isEmpty(baseMetric) && !StringUtil.isEmpty(existBaseMetric)) {
-										if (baseMetric.equals(existBaseMetric)) {
-											if (new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) > 0
-													|| new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) < 0) {
+								if (!initializeFlag) {
+									cveId = (String) cveInfo.get("cveId");
+									Map<String, Object> existCveInfo = mapper.selectOneCveInfoV3(cveInfo);
+									if (!MapUtils.isEmpty(existCveInfo)) {
+										String baseMetric = (String) cveInfo.get("baseMetric");
+										String existBaseMetric = (String) existCveInfo.get("baseMetric");
+										
+										Timestamp modiDate = (Timestamp) cveInfo.get("modiDate");
+										Timestamp existModiDate = (Timestamp) existCveInfo.get("modiDate");
+										
+										Timestamp truncatedModiDate = modiDate != null ? Timestamp.valueOf(modiDate.toLocalDateTime().withNano(0)) : null;
+										Timestamp truncatedExistModiDate = existModiDate != null ? Timestamp.valueOf(existModiDate.toLocalDateTime().withNano(0)) : null;
+										boolean modiDateChanged = truncatedModiDate != null && (truncatedExistModiDate == null || truncatedModiDate.after(truncatedExistModiDate));
+										
+										Map<String, Object> param = new HashMap<>();
+										param.put("cveId", cveInfo.get("cveId"));
+										boolean updateFlag = false;
+										if (StringUtil.isEmpty(existBaseMetric) && !StringUtil.isEmpty(baseMetric)) {
+											param.put("baseMetric", baseMetric);
+											param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+											param.put("summary", (String) cveInfo.get("summary"));
+											param.put("modiDate", cveInfo.get("modiDate"));
+											updateFlag = true;
+										} else if (!StringUtil.isEmpty(baseMetric) && !StringUtil.isEmpty(existBaseMetric)) {
+											if (baseMetric.equals(existBaseMetric)) {
+												if (new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) > 0
+														|| new BigDecimal(cveInfo.get("cvssScore").toString()).compareTo(new BigDecimal(existCveInfo.get("cvssScore").toString())) < 0) {
+													param.put("baseMetric", baseMetric);
+													param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
+													param.put("summary", (String) cveInfo.get("summary"));
+													param.put("modiDate", cveInfo.get("modiDate"));
+													updateFlag = true;
+												}
+											} else {
 												param.put("baseMetric", baseMetric);
 												param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
 												param.put("summary", (String) cveInfo.get("summary"));
 												param.put("modiDate", cveInfo.get("modiDate"));
 												updateFlag = true;
 											}
-										} else {
+										}
+										if (!updateFlag && modiDateChanged) {
 											param.put("baseMetric", baseMetric);
 											param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
 											param.put("summary", (String) cveInfo.get("summary"));
 											param.put("modiDate", cveInfo.get("modiDate"));
 											updateFlag = true;
 										}
-									}
-									if (!updateFlag && modiDateChanged) {
-										param.put("baseMetric", baseMetric);
-										param.put("cvssScore", Float.parseFloat((String) cveInfo.get("cvssScore")));
-										param.put("summary", (String) cveInfo.get("summary"));
-										param.put("modiDate", cveInfo.get("modiDate"));
-										updateFlag = true;
-									}
-									if (updateFlag) {
-										mapper.updateCveInfoV3(param);
+										if (updateFlag) {
+											mapper.updateCveInfoV3(param);
+										}
+									} else {
+										mapper.insertCveInfoV3Temp(cveInfo);
 									}
 								} else {
 									mapper.insertCveInfoV3Temp(cveInfo);
