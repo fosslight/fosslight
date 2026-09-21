@@ -797,11 +797,6 @@ public class OsvDataService extends CoTopComponent {
 	    for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
 	        boolean activateFlag = isEmpty(osvVulnInfo.getOssVersion());
 	        
-	        // !isSecurity 일 때는 activateFlag가 true(버전 없음)이면 건너뜀
-	        if (!isSecurity && activateFlag) {
-	            continue;
-	        }
-
 	        // [개선 3] StringBuilder를 활용한 그리드 ID 결합 효율화 (힙 오버헤드 대폭 감소)
 	        gridIdBuilder.setLength(0);
 	        gridIdBuilder.append(gridIdPrefix).append(securityIdx++);
