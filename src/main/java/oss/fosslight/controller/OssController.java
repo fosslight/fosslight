@@ -338,9 +338,6 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("projectListFlag", projectListFlag);
 		
-		List<Vulnerability> vulnInfoList = ossService.getMergedVulnerabilityList(ossMaster);
-		model.addAttribute("vulnInfoList", vulnInfoList);
-		
 		List<String> nickList = new ArrayList<>();
 		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 		
@@ -2540,5 +2537,18 @@ public class OssController extends CoTopComponent{
 		}
 		
 		return makeJsonResponseHeader(false, null);
+	}
+	
+	@PostMapping(value = OSS.OSS_VULNERABILITY_AJAX)
+	public @ResponseBody ResponseEntity<Object> ossVulnerabilityAjax(@RequestBody OssMaster ossMaster, HttpServletResponse response) {
+		Map<String, Object> resMap = new HashMap<>();
+		
+		OssMaster bean = new OssMaster(ossMaster.getOssId());
+		bean = ossService.getOssMasterOne(bean);
+		
+		List<Vulnerability> vulnInfoList = ossService.getMergedVulnerabilityList(bean);
+		resMap.put("vulnList", CollectionUtils.isEmpty(vulnInfoList) ? Collections.EMPTY_LIST : vulnInfoList);
+		
+		return makeJsonResponseHeader(resMap);
 	}
 }
