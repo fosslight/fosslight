@@ -2680,7 +2680,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		String prjId = ossNotice.getPrjId();
 
 		try {
-			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
+			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.3.xlsx"));
 
 			wb = WorkbookFactory.create(inFile);
 			sheetDoc = wb.getSheetAt(0);
@@ -3276,7 +3276,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 
-		return makeExcelFileId(wb,downloadFileName, "xls");
+		return makeExcelFileId(wb,downloadFileName, "xlsx");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -3307,7 +3307,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		ossNotice.setFileType("text");
 
 		try {
-			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
+			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.3.xlsx"));
 
 			wb = WorkbookFactory.create(inFile);
 			sheetDoc = wb.getSheetAt(0);
@@ -4000,7 +4000,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 
-		return makeExcelFileId(wb,downloadFileName, "xls");
+		return makeExcelFileId(wb,downloadFileName, "xlsx");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -4025,7 +4025,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		String prjId = ossNotice.getPrjId();
 		
 		try {
-			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
+			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.3.xlsx"));
 			
 			wb = WorkbookFactory.create(inFile);
 			sheetDoc = wb.getSheetAt(0);
@@ -4536,7 +4536,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 		
-		return makeExcelFileId(wb,downloadFileName, "xls");
+		return makeExcelFileId(wb,downloadFileName, "xlsx");
 	}
 
 	private static Cell getCell(Row row, int cellIdx) {
