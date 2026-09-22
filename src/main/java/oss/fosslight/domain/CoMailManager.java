@@ -3541,7 +3541,11 @@ public class CoMailManager extends CoTopComponent {
 						if (trimCveId.equalsIgnoreCase("NONE")) {
 							customCveId += "NONE"; 
 						} else {
-							customCveId += "<a href='https://nvd.nist.gov/vuln/detail/" + splitCveId.trim() + "' target='_blank'>" + splitCveId.trim() + "</a>";
+							if (isNvdType) {
+								customCveId += "<a href='https://nvd.nist.gov/vuln/detail/" + splitCveId.trim() + "' target='_blank'>" + splitCveId.trim() + "</a>";
+							} else {
+								customCveId = "<a href='https://osv.dev/vulnerability/" + splitCveId.trim() + "' target='_blank'>" + splitCveId.trim() + "</a>";
+							}
 						}
 						if (idx < splitCveIds.length) {
 							customCveId += " -> ";
