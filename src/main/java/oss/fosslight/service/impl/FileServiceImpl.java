@@ -414,7 +414,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						}
 						isConvert = new File(convertFullStrPath).exists();
 					} else {
-						fileExt = "xlsx";
+						fileExt = "xls";
 						originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
 						uploadFileName = randomUUID + "." + fileExt;
 						convertFullStrPath = uploadFilePath + "/" + uploadFileName;
@@ -473,7 +473,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		try {
 			if (isConverted) {
-				upFile.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+				upFile.setContentType("application/vnd.ms-excel");
 				upFile.setSize(finalFileSize);
 			} else {
 				upFile.setContentType(mFile.getContentType());
@@ -521,7 +521,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		try {
 			if (isConverted) {
 				registFile.setGubn("CV");
-				registFile.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+				registFile.setContentType("application/vnd.ms-excel");
 				registFile.setSize(String.valueOf(finalFileSize));
 			} else {
 				registFile.setContentType(mFile.getContentType());

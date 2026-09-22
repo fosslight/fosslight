@@ -3276,7 +3276,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 
-		return makeExcelFileId(wb,downloadFileName, "xlsx");
+		return makeExcelFileId(wb,downloadFileName, "xls");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -4000,7 +4000,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 
-		return makeExcelFileId(wb,downloadFileName, "xlsx");
+		return makeExcelFileId(wb,downloadFileName, "xls");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -4536,7 +4536,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 		
-		return makeExcelFileId(wb,downloadFileName, "xlsx");
+		return makeExcelFileId(wb,downloadFileName, "xls");
 	}
 
 	private static Cell getCell(Row row, int cellIdx) {
