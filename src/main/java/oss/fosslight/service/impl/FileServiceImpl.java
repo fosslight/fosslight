@@ -720,7 +720,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			Map<String, String> packagePurlMap, Map<String, Map<String, String>> files, JsonNode relationshipsNode)
 			throws Exception {
 		String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-		File templateFile = new File(templatePath + "/SPDXRdf_2.3.xlsx");
+		File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
 
 		try (FileInputStream fis = new FileInputStream(templateFile);
 				Workbook workbook = WorkbookFactory.create(fis);
@@ -1113,7 +1113,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
     private static void writeXls(File xlsFile, Map<String, Map<String, String>> packages, Map<String, Map<String, String>> files, Map<String, Map<String, String>> snippets, List<Map<String, String>> relationships) throws Exception {
     	String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-    	File templateFile = new File(templatePath + "/SPDXRdf_2.3.xlsx");
+    	File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
 	    
 	    try (FileInputStream fis = new FileInputStream(templateFile);
 	    	Workbook workbook = WorkbookFactory.create(fis);
@@ -1525,7 +1525,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    }
 
 	    File resultFile = new File(convertFullStrPath);
-	    File templateFile = new File(templatePath + "/SPDXRdf_2.3.xlsx");
+	    File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
 	    
 	    try (FileInputStream fis = new FileInputStream(templateFile);
 	    	Workbook workbook = WorkbookFactory.create(fis);
