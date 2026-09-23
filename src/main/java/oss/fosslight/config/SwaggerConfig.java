@@ -165,6 +165,13 @@ public class SwaggerConfig implements WebMvcConfigurer {
         };
     }
 
+    @Bean
+    springfox.documentation.swagger.web.UiConfiguration uiConfiguration() {
+        return springfox.documentation.swagger.web.UiConfigurationBuilder.builder()
+                .validatorUrl("")
+                .build();
+    }
+
     private SwaggerResource swaggerResource(String name, String location) {
         SwaggerResource resource = new SwaggerResource();
         resource.setName(name);
