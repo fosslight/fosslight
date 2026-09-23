@@ -322,6 +322,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@Override
 	public OssMaster getOssMasterOne(OssMaster ossMaster) {
+		String isCopy = avoidNull(ossMaster.getOssCopyFlag());
 		ossMaster = ossMapper.selectOssOne(ossMaster);
 		if (ossMaster == null) {
 			return null;
@@ -342,7 +343,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setExcludeCpes(excludeCpeInfo.getExcludeCpe().split(","));
 			ossMaster.setSearchExcludeCpes(excludeCpeInfo.getSearchExcludeCpe().split(","));
 		}
-		if (!CoConstDef.FLAG_YES.equals(ossMaster.getOssCopyFlag()) && CollectionUtils.isNotEmpty(ossVersionAliasList)) {
+		if (!CoConstDef.FLAG_YES.equals(isCopy) && CollectionUtils.isNotEmpty(ossVersionAliasList)) {
 			ossMaster.setOssVersionAliases(ossVersionAliasList.toArray(new String[ossVersionAliasList.size()]));
 		}
 		
