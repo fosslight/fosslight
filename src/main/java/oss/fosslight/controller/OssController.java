@@ -286,6 +286,8 @@ public class OssController extends CoTopComponent{
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
 	public String edit(@PathVariable String ossId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		String initTab = req.getParameter("initTab");
+		
 		OssMaster ossMaster = new OssMaster(ossId);
 		Map<String, Object> map = ossService.getOssLicenseList(ossMaster);
 		ossMaster = ossService.getOssMasterOne(ossMaster);
@@ -344,6 +346,10 @@ public class OssController extends CoTopComponent{
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 
+		if (!isEmpty(initTab)) {
+			model.addAttribute("initTab", initTab);
+		}
+		
 		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 	
