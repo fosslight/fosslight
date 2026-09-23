@@ -368,6 +368,7 @@ public class OssController extends CoTopComponent{
 	@GetMapping(value={OSS.COPY_ID}, produces = "text/html; charset=utf-8")
 	public String copy(@PathVariable String ossId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		OssMaster ossMaster = new OssMaster(ossId);
+		ossMaster.setOssCopyFlag(CoConstDef.FLAG_YES);
 		String _version = req.getParameter("ossVersion");
 		String jobSeq = req.getParameter("jobSeq");
 		boolean isVersionup = false;

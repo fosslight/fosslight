@@ -4372,6 +4372,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
             if (saveCnt > 0) {
                 sqlSession.flushStatements();
             }
+            
+            sqlSession.commit();
         }
 		
 		bomComponentsList.clear();

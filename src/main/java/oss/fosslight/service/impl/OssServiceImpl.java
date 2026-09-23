@@ -342,7 +342,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setExcludeCpes(excludeCpeInfo.getExcludeCpe().split(","));
 			ossMaster.setSearchExcludeCpes(excludeCpeInfo.getSearchExcludeCpe().split(","));
 		}
-		if (CollectionUtils.isNotEmpty(ossVersionAliasList)) {
+		if (!CoConstDef.FLAG_YES.equals(ossMaster.getOssCopyFlag()) && CollectionUtils.isNotEmpty(ossVersionAliasList)) {
 			ossMaster.setOssVersionAliases(ossVersionAliasList.toArray(new String[ossVersionAliasList.size()]));
 		}
 		
