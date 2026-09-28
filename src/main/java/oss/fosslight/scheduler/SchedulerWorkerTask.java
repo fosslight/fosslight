@@ -114,19 +114,6 @@ public class SchedulerWorkerTask extends CoTopComponent {
 		}
 	}
 	
-	@Scheduled(cron="0 0 9 * * ?")
-	public void sendMailNvdDataIfJob() {
-		log.info("sendMailNvdDataIfJob start");
-		
-		try {
-			vulnerabilityService.sendMailNvdDataIfJob();
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
-		log.info("sendMailNvdDataIfJob end");
-	}
-	
 	// 0분 부터 5분 단위 스케줄 - 30분이 지난 메일은 삭제한다.
 	//@Scheduled(cron="0 5,10,15,20,25,30,35,40,45,50,55 * * * *")
 	public void sendMailRunTimeout(){
