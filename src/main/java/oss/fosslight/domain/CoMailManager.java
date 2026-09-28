@@ -275,6 +275,35 @@ public class CoMailManager extends CoTopComponent {
     			convertDataMap.put("vulnerability_sync_result", bean.getParamMap());
     		}
     		
+    		if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())) {
+    			List<OssMaster> vulnerabilityProject = (List<OssMaster>) convertDataMap.get("vulnerability_prj_oss_info");
+    			if (!CollectionUtils.isEmpty(vulnerabilityProject)) {
+    				String domain = CommonFunction.getProperty("server.domain") + "/oss/edit/";
+    				StringBuilder noVersionMsg = new StringBuilder();
+    				int idx = 0;
+    				int size = vulnerabilityProject.size();
+    				
+    				for (OssMaster vulnerability : vulnerabilityProject) {
+    					if (StringUtils.isEmpty(vulnerability)) {
+    						noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + vulnerability.getOssName() + "</a>");
+    						if (idx < size - 1) {
+    							noVersionMsg.append(", ");
+    		                }
+    						idx++;
+    					}
+    				}
+    				
+    				if (noVersionMsg.length() > 0) {
+    					String comment = bean.getComment();
+    					if (!StringUtils.isEmpty(comment)) {
+    						comment += "<br/>";
+    					}
+    					comment += getMessage("msg.project.security.check.version") + "<br/>- " + noVersionMsg.toString();
+    					bean.setComment(comment);
+    				}
+    			}
+    		}
+    		
     		// ldap Search시 사용자 정보가 변경된 경우
     		if (CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO.equals(bean.getMsgType()) && bean.getParamList() != null) {
     			List<Map<String, Object>> userList = bean.getParamList();
