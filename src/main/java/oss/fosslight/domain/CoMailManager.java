@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -276,31 +277,45 @@ public class CoMailManager extends CoTopComponent {
     		}
     		
     		if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())) {
-    			List<OssMaster> vulnerabilityProject = (List<OssMaster>) convertDataMap.get("vulnerability_prj_oss_info");
-    			if (!CollectionUtils.isEmpty(vulnerabilityProject)) {
-    				String domain = CommonFunction.getProperty("server.domain") + "/oss/edit/";
-    				StringBuilder noVersionMsg = new StringBuilder();
-    				int idx = 0;
-    				int size = vulnerabilityProject.size();
-    				
-    				for (OssMaster vulnerability : vulnerabilityProject) {
-    					if (StringUtils.isEmpty(vulnerability)) {
-    						noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + vulnerability.getOssName() + "</a>");
-    						if (idx < size - 1) {
-    							noVersionMsg.append(", ");
-    		                }
-    						idx++;
-    					}
-    				}
-    				
-    				if (noVersionMsg.length() > 0) {
-    					String comment = bean.getComment();
-    					if (!StringUtils.isEmpty(comment)) {
-    						comment += "<br/>";
-    					}
-    					comment += getMessage("msg.project.security.check.version") + "<br/>- " + noVersionMsg.toString();
-    					bean.setComment(comment);
-    				}
+    			if (convertDataMap.containsKey("vulnerability_prj_oss_info")) {
+    				List<OssMaster> vulnerabilityProject = (List<OssMaster>) convertDataMap.get("vulnerability_prj_oss_info");
+        			if (!CollectionUtils.isEmpty(vulnerabilityProject)) {
+        				List<OssMaster> ossWithVersionList = vulnerabilityProject.stream().filter(e -> !isEmpty(e.getOssVersion())).collect(Collectors.toList());
+        				List<OssMaster> ossWithoutVersionList = vulnerabilityProject.stream().filter(e -> isEmpty(e.getOssVersion()) && CommonFunction.isBigDecimal(e.getCvssScore()))
+        																						.collect(Collectors.groupingBy(e -> e.getOssName()))
+																        						.values().stream()
+																								.map(list -> list.stream()
+																										.max(Comparator.comparingDouble(e -> Float.valueOf(e.getCvssScore())))
+																										.get()
+																								).collect(Collectors.toList());
+        				ossWithVersionList.addAll(ossWithoutVersionList);
+        				
+        				String domain = CommonFunction.getProperty("server.domain") + "/oss/edit/";
+        				StringBuilder noVersionMsg = new StringBuilder();
+        				int idx = 0;
+        				int size = ossWithoutVersionList.size();
+        				
+        				for (OssMaster vulnerability : ossWithoutVersionList) {
+        					if (StringUtils.isEmpty(vulnerability)) {
+        						noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + vulnerability.getOssName() + "</a>");
+        						if (idx < size - 1) {
+        							noVersionMsg.append(", ");
+        		                }
+        						idx++;
+        					}
+        				}
+        				
+        				if (noVersionMsg.length() > 0) {
+        					String comment = bean.getComment();
+        					if (!StringUtils.isEmpty(comment)) {
+        						comment += "<br/>";
+        					}
+        					comment += getMessage("msg.project.security.check.version") + "<br/>- " + noVersionMsg.toString();
+        					bean.setComment(comment);
+        				}
+        				
+        				convertDataMap.put("vulnerability_prj_oss_info", ossWithVersionList);
+        			}
     			}
     		}
     		
