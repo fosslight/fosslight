@@ -572,7 +572,7 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
             }
 		}
         
-        completeSyncToEnterprise("ossAnalysis", true);
+        completeSyncToEnterprise(true);
         log.info("OSS Info sync to Enterprise completed successfully");
 	}
 
@@ -611,7 +611,7 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
             }
 		}
         
-        completeSyncToEnterprise("license", false);
+        completeSyncToEnterprise(false);
         log.info("License Info sync to Enterprise completed successfully.");
 	}
 	
@@ -620,7 +620,11 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
 		log.info("Sending request to clear sync API: {}", targetUrl);
 		
 		try {
-			ResponseEntity<String> response = enterpriseApiRestTemplate.postForEntity(targetUrl, null, String.class);
+			HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = enterpriseApiRestTemplate.exchange(targetUrl, HttpMethod.POST, entity, String.class);
 	        if (!response.getStatusCode().is2xxSuccessful()) {
 	            throw new RuntimeException("External server returned an error status during preparation: " + response.getStatusCode());
 	        }
@@ -643,21 +647,23 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
         }
 	}
 	
-	private void completeSyncToEnterprise(String category, boolean includeData) {
-		String targetUrl = enterpriseIntegrationUrl + "/api/v2/coReviewer/" + category + "/sync/complete";
-        log.info("Sending request to complete sync API: {}", targetUrl);
+	private void completeSyncToEnterprise(boolean includeData) {
+		String targetUrl = enterpriseIntegrationUrl + "/api/v2/coReviewer/";
         try {
         	HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<?> entity;
             
             if (includeData) {
+            	targetUrl += "ossAnalysis/sync/complete";
                 List<EnterpriseIntegrationBean> enterpriseIntegrationJobs = enterpriseIntegrationMapper.getEnterpriseIntegrationJobs();
                 entity = new HttpEntity<>(enterpriseIntegrationJobs, headers);
             } else {
+            	targetUrl += "license/sync/complete";
                 entity = new HttpEntity<>(headers); 
             }
             
+            log.info("Sending request to complete sync API: {}", targetUrl);
             ResponseEntity<String> response = enterpriseApiRestTemplate.exchange(targetUrl, HttpMethod.POST, entity, String.class);
             if (!response.getStatusCode().is2xxSuccessful()) {
             	throw new RuntimeException("External server returned an error status during completion: " + response.getStatusCode());
