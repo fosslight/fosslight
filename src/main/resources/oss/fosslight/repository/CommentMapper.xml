@@ -157,79 +157,119 @@
 	</select>
 	
 	<select id="getCommentListHis" parameterType="oss.fosslight.domain.CommentsHistory" resultType="oss.fosslight.domain.CommentsHistory">
-	SELECT
-		CH.*
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(user) and !@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
-			, (SELECT CASE WHEN IFNULL(NOTICE_TYPE, '') = '80' THEN 'Y' ELSE 'N' END REFERENCE_DIV_FLAG FROM OSS_NOTICE WHERE PRJ_ID = CH.REFERENCE_ID) AS REFERENCE_DIV_FLAG
-		</if>
-	FROM
-		COMMENTS_HISTORY CH
-	WHERE 1=1
+		SELECT
+			CH.*
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(user) and !@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+				, (SELECT CASE WHEN IFNULL(NOTICE_TYPE, '') = '80' THEN 'Y' ELSE 'N' END REFERENCE_DIV_FLAG FROM OSS_NOTICE WHERE PRJ_ID = CH.REFERENCE_ID) AS REFERENCE_DIV_FLAG
+			</if>
+		FROM
+			COMMENTS_HISTORY CH
+		WHERE 1=1
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+				<if test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+					AND CH.REFERENCE_ID = #{referenceId}
+					AND CH.REFERENCE_DIV = '40'
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@notEquals(referenceDiv,'oss')">
+					AND CH.REFERENCE_ID = #{referenceId}
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+							AND CH.REFERENCE_DIV IN ('19', '10', '12', '14')
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+							AND CH.REFERENCE_DIV IN ('30')
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+							AND CH.REFERENCE_DIV IN ('20', '22')
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+							AND CH.REFERENCE_DIV = '60'
+						</when>
+						<otherwise>
+							AND CH.REFERENCE_DIV IN ('99')
+						</otherwise>
+					</choose>
+				</if>
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
+				AND CH.REFERENCE_DIV = #{schReferenceDiv}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+				<foreach item="item" index="index" collection="schKeywordList">
+	        		AND CH.CONTENTS LIKE CONCAT('%', #{item}, '%')
+	  			</foreach>
+			</if>
+			AND CH.USE_YN = 'Y'
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(user)">
+				AND CH.CREATOR != #{user}
+				AND (
+					IFNULL(CH.STATUS, '') = ''
+					OR (
+						CH.STATUS != 'Terminated' 
+						AND CH.STATUS != 'OSS Name Changed'
+						AND CH.STATUS != 'Cancelled Reservation' 
+						AND CH.STATUS != 'Add Model by OSDD' 
+						AND CH.STATUS != 'Distribute Rejected' 
+						AND CH.STATUS != 'Distribute Reserved' 
+						AND CH.STATUS != 'Distribute Model Only'
+						AND CH.STATUS NOT LIKE 'changed%' 
+						AND CH.STATUS NOT LIKE 'Distribute Deleted%' 
+						AND CH.STATUS NOT LIKE 'pre-review%'
+						AND CH.STATUS NOT LIKE 'Updated Model by%'
+					)
+				)
+			</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
 			<if test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
-				AND ((CH.REFERENCE_ID = #{referenceId} AND CH.REFERENCE_DIV = '40')
-				OR (CH.REFERENCE_ID IN (SELECT OSS_ID FROM OSS_VERSION	WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{referenceId})) AND CH.REFERENCE_DIV = '42'))
+				UNION ALL
+			
+				SELECT CH.*
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(user) and !@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+					, (SELECT CASE WHEN IFNULL(NOTICE_TYPE, '') = '80' THEN 'Y' ELSE 'N' END REFERENCE_DIV_FLAG FROM OSS_NOTICE WHERE PRJ_ID = CH.REFERENCE_ID) AS REFERENCE_DIV_FLAG
+				</if>
+				FROM COMMENTS_HISTORY CH
+				WHERE CH.REFERENCE_DIV = '42'
+				AND CH.REFERENCE_ID IN (SELECT OSS_ID FROM OSS_VERSION WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{referenceId}))
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
+					AND CH.REFERENCE_DIV = #{schReferenceDiv}
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+					<foreach item="item" index="index" collection="schKeywordList">
+		        		AND CH.CONTENTS LIKE CONCAT('%', #{item}, '%')
+		  			</foreach>
+				</if>
+				AND CH.USE_YN = 'Y'
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(user)">
+					AND CH.CREATOR != #{user}
+					AND (
+						IFNULL(CH.STATUS, '') = ''
+						OR (
+							CH.STATUS != 'Terminated' 
+							AND CH.STATUS != 'OSS Name Changed'
+							AND CH.STATUS != 'Cancelled Reservation' 
+							AND CH.STATUS != 'Add Model by OSDD' 
+							AND CH.STATUS != 'Distribute Rejected' 
+							AND CH.STATUS != 'Distribute Reserved' 
+							AND CH.STATUS != 'Distribute Model Only'
+							AND CH.STATUS NOT LIKE 'changed%' 
+							AND CH.STATUS NOT LIKE 'Distribute Deleted%' 
+							AND CH.STATUS NOT LIKE 'pre-review%'
+							AND CH.STATUS NOT LIKE 'Updated Model by%'
+						)
+					)
+				</if>
 			</if>
-			<if test="@oss.fosslight.util.StringUtil@notEquals(referenceDiv,'oss')">
-				AND CH.REFERENCE_ID = #{referenceId}
-				<choose>
-					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
-						AND CH.REFERENCE_DIV IN ('19', '10', '12', '14')
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
-						AND CH.REFERENCE_DIV IN ('30')
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-						AND CH.REFERENCE_DIV IN ('20', '22')
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
-						AND CH.REFERENCE_DIV = '60'
-					</when>
-					<otherwise>
-						AND CH.REFERENCE_DIV IN ('99')
-					</otherwise>
-				</choose>
+		</if>	
+		ORDER BY 
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+				CASE WHEN CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
+			</if>
+		COMM_ID DESC
+		<if test="@oss.fosslight.util.StringUtil@equals(moreFlag, 'N') and @oss.fosslight.util.StringUtil@isEmpty(user)">
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
+				LIMIT 5
 			</if>
 		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
-			AND CH.REFERENCE_DIV = #{schReferenceDiv}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
-			<foreach item="item" index="index" collection="schKeywordList">
-        		AND CH.CONTENTS LIKE CONCAT('%', #{item}, '%')
-  			</foreach>
-		</if>
-		AND CH.USE_YN = 'Y'
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(user)">
-			AND CH.CREATOR != #{user}
-			AND (
-				IFNULL(CH.STATUS, '') = ''
-				OR (
-					CH.STATUS != 'Terminated' 
-					AND CH.STATUS != 'OSS Name Changed'
-					AND CH.STATUS != 'Cancelled Reservation' 
-					AND CH.STATUS != 'Add Model by OSDD' 
-					AND CH.STATUS != 'Distribute Rejected' 
-					AND CH.STATUS != 'Distribute Reserved' 
-					AND CH.STATUS != 'Distribute Model Only'
-					AND CH.STATUS NOT LIKE 'changed%' 
-					AND CH.STATUS NOT LIKE 'Distribute Deleted%' 
-					AND CH.STATUS NOT LIKE 'pre-review%'
-					AND CH.STATUS NOT LIKE 'Updated Model by%'
-				)
-			)
-		</if>
-	ORDER BY 
-	
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
-			CASE WHEN CH.CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
-		</if>
-	CH.COMM_ID DESC
-	<if test="@oss.fosslight.util.StringUtil@equals(moreFlag, 'N') and @oss.fosslight.util.StringUtil@isEmpty(user)">
-		<if test="@oss.fosslight.util.StringUtil@isEmpty(recentFlag)">
-			LIMIT 5
-		</if>
-	</if>
 	</select>
 	
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
