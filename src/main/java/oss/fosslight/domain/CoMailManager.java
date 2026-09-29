@@ -296,13 +296,14 @@ public class CoMailManager extends CoTopComponent {
         				int size = ossWithoutVersionList.size();
         				
         				for (OssMaster vulnerability : ossWithoutVersionList) {
-        					if (StringUtils.isEmpty(vulnerability)) {
-        						noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + vulnerability.getOssName() + "</a>");
-        						if (idx < size - 1) {
-        							noVersionMsg.append(", ");
-        		                }
-        						idx++;
+        					if (StringUtils.isEmpty(vulnerability.getOssId()) || StringUtils.isEmpty(vulnerability.getOssName())) {
+        						continue;
         					}
+        					noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + vulnerability.getOssName() + "</a>");
+    						if (idx < size - 1) {
+    							noVersionMsg.append(", ");
+    		                }
+    						idx++;
         				}
         				
         				if (noVersionMsg.length() > 0) {
