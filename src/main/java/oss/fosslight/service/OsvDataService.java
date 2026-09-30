@@ -1710,7 +1710,7 @@ public class OsvDataService extends CoTopComponent {
 	        currentTargetVersion = isSecurity ? osvVulnerability.getOssVersion() : targetVersion;
 	        
 	        // 1순위 검증: Exact Match
-	        if (osvVulnerability.getPriority() == 1 && !isEmpty(osvVulnerability.getSearchVersionP1())) {
+	        if (!isEmpty(osvVulnerability.getSearchVersionP1())) {
 	        	if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {
 		        	seenVulnerabilities.add(uniqueKey);
 	                processVulnerabilityData(osvVulnerability, osvVulnerabilityMap);
@@ -1720,7 +1720,7 @@ public class OsvDataService extends CoTopComponent {
 	        }
 
 	        // 2순위 검증: Range Match
-	        if (osvVulnerability.getPriority() == 2 && !isEmpty(osvVulnerability.getSearchNameP2())) {
+	        if (!isEmpty(osvVulnerability.getSearchVersionP2())) {
 	        	boolean matched = isVersionInRange(currentTargetVersion, osvVulnerability.getSearchVersionP2(), osvVulnerability.getAffectedVersion());
 	            if (!matched && aliases != null) {
 	                for (String alias : aliases) {
