@@ -1018,17 +1018,13 @@
 		     	M.SEARCH_VERSION_P2,
 		      	M.SEARCH_VERSION_P3_YN,
 		      	M.ID AS GROUP_KEY_ID,
-		      	OC.OSS_COMMON_ID AS MATCH_OSS_COMMON_ID,
-		      	OC.OSS_NAME AS MATCH_OSS_NAME,
 		      	1 AS PRIORITY
 		   	FROM OSV_SEARCH_MASTER M
-		   	LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
-		   	LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
-		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
+		   	LEFT JOIN OSV_ALIASES A ON M.ID = A.ALIAS_ID
 		   	WHERE M.WITHDRAWN_YN = 'N'
 			AND
 			(
-				M.SEARCH_NAME_P1 = OC.OSS_NAME
+				M.SEARCH_NAME_P1 = #{ossName}
 			<if test="ossNicknames != null">
 				<foreach item="item" collection="ossNicknames">
 					OR M.SEARCH_NAME_P1 = #{item}
@@ -1038,7 +1034,9 @@
 			AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
-				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				INNER JOIN OSS_COMMON OC
+				ON OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				WHERE OC.OSS_NAME = #{ossName}
 			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
 			</if>
@@ -1079,7 +1077,7 @@
 					)
 				)
 			)
-			GROUP BY M.ID, OC.OSS_COMMON_ID
+			GROUP BY M.ID
 			
 			UNION ALL
 			
@@ -1106,28 +1104,26 @@
 				M_ALIAS.SEARCH_VERSION_P2,
 				M_ALIAS.SEARCH_VERSION_P3_YN,
 				M.ID AS GROUP_KEY_ID,
-				OC.OSS_COMMON_ID AS MATCH_OSS_COMMON_ID,
-				OC.OSS_NAME AS MATCH_OSS_NAME,
 		      	1 AS PRIORITY
 		   	FROM OSV_SEARCH_MASTER M
-		   	INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
-		   	INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+		   	INNER JOIN OSV_ALIASES A ON M.ID = A.ALIAS_ID
 		   	INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
-		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
 			WHERE M.WITHDRAWN_YN = 'N'
 			AND
 			(
-				M_ALIAS.SEARCH_NAME_P1 = OC.OSS_NAME
-				<if test="ossNicknames != null">
-					<foreach item="item" collection="ossNicknames">
-						OR M_ALIAS.SEARCH_NAME_P1 = #{item}
-					</foreach>
-				</if>
+				M_ALIAS.SEARCH_NAME_P1 = #{ossName}
+			<if test="ossNicknames != null">
+				<foreach item="item" collection="ossNicknames">
+					OR M_ALIAS.SEARCH_NAME_P1 = #{item}
+				</foreach>
+			</if>
 			)
 			AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
-				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				INNER JOIN OSS_COMMON OC
+				ON OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				WHERE OC.OSS_NAME = #{ossName}
 			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
 			</if>
@@ -1196,12 +1192,9 @@
 		      	M.SEARCH_VERSION_P2,
 		      	M.SEARCH_VERSION_P3_YN,
 		      	M.ID AS GROUP_KEY_ID,
-		      	OC.OSS_COMMON_ID AS MATCH_OSS_COMMON_ID,
-		      	OC.OSS_NAME AS MATCH_OSS_NAME,
 		      	2 AS PRIORITY
 			FROM OSV_SEARCH_MASTER M
-			LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
-			LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
+			LEFT JOIN OSV_ALIASES A ON M.ID = A.ALIAS_ID
 			INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
 			INNER JOIN OSS_DOWNLOADLOCATION DL ON DL.OSS_COMMON_ID = OC.OSS_COMMON_ID AND DL.PURL IS NOT NULL AND DL.PURL <![CDATA[<>]]> '' AND M.SEARCH_NAME_P2 = DL.PURL
 			WHERE M.WITHDRAWN_YN = 'N'
@@ -1255,7 +1248,7 @@
 					)
 				)
 			)
-			GROUP BY M.ID, OC.OSS_COMMON_ID
+			GROUP BY M.ID
 			
 			UNION ALL
 			
@@ -1282,16 +1275,13 @@
 		      	M_ALIAS.SEARCH_VERSION_P2,
 		      	M_ALIAS.SEARCH_VERSION_P3_YN,
 		      	M.ID AS GROUP_KEY_ID,
-		      	OC.OSS_COMMON_ID AS MATCH_OSS_COMMON_ID,
-		      	OC.OSS_NAME AS MATCH_OSS_NAME,
 				2 AS PRIORITY
 			FROM OSV_SEARCH_MASTER M
-		   	INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
-		   	INNER JOIN OSV_ALIASES A ON A.ID = V.ID
-		   	INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
-		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
-		   	INNER JOIN OSS_DOWNLOADLOCATION DL ON DL.OSS_COMMON_ID = OC.OSS_COMMON_ID AND DL.PURL IS NOT NULL AND DL.PURL <![CDATA[<>]]> '' AND M_ALIAS.SEARCH_NAME_P2 = DL.PURL
-		   	WHERE M.WITHDRAWN_YN = 'N'
+			INNER JOIN OSV_ALIASES A ON M.ID = A.ALIAS_ID
+		   INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+		   INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
+		   INNER JOIN OSS_DOWNLOADLOCATION DL ON DL.OSS_COMMON_ID = OC.OSS_COMMON_ID AND DL.PURL IS NOT NULL AND DL.PURL <![CDATA[<>]]> '' AND M_ALIAS.SEARCH_NAME_P2 = DL.PURL
+		   WHERE M.WITHDRAWN_YN = 'N'
 			AND (
 				M_ALIAS.SEARCH_NAME_P1 IS NULL
 				OR NOT EXISTS (
@@ -1370,13 +1360,9 @@
 		        M.SEARCH_VERSION_P2,
 		        M.SEARCH_VERSION_P3_YN,
 		        M.ID AS GROUP_KEY_ID,
-		        OC.OSS_COMMON_ID AS MATCH_OSS_COMMON_ID,
-		        OC.OSS_NAME AS MATCH_OSS_NAME,
 		        3 AS PRIORITY
 			FROM OSV_SEARCH_MASTER M
-			LEFT JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
-		   	LEFT JOIN OSV_ALIASES A ON A.ID = V.ID
-		   	INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
+			LEFT JOIN OSV_ALIASES A ON M.ID = A.ALIAS_ID
 			WHERE M.WITHDRAWN_YN = 'N'
 		   	AND (
 		   		M.SEARCH_NAME_P1 IS NULL
@@ -1391,17 +1377,19 @@
 		   		)
 		   	)
 		   	AND (
-		   		M.SEARCH_NAME_P3 = OC.OSS_NAME
-		   		<if test="ossNicknames != null">
-					<foreach item="item" collection="ossNicknames">
-						OR M.SEARCH_NAME_P3 = #{item}
-					</foreach>
-				</if>
+		   		M.SEARCH_NAME_P3 = #{ossName}
+		   	<if test="ossNicknames != null">
+				<foreach item="item" collection="ossNicknames">
+					OR M.SEARCH_NAME_P3 = #{item}
+				</foreach>
+			</if>
 		   	)
 		   	AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
-				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				INNER JOIN OSS_COMMON OC
+				ON OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				WHERE OC.OSS_NAME = #{ossName}
 			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
 			</if>
@@ -1442,7 +1430,7 @@
 					)
 				)
 			)
-			GROUP BY M.ID, OC.OSS_COMMON_ID
+			GROUP BY M.ID
 			
 			UNION ALL
 			
@@ -1469,14 +1457,10 @@
 		      	M_ALIAS.SEARCH_VERSION_P2,
 		      	M_ALIAS.SEARCH_VERSION_P3_YN,
 		      	M.ID AS GROUP_KEY_ID,
-		      	OC.OSS_COMMON_ID AS MATCH_OSS_COMMON_ID,
-		      	OC.OSS_NAME AS MATCH_OSS_NAME,
 		      	3 AS PRIORITY
 			FROM OSV_SEARCH_MASTER M
-			INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
-			INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+			INNER JOIN OSV_ALIASES A ON M.ID = A.ALIAS_ID
 			INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
-			INNER JOIN OSS_COMMON OC ON OC.OSS_NAME = #{ossName}
 		   	WHERE M.WITHDRAWN_YN = 'N'
 			AND (
 				M_ALIAS.SEARCH_NAME_P1 IS NULL
@@ -1491,17 +1475,19 @@
 		   		)
 		   	)
 		   	AND (
-		   		M_ALIAS.SEARCH_NAME_P3 = OC.OSS_NAME
-		   		<if test="ossNicknames != null">
-					<foreach item="item" collection="ossNicknames">
-						OR M_ALIAS.SEARCH_NAME_P3 = #{item}
-					</foreach>
-				</if>
+		   		M_ALIAS.SEARCH_NAME_P3 = #{ossName}
+		   	<if test="ossNicknames != null">
+				<foreach item="item" collection="ossNicknames">
+					OR M_ALIAS.SEARCH_NAME_P3 = #{item}
+				</foreach>
+			</if>
 		   	)
 		   	AND EXISTS (
 				SELECT 1
 				FROM OSS_VERSION OV
-				WHERE OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				INNER JOIN OSS_COMMON OC
+				ON OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				WHERE OC.OSS_NAME = #{ossName}
 			<if test="ossVersion != null">
 				AND OV.OSS_VERSION = #{ossVersion}
 			</if>
