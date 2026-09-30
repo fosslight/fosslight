@@ -1479,14 +1479,22 @@ public class OsvDataService extends CoTopComponent {
 	    // 이중 루프 대체를 위한 역색인(Inverted Index) 맵
 	    List<Vulnerability> resultList = new ArrayList<>();
 	    Map<String, Vulnerability> tokenToVulnMap = new HashMap<>(); // 토큰 -> 취약점 객체 매핑 매개체
+	    Set<String> resultKey = new HashSet<>();
 
 	    for (Vulnerability v : mergedOsvMap.values()) {
+	    	String ossName = v.getOssName();
+	    	String ossVersion = v.getOssVersion();
+	    	String cveId = v.getId();
+	    	String aliasId = v.getAliasId();
+	    	
+	    	String key = ossName + "_" + ossVersion;
+	    	
 	        Set<String> currentTokens = new LinkedHashSet<>();
-	        if (v.getId() != null) {
-	            extractTokens(v.getId(), currentTokens);
+	        if (!isEmpty(cveId)) {
+	            extractTokens(cveId, currentTokens);
 	        }
-	        if (v.getAliasId() != null) {
-	            for (String alias : v.getAliasId().split(",")) {
+	        if (!isEmpty(aliasId)) {
+	            for (String alias : aliasId.split(",")) {
 	                String trimmed = alias.trim();
 	                if (!trimmed.isEmpty()) {
 	                    currentTokens.add(trimmed);
@@ -1498,13 +1506,18 @@ public class OsvDataService extends CoTopComponent {
 	            continue;
 	        }
 
-	        // 역색인 맵을 활용하여 기존 등록된 취약점 중 교집합이 있는지 O(1) 단위로 확인
 	        Vulnerability targetExisting = null;
+	        // 역색인 맵을 활용하여 기존 등록된 취약점 중 교집합이 있는지 O(1) 단위로 확인
 	        for (String token : currentTokens) {
-	            if (tokenToVulnMap.containsKey(token)) {
-	                targetExisting = tokenToVulnMap.get(token);
-	                break; // 토큰이 하나라도 겹치면 해당 객체를 병합 대상으로 선정
-	            }
+	        	token = key + "_" + token;
+	        	if (resultKey.add(token)) {
+		        } else {
+		        	if (tokenToVulnMap.containsKey(token)) {
+		                targetExisting = tokenToVulnMap.get(token);
+		                break; // 토큰이 하나라도 겹치면 해당 객체를 병합 대상으로 선정
+		            }
+		        }
+	            
 	        }
 
 	        if (targetExisting != null) {
@@ -1518,7 +1531,7 @@ public class OsvDataService extends CoTopComponent {
 	            
 	            // 새로 파싱된 토큰들도 기존 객체를 가리키도록 역색인 관계 누적 업데이트
 	            for (String token : currentTokens) {
-	                tokenToVulnMap.putIfAbsent(token, targetExisting);
+	                tokenToVulnMap.putIfAbsent(key + "_" + token, targetExisting);
 	            }
 	        } else {
 	            // [신규 등록] 중복 토큰이 없다면 최종 리스트에 추가 후 역색인 등록
@@ -1526,7 +1539,7 @@ public class OsvDataService extends CoTopComponent {
 	            resultList.add(v);
 	            
 	            for (String token : currentTokens) {
-	                tokenToVulnMap.put(token, v);
+	                tokenToVulnMap.put(key + "_" + token, v);
 	            }
 	        }
 	    }

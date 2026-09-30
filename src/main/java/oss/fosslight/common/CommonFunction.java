@@ -6620,6 +6620,7 @@ public class CommonFunction extends CoTopComponent {
 	        String searchVersionP1 = osvVulnInfo.getSearchVersionP1();
 	        String searchVersionP2 = osvVulnInfo.getSearchVersionP2();
 	        String searchVersionP3Yn = osvVulnInfo.getSearchVersionP3Yn();
+	        String affectedVersion = osvVulnInfo.getAffectedVersion();
 	        
 	        if (!existingKeys.contains(uniqueKey)) {
 	            if (!isEmpty(ossVersion)) {
@@ -6635,11 +6636,7 @@ public class CommonFunction extends CoTopComponent {
 	            boolean isMatched = false;
 	            if (!isEmpty(ossVersion)) {
 	                if (!isEmpty(searchVersionP1)) {
-	                    // [개선] 불필요한 new ArrayList 생성 및 래핑 제거. 배열 상태로 직접 스트리밍/루프 처리
-	                    String[] versionArray = searchVersionP1.contains("|") 
-	                        ? searchVersionP1.split("\\|") 
-	                        : searchVersionP1.split(",");
-	                        
+	                    String[] versionArray = searchVersionP1.contains("|") ? searchVersionP1.split("\\|") : searchVersionP1.split(",");
 	                    String trimmedOssVer = ossVersion.trim();
 	                    for (String version : versionArray) {
 	                        if (version != null && version.trim().equals(trimmedOssVer)) {
@@ -6652,10 +6649,10 @@ public class CommonFunction extends CoTopComponent {
 	                if (!isMatched) {
 	                    boolean isMatchedInRange = false;
 	                    if (!isEmpty(searchVersionP2)) {
-	                        isMatchedInRange = isVersionInRange(ossVersion, searchVersionP2);
+	                        isMatchedInRange = isVersionInRange(ossVersion, searchVersionP2, affectedVersion);
 	                        if (bean != null && !isMatchedInRange && bean.getOssVersionAliases() != null) {
 	                            for (String alias : bean.getOssVersionAliases()) {
-	                                if (isVersionInRange(alias, searchVersionP2)) {
+	                                if (isVersionInRange(alias, searchVersionP2, affectedVersion)) {
 	                                    isMatchedInRange = true;
 	                                    break;
 	                                }
@@ -6949,58 +6946,67 @@ public class CommonFunction extends CoTopComponent {
 		}
 	}
 	
-	private static boolean isVersionInRange(String targetVersion, String rangeRaw) {
+	private static boolean isVersionInRange(String targetVersion, String rangeRaw, String affectedVersion) {
         if (rangeRaw == null || rangeRaw.isEmpty() || "-".equals(rangeRaw)) {
         	return false;
         }
         
         String[] orRanges = rangeRaw.split("\\|");
-        for (String range : orRanges) {
-            String[] parts = range.split("~");
-            if (parts.length < 2) {
-            	continue;
-            }
-            
-            String start = parts[0].trim();
-            String end = parts[1].trim();
-            
-            if (compareVersion(targetVersion, start) >= 0 && compareVersion(targetVersion, end) <= 0) {
-                return true; 
-            }
-        }
-        return false;
+	    String[] affectedVersions = !isEmpty(affectedVersion) ? affectedVersion.split("\\s*,\\s*(?=\\[|\\()") : new String[0];
+
+	    for (int i = 0; i < orRanges.length; i++) {
+	        String[] parts = orRanges[i].split("~");
+	        if (parts.length < 2) {
+	        	continue;
+	        }
+
+	        String start = parts[0].trim();
+	        String end = parts[1].trim();
+
+	        int startCompare = compareVersion(targetVersion, start);
+	        int endCompare = compareVersion(targetVersion, end);
+
+	        boolean endExclusive = i < affectedVersions.length && affectedVersions[i].trim().endsWith(")");
+	        boolean endMatched = endExclusive ? endCompare < 0 : endCompare <= 0;
+
+	        if (startCompare >= 0 && endMatched) {
+	            return true;
+	        }
+	    }
+
+	    return false;
     }
 	
 	private static int compareVersion(String v1, String v2) {
-        if ("0".equals(v1) || "0".equals(v2)) {
-            if ("0".equals(v1) && "0".equals(v2)) {
-            	return 0;
-            }
-            return "0".equals(v1) ? -1 : 1;
-        }
+		if ("0".equals(v1) || "0".equals(v2)) {
+			if ("0".equals(v1) && "0".equals(v2)) {
+				return 0;
+			}
+			return "0".equals(v1) ? -1 : 1;
+		}
 
-        String cleanV1 = REVISION_PATTERN.matcher(v1).replaceAll("");
-        String cleanV2 = REVISION_PATTERN.matcher(v2).replaceAll("");
+		String cleanV1 = REVISION_PATTERN.matcher(v1).replaceAll("");
+		String cleanV2 = REVISION_PATTERN.matcher(v2).replaceAll("");
 
-        String[] vals1 = cleanV1.split("\\.");
-        String[] vals2 = cleanV2.split("\\.");
-        int i = 0;
+		String[] vals1 = cleanV1.split("\\.");
+		String[] vals2 = cleanV2.split("\\.");
+		int i = 0;
 
-        while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
-            i++;
-        }
+		while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
+			i++;
+		}
 
-        if (i < vals1.length && i < vals2.length) {
-            try {
-                int num1 = Integer.parseInt(vals1[i].replaceAll("[^0-9]", ""));
-                int num2 = Integer.parseInt(vals2[i].replaceAll("[^0-9]", ""));
-                return Integer.compare(num1, num2);
-            } catch (NumberFormatException e) {
-                return vals1[i].compareTo(vals2[i]);
-            }
-        }
-        return Integer.compare(vals1.length, vals2.length);
-    }
+		if (i < vals1.length && i < vals2.length) {
+			try {
+				int num1 = Integer.parseInt(vals1[i].replaceAll("[^0-9]", ""));
+				int num2 = Integer.parseInt(vals2[i].replaceAll("[^0-9]", ""));
+				return Integer.compare(num1, num2);
+			} catch (NumberFormatException e) {
+				return vals1[i].compareTo(vals2[i]);
+			}
+		}
+		return Integer.compare(vals1.length, vals2.length);
+	}
 	
 	private static String getPriorityRepresentativeId(Set<String> idSet) {
 		if (idSet == null || idSet.isEmpty()) {
