@@ -2425,16 +2425,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 	@SuppressWarnings("unchecked")
 	private static String getSecurityExcelId(Map<String, Object> result, Project projectMaster, String code) throws IOException {
-		List<OssComponents> securityGridList = null;
-		switch (code) {
-			case "total" : securityGridList = (List<OssComponents>) result.get("totalList");
-				break;
-			default : securityGridList = (List<OssComponents>) result.get("fullDiscoveredList");
-				break;
-		}
+		List<OssComponents> needToResolveList = (List<OssComponents>) result.get("totalList");
+		List<OssComponents> fullDiscoveredList = (List<OssComponents>) result.get("fullDiscoveredList");
 		
 		Workbook wb = null;
-		Sheet sheet = null;
 		FileInputStream inFile=null;
 		
 		// download file name
@@ -2442,54 +2436,119 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_prj-" + StringUtil.deleteWhitespaceWithSpecialChar(projectMaster.getPrjId());
 		
 		try {
+			String type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+			if (CoConstDef.FLAG_YES.equals(projectMaster.getAndroidFlag())) {
+				type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+			}
+			
 			inFile= new FileInputStream(new File(downloadpath+"/Security.xlsx"));
 			wb = WorkbookFactory.create(inFile);
+			
+			ProjectIdentification ossListParam = new ProjectIdentification();
+			ossListParam.setReferenceId(projectMaster.getPrjId());
+			
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+				// bom
+				{
+					ossListParam.setReferenceDiv(type);
+					ossListParam.setMerge(CoConstDef.FLAG_NO);
+					
+					Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
+					map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+					ExcelDownLoadUtil.reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(2), map, projectMaster);
+				}
+			} else {
+				// binAndroid bom
+				{
+					ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+					ossListParam.setMerge(CoConstDef.FLAG_NO);
+					ExcelDownLoadUtil.reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM, wb.getSheetAt(2), projectService.getIdentificationGridList(ossListParam), projectMaster);
+				}
+			}
+			
 			CreationHelper creationHelper = wb.getCreationHelper();
 			CellStyle style = wb.createCellStyle();
+			CellStyle style2 = wb.createCellStyle();
 			CellStyle hyperLinkStyle = wb.createCellStyle();
 			Font hyperLinkFont = wb.createFont();
 			hyperLinkFont.setUnderline(Font.U_SINGLE);
 			hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
 			hyperLinkStyle.setFont(hyperLinkFont);
-			sheet = wb.getSheetAt(8);
 			
-			if (securityGridList != null){
-				List<String[]> rowInfoData = new ArrayList<>();
-				List<String[]> rowDatas = new ArrayList<>();
-				
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				Date now = new Date();
-				String now_dt = format.format(now);
-				
-				String[] rowInfoParam = {
-						now_dt
-						, projectMaster.getPrjName()
-						, projectMaster.getPrjVersion()
-						, projectMaster.getPrjUserName()
-						, CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, projectMaster.getDivision())
-				};
-				
-				rowInfoData.add(rowInfoParam);
-				
-				int num = 1;
-				for (OssComponents bean : securityGridList) {
-					String[] rowParam = {
-						String.valueOf(num++)
-						, bean.getOssName()
-						, bean.getOssVersion()
-						, bean.getCveId()
-						, bean.getPublDate()
-						, bean.getCvssScore()
-						, bean.getVulnerabilityResolution()
-						, bean.getVulnerabilityLink()
-						, bean.getSecurityComments()
-					};
-					
-					rowDatas.add(rowParam);
+			List<String[]> rowInfoData = new ArrayList<>();
+			List<String[]> rowDatas = new ArrayList<>();
+			
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date now = new Date();
+			String now_dt = format.format(now);
+			
+			String[] rowInfoParam = {
+					now_dt
+					, projectMaster.getPrjName()
+					, projectMaster.getPrjVersion()
+					, projectMaster.getPrjUserName()
+					, CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, projectMaster.getDivision())
+			};
+			
+			rowInfoData.add(rowInfoParam);
+			
+			int num = 1;
+			for (OssComponents bean : needToResolveList) {
+				String verRange = bean.getVerStartEndRange();
+				if (!isEmpty(verRange) && verRange.endsWith("|")) {
+				    verRange = verRange.substring(0, verRange.length() - 1);
 				}
 				
-				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas, true, false);
+				String[] rowParam = {
+					String.valueOf(num++)
+					, bean.getOssName()
+					, bean.getOssVersion()
+					, bean.getCveId()
+					, bean.getCvssScore()
+					, bean.getCpeName()
+					, bean.getPublDate()
+					, bean.getVulnerabilityResolution()
+					, bean.getVulnerabilityLink()
+					, bean.getOfficialPatchLink()
+					, bean.getSecurityPatchLink()
+					, verRange
+					, bean.getSecurityComments()
+				};
+				
+				rowDatas.add(rowParam);
 			}
+			
+			makeSecuritySheetV2(creationHelper, wb.getSheetAt(0), style, style2, hyperLinkStyle, rowInfoData, rowDatas);
+			
+			rowDatas.clear();
+			
+			num = 1;
+			for (OssComponents bean : fullDiscoveredList) {
+				String verRange = bean.getVerStartEndRange();
+				if (!isEmpty(verRange) && verRange.endsWith("|")) {
+				    verRange = verRange.substring(0, verRange.length() - 1);
+				}
+				
+				String[] rowParam = {
+					String.valueOf(num++)
+					, bean.getOssName()
+					, bean.getOssVersion()
+					, bean.getCveId()
+					, bean.getCvssScore()
+					, bean.getCpeName()
+					, bean.getPublDate()
+					, bean.getVulnerabilityResolution()
+					, bean.getVulnerabilityLink()
+					, bean.getOfficialPatchLink()
+					, bean.getSecurityPatchLink()
+					, verRange
+					, bean.getSecurityComments()
+				};
+				
+				rowDatas.add(rowParam);
+			}
+			
+			makeSecuritySheetV2(creationHelper, wb.getSheetAt(1), style, style2, hyperLinkStyle, rowInfoData, rowDatas);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -2503,6 +2562,113 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return makeExcelFileId(wb, downloadFileName);
 	}
 	
+	private static void makeSecuritySheetV2(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle style2, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows) {
+		int infoStartRow = 1;
+		int startRow = 8;
+		int startCol = 0;
+		int endCol = 0;
+		
+		if (!infoRows.isEmpty()) {
+			endCol = infoRows.get(0).length-1;
+		}
+		
+		int shiftRowNum = infoRows.get(0).length;
+		String[] rowParam = infoRows.get(0);
+		
+		for (int i = infoStartRow; i < infoStartRow + shiftRowNum; i++){
+			Row templateRow = sheet.getRow(i);
+			Cell templateCell = templateRow.getCell(3);
+			CellStyle st = templateCell.getCellStyle();
+			
+			Row row = sheet.getRow(i);
+			Cell cell = getCell(row, 3);
+			cell.setCellStyle(st);
+			cell.setCellType(CellType.STRING);
+			if (!isEmpty(rowParam[i-infoStartRow])) {
+				cell.setCellValue(rowParam[i-infoStartRow]);
+			} else {
+				cell.setBlank();
+			}
+		}
+		
+		if (!rows.isEmpty()) {
+			endCol = rows.get(0).length-1;
+		}
+		
+		Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
+		int rowIndex = 0;
+		for (int i = startRow; i < startRow+rows.size(); i++){
+			Row row = sheet.createRow(i);
+			for (int colNum=startCol; colNum<=endCol; colNum++){
+				Cell cell = row.createCell(colNum);
+				style.setWrapText(false);
+				if (colNum == 5) {
+					String cellData = rows.get(rowIndex)[colNum];
+					if (!isEmpty(cellData)) {
+						if (cellData.contains(",")) {
+							String[] splitData = cellData.split(",");
+							String sData = "";
+							for (int j=0; j<splitData.length; j++) {
+								sData += splitData[j];
+								sData += "\n";
+							}
+							cellData = sData.substring(0, sData.length()-1);
+							style.setWrapText(true);
+						}
+					}
+					cell.setCellValue(cellData);
+					cell.setCellStyle(style);
+				} else if (colNum == 8 || colNum == 9 || colNum == 10) {
+					String cellData = rows.get(rowIndex)[colNum];
+					if (!isEmpty(cellData)) {
+						if (!"N/A".equalsIgnoreCase(cellData)) {
+							if (cellData.contains(",")) {
+								String[] splitData = cellData.split(",");
+								String sData = "";
+								for (int j=0; j<splitData.length; j++) {
+									sData += splitData[j];
+									sData += "\n";
+								}
+								cellData = sData.substring(0, sData.length()-1);
+								hyperLinkStyle.setWrapText(true);
+							}
+							hyperlink.setAddress(cell.getStringCellValue());
+							cell.setCellValue(cellData);
+							cell.setCellStyle(hyperLinkStyle);
+						} else {
+							cell.setCellValue(cellData);
+							cell.setCellStyle(style);
+						}
+					}
+				} else if (colNum == 11) {
+					String cellData = rows.get(rowIndex)[colNum];
+					if (!isEmpty(cellData)) {
+						if (cellData.contains("|")) {
+							String[] splitData = cellData.split("[|]");
+							String sData = "";
+							for (int j=0; j<splitData.length; j++) {
+								if (!isEmpty(splitData[j])) {
+									sData += splitData[j];
+									if (j<splitData.length-1) {
+										sData += "\n";
+									}
+								}
+							}
+							cellData = sData;
+							style2.setWrapText(true);
+						}
+						cell.setCellValue(cellData);
+						cell.setCellStyle(style2);
+					}
+				} else {
+					cell.setCellValue(rows.get(rowIndex)[colNum]);
+					cell.setCellStyle(style2);
+				}
+			}
+			rowIndex++;
+		}
+	}
+
 	private static void makeSecuritySheet(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows, boolean isProject, boolean isDemo) {
 		int infoStartRow= 1;
 		int startRow= 8;
