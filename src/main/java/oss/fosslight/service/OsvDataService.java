@@ -1484,7 +1484,7 @@ public class OsvDataService extends CoTopComponent {
 	    for (Vulnerability v : mergedOsvMap.values()) {
 	    	String ossName = v.getOssName();
 	    	String ossVersion = v.getOssVersion();
-	    	String cveId = v.getId();
+	    	String cveId = isEmpty(v.getId()) ? v.getCveId() : v.getId();
 	    	String aliasId = v.getAliasId();
 	    	
 	    	String key = ossName + "_" + ossVersion;

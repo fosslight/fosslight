@@ -6636,13 +6636,25 @@ public class CommonFunction extends CoTopComponent {
 	            boolean isMatched = false;
 	            if (!isEmpty(ossVersion)) {
 	                if (!isEmpty(searchVersionP1)) {
-	                    String[] versionArray = searchVersionP1.contains("|") ? searchVersionP1.split("\\|") : searchVersionP1.split(",");
+	                	Set<String> versionSet = new HashSet<>();
+	                	if (searchVersionP1.contains("|")) {
+	                		String[] versionArray = searchVersionP1.split("[|]");
+	                		for (String version : versionArray) {
+	                			String[] versions = version.split(",");
+	                			for (String v : versions) {
+	                				versionSet.add(v.trim());
+	                			}
+	                		}
+	                	} else {
+	                		String[] versionArray = searchVersionP1.split(",");
+	                		for (String v : versionArray) {
+	                			versionSet.add(v.trim());
+	                		}
+	                	}
+	                	
 	                    String trimmedOssVer = ossVersion.trim();
-	                    for (String version : versionArray) {
-	                        if (version != null && version.trim().equals(trimmedOssVer)) {
-	                            isMatched = true;
-	                            break;
-	                        }
+	                    if (versionSet.contains(trimmedOssVer)) {
+	                    	isMatched = true;
 	                    }
 	                }
 	                
