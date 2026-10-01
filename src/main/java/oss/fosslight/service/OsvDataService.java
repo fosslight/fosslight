@@ -1830,11 +1830,16 @@ public class OsvDataService extends CoTopComponent {
 			return false;
 		}
 
+		Set<String> orRangeSet = new HashSet<>();
 	    String[] orRanges = rangeRaw.split("\\|");
+	    for (String orRange : orRanges) {
+	    	orRangeSet.add(orRange.trim());
+	    }
 	    String[] affectedVersions = !isEmpty(affectedVersion) ? affectedVersion.split("\\s*,\\s*(?=\\[|\\()") : new String[0];
 
-	    for (int i = 0; i < orRanges.length; i++) {
-	        String[] parts = orRanges[i].split("~");
+	    int idx = 0;
+	    for (String orRange : orRangeSet) {
+	        String[] parts = orRange.split("~");
 	        if (parts.length < 2) {
 	        	continue;
 	        }
@@ -1845,12 +1850,13 @@ public class OsvDataService extends CoTopComponent {
 	        int startCompare = compareVersion(targetVersion, start);
 	        int endCompare = compareVersion(targetVersion, end);
 
-	        boolean endExclusive = i < affectedVersions.length && affectedVersions[i].trim().endsWith(")");
+	        boolean endExclusive = idx < affectedVersions.length && affectedVersions[idx].trim().endsWith(")");
 	        boolean endMatched = endExclusive ? endCompare < 0 : endCompare <= 0;
 
 	        if (startCompare >= 0 && endMatched) {
 	            return true;
 	        }
+	        idx++;
 	    }
 
 	    return false;
