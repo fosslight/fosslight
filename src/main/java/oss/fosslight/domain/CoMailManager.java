@@ -292,18 +292,15 @@ public class CoMailManager extends CoTopComponent {
         				
         				String domain = CommonFunction.getProperty("server.domain") + "/oss/edit/";
         				StringBuilder noVersionMsg = new StringBuilder();
-        				int idx = 0;
-        				int size = ossWithoutVersionList.size();
         				
         				for (OssMaster vulnerability : ossWithoutVersionList) {
 							if (StringUtils.isEmpty(vulnerability.getOssId()) || StringUtils.isEmpty(vulnerability.getOssNameTemp())) {
         						continue;
         					}
+							if (noVersionMsg.length() > 0) {
+								noVersionMsg.append(", ");
+							}
 							noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + CommonFunction.htmlEscape(vulnerability.getOssNameTemp()) + "</a>");
-    						if (idx < size - 1) {
-    							noVersionMsg.append(", ");
-    		                }
-    						idx++;
         				}
         				
         				if (noVersionMsg.length() > 0) {
