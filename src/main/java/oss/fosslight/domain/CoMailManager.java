@@ -307,12 +307,7 @@ public class CoMailManager extends CoTopComponent {
         				}
         				
         				if (noVersionMsg.length() > 0) {
-        					String comment = bean.getComment();
-        					if (!StringUtils.isEmpty(comment)) {
-        						comment += "<br/>";
-        					}
-        					comment += getMessage("msg.project.security.check.version") + "<br/>- " + noVersionMsg.toString();
-        					bean.setComment(comment);
+        					convertDataMap.put("vulnerability_no_version_msg", getMessage("msg.project.security.check.version") + "<br/>- " + noVersionMsg.toString());
         				}
         				
         				convertDataMap.put("vulnerability_prj_oss_info", ossWithVersionList);
@@ -4661,5 +4656,4 @@ public class CoMailManager extends CoTopComponent {
 		}
 	}
 }
-
 
