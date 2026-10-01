@@ -296,10 +296,10 @@ public class CoMailManager extends CoTopComponent {
         				int size = ossWithoutVersionList.size();
         				
         				for (OssMaster vulnerability : ossWithoutVersionList) {
-        					if (StringUtils.isEmpty(vulnerability.getOssId()) || StringUtils.isEmpty(vulnerability.getOssName())) {
+							if (StringUtils.isEmpty(vulnerability.getOssId()) || StringUtils.isEmpty(vulnerability.getOssNameTemp())) {
         						continue;
         					}
-        					noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + vulnerability.getOssName() + "</a>");
+							noVersionMsg.append("<a href=\"" + domain + vulnerability.getOssId() + "?initTab=vuln\" target=\"_blank\">" + CommonFunction.htmlEscape(vulnerability.getOssNameTemp()) + "</a>");
     						if (idx < size - 1) {
     							noVersionMsg.append(", ");
     		                }
@@ -3646,6 +3646,7 @@ public class CoMailManager extends CoTopComponent {
 			
 			bean.setOssId(ossId);
 			bean.setOssName(ossName);
+			bean.setOssNameTemp(getValue(dataMap, "OSS_NAME"));
 			bean.setOssVersion(getValue(dataMap, "OSS_VERSION"));
 			bean.setCveId(customCveId);
 			bean.setCvssScore(getValue(dataMap, "CVSS_SCORE"));
@@ -4656,4 +4657,3 @@ public class CoMailManager extends CoTopComponent {
 		}
 	}
 }
-
