@@ -1913,5 +1913,6 @@ public class OsvDataService extends CoTopComponent {
 		target.setSearchVersionP2(source.getSearchVersionP2());
 		target.setSearchVersionP3Yn(source.getSearchVersionP3Yn());
 		target.setPriority(source.getPriority());
+		target.setPatchLink(source.getPatchLink());
 	}
 }
