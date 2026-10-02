@@ -3567,31 +3567,39 @@ public class CoMailManager extends CoTopComponent {
 			String customCveId = "";
 			String cveId = getValue(dataMap, "CVE_ID");
 			String type = getValue(dataMap, "TYPE");
+			String typeTo = getValue(dataMap, "TYPE_TO");
+			String[] types = new String[] {type, typeTo};
 			
 			if (!isEmpty(cveId)) {
-				boolean isNvdType = isEmpty(type) || (!isEmpty(type) && "NVD".equals(type));
 				if (cveId.contains("->")) {
 					String[] splitCveIds = cveId.split("\\->");
 					int idx = 1;
-					for (String splitCveId : splitCveIds) {
-						String trimCveId = splitCveId.trim();
+					for (int i=0; i < splitCveIds.length; i++) {
+						String trimCveId = splitCveIds[i].trim();
+						String splitType = types[i];
+						
 						if (trimCveId.equalsIgnoreCase("NONE")) {
 							customCveId += "NONE"; 
 						} else {
-							if (isNvdType) {
-								customCveId += "<a href='https://nvd.nist.gov/vuln/detail/" + splitCveId.trim() + "' target='_blank'>" + splitCveId.trim() + "</a>";
+							if (!isEmpty(splitType)) {
+								if (splitType.equalsIgnoreCase("NVD")) {
+									customCveId += "<a href='https://nvd.nist.gov/vuln/detail/" + trimCveId + "' target='_blank'>" + trimCveId + "</a>";
+								} else if (splitType.equalsIgnoreCase("OSV")) {
+									customCveId = "<a href='https://osv.dev/vulnerability/" + trimCveId + "' target='_blank'>" + trimCveId + "</a>";
+								} else {
+									customCveId = trimCveId;
+								}
 							} else {
-								customCveId = "<a href='https://osv.dev/vulnerability/" + splitCveId.trim() + "' target='_blank'>" + splitCveId.trim() + "</a>";
+								customCveId = trimCveId;
 							}
 						}
 						if (idx < splitCveIds.length) {
 							customCveId += " -> ";
 						}
-						idx++;
 					}
 				} else {
-					if (!cveId.equalsIgnoreCase("NONE")) {
-						if (isNvdType) {
+					if (!cveId.equalsIgnoreCase("NONE") && !isEmpty(type)) {
+						if (type.equalsIgnoreCase("NVD")) {
 							customCveId = "<a href='https://nvd.nist.gov/vuln/detail/" + cveId.trim() + "' target='_blank'>" + cveId.trim() + "</a>";
 						} else {
 							customCveId = "<a href='https://osv.dev/vulnerability/" + cveId.trim() + "' target='_blank'>" + cveId.trim() + "</a>";
