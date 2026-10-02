@@ -867,7 +867,7 @@ public class OsvDataService extends CoTopComponent {
 
 	        // 보안 전용 부가 정보 세팅 (isSecurity 전용 로직)
 	        if (isSecurity) {
-	            ossComponents.setVulnerabilityLink("https://osv.dev/vulnerability/" + osvVulnInfo.getCveId());
+	            ossComponents.setVulnerabilityLink(CommonFunction.getProperty("server.domain") + "/vulnerability/vulnpopup?ossName=" + osvVulnInfo.getOssName() + "&ossVersion=" + osvVulnInfo.getOssVersion());
 	            
 	            if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
 	                // 상단 전역 static final로 컴파일해둔 COMPONENT_PATTERN 재사용
