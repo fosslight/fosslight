@@ -2836,7 +2836,7 @@ public class CommonFunction extends CoTopComponent {
 				
 				hasLicense = true;
 			} else {
-				liBean.setExcludeYn(CoConstDef.FLAG_YES);
+//				liBean.setExcludeYn(CoConstDef.FLAG_YES);
 			}
 			
 			licenseNameList.add(bean.getLicenseName());
