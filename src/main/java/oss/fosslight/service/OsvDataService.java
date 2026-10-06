@@ -867,7 +867,11 @@ public class OsvDataService extends CoTopComponent {
 
 	        // 보안 전용 부가 정보 세팅 (isSecurity 전용 로직)
 	        if (isSecurity) {
-	            ossComponents.setVulnerabilityLink(CommonFunction.getProperty("server.domain") + "/vulnerability/vulnpopup?ossName=" + osvVulnInfo.getOssName() + "&ossVersion=" + osvVulnInfo.getOssVersion());
+	        	if (activateFlag) {
+	        		ossComponents.setVulnerabilityLink(CommonFunction.getProperty("server.domain") + "/vulnerability/vulnpopup?ossName=" + osvVulnInfo.getOssName() + "&ossVersion=" + osvVulnInfo.getOssVersion());
+	        	} else {
+	        		ossComponents.setVulnerabilityLink("https://nvd.nist.gov/vuln/detail/" + ossComponents.getCveId());
+	        	}
 	            
 	            if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
 	                // 상단 전역 static final로 컴파일해둔 COMPONENT_PATTERN 재사용
