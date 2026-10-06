@@ -870,7 +870,7 @@ public class OsvDataService extends CoTopComponent {
 	        	if (activateFlag) {
 	        		ossComponents.setVulnerabilityLink(CommonFunction.getProperty("server.domain") + "/vulnerability/vulnpopup?ossName=" + osvVulnInfo.getOssName() + "&ossVersion=" + osvVulnInfo.getOssVersion());
 	        	} else {
-	        		ossComponents.setVulnerabilityLink("https://nvd.nist.gov/vuln/detail/" + ossComponents.getCveId());
+	        		ossComponents.setVulnerabilityLink("https://osv.dev/vulnerability/" + ossComponents.getCveId());
 	        	}
 	            
 	            if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
