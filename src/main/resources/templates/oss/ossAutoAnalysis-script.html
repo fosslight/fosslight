@@ -288,9 +288,6 @@ var Ctrl_fn = {
 			height : '650px',
 			grouping:true,
 			autoencode: true,
-			// Inline edits stay in the browser. A real editurl posts the row to this
-			// page and leaves input markup in the cells Save sends.
-			editurl: 'clientArray',
 			groupingView:{
 				groupField:['groupId'],
 				groupColumnShow:[false]
@@ -659,52 +656,39 @@ var Ctrl_fn = {
 	setDuplicateUnCheck : function(target){
 		var name = $(target).attr("name");
 		var isChecked = $(target).prop("checked");
-
-		// .attr("checked") does not restore the live checked state, so the row
-		// the user just selected looks unchecked and Save skips it.
-		$("[name='"+name+"']").prop("checked", false);
-
+		
+		$("[name='"+name+"']").attr("checked", false); // Row with the same group ID cannot be checked in more than one case.
+		
 		if(isChecked){
-			$(target).prop("checked", true);
+			$(target).attr("checked", true);
 		}
-	},
-	checkedAnalysisRows : function(){
-		var rows = [];
-		$("#ossList input[type='checkbox'][name^='checkbox_']").each(function(){
-			if (!this.checked || this.disabled) {
-				return;
-			}
-			var rowId = $(this).closest("tr.jqgrow").attr("id");
-			if (rowId) {
-				rows.push({gridId: rowId});
-			}
-		});
-		return rows;
-	},
-	analysisRowForSave : function(rowId){
-		cleanErrMsg("ossList", rowId);
-		$("#ossList").jqGrid("saveRow", rowId);
-		var rowdata = $("#ossList").getRowData(rowId);
-		Object.keys(rowdata).forEach(function(key) {
-			rowdata[key] = stripGridWarning(rowdata[key]);
-		});
-		return rowdata;
 	},
 	registOss : function(){
 		$("#loading_wrap_popup").show();
-		var checkedRows = Ctrl_fn.checkedAnalysisRows();
+		var checkedRows = $("#ossList").getRowData().reduce(function(arr, item){
+			if(item["checkbox"].indexOf("checked") > -1){
+		       arr.push(item);
+		    }
+
+		    return arr;
+		}, []);
 
 		// Imported only rows that selected checkbox.
 		var result = [];
 
 		// Check whether it's okay or not.
 		var hasChecked = false;
+		var gridObj = $("#ossList");
+		var gridStr = "ossList";
 
 		window.setTimeout(function(){
 			for (var i = 0; i < checkedRows.length; i++) { //Run as many times as row id.
 			    	var rowId = checkedRows[i].gridId;
-					var rowdata = Ctrl_fn.analysisRowForSave(rowId);
-			    	var groupId = rowdata.groupId;
+			    	var groupId = checkedRows[i].groupId;
+			    	
+			    	cleanErrMsg("ossList", rowId);
+			    	gridObj.jqGrid('saveRow',rowId);
+					var rowdata = $("#ossList").getRowData(rowId); // Obtained row data of the id.
 
 				    hasChecked = true;
 					
@@ -737,9 +721,9 @@ var Ctrl_fn = {
 							} else {
 								try {
 									$('#ossList').jqGrid('setCell', rowId, 'result', resultData.validMsg);
-			        			    $("#"+rowId + " > td > [type='checkbox']").prop("checked", true);
+			        			    $("#"+rowId + " > td > [type='checkbox']").attr("checked", false);
 
-			        			    if(resultData.validMsg && resultData.validMsg.toUpperCase() == "FAIL") {
+			        			    if(resultData.validMsg.toUpperCase() == "FAIL") {
 										if(typeof resultData.resultData.validMapResult !== "undefined" && typeof resultData.resultData.diffMapResult !== "undefined"){
 											var resultValidMap = resultData.resultData.validMapResult;
 					        			    var resultDiffMap = resultData.resultData.diffMapResult;
@@ -771,8 +755,9 @@ var Ctrl_fn = {
 				        			}
 								} catch(e) {
 									$('#ossList').jqGrid('setCell', rowId, 'result', "Failed");
-			        			    $("#"+rowId + " > td > [type='checkbox']").prop("checked", true);
-
+			        			    $("#"+rowId).addClass("excludeRow");
+			        			    $("#"+rowId + " > td > [type='checkbox']").attr({"disabled": true, "checked": false});
+			        			    
 									alertify.error(e);
 								}
 							}
