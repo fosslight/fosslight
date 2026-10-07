@@ -115,6 +115,10 @@ function openAnalysisDetailFromQuery() {
 					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
 				}
 			}
+		},
+		error : function() {
+			window._reviewDetailOpened = false;
+			alertify.error([[#{msg.common.valid2}]], 0);
 		}
 	});
 }
