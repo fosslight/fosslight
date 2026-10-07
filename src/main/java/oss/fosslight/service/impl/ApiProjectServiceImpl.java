@@ -737,6 +737,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		String type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
 		Project project = new Project();
 		project.setPrjId(prjId);
+		
+		Project prjInfo = projectService.getProjectDetail(project);
+		if (prjInfo != null && CoConstDef.FLAG_YES.equals(avoidNull(prjInfo.getAndroidFlag()))) {
+			type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
+		}
 
 		String dataStr = toJson(project);
 		Type projectType = new TypeToken<Project>(){}.getType();

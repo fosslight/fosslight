@@ -565,8 +565,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false) String saveFlag) {
-        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag,
-                "/projects/{id}/bom/json-data");
+        return getPrjBomAsJsonInternal(authorization, prjId, saveFlag, "/projects/{id}/bom/json-data");
     }
 
     private ResponseEntity<Map<String, Object>> getPrjBomAsJsonInternal(String authorization, String prjId,
