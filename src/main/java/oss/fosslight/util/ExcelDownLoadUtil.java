@@ -3006,11 +3006,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// Package Supplier
 					Cell packageSupplier = getCell(row, cellIdx); cellIdx++;
-					packageSupplier.setCellValue("Person: \"\"");
+					packageSupplier.setCellValue("");
 
 					// Package Originator
 					Cell packageOriginator = getCell(row, cellIdx); cellIdx++;
-					packageOriginator.setCellValue("Organization: \"\"");
+					packageOriginator.setCellValue("");
 
 					// Home Page
 					Cell cellHomePage = getCell(row, cellIdx); cellIdx++;
@@ -3660,11 +3660,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// Package Supplier
 					Cell packageSupplier = getCell(row, cellIdx); cellIdx++;
-					packageSupplier.setCellValue("Person: \"\"");
+					packageSupplier.setCellValue("");
 
 					// Package Originator
 					Cell packageOriginator = getCell(row, cellIdx); cellIdx++;
-					packageOriginator.setCellValue("Organization: \"\"");
+					packageOriginator.setCellValue("");
 
 					// Home Page
 					Cell cellHomePage = getCell(row, cellIdx); cellIdx++;
@@ -4338,11 +4338,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// Package Supplier
 					Cell packageSupplier = getCell(row, cellIdx); cellIdx++;
-					packageSupplier.setCellValue("Person: \"\"");
+					packageSupplier.setCellValue("");
 					
 					// Package Originator
 					Cell packageOriginator = getCell(row, cellIdx); cellIdx++;
-					packageOriginator.setCellValue("Organization: \"\"");
+					packageOriginator.setCellValue("");
 					
 					// Home Page
 					Cell cellHomePage = getCell(row, cellIdx); cellIdx++;

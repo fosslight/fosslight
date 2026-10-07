@@ -243,7 +243,7 @@
         $("#noticeEdit_" + seq).summernote({ height: 200,  toolbar: [], disable: true});
         $("#noticeEdit_" + seq).summernote('disable');
 
-        $("#btnNotice_"+ seq).click(function () {
+        $("#btnNotice_"+ seq + ", #btnNoticeClose_" + seq).click(function () {
             var checkbox = document.getElementById("chkday_" + seq);
             if (checkbox.checked) {
                 setCookie("noticeYn_" + seq, "N", 1);
@@ -330,6 +330,7 @@
 
             var closeButton = document.createElement("button");
             closeButton.type = "button";
+            closeButton.id = "btnNoticeClose_" + seq;
             closeButton.classList.add("close");
             closeButton.setAttribute("data-dismiss", "modal");
             closeButton.setAttribute("aria-label", "Close");

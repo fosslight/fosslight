@@ -1637,8 +1637,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                }
 	                row.createCell(13).setCellValue(licenseStr);
 
-	                // [R] Package Copyright Text (17)
-	                row.createCell(17).setCellValue(c.getCopyright() != null ? c.getCopyright() : "");
+	                // [Q] Package Copyright Text (16)
+	                row.createCell(16).setCellValue(c.getCopyright() != null ? c.getCopyright() : "");
 
 	                // [V] Files Analyzed (21) - 대문자 FALSE 기입
 	                row.createCell(21).setCellValue("FALSE");
