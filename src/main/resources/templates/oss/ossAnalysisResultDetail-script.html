@@ -42,6 +42,21 @@ var Ctrl_fn = {
 
 		$("[id^=selectTitle]").html(options);
 	},
+	reviewNoteFromLocation : function(){
+		try {
+			return new URLSearchParams(window.location.search).get("reviewNote") || "";
+		} catch (e) {
+			return "";
+		}
+	},
+	commentWithReviewNote : function(comment){
+		var note = Ctrl_fn.reviewNoteFromLocation();
+		var current = (comment == null || typeof comment === "undefined") ? "" : String(comment);
+		if (!note || current.indexOf(note) === 0) {
+			return current;
+		}
+		return current ? (note + "\n" + current) : note;
+	},
 	selectTitle : function(seq){
 		var gridId = $("#selectTitle"+seq).val();
 		var selectData = common_data.detailData.filter(function(cur){
@@ -59,7 +74,7 @@ var Ctrl_fn = {
 			$("#detailSummaryDescription"+seq).val(formatToTextarea(selectData.summaryDescription));
 		}
 		$("#detailImportantNotes"+seq).val(selectData.importantNotes);
-		$("#detailcomment"+seq).val(selectData.comment);
+		$("#detailcomment"+seq).val(Ctrl_fn.commentWithReviewNote(selectData.comment));
 		
 		if (typeof selectData.ossId !== 'undefined') {
 			if ('' == commentTemp){
@@ -521,8 +536,13 @@ var Ctrl_fn = {
 					}
 
 					$("#loading_wrap_popup").hide();
+				} else if (Ctrl_fn.reviewNoteFromLocation() && (window._detailSessionRetry || 0) < 10) {
+					window._detailSessionRetry = (window._detailSessionRetry || 0) + 1;
+					setTimeout(function() {
+						Ctrl_fn.getAnalysisResultDetailData();
+					}, 400);
 				} else {
-					// message 출력
+					$("#loading_wrap_popup").hide();
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			},
