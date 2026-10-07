@@ -385,7 +385,7 @@ var Ctrl_fn = {
 							contentType : 'application/json',
 							success : function(resultData){
 								if(resultData){
-									_popupAnalysisDetailData = window.open(analysisDetailUrl(groupId), "OSS Auto Analysis Result Detail"+groupId, "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
+									_popupAnalysisDetailData = window.open('/oss/getAnalysisResultDetail/'+groupId, "OSS Auto Analysis Result Detail"+groupId, "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
 
 									if(!_popupAnalysisDetailData || _popupAnalysisDetailData.closed || typeof _popupAnalysisDetailData.closed=='undefined') {
 										alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
