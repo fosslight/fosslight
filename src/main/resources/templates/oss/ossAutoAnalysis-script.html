@@ -49,6 +49,80 @@ var evt_fn = {
 	}
 };
 
+function analysisReviewQuery() {
+	try {
+		return new URLSearchParams(window.location.search);
+	} catch (e) {
+		return new URLSearchParams();
+	}
+}
+
+function analysisDetailUrl(groupId) {
+	var url = '/oss/getAnalysisResultDetail/' + groupId;
+	var note = analysisReviewQuery().get('reviewNote') || '';
+	if (note) {
+		url += '?reviewNote=' + encodeURIComponent(note);
+	}
+	return url;
+}
+
+function openAnalysisDetailFromQuery() {
+	if (window._reviewDetailOpened) {
+		return;
+	}
+	var targetId = analysisReviewQuery().get('gridId');
+	if (!targetId) {
+		return;
+	}
+	var rows = $("#ossList").getRowData();
+	var groupId = '';
+	for (var i = 0; i < rows.length; i++) {
+		if (String(rows[i].gridId) === String(targetId) || String(rows[i].groupId) === String(targetId)) {
+			groupId = rows[i].groupId || targetId;
+			break;
+		}
+	}
+	if (!groupId) {
+		return;
+	}
+	window._reviewDetailOpened = true;
+	var postData = rows.filter(function(cur) {
+		return cur.groupId == groupId;
+	});
+	for (var i = 0; i < postData.length; i++) {
+		if (postData[i].licenseName) {
+			postData[i].licenseName = postData[i].licenseName.trim();
+		}
+		var gridRowData = $("#ossList").jqGrid('getLocalRow', postData[i].gridId);
+		if (gridRowData) {
+			postData[i].askalonoLicense = gridRowData.askalonoLicense || '';
+			postData[i].scancodeLicense = gridRowData.scancodeLicense || '';
+			postData[i].needReviewLicenseScanode = gridRowData.needReviewLicenseScanode || '';
+			postData[i].jobSeq = gridRowData.jobSeq || '';
+		}
+	}
+	$.ajax({
+		url : '/oss/setSessionAnalysisResultData',
+		dataType : 'json',
+		type : 'POST',
+		cache : false,
+		data : JSON.stringify({"dataString": JSON.stringify(postData), "groupId": groupId}),
+		contentType : 'application/json',
+		success : function(resultData) {
+			if (resultData) {
+				var popup = window.open(analysisDetailUrl(groupId), "OSS Auto Analysis Result Detail" + targetId, "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
+				if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+				}
+			}
+		},
+		error : function() {
+			window._reviewDetailOpened = false;
+			alertify.error([[#{msg.common.valid2}]], 0);
+		}
+	});
+}
+
 var Ctrl_fn = {
 	oldRowNum:20,
 	loadAnalysisResultGrid : function(){
@@ -256,6 +330,7 @@ var Ctrl_fn = {
 				        }
 				    }
 				}
+				openAnalysisDetailFromQuery();
 			},
 			beforeSelectRow: function(rowid){
 				if(lastSelection != undefined && rowid != lastSelection) {
