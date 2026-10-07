@@ -1274,8 +1274,10 @@ public class ExcelUtil extends CoTopComponent {
     				// The SPDX Spradsheet reads the same row as the Package Identifier of the Per File Info sheet and the Spdx Identifier of the Package Info sheet
     				if (ossNameCol < 0) {
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
-    					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
-    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)).trim() : getCellData(row.getCell(licenseCol)).trim() + ", " + getCellData(row.getCell(commentCol)).trim());
+    					String copyrightText = copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol));
+    					bean.setCopyrightText(isSbomEmptyValue(copyrightText) ? "" : copyrightText);
+    					String comment = commentCol < 0 ? getCellData(row.getCell(licenseCol)).trim() : getCellData(row.getCell(licenseCol)).trim() + ", " + getCellData(row.getCell(commentCol)).trim();
+    					bean.setComments(isSbomEmptyValue(comment) ? "" : comment);
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					if (bean.getCopyrightText() == ""){
     						bean.setCopyrightText(" ");
@@ -1286,10 +1288,10 @@ public class ExcelUtil extends CoTopComponent {
     						OssComponents temp = list.get(beanIndex);
     						if (packageIdentifier.equals(temp.getSpdxIdentifier())){
     							nullCheck = false;
-    							bean.setOssName(temp.getOssName());
-    							bean.setOssVersion(temp.getOssVersion());
-    							bean.setDownloadLocation(temp.getDownloadLocation());
-    							bean.setHomepage(temp.getHomepage());
+    							bean.setOssName(isSbomEmptyValue(temp.getOssName()) ? "" : temp.getOssName());
+    							bean.setOssVersion(isSbomEmptyValue(temp.getOssVersion()) ? "" : temp.getOssVersion());
+    							bean.setDownloadLocation(isSbomEmptyValue(temp.getDownloadLocation()) ? "" : temp.getDownloadLocation());
+    							bean.setHomepage(isSbomEmptyValue(temp.getHomepage()) ? "" : temp.getHomepage());
     							break;
     						}
     					}
@@ -1301,13 +1303,15 @@ public class ExcelUtil extends CoTopComponent {
     					}
     				} else {
     					// basic info
-    					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", ""));
+    					String ossName = ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", "");
+    					bean.setOssName(isSbomEmptyValue(ossName) ? "" : ossName);
     					if (ossVersionCol < 0) {
     						bean.setOssVersion("");
     					} else {
     						Cell cell = row.getCell(ossVersionCol);
     						if (cell != null) {
-        						bean.setOssVersion(avoidNull(formatter.formatCellValue(cell, evaluator)).trim().replaceAll("\t", ""));
+        						String ossVersion = avoidNull(formatter.formatCellValue(cell, evaluator)).trim().replaceAll("\t", "");
+        						bean.setOssVersion(isSbomEmptyValue(ossVersion) ? "" : ossVersion);
     						} else {
     							bean.setOssVersion("");
     						}
@@ -1320,7 +1324,7 @@ public class ExcelUtil extends CoTopComponent {
     					if (isSpdxSpreadsheet && isSbomEmptyValue(packageUrl)) {
     						packageUrl = normalizeSpdxValue(spdxPurlMap.get(bean.getSpdxIdentifier()));
     					}
-    					bean.setPackageUrl(packageUrl);
+    					bean.setPackageUrl(isSbomEmptyValue(packageUrl) ? "" : packageUrl);
 					
     					if (downloadLocationCol < 0) {
     						bean.setDownloadLocation("");
@@ -1390,9 +1394,11 @@ public class ExcelUtil extends CoTopComponent {
         						}
         					}
 
-        					bean.setComments(commentCol < 0 ? "" : comment.trim());
+        					String commentValue = commentCol < 0 ? "" : comment.trim();
+        					bean.setComments(isSbomEmptyValue(commentValue) ? "" : commentValue);
         				} else {
-        					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)).trim());
+        					String commentValue = commentCol < 0 ? "" : getCellData(row.getCell(commentCol)).trim();
+        					bean.setComments(isSbomEmptyValue(commentValue) ? "" : commentValue);
         				}
     				}
     
@@ -1420,7 +1426,7 @@ public class ExcelUtil extends CoTopComponent {
     						licenseName = new String(asciiValuesRetry);
     					}
         				
-        				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
+        				subBean.setLicenseName(licenseCol < 0 || isSbomEmptyValue(licenseName) ? "" : licenseName);
         				subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     				}
     				
@@ -1431,7 +1437,7 @@ public class ExcelUtil extends CoTopComponent {
     				if ("false".equals(bean.getCopyrightText())) {
     					bean.setCopyrightText("");
     				}
-    				
+
     				// file path에 개행이 있는 경우 콤마로 변경
     				if (!isEmpty(bean.getFilePath()) && (bean.getFilePath().indexOf("\r\n") > -1 || bean.getFilePath().indexOf("\n") > -1)) {
     					String _tmpFilePath = bean.getFilePath().trim().replaceAll("\r\n", "\n");
@@ -1475,7 +1481,7 @@ public class ExcelUtil extends CoTopComponent {
     						dependencies = StringUtil.join(new ArrayList<>(dependsOnUrls), ",");
     					}
 					}
-					bean.setDependencies(dependencies);
+					bean.setDependencies(isSbomEmptyValue(dependencies) ? "" : dependencies);
     				
     				if (tlshCol > -1) {
 						bean.setTlsh(tlshCol < 0 ? "" : avoidNull(getCellData(row.getCell(tlshCol))).trim().replaceAll("\t", ""));
