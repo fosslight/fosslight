@@ -35,7 +35,7 @@ var Ctrl_fn = {
 	initEvent : function(){},
 	setSelectTitle : function(){
 		var options = common_data.detailData.reduce(function(arr, cur){
-		    var option = "<option value='" + cur.gridId + "'>"+cur.title.replace(/(<([^>]+)>)/ig,"")+"</option>";
+		    var option = "<option value='" + cur.gridId + "'>"+Ctrl_fn.stripGridWarning(cur.title).replace(/(<([^>]+)>)/ig,"")+"</option>";
 		    arr.push(option);
 		    return arr;
 		}, ["<option value=''></option>"]).join("");
@@ -63,18 +63,20 @@ var Ctrl_fn = {
 		    return cur.gridId == gridId;
 		})[0];
 		
+		var licenseNameText = Ctrl_fn.stripGridWarning(selectData.licenseName);
+		var downloadLocationText = Ctrl_fn.stripGridWarning(selectData.downloadLocation);
 		$("#licenseName"+seq).val("");
 		$("#detailOssName"+seq).val(Ctrl_fn.removeTag(selectData.ossName));
-		$("#detailOssVersion"+seq).val(selectData.ossVersion);
-		$("#detailLicenseName"+seq).val(selectData.licenseName);
-		$("#detailCopyright"+seq).val(selectData.ossCopyright);
-		$("#detailDownloadLocation"+seq).val(selectData.downloadLocation);
-		$("#detailHomePage"+seq).val(selectData.homepage);
+		$("#detailOssVersion"+seq).val(Ctrl_fn.stripGridWarning(selectData.ossVersion));
+		$("#detailLicenseName"+seq).val(licenseNameText);
+		$("#detailCopyright"+seq).val(Ctrl_fn.stripGridWarning(selectData.ossCopyright));
+		$("#detailDownloadLocation"+seq).val(downloadLocationText);
+		$("#detailHomePage"+seq).val(Ctrl_fn.stripGridWarning(selectData.homepage));
 		if (typeof selectData.summaryDescription !== "undefined" && "" != selectData.summaryDescription) {
-			$("#detailSummaryDescription"+seq).val(formatToTextarea(selectData.summaryDescription));
+			$("#detailSummaryDescription"+seq).val(formatToTextarea(Ctrl_fn.stripGridWarning(selectData.summaryDescription)));
 		}
-		$("#detailImportantNotes"+seq).val(selectData.importantNotes);
-		$("#detailcomment"+seq).val(Ctrl_fn.commentWithReviewNote(selectData.comment));
+		$("#detailImportantNotes"+seq).val(Ctrl_fn.stripGridWarning(selectData.importantNotes));
+		$("#detailcomment"+seq).val(Ctrl_fn.commentWithReviewNote(Ctrl_fn.stripGridWarning(selectData.comment)));
 		
 		if (typeof selectData.ossId !== 'undefined') {
 			if ('' == commentTemp){
@@ -95,20 +97,20 @@ var Ctrl_fn = {
 		$("#lt"+seq).html('');
 		$("#ob"+seq).html('');
 		
-		selectData.ossNickname.split(",").forEach(function(nickName){
+		Ctrl_fn.stripGridWarning(selectData.ossNickname).split(",").forEach(function(nickName){
 		    if ('' != nickName){
 		    	Ctrl_fn.addOssNickname(nickName, seq, false);
 		    }
 		});
 		
-		selectData.downloadLocation.split(",").forEach(function(downloadLocation){
+		downloadLocationText.split(",").forEach(function(downloadLocation){
 		    if ('' != downloadLocation){
 		    	Ctrl_fn.addDownloadLocation(downloadLocation, seq, false);
 				$("#input_downloadLocations" + seq).val("");
 		    }
 		});
 		
-		selectData.detectedLicense.split(",").forEach(function(licenseName){
+		Ctrl_fn.stripGridWarning(selectData.detectedLicense).split(",").forEach(function(licenseName){
 			if ('' != licenseName) {
 				let detectedLicenseHtml 	= 	'<div class="col-lg-4 mt-1 pl-0">';
 				detectedLicenseHtml 		+= 		'<div class="form-group mb-0">';
@@ -125,6 +127,7 @@ var Ctrl_fn = {
 
 		if (typeof selectData.includeCpes !== "undefined") {
 			selectData.includeCpes.forEach(function(includeCpe) {
+				includeCpe = Ctrl_fn.stripGridWarning(includeCpe);
 				if ('' != includeCpe) {
 					Ctrl_fn.addIncludeCpe(includeCpe, seq, false);
 				}
@@ -133,6 +136,7 @@ var Ctrl_fn = {
 		
 		if (typeof selectData.excludeCpes !== "undefined") {
 			selectData.excludeCpes.forEach(function(excludeCpe) {
+				excludeCpe = Ctrl_fn.stripGridWarning(excludeCpe);
 				if ('' != excludeCpe) {
 					Ctrl_fn.addExcludeCpe(excludeCpe, seq, false);
 				}
@@ -141,6 +145,7 @@ var Ctrl_fn = {
 		
 		if (typeof selectData.ossVersionAliases !== "undefined") {
 			selectData.ossVersionAliases.forEach(function(versionAlias){
+				versionAlias = Ctrl_fn.stripGridWarning(versionAlias);
 				if ('' != versionAlias) {
 					let ossVersionAliasHtml 	= 	'<div class="col-md-12 mt-1">';
 					ossVersionAliasHtml 		+= 		'<div class="form-group mb-0">';
@@ -162,7 +167,7 @@ var Ctrl_fn = {
 			Ctrl_fn.homepageDuplication($("#ossForm"+seq+" input[name=homepage]"));
 		}
 		
-		var replaceLicenseData = selectData.licenseName.replace(/\,/gi, ' AND ');
+		var replaceLicenseData = licenseNameText.replace(/\,/gi, ' AND ');
 		var licenseData = replaceLicenseData.split(/\s(?=AND|OR)/g);
 		var licenseDiv = licenseData.length > 1 ? "M" : "S";
 		$("[name='licenseDiv"+seq+"']").eq(licenseDiv.toUpperCase() == "M" ? 1 : 0).trigger("click");
@@ -551,6 +556,12 @@ var Ctrl_fn = {
 	},
 	removeTag: function(str){
 		return str.replace(/(<([^]+)>)/ig,"");
+	},
+	stripGridWarning: function(value){
+		if (typeof value !== "string" || value.indexOf("<div") === -1) {
+			return value;
+		}
+		return value.replace(/<div\b[^>]*class="[^"]*\bretxt[bg]?\b[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "");
 	},
 	removeTag2: function(obj){
 		$(obj).parent().parent().remove();
