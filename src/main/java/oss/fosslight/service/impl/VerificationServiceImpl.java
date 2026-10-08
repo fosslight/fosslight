@@ -1518,11 +1518,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					readmeFileName = readmeFileName.substring(readmeFileName.lastIndexOf("/") + 1);
 				}
 				
-				if (readmePath.indexOf(" ") > -1) {
-					log.info("do space replase ok");
-					
-					readmePath = readmePath.replaceAll(" ", "*");
-				}
+//				if (readmePath.indexOf(" ") > -1) {
+//					log.info("do space replase ok");
+//					
+//					readmePath = readmePath.replaceAll(" ", "*");
+//				}
 				
 				log.info("readmePath : " + readmePath);
 				log.info("readmeFileName : " + readmeFileName);
@@ -1531,7 +1531,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				File readmeFile = new File(VERIFY_PATH_OUTPUT +"/" + prjId +"/" + readmeFileName);
 				if (isChangedPackageFile || !readmeFile.exists()){
-					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
+					Path sourcePath = Paths.get(VERIFY_PATH_DECOMP, String.valueOf(prjId), readmePath);
+					Path targetPath = Paths.get(VERIFY_PATH_OUTPUT, String.valueOf(prjId), readmeFileName);
+					Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+//					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
 				resMap.put("readmeFileName", readmeFileName);
