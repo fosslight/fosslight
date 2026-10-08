@@ -66,6 +66,31 @@ function analysisDetailUrl(groupId) {
 	return url;
 }
 
+function stripGridWarning(value) {
+	// Remove only the diff/valid message the grid appends into a cell.
+	// Any other string, including values that contain "<", is returned as-is.
+	if (typeof value !== "string" || value.indexOf("<div") === -1) {
+		return value;
+	}
+	return value.replace(/<div\b[^>]*class="[^"]*\bretxt[bg]?\b[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "");
+}
+
+function analysisRowsWithoutGridMessages() {
+	// Same order as a direct title double-click: drop warning nodes, then read.
+	// Put the warnings back so the list the user is looking at stays unchanged.
+	cleanErrMsg("ossList");
+	try {
+		return $("#ossList").getRowData();
+	} finally {
+		if (ossValidMsg) {
+			gridValidMsgNew(ossValidMsg, "ossList");
+		}
+		if (ossDiffMsg) {
+			gridDiffMsg(ossDiffMsg, "ossList");
+		}
+	}
+}
+
 function openAnalysisDetailFromQuery() {
 	if (window._reviewDetailOpened) {
 		return;
@@ -74,7 +99,7 @@ function openAnalysisDetailFromQuery() {
 	if (!targetId) {
 		return;
 	}
-	var rows = $("#ossList").getRowData();
+	var rows = analysisRowsWithoutGridMessages();
 	var groupId = '';
 	for (var i = 0; i < rows.length; i++) {
 		if (String(rows[i].gridId) === String(targetId) || String(rows[i].groupId) === String(targetId)) {
@@ -90,6 +115,9 @@ function openAnalysisDetailFromQuery() {
 		return cur.groupId == groupId;
 	});
 	for (var i = 0; i < postData.length; i++) {
+		Object.keys(postData[i]).forEach(function(key) {
+			postData[i][key] = stripGridWarning(postData[i][key]);
+		});
 		if (postData[i].licenseName) {
 			postData[i].licenseName = postData[i].licenseName.trim();
 		}
