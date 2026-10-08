@@ -275,11 +275,6 @@
 											<input type="hidden" id="allowDownloadNoticeTextYn" name="allowDownloadNoticeTextYn" th:value="${project.allowDownloadNoticeTextYn}" />
 											<input type="hidden" id="allowDownloadSimpleHTMLYn" name="allowDownloadSimpleHTMLYn" th:value="${project.allowDownloadSimpleHTMLYn}" />
 											<input type="hidden" id="allowDownloadSimpleTextYn" name="allowDownloadSimpleTextYn" th:value="${project.allowDownloadSimpleTextYn}" />
-											<input type="hidden" id="allowDownloadSPDXSheetYn" name="allowDownloadSPDXSheetYn" th:value="${project.allowDownloadSPDXSheetYn}" />
-											<input type="hidden" id="allowDownloadSPDXRdfYn" name="allowDownloadSPDXRdfYn" th:value="${project.allowDownloadSPDXRdfYn}" />
-											<input type="hidden" id="allowDownloadSPDXTagYn" name="allowDownloadSPDXTagYn" th:value="${project.allowDownloadSPDXTagYn}" />
-											<input type="hidden" id="allowDownloadSPDXJsonYn" name="allowDownloadSPDXJsonYn" th:value="${project.allowDownloadSPDXJsonYn}" />
-											<input type="hidden" id="allowDownloadSPDXYamlYn" name="allowDownloadSPDXYamlYn" th:value="${project.allowDownloadSPDXYamlYn}" />
 											<input type="hidden" id="isSimpleNotice" name="isSimpleNotice">
 											<input type="hidden" name="previewOnly" id="previewOnly" th:value="N"/>
 											<input type="hidden" name="noticeAppendType" id="noticeAppendType" th:value="${ossNotice?.noticeAppendType}"/>
@@ -408,18 +403,6 @@
                                                         <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
                                                         		value="chkAllowDownloadSimpleText" th:text="'Simple Text'" th:selected="${project.allowDownloadSimpleTextYn == 'Y'}"
                                                         		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
-                                                        <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
-                                                        	<option value="chkAllowDownloadSPDXSheet" th:text="'SPDX(SpreadSheet)'" th:selected="${project.allowDownloadSPDXSheetYn == 'Y'}"
-                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
-                                                        	<option value="chkAllowDownloadSPDXRdf" th:text="'SPDX(RDF)'" th:selected="${project.allowDownloadSPDXRdfYn == 'Y'}"
-                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
-                                                        	<option value="chkAllowDownloadSPDXTag" th:text="'SPDX(TAG)'" th:selected="${project.allowDownloadSPDXTagYn == 'Y'}"
-                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
-                                                        	<option value="chkAllowDownloadSPDXJson" th:text="'SPDX(JSON)'" th:selected="${project.allowDownloadSPDXJsonYn == 'Y'}"
-                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
-                                                        	<option value="chkAllowDownloadSPDXYaml" th:text="'SPDX(YAML)'" th:selected="${project.allowDownloadSPDXYamlYn == 'Y'}"
-                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
-                                                        </th:block>
                                                   	</select>
                                                 </div>
                                             </div>
@@ -448,13 +431,6 @@
                                                                 <option value="noticeSimpleDownload" th:text="'Simple (html)'"></option>
                                                                 <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}" 
                                                                 		th:value="noticeTextSimpleDownload" th:text="'Simple (text)'"></option>
-                                                     			<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
-                                                               		<option th:value="spdxSpreadSheet" th:text="'SPDX (spreadsheet)'"></option>
-                                                                	<option th:value="spdxRdf" th:text="'SPDX (RDF)'"></option>
-																	<option th:value="spdxTag" th:text="'SPDX (TAG)'"></option>
-																	<option th:value="spdxJson" th:text="'SPDX (JSON)'"></option>
-																	<option th:value="spdxYaml" th:text="'SPDX (YAML)'"></option>
-                                                     			</th:block>
                                                             </select>
                                                         </div>
                                                        	<div class="d-flex align-items-center">
@@ -486,21 +462,6 @@
                                                 	</div>
                                                 	<div class="col-md-1" th:if="${project.allowDownloadSimpleTextYn == 'Y'}">
                                                 		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Simple Text'" th:onclick="|fn.downloadNoticeTextSimple()|"></button>
-                                                	</div>
-                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXSheetYn == 'Y'}">
-                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(SpreadSheet)'" th:onclick="|fn.downloadSpdxSpreadSheetExcel()|"></button>
-                                                	</div>
-                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXRdfYn == 'Y'}">
-                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(RDF)'" th:onclick="|fn.downloadSpdxRdf(()|"></button>
-                                                	</div>
-                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXTagYn == 'Y'}">
-                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(TAG)'" th:onclick="|fn.downloadSpdxTag(()|"></button>
-                                                	</div>
-                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXJsonYn == 'Y'}">
-                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(JSON)'" th:onclick="|fn.downloadSpdxJson(()|"></button>
-                                                	</div>
-                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXYamlYn == 'Y'}">
-                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(YAML)'" th:onclick="|fn.downloadSpdxYaml(()|"></button>
                                                 	</div>
                                                 </div>
                                             </div>

@@ -207,32 +207,6 @@
                 selectedList.push("chkAllowDownloadNoticeHTML");
                 datas.noticeFileFormat = selectedList;
             });
-            
-            const $noticeFileFormat = $('#noticeFileFormat');
-            const $docType = $('#docType');
-            
-            $noticeFileFormat.on('select2:selecting', function(e) {
-            	if ($("#hideOssVersion").is(':checked')) {
-                    const selectedVal = e.params.args.data.id;
-                    if (/SPDX|CDX/i.test(selectedVal)) {
-                        e.preventDefault();
-                        alertify.alert([[#{msg.package.notice.file.format.unavailable}]], function(){});
-                    }
-                }
-            });
-
-            $docType.on('change', function(e) {
-                if ($("#hideOssVersion").is(':checked')) {
-                    const currentVal = $(this).val();
-                    if (/SPDX|CDX/i.test(currentVal)) {
-                    	e.preventDefault();
-                        alertify.alert([[#{msg.package.notice.file.format.unavailable}]], function(){
-                        	const firstVal = $docType.find('option:first').val();
-                            $docType.val(firstVal);
-                        });
-                    }
-                }
-            });
         });
 
         var datas = {
@@ -1172,16 +1146,6 @@
                         fn.downloadNoticeSimple();
                     } else if (type == 'noticeTextSimpleDownload') {
                         fn.downloadNoticeTextSimple();
-                    } else if (type == 'spdxSpreadSheet') {
-                        fn.downloadSpdxSpreadSheetExcel();
-                    } else if (type == 'spdxRdf') {
-                        fn.downloadSpdxRdf();
-                    } else if (type == 'spdxTag') {
-                        fn.downloadSpdxTag();
-                    } else if (type == 'spdxJson') {
-                        fn.downloadSpdxJson();
-                    } else if (type == 'spdxYaml') {
-                        fn.downloadSpdxYaml();
                     }
                 });
 
@@ -1253,25 +1217,6 @@
                     return false;
                 });
 
-                $('#spdxSpreadSheet').click(function (e) {
-                    fn.downloadSpdxSpreadSheetExcel();
-                });
-
-                $('#spdxRdf').click(function (e) {
-                    fn.downloadSpdxRdf();
-                });
-
-                $('#spdxTag').click(function (e) {
-                    fn.downloadSpdxTag();
-                });
-
-                $('#spdxJson').click(function (e) {
-                    fn.downloadSpdxJson();
-                });
-
-                $('#spdxYaml').click(function (e) {
-                    fn.downloadSpdxYaml();
-                });
                 //// [Pakage Document Download END]
 
                 $("#append").click(function (e) {
@@ -3170,120 +3115,6 @@
                     }
                 }).submit();
             },
-            downloadSpdxSpreadSheetExcel: function () {
-                var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-
-                $.ajax({
-                    type: "POST",
-                    url: '/spdxdownload/getSPDXPost',
-                    data: JSON.stringify({"type": "spdx", "prjId": [[${project.prjId}]], "dataStr": dataStr}),
-                    dataType: 'json',
-                    cache: false,
-                    contentType: 'application/json',
-                    success: function (data) {
-                        if ("false" == data.isValid) {
-                            alertify.error([[#{msg.common.valid2}]], 0);
-                        } else {
-                            window.location = '/spdxdownload/getFile?id=' + data.validMsg;
-                        }
-                    },
-                    error: function (data) {
-                        alertify.error([[#{msg.common.valid2}]], 0);
-                    }
-                });
-            },
-
-            downloadSpdxRdf: function () {
-                var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-
-                $.ajax({
-                    type: "POST",
-                    url: '/spdxdownload/getSPDXPost',
-                    data: JSON.stringify({"type": "spdxRdf", "prjId": [[${project.prjId}]], "dataStr": dataStr}),
-                    dataType: 'json',
-                    cache: false,
-                    contentType: 'application/json',
-                    success: function (data) {
-                        if ("false" == data.isValid) {
-                            alertify.error([[#{msg.common.valid2}]], 0);
-                        } else {
-                            window.location = '/spdxdownload/getFile?id=' + data.validMsg;
-                        }
-                    },
-                    error: function (data) {
-                        alertify.error([[#{msg.common.valid2}]], 0);
-                    }
-                });
-            },
-
-            downloadSpdxTag: function () {
-                var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-
-                $.ajax({
-                    type: "POST",
-                    url: '/spdxdownload/getSPDXPost',
-                    data: JSON.stringify({"type": "spdxTag", "prjId": [[${project.prjId}]], "dataStr": dataStr}),
-                    dataType: 'json',
-                    cache: false,
-                    contentType: 'application/json',
-                    success: function (data) {
-                        if ("false" == data.isValid) {
-                            alertify.error([[#{msg.common.valid2}]], 0);
-                        } else {
-                            window.location = '/spdxdownload/getFile?id=' + data.validMsg;
-                        }
-                    },
-                    error: function (data) {
-                        alertify.error([[#{msg.common.valid2}]], 0);
-                    }
-                });
-            },
-
-            downloadSpdxJson: function () {
-                var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-
-                $.ajax({
-                    type: "POST",
-                    url: '/spdxdownload/getSPDXPost',
-                    data: JSON.stringify({"type": "spdxJson", "prjId": [[${project.prjId}]], "dataStr": dataStr}),
-                    dataType: 'json',
-                    cache: false,
-                    contentType: 'application/json',
-                    success: function (data) {
-                        if ("false" == data.isValid) {
-                            alertify.error([[#{msg.common.valid2}]], 0);
-                        } else {
-                            window.location = '/spdxdownload/getFile?id=' + data.validMsg;
-                        }
-                    },
-                    error: function (data) {
-                        alertify.error([[#{msg.common.valid2}]], 0);
-                    }
-                })
-            },
-
-            downloadSpdxYaml: function () {
-                var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-
-                $.ajax({
-                    type: "POST",
-                    url: '/spdxdownload/getSPDXPost',
-                    data: JSON.stringify({"type": "spdxYaml", "prjId": [[${project.prjId}]], "dataStr": dataStr}),
-                    dataType: 'json',
-                    cache: false,
-                    contentType: 'application/json',
-                    success: function (data) {
-                        if ("false" == data.isValid) {
-                            alertify.error([[#{msg.common.valid2}]], 0);
-                        } else {
-                            window.location = '/spdxdownload/getFile?id=' + data.validMsg;
-                        }
-                    },
-                    error: function (data) {
-                        alertify.error([[#{msg.common.valid2}]], 0);
-                    }
-                })
-            },
             appendEditVisible: function (target) {
                 var checked = $(target).prop("checked");
 
@@ -3417,11 +3248,6 @@
                 $("select[name='noticeFileFormat'] option[value='chkAllowDownloadNoticeText']").attr("disabled", !checked);
                 $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSimpleHTML']").attr("disabled", !checked);
                 $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSimpleText']").attr("disabled", !checked);
-                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXSheet']").attr("disabled", !checked);
-                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXRdf']").attr("disabled", !checked);
-                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXTag']").attr("disabled", !checked);
-                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXJson']").attr("disabled", !checked);
-                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXYaml']").attr("disabled", !checked);
             },
             initNotice: function () {
                 window.setTimeout(function () {
@@ -3548,34 +3374,6 @@
             	noticeFileFormat = [[${project.allowDownloadSimpleTextYn}]];
             	if ("Y" == noticeFileFormat) {
             		datas.noticeFileFormat.push("chkAllowDownloadSimpleText");
-            	}
-            	noticeFileFormat = [[${project.allowDownloadSPDXSheetYn}]];
-            	if ("Y" == noticeFileFormat) {
-            		datas.noticeFileFormat.push("chkAllowDownloadSPDXSheet");
-            	}
-            	noticeFileFormat = [[${project.allowDownloadSPDXRdfYn}]];
-            	if ("Y" == noticeFileFormat) {
-            		datas.noticeFileFormat.push("chkAllowDownloadSPDXRdf");
-            	}
-            	noticeFileFormat = [[${project.allowDownloadSPDXTagYn}]];
-            	if ("Y" == noticeFileFormat) {
-            		datas.noticeFileFormat.push("chkAllowDownloadSPDXTag");
-            	}
-            	noticeFileFormat = [[${project.allowDownloadSPDXJsonYn}]];
-            	if ("Y" == noticeFileFormat) {
-            		datas.noticeFileFormat.push("chkAllowDownloadSPDXJson");
-            	}
-            	noticeFileFormat = [[${project.allowDownloadSPDXYamlYn}]];
-            	if ("Y" == noticeFileFormat) {
-            		datas.noticeFileFormat.push("chkAllowDownloadSPDXYaml");
-            	}
-            	noticeFileFormat = [[${project.allowDownloadCDXJsonYn}]];
-            	if ("Y" == noticeFileFormat) {
-            		datas.noticeFileFormat.push("chkAllowDownloadCDXJson");
-            	}
-            	noticeFileFormat = [[${project.allowDownloadCDXXmlYn}]];
-            	if ("Y" == noticeFileFormat) {
-            		datas.noticeFileFormat.push("chkAllowDownloadCDXXml");
             	}
             },
             procRequest: function (e) {
