@@ -7,8 +7,6 @@ package oss.fosslight.controller;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1763,14 +1761,6 @@ public class OssController extends CoTopComponent{
 	
 	@RequestMapping(value=OSS.OSS_AUTO_ANALYSIS, method = {RequestMethod.POST, RequestMethod.GET}, produces = "text/html; charset=utf-8")
 	public String ossAutoRegist(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
-		// A review link carries gridId so the detail page can open on its own.
-		// Leave the list page for every other visit, including a direct open.
-		String gridId = req.getParameter("gridId");
-		String prjId = req.getParameter("prjId");
-		if ("GET".equalsIgnoreCase(req.getMethod()) && !isEmpty(gridId) && !isEmpty(prjId)) {
-			return analysisDetailRedirect(gridId, prjId, req.getParameter("reviewNote"));
-		}
-
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
@@ -1902,114 +1892,9 @@ public class OssController extends CoTopComponent{
 	
 	@GetMapping(value=OSS.ANALYSIS_RESULT_DETAIL_ID)
 	public String analysisResultDetail(HttpServletRequest req, HttpServletResponse res, @PathVariable String groupId, Model model){
-		// prjId is present only on a direct review link. A title double-click
-		// already stored the session and opens this page without prjId.
-		String prjId = req.getParameter("prjId");
-		if (!isEmpty(prjId)) {
-			String resolvedGroupId = storeAnalysisDetailSession(prjId, groupId);
-			if (!isEmpty(resolvedGroupId)) {
-				groupId = resolvedGroupId;
-			}
-		}
 		model.addAttribute("groupId", groupId);
 		
 		return "oss/ossAnalysisResultDetailpopup";
-	}
-
-	private String analysisDetailRedirect(String gridId, String prjId, String reviewNote) {
-		StringBuilder url = new StringBuilder("redirect:");
-		url.append(OSS.PATH).append("/getAnalysisResultDetail/").append(gridId);
-		url.append("?prjId=").append(URLEncoder.encode(prjId, StandardCharsets.UTF_8));
-		if (!isEmpty(reviewNote)) {
-			url.append("&reviewNote=").append(URLEncoder.encode(reviewNote, StandardCharsets.UTF_8));
-		}
-		return url.toString();
-	}
-
-	/**
-	 * Load the analysis group for a review link and store it in the same session
-	 * the detail page already reads. Returns the group id, or null when the row
-	 * cannot be loaded.
-	 */
-	@SuppressWarnings("unchecked")
-	private String storeAnalysisDetailSession(String prjId, String targetId) {
-		try {
-			OssMaster ossMaster = new OssMaster();
-			ossMaster.setPrjId(prjId);
-			ossMaster.setStartAnalysisFlag(CoConstDef.FLAG_YES);
-			// One page covering every analyzed component, so the target is not
-			// dropped by the list page size.
-			ossMaster.setPageListSize(100000);
-
-			Map<String, Object> map = new HashMap<>();
-			String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "/autoanalysis/out/dev") + "/" + prjId + "/result";
-			map.put("analysisResultListPath", analysisResultListPath);
-			map = ExcelUtil.getCsvData(map, ossMaster);
-			if (map == null || map.isEmpty() || map.get("csvData") == null) {
-				return null;
-			}
-
-			List<String[]> allData = (List<String[]>) map.get("csvData");
-			map = ossService.getOssAnalysisList(ossMaster);
-			Map<String, Object> result = ExcelUtil.readAnalysisList(allData, (List<OssAnalysis>) map.get("rows"));
-			if (result == null || result.isEmpty() || !Boolean.TRUE.equals(result.get("isValid"))) {
-				return null;
-			}
-			CommonFunction.setAnalysisResultList(result);
-
-			List<OssAnalysis> rows = (List<OssAnalysis>) result.get("rows");
-			if (rows == null) {
-				return null;
-			}
-			String groupId = null;
-			for (OssAnalysis row : rows) {
-				if (targetId.equals(row.getGridId()) || targetId.equals(row.getGroupId())) {
-					groupId = isEmpty(row.getGroupId()) ? row.getGridId() : row.getGroupId();
-					break;
-				}
-			}
-			if (isEmpty(groupId)) {
-				return null;
-			}
-
-			List<OssAnalysis> analysisResultData = new ArrayList<>();
-			for (OssAnalysis row : rows) {
-				if (groupId.equals(row.getGroupId())) {
-					analysisResultData.add(row);
-				}
-			}
-			for (OssAnalysis oa : analysisResultData) {
-				if (!isEmpty(oa.getDownloadLocation())) {
-					Set<String> uniqueLocations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-					String cleanedLocation = Arrays.stream(oa.getDownloadLocation().split(","))
-										            .map(String::trim)
-										            .filter(s -> !isEmpty(s))
-										            .filter(url -> uniqueLocations.add(url.replaceFirst("^[^:]+://", "")))
-										            .collect(Collectors.joining(","));
-				    oa.setDownloadLocation(cleanedLocation);
-				}
-
-				if (oa.getTitle() != null && oa.getTitle().contains("최신 등록 정보")) {
-					OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
-					if (bean != null) {
-						oa.setOssId(bean.getOssId());
-						if (!isEmpty(bean.getImportantNotes())) {
-							oa.setImportantNotes(bean.getImportantNotes());
-						}
-					}
-				}
-			}
-
-			String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, groupId);
-			if (getSessionObject(sessionKey) != null) {
-				deleteSession(sessionKey);
-			}
-			putSessionObject(sessionKey, analysisResultData);
-			return groupId;
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			return null;
-		}
 	}
 	
 	@SuppressWarnings("unchecked")
