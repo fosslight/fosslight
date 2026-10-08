@@ -647,13 +647,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		if (tempData.size() > 0) {
 			Collections.sort(tempData, new Comparator<Map<String, Object>>() {
 				@Override
-				public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-					if (((String) o1.get("licenseName")).length() >= ((String) o2.get("licenseName")).length()) { // license name이 같으면 bomList조회해온 순서 그대로 유지함. license name이 다르면 순서변경
-						return 1;
-					}else {
-						return -1;
-					}
-				}
+			    public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+			        return Integer.compare(((String) o1.get("licenseName")).length(), ((String) o2.get("licenseName")).length());
+			    }
 			});
 			
 			Map<String, Object> rtnBean = null;
