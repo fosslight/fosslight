@@ -199,11 +199,6 @@
 										<input type="hidden" id="allowDownloadNoticeTextYn" name="allowDownloadNoticeTextYn" th:value="${project?.allowDownloadNoticeTextYn}" />
 										<input type="hidden" id="allowDownloadSimpleHTMLYn" name="allowDownloadSimpleHTMLYn" th:value="${project?.allowDownloadSimpleHTMLYn}" />
 										<input type="hidden" id="allowDownloadSimpleTextYn" name="allowDownloadSimpleTextYn" th:value="${project?.allowDownloadSimpleTextYn}" />
-										<input type="hidden" id="allowDownloadSPDXSheetYn" name="allowDownloadSPDXSheetYn" th:value="${project?.allowDownloadSPDXSheetYn}" />
-										<input type="hidden" id="allowDownloadSPDXRdfYn" name="allowDownloadSPDXRdfYn" th:value="${project?.allowDownloadSPDXRdfYn}" />
-										<input type="hidden" id="allowDownloadSPDXTagYn" name="allowDownloadSPDXTagYn" th:value="${project?.allowDownloadSPDXTagYn}" />
-										<input type="hidden" id="allowDownloadSPDXJsonYn" name="allowDownloadSPDXJsonYn" th:value="${project?.allowDownloadSPDXJsonYn}" />
-										<input type="hidden" id="allowDownloadSPDXYamlYn" name="allowDownloadSPDXYamlYn" th:value="${project?.allowDownloadSPDXYamlYn}" />
 										<input type="hidden" id="isSimpleNotice" name="isSimpleNotice">
 										<input type="hidden" name="previewOnly" id="previewOnly" th:value="N"/>
 										
@@ -294,13 +289,6 @@
                                                 		<option value="noticeSimpleDownload" th:text="'Simple (html)'"></option>
                                                 		<option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
                                                         	value="noticeTextSimpleDownload" th:text="'Simple (text)'"></option>
-                                            		<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
-                                                		<option value="spdxSpreadSheet" th:text="'SPDX (spreadsheet)'"></option>
-                                                		<option value="spdxRdf" th:text="'SPDX (RDF)'"></option>
-                                                		<option value="spdxTag" th:text="'SPDX (TAG)'"></option>
-                                                		<option value="spdxJson" th:text="'SPDX (JSON)'"></option>
-                                                		<option value="spdxYaml" th:text="'SPDX (YAML)'"></option>
-                                            		</th:block>
                                             		</select>
                                         		</div>
                                         		<div class="d-flex align-items-center">
