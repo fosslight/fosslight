@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -2967,11 +2968,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// Package Name
 					Cell cellPackageName = getCell(row, cellIdx); cellIdx++;
-					cellPackageName.setCellValue(bean.getOssName());
+					String ossName = StringUtil.removeEscapeChar(bean.getOssName());
+					cellPackageName.setCellValue(ossName);
 
 					// SPDX Identifier
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
-					String ossName = bean.getOssName().replace("&#39;", "\'"); // ossName에 '가 들어갈 경우 정상적으로 oss Info를 찾지 못하는 증상이 발생하여 현재 값으로 치환.
 
 					String relationshipsKey = "";
 					if (!isEmpty(bean.getPackageUrl())) {
@@ -3194,7 +3195,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, LicenseMaster> nonIdetifierNoticeList = new HashMap<>();
 
 				for (OssComponents ocBean : noticeList) {
-					String ossName = ocBean.getOssName().replace("&#39;", "\'");
+					String ossName = StringUtil.removeEscapeChar(ocBean.getOssName());
 
 					List<String> licenseList = new ArrayList<>();
 					if (ossName.equals("-")) {
@@ -3621,11 +3622,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// Package Name
 					Cell cellPackageName = getCell(row, cellIdx); cellIdx++;
-					cellPackageName.setCellValue(bean.getOssName());
+					String ossName = StringUtil.removeEscapeChar(bean.getOssName());
+					cellPackageName.setCellValue(ossName);
 
 					// SPDX Identifier
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
-					String ossName = bean.getOssName().replace("&#39;", "\'");
 
 //					String relationshipsKey = (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
 					String relationshipsKey = "";
@@ -3917,7 +3918,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, LicenseMaster> nonIdetifierNoticeList = new HashMap<>();
 
 				for (OssComponents ocBean : noticeList) {
-					String ossName = ocBean.getOssName().replace("&#39;", "\'");
+					String ossName = StringUtil.removeEscapeChar(ocBean.getOssName());
 
 					List<String> licenseList = new ArrayList<>();
 					if (ossName.equals("-")) {
@@ -4314,11 +4315,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// Package Name
 					Cell cellPackageName = getCell(row, cellIdx); cellIdx++;
-					cellPackageName.setCellValue(bean.getOssName());
+					String ossName = StringUtil.removeEscapeChar(bean.getOssName());
+					cellPackageName.setCellValue(ossName);
 					
 					// SPDX Identifier
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
-					String ossName = bean.getOssName().replace("&#39;", "\'"); // ossName에 '가 들어갈 경우 정상적으로 oss Info를 찾지 못하는 증상이 발생하여 현재 값으로 치환.
 
 					if (!isEmpty(bean.getOssId())) {
 						cellSPDXIdentifier.setCellValue("SPDXRef-Package-" + bean.getOssId());
@@ -4490,7 +4491,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, LicenseMaster> nonIdetifierNoticeList = new HashMap<>();
 				
 				for (OssComponents ocBean : noticeList) {
-					String ossName = ocBean.getOssName().replace("&#39;", "\'");
+					String ossName = StringUtil.removeEscapeChar(ocBean.getOssName());
 
 					List<String> licenseList = new ArrayList<>();
 					if (ossName.equals("-")) {
@@ -5864,7 +5865,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		String fileId = "";
 		FileWriter fw = null;
 		try {
-			fw = new FileWriter(excelFilePath + "/" + logiFileName, true);
+			fw = new FileWriter(excelFilePath + "/" + logiFileName, StandardCharsets.UTF_8, true);
 			if (type.toUpperCase().endsWith("JSON")) {
 				fw.write(BomGeneratorFactory.createJson(CycloneDxSchema.VERSION_LATEST, bom).toJsonString());
 			} else {
@@ -5964,7 +5965,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		boolean isPackageUrl = false;
 		for (OssComponents bean : noticeList) {
-			String ossName = bean.getOssName();
+			String ossName = StringUtil.removeEscapeChar(bean.getOssName());
 			String ossVersion = bean.getOssVersion();
 			
 			Component component = new Component();
