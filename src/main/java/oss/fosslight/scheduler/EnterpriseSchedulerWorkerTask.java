@@ -18,7 +18,7 @@ import oss.fosslight.service.*;
 public class EnterpriseSchedulerWorkerTask extends CoTopComponent {
 	@Autowired EnterpriseIntegrationService enterpriseIntegrationService;
 	
-	@Scheduled(cron="0 30 22 * * ?")
+//	@Scheduled(cron="0 30 22 * * ?")
 	public void syncOssAndLicenseToEnterprise() {
 		log.info("syncOssAndLicenseToEnterprise start");
 		
