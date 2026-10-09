@@ -56,6 +56,7 @@ import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -2429,6 +2430,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		List<OssComponents> needToResolveList = (List<OssComponents>) result.get("totalList");
 		List<OssComponents> fullDiscoveredList = (List<OssComponents>) result.get("fullDiscoveredList");
 		
+		boolean isVulnerable = false;
+		boolean isNotVulnerability = false;
+		boolean isFile = !isEmpty(projectMaster.getIdentificationCsvFileId()) ? true : false;
+		
 		Workbook wb = null;
 		FileInputStream inFile=null;
 		
@@ -2441,6 +2446,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (CoConstDef.FLAG_YES.equals(projectMaster.getAndroidFlag())) {
 				type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
 			}
+			
+			boolean sbomAbsent = false;
 			
 			inFile= new FileInputStream(new File(downloadpath+"/Security.xlsx"));
 			wb = WorkbookFactory.create(inFile);
@@ -2455,7 +2462,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					ossListParam.setMerge(CoConstDef.FLAG_NO);
 					
 					Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
-					map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+					List<ProjectIdentification> rows = (List<ProjectIdentification>) map.get("rows");
+					if (CollectionUtils.isEmpty(rows)) {
+						sbomAbsent = true;
+					}
+					map.replace("rows", projectService.setMergeGridData(rows));
 					ExcelDownLoadUtil.reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(2), map, projectMaster);
 				}
 			} else {
@@ -2463,7 +2474,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				{
 					ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 					ossListParam.setMerge(CoConstDef.FLAG_NO);
-					ExcelDownLoadUtil.reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM, wb.getSheetAt(2), projectService.getIdentificationGridList(ossListParam), projectMaster);
+					Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
+					List<ProjectIdentification> rows = (List<ProjectIdentification>) map.get("rows");
+					if (CollectionUtils.isEmpty(rows)) {
+						sbomAbsent = true;
+					}
+					ExcelDownLoadUtil.reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM, wb.getSheetAt(2), map, projectMaster);
 				}
 			}
 			
@@ -2475,6 +2491,29 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			hyperLinkFont.setUnderline(Font.U_SINGLE);
 			hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
 			hyperLinkStyle.setFont(hyperLinkFont);
+			
+			if (!CollectionUtils.isEmpty(needToResolveList)) {
+				boolean allFixed = needToResolveList.stream().allMatch(item -> "Fixed".equals(item.getVulnerabilityResolution()));
+			    if (!allFixed) {
+			    	isVulnerable = true;
+			    }
+			}
+			if (!isVulnerable && !CollectionUtils.isEmpty(fullDiscoveredList)) {
+				isNotVulnerability = true;
+			}
+			
+			String vulnerabilityStatus = "";
+			if (!isFile && sbomAbsent) {
+				vulnerabilityStatus = "등록된 SBOM 없음";
+			} else {
+				if (isVulnerable) {
+					vulnerabilityStatus = "취약";
+				} else if (isNotVulnerability) {
+					vulnerabilityStatus = "양호";
+				} else {
+					vulnerabilityStatus = "안전";
+				}
+			}
 			
 			List<String[]> rowInfoData = new ArrayList<>();
 			List<String[]> rowDatas = new ArrayList<>();
@@ -2489,6 +2528,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, projectMaster.getPrjVersion()
 					, projectMaster.getPrjUserName()
 					, CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, projectMaster.getDivision())
+					, vulnerabilityStatus
 			};
 			
 			rowInfoData.add(rowInfoParam);
@@ -2565,9 +2605,38 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 	private static void makeSecuritySheetV2(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle style2, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows) {
 		int infoStartRow = 1;
-		int startRow = 8;
+		int startRow = 9;
 		int startCol = 0;
 		int endCol = 0;
+		
+		int lastRowNum = sheet.getLastRowNum();
+		if (lastRowNum >= 6) {
+	        sheet.shiftRows(6, lastRowNum, 1);
+	    }
+	    
+		Row row6 = sheet.getRow(5);
+	    Row row7 = sheet.createRow(6);
+	    
+	    if (row6 != null) {
+	        row7.setHeight(row6.getHeight());
+	        
+	        for (int c = 0; c <= 8; c++) {
+	            Cell cell6 = row6.getCell(c);
+	            Cell cell7 = row7.createCell(c);
+	            
+	            if (cell6 != null) {
+	                cell7.setCellStyle(cell6.getCellStyle());
+	            }
+	        }
+	        
+	        Cell cell7_d = row7.getCell(1);
+	        if (cell7_d != null) {
+	            cell7_d.setCellValue("Vulnerability Status");
+	        }
+	        
+	        sheet.addMergedRegion(new CellRangeAddress(6, 6, 1, 2));
+	        sheet.addMergedRegion(new CellRangeAddress(6, 6, 3, 8));
+	    }
 		
 		if (!infoRows.isEmpty()) {
 			endCol = infoRows.get(0).length-1;
