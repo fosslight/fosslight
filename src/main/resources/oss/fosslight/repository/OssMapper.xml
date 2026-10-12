@@ -749,6 +749,45 @@
 	                    LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON OV.OSS_ID = T8.OSS_ID
 	                    WHERE OV.USE_YN = 'Y'
 	                    <include refid="ossSearchFilters"/>
+	                    
+	                    UNION
+	                    	                    
+	                    SELECT <include refid="ossColumns"/>
+	                    FROM OSS_COMMON OC
+	                    <include refid="ossCoreJoins"/>
+		              	LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON OC.OSS_COMMON_ID = T6.OSS_COMMON_ID
+	                    LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON OC.OSS_COMMON_ID = T7.OSS_COMMON_ID
+	                    LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON OV.OSS_ID = T8.OSS_ID
+	                    WHERE OV.USE_YN = 'Y'
+	                    AND EXISTS (
+	                    	SELECT 1
+							FROM OSV_SEARCH_MASTER M
+							WHERE M.ID = #{cveId}
+							AND (
+								M.SEARCH_NAME_P1 = OC.OSS_NAME 
+								OR EXISTS (
+							     	SELECT 1
+							        FROM OSS_DOWNLOADLOCATION DL
+							        WHERE DL.OSS_COMMON_ID IN (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = OC.OSS_NAME)
+							        AND DL.PURL IS NOT NULL
+							        AND DL.PURL <![CDATA[<>]]> ''
+							        AND M.SEARCH_NAME_P2 = DL.PURL
+							  	)
+								OR M.SEARCH_NAME_P3 = OC.OSS_NAME
+							)
+							AND CASE WHEN IFNULL(OV.OSS_VERSION, '') <![CDATA[<>]]> ''
+								THEN
+									(
+										M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+									)
+									OR
+									(
+										M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+									)
+								ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+							END
+						)
+						<include refid="ossSearchFilters"/>
 	                </when>
 	                <otherwise>
 	                    SELECT <include refid="ossColumns"/>
@@ -854,6 +893,45 @@
                     LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON OV.OSS_ID = T8.OSS_ID
                     WHERE OV.USE_YN = 'Y'
                     <include refid="ossSearchFilters"/>
+                    
+                    UNION
+	                    	                    
+	              	SELECT <include refid="ossColumns"/>
+	               	FROM OSS_COMMON OC
+	              	<include refid="ossCoreJoins"/>
+	              	LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON OC.OSS_COMMON_ID = T6.OSS_COMMON_ID
+                    LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON OC.OSS_COMMON_ID = T7.OSS_COMMON_ID
+                    LEFT OUTER JOIN OSS_LICENSE_DETECTED T8 ON OV.OSS_ID = T8.OSS_ID
+                    WHERE OV.USE_YN = 'Y'
+	          		AND EXISTS (
+	                   	SELECT 1
+						FROM OSV_SEARCH_MASTER M
+						WHERE M.ID = #{cveId}
+						AND (
+							OC.OSS_NAME = M.SEARCH_NAME_P1
+							OR EXISTS (
+						     	SELECT 1
+						        FROM OSS_DOWNLOADLOCATION DL
+						        WHERE DL.OSS_COMMON_ID IN (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = OC.OSS_NAME)
+						        AND DL.PURL IS NOT NULL
+						        AND DL.PURL <![CDATA[<>]]> ''
+						        AND M.SEARCH_NAME_P2 = DL.PURL
+						  	)
+							OR OC.OSS_NAME = M.SEARCH_NAME_P3
+						)
+						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') <![CDATA[<>]]> ''
+							THEN
+								(
+									M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+								)
+								OR
+								(
+									M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+								)
+							ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+						END
+					)
+					<include refid="ossSearchFilters"/>
                 </when>
                 
                 <otherwise>
@@ -983,6 +1061,111 @@
 			  			WHERE IFNULL(OIC.CPE23URI, '') <![CDATA[<>]]> ''
 			    	) T2
 			    	ON T1.VENDORPRODUCT = T2.CPE23URI
+			    	
+			    	UNION ALL
+			    	
+			    	SELECT OC.OSS_NAME
+			    	FROM OSS_COMMON OC
+			    	INNER JOIN OSS_VERSION OV
+			    	ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			    	WHERE EXISTS (
+	                   	SELECT 1
+						FROM OSV_SEARCH_MASTER M
+						WHERE M.ID = #{cveId}
+						AND OC.OSS_NAME = M.SEARCH_NAME_P1
+						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') = ''
+							THEN
+								(
+									M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+								)
+								OR
+								(
+									M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+								)
+							ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+						END
+					)
+					
+					UNION ALL
+			    	
+			    	SELECT OC.OSS_NAME
+			    	FROM OSS_COMMON OC
+			    	INNER JOIN OSS_VERSION OV
+			    	ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			    	WHERE EXISTS (
+	                   	SELECT 1
+						FROM OSV_SEARCH_MASTER M
+						WHERE M.ID = #{cveId}
+						AND (
+							M.SEARCH_NAME_P1 IS NULL
+							OR NOT EXISTS (
+								SELECT 1
+								FROM OSS_COMMON OC_P1
+								WHERE OC_P1.OSS_NAME = M.SEARCH_NAME_P1
+							)
+						)
+						AND (
+							EXISTS (
+						    	SELECT 1
+						        FROM OSS_DOWNLOADLOCATION DL
+						        WHERE DL.OSS_COMMON_ID IN (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = OC.OSS_NAME)
+						        AND DL.PURL IS NOT NULL
+						        AND DL.PURL <![CDATA[<>]]> ''
+						        AND M.SEARCH_NAME_P2 = DL.PURL
+						  	)
+						)
+						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') = ''
+							THEN
+								(
+									M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+								)
+								OR
+								(
+									M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+								)
+							ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+						END
+					)
+					
+					UNION ALL
+			    	
+			    	SELECT OC.OSS_NAME
+			    	FROM OSS_COMMON OC
+			    	INNER JOIN OSS_VERSION OV
+			    	ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			    	WHERE EXISTS (
+	                   	SELECT 1
+						FROM OSV_SEARCH_MASTER M
+						WHERE M.ID = #{cveId}
+						AND M.SEARCH_NAME_P3 = OC.OSS_NAME
+						AND (
+							M.SEARCH_NAME_P1 IS NULL
+							OR NOT EXISTS (
+								SELECT 1
+								FROM OSS_COMMON OC_P1
+								WHERE OC_P1.OSS_NAME = M.SEARCH_NAME_P1
+							)
+						)
+						AND (
+							M.SEARCH_NAME_P2 IS NULL
+							OR NOT EXISTS (
+								SELECT 1
+								FROM OSS_DOWNLOADLOCATION DL_P2
+								WHERE DL_P2.PURL IS NOT NULL AND DL_P2.PURL <![CDATA[<>]]> '' AND DL_P2.PURL = M.SEARCH_NAME_P2
+							)
+						)
+						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') = ''
+							THEN
+								(
+									M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+								)
+								OR
+								(
+									M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+								)
+							ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+						END
+					)
 			   	) TBL
 			   	GROUP BY TBL.OSS_NAME
 			   	HAVING COUNT(TBL.OSS_NAME) <![CDATA[>]]> 1
@@ -1252,34 +1435,64 @@
 			]]>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
-			AND EXISTS (
-				SELECT 1
-				FROM NVD_DATA_V3
-				WHERE CVE_ID = #{cveId}
-				AND VERSION = CASE WHEN IFNULL(T1.OSS_VERSION, '') = '' THEN VERSION ELSE T1.OSS_VERSION END
-				AND (
-					PRODUCT = T1.OSS_NAME 
-					OR REPLACE(PRODUCT, '_', ' ') = T1.OSS_NAME
-					OR EXISTS (
-						SELECT 1
-						FROM OSS_NICKNAME
-						WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID
-						AND OSS_NICKNAME = REPLACE(PRODUCT, '_', ' ')
-					)
-					OR VENDORPRODUCT = (
-						(
-							CASE 
-								WHEN T5.CPE23URI LIKE 'cpe:2.3:%' THEN 
-								   	CONCAT(
-								      	SUBSTRING_INDEX(SUBSTRING_INDEX(T5.CPE23URI, ':', 4), ':', -1),
-								         	'-',
-								   		SUBSTRING_INDEX(SUBSTRING_INDEX(T5.CPE23URI, ':', 5), ':', -1)
-								   	)
-								ELSE 
-							   		REPLACE(T5.CPE23URI, ':', '-')
-								END
+			AND (
+				EXISTS (
+					SELECT 1
+					FROM NVD_DATA_V3
+					WHERE CVE_ID = #{cveId}
+					AND VERSION = CASE WHEN IFNULL(T1.OSS_VERSION, '') = '' THEN VERSION ELSE T1.OSS_VERSION END
+					AND (
+						PRODUCT = T1.OSS_NAME 
+						OR REPLACE(PRODUCT, '_', ' ') = T1.OSS_NAME
+						OR EXISTS (
+							SELECT 1
+							FROM OSS_NICKNAME
+							WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID
+							AND OSS_NICKNAME = REPLACE(PRODUCT, '_', ' ')
+						)
+						OR VENDORPRODUCT = (
+							(
+								CASE 
+									WHEN T5.CPE23URI LIKE 'cpe:2.3:%' THEN 
+									   	CONCAT(
+									      	SUBSTRING_INDEX(SUBSTRING_INDEX(T5.CPE23URI, ':', 4), ':', -1),
+									         	'-',
+									   		SUBSTRING_INDEX(SUBSTRING_INDEX(T5.CPE23URI, ':', 5), ':', -1)
+									   	)
+									ELSE 
+								   		REPLACE(T5.CPE23URI, ':', '-')
+									END
+							)
 						)
 					)
+				)
+				OR EXISTS (
+					SELECT 1
+					FROM OSV_SEARCH_MASTER M
+					WHERE M.ID = #{cveId}
+					AND (
+						T1.OSS_NAME = M.SEARCH_NAME_P1
+						OR EXISTS (
+				            SELECT 1
+				            FROM OSS_DOWNLOADLOCATION DL
+				            WHERE DL.OSS_COMMON_ID IN (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = T1.OSS_NAME)
+				            AND DL.PURL IS NOT NULL
+				            AND DL.PURL <![CDATA[<>]]> ''
+				            AND M.SEARCH_NAME_P2 = DL.PURL
+				        )
+						OR T1.OSS_NAME = M.SEARCH_NAME_P3
+					)
+					AND CASE WHEN IFNULL(T1.OSS_VERSION, '') = ''
+						THEN
+							(
+								M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(T1.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+							)
+							OR
+							(
+								M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(T1.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+							)
+						ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+					END
 				)
 			)
 		</if>

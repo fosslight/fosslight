@@ -145,7 +145,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		ossMaster.setCveIdText();
+//		ossMaster.setCveIdText();
 		int records = ossMapper.selectOssMasterTotalCount(ossMaster);
 		ossMaster.setTotListSize(records);
 		
