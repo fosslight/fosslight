@@ -8080,6 +8080,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		vulnScore.put("High", 0);
 		vulnScore.put("Medium", 0);
 		vulnScore.put("Low", 0);
+		vulnScore.put("?", 0);
 		
 		Map<String, Object> vulnScoreResolution = new LinkedHashMap<>();
 		vulnScoreResolution.put("Unresolved", 0);
@@ -8538,9 +8539,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// Count graph by vulnerability score range for all CVE IDs
 		String cveId = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
 		String cvssScore = oc.getCvssScore();
+		String vulnerabilityResolution = avoidNull(oc.getVulnerabilityResolution());
+		boolean isFixed = !isEmpty(vulnerabilityResolution) && "Fixed".equalsIgnoreCase(vulnerabilityResolution);
 		String scoreStr = "";
 		
-		if (!isEmpty(cvssScore)) {
+		if (!isFixed && !isEmpty(cvssScore)) {
 			if (CommonFunction.isBigDecimal(cvssScore)) {
 				BigDecimal score = new BigDecimal(cvssScore);
 				if (score.compareTo(new BigDecimal("9.0")) >= 0) {
@@ -8568,8 +8571,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// Vulnerability resolution graph
-		if (!isEmpty(oc.getVulnerabilityResolution())) {
-			String vulnerabilityResolution = oc.getVulnerabilityResolution();
+		if (!isEmpty(vulnerabilityResolution)) {
 			if (vulnScoreResolution.containsKey(vulnerabilityResolution)) {
 				int count = (int) vulnScoreResolution.get(vulnerabilityResolution);
 				count++;
@@ -8589,6 +8591,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				vulnScoreByOssVersionMap.put("High", 0);
 				vulnScoreByOssVersionMap.put("Medium", 0);
 				vulnScoreByOssVersionMap.put("Low", 0);
+				vulnScoreByOssVersionMap.put("?", 0);
 				if (vulnScoreByOssVersionMap.containsKey(scoreStr)) {
 					vulnScoreByOssVersionMap.replace(scoreStr, 1);
 				}
