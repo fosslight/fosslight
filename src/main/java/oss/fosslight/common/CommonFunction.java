@@ -1609,10 +1609,14 @@ public class CommonFunction extends CoTopComponent {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		if (reportData != null) {
+			Set<String> reportKey = new HashSet<>();
 			Map<String, OssComponents> reportMap = new HashMap<>();
+			
 			for (OssComponents report : reportData) {
 				String key = (report.getOssName() + "_" + report.getOssVersion() + "_" + report.getCveId()).toUpperCase();
-				reportMap.put(key, report);
+				if (reportKey.add(key)) {
+					reportMap.put(key, report);
+				}
 			}
 			
 			for (OssComponents bean : ossComponents) {

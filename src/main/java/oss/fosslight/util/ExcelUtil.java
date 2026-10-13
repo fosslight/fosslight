@@ -1107,6 +1107,7 @@ public class ExcelUtil extends CoTopComponent {
 						securityCommentsCol = colIdx;
 						break;
 					case "CVE ID":
+					case "VULNERABILITY ID":
 						if (cveIdCol > -1) {
 							dupColList.add(value);
 						}
