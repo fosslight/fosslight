@@ -6203,25 +6203,34 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			// vulnerability
 			if (!isEmpty(ossName) && !ossName.equals("-")) {
-				OssMaster param = new OssMaster();
-				param.setOssName(ossName);
-				param.setOssVersion(isEmpty(ossVersion) ? "N/A" : ossVersion);
-				Map<String, Object> vulnMap = vulnerabilityService.getVulnListByOssName(param);
-				List<Vulnerability> vulnList = (List<Vulnerability>) vulnMap.get("rows");
-				if (vulnList != null && !vulnList.isEmpty()) {
-					for (Vulnerability vulnerability : vulnList) {
-						String cveId = vulnerability.getCveId();
-						String key = bomRef + "_" + cveId;
-						if (!checkCveIdList.contains(key)) {
-							org.cyclonedx.model.vulnerability.Vulnerability vuln = new org.cyclonedx.model.vulnerability.Vulnerability();
-							Source vulnSource = new Source();
-							vulnSource.setName("NVD"); // source set name : NVD
-							vulnSource.setUrl("https://nvd.nist.gov/vuln/detail/" + cveId); // source set nvd url
-							vuln.setBomRef(bomRef);
-							vuln.setId(cveId);
-							vuln.setSource(vulnSource);
-							vulnerablityList.add(vuln);
-							checkCveIdList.add(key);
+				OssMaster ossMaster = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ossVersion)).toUpperCase());
+				if (ossMaster != null) {
+					List<Vulnerability> vulnerabilityList = ossService.getMergedVulnerabilityList(ossMaster);
+					if (CollectionUtils.isNotEmpty(vulnerabilityList)) {
+						for (Vulnerability vulnerability : vulnerabilityList) {
+							String cveId = vulnerability.getId();
+							String key = bomRef + "_" + cveId;
+							if (!checkCveIdList.contains(key)) {
+								String source = vulnerability.getSource();
+								String url = "";
+								if (cveId.startsWith("CVE-") && source.contains("NVD")) {
+									source = "NVD";
+									url = "https://nvd.nist.gov/vuln/detail/" + cveId;
+								} else {
+									source = "OSV";
+									url = "https://osv.dev/vulnerability/" + cveId;
+								}
+								
+								org.cyclonedx.model.vulnerability.Vulnerability vuln = new org.cyclonedx.model.vulnerability.Vulnerability();
+								Source vulnSource = new Source();
+								vulnSource.setName(source);
+								vulnSource.setUrl(url);
+								vuln.setBomRef(bomRef);
+								vuln.setId(cveId);
+								vuln.setSource(vulnSource);
+								vulnerablityList.add(vuln);
+								checkCveIdList.add(key);
+							}
 						}
 					}
 				}
