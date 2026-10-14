@@ -382,8 +382,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						try {
 							FileUploadErrorCode validationError;
 							if (("yaml").equalsIgnoreCase(originalFileExt) || ("yml").equalsIgnoreCase(originalFileExt)) {
-								validationError = validateSpdxContent(originalFileExt,
-										readUtf8Content(Files.readAllBytes(tempFile.toPath())));
+								validationError = validateSpdxContent(originalFileExt, readUtf8Content(Files.readAllBytes(tempFile.toPath())));
 							} else {
 								validationError = validateSpdxContent(originalFileExt, contentStr);
 							}
@@ -423,10 +422,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 					
 					if (!isConvert) {
 						if (isEmpty(upFile.getUploadErrorCode())) {
-							setUploadError(upFile,
-									isCycloneDxFile ? FileUploadErrorCode.CDX_CONVERSION_FAILED
-											: FileUploadErrorCode.SPDX_CONVERSION_FAILED,
-									null);
+							setUploadError(upFile, isCycloneDxFile ? FileUploadErrorCode.CDX_CONVERSION_FAILED : FileUploadErrorCode.SPDX_CONVERSION_FAILED, null);
 						}
 						return new UploadProcessResult(upFile, true);
 					}
@@ -2748,7 +2744,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		}
 		
 		if (!CollectionUtils.isEmpty(orgFileInfoList)) {
+			String fileSeq = "";
 			for (T2File orgFile : orgFileInfoList) {
+				String refFileSeq = orgFile.getRefFileSeq();
 				String baseFile = orgFile.getLogiPath() + "/" + orgFile.getLogiNm();
 				
 				UUID randomUUID = UUID.randomUUID();
@@ -2772,11 +2770,16 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						fileInfo.setLogiPath(orgFile.getLogiPath());
 						fileInfo.setLogiThumbPath(orgFile.getLogiThumbPath());
 					}
+					if (!isEmpty(refFileSeq)) {
+						fileInfo.setRefFileSeq(fileSeq);
+					}
 					
 					fileMapper.insertCopyPhysicalFileInfo(fileInfo);
 					if (!isFileId) {
 						fileInfo = selectFileInfoById(newFileId);
 						newFileId = fileInfo.getFileSeq();
+					} else {
+						fileSeq = fileInfo.getFileSeq();
 					}
 					fileCopyFlag = true;
 				} else {

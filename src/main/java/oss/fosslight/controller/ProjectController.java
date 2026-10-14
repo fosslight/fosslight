@@ -3804,9 +3804,7 @@ public class ProjectController extends CoTopComponent {
 				}
 				
 				if (CollectionUtils.isNotEmpty(list) && !list.get(0).isUploadSucc()) {
-					resultList.add(StringUtil.isEmpty(list.get(0).getUploadErrorCode())
-							? FileUploadErrorCode.FILE_CONVERSION_FAILED.getCode()
-							: list.get(0).getUploadErrorCode());
+					resultList.add(StringUtil.isEmpty(list.get(0).getUploadErrorCode()) ? FileUploadErrorCode.FILE_CONVERSION_FAILED.getCode() : list.get(0).getUploadErrorCode());
 					resultList.add(list.get(0).getComments());
 					return toJson(resultList);
 				}

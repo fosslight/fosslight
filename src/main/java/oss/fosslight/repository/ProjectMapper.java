@@ -491,4 +491,6 @@ public interface ProjectMapper {
 	Double selectMaxProjectVersion(@Param("prjName") String prjName);
 	
 	List<Vulnerability> selectMaxScoreSecurityListForProject(ProjectIdentification identification);
+
+	List<Project> selectProjectFileListForCopy(@Param("prjId") String prjId, @Param("identificationCsvFileId") String identificationCsvFileId);
 }

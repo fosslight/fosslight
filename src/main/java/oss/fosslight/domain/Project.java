@@ -406,6 +406,7 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The identification csv file id. */
 	private String identificationCsvFileId;
+	private String copyIdentificationCsvFileId;
 	private String identificationCsvFileSeq;
 	
 	/** The dep csv file id. */
@@ -4911,7 +4912,15 @@ public class Project extends ComBean implements Serializable {
 	public String getIdentificationCsvFileFlag() {
 		return identificationCsvFileFlag;
 	}
-
+	
+	public void setCopyIdentificationCsvFileId(String copyIdentificationCsvFileId) {
+		this.copyIdentificationCsvFileId = copyIdentificationCsvFileId;
+	}
+	
+	public String getCopyIdentificationCsvFileId() {
+		return copyIdentificationCsvFileId;
+	}
+	
 	public void setIdentificationCsvFileFlag(String identificationCsvFileFlag) {
 		this.identificationCsvFileFlag = identificationCsvFileFlag;
 	}

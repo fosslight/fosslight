@@ -2790,6 +2790,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributeDeployTime)">
 				, DISTRIBUTE_DEPLOY_TIME = #{distributeDeployTime}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationCsvFileId)">
+				, IDENTIFICATION_CSV_FILE_ID = #{identificationCsvFileId}
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcCsvFileId)">
 				, SRC_CSV_FILE_ID = #{srcCsvFileId}
 			</if>
@@ -7320,7 +7323,6 @@
 	</select>
 	
 	<insert id="insertFileAddList" parameterType="oss.fosslight.domain.Project">
-	/* ProjectMapper insertFileAddList */
 		INSERT INTO	PROJECT_FILELIST (
 			REFERENCE_ID,
 			REFERENCE_DIV,
@@ -7343,6 +7345,13 @@
 		FROM PROJECT_FILELIST
 		WHERE REFERENCE_ID = #{prjId}
 		AND FILE_ID = #{fileId}
+	</select>
+	
+	<select id="selectProjectFileListForCopy" parameterType="string" resultType="oss.fosslight.domain.Project">
+		SELECT REFERENCE_ID, REFERENCE_DIV, FILE_SEQ AS IDENTIFICATION_CSV_FILE_SEQ, FILE_ID AS IDENTIFICATION_CSV_FILE_ID, COMPONENT_COUNT
+		FROM PROJECT_FILELIST 
+		WHERE REFERENCE_ID = #{prjId}
+		AND FILE_SEQ IN (SELECT FILE_SEQ FROM T2_FILE WHERE FILE_ID = #{identificationCsvFileId} AND DEL_YN = 'N')
 	</select>
 	
 	<select id="selectProjectAddList" parameterType="string" resultType="oss.fosslight.domain.Project">

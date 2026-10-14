@@ -1999,6 +1999,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					newBean.setDistributeSoftwareType(orgBean.getDistributeSoftwareType());
 				}
 				
+				if (!isEmpty(orgBean.getIdentificationCsvFileId())) {
+					project.setCopyIdentificationCsvFileId(orgBean.getIdentificationCsvFileId());
+					newBean.setIdentificationCsvFileId(fileService.copyPhysicalFile(orgBean.getIdentificationCsvFileId(), null, true));
+					if (!isEmpty(newBean.getIdentificationCsvFileId())) {
+						project.setIdentificationCsvFileId(newBean.getIdentificationCsvFileId());
+					}
+				}
+				
 				if (!isEmpty(orgBean.getSrcCsvFileId())) {
 					newBean.setSrcCsvFileId(fileService.copyPhysicalFile(orgBean.getSrcCsvFileId(), null, true));
 				}
@@ -2370,6 +2378,40 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                 commentService.registComment(commHisBean, false);
             }
         }
+		
+		if (!isEmpty(project.getCopyIdentificationCsvFileId()) && !isEmpty(project.getIdentificationCsvFileId())) {
+			copyProjectFileList(project.getCopyPrjId(), project.getPrjId(), project.getCopyIdentificationCsvFileId(), project.getIdentificationCsvFileId());
+		}
+	}
+	
+	private void copyProjectFileList(String sourcePrjId, String targetPrjId, String sourceIdentificationCsvFileId, String targetIdentificationCsvFileId) {
+		List<Project> sourceProjectFileList = projectMapper.selectProjectFileListForCopy(sourcePrjId, sourceIdentificationCsvFileId);
+		List<T2File> sourceFileList = fileService.getFileInfoList(sourceIdentificationCsvFileId);
+		List<T2File> targetFileList = fileService.getFileInfoList(targetIdentificationCsvFileId);
+		
+		if (CollectionUtils.isNotEmpty(sourceProjectFileList) && CollectionUtils.isNotEmpty(sourceFileList) && CollectionUtils.isNotEmpty(targetFileList)) {
+			sourceProjectFileList.sort(Comparator.comparingLong(p -> Long.parseLong(p.getIdentificationCsvFileSeq())));
+			sourceFileList.sort(Comparator.comparingLong(f -> Long.parseLong(f.getFileSeq())));
+			targetFileList.sort(Comparator.comparingLong(f -> Long.parseLong(f.getFileSeq())));
+			
+			Map<String, String> fileSeqMap = new HashMap<>();
+			
+			for (int i = 0; i < sourceFileList.size(); i++) {
+			    fileSeqMap.put(sourceFileList.get(i).getFileSeq(), targetFileList.get(i).getFileSeq());
+			}
+			
+			for (Project source : sourceProjectFileList) {
+			    Project target = new Project();
+
+			    target.setPrjId(targetPrjId);
+			    target.setReferenceDiv(source.getReferenceDiv());
+			    target.setIdentificationCsvFileSeq(fileSeqMap.get(source.getIdentificationCsvFileSeq()));
+			    target.setIdentificationCsvFileId(targetIdentificationCsvFileId);
+			    target.setComponentCount(source.getComponentCount());
+
+			    projectMapper.insertFileAddList(target);
+			}
+		}
 	}
 	
 	@Transactional

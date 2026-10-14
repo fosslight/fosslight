@@ -100,10 +100,12 @@
 		    SIZE,
 		    REG_DT,
 		    REG_ID,
-		    CONTENT_TYPE
+		    CONTENT_TYPE,
+		    REF_FILE_SEQ
 		FROM T2_FILE
 		WHERE FILE_ID=#{fileId}
 		AND DEL_YN='N'
+		ORDER BY FILE_SEQ
 	</select>
 	
 	<select id="getFileInfoListKessan" parameterType="oss.fosslight.domain.T2File" resultType="oss.fosslight.domain.T2File">
@@ -348,8 +350,8 @@
 	</select>
 	
 	<insert id="insertCopyPhysicalFileInfo" parameterType="oss.fosslight.domain.T2File">
-		INSERT INTO T2_FILE ( FILE_ID, GUBN, GUBN_CHK, ORIG_NM, LOGI_NM, LOGI_PATH, LOGI_THUMB_NM, LOGI_THUMB_PATH, EXT, SIZE, REG_ID, UPD_ID, CONTENT_TYPE ) 
-		SELECT #{fileId}, GUBN, GUBN_CHK, ORIG_NM, #{logiNm}, #{logiPath}, #{logiThumbNm}, #{logiThumbPath}, EXT, SIZE, #{loginUserName}, #{loginUserName}, CONTENT_TYPE
+		INSERT INTO T2_FILE ( FILE_ID, GUBN, GUBN_CHK, ORIG_NM, LOGI_NM, LOGI_PATH, LOGI_THUMB_NM, LOGI_THUMB_PATH, EXT, SIZE, REG_ID, UPD_ID, CONTENT_TYPE, REF_FILE_SEQ) 
+		SELECT #{fileId}, GUBN, GUBN_CHK, ORIG_NM, #{logiNm}, #{logiPath}, #{logiThumbNm}, #{logiThumbPath}, EXT, SIZE, #{loginUserName}, #{loginUserName}, CONTENT_TYPE, #{refFileSeq}
 		FROM T2_FILE
 		WHERE FILE_SEQ = #{fileSeq}
 	</insert>
