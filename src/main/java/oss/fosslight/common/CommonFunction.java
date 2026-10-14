@@ -2815,36 +2815,41 @@ public class CommonFunction extends CoTopComponent {
 		List<String> licenseNameList = new ArrayList<String>();
 		
 		for (OssLicense bean : list) {
-			ProjectIdentification liBean = new ProjectIdentification();
-			liBean.setLicenseId(bean.getLicenseId());
-			liBean.setOssLicenseComb(bean.getOssLicenseComb());
-			liBean.setLicenseName(bean.getLicenseName());
-			liBean.setLicenseText(selectedLicenseBean.getLicenseText());
-			liBean.setComponentId(selectedLicenseBean.getComponentId());
-			liBean.setGridId(selectedLicenseBean.getGridId());
-			
-			if (bean.getLicenseName().toUpperCase().trim().equals(selectedLicenseName.toUpperCase().trim())) {
-				boolean isDup = false;
-				
-				for (String licenseName : licenseNameList){
-					if (licenseName.toUpperCase().trim().equals(bean.getLicenseName().toUpperCase().trim())){
-						isDup = true;
-					}
-				}
-				
-				if (isDup){
-					liBean.setExcludeYn(CoConstDef.FLAG_YES);
-				}else{
-					liBean.setExcludeYn(CoConstDef.FLAG_NO);
-				}
-				
-				hasLicense = true;
-			} else {
-//				liBean.setExcludeYn(CoConstDef.FLAG_YES);
+			if (isEmpty(selectedLicenseName)) {
+				continue;
 			}
-			
-			licenseNameList.add(bean.getLicenseName());
-			licenseList.add(liBean);
+			if (selectedLicenseName.equalsIgnoreCase(bean.getLicenseName())) {
+				ProjectIdentification liBean = new ProjectIdentification();
+				liBean.setLicenseId(bean.getLicenseId());
+				liBean.setOssLicenseComb(bean.getOssLicenseComb());
+				liBean.setLicenseName(bean.getLicenseName());
+				liBean.setLicenseText(selectedLicenseBean.getLicenseText());
+				liBean.setComponentId(selectedLicenseBean.getComponentId());
+				liBean.setGridId(selectedLicenseBean.getGridId());
+				
+				if (bean.getLicenseName().toUpperCase().trim().equals(selectedLicenseName.toUpperCase().trim())) {
+					boolean isDup = false;
+					
+					for (String licenseName : licenseNameList){
+						if (licenseName.toUpperCase().trim().equals(bean.getLicenseName().toUpperCase().trim())){
+							isDup = true;
+						}
+					}
+					
+					if (isDup){
+						liBean.setExcludeYn(CoConstDef.FLAG_YES);
+					}else{
+						liBean.setExcludeYn(CoConstDef.FLAG_NO);
+					}
+					
+					hasLicense = true;
+				} else {
+//					liBean.setExcludeYn(CoConstDef.FLAG_YES);
+				}
+				
+				licenseNameList.add(bean.getLicenseName());
+				licenseList.add(liBean);
+			}
 		}
 		
 		if (!hasLicense) {
