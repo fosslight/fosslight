@@ -2200,12 +2200,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		int ossComponentIdx = 1;
 		
 		Map<String, Vulnerability> securityDataMap = new HashMap<>();
+		Map<String, String> fileSeqMap = new HashMap<>();
+		
+		if (!isEmpty(project.getCopyIdentificationCsvFileId()) && !isEmpty(project.getIdentificationCsvFileId())) {
+			fileSeqMap = copyProjectFileList(project.getCopyPrjId(), project.getPrjId(), project.getCopyIdentificationCsvFileId(), project.getIdentificationCsvFileId());
+		}
 		
 		for (ProjectIdentification ossBean : ossComponents) {
 			ossBean.setReferenceId(prjId);
 			ossBean.setReportFileId(null);
 			ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
 			ossBean.setCopyrightText(ossBean.getCopyright());
+			ossBean.setRefLoadedVal(fileSeqMap.get(ossBean.getRefLoadedVal()));
 			ossComponentsIdList.add(ossBean.getComponentId());
 			insertOssComponentList.add(ossBean);
 		}
@@ -2378,13 +2384,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
                 commentService.registComment(commHisBean, false);
             }
         }
-		
-		if (!isEmpty(project.getCopyIdentificationCsvFileId()) && !isEmpty(project.getIdentificationCsvFileId())) {
-			copyProjectFileList(project.getCopyPrjId(), project.getPrjId(), project.getCopyIdentificationCsvFileId(), project.getIdentificationCsvFileId());
-		}
 	}
 	
-	private void copyProjectFileList(String sourcePrjId, String targetPrjId, String sourceIdentificationCsvFileId, String targetIdentificationCsvFileId) {
+	private Map<String, String> copyProjectFileList(String sourcePrjId, String targetPrjId, String sourceIdentificationCsvFileId, String targetIdentificationCsvFileId) {
+		Map<String, String> fileSeqMap = new HashMap<>();
 		List<Project> sourceProjectFileList = projectMapper.selectProjectFileListForCopy(sourcePrjId, sourceIdentificationCsvFileId);
 		List<T2File> sourceFileList = fileService.getFileInfoList(sourceIdentificationCsvFileId);
 		List<T2File> targetFileList = fileService.getFileInfoList(targetIdentificationCsvFileId);
@@ -2393,8 +2396,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			sourceProjectFileList.sort(Comparator.comparingLong(p -> Long.parseLong(p.getIdentificationCsvFileSeq())));
 			sourceFileList.sort(Comparator.comparingLong(f -> Long.parseLong(f.getFileSeq())));
 			targetFileList.sort(Comparator.comparingLong(f -> Long.parseLong(f.getFileSeq())));
-			
-			Map<String, String> fileSeqMap = new HashMap<>();
 			
 			for (int i = 0; i < sourceFileList.size(); i++) {
 			    fileSeqMap.put(sourceFileList.get(i).getFileSeq(), targetFileList.get(i).getFileSeq());
@@ -2412,6 +2413,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			    projectMapper.insertFileAddList(target);
 			}
 		}
+		
+		return fileSeqMap;
 	}
 	
 	@Transactional

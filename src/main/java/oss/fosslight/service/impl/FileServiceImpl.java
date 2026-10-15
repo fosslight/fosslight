@@ -1467,8 +1467,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    return file;
 	}
 	
-	private boolean convertCdxToExcel(File tempFile, String contentStr, String convertFullStrPath,
-			UploadFile uploadFile) throws Exception {
+	private boolean convertCdxToExcel(File tempFile, String contentStr, String convertFullStrPath, UploadFile uploadFile) throws Exception {
 		String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
 		
 	    Bom bom;
@@ -1493,9 +1492,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        }
 
 	        log.error("Error Message: {}", e.getMessage());
-	        setUploadError(uploadFile,
-	        		isXml ? FileUploadErrorCode.CDX_XML_PARSE_ERROR : FileUploadErrorCode.CDX_JSON_PARSE_ERROR,
-	        		e.getMessage());
+	        setUploadError(uploadFile, isXml ? FileUploadErrorCode.CDX_XML_PARSE_ERROR : FileUploadErrorCode.CDX_JSON_PARSE_ERROR, e.getMessage());
 	        return false;
 	    }
 
@@ -1540,8 +1537,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        Map<String, String> bomRefToSpdxIdMap = new HashMap<>();
 	        List<String> packageInfoidentifierList = new ArrayList<>();
 	        
-	        if (bom.getComponents() != null) {
-	            for (Component c : bom.getComponents()) {
+	        List<Component> allComponents = new ArrayList<>();
+	        collectComponents(bom.getComponents(), allComponents);
+	        
+	        if (CollectionUtils.isNotEmpty(allComponents)) {
+	            for (Component c : allComponents) {
 	                Row row = pkgSheet.createRow(rowIdx++);
 
 	                // [A] Package Name (0)
@@ -1758,6 +1758,17 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        log.error("convertCdxToExcel failed : " + e.getMessage());
 	        setUploadError(uploadFile, FileUploadErrorCode.CDX_CONVERSION_FAILED, e.getMessage());
 	        return false;
+	    }
+	}
+
+	private void collectComponents(List<Component> components, List<Component> result) {
+		if (CollectionUtils.isEmpty(components)) {
+	        return;
+	    }
+
+	    for (Component component : components) {
+	        result.add(component);
+	        collectComponents(component.getComponents(), result);
 	    }
 	}
 
