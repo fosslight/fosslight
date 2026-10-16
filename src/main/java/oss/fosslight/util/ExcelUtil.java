@@ -1758,7 +1758,7 @@ public class ExcelUtil extends CoTopComponent {
 		}
 
 		try {
-			return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
+			return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8.name());
 		} catch (Exception e) {
 			return value;
 		}
