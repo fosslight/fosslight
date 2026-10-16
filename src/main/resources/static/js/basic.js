@@ -2963,6 +2963,18 @@ $(document).ready(function () {
     };
 });
 
+function parseEditorContent(html) {
+    // Keep validation separate from the editor DOM and the original HTML.
+    var content = document.createElement('div');
+    content.innerHTML = html;
+    return content;
+}
+
+function hasEditorContent(html) {
+    var content = parseEditorContent(html);
+    return content.textContent.trim() !== "" || content.querySelector('img') !== null;
+}
+
 /**
  * 문자열이 빈 문자열인지 체크하여 결과값을 리턴한다.
  * @param str       : 체크할 문자열

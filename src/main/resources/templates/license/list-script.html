@@ -384,7 +384,7 @@
                         .set('onok', function(e){
                             if (e) {
                                 var editorVal = $("#deleteLicenseEditor").summernote('code');
-                                if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+                                if (hasEditorContent(editorVal)) {
                                 	fn.deleteSubmit(ids);
                                 } else {
                                     alertify.alert([[#{msg.project.required.comments}]], function(){});

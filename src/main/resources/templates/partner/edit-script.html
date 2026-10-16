@@ -195,7 +195,7 @@ var evt = {
 var fn = {
 	approvePermission : function () {
 		var editorVal = $("#permissionConfirmEditor").summernote('code');
-		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		if (hasEditorContent(editorVal)) {
 		} else {
 			editorVal = "";
 		}
@@ -223,7 +223,7 @@ var fn = {
 	},
 	rejectPermission : function () {
 		var editorVal = $("#permissionConfirmEditor").summernote('code');
-		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		if (hasEditorContent(editorVal)) {
 		} else {
 			editorVal = "";
 		}
@@ -861,7 +861,7 @@ var fn = {
 	       		.set('onok', function(e) {
 	       			if (e) {
 	       				var comment = $("#parSaveEditor").summernote('code');
-	       				if (("" != $(comment).text().trim() || $(comment).find('img').length > 0) && !isStatusChangeFlag) {
+	       				if (hasEditorContent(comment) && !isStatusChangeFlag) {
 	       					$("#userComment").val(comment);
 	       				} else {
 	       					$('#userComment').val("");
@@ -905,7 +905,7 @@ var fn = {
 		$(".permissionRadio").find(".active").find("input").prop("checked", true);
 		
 		var editorVal = $("#descriptionTextarea").summernote('code');
-		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		if (hasEditorContent(editorVal)) {
 			$('#description').val(replaceWithLink(editorVal));
 		} else {
 			$('#description').val("");
@@ -1078,7 +1078,7 @@ var fn = {
            	.set('onok', function(e){
            		if (e) {
            			var comment = $("#parDelEditor").summernote('code');
-               		if ("" != $(comment).text().trim() || $(editorVal).find('img').length > 0) {
+               		if (hasEditorContent(comment)) {
                			var partnerId = $('input[name=partnerId]').val();
     					$.ajax({
     						url : '/partner/delAjax',

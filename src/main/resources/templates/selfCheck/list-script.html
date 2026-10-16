@@ -315,7 +315,7 @@ var fn = {
 	           	alertify.delSelfDialog(innerHtml, function () {
 					var editorVal = $("#delSelfEditor").summernote('code');
 
-					if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+					if (hasEditorContent(editorVal)) {
 						fn.deleteSubmit(permissions, notPermissions);
 					} else {
 						alertify.alert([[#{msg.project.required.comments}]], function () { });

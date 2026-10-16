@@ -43,7 +43,7 @@
     <!-- bootstrap-switch -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.min.js"></script>
 
-	<script th:src="@{/js/basic.js}"></script>
+	<script th:src="@{/js/basic.js(v=${@environment.getRequiredProperty('app.assets.version')})}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"/>

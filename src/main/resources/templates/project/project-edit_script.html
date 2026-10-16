@@ -44,7 +44,7 @@
     <!-- bootstrap-switch -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.min.js"></script>
     <!-- Common function js -->
-    <script th:src="@{/js/basic.js}"></script>
+    <script th:src="@{/js/basic.js(v=${@environment.getRequiredProperty('app.assets.version')})}"></script>
     
     <!-- include summernote bs4 css/js-->
    	<link href="//cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">

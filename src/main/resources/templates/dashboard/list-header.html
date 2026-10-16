@@ -27,7 +27,7 @@
     <script th:src="@{/js/flot/plugins/jquery.flot.pie.js}"></script>
     <script th:src="@{/js/datatables/jquery.dataTables.min.js}"></script>
     <script th:src="@{/js/datatables/dataTables.bootstrap4.min.js}"></script>
-    <script th:src="@{/js/basic.js}"></script>
+    <script th:src="@{/js/basic.js(v=${@environment.getRequiredProperty('app.assets.version')})}"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"/>

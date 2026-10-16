@@ -402,7 +402,7 @@
 							.set('onok', function(e){
 								var comment = $("#promptPopupEditor").summernote('code');
 	                            if (e) {
-	                            	if ("" != $(comment).text().trim() || $(comment).find('img').length > 0) {
+	                            	if (hasEditorContent(comment)) {
 	                            		oss_lst_fn.multiDelAjax(deleteIds, comment);
 	                                } else {
 	                                	alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {});

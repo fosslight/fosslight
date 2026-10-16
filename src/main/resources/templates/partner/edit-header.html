@@ -42,9 +42,9 @@
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.full.min.js"></script>
     <!-- Common function js -->
-    <script th:src="@{/js/basic.js}"></script>
+    <script th:src="@{/js/basic.js(v=${@environment.getRequiredProperty('app.assets.version')})}"></script>
     <!-- Grid Common function js -->
-    <script th:src="@{/js/grid.comonFunc.js}"></script>
+    <script th:src="@{/js/grid.comonFunc.js(v=${@environment.getRequiredProperty('app.assets.version')})}"></script>
     
     <!-- include summernote bs4 css/js-->
    	<link href="//cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
