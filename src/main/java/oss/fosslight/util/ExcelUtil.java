@@ -1672,14 +1672,28 @@ public class ExcelUtil extends CoTopComponent {
 			}
 
 			Map<String, String> qualifiers = purl.getQualifiers();
-			String downloadUrl = qualifiers != null ? qualifiers.get("download_url") : null;
-			if (StringUtils.isNotBlank(downloadUrl)) {
-				return decodePurlValue(downloadUrl);
-			}
+			if ("generic".equalsIgnoreCase(type)) {
+				String downloadUrl = qualifiers != null ? qualifiers.get("download_url") : null;
+				if (StringUtils.isNotBlank(downloadUrl)) {
+					return decodePurlValue(downloadUrl);
+				}
 
-			String repositoryUrl = qualifiers != null ? qualifiers.get("repository_url") : null;
-			String resolvedRepositoryUrl = StringUtils.isNotBlank(repositoryUrl) ? decodePurlValue(repositoryUrl) : "";
-			String normalizedRepositoryUrl = StringUtils.removeEnd(resolvedRepositoryUrl.trim(), "/");
+				String repositoryUrl = qualifiers != null ? qualifiers.get("repository_url") : null;
+				if (StringUtils.isNotBlank(repositoryUrl)) {
+					String normalizedRepositoryUrl = StringUtils.removeEnd(decodePurlValue(repositoryUrl).trim(), "/");
+					if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
+						return normalizedRepositoryUrl;
+					}
+				}
+
+				String vcsUrl = qualifiers != null ? qualifiers.get("vcs_url") : null;
+				if (StringUtils.isNotBlank(vcsUrl)) {
+					String normalizedVcsUrl = StringUtils.removeEnd(decodePurlValue(vcsUrl).trim(), "/");
+					if (StringUtils.isNotBlank(normalizedVcsUrl)) {
+						return normalizedVcsUrl;
+					}
+				}
+			}
 
 			switch (type) {
 				case "github":
@@ -1695,9 +1709,6 @@ public class ExcelUtil extends CoTopComponent {
 				case "pypi":
 						return "https://pypi.org/project/" + name;
 				case "maven":
-						if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
-							return normalizedRepositoryUrl;
-						}
 						if (StringUtils.isNotBlank(namespace)) {
 							return "https://mvnrepository.com/artifact/" + namespace + "/" + name;
 						}
