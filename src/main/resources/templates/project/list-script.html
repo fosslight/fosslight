@@ -1977,7 +1977,7 @@ var fn = {
 	           			if (e) {
 		           			var editorVal = $("#delPrjListEditor").summernote('code');
 		           			
-		           			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		           			if (hasEditorContent(editorVal)) {
 		           				chkPrjIds = fn.checkStatus(permissions);
 		 						fn.beforeDeleteSubmit(permissions, notPermissions, chkPrjIds);
 							} else {

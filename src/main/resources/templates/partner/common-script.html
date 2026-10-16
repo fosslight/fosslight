@@ -61,7 +61,7 @@
 		       		if (e) {
 		       			var editorVal = $("#partnerRejectEditor").summernote('code');
 		       			
-		       			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		       			if (hasEditorContent(editorVal)) {
 		       				var param = {status : 'PROG', partnerId : [[${detail.partnerId}]], userComment : replaceWithLink(editorVal)};
 
 		    				$.ajax({
@@ -186,7 +186,7 @@
 		               	}
 		               	
 		               	var editorVal = $("#partnerConfirmEditor").summernote('code');
-		       			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		       			if (hasEditorContent(editorVal)) {
 		       			} else {
 		       				editorVal = "";
 		       			}

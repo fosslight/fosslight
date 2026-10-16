@@ -357,7 +357,7 @@ var fn = {
 	       			
 	       			if (e) {
 	       				var comment = $("#parSaveEditor").summernote('code');
-	       				if (("" != $(comment).text().trim() || $(comment).find('img').length > 0) && !isStatusChangeFlag) {
+	       				if (hasEditorContent(comment) && !isStatusChangeFlag) {
 	       					$("#userComment").val(comment);
 	       				} else {
 	       					$('#userComment').val("");
@@ -573,7 +573,7 @@ var fn = {
 			if ("10" == data.resCd) {
 				if (isStatusChangeFlag) {
 					var comment = $("#parSaveEditor").summernote('code');
-       				if ("" == $(comment).text().trim()) {
+       				if ("" == parseEditorContent(comment).textContent.trim()) {
        					comment = "";
 					}
 					

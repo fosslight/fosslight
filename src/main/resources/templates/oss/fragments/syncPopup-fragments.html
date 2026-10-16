@@ -207,7 +207,7 @@
 
                         $("input[name=ossIds]").val(checkedOssList);
                         let editorVal = $("#syncOssEditor").summernote('code');
-                        if ("" == $(editorVal).text()) {
+                        if ("" == parseEditorContent(editorVal).textContent) {
                         	editorVal = "";
                         }
                         let ossIds = $("input[name=ossIds]").val();

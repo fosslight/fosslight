@@ -660,7 +660,7 @@
                         alertify.verConfirmDialog()
                         .set('onok', function(e) {
                         	var editorVal = $("#verConfirmEditor").summernote('code');
-            				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+            				if (hasEditorContent(editorVal)) {
                				} else {
                					editorVal = "";
                				}
@@ -767,7 +767,7 @@
                         .set('onok', function(e) {
                         	var editorVal = $("#editor3").summernote('code');
                         	
-     						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+     						if (hasEditorContent(editorVal)) {
      							var data = {
                                		"prjId": [[${project.prjId}]]
                                     , "verificationStatus": "PROG"

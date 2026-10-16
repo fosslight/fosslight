@@ -62,9 +62,9 @@
     
     <script th:src="@{/js/summernote/summernote-bs4.min.js}"></script>
     <!-- Common function js -->
-    <script th:src="@{/js/basic.js}"></script>
+    <script th:src="@{/js/basic.js(v=${@environment.getRequiredProperty('app.assets.version')})}"></script>
     <!-- Grid Common function js -->
-    <script th:src="@{/js/grid.comonFunc.js}"></script>
+    <script th:src="@{/js/grid.comonFunc.js(v=${@environment.getRequiredProperty('app.assets.version')})}"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"/>

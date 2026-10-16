@@ -114,7 +114,7 @@ var com_evt = {
            			if (e) {
 						var editorVal = $("#bomRejectEditor").summernote('code');
 
-						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+						if (hasEditorContent(editorVal)) {
 							var data = {"prjId": [[${project.prjId}]], "identificationStatus": "PROG", "userComment": editorVal};
 							com_fn.checkSave(data, "PROG");
 						} else {
@@ -362,7 +362,7 @@ var com_fn = {
        		alertify.bomConfirmDialog()
        		.set('onok', function(e) {
        			var editorVal = $("#bomConfirmEditor").summernote('code');
-       			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+       			if (hasEditorContent(editorVal)) {
    				} else {
    					editorVal = "";
    				}
@@ -2184,7 +2184,7 @@ var com_fn = {
 					}
 					
 					var editorVal = $("#bomRequestEditor").summernote('code');
-       				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+       				if (hasEditorContent(editorVal)) {
        				} else {
        					editorVal = "";
        				}

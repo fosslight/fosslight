@@ -260,7 +260,7 @@
            		.set('onok', function(e) {
            			if (e) {
 						var editorVal = $("#completeEditor").summernote('code');
-						if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+						if (hasEditorContent(editorVal)) {
 	       				} else {
 	       					editorVal = "";
 	       				}
@@ -327,7 +327,7 @@
                 	.set('onok', function(e) {
                 		if (e) {
 							var editorVal = $("#dropEditor").summernote('code');
-							if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+							if (hasEditorContent(editorVal)) {
 								if (distributionStatus == "PROC") {
 		    						var comment = [[#{msg.project.distribution.loading}]];
 		    						
@@ -407,7 +407,7 @@
 				.set('onok', function(event){
 					var editorVal = $("#prjDelEditor").summernote('code');
 
-					if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+					if (hasEditorContent(editorVal)) {
 						fn.deleteSubmit();
 					} else {
 						alertify.alert([[#{msg.project.required.comments}]], function () { });
@@ -664,7 +664,7 @@
 	var fn = {
 		approvePermission : function () {
 			var editorVal = $("#permissionConfirmEditor").summernote('code');
-			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+			if (hasEditorContent(editorVal)) {
 			} else {
 				editorVal = "";
 			}
@@ -692,7 +692,7 @@
 		},
 		rejectPermission : function () {
 			var editorVal = $("#permissionConfirmEditor").summernote('code');
-			if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+			if (hasEditorContent(editorVal)) {
 			} else {
 				editorVal = "";
 			}
@@ -1222,7 +1222,7 @@
 	       		.set('onok', function(e) {
 	       			if (e) {
 	       				var editorVal = $("#prjSaveEditor").summernote('code');
-	       				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+	       				if (hasEditorContent(editorVal)) {
 							$("input[name='userComment']").val(editorVal);
 						}
 	       				
@@ -1633,7 +1633,7 @@
 				//코멘트 저장
 				var editorVal = $("#modifiedCommentInPjtEditor").summernote('code');
 				
-				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+				if (hasEditorContent(editorVal)) {
 				} else {
 					alertify.alert([[#{msg.project.enter.comment}]], function(){});
 					
@@ -2025,7 +2025,7 @@
 							var userComment = "";
 							var summernoteVal = $("#editor3").summernote('code');
 							
-							if ("" != $(summernoteVal).text().trim() || $(summernoteVal).find('img').length > 0) {
+							if (hasEditorContent(summernoteVal)) {
 								userComment = summernoteVal;
 							}
 							
@@ -2123,7 +2123,7 @@
 			},
 			commentsIgnore : function(){
 				var editorVal = $("#reqToOpenTextareaAdmin").summernote('code');
-				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+				if (hasEditorContent(editorVal)) {
     			} else {
 					editorVal = "";
     			}
@@ -2343,7 +2343,7 @@
 						editorVal = $("#reqToOpenTextarea").summernote('code');
 					}
 					
-					if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+					if (hasEditorContent(editorVal)) {
 					} else {
 						alertify.alert([[#{msg.project.required.comments.reopen}]], function(){});
 						return false;

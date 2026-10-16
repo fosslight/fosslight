@@ -462,7 +462,7 @@ var fn = {
 	// 저장
 	saveSubmit : function(){
 		var editorVal = $("#editor").summernote('code');
-		if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+		if (hasEditorContent(editorVal)) {
 			$('input[name=comment]').val(replaceWithLink(editorVal));
 		} else {
 			$('input[name=comment]').val("");

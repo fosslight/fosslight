@@ -496,7 +496,7 @@
                 alertify.delOssDialog()
                     .set('onok', function(event){
                         var editorVal = $("#deleteOssEditor").summernote('code');
-                        if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+                        if (hasEditorContent(editorVal)) {
                         } else {
                         	alertify.alert([[#{msg.oss.required.deletion}]], function(){});
                             return false;
@@ -3283,7 +3283,7 @@
            		.set('onok', function(e) {
            			if (e) {
            				var editorVal = $("#ossSaveEditor").summernote('code');
-           				if ("" != $(editorVal).text().trim() || $(editorVal).find('img').length > 0) {
+           				if (hasEditorContent(editorVal)) {
 							$("input[name='comment']").val(editorVal);
 						} else {
 							var localDeactivateFlag = $("[name='deactivateFlag']").val();
