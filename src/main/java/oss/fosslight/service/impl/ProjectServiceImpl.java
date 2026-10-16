@@ -2202,8 +2202,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Vulnerability> securityDataMap = new HashMap<>();
 		Map<String, String> fileSeqMap = new HashMap<>();
 		
-		if (!isEmpty(project.getCopyIdentificationCsvFileId()) && !isEmpty(project.getIdentificationCsvFileId())) {
-			fileSeqMap = copyProjectFileList(project.getCopyPrjId(), project.getPrjId(), project.getCopyIdentificationCsvFileId(), project.getIdentificationCsvFileId());
+		if (!isBom && !isEmpty(project.getCopyIdentificationCsvFileId()) && !isEmpty(project.getIdentificationCsvFileId())) {
+			fileSeqMap = copyProjectFileList(copyPrjId, prjId, project.getCopyIdentificationCsvFileId(), project.getIdentificationCsvFileId());
 		}
 		
 		for (ProjectIdentification ossBean : ossComponents) {
@@ -2211,7 +2211,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			ossBean.setReportFileId(null);
 			ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
 			ossBean.setCopyrightText(ossBean.getCopyright());
-			ossBean.setRefLoadedVal(fileSeqMap.get(ossBean.getRefLoadedVal()));
+			if (!isBom) {
+				ossBean.setRefLoadedVal(fileSeqMap.get(ossBean.getRefLoadedVal()));
+			}
 			ossComponentsIdList.add(ossBean.getComponentId());
 			insertOssComponentList.add(ossBean);
 		}
@@ -2394,8 +2396,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (CollectionUtils.isNotEmpty(sourceProjectFileList) && CollectionUtils.isNotEmpty(sourceFileList) && CollectionUtils.isNotEmpty(targetFileList)) {
 			sourceProjectFileList.sort(Comparator.comparingLong(p -> Long.parseLong(p.getIdentificationCsvFileSeq())));
-			sourceFileList.sort(Comparator.comparingLong(f -> Long.parseLong(f.getFileSeq())));
-			targetFileList.sort(Comparator.comparingLong(f -> Long.parseLong(f.getFileSeq())));
 			
 			for (int i = 0; i < sourceFileList.size(); i++) {
 			    fileSeqMap.put(sourceFileList.get(i).getFileSeq(), targetFileList.get(i).getFileSeq());

@@ -103,7 +103,7 @@
 		    CONTENT_TYPE,
 		    REF_FILE_SEQ
 		FROM T2_FILE
-		WHERE FILE_ID=#{fileId}
+		WHERE FILE_ID = #{fileId}
 		AND DEL_YN='N'
 		ORDER BY FILE_SEQ
 	</select>

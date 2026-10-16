@@ -2786,8 +2786,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 					}
 					
 					fileMapper.insertCopyPhysicalFileInfo(fileInfo);
+					fileInfo = selectFileInfoById(newFileId);
 					if (!isFileId) {
-						fileInfo = selectFileInfoById(newFileId);
 						newFileId = fileInfo.getFileSeq();
 					} else {
 						fileSeq = fileInfo.getFileSeq();
