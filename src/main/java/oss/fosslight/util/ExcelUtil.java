@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1672,26 +1671,24 @@ public class ExcelUtil extends CoTopComponent {
 			}
 
 			Map<String, String> qualifiers = purl.getQualifiers();
-			if ("generic".equalsIgnoreCase(type)) {
-				String downloadUrl = qualifiers != null ? qualifiers.get("download_url") : null;
-				if (StringUtils.isNotBlank(downloadUrl)) {
-					return decodePurlValue(downloadUrl);
-				}
+			String downloadUrl = qualifiers != null ? qualifiers.get("download_url") : null;
+			if (StringUtils.isNotBlank(downloadUrl)) {
+				return downloadUrl;
+			}
 
-				String repositoryUrl = qualifiers != null ? qualifiers.get("repository_url") : null;
-				if (StringUtils.isNotBlank(repositoryUrl)) {
-					String normalizedRepositoryUrl = StringUtils.removeEnd(decodePurlValue(repositoryUrl).trim(), "/");
-					if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
-						return normalizedRepositoryUrl;
-					}
+			String repositoryUrl = qualifiers != null ? qualifiers.get("repository_url") : null;
+			if (StringUtils.isNotBlank(repositoryUrl)) {
+				String normalizedRepositoryUrl = StringUtils.removeEnd(repositoryUrl.trim(), "/");
+				if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
+					return normalizedRepositoryUrl;
 				}
+			}
 
-				String vcsUrl = qualifiers != null ? qualifiers.get("vcs_url") : null;
-				if (StringUtils.isNotBlank(vcsUrl)) {
-					String normalizedVcsUrl = StringUtils.removeEnd(decodePurlValue(vcsUrl).trim(), "/");
-					if (StringUtils.isNotBlank(normalizedVcsUrl)) {
-						return normalizedVcsUrl;
-					}
+			String vcsUrl = qualifiers != null ? qualifiers.get("vcs_url") : null;
+			if (StringUtils.isNotBlank(vcsUrl)) {
+				String normalizedVcsUrl = StringUtils.removeEnd(vcsUrl.trim(), "/");
+				if (StringUtils.isNotBlank(normalizedVcsUrl)) {
+					return normalizedVcsUrl;
 				}
 			}
 
@@ -1760,18 +1757,6 @@ public class ExcelUtil extends CoTopComponent {
 		} catch (Exception e) {
 			log.debug("Failed to generate download location from purl: {}", purlValue, e);
 			return "";
-		}
-	}
-
-	private static String decodePurlValue(String value) {
-		if (StringUtils.isBlank(value)) {
-			return "";
-		}
-
-		try {
-			return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8.name());
-		} catch (Exception e) {
-			return value;
 		}
 	}
 
