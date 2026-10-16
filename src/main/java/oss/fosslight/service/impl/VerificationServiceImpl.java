@@ -8,6 +8,7 @@ package oss.fosslight.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -1533,7 +1534,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				if (isChangedPackageFile || !readmeFile.exists()){
 					Path sourcePath = Paths.get(VERIFY_PATH_DECOMP, String.valueOf(prjId), readmePath);
 					Path targetPath = Paths.get(VERIFY_PATH_OUTPUT, String.valueOf(prjId), readmeFileName);
-					Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+					if (Files.isRegularFile(sourcePath) && Files.isReadable(sourcePath)) {
+						try {
+							Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+						} catch (NoSuchFileException e) {
+							log.warn("README file disappeared before it could be copied. Skipping README: {}", sourcePath);
+							readmeFileName = "";
+						}
+					} else {
+						log.warn("README file listed by verification was not found. Skipping README: {}", sourcePath);
+						readmeFileName = "";
+					}
 //					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
