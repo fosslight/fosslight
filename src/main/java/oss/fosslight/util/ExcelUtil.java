@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1674,12 +1673,24 @@ public class ExcelUtil extends CoTopComponent {
 			Map<String, String> qualifiers = purl.getQualifiers();
 			String downloadUrl = qualifiers != null ? qualifiers.get("download_url") : null;
 			if (StringUtils.isNotBlank(downloadUrl)) {
-				return decodePurlValue(downloadUrl);
+				return downloadUrl;
 			}
 
 			String repositoryUrl = qualifiers != null ? qualifiers.get("repository_url") : null;
-			String resolvedRepositoryUrl = StringUtils.isNotBlank(repositoryUrl) ? decodePurlValue(repositoryUrl) : "";
-			String normalizedRepositoryUrl = StringUtils.removeEnd(resolvedRepositoryUrl.trim(), "/");
+			if (StringUtils.isNotBlank(repositoryUrl)) {
+				String normalizedRepositoryUrl = StringUtils.removeEnd(repositoryUrl.trim(), "/");
+				if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
+					return normalizedRepositoryUrl;
+				}
+			}
+
+			String vcsUrl = qualifiers != null ? qualifiers.get("vcs_url") : null;
+			if (StringUtils.isNotBlank(vcsUrl)) {
+				String normalizedVcsUrl = StringUtils.removeEnd(vcsUrl.trim(), "/");
+				if (StringUtils.isNotBlank(normalizedVcsUrl)) {
+					return normalizedVcsUrl;
+				}
+			}
 
 			switch (type) {
 				case "github":
@@ -1695,9 +1706,6 @@ public class ExcelUtil extends CoTopComponent {
 				case "pypi":
 						return "https://pypi.org/project/" + name;
 				case "maven":
-						if (StringUtils.isNotBlank(normalizedRepositoryUrl)) {
-							return normalizedRepositoryUrl;
-						}
 						if (StringUtils.isNotBlank(namespace)) {
 							return "https://mvnrepository.com/artifact/" + namespace + "/" + name;
 						}
@@ -1749,18 +1757,6 @@ public class ExcelUtil extends CoTopComponent {
 		} catch (Exception e) {
 			log.debug("Failed to generate download location from purl: {}", purlValue, e);
 			return "";
-		}
-	}
-
-	private static String decodePurlValue(String value) {
-		if (StringUtils.isBlank(value)) {
-			return "";
-		}
-
-		try {
-			return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
-		} catch (Exception e) {
-			return value;
 		}
 	}
 
