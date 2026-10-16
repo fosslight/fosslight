@@ -2562,6 +2562,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 12 :
 					ArrayList<String> name = new ArrayList<>();
 					name.add("codelinaro");
+					name.add(ossNameMatcher.group(4));
 					for(String nick : ossNameMatcher.group(5).split("/")) {
 						name.add(nick);
 					}
