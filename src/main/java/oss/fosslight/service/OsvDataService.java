@@ -345,14 +345,24 @@ public class OsvDataService extends CoTopComponent {
 		}
 
 		// Map and Queue Alternate IDs (OSV_ALIASES)
-		if (root.has("aliases")) {
-			for (JsonNode aliasNode : root.get("aliases")) {
-				if (aliasNode == null) {
-					continue;
-				}
-				Map<String, Object> aliasParam = Map.of("id", id, "aliasId", aliasNode.asText());
-				sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvAlias", aliasParam);
-			}
+		JsonNode aliasesNode = root.get("aliases");
+		if (aliasesNode != null && aliasesNode.isArray()) {
+		    Set<String> aliasIds = new HashSet<>();
+
+		    for (JsonNode aliasNode : aliasesNode) {
+		        if (aliasNode != null && !aliasNode.isNull()) {
+		            String aliasId = aliasNode.asText().trim();
+
+		            if (!aliasId.isEmpty()) {
+		                aliasIds.add(aliasId);
+		            }
+		        }
+		    }
+
+		    for (String aliasId : aliasIds) {
+		        Map<String, Object> aliasParam = Map.of("id", id, "aliasId", aliasId);
+		        sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvAlias", aliasParam);
+		    }
 		}
 
 		// Map and Queue Severity Vectors (OSV_SEVERITIES)
@@ -1224,64 +1234,49 @@ public class OsvDataService extends CoTopComponent {
 		}
 		
 		if (CollectionUtils.isNotEmpty(combinedList)) {
-			combinedList = combinedList.stream()
-							    .filter(v -> v != null && !isEmpty(v.getCveId()))
-							    .collect(Collectors.groupingBy(
-							        item -> String.format("%s_%s_%s", 
-							            !isEmpty(item.getProduct()) ? item.getProduct().toUpperCase().trim() : "", 
-							            !isEmpty(item.getVersion()) ? item.getVersion().toUpperCase().trim() : "", 
-							            item.getCveId().toUpperCase().trim()
-							        ),
-							        LinkedHashMap::new,
-							        Collectors.collectingAndThen(
-							            Collectors.toList(),
-							            itemList -> {
-							                // If there is only 1 item in the group, return it as-is
-							                if (itemList.size() == 1) {
-							                    return itemList.get(0);
-							                }
-							                
-							                // Sort the entire group:
-							                // Valid CVSS scores come first, sorted in descending order (highest score first)
-							                // If scores are invalid or equal, sort by priority in ascending order
-							                return itemList.stream()
-							                    .sorted((a, b) -> {
-							                    	boolean validA = CommonFunction.isBigDecimal(a.getCvssScore());
-							                        boolean validB = CommonFunction.isBigDecimal(b.getCvssScore());
-							                        
-							                        // Both have valid scores: compare scores descending (Max first)
-							                        if (validA && validB) {
-							                            int scoreCompare = new java.math.BigDecimal(b.getCvssScore()).compareTo(new java.math.BigDecimal(a.getCvssScore()));
-							                            if (scoreCompare != 0) {
-							                                return scoreCompare;
-							                            }
-							                        }
-							                        
-							                        // Only A has a valid score -> A comes first (-1)
-							                        if (validA && !validB) {
-							                            return -1;
-							                        }
-							                        // Only B has a valid score -> B comes first (1)
-							                        if (!validA && validB) {
-							                            return 1;
-							                        }
-							                        
-							                        // Neither has a valid score (or both invalid): compare by priority
-							                        return Integer.compare(a.getPriority(), b.getPriority());
-							                    })
-							                    .findFirst()
-							                    .orElse(itemList.get(0));
-							            }
-							        )
-							    ))
-							    .values()
-							    .stream()
-							    .collect(Collectors.toList());
+			Map<String, Vulnerability> bestVulnerabilityMap = new LinkedHashMap<>();
+
+		    for (Vulnerability item : combinedList) {
+		        if (item == null || isEmpty(item.getCveId())) {
+		            continue;
+		        }
+
+		        String key = String.format("%s_%s_%s",
+		            !isEmpty(item.getProduct()) ? item.getProduct().toUpperCase().trim() : "",
+		            !isEmpty(item.getVersion()) ? item.getVersion().toUpperCase().trim() : "",
+		            item.getCveId().toUpperCase().trim());
+
+		        Vulnerability existing = bestVulnerabilityMap.get(key);
+
+		        if (existing == null || isBetterVulnerability(item, existing)) {
+		            bestVulnerabilityMap.put(key, item);
+		        }
+		    }
+
+		    combinedList = new ArrayList<>(bestVulnerabilityMap.values());
 		}
 		
 		return combinedList;
 	}
 
+	private boolean isBetterVulnerability(Vulnerability candidate, Vulnerability existing) {
+	    boolean candidateValid = CommonFunction.isBigDecimal(candidate.getCvssScore());
+	    boolean existingValid = CommonFunction.isBigDecimal(existing.getCvssScore());
+
+	    if (candidateValid && existingValid) {
+	        int scoreCompare = new BigDecimal(existing.getCvssScore()).compareTo(new BigDecimal(candidate.getCvssScore()));
+	        if (scoreCompare != 0) {
+	            return scoreCompare > 0;
+	        }
+	    }
+
+	    if (candidateValid != existingValid) {
+	        return candidateValid;
+	    }
+
+	    return candidate.getPriority() < existing.getPriority();
+	}
+	
 	private boolean isIdMatched(String id1, String id2) {
 		if (id1 == null || id2 == null) {
 			return false;
