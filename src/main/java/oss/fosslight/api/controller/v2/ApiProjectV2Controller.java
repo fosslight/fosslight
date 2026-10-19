@@ -759,7 +759,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     "  - 형식: `{\"탭명\": [\"시트명1\", \"시트명2\", ...]}`\n" +
                     "  - 탭명 허용값: `src`, `dep`, `bin` (소문자)\n" +
                     "  - 로드하지 않을 탭은 JSON에서 생략하면 됨 (예: src만 로드 → `{\"src\":[\"시트명\"]}`)\n" +
-                    "  - 예시: `{\"src\":[\"SRC_FL_Source\"],\"dep\":[\"DEP_FL_Dependency\"],\"bin\":[\"BIN_FL_Binary\"]}`\n\n" +
+                    "  - CycloneDX, SPDX 형식의 경우 시트명이 고정되어 있음: `PACKAGE INFO`, `PER FILE INFO`\n" +
+                    "  - 예시 1 (FOSSLight Report): `{\"src\":[\"SRC_FL_Source\"],\"dep\":[\"DEP_FL_Dependency\"],\"bin\":[\"BIN_FL_Binary\"]}`\n" +
+                    "  - 예시 2 (CycloneDX, SPDX): `{\"dep\" : [\"PACKAGE INFO\", \"PER FILE INFO\"]}`\n\n" +
                     "* **comment** - 업로드 시 추가 설명 (선택)\n\n" +
                     "* **id** - Report파일을 업로드할 Project ID\n\n"
     )
