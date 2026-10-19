@@ -3596,6 +3596,7 @@ public class CoMailManager extends CoTopComponent {
 						if (idx < splitCveIds.length) {
 							customCveId += " -> ";
 						}
+						idx++;
 					}
 				} else {
 					if (!cveId.equalsIgnoreCase("NONE") && !isEmpty(type)) {

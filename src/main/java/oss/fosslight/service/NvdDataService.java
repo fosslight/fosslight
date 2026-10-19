@@ -52,6 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.NvdDataMapper;
@@ -90,7 +91,7 @@ public class NvdDataService extends CoTopComponent {
 	public String executeNvdDataSync() throws IOException {
 		
 		// check initialize flag
-		if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+		if (CoConstDef.FLAG_YES.equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
 			initializeFlag = true;
 		}
 
@@ -219,8 +220,9 @@ public class NvdDataService extends CoTopComponent {
 									continue;
 								}
                 
+								cveId = (String) cveInfo.get("cveId");
+								
 								if (!initializeFlag) {
-									cveId = (String) cveInfo.get("cveId");
 									Map<String, Object> existCveInfo = mapper.selectOneCveInfoV3(cveInfo);
 									if (!MapUtils.isEmpty(existCveInfo)) {
 										String baseMetric = (String) cveInfo.get("baseMetric");

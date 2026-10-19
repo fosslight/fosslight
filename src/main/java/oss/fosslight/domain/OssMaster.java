@@ -247,6 +247,8 @@ public class OssMaster extends ComBean implements Serializable{
 	/**  vulnerability 조회 조건. */
 	private String vulnType;
 	
+	private String vulnTypeTo;
+	
 	/** The vuln recheck. */
 	private String vulnRecheck;
 	
@@ -2587,5 +2589,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setSearchExcludeCpes(String[] searchExcludeCpes) {
 		this.searchExcludeCpes = searchExcludeCpes;
+	}
+
+	public String getVulnTypeTo() {
+		return vulnTypeTo;
+	}
+
+	public void setVulnTypeTo(String vulnTypeTo) {
+		this.vulnTypeTo = vulnTypeTo;
 	}
 }
