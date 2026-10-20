@@ -7,6 +7,8 @@ package oss.fosslight.controller;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,10 +21,12 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -1761,6 +1766,19 @@ public class OssController extends CoTopComponent{
 	
 	@RequestMapping(value=OSS.OSS_AUTO_ANALYSIS, method = {RequestMethod.POST, RequestMethod.GET}, produces = "text/html; charset=utf-8")
 	public String ossAutoRegist(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		String prjId = req.getParameter("prjId");
+		String gridId = req.getParameter("gridId");
+		if ("GET".equals(req.getMethod()) && "result".equalsIgnoreCase(req.getParameter("ossAnalysisStatus"))
+				&& !isEmpty(prjId) && !isEmpty(gridId)) {
+			String url = OSS.PATH + "/getAnalysisResultDetail/" + URLEncoder.encode(gridId, StandardCharsets.UTF_8)
+					+ "?prjId=" + URLEncoder.encode(prjId, StandardCharsets.UTF_8);
+			String reviewNote = req.getParameter("reviewNote");
+			if (!isEmpty(reviewNote)) {
+				url += "&reviewNote=" + URLEncoder.encode(reviewNote, StandardCharsets.UTF_8);
+			}
+			return "redirect:" + url;
+		}
+
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
@@ -1857,8 +1875,12 @@ public class OssController extends CoTopComponent{
 		String groupId = (String) map.get("groupId");
 		String dataString = (String) map.get("dataString");
 		Type typeAnalysis = new TypeToken<List<OssAnalysis>>() {}.getType();
-		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
-		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
+		List<OssAnalysis> analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
+
+		return makeJsonResponseHeader(storeAnalysisResultData(groupId, analysisResultData));
+	}
+
+	private boolean storeAnalysisResultData(String groupId, List<OssAnalysis> analysisResultData) {
 		for (OssAnalysis oa : analysisResultData) {
 			if (!isEmpty(oa.getDownloadLocation())) {
 				Set<String> uniqueLocations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -1883,18 +1905,82 @@ public class OssController extends CoTopComponent{
 		
 		String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, groupId);
 		
-		if (getSessionObject(sessionKey) != null) {
-			deleteSession(sessionKey);
-		}
-		
-		return makeJsonResponseHeader(putSessionObject(sessionKey, analysisResultData));
+		return putSessionObject(sessionKey, analysisResultData);
 	}
 	
 	@GetMapping(value=OSS.ANALYSIS_RESULT_DETAIL_ID)
 	public String analysisResultDetail(HttpServletRequest req, HttpServletResponse res, @PathVariable String groupId, Model model){
+		String prjId = req.getParameter("prjId");
+		if (!isEmpty(prjId)) {
+			loadAnalysisDetailSession(prjId, groupId);
+		}
 		model.addAttribute("groupId", groupId);
 		
 		return "oss/ossAnalysisResultDetailpopup";
+	}
+
+	@SuppressWarnings("unchecked")
+	private void loadAnalysisDetailSession(String prjId, String groupId) {
+		if (!prjId.matches("[A-Za-z0-9_-]+")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid analysis project ID");
+		}
+
+		OssMaster ossMaster = new OssMaster();
+		ossMaster.setPrjId(prjId);
+		ossMaster.setStartAnalysisFlag(CoConstDef.FLAG_YES);
+		ossMaster.setCurPage(1);
+		ossMaster.setPageListSize(1);
+
+		Map<String, Object> csvSource = new HashMap<>();
+		csvSource.put("analysisResultListPath",
+				CommonFunction.emptyCheckProperty("autoanalysis.output.path", "/autoanalysis/out/dev")
+						+ "/" + prjId + "/result");
+		csvSource = ExcelUtil.getCsvData(csvSource, ossMaster);
+		List<String[]> csvData = (List<String[]>) csvSource.get("csvData");
+		if (CollectionUtils.isEmpty(csvData)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Analysis result file is not available");
+		}
+
+		int[] csvIds = ossMaster.getCsvComponentIdList();
+		int[] selectedIds = csvIds == null ? new int[0] : Arrays.stream(csvIds)
+				.filter(id -> groupId.equals(Integer.toString(id))).distinct().toArray();
+		if (selectedIds.length == 0) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"Analysis group is not available for this project");
+		}
+		ossMaster.setCsvComponentIdList(selectedIds);
+
+		Map<String, Object> analysisSource = ossService.getOssAnalysisList(ossMaster);
+		List<OssAnalysis> inputRows = (List<OssAnalysis>) analysisSource.get("rows");
+		if (CollectionUtils.isEmpty(inputRows)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"Analyzed component is not available for this project");
+		}
+		Map<String, Object> result = ExcelUtil.readAnalysisList(csvData, inputRows);
+		if (!Boolean.TRUE.equals(result.get("isValid"))) {
+			throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+					"Invalid analysis result: " + result.get("errorMsg"));
+		}
+
+		CommonFunction.setAnalysisResultList(result);
+		List<OssAnalysis> rows = (List<OssAnalysis>) result.get("rows");
+		List<OssAnalysis> detailData = rows.stream()
+				.filter(row -> groupId.equals(row.getGroupId())).collect(Collectors.toList());
+		if (detailData.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Analysis detail group is not available");
+		}
+		if (!storeAnalysisResultData(groupId, detailData)) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+					"Analysis detail session could not be initialized");
+		}
+	}
+
+	@ExceptionHandler(ResponseStatusException.class)
+	public ResponseEntity<Object> analysisDetailError(ResponseStatusException exception) {
+		log.warn("Analysis detail could not be loaded: {}", exception.getReason());
+		ResponseEntity<Object> response = makeJsonResponseHeader(
+				Map.of("isValid", false, "errorMsg", exception.getReason()));
+		return ResponseEntity.status(exception.getStatus()).headers(response.getHeaders()).body(response.getBody());
 	}
 	
 	@SuppressWarnings("unchecked")

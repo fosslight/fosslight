@@ -46,6 +46,25 @@ FOSSLight Hub helps you use the open source software compliantly and securely by
 - [FOSSLight guide](https://fosslight.org/fosslight-guide-en/)
      We provide the guide for the installation and how to use it.    
 
+### Direct OSS auto-analysis detail links
+
+Authenticated users can open an analysis detail without first opening the result list:
+
+```text
+/oss/getAnalysisResultDetail/{group_id}?prjId={project_id}
+```
+
+`group_id` is the original analyzed component's ID, not a generated comparison-row ID.
+The detail request loads only that component's group from the project's analysis result
+and prepares the same session data used by the existing popup. Add an optional URL-encoded
+`reviewNote` to prepend a review comment. The project must have an available result CSV
+and the component must be included in its completed analysis.
+
+Existing result-mode GET links to `/oss/ossAutoAnalysis` with both `prjId` and `gridId`
+redirect to the direct detail URL, preserving `reviewNote`. Ordinary result-list visits,
+input-mode visits, and POST requests are unchanged. Missing results return HTTP 404, invalid project IDs return
+HTTP 400, and invalid result data returns HTTP 422 rather than an empty popup.
+
 ## Demo site
 You can experience FOSSLight Hub through the **[Demo site](https://demo.fosslight.org/)**.  
 Please visit the Demo site and try out the many features of the FOSSLight Hub first-hand!  
