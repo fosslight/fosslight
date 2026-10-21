@@ -107,7 +107,7 @@ public class NvdDataService extends CoTopComponent {
 		    String endTime = sdformat.format(cal.getTime());
 
 			Calendar mon = Calendar.getInstance();
-			mon.add(Calendar.DATE, -7); // Set start time (1 weeks ago from current time)
+			mon.add(Calendar.DATE, -4); // Set start time (1 weeks ago from current time)
 //		    mon.add(Calendar.MONTH, -1);
 		    String startTime = sdformat.format(mon.getTime());
 
