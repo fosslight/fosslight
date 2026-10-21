@@ -1706,10 +1706,10 @@ public class ExcelUtil extends CoTopComponent {
 				case "pypi":
 						return "https://pypi.org/project/" + name;
 				case "maven":
-						if (StringUtils.isNotBlank(namespace)) {
-							return "https://mvnrepository.com/artifact/" + namespace + "/" + name;
+						if (StringUtils.isBlank(namespace)) {
+							return "";
 						}
-						return "https://mvnrepository.com/artifact/" + name;
+						return "https://mvnrepository.com/artifact/" + namespace + "/" + name;
 				case "cocoapods":
 						return "https://cocoapods.org/pods/" + name;
 				case "gem":
