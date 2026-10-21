@@ -1512,7 +1512,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    	}
 	    }
 
-	    if (CollectionUtils.isEmpty(bom.getComponents())) {
+	    List<Component> allComponents = collectCdxLoadTargetComponents(bom);
+	    if (CollectionUtils.isEmpty(allComponents)) {
 	    	setUploadError(uploadFile, FileUploadErrorCode.CDX_NO_COMPONENTS, null);
 	    	return false;
 	    }
@@ -1536,9 +1537,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        Map<String, String> externalRefsMap = new HashMap<>();
 	        Map<String, String> bomRefToSpdxIdMap = new HashMap<>();
 	        List<String> packageInfoidentifierList = new ArrayList<>();
-	        
-	        List<Component> allComponents = new ArrayList<>();
-	        collectComponents(bom.getComponents(), allComponents);
 	        
 	        if (CollectionUtils.isNotEmpty(allComponents)) {
 	            for (Component c : allComponents) {
@@ -1611,6 +1609,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	                // [N] License Declared (13) - 첫 번째 라이선스 ID 추출
 	                String licenseStr = "NOASSERTION";
+	                String packageComment = "";
+	                Cell packageCommentCell = row.getCell(15);
+	                if (packageCommentCell != null) {
+	                	packageComment = avoidNull(packageCommentCell.toString()).trim();
+	                }
 	                
 	                org.cyclonedx.model.LicenseChoice lc = c.getLicenses();
 	                if (lc != null) {
@@ -1638,6 +1641,18 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	                // [V] Files Analyzed (21) - 대문자 FALSE 기입
 	                row.createCell(21).setCellValue("FALSE");
+
+	                // [P] License Comments (15)
+	                // metadata.component is the BOM root package.
+	                if (isMetadataRootComponent(c, bom)) {
+	                	packageComment = mergeRootPackageComment(packageComment);
+	                }
+	                if (!isEmpty(packageComment)) {
+	                	if (packageCommentCell == null) {
+	                		packageCommentCell = row.createCell(15);
+	                	}
+	                	packageCommentCell.setCellValue(packageComment);
+	                }
 	                
 	                packageInfoidentifierList.add(spdxId);
 	                if (!isEmpty(c.getBomRef())) {
@@ -1759,6 +1774,66 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        setUploadError(uploadFile, FileUploadErrorCode.CDX_CONVERSION_FAILED, e.getMessage());
 	        return false;
 	    }
+	}
+
+	private List<Component> collectCdxLoadTargetComponents(Bom bom) {
+		List<Component> allComponents = new ArrayList<>();
+		collectComponents(bom.getComponents(), allComponents);
+
+		if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
+			Component metadataComponent = bom.getMetadata().getComponent();
+			allComponents.add(metadataComponent);
+			collectComponents(metadataComponent.getComponents(), allComponents);
+		}
+
+		return deduplicateComponentsByBomRef(allComponents);
+	}
+
+	private List<Component> deduplicateComponentsByBomRef(List<Component> components) {
+		if (CollectionUtils.isEmpty(components)) {
+			return Collections.emptyList();
+		}
+
+		List<Component> deduplicatedComponents = new ArrayList<>();
+		Set<String> seenBomRefs = new HashSet<>();
+
+		for (Component component : components) {
+			if (component == null) {
+				continue;
+			}
+
+			String bomRef = normalizeCdxBomRef(component.getBomRef());
+			if (isEmpty(bomRef) || seenBomRefs.add(bomRef)) {
+				deduplicatedComponents.add(component);
+			}
+		}
+
+		return deduplicatedComponents;
+	}
+
+	private String normalizeCdxBomRef(String bomRef) {
+		return bomRef == null ? "" : bomRef.trim();
+	}
+
+	private boolean isMetadataRootComponent(Component component, Bom bom) {
+		if (component == null || bom == null || bom.getMetadata() == null || bom.getMetadata().getComponent() == null) {
+			return false;
+		}
+
+		Component metadataComponent = bom.getMetadata().getComponent();
+		String metadataBomRef = normalizeCdxBomRef(metadataComponent.getBomRef());
+		String componentBomRef = normalizeCdxBomRef(component.getBomRef());
+
+		if (!isEmpty(metadataBomRef) && metadataBomRef.equals(componentBomRef)) {
+			return true;
+		}
+
+		return component == metadataComponent;
+	}
+
+	private String mergeRootPackageComment(String comment) {
+		String normalizedComment = comment == null ? "" : comment.trim();
+		return isEmpty(normalizedComment) ? "root package" : "root package / " + normalizedComment;
 	}
 
 	private void collectComponents(List<Component> components, List<Component> result) {
