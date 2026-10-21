@@ -1283,8 +1283,10 @@ public class OsvDataService extends CoTopComponent {
 		}
 		if (id1.equals(id2)) {
 			return true;
+		} else {
+			return false;
 		}
-		return id2.contains(id1) || id1.contains(id2);
+//		return id2.contains(id1) || id1.contains(id2);
 	}
 
 	private String mergeAndFormatIds(String id1, String id2, String aliasId) {
@@ -1913,5 +1915,9 @@ public class OsvDataService extends CoTopComponent {
 		target.setSearchVersionP3Yn(source.getSearchVersionP3Yn());
 		target.setPriority(source.getPriority());
 		target.setPatchLink(source.getPatchLink());
+	}
+
+	public Map<String, Object> getVulnerabilityInfo(String cveId) {
+		return osvDataMapper.getVulnerabilityInfo(cveId);
 	}
 }
