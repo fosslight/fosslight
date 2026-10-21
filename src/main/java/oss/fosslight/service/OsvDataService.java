@@ -1918,6 +1918,7 @@ public class OsvDataService extends CoTopComponent {
 	}
 
 	public Map<String, Object> getVulnerabilityInfo(String cveId) {
-		return osvDataMapper.getVulnerabilityInfo(cveId);
+		//return osvDataMapper.getVulnerabilityInfo(cveId);
+		return null;
 	}
 }
