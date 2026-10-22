@@ -756,7 +756,18 @@ public class OsvDataService extends CoTopComponent {
 	    // 최적화된 하위 메서드 호출
 	    List<Vulnerability> processedVulnerabilityList = filterByNamePriority(null, osvVulnList);
 	    List<Vulnerability> osvResultList = filterByVersionPriority(processedVulnerabilityList, osvVulnerabilityMap, null, null, true);
-
+	    if (CollectionUtils.isNotEmpty(osvResultList)) {
+	    	Set<String> aliasKeys = osvResultList.stream()
+								    		    .filter(v -> !isEmpty(v.getAliasId()))
+								    		    .flatMap(v -> Arrays.stream(v.getAliasId().split(","))
+								    		        .map(String::trim)
+								    		        .filter(aliasId -> !isEmpty(aliasId))
+								    		        .map(aliasId -> v.getOssName() + "|" + v.getOssVersion() + "|" + aliasId)
+								    		    )
+								    		    .collect(Collectors.toSet());
+	    	osvResultList.removeIf(v -> !isEmpty(v.getCveId()) && aliasKeys.contains(v.getOssName() + "|" + v.getOssVersion() + "|" + v.getCveId()));
+	    }
+	    
 	    // [개선 4] 스트림 내부 정렬 구조를 제거하고 단일 반복문 내 대소 비교(Map.compute) 구조로 변환
 	    Map<FinalGroupKey, Vulnerability> finalMap = new LinkedHashMap<>();
 	    
