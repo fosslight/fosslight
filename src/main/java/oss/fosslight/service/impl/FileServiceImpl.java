@@ -1802,17 +1802,17 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				continue;
 			}
 
-			String bomRef = normalizeCdxBomRef(component.getBomRef());
-			if (isEmpty(bomRef) || seenBomRefs.add(bomRef)) {
+			String bomRef = component.getBomRef();
+			if (isEmpty(bomRef)) {
+				deduplicatedComponents.add(component);
+				continue;
+			}
+			if (seenBomRefs.add(bomRef)) {
 				deduplicatedComponents.add(component);
 			}
 		}
 
 		return deduplicatedComponents;
-	}
-
-	private String normalizeCdxBomRef(String bomRef) {
-		return bomRef == null ? "" : bomRef.trim();
 	}
 
 	private boolean isMetadataRootComponent(Component component, Bom bom) {
@@ -1821,10 +1821,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		}
 
 		Component metadataComponent = bom.getMetadata().getComponent();
-		String metadataBomRef = normalizeCdxBomRef(metadataComponent.getBomRef());
-		String componentBomRef = normalizeCdxBomRef(component.getBomRef());
+		String metadataBomRef = metadataComponent.getBomRef();
+		String componentBomRef = component.getBomRef();
 
-		if (!isEmpty(metadataBomRef) && metadataBomRef.equals(componentBomRef)) {
+		if (!isEmpty(metadataBomRef) && Objects.equals(metadataBomRef, componentBomRef)) {
 			return true;
 		}
 
