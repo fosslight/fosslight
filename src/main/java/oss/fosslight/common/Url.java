@@ -1094,6 +1094,7 @@ public final class Url {
 
 
 			public static final String FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON	    = "/projects/{id}/security/json-data";
+			public static final String FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_FILE      = "/projects/{id}/security/file";
 
       		public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
 
