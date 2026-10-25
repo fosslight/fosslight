@@ -803,7 +803,7 @@
     <update id="truncateNvdDataRunningOnWith">TRUNCATE TABLE NVD_DATA_RUNNING_ON_WITH</update>
     
 	<insert id="copyNvdCveV3FromTemp">INSERT INTO NVD_CVE_V3 SELECT * FROM NVD_CVE_V3_TEMP</insert>
-	<insert id="copyNvdDataV3FromTemp">INSERT INTO NVD_DATA_V3 SELECT * FROM NVD_DATA_V3_TEMP</insert>
+	<insert id="copyNvdDataV3FromTemp">INSERT INTO NVD_DATA_V3 (CVE_ID, PRODUCT, VERSION, VENDOR, VENDORPRODUCT) SELECT CVE_ID, PRODUCT, VERSION, VENDOR, VENDORPRODUCT FROM NVD_DATA_V3_TEMP ON DUPLICATE KEY UPDATE VENDORPRODUCT = VALUES(VENDORPRODUCT)</insert>
 	<insert id="copyNvdDataConfigurationsFromTemp">INSERT INTO NVD_DATA_CONFIGURATIONS SELECT * FROM NVD_DATA_CONFIGURATIONS_TEMP</insert>
 	<insert id="copyNvdDataPatchLinkFromTemp">INSERT INTO NVD_DATA_PATCH_LINK SELECT * FROM NVD_DATA_PATCH_LINK_TEMP</insert>
 	<insert id="copyNvdDataRunningOnWithFromTemp">INSERT INTO NVD_DATA_RUNNING_ON_WITH SELECT * FROM NVD_DATA_RUNNING_ON_WITH_TEMP</insert>
@@ -1021,4 +1021,32 @@
 	<update id="renameNvdSearchMaster">
 		RENAME TABLE NVD_SEARCH_MASTER_TEMP TO NVD_SEARCH_MASTER
 	</update>
+	
+	<select id="selectNvdMatchList" resultType="String">
+	    SELECT IFNULL(T2.CPE23URI, T1.CPE23URI) AS CPE23URI
+	    FROM NVD_CPE_MATCH T1
+	    LEFT JOIN NVD_CPE_MATCH_NAMES T2
+	    ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID
+	    WHERE T1.MATCH_CRITERIA_ID = #{matchCriteriaId}
+	    ORDER BY T2.IDX
+	</select>
+	
+	<insert id="insertNvdDataV3TempBatch">
+	    INSERT INTO NVD_DATA_V3_TEMP (CVE_ID, VENDOR, PRODUCT, VERSION, VENDORPRODUCT)
+	    VALUES
+	    <foreach collection="list" item="item" separator=",">
+	        (
+	            #{cveId},
+	            SUBSTRING_INDEX(SUBSTRING_INDEX(#{item}, ':', 4), ':', -1),
+	            SUBSTRING_INDEX(SUBSTRING_INDEX(#{item}, ':', 5), ':', -1),
+	            SUBSTRING_INDEX(SUBSTRING_INDEX(#{item}, ':', 6), ':', -1),
+	            CONCAT(
+	                SUBSTRING_INDEX(SUBSTRING_INDEX(#{item}, ':', 4), ':', -1),
+	                '-',
+	                SUBSTRING_INDEX(SUBSTRING_INDEX(#{item}, ':', 5), ':', -1)
+	            )
+	        )
+	    </foreach>
+	    ON DUPLICATE KEY UPDATE VENDORPRODUCT = VALUES(VENDORPRODUCT)
+	</insert>
 </mapper>

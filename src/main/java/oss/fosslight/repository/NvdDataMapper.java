@@ -3,6 +3,7 @@ package oss.fosslight.repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -108,4 +109,7 @@ public interface NvdDataMapper {
 	void createIdxNvdSearchMasterTemp3();
 	void dropNvdSearchMaster();
 	void renameNvdSearchMaster();
+	
+	Set<String> selectNvdMatchList(@Param("matchCriteriaId") String matchCriteriaId);
+	void insertNvdDataV3TempBatch(@Param("cveId") String cveId, @Param("list") List<String> batchList);
 }

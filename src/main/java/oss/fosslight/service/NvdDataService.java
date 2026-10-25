@@ -16,8 +16,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -285,7 +287,7 @@ public class NvdDataService extends CoTopComponent {
 									continue;
 								}
 								
-								List<String> matchCriteriaIdDuplicatedList = new ArrayList<>();
+								Set<String> matchCriteriaIdDuplicatedSet = new HashSet<>();
 
 								for (Map<String, Object> cpe_match_data : cpe_match_all) {
 									// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
@@ -301,10 +303,9 @@ public class NvdDataService extends CoTopComponent {
 									// configurations의 operator (AND/OR)에 따라 동일한 CVE ID에 matchCriteriaId 가 여러번 등장할 수 있음
 									// FL-Hub에서는 operator 조건을 확인하지 않기 때문에, CVEID + matchCriteriaId를 PK로 사용하는 경우 중복 오류가 발생할 수 있음
 									// ex) https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2001-1104
-									if (matchCriteriaIdDuplicatedList.contains(cveId + "-" + matchCriteriaId)) {
+									if (!matchCriteriaIdDuplicatedSet.add(cveId + "-" + matchCriteriaId)) {
 										continue;
 									}
-									matchCriteriaIdDuplicatedList.add(cveId + "-" + matchCriteriaId);
 									
 									String versionStartIncluding = null;
 									String versionEndIncluding = null;
@@ -328,31 +329,32 @@ public class NvdDataService extends CoTopComponent {
 //										_matchNameParams.put("versionEndExcluding", versionEndExcluding);
 									}
 
-//									matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
-//
-//									// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
-//									if (matchNames == null || matchNames.isEmpty()) {
-//										log.warn("unmatchNames matchCriteriaId : {}, criteria : {}" , matchCriteriaId, criteria);
-//										// api 호출 여부 확인
-//										continue;
-//									}
-//
-//									// cpe23uri에서 product, version 정보를 추출한다.
-//									List<Map<String, String>> nvdDataV3TempList = new ArrayList<>();
-//									matchNames.forEach(cpe23uri -> {
-//										final String[] cpeInfoArr = cpe23uri.split(":");
-//
-//										final Map<String, String> _productInfo = new HashMap<>();
-//										_productInfo.put("cveId", cveId);
-//										_productInfo.put("vendor", cpeInfoArr[3]);
-//										_productInfo.put("product", cpeInfoArr[4]);
-//										_productInfo.put("version", cpeInfoArr[5]);
-//										nvdDataV3TempList.add(_productInfo);
-//									});
-//									
-//									if(!CollectionUtils.isEmpty(nvdDataV3TempList)) {
-//										mapper.insertBulkNvdDataV3Temp(nvdDataV3TempList);
-//									}
+									Set<String> matchNames = nvdDataMapper.selectNvdMatchList(matchCriteriaId);
+
+									// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
+									if (matchNames == null || matchNames.isEmpty()) {
+										log.warn("unmatchNames matchCriteriaId : {}, criteria : {}" , matchCriteriaId, criteria);
+										// api 호출 여부 확인
+										continue;
+									}
+									
+									// CPE23URI를 250건씩 나누어 TEMP 테이블에 저장
+									final int batchSize = 250;
+									List<String> batchList = new ArrayList<>(batchSize);
+
+									for (String cpe23uri : matchNames) {
+									    batchList.add(cpe23uri);
+
+									    if (batchList.size() >= batchSize) {
+									        nvdDataMapper.insertNvdDataV3TempBatch(cveId, batchList);
+									        batchList.clear();
+									    }
+									}
+
+									// 마지막 잔여 데이터 저장
+									if (!batchList.isEmpty()) {
+									    nvdDataMapper.insertNvdDataV3TempBatch(cveId, batchList);
+									}
 									
 									final Map<String, String> configurationInsertParam = new HashMap<>();
 									configurationInsertParam.put("cveId", cveId);
@@ -411,7 +413,7 @@ public class NvdDataService extends CoTopComponent {
 									cvePatchList = null;
 								}
 								
-								mapper.insertNvdDataV3Temp(cveId);
+//								mapper.insertNvdDataV3Temp(cveId);
 							}
 
 							sqlSession.flushStatements();
