@@ -1667,6 +1667,53 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return ResponseEntity.ok(resultMap);
     }
 
+    @ApiOperation(value = "프로젝트 Security Report 파일 다운로드", notes = "프로젝트 Security Report를 생성하여 파일로 다운로드합니다.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "파일 다운로드 성공", response = FileSystemResource.class),
+            @ApiResponse(code = 404, message = "프로젝트가 없거나 조회 권한 없음, 또는 파일 정보 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"File information not found.\"}")))
+    })
+    @GetMapping(value = {"${api.v2.project.security.export-file.path:/projects/{id}/security/file}"})
+    public ResponseEntity<?> getPrjSecurityDownload(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId) throws Exception {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        auditLog.info("AUDIT event=API_ACCESS method=GET api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                Url.APIV2.FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_FILE, userInfo.getUserId(), prjId);
+
+        List<String> prjIdList = new ArrayList<String>();
+        prjIdList.add(prjId);
+
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("userId", userInfo.getUserId());
+        paramMap.put("userRole", userRole(userInfo));
+        paramMap.put("prjId", prjIdList);
+        paramMap.put("distributionType", "normal");
+
+        if (!apiProjectService.existProjectCnt(paramMap)) {
+            return responseService.errorResponse(HttpStatus.NOT_FOUND,
+                    String.format("Project %s not exist or User doesn't have permission for the project", prjId));
+        }
+
+        String securityParam = String.format("{\"prjId\":\"%s\",\"code\":\"security\"}", prjId);
+        String downloadId = ExcelDownLoadUtil.getExcelDownloadId("security", securityParam, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+        if (isEmpty(downloadId)) {
+            return responseService.errorResponse(HttpStatus.NOT_FOUND, FILE_INFORMATION_NOT_FOUND_MESSAGE);
+        }
+
+        T2File fileInfo = fileService.selectFileInfo(downloadId);
+        if (fileInfo == null) {
+            return responseService.errorResponse(HttpStatus.NOT_FOUND, FILE_INFORMATION_NOT_FOUND_MESSAGE);
+        }
+
+        String filePath = fileInfo.getLogiPath();
+        if (!filePath.endsWith("/")) {
+            filePath += "/";
+        }
+
+        return excelToResponseEntity(filePath + fileInfo.getLogiNm(), fileInfo.getOrigNm());
+    }
+
     @ApiOperation(value = "프로젝트 Notice 다운로드", notes = "발행된 프로젝트 Notice HTML 파일을 다운로드합니다.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "파일 다운로드 성공", response = FileSystemResource.class),

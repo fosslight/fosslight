@@ -2570,7 +2570,14 @@ public class CommonFunction extends CoTopComponent {
 		String type = "";
 		
 		if (!isEmpty(fileName)) {
-			type = "application/octet-stream";
+			String normalized = fileName.toLowerCase();
+			if (normalized.endsWith(".xlsx")) {
+				type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+			} else if (normalized.endsWith(".xls")) {
+				type = "application/vnd.ms-excel";
+			} else {
+				type = "application/octet-stream";
+			}
 		}
 		
 		return type;

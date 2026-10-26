@@ -41,6 +41,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfig implements WebMvcConfigurer {
     private static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("application/json")));
     private static final String REFERENCE = "authorization header value";
+    private static final String API_V2_ALL_PATH = "/api/v2/**";
+    private static final String FOSSLIGHT_SECURITY_FALLBACK_PATH = "/api/v2/projects/*/security/file-fosslight";
 
     /** Swagger group name exposed to every user (external + internal). */
     private static final String GROUP_V2 = "v2";
@@ -61,7 +63,8 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
                 .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE + ".api.controller")
                         .and(notInternalApi()))
-                .paths(PathSelectors.ant("/api/v2/**"))
+                .paths(path -> PathSelectors.ant(API_V2_ALL_PATH).test(path)
+                        && !PathSelectors.ant(FOSSLIGHT_SECURITY_FALLBACK_PATH).test(path))
                 .build()
                 .groupName(GROUP_V2)
                 .securityContexts(List.of(securityContext()))
@@ -81,7 +84,8 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
                 .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE + ".api.controller")
                         .and(internalApi()))
-                .paths(PathSelectors.ant("/api/v2/**"))
+                .paths(path -> PathSelectors.ant(API_V2_ALL_PATH).test(path)
+                        && !PathSelectors.ant(FOSSLIGHT_SECURITY_FALLBACK_PATH).test(path))
                 .build()
                 .groupName(GROUP_V2_INTERNAL)
                 .securityContexts(List.of(securityContext()))
