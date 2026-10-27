@@ -2336,26 +2336,81 @@ public class ExcelUtil extends CoTopComponent {
 	 * @return
 	 */
 	private static int findHeaderRowIndex(Sheet sheet) {
-		// 최대 10번째 row 까지만 검색
+		if (sheet == null) {
+			return -1;
+		}
+		
+		int candidateRow = -1;
+		
 		for (Row row : sheet) {
-			// 최대 5개까지만 확인
-			int maxCnt = 0;
+			if (row == null) {
+				continue;
+			}
+			
+			Set<String> headerValues = new LinkedHashSet<>();
+			int checkedCellCount = 0;
 			
 			for (Cell cell : row) {
-				String id = avoidNull(getCellData(cell)).trim().toUpperCase();
-				
-				if ("NO".equalsIgnoreCase(id) || "ID".equalsIgnoreCase(id) || "PACKAGE NAME".equalsIgnoreCase(id) || "FILE NAME".equalsIgnoreCase(id) || "CHECKLIST".equalsIgnoreCase(id)) {
-					return row.getRowNum();
-				}
-				
-				if (maxCnt > 5) {
+				if (checkedCellCount > 30) {
 					break;
 				}
+				
+				String value = avoidNull(getCellData(cell)).trim().toUpperCase();
+				if (!isEmpty(value)) {
+					headerValues.add(value);
+				}
+				
+				checkedCellCount++;
+			}
+			
+			if (headerValues.isEmpty()) {
+				continue;
+			}
+			
+			if (isHeaderTitleRow(headerValues)) {
+				return row.getRowNum();
+			}
+			
+			if (candidateRow < 0 && (headerValues.contains("NO")
+					|| headerValues.contains("ID")
+					|| headerValues.contains("PACKAGE NAME")
+					|| headerValues.contains("FILE NAME")
+					|| headerValues.contains("CHECKLIST"))) {
+				candidateRow = row.getRowNum();
 			}
 		}
 		
-		// 찾지못한경우 신규 report 양식으로 지정
-		return -1;
+		// 표준 헤더 패턴이 없으면 기존 동작과 동일하게 첫 후보를 사용한다.
+		return candidateRow;
+	}
+
+	private static boolean isHeaderTitleRow(Set<String> headerValues) {
+		boolean hasIdToken = headerValues.contains("NO") || headerValues.contains("ID");
+		boolean hasOssToken = headerValues.contains("OSS NAME")
+				|| headerValues.contains("OSS NAME ( OPEN SOURCE SOFTWARE NAME )")
+				|| headerValues.contains("OSS COMPONENT")
+				|| headerValues.contains("PACKAGE NAME")
+				|| headerValues.contains("FILE NAME");
+		boolean hasVersionToken = headerValues.contains("OSS VERSION") || headerValues.contains("PACKAGE VERSION");
+		boolean hasLicenseToken = headerValues.contains("LICENSE") || headerValues.contains("LICENSE CONCLUDED");
+		boolean hasSecurityToken = headerValues.contains("VULNERABILITY ID") || headerValues.contains("CVE ID");
+		boolean hasChecklistToken = headerValues.contains("CHECKLIST");
+		boolean hasAgreementToken = headerValues.contains("AGREEMENT");
+		
+		if (hasChecklistToken) {
+			return hasAgreementToken || headerValues.size() > 1;
+		}
+		
+		if (hasIdToken && (hasOssToken || hasVersionToken || hasLicenseToken || hasSecurityToken)) {
+			return true;
+		}
+		
+		if ((headerValues.contains("PACKAGE NAME") || headerValues.contains("FILE NAME"))
+				&& (hasVersionToken || hasLicenseToken || headerValues.contains("SPDX IDENTIFIER"))) {
+			return true;
+		}
+		
+		return false;
 	}
 
 	private static String getCellData(Cell cell) {

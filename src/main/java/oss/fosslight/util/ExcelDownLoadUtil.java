@@ -2524,6 +2524,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			String[] rowInfoParam = {
 					now_dt
+					, projectMaster.getPrjId()
 					, projectMaster.getPrjName()
 					, projectMaster.getPrjVersion()
 					, projectMaster.getPrjUserName()
@@ -2605,59 +2606,49 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 	private static void makeSecuritySheetV2(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle style2, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows) {
 		int infoStartRow = 1;
-		int startRow = 9;
 		int startCol = 0;
 		int endCol = 0;
 		
-		int lastRowNum = sheet.getLastRowNum();
-		if (lastRowNum >= 6) {
-	        sheet.shiftRows(6, lastRowNum, 1);
-	    }
-	    
-		Row row6 = sheet.getRow(5);
-	    Row row7 = sheet.createRow(6);
-	    
-	    if (row6 != null) {
-	        row7.setHeight(row6.getHeight());
-	        
-	        for (int c = 0; c <= 8; c++) {
-	            Cell cell6 = row6.getCell(c);
-	            Cell cell7 = row7.createCell(c);
-	            
-	            if (cell6 != null) {
-	                cell7.setCellStyle(cell6.getCellStyle());
-	            }
-	        }
-	        
-	        Cell cell7_d = row7.getCell(1);
-	        if (cell7_d != null) {
-	            cell7_d.setCellValue("Vulnerability Status");
-	        }
-	        
-	        sheet.addMergedRegion(new CellRangeAddress(6, 6, 1, 2));
-	        sheet.addMergedRegion(new CellRangeAddress(6, 6, 3, 8));
-	    }
-		
-		if (!infoRows.isEmpty()) {
-			endCol = infoRows.get(0).length-1;
+		int dateRow = findRowByLabel(sheet, 1, "Date");
+		if (dateRow >= 0) {
+			infoStartRow = dateRow;
 		}
 		
-		int shiftRowNum = infoRows.get(0).length;
-		String[] rowParam = infoRows.get(0);
+		int headerRow = findRowByLabel(sheet, 0, "ID");
+		int startRow = headerRow >= 0 ? headerRow + 1 : 9;
 		
-		for (int i = infoStartRow; i < infoStartRow + shiftRowNum; i++){
-			Row templateRow = sheet.getRow(i);
-			Cell templateCell = templateRow.getCell(3);
-			CellStyle st = templateCell.getCellStyle();
-			
-			Row row = sheet.getRow(i);
-			Cell cell = getCell(row, 3);
-			cell.setCellStyle(st);
-			cell.setCellType(CellType.STRING);
-			if (!isEmpty(rowParam[i-infoStartRow])) {
-				cell.setCellValue(rowParam[i-infoStartRow]);
-			} else {
-				cell.setBlank();
+		if (!infoRows.isEmpty()) {
+			String[] rowParam = infoRows.get(0);
+			String[][] infoByLabel = new String[][] {
+				{ "Date", rowParam.length > 0 ? rowParam[0] : "" },
+				{ "Project ID", rowParam.length > 1 ? rowParam[1] : "" },
+				{ "Project Name", rowParam.length > 2 ? rowParam[2] : "" },
+				{ "Project Version", rowParam.length > 3 ? rowParam[3] : "" },
+				{ "Creator", rowParam.length > 4 ? rowParam[4] : "" },
+				{ "Division", rowParam.length > 5 ? rowParam[5] : "" },
+				{ "Vulnerability Status", rowParam.length > 6 ? rowParam[6] : "" }
+			};
+			for (String[] info : infoByLabel) {
+				int rowNum = findRowByLabel(sheet, 1, info[0]);
+				if (rowNum < 0) {
+					continue;
+				}
+				Row row = sheet.getRow(rowNum);
+				if (row == null) {
+					row = sheet.createRow(rowNum);
+				}
+				Cell templateCell = row.getCell(3);
+				CellStyle st = templateCell != null ? templateCell.getCellStyle() : null;
+				Cell cell = getCell(row, 3);
+				if (st != null) {
+					cell.setCellStyle(st);
+				}
+				cell.setCellType(CellType.STRING);
+				if (!isEmpty(info[1])) {
+					cell.setCellValue(info[1]);
+				} else {
+					cell.setBlank();
+				}
 			}
 		}
 		
@@ -2667,7 +2658,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
 		int rowIndex = 0;
-		for (int i = startRow; i < startRow+rows.size(); i++){
+		for (int i = startRow; i < startRow + rows.size(); i++){
 			Row row = sheet.createRow(i);
 			for (int colNum=startCol; colNum<=endCol; colNum++){
 				Cell cell = row.createCell(colNum);
@@ -2737,6 +2728,27 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			rowIndex++;
 		}
+	}
+
+	private static int findRowByLabel(Sheet sheet, int colNum, String label) {
+		for (int rowNum = 0; rowNum <= sheet.getLastRowNum(); rowNum++) {
+			Row row = sheet.getRow(rowNum);
+			if (row == null) {
+				continue;
+			}
+			
+			Cell cell = row.getCell(colNum);
+			if (cell == null) {
+				continue;
+			}
+			
+			String value = avoidNull(cell.toString()).trim();
+			if (label.equalsIgnoreCase(value)) {
+				return rowNum;
+			}
+		}
+		
+		return -1;
 	}
 
 	private static void makeSecuritySheet(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows, boolean isProject, boolean isDemo) {
