@@ -2619,22 +2619,33 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		if (!infoRows.isEmpty()) {
 			String[] rowParam = infoRows.get(0);
-			for (int i = 0; i < rowParam.length; i++) {
-				int rowNum = infoStartRow + i;
-				Row templateRow = sheet.getRow(rowNum);
-				if (templateRow == null) {
-					templateRow = sheet.createRow(rowNum);
+			String[][] infoByLabel = new String[][] {
+				{ "Date", rowParam.length > 0 ? rowParam[0] : "" },
+				{ "Project ID", rowParam.length > 1 ? rowParam[1] : "" },
+				{ "Project Name", rowParam.length > 2 ? rowParam[2] : "" },
+				{ "Project Version", rowParam.length > 3 ? rowParam[3] : "" },
+				{ "Creator", rowParam.length > 4 ? rowParam[4] : "" },
+				{ "Division", rowParam.length > 5 ? rowParam[5] : "" },
+				{ "Vulnerability Status", rowParam.length > 6 ? rowParam[6] : "" }
+			};
+			for (String[] info : infoByLabel) {
+				int rowNum = findRowByLabel(sheet, 1, info[0]);
+				if (rowNum < 0) {
+					continue;
 				}
-				Cell templateCell = templateRow.getCell(3);
+				Row row = sheet.getRow(rowNum);
+				if (row == null) {
+					row = sheet.createRow(rowNum);
+				}
+				Cell templateCell = row.getCell(3);
 				CellStyle st = templateCell != null ? templateCell.getCellStyle() : null;
-				
-				Cell cell = getCell(templateRow, 3);
+				Cell cell = getCell(row, 3);
 				if (st != null) {
 					cell.setCellStyle(st);
 				}
 				cell.setCellType(CellType.STRING);
-				if (!isEmpty(rowParam[i])) {
-					cell.setCellValue(rowParam[i]);
+				if (!isEmpty(info[1])) {
+					cell.setCellValue(info[1]);
 				} else {
 					cell.setBlank();
 				}
