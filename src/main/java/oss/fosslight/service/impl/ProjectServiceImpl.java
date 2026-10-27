@@ -4432,8 +4432,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		//review 상태로 변경시 reviewer가 설정되어 있지 않은 경우, reviewer도 업데이트 한다.
 		if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getIdentificationStatus())) {
 			if (isEmpty(param.getReviewer())) {
-				param.setModifier(param.getLoginUserName());
-				param.setReviewer(param.getLoginUserName());
+				String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
+				List<T2Users> userList = userMapper.selectReviwer(ldapFlag);
+				
+				String loginUserName = param.getLoginUserName();
+				param.setModifier(loginUserName);
+				
+				if (!isEmpty(loginUserName) && CollectionUtils.isNotEmpty(userList) && userList.stream().anyMatch(user -> loginUserName.equals(user.getUserId()))) {
+					param.setReviewer(loginUserName);
+				}
 				
 				projectMapper.updateReviewer(param);
 				
