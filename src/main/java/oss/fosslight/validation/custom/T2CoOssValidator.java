@@ -121,11 +121,14 @@ public class T2CoOssValidator extends T2CoValidator {
 					}
 					
 					for (int i = 0 ; i < downLoadLocationList.size() ; i++) {
+						if (i > 0) {
+							msg += ",";
+						}
 						if ("1".equals(sortOrder) && !"1".equals(downLoadLocationList.get(i).getSOrder())) {
 							msg += "<br>" + MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 							msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
 						} else {
-							msg += (i==0?"":",") + MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
+							msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
 						}
 						sortOrder = downLoadLocationList.get(i).getSOrder();
 					}
@@ -159,11 +162,14 @@ public class T2CoOssValidator extends T2CoValidator {
 						}
 						
 						for (int i = 0 ; i < downLoadLocationList.size() ; i++) {
+							if (i > 0) {
+								msg += ",";
+							}
 							if ("1".equals(sortOrder) && !"1".equals(downLoadLocationList.get(i).getSOrder())) {
 								msg += "<br>" + MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 								msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
 							} else {
-								msg += (i==0?"":",") + MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
+								msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
 							}
 							sortOrder = downLoadLocationList.get(i).getSOrder();
 						}
@@ -196,11 +202,14 @@ public class T2CoOssValidator extends T2CoValidator {
 					}
 					
 					for (int i = 0 ; i < homepageList.size() ; i++) {
+						if (i > 0) {
+							msg += ",";
+						}
 						if ("1".equals(sortOrder) && !"1".equals(homepageList.get(i).getSOrder())) {
 							msg += "<br>" + MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 							msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), homepageList.get(i).getOssName(), homepageList.get(i).getOssName());
 						} else {
-							msg += (i==0?"":",") + MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), homepageList.get(i).getOssName(), homepageList.get(i).getOssName());
+							msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), homepageList.get(i).getOssName(), homepageList.get(i).getOssName());
 						}
 						sortOrder = homepageList.get(i).getSOrder();
 					}

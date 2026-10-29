@@ -3108,8 +3108,8 @@
 			        				homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
 			        			}
 			        		
-			        			$(target).parent().next().children().empty();
-								$(target).parent().next().children().html(homepageHtml).show();
+			        			$(target).parent().next("span.urltxt").empty();
+								$(target).parent().next("span.urltxt").html(homepageHtml).show();
 								$(target).addClass("is-warning");
 		        			}
 		        		} else {
