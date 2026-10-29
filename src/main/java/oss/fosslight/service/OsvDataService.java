@@ -86,7 +86,7 @@ public class OsvDataService extends CoTopComponent {
 
 	public String executeOsvDataSync() throws IOException {
 		boolean initializeFlag = false;
-		if (CoConstDef.FLAG_YES.equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100"))) {
+		if (CoConstDef.FLAG_YES.equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "110"))) {
 			initializeFlag = true;
 		}
 		
@@ -94,6 +94,10 @@ public class OsvDataService extends CoTopComponent {
 		osvDataTotalBulkJob(initializeFlag, osvDataApiRestTemplate, BATCH_SIZE);
 		schlog.info("[OSV] End Total/Full Data Synchronization.");
 		
+		if (initializeFlag) {
+			codeMapper.updateCodeDtlNm("990", "110", "N");
+			initializeFlag = false;
+		}
 		return "00";
 	}
 
@@ -110,6 +114,17 @@ public class OsvDataService extends CoTopComponent {
 		int retryCount = 0;
 		boolean success = false;
 
+		if (initializeFlag) {
+			osvDataMapper.truncateOsvAffectedPackagesVersions();
+			osvDataMapper.truncateOsvAffectedPackageRanges();
+			osvDataMapper.truncateOsvAffectedPackages();
+			osvDataMapper.truncateOsvAliases();
+			osvDataMapper.truncateOsvSeverities();
+			osvDataMapper.truncateOsvReferences();
+			osvDataMapper.truncateOsvVulnerabilities();
+			osvDataMapper.truncateOsvSearchMaster();
+		}
+		
 		while (!success && retryCount < MAX_RETRY) {
 	        try {
 	            schlog.info("[OSV] Download attempt {}/{} started.", retryCount + 1, MAX_RETRY);
@@ -148,18 +163,21 @@ public class OsvDataService extends CoTopComponent {
 	                                }
 
 	                                jsonCount++;
+	                                
+	                                String jsonContent;
 
-	                                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	                                try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+	                                    int len;
 
-	                                int len;
-	                                while ((len = zis.read(buffer)) != -1) {
-	                                    bos.write(buffer, 0, len);
+	                                    while ((len = zis.read(buffer)) != -1) {
+	                                        bos.write(buffer, 0, len);
+	                                    }
+
+	                                    jsonContent = bos.toString(StandardCharsets.UTF_8.name());
 	                                }
 
-	                                String jsonContent = bos.toString("UTF-8");
-
 	                                try {
-	                                    boolean isProcess = processAndQueueOsvRecord(sqlSession, jsonContent, entry.getName(), initializeFlag);
+	                                	boolean isProcess = processAndQueueOsvRecord(sqlSession, jsonContent, entry.getName(), initializeFlag);
 	                                    if (isProcess) {
 	                                        count++;
 	                                    }
@@ -167,14 +185,10 @@ public class OsvDataService extends CoTopComponent {
 	                                    log.error("[OSV] Failed to process JSON file [{}]: {}", entry.getName(), ex.getMessage(), ex);
 	                                }
 
-	                                jsonContent = null;
-	                                bos = null;
-
 	                                if (count > 0 && count % batchSize == 0) {
 	                                    sqlSession.flushStatements();
 	                                    schlog.info("[OSV] Batch flushed. Processed {} records.", count);
 	                                }
-
 	                            } finally {
 	                                zis.closeEntry();
 	                            }
@@ -288,15 +302,18 @@ public class OsvDataService extends CoTopComponent {
 		Instant jsonModiInstant = root.has("modified") ? Instant.parse(root.get("modified").asText()) : null;
 
 		boolean isUpdate = false;
-		Vulnerability bean = sqlSession.selectOne("oss.fosslight.repository.OsvDataMapper.selectOsvVulnerabilityInfo", osvId);
-		if (bean != null) {
-			Timestamp dbModiDate = Timestamp.valueOf(bean.getModiDate());
-			Instant dbModiInstant = dbModiDate != null ? dbModiDate.toInstant() : null;
-			if (jsonModiInstant != null) {
-				if (!jsonModiInstant.equals(dbModiInstant)) {
-					isUpdate = true;
-				} else {
-					return true;
+		Vulnerability bean = null;
+		if (!initializeFlag) {
+			bean = sqlSession.selectOne("oss.fosslight.repository.OsvDataMapper.selectOsvVulnerabilityInfo", osvId);
+			if (bean != null) {
+				Timestamp dbModiDate = Timestamp.valueOf(bean.getModiDate());
+				Instant dbModiInstant = dbModiDate != null ? dbModiDate.toInstant() : null;
+				if (jsonModiInstant != null) {
+					if (!jsonModiInstant.equals(dbModiInstant)) {
+						isUpdate = true;
+					} else {
+						return true;
+					}
 				}
 			}
 		}
@@ -307,21 +324,21 @@ public class OsvDataService extends CoTopComponent {
 		// Parse and Map Main Vulnerability Properties (OSV_VULNERABILITIES)
 		Map<String, Object> vulnParam = new HashMap<>();
 		vulnParam.put("osvId", osvId);
-		vulnParam.put("schemaVersion", root.path("schema_version").asText(null));
-		vulnParam.put("summary", root.path("summary").asText(null));
-		vulnParam.put("details", root.path("details").asText(null));
-		vulnParam.put("publDate", root.has("published") ? Timestamp.from(Instant.parse(root.get("published").asText())) : null);
-		vulnParam.put("modiDate", root.has("modified") ? Timestamp.from(jsonModiInstant) : null);
-		vulnParam.put("withdrawn", root.has("withdrawn") ? Timestamp.from(Instant.parse(root.get("withdrawn").asText())) : null);
+		vulnParam.put("schemaVersion", root.hasNonNull("schema_version") ? root.get("schema_version").asText() : null);
+		vulnParam.put("summary", root.hasNonNull("summary") ? root.get("summary").asText() : null);
+		vulnParam.put("details", root.hasNonNull("details") ? root.get("details").asText() : null);
+		vulnParam.put("publDate", root.hasNonNull("published") && !root.get("published").asText().isBlank() ? Timestamp.from(Instant.parse(root.get("published").asText())) : null);
+		vulnParam.put("modiDate", root.hasNonNull("modified") && !root.get("modified").asText().isBlank() ? Timestamp.from(Instant.parse(root.get("modified").asText())) : null);
+		vulnParam.put("withdrawn", root.hasNonNull("withdrawn") && !root.get("withdrawn").asText().isBlank() ? Timestamp.from(Instant.parse(root.get("withdrawn").asText())) : null);
 		vulnParam.put("rawJson", jsonContent);
 
 		if (!isUpdate) {
 			sqlSession.insert("oss.fosslight.repository.OsvDataMapper.insertOsvVulnerability", vulnParam);
+			sqlSession.flushStatements();
 		} else {
 			vulnParam.put("id", bean.getId());
 			sqlSession.update("oss.fosslight.repository.OsvDataMapper.updateOsvVulnerability", vulnParam);
 		}
-		sqlSession.flushStatements();
 
 		int id;
 		if (isUpdate) {
@@ -335,7 +352,7 @@ public class OsvDataService extends CoTopComponent {
 			id = ((Number) idObj).intValue();
 		}
 
-		if (isUpdate) {
+		if (!initializeFlag && isUpdate) {
 			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvReferences", osvId);
 			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvAffectedPackageRange", id);
 			sqlSession.delete("oss.fosslight.repository.OsvDataMapper.deleteOsvAffectedPackageVersion", id);
@@ -1929,7 +1946,6 @@ public class OsvDataService extends CoTopComponent {
 	}
 
 	public Map<String, Object> getVulnerabilityInfo(String cveId) {
-		//return osvDataMapper.getVulnerabilityInfo(cveId);
-		return null;
+		return osvDataMapper.getVulnerabilityInfo(cveId);
 	}
 }

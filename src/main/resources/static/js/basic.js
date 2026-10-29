@@ -2261,8 +2261,36 @@ function openNVD(cveId) {
     }
 }
 
-function openNVD2(_ossName, _url) {
-    if (_popupVuln == null || _popupVuln.closed) {
+function checkOssInfo(ossName, ossVersion, callback) {
+    $.ajax({
+        url: '/oss/checkOssInfo',
+        type: 'GET',
+        data: {
+            ossName: ossName,
+            ossVersion: ossVersion
+        },
+        success: function (isExists) {
+            callback(isExists);
+        },
+        error: function () {
+            alertify.alert('Failed to check open source registration.');
+        }
+    });
+}
+
+function openNVD2(_ossName, _url, _ossVersion, _msg) {
+    checkOssInfo(_ossName, _ossVersion, function(isExists) {
+        if (!isExists) {
+            alertify.alert(_msg, function(){});
+            return;
+        }
+        
+		openVulnerabilityPopup(_ossName, _url);
+    });
+}
+
+function openVulnerabilityPopup(_ossName, _url) {
+	if (_popupVuln == null || _popupVuln.closed) {
         _popupVuln = window.open(_url, "vulnViewPopup_" + _ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 
         if (!_popupVuln || _popupVuln.closed || typeof _popupVuln.closed == 'undefined') {

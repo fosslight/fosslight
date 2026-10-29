@@ -2185,4 +2185,17 @@
 	
 	<update id="dropOsvSearchMaster">DROP TABLE IF EXISTS OSV_SEARCH_MASTER</update>
 	<update id="renameOsvSearchMasterTemp">RENAME TABLE OSV_SEARCH_MASTER_TEMP TO OSV_SEARCH_MASTER</update>
+	
+	<select id="getVulnerabilityInfo" resultType="HashMap">
+		SELECT ID AS CVE_ID, SEVERITY AS CVSS_SCORE, SUMMARY AS VULN_SUMMARY, PUBL_DATE, MODI_DATE FROM OSV_SEARCH_MASTER WHERE ID = #{vulnerabilityId}
+	</select>
+	
+	<update id="truncateOsvAffectedPackagesVersions">TRUNCATE TABLE OSV_AFFECTED_PACKAGES_VERSIONS</update>
+	<update id="truncateOsvAffectedPackageRanges">TRUNCATE TABLE OSV_AFFECTED_PACKAGE_RANGES</update>
+	<update id="truncateOsvAffectedPackages">TRUNCATE TABLE OSV_AFFECTED_PACKAGES</update>
+	<update id="truncateOsvAliases">TRUNCATE TABLE OSV_ALIASES</update>
+	<update id="truncateOsvSeverities">TRUNCATE TABLE OSV_SEVERITIES</update>
+	<update id="truncateOsvReferences">TRUNCATE TABLE OSV_REFERENCES</update>
+	<update id="truncateOsvVulnerabilities">TRUNCATE TABLE OSV_VULNERABILITIES</update>
+	<update id="truncateOsvSearchMaster">TRUNCATE TABLE OSV_SEARCH_MASTER</update>
 </mapper>

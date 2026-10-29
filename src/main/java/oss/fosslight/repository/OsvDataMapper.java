@@ -95,4 +95,15 @@ public interface OsvDataMapper {
 
 	void dropOsvSearchMaster();
 	void renameOsvSearchMasterTemp();
+
+	Map<String, Object> getVulnerabilityInfo(String vulnerabilityId);
+
+	void truncateOsvSearchMaster();
+	void truncateOsvVulnerabilities();
+	void truncateOsvSeverities();
+	void truncateOsvReferences();
+	void truncateOsvAliases();
+	void truncateOsvAffectedPackages();
+	void truncateOsvAffectedPackageRanges();
+	void truncateOsvAffectedPackagesVersions();
 }

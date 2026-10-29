@@ -1158,30 +1158,24 @@ var bom_fn = {
 		var display = "";
 		var _url = "";
 		var prjId = [[${project.prjId}]];
-		var ossName = "";
-		if (typeof rowObject.refOssName !== "undefined") {
-			ossName = rowObject.refOssName.replace(' ','_');
-		} else {
-			ossName = rowObject.ossName;
-			if (typeof ossName !== "undefined" && "" != ossName) {
-				ossName = ossName.replace(' ', '_');
-			}
-		}
+		var ossName = rowObject.ossName || "";
+		var ossVersion = rowObject.ossVersion || "";
+		var msg = [[#{msg.project.check.vulnerability}]];
 		
 		if (prjId) {
-			_url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=Y&prjId='+prjId+'&ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
+			_url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=Y&prjId='+prjId+'&ossName='+ossName+'&ossVersion='+ossVersion+'&vulnType=';
 		} else {
-			_url = '/vulnerability/vulnpopup?ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
+			_url = '/vulnerability/vulnpopup?ossName='+ossName+'&ossVersion='+ossVersion+'&vulnType=';
 		}
 		
 		if (parseInt(cellvalue) >= 9.0 ) {
-			display = "<span class=\"badge badge-dark\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">CRITICAL</span>";
+			display = "<span class=\"badge badge-dark\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + ossName + "','" + _url + "','" + ossVersion + "','" + msg + "')\">CRITICAL</span>";
 		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display = "<span class=\"badge badge-danger\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">HIGH</span>";
+			display = "<span class=\"badge badge-danger\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + ossName + "','" + _url + "','" + ossVersion + "','" + msg + "')\">HIGH</span>";
 		} else if(parseInt(cellvalue) >= 4.0) {
-			display = "<span class=\"badge badge-orange\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">MEDIUM</span>";
+			display = "<span class=\"badge badge-orange\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + ossName + "','" + _url + "','" + ossVersion + "','" + msg + "')\">MEDIUM</span>";
 		} else if(parseInt(cellvalue) > 0) {
-			display = "<span class=\"badge badge-warning\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
+			display = "<span class=\"badge badge-warning\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + ossName + "','" + _url + "','" + ossVersion + "','" + msg + "')\">LOW</span>";
 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
 			display = "<span style=\"font-size:0;\" title=\"0\"></span>";
 		} else {

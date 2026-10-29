@@ -1330,11 +1330,7 @@ public class OssController extends CoTopComponent{
 	}
 
 	@PostMapping(value=OSS.SAVE_OSS_BULK_REG)
-	public @ResponseBody ResponseEntity<Object> saveOssBulkReg(
-			@RequestBody OssMaster ossMaster
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
+	public @ResponseBody ResponseEntity<Object> saveOssBulkReg(@RequestBody OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model){
 		// 이미등록되어 있는 OSS의 경우 Skip한다.
 		if (CoCodeManager.OSS_INFO_UPPER.containsKey( (ossMaster.getOssName() + "_" + avoidNull(ossMaster.getOssVersion())).toUpperCase() )) {
 			return makeJsonResponseHeader(true, "Skip");
@@ -1507,11 +1503,18 @@ public class OssController extends CoTopComponent{
 	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		model.addAttribute("projectInfo", bean);
 		model.addAttribute("isNext", req.getParameter("isNext"));
-
-
 		return "oss/checkOssLicensePopup";
 	}
 
+	@GetMapping(value = OSS.CHECK_OSS_INFO)
+	public @ResponseBody boolean checkOssInfo(@ModelAttribute OssMaster bean) {
+		if (MapUtils.isEmpty(CoCodeManager.OSS_INFO_UPPER)) {
+	        return false;
+	    }
+	    String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+	    return CoCodeManager.OSS_INFO_UPPER.containsKey(key);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@GetMapping(value = OSS.CHECK_OSS_LICENSE_AJAX, produces = "text/html; charset=utf-8")
 	public @ResponseBody ResponseEntity<Object> getCheckOssLicenseAjax(
@@ -2550,8 +2553,25 @@ public class OssController extends CoTopComponent{
 	public @ResponseBody ResponseEntity<Object> ossVulnerabilityAjax(@RequestBody OssMaster ossMaster, HttpServletResponse response) {
 		Map<String, Object> resMap = new HashMap<>();
 		
-		OssMaster bean = new OssMaster(ossMaster.getOssId());
-		bean = ossService.getOssMasterOne(bean);
+		OssMaster bean = null;
+		if (!isEmpty(ossMaster.getOssId())) {
+			bean = new OssMaster(ossMaster.getOssId());
+			bean = ossService.getOssMasterOne(bean);
+		} else if (!isEmpty(ossMaster.getOssName())) {
+			String ossName = ossMaster.getOssName();
+			String ossVersion = avoidNull(ossMaster.getOssVersion());
+			
+			bean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + ossVersion).toUpperCase());
+			if (bean == null) {
+				ossName  = ossName.replaceAll("_", " ");
+				bean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + ossVersion).toUpperCase());
+			}
+			if (bean == null) {
+				bean = new OssMaster();
+				bean.setOssName(ossName);
+				bean.setOssVersion(ossVersion);
+			}
+		}
 		
 		List<Vulnerability> vulnInfoList = ossService.getMergedVulnerabilityList(bean);
 		resMap.put("vulnList", CollectionUtils.isEmpty(vulnInfoList) ? Collections.EMPTY_LIST : vulnInfoList);

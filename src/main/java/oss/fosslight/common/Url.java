@@ -226,6 +226,7 @@ public final class Url {
 		public static final String SAVE_OSS_URL_NICKNAME = PATH + "/saveOssURLNickName";
 
 		public static final String CHECK_OSS_LICENSE = PATH + "/checkOssLicense";
+		public static final String CHECK_OSS_INFO = PATH + "/checkOssInfo";
 
 		public static final String SELECT_OSS_POPUP = PATH + "/ossSelectPopup";
 
