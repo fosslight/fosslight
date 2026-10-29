@@ -119,7 +119,18 @@
 	<delete id="deleteNotice" parameterType="oss.fosslight.domain.Notice" >
 		DELETE
 		FROM USER_NOTICE
-		WHERE SEQ = #{seq}
+		<choose>
+	        <when test="seq != null and seq.contains(&quot;,&quot;)">
+	        	<bind name="seqList" value="seq.split(',')" />
+	            WHERE SEQ IN
+	            <foreach collection="seqList" item="item" open="(" separator="," close=")">
+	                #{item}
+	            </foreach>
+	        </when>
+	        <otherwise>
+	            WHERE SEQ = #{seq}
+	        </otherwise>
+	    </choose>
 	</delete>
 	
     <select id="selectPublishedNotice" parameterType="oss.fosslight.domain.Notice" resultType="oss.fosslight.domain.Notice">

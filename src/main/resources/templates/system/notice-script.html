@@ -14,6 +14,10 @@ $(function () {
    	$("#noticeSave").on("click", function () {
    		noticePopup.save();
    	});
+   	
+   	$("#noticeDelete").on("click", function () {
+   		noticePopup.delPopup();
+   	});
 });	
 
 // 함수
@@ -161,6 +165,8 @@ var noticeList = {
 			, pager: '#pager'
 			, toppager: true
 			, gridview: true
+			, multiselect: true
+			, multiselectWidth: 35
 			, sortable: function (permutation) {}
 			, sortname: 'seq'
 			, sortorder: 'desc'
@@ -185,8 +191,13 @@ var noticeList = {
 					}
 				}
 			}
-			, onSelectRow: function(rowid, status, e) {
-				noticePopup.editPopup(rowid);
+			, onCellSelect: function(rowid,iCol,cellcontent,e) {
+				if (iCol > 2) {
+					noticePopup.editPopup(rowid);
+				}
+			}
+			, onSelectRow: function(rowid, iCol, status, e) {
+//				noticePopup.editPopup(rowid);
 			}
 			, gridComplete : function() {
 				updateGridRowCount('list', 'pager');	
@@ -282,12 +293,12 @@ var noticePopup = {
 	    	$("#noticeForm").find("input,textarea").prop("disabled",true);
 	        $("#noticeTextarea").summernote("disable");
 	        $("#noticeSave").hide();
+	        $("#noticeDelete").hide();
 	        
 	     	// Hide unnecessary elements
 	        $("#noticeNoDiv").hide();
 	        $("#sDate").closest(".form-row").hide();
 	        $("#publish").closest(".form-row").hide();
-	        $("#noticeSave").hide();
 
 	        // Set Title and Notice inputs to disabled for read-only view
 	        $("#title").prop("disabled", true);
@@ -299,6 +310,7 @@ var noticePopup = {
 	    	$("#noticeForm").find("input,textarea").prop("disabled",false);
 	        $("#noticeTextarea").summernote("enable");
 	        $("#noticeSave").show();
+	        $("#noticeDelete").show();
 	        
 	     	// Restore elements for regular Edit mode
 	        $("#noticeNoDiv").show();
@@ -327,28 +339,27 @@ var noticePopup = {
 	    $("#noticeModal").modal("show");
 	},
 	delPopup : function() {
-		var rowId = $("#list").jqGrid("getGridParam", "selrow");
-	    if (!rowId) {
-	        alertify.alert("Please select a notice.");
-	        return;
-	    }
-	    
-	    var rowId = $("#list").jqGrid("getGridParam", "selrow");
-
-	    if (!rowId) {
-	        alertify.alert("Please select a notice.");
-	        return;
-	    }
-
-	    var rowData = $("#list").jqGrid("getRowData", rowId);
-
+		var rowIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		if (rowIds.length == 0) {
+			alertify.alert("Please select a notice.");
+ 	        return;
+		}
+		
+		var seq = rowIds.map(function(rowId) {
+			var rowData = $("#list").jqGrid("getRowData", rowId);
+			return rowData.seq;
+		}).join(",");
+		
 	    alertify.confirm(
 	        "Delete",
 	        "Are you sure you want to delete this notice?",
 	        function () {
+	        	loading.show();
+	        	
 	        	var postData = {
 	        		oper: "del",
-	        		seq: rowData.seq
+	        		seq: seq
 	        	};
 
 	            $.ajax({
@@ -357,11 +368,17 @@ var noticePopup = {
 	                data: postData,
 	                dataType: "json",
 	                success: function (response) {
+	                	loading.hide();
+	                	
 	                    if (response.isValid == false) {
 	                        alertify.error([[#{msg.common.valid}]], 0);
 	                        return;
 	                    }
 
+	                    if ($("#noticeModal").hasClass("show")) {
+	                        $("#noticeModal").modal("hide");
+	                    }
+	                    
 	                    alertify.success([[#{msg.common.success}]]);
 	                    $("#list").trigger("reloadGrid");
 	                },

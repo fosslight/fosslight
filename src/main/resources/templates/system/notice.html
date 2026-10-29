@@ -19,7 +19,7 @@
     	</div>
   	</div>
   	
-  	<div class="modal fade" id="noticeModal" tabindex="-1">
+  	<div class="modal fade" id="noticeModal" tabindex="-1" data-backdrop="static">
     	<div class="modal-dialog modal-lg">
         	<div class="modal-content">
             	<div class="modal-header">
@@ -74,6 +74,7 @@
             		</form>
 	            </div>
 	            <div class="modal-footer">
+	            	<button id="noticeDelete" class="btn btn-danger" th:text="Delete"></button>
 	                <button id="noticeSave" class="btn btn-primary" th:text="Save"></button>
 					<button class="btn btn-secondary" data-dismiss="modal" th:text="Close"></button>
 	            </div>
