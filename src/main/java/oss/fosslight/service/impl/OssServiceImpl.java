@@ -3664,22 +3664,27 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	private void checkIncludeCpeEnvironment(Map<String, Object> includeVendorProductInfo, List<String> includeCpeEnvironmentList, List<Map<String, Object>> filteredVendorProductInfoList) {
 		String criteria = (String) includeVendorProductInfo.get("CRITERIA");
-		String[] criteriaSplit = criteria.split("[:]");
-		
-		int cpeIdx = 0;
 		String criteriaEnvironment = "";
 		
-		for (String cpe : criteriaSplit) {
-			if (cpeIdx != 5) {
-				criteriaEnvironment += cpe;
-				if (cpeIdx != criteriaSplit.length-1) criteriaEnvironment += ":";
+		if (!isEmpty(criteria)) {
+			String[] criteriaSplit = criteria.split("[:]");
+			
+			int cpeIdx = 0;
+			
+			for (String cpe : criteriaSplit) {
+				if (cpeIdx != 5) {
+					criteriaEnvironment += cpe;
+					if (cpeIdx != criteriaSplit.length-1) criteriaEnvironment += ":";
+				}
+				cpeIdx++;
 			}
-			cpeIdx++;
 		}
 		
 		if (includeCpeEnvironmentList != null && !includeCpeEnvironmentList.isEmpty()) {
-			if (includeCpeEnvironmentList.contains(criteriaEnvironment)) {
-				filteredVendorProductInfoList.add(includeVendorProductInfo);
+			if (!isEmpty(criteriaEnvironment)) {
+				if (includeCpeEnvironmentList.contains(criteriaEnvironment)) {
+					filteredVendorProductInfoList.add(includeVendorProductInfo);
+				}
 			}
 		} else {
 			filteredVendorProductInfoList.add(includeVendorProductInfo);
@@ -4798,10 +4803,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			List<String> excludeCpeEnvironmentList = new ArrayList<>();
 			
 			List<String> includeCpeList = null;
+			if (ossMaster.getSearchIncludeCpes() == null && !isEmpty(ossMaster.getSearchIncludeCpe())) {
+				ossMaster.setSearchIncludeCpes(ossMaster.getSearchIncludeCpe().split(","));
+			}
 			if (ossMaster.getSearchIncludeCpes() != null) {
 				includeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getSearchIncludeCpes()));
 			}
 			List<String> excludeCpeList = null;
+			if (ossMaster.getSearchExcludeCpes() == null && !isEmpty(ossMaster.getSearchExcludeCpe())) {
+				ossMaster.setSearchExcludeCpes(ossMaster.getSearchExcludeCpe().split(","));
+			}
 			if (ossMaster.getSearchExcludeCpes() != null) {
 				excludeCpeList = new ArrayList<>(Arrays.asList(ossMaster.getSearchExcludeCpes()));
 			}
@@ -4880,7 +4891,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e.getMessage(), e);
 		}
 		
 		ossMaster.setOssNameTemp(null);
@@ -4932,7 +4943,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			param.setDashOssNameList(dashOssNameList.toArray(new String[dashOssNameList.size()]));
 		}
 		
-		if (!param.getOssVersion().equals("-")) {
+		if (!isEmpty(param.getOssVersion()) && !param.getOssVersion().equals("-")) {
 			list = ossMapper.getOssVulnerabilityList2(param);
 		} else {
 			list = ossMapper.getVulnerabilityInfoWithOutVer(param);
@@ -4960,6 +4971,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				List<Vulnerability> customList = new ArrayList<>();
 				
 				for (Vulnerability vuln : list) {
+					if (isEmpty(vuln.getCriteria())) {
+						continue;
+					}
 					if (!includeCpeList.contains(vuln.getCriteria())) {
 						customList.add(vuln);
 					}
@@ -5091,7 +5105,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			CoMailManager.getInstance().sendMail(mailBean);
-
 		} catch (Exception e) {
 			log.error("Failed to send mail:" + e.getMessage());
 		}
