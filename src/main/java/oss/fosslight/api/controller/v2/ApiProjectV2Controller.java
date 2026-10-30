@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.advice.CProjectNotAvailableException;
+import oss.fosslight.api.advice.CProjectNotFoundException;
 import oss.fosslight.api.annotation.ApiCommonResponses;
 import oss.fosslight.api.doc.example.ProjectApiExampleConstants;
 import oss.fosslight.api.service.RestResponseService;
@@ -460,6 +461,257 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @ApiOperation(
+            value = "프로젝트 기본정보 수정",
+            notes = "프로젝트 기본정보를 수정합니다.\n"
+                    + "\n"
+                    + "[별도 API로 처리되는 항목]\n"
+                    + "- Model Information: updateModelList API\n"
+                    + "- Edit Permission: addPrjEditor API\n"
+                    + "- Security Person / Security Mail: Security 관련 API\n"
+                    + "\n"
+                    + "위 항목은 각 전용 API를 사용해 주세요.\n"
+                    + "\n"
+                    + "[응답 안내]\n"
+                    + "- changed=true: 실제로 변경이 반영됨\n"
+                    + "- changed=false: 요청은 성공했지만 변경사항 없음(no-change), history/comment/mail 발송은 반영되지 않습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "수정 성공", response = Map.class,
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"prjId\":\"123\",\"before\":{\"prjName\":\"old-name\"},\"after\":{\"prjName\":\"new-name\"},\"changed\":true}"))),
+            @ApiResponse(code = 200, message = "수정 성공(변경사항 없음)", response = Map.class,
+                    examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"prjId\":\"123\",\"before\":{},\"after\":{},\"changed\":false,\"message\":\"No changes detected. History/comment/mail were skipped.\"}"))),
+            @ApiResponse(code = 400, message = "잘못된 요청 - 유효하지 않은 파라미터 값", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Valid distribution type code is invalid.\"}"))),
+            @ApiResponse(code = 403, message = "프로젝트 수정 권한 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"The user does not have edit permissions for Project 123\"}"))),
+            @ApiResponse(code = 404, message = "프로젝트 없음", examples = @Example(@ExampleProperty(mediaType = "application/json", value = "{\"message\":\"Project not found. Project ID: 123\"}")))
+    })
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BY_ID})
+    public ResponseEntity<Map<String, Object>> updateProjectBasicInfo(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Project Name", required = false) @RequestParam(required = false) String prjName,
+            @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
+            @ApiParam(value = "Additional Information", required = false) @RequestParam(required = false) String additionalInformation,
+            @ApiParam(value = "User Comment", required = false) @RequestParam(required = false) String userComment,
+            @ApiParam(value = "Distribution Type (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionType,
+            @ApiParam(value = "OS Type (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String osType,
+            @ApiParam(value = "OS Type etc", required = false) @RequestParam(required = false) String osTypeEtc,
+            @ApiParam(value = "Distribution Site (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionSite,
+            @ApiParam(value = "Network Service (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String networkServerType,
+            @ApiParam(value = "OSS Notice (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeType,
+            @ApiParam(value = "Notice Platform (Required only if OSS Notice is Platform-generated. Check input values at /api/v2/codes)", required = false) @RequestParam(required = false) String noticeTypeEtc,
+            @ApiParam(value = "Priority (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String priority
+    ) {
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        auditLog.info("AUDIT event=API_ACCESS method=POST api=/api/v2{} actor={} resourceType=PROJECT resourceId={}",
+                APIV2.FOSSLIGHT_API_PROJECT_BY_ID, userInfo.getUserId(), prjId);
+        Project beforeProject = projectService.getProjectBasicInfo(prjId);
+        if (beforeProject == null) {
+            throw new CProjectNotFoundException("Project not found. Project ID: " + prjId);
+        }
+
+        String role = userRole(userInfo);
+        boolean isAdmin = "ROLE_ADMIN".equalsIgnoreCase(role);
+        boolean isManager = "ROLE_MGR".equalsIgnoreCase(role);
+        boolean isCompleteProject = CoConstDef.FLAG_YES.equalsIgnoreCase(avoidNull(beforeProject.getCompleteYn()));
+
+        if (!isAdmin && !avoidNull(userInfo.getDivision()).equals(avoidNull(beforeProject.getDivision()))) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Division", prjId));
+        }
+
+        if (isManager && isCompleteProject) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
+
+        if (!isAdmin && !isManager && !apiProjectService.checkUserHasProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
+
+        if (!hasAnyProjectUpdateParam(prjName, prjVersion, additionalInformation, distributionType, osType, osTypeEtc,
+                distributionSite, networkServerType, noticeType, noticeTypeEtc, priority)) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "At least one updatable parameter is required.");
+        }
+
+        if (isAdmin && isCompleteProject && hasRestrictedUpdateParamForCompleteProject(prjName, distributionType, osType, osTypeEtc,
+                distributionSite, networkServerType, noticeType, noticeTypeEtc, priority)) {
+            throw new CProjectNotAvailableException(String.format("%s. Complete project can update only prjVersion and additionalInformation", prjId));
+        }
+
+        String updatedPrjName = beforeProject.getPrjName();
+        if (prjName != null) {
+            if (isEmpty(prjName)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Project name is required.");
+            }
+            updatedPrjName = prjName;
+        }
+
+        String updatedPrjVersion = prjVersion != null ? prjVersion : avoidNull(beforeProject.getPrjVersion(), "");
+        String updatedAdditionalInformation = additionalInformation != null ? additionalInformation : avoidNull(beforeProject.getComment(), "");
+
+        String updatedDistributionType = avoidNull(beforeProject.getDistributionType(), "");
+        if (distributionType != null) {
+            if (isEmpty(distributionType) || isEmpty(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, distributionType))) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Valid distribution type code is invalid.");
+            }
+            updatedDistributionType = distributionType;
+        }
+
+        String updatedOsType = avoidNull(beforeProject.getOsType(), "");
+        String updatedOsTypeEtc = avoidNull(beforeProject.getOsTypeEtc(), "");
+        String updatedDistributionSite = avoidNull(beforeProject.getDistributeTarget(), "");
+        String updatedNetworkServerType = avoidNull(beforeProject.getNetworkServerType(), "");
+        String updatedNoticeType = avoidNull(beforeProject.getNoticeType(), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL);
+        String updatedNoticeTypeEtc = avoidNull(beforeProject.getNoticeTypeEtc(), "");
+        String updatedPriority = avoidNull(beforeProject.getPriority(), "");
+        boolean shouldUpdateNotice = false;
+
+        if (osType != null) {
+            if (isEmpty(CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, osType))) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Valid OS type code is required.");
+            }
+            updatedOsType = osType;
+        }
+        if (osTypeEtc != null) {
+            updatedOsTypeEtc = osTypeEtc;
+        }
+        if (distributionSite != null) {
+            if (isEmpty(distributionSite) || isEmpty(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, distributionSite))) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Valid distribution site type code is invalid.");
+            }
+            updatedDistributionSite = distributionSite;
+        }
+        if (networkServerType != null) {
+            if (!CoConstDef.FLAG_YES.equals(networkServerType) && !CoConstDef.FLAG_NO.equals(networkServerType)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                        String.format("Network server type parameter must be either %s or %s.", CoConstDef.FLAG_YES, CoConstDef.FLAG_NO));
+            }
+            updatedNetworkServerType = networkServerType;
+        }
+        if (noticeType != null) {
+            shouldUpdateNotice = true;
+            if (isEmpty(noticeType) || !CoCodeManager.checkValidCodeDtl(CoConstDef.CD_NOTICE_TYPE, noticeType)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Notice type code is invalid.");
+            }
+            updatedNoticeType = noticeType;
+            if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType)) {
+                updatedNoticeTypeEtc = "";
+            }
+        }
+        if (noticeTypeEtc != null) {
+            shouldUpdateNotice = true;
+            if (isEmpty(noticeTypeEtc)) {
+                updatedNoticeTypeEtc = "";
+            } else if (!CoCodeManager.checkValidCodeDtl(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "noticeTypeEtc code is invalid.");
+            } else {
+                updatedNoticeType = CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED;
+                updatedNoticeTypeEtc = noticeTypeEtc;
+            }
+        }
+        if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(updatedNoticeType) && isEmpty(updatedNoticeTypeEtc)) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Must select 'noticeTypeEtc' code for Platform-generated type");
+        }
+        if (priority != null) {
+            if (isEmpty(priority) || isEmpty(CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, priority))) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Priority code is invalid");
+            }
+            updatedPriority = priority;
+        }
+
+        Map<String, Object> updateParam = new HashMap<>();
+        updateParam.put("prjId", prjId);
+        updateParam.put("prjName", updatedPrjName);
+        updateParam.put("prjVersion", updatedPrjVersion);
+        updateParam.put("distributionType", updatedDistributionType);
+        updateParam.put("comment", updatedAdditionalInformation);
+        updateParam.put("loginUserName", userInfo.getUserId());
+        updateParam.put("networkServerType", updatedNetworkServerType);
+        updateParam.put("osType", updatedOsType);
+        updateParam.put("osTypeEtc", updatedOsTypeEtc);
+        updateParam.put("distributionSite", updatedDistributionSite);
+        updateParam.put("priority", updatedPriority);
+
+        int updatedCount = apiProjectService.updateProjectBasicInfo(updateParam);
+        if (updatedCount == 0) {
+            throw new CProjectNotFoundException("Project not found. Project ID: " + prjId);
+        }
+
+        if (shouldUpdateNotice) {
+            Map<String, Object> noticeMap = new HashMap<>();
+            noticeMap.put("prjId", prjId);
+            noticeMap.put("noticeType", updatedNoticeType);
+            noticeMap.put("noticeTypeEtc", updatedNoticeTypeEtc);
+            apiProjectService.makeOssNotice(noticeMap);
+        }
+
+        Project afterProject = projectService.getProjectBasicInfo(prjId);
+        Map<String, Object> beforeMap = new LinkedHashMap<>();
+        Map<String, Object> afterMap = new LinkedHashMap<>();
+
+        addChangedField(beforeMap, afterMap, "prjName", beforeProject.getPrjName(), afterProject.getPrjName());
+        addChangedField(beforeMap, afterMap, "prjVersion", beforeProject.getPrjVersion(), afterProject.getPrjVersion());
+        addChangedField(beforeMap, afterMap, "additionalInformation", beforeProject.getComment(), afterProject.getComment());
+        addChangedField(beforeMap, afterMap, "distributionType", beforeProject.getDistributionType(), afterProject.getDistributionType());
+        addChangedField(beforeMap, afterMap, "osType", beforeProject.getOsType(), afterProject.getOsType());
+        addChangedField(beforeMap, afterMap, "osTypeEtc", beforeProject.getOsTypeEtc(), afterProject.getOsTypeEtc());
+        addChangedField(beforeMap, afterMap, "distributionSite", beforeProject.getDistributeTarget(), afterProject.getDistributeTarget());
+        addChangedField(beforeMap, afterMap, "networkServerType", beforeProject.getNetworkServerType(), afterProject.getNetworkServerType());
+        addChangedField(beforeMap, afterMap, "noticeType", beforeProject.getNoticeType(), afterProject.getNoticeType());
+        addChangedField(beforeMap, afterMap, "noticeTypeEtc", beforeProject.getNoticeTypeEtc(), afterProject.getNoticeTypeEtc());
+        addChangedField(beforeMap, afterMap, "priority", beforeProject.getPriority(), afterProject.getPriority());
+
+        Map<String, Object> resultMap = new LinkedHashMap<>();
+        resultMap.put("prjId", prjId);
+        resultMap.put("before", beforeMap);
+        resultMap.put("after", afterMap);
+        boolean hasChanged = !beforeMap.isEmpty();
+        resultMap.put("changed", hasChanged);
+
+        if (!hasChanged) {
+            resultMap.put("message", "No changes detected. History/comment/mail were skipped.");
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        }
+
+        try {
+            History h = new History();
+            Project project = new Project();
+            project.setPrjId(prjId);
+            h = projectService.work(project);
+            h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+            h.setModifier(userInfo.getUserId());
+            historyService.storeData(h);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        try {
+            CommentsHistory commHisBean = new CommentsHistory();
+            commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+            commHisBean.setReferenceId(prjId);
+            commHisBean.setLoginUserName(userInfo.getUserId());
+            commHisBean.setContents(makeApiProjectUpdateComment(beforeMap, afterMap, userComment));
+            commHisBean.setStatus("Changed");
+            commentService.registComment(commHisBean);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        try {
+            CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED);
+            mailBean.setParamPrjId(prjId);
+            mailBean.setCompareDataBefore(beforeProject);
+            mailBean.setCompareDataAfter(afterProject);
+            mailBean.setComment(userComment);
+            mailBean.setLoginUserName(userInfo.getUserId());
+            mailBean.setLoginUserRole(userInfo.getAuthority());
+            CoMailManager.getInstance().sendMail(mailBean);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
 
@@ -1950,6 +2202,83 @@ public class ApiProjectV2Controller extends CoTopComponent {
             resultMap.put("msg", "Error occurs during remove ref files. Please report this issue");
             resultMap.put("message", "Error occurs during remove ref files. Please report this issue");
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private boolean hasAnyProjectUpdateParam(String prjName, String prjVersion, String additionalInformation,
+                                             String distributionType, String osType, String osTypeEtc,
+                                             String distributionSite, String networkServerType, String noticeType,
+                                             String noticeTypeEtc, String priority) {
+        return prjName != null || prjVersion != null || additionalInformation != null || distributionType != null
+                || osType != null || osTypeEtc != null || distributionSite != null || networkServerType != null
+                || noticeType != null || noticeTypeEtc != null || priority != null;
+    }
+
+    private boolean hasRestrictedUpdateParamForCompleteProject(String prjName, String distributionType,
+                                                               String osType, String osTypeEtc, String distributionSite,
+                                                               String networkServerType, String noticeType, String noticeTypeEtc,
+                                                               String priority) {
+        return prjName != null || distributionType != null || osType != null || osTypeEtc != null
+                || distributionSite != null || networkServerType != null || noticeType != null
+                || noticeTypeEtc != null || priority != null;
+    }
+
+    private String makeApiProjectUpdateComment(Map<String, Object> beforeMap, Map<String, Object> afterMap, String userComment) {
+        StringBuilder comment = new StringBuilder();
+
+        if (!isEmpty(userComment)) {
+            comment.append("<p>").append(userComment).append("</p>");
+        }
+
+        comment.append("<p>project information updated (by API)</p>");
+
+        for (Map.Entry<String, Object> beforeEntry : beforeMap.entrySet()) {
+            String key = beforeEntry.getKey();
+            Object afterValue = afterMap.get(key);
+            comment.append("<p><strong>").append(getProjectUpdateFieldDisplayName(key)).append("</strong><br />");
+            comment.append("Before : ").append(beforeEntry.getValue()).append("<br />");
+            comment.append("After : <span style='background-color:yellow'>").append(afterValue).append("</span></p>");
+        }
+
+        return comment.toString();
+    }
+
+    private String getProjectUpdateFieldDisplayName(String key) {
+        switch (key) {
+            case "prjName":
+                return "Project Name";
+            case "prjVersion":
+                return "Project Version";
+            case "additionalInformation":
+                return "Additional Information";
+            case "distributionType":
+                return "Type";
+            case "osType":
+                return "OS Type";
+            case "osTypeEtc":
+                return "OS Type etc";
+            case "distributionSite":
+                return "Distribution Site";
+            case "networkServerType":
+                return "Network Service";
+            case "noticeType":
+                return "OSS Notice";
+            case "noticeTypeEtc":
+                return "Notice Platform";
+            case "priority":
+                return "Priority";
+            default:
+                return key;
+        }
+    }
+
+    private void addChangedField(Map<String, Object> beforeMap, Map<String, Object> afterMap, String key, Object beforeValue, Object afterValue) {
+        String beforeString = beforeValue == null ? "" : beforeValue.toString();
+        String afterString = afterValue == null ? "" : afterValue.toString();
+
+        if (!Objects.equals(beforeString, afterString)) {
+            beforeMap.put(key, beforeString);
+            afterMap.put(key, afterString);
         }
     }
 }
