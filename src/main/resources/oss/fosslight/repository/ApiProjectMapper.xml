@@ -606,6 +606,25 @@
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
 		)
 	</insert>
+
+	<update id="updateProjectBasicInfo" parameterType="hashMap">
+		UPDATE PROJECT_MASTER
+		<set>
+			PRJ_NAME = #{prjName}
+			, PRJ_VERSION = #{prjVersion}
+			, DISTRIBUTION_TYPE = #{distributionType}
+			, COMMENT = #{comment}
+			, MODIFIER = #{loginUserName}
+			, MODIFIED_DATE = now()
+			, NETWORK_SERVER_TYPE = #{networkServerType}
+			, OS_TYPE = #{osType}
+			, OS_TYPE_ETC = #{osTypeEtc}
+			, DISTRIBUTE_TARGET = #{distributionSite}
+			, PRIORITY = #{priority}
+		</set>
+		WHERE PRJ_ID = #{prjId}
+		  AND USE_YN = 'Y'
+	</update>
 	
 	<insert id="makeOssNotice" parameterType="hashMap">
 		INSERT INTO OSS_NOTICE(
