@@ -2878,10 +2878,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 		List<ProjectIdentification> referenceOssNameList = new ArrayList<ProjectIdentification>();
 		List<ProjectIdentification> referenceUrlList = new ArrayList<ProjectIdentification>();
+		List<ProjectIdentification> referenceExactUrlList = new ArrayList<ProjectIdentification>();
 		Set<String> inputNames = new HashSet<>();
 		Set<String> inputUrls = new HashSet<>();
+		Set<String> inputExactUrls = new HashSet<>();
+		Map<ProjectIdentification, String> inputExactUrlMap = new HashMap<>();
 		
 		for (ProjectIdentification bean : list) {
+			String exactUrl = removeProtocol(bean.getDownloadLocation());
+			if (!isEmpty(exactUrl)) {
+				inputExactUrls.add(exactUrl);
+				inputExactUrlMap.put(bean, exactUrl);
+			}
+
 			preProcessUrl(bean, packageManagerUrl, checkOssNameUrl, validMavenHosts);
 	        if (!isEmpty(bean.getOssName())) {
 	            inputNames.add(bean.getOssName());
@@ -2897,7 +2906,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		List<List<String>> namePartitions = ListUtils.partition(new ArrayList<>(inputNames), 1000);
 		List<List<String>> urlPartitions = ListUtils.partition(new ArrayList<>(inputUrls), 1000);
+		List<List<String>> exactUrlPartitions = ListUtils.partition(new ArrayList<>(inputExactUrls), 1000);
 		
+		for (List<String> urls : exactUrlPartitions) {
+	        if (!urls.isEmpty()) {
+				referenceExactUrlList.addAll(ossMapper.selectBulkOssInfoByExactUrls(urls));
+	        }
+	    }
+
 		for (List<String> names : namePartitions) {
 	        if (!names.isEmpty()) {
 	        	referenceOssNameList.addAll(ossMapper.selectBulkOssInfoByNames(names));
@@ -2912,6 +2928,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		Map<String, Set<String>> urlToNameMap = new HashMap<>();
 		Map<String, Set<String>> urlToNameMap2 = new HashMap<>();
+		Map<String, Set<String>> exactUrlToNameMap = new HashMap<>();
 		for (ProjectIdentification pi : referenceOssNameList) {
 			pi.setDownloadLocation(normalize(pi.getDownloadLocation()));
 			urlToNameMap.computeIfAbsent(pi.getDownloadLocation(), k -> new HashSet<>()).add(pi.getOssName());
@@ -2919,6 +2936,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		for (ProjectIdentification pi : referenceUrlList) {
 			pi.setDownloadLocation(normalize(pi.getDownloadLocation()));
 			urlToNameMap2.computeIfAbsent(pi.getDownloadLocation(), k -> new HashSet<>()).add(pi.getOssName());
+		}
+		for (ProjectIdentification pi : referenceExactUrlList) {
+			String exactUrl = removeProtocol(pi.getDownloadLocation());
+			exactUrlToNameMap.computeIfAbsent(exactUrl, k -> new HashSet<>()).add(pi.getOssName());
 		}
 		
 		List<ProjectIdentification> redirectTargets = new ArrayList<>();
@@ -2929,8 +2950,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				continue;
 			}
 			
-			Set<String> names = urlToNameMap.get(bean.getDownloadLocation());
-			if (!isEmpty(bean.getOssName()) && urlToNameMap.containsKey(bean.getDownloadLocation())) {
+			Set<String> names = exactUrlToNameMap.get(inputExactUrlMap.get(bean));
+			boolean hasExactUrlMatch = names != null;
+			if (!hasExactUrlMatch) {
+				names = urlToNameMap.get(bean.getDownloadLocation());
+			}
+			if (!isEmpty(bean.getOssName()) && names != null) {
 				if (names.contains(bean.getOssName())) {
 					continue;
 				}
@@ -2939,7 +2964,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if (bean.getUrlSearchSeq() > -1) {
 				Pattern p = generatePattern(bean.getUrlSearchSeq(), bean.getDownloadLocation());
 				bean.setOssNickName(generateCheckOSSName(bean.getUrlSearchSeq(), bean.getDownloadLocation(), p));
-				String checkName = appendCheckOssName(names, ossInfoNames, bean.getOssNickName());
+				String checkName = hasExactUrlMatch ? String.join("|", names) : appendCheckOssName(names, ossInfoNames, bean.getOssNickName());
 				if (!isEmpty(checkName)) {
 					bean.setCheckOssList("Y");
 					bean.setRecommendedNickname(bean.getOssNickName());
@@ -3150,6 +3175,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
         }
 
         return processed.trim();
+	}
+
+	private String removeProtocol(String url) {
+		if (isEmpty(url)) {
+			return "";
+		}
+
+		int protocolSeparatorIndex = url.indexOf("://");
+		return protocolSeparatorIndex > -1 ? url.substring(protocolSeparatorIndex + 3) : url;
 	}
 	
 	private String appendCheckOssName(Set<String> ossNameList, Map<String, String> ossInfoNames, String checkOssName) {

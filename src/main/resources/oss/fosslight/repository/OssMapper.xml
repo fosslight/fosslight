@@ -4901,6 +4901,50 @@
 	          #{url}
 	      </foreach>
 	</select>
+
+	<select id="selectBulkOssInfoByExactUrls" resultType="oss.fosslight.domain.ProjectIdentification">
+        SELECT OC.OSS_NAME,
+            CASE
+                WHEN LOCATE('://', DOWN.DOWNLOAD_LOCATION) > 0
+                     AND SUBSTRING(DOWN.DOWNLOAD_LOCATION, LOCATE('://', DOWN.DOWNLOAD_LOCATION) + 3) IN
+                        <foreach item="url" collection="urls" open="(" separator="," close=")">
+                            #{url}
+                        </foreach>
+                THEN DOWN.DOWNLOAD_LOCATION
+                WHEN DOWN.DOWNLOAD_LOCATION IN
+                    <foreach item="url" collection="urls" open="(" separator="," close=")">
+                        #{url}
+                    </foreach>
+                THEN DOWN.DOWNLOAD_LOCATION
+                ELSE OC.DOWNLOAD_LOCATION
+            END AS DOWNLOAD_LOCATION
+        FROM OSS_COMMON OC
+        LEFT JOIN OSS_DOWNLOADLOCATION DOWN ON OC.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
+        WHERE
+            (
+                CASE
+                    WHEN LOCATE('://', DOWN.DOWNLOAD_LOCATION) > 0
+                    THEN SUBSTRING(DOWN.DOWNLOAD_LOCATION, LOCATE('://', DOWN.DOWNLOAD_LOCATION) + 3)
+                    ELSE DOWN.DOWNLOAD_LOCATION
+                END
+                IN
+              <foreach item="url" collection="urls" open="(" separator="," close=")">
+                  #{url}
+              </foreach>
+            )
+            OR
+            (
+                CASE
+                    WHEN LOCATE('://', OC.DOWNLOAD_LOCATION) > 0
+                    THEN SUBSTRING(OC.DOWNLOAD_LOCATION, LOCATE('://', OC.DOWNLOAD_LOCATION) + 3)
+                    ELSE OC.DOWNLOAD_LOCATION
+                END
+                IN
+              <foreach item="url" collection="urls" open="(" separator="," close=")">
+                  #{url}
+              </foreach>
+            )
+	</select>
 	
 	<update id="updateSendMailFlagForCoReviewerEmails">
 		UPDATE OSS_ANALYSIS_STATUS
