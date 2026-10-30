@@ -1406,10 +1406,12 @@ public class ExcelUtil extends CoTopComponent {
     				OssComponentsLicense subBean = new OssComponentsLicense();
     				if (licenseCol > 0) {
     					String licenseName = licenseValue;
-        				if (isSpdxSpreadsheet){
-        					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
+    					if (isSpdxSpreadsheet){
+        					if (licenseName.contains(" AND ") || licenseName.contains(" OR ")) {
+        				        licenseName = StringUtil.join(Arrays.stream(licenseName.split("\\(|\\)|\\s+")).filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
+        				    }
         				} else if (licenseName.contains(",")) {
-        					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
+        					licenseName = StringUtil.join(Arrays.stream(licenseName.split(",")).map(String::trim).filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
         				}
         				
         				if (!licenseName.matches("\\A\\p{ASCII}*\\z")) {
