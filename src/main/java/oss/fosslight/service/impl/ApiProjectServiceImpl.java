@@ -559,6 +559,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	
 	@Transactional
 	@Override
+	public int updateProjectBasicInfo(Map<String, Object> paramMap){
+		return apiProjectMapper.updateProjectBasicInfo(paramMap);
+	}
+
+	@Transactional
+	@Override
 	public int makeOssNotice(Map<String, Object> paramMap){
 		return apiProjectMapper.makeOssNotice(paramMap);
 	}
