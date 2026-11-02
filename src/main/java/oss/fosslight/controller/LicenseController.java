@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -653,6 +654,7 @@ public class LicenseController extends CoTopComponent {
 			UploadFile uploadFile = new UploadFile();
 			MultipartFile multipart = req.getFile(fileNames.next());
 			uploadFile.setSize(multipart.getSize());
+			uploadFile.setFileExt(FilenameUtils.getExtension(avoidNull(multipart.getOriginalFilename())).toLowerCase(Locale.ROOT));
 			list.add(uploadFile);
 		}
 
