@@ -4942,6 +4942,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	private List<Vulnerability> vulnDataForNotIncludeCpeMatch(Boolean convertFlag, OssMaster ossMaster, String[] nicknameList, Set<String> convertNameList, Set<String> dashOssNameList, OssMaster param) {
 		List<Vulnerability> list = new ArrayList<>();
+		boolean hasNoVersion = false;
 		
 		if ("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
 			param.setOssVersion("-");
@@ -4977,9 +4978,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			param.setDashOssNameList(dashOssNameList.toArray(new String[dashOssNameList.size()]));
 		}
 		
+		if (ossMaster.getSearchExcludeCpes() != null) {
+			param.setExcludeCpes(ossMaster.getSearchExcludeCpes());
+		}
+		
 		if (!isEmpty(param.getOssVersion()) && !param.getOssVersion().equals("-")) {
 			list = ossMapper.getOssVulnerabilityList2(param);
 		} else {
+			hasNoVersion = true;
 			list = ossMapper.getVulnerabilityInfoWithOutVer(param);
 		}
 		
@@ -5001,14 +5007,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			OssMaster includeCpeInfo = ossMapper.notExistsOssIncludeCpeListByOssCommonId(ossMaster);
 			if (includeCpeInfo != null) {
-				List<String> includeCpeList = Arrays.asList(includeCpeInfo.getSearchIncludeCpe().split(","));
+				Set<String> includeCpeList = Arrays.stream(includeCpeInfo.getSearchIncludeCpe().split(",")).map(String::toUpperCase).collect(Collectors.toSet());
 				List<Vulnerability> customList = new ArrayList<>();
 				
 				for (Vulnerability vuln : list) {
-					if (isEmpty(vuln.getCriteria())) {
-						continue;
-					}
-					if (!includeCpeList.contains(vuln.getCriteria())) {
+					String key = hasNoVersion ? vuln.getVendor() + "-" + vuln.getProduct(): vuln.getCriteria();
+					if (!includeCpeList.contains(key.toUpperCase())) {
 						customList.add(vuln);
 					}
 				}
