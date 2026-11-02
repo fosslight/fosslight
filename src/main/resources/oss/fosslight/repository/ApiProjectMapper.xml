@@ -407,6 +407,10 @@
 							OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{userId}) )
 						)
 					)
+					<!-- MANAGER(ROLE_MGR) 계정은 본인이 속한 DIVISION의 프로젝트에 대해 CREATOR/WATCHER 여부와 관계없이 편집(파일 업로드 등) 가능 -->
+					<if test="@oss.fosslight.util.StringUtil@equals('ROLE_MGR', userRole)">
+						OR T1.DIVISION = (SELECT DIVISION FROM T2_USERS A3 WHERE A3.USER_ID = #{userId})
+					</if>
 				)
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', needToUploadReport)">
 					AND (T1.IDENTIFICATION_STATUS = 'PROG' OR T1.IDENTIFICATION_STATUS IS NULL)
@@ -495,6 +499,10 @@
 							)
 				  <if test="@oss.fosslight.util.StringUtil@notEquals('N', readOnly)">
 					  OR PUBLIC_YN = 'Y'
+				  </if>
+				  <!-- MANAGER(ROLE_MGR) 계정은 본인이 속한 DIVISION의 프로젝트는 CREATOR/WATCHER 여부와 관계없이 조회 가능 -->
+				  <if test="@oss.fosslight.util.StringUtil@equals('ROLE_MGR', userRole)">
+					  OR T1.DIVISION = (SELECT DIVISION FROM T2_USERS A3 WHERE A3.USER_ID = #{userId})
 				  </if>
 					)
 			  </if>
