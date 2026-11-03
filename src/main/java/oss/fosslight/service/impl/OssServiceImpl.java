@@ -4819,7 +4819,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster) {
 		List<Vulnerability> list = null;
-		boolean inCpeMatchFlag = CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag())) ? true : false;
+		boolean inCpeMatchFlag = ossMaster.getSearchIncludeCpes() != null ? true : false;
 		
 		String[] nicknameList = null;
 		Set<String> dashOssNameList = new HashSet<>();
