@@ -206,6 +206,29 @@
 									</table>
 								</div>
 
+								<th:block th:if="${vulnerability_info != null}">
+									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:utext="'« Vulnerability Information »'"></h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
+										<tr>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Name'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Version'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Vulnerability ID'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Score'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Summary'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Published Date'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Modified Date'"></th>
+										</tr>
+										<tr>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability_info.OSS_NAME}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability_info.OSS_VERSION}"></td>
+											<td th:style="'padding:5px;'"><span th:utext="${vulnerability_info.CVE_ID}"></span></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability_info.CVSS_SCORE}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability_info.VULN_SUMMARY}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability_info.PUBL_DATE}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability_info.MODI_DATE}"></td>
+										</tr>
+									</table>
+								</th:block>
 								
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
 								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
