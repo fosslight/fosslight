@@ -1336,9 +1336,10 @@ public class ExcelUtil extends CoTopComponent {
         						bean.setDownloadLocation(downloadLocation);
         					}
     					}
-    					if (isSpdxSpreadsheet && isSbomEmptyValue(bean.getDownloadLocation()) && !isSbomEmptyValue(bean.getPackageUrl())) {
+    					if (isSpdxSpreadsheet && !isSbomEmptyValue(bean.getPackageUrl())) {
     						String generatedDownloadLocation = generateDownloadLocationFromPurl(bean.getPackageUrl());
-    						if (!isSbomEmptyValue(generatedDownloadLocation)) {
+    						if (!isSbomEmptyValue(generatedDownloadLocation)
+    								&& !StringUtils.equals(bean.getDownloadLocation(), generatedDownloadLocation)) {
     							bean.setDownloadLocation(generatedDownloadLocation);
     						}
     					}
