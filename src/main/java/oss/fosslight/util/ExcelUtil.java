@@ -1723,6 +1723,8 @@ public class ExcelUtil extends CoTopComponent {
 						return "https://pkg.go.dev/" + namespace + "/" + name;
 				case "cargo":
 						return "https://crates.io/crates/" + name;
+				case "pub":
+						return "https://pub.dev/packages/" + name;
 				case "nuget":
 						return "https://nuget.org/packages/" + name;
 				case "bitbucket":
