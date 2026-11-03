@@ -6104,9 +6104,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	                    }
 
 	                    if (MapUtils.isNotEmpty(vulnMailInfo)) {
-	                        String cvssScore = String.valueOf(vulnMailInfo.getOrDefault("CVSS_SCORE", "0.0"));
-	                        String publDate = String.valueOf(vulnMailInfo.getOrDefault("PUBL_DATE", ""));
-	                        String modiDate = String.valueOf(vulnMailInfo.getOrDefault("MODI_DATE", ""));
+	                    	String vulnSummary = Objects.toString(vulnMailInfo.get("VULN_SUMMARY"), "");
+	                        String cvssScore = Objects.toString(vulnMailInfo.get("CVSS_SCORE"), "0.0");
+	                        String publDate = Objects.toString(vulnMailInfo.get("PUBL_DATE"), "");
+	                        String modiDate = Objects.toString(vulnMailInfo.get("MODI_DATE"), "");
 	                        if (!isEmpty(publDate)) {
 	                            publDate = publDate.substring(0, 10);
 	                        }
@@ -6134,6 +6135,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	                        vulnMailInfo.put("CVSS_SCORE", customCvssScore);
 	                        vulnMailInfo.put("PUBL_DATE", publDate);
 	                        vulnMailInfo.put("MODI_DATE", modiDate);
+	                        vulnMailInfo.put("VULN_SUMMARY", vulnSummary);
 	                        vulnerabilityMapper.updateOssVulnInfoNew(ossMaster);
 	                    } else {
 	                        isVulnMainInfoNull = true;
@@ -6157,7 +6159,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	                    vulnMailInfo.put("OSS_NAME", ossMaster.getOssName());
 	                    vulnMailInfo.put("OSS_VERSION", ossMaster.getOssVersion());
-	                    CoMail mailBean = new CoMail("15");
+	                    
+	                    CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED);
 	                    mailBean.setParamOssId(ossId);
 	                    mailBean.setParamOssInfo(ossMaster);
 	                    mailBean.setParamMap(vulnMailInfo);
