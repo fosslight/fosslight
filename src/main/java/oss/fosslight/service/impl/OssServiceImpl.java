@@ -3500,6 +3500,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (CoConstDef.FLAG_YES.equals(beforeDeactivateFlag) && CoConstDef.FLAG_NO.equals(afterDeactivateFlag)) {
 					isActivateFlag = true;
 				}
+				
+				if (!isEmpty(result)) {
+					ossId = result;
+				}
 			} else { // OSS 등록
 				// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
 				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
