@@ -6442,28 +6442,30 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public String addWatcher(Project project) {
 		String addWatcher = "";
 		
-		if (!isEmpty(project.getPrjEmail())) {
-			if (projectMapper.existsWatcherByEmail(project) == 0) { // 이미 추가된 watcher 체크
-				projectMapper.insertWatcher(project); // watcher 추가
-				
-				// email 발송
-				try {
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_INVATED);
-					mailBean.setParamPrjId(project.getPrjId());
-					mailBean.setParamUserId(project.getLoginUserName());
-					mailBean.setParamEmail(project.getPrjEmail());
-					
-					CoMailManager.getInstance().sendMail(mailBean);
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-				}
-			}
-		} else {
-			if (projectMapper.existsWatcherByUser(project) == 0) { // 이미 추가된 watcher 체크
-				if (projectMapper.existsWatcherByUserDivistion(project) > 0) { // 이미 추가된 watcher 의 user division 이 변경된 경우
-					projectMapper.updateWatcherDivision(project);
-				} else {
+		if (!isEmpty(project.getPrjId())) {
+			if (!isEmpty(project.getPrjEmail())) {
+				if (projectMapper.existsWatcherByEmail(project) == 0) { // 이미 추가된 watcher 체크
 					projectMapper.insertWatcher(project); // watcher 추가
+					
+					// email 발송
+					try {
+						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_INVATED);
+						mailBean.setParamPrjId(project.getPrjId());
+						mailBean.setParamUserId(project.getLoginUserName());
+						mailBean.setParamEmail(project.getPrjEmail());
+						
+						CoMailManager.getInstance().sendMail(mailBean);
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			} else {
+				if (projectMapper.existsWatcherByUser(project) == 0) { // 이미 추가된 watcher 체크
+					if (projectMapper.existsWatcherByUserDivistion(project) > 0) { // 이미 추가된 watcher 의 user division 이 변경된 경우
+						projectMapper.updateWatcherDivision(project);
+					} else {
+						projectMapper.insertWatcher(project); // watcher 추가
+					}
 				}
 			}
 		}

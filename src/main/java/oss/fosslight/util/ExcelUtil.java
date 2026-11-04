@@ -1336,9 +1336,10 @@ public class ExcelUtil extends CoTopComponent {
         						bean.setDownloadLocation(downloadLocation);
         					}
     					}
-    					if (isSpdxSpreadsheet && isSbomEmptyValue(bean.getDownloadLocation()) && !isSbomEmptyValue(bean.getPackageUrl())) {
+    					if (isSpdxSpreadsheet && !isSbomEmptyValue(bean.getPackageUrl())) {
     						String generatedDownloadLocation = generateDownloadLocationFromPurl(bean.getPackageUrl());
-    						if (!isSbomEmptyValue(generatedDownloadLocation)) {
+    						if (!isSbomEmptyValue(generatedDownloadLocation)
+    								&& !StringUtils.equals(bean.getDownloadLocation(), generatedDownloadLocation)) {
     							bean.setDownloadLocation(generatedDownloadLocation);
     						}
     					}
@@ -1723,6 +1724,8 @@ public class ExcelUtil extends CoTopComponent {
 						return "https://pkg.go.dev/" + namespace + "/" + name;
 				case "cargo":
 						return "https://crates.io/crates/" + name;
+				case "pub":
+						return "https://pub.dev/packages/" + name;
 				case "nuget":
 						return "https://nuget.org/packages/" + name;
 				case "bitbucket":

@@ -3500,6 +3500,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (CoConstDef.FLAG_YES.equals(beforeDeactivateFlag) && CoConstDef.FLAG_NO.equals(afterDeactivateFlag)) {
 					isActivateFlag = true;
 				}
+				
+				if (!isEmpty(result)) {
+					ossId = result;
+				}
 			} else { // OSS 등록
 				// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
 				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
@@ -4819,7 +4823,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster) {
 		List<Vulnerability> list = null;
-		boolean inCpeMatchFlag = CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getInCpeMatchFlag())) ? true : false;
+		boolean inCpeMatchFlag = ossMaster.getSearchIncludeCpes() != null ? true : false;
 		
 		String[] nicknameList = null;
 		Set<String> dashOssNameList = new HashSet<>();
@@ -5101,6 +5105,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		boolean isChangedName = (boolean) resMap.get("isChangedName");
 		boolean isDeactivateFlag = (boolean) resMap.get("isDeactivateFlag");
 		boolean isActivateFlag = (boolean) resMap.get("isActivateFlag");
+		if (isNew) {
+		    CoCodeManager.getInstance().refreshOssInfoByOssId(null, ossId);
+		}
 		
 		Map<String, List<OssMaster>> updateOssNameVersionDiffMergeObject = null;
 		if (resMap.containsKey("updateOssNameVersionDiffMergeObject")) {
@@ -6033,5 +6040,138 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossMapper.updateEntAnalysisJobDetails(ossId, ossName, ossVersion, jobSeq);
 		// UPDATE OSS_VERSION
 		ossMapper.updateDivisionOssVersion(ossId, jobSeq);
+	}
+
+	@Override
+	public void updateOssVulnerabilityAndSendMail(Map<String, Object> map) {
+	    String ossId = String.valueOf(map.getOrDefault("ossId", ""));
+	    if (!isEmpty(ossId)) {
+	        boolean isVulnerabilityChanged = false;
+	        OssMaster beforeOssMaster = null;
+	        String beforeCveId = "";
+	        String beforeCvssScore = "";
+	        String beforeVulnType = "";
+	        if (map.containsKey("beforeBean")) {
+	            beforeOssMaster = (OssMaster)map.get("beforeBean");
+	        }
+
+	        OssMaster ossMaster = getOssInfo(ossId, true);
+	        List<Vulnerability> vulnInfoList = getMergedVulnerabilityList(ossMaster);
+	        Vulnerability vulnerability = null;
+	        if (CollectionUtils.isNotEmpty(vulnInfoList)) {
+	        	vulnerability = vulnInfoList.stream().filter(v -> !isEmpty(v.getCvssScore()) && CommonFunction.isBigDecimal(v.getCvssScore())).max(Comparator.comparing(v -> new BigDecimal(v.getCvssScore()))).orElse(null);
+	        }
+
+	        if (beforeOssMaster == null) {
+	            isVulnerabilityChanged = vulnerability != null;
+	        } else {
+	            beforeCveId = beforeOssMaster.getCveId();
+	            beforeCvssScore = beforeOssMaster.getCvssScore();
+	            beforeVulnType = beforeOssMaster.getVulnType();
+	            String afterCvssScore = vulnerability != null ? vulnerability.getCvssScore() : null;
+	            if (!isEmpty(beforeCvssScore) && !isEmpty(afterCvssScore)) {
+	                if (CommonFunction.isBigDecimal(beforeCvssScore) && CommonFunction.isBigDecimal(afterCvssScore)) {
+	                    isVulnerabilityChanged = (new BigDecimal(beforeCvssScore)).compareTo(new BigDecimal(afterCvssScore)) != 0;
+	                } else {
+	                    isVulnerabilityChanged = true;
+	                }
+	            } else {
+	                isVulnerabilityChanged = !isEmpty(beforeCvssScore) || !isEmpty(afterCvssScore);
+	            }
+	        }
+
+	        boolean isVulnMainInfoNull = false;
+	        if (isVulnerabilityChanged) {
+	            try {
+	                Map<String, Object> vulnMailInfo = new HashMap<String, Object>();
+	                String customCveId = "";
+	                String customCvssScore = "";
+	                if (!isEmpty(beforeCveId)) {
+	                    customCveId = beforeCveId + " -> ";
+	                }
+
+	                if (!isEmpty(beforeCvssScore)) {
+	                    customCvssScore = beforeCvssScore + " -> ";
+	                }
+
+	                if (vulnerability != null) {
+	                    String cveId = vulnerability.getCveId();
+	                    String source = vulnerability.getSource();
+	                    if (source.equalsIgnoreCase("NVD")) {
+	                        vulnMailInfo = vulnerabilityService.getCveInfo(cveId);
+	                    } else {
+	                        vulnMailInfo = osvDataService.getVulnerabilityInfo(cveId);
+	                    }
+
+	                    if (MapUtils.isNotEmpty(vulnMailInfo)) {
+	                    	String vulnSummary = Objects.toString(vulnMailInfo.get("VULN_SUMMARY"), "");
+	                        String cvssScore = Objects.toString(vulnMailInfo.get("CVSS_SCORE"), "0.0");
+	                        String publDate = Objects.toString(vulnMailInfo.get("PUBL_DATE"), "");
+	                        String modiDate = Objects.toString(vulnMailInfo.get("MODI_DATE"), "");
+	                        if (!isEmpty(publDate)) {
+	                            publDate = publDate.substring(0, 10);
+	                        }
+
+	                        if (!isEmpty(modiDate)) {
+	                            modiDate = modiDate.substring(0, 10);
+	                        }
+
+	                        customCveId = customCveId + cveId;
+	                        customCvssScore = customCvssScore + cvssScore;
+	                        if (!cvssScore.equals("0.0")) {
+	                            ossMaster.setVulnType(source);
+	                            ossMaster.setCveId(cveId);
+	                            ossMaster.setCvssScore(cvssScore);
+	                        }
+
+	                        if (!isEmpty(beforeCveId)) {
+	                            vulnMailInfo.put("TYPE_TO", source);
+	                        } else {
+	                            vulnMailInfo.put("TYPE", source);
+	                        }
+
+	                        vulnMailInfo.put("SOURCE", source);
+	                        vulnMailInfo.put("CVE_ID", customCveId);
+	                        vulnMailInfo.put("CVSS_SCORE", customCvssScore);
+	                        vulnMailInfo.put("PUBL_DATE", publDate);
+	                        vulnMailInfo.put("MODI_DATE", modiDate);
+	                        vulnMailInfo.put("VULN_SUMMARY", vulnSummary);
+	                        vulnerabilityMapper.updateOssVulnInfoNew(ossMaster);
+	                    } else {
+	                        isVulnMainInfoNull = true;
+	                    }
+	                } else {
+	                    customCveId = customCveId + "NONE";
+	                    customCvssScore = customCvssScore + "0.0";
+	                    vulnMailInfo.put("CVE_ID", customCveId);
+	                    vulnMailInfo.put("CVSS_SCORE", customCvssScore);
+	                    vulnMailInfo.put("VULN_SUMMARY", "");
+	                    vulnMailInfo.put("PUBL_DATE", "");
+	                    vulnMailInfo.put("MODI_DATE", "");
+	                    vulnerabilityMapper.deleteOssVulnInfo(ossId);
+	                }
+
+	                if (!isVulnMainInfoNull) {
+	                    CoCodeManager.getInstance().refreshOssInfoByOssId(beforeOssMaster, ossId);
+	                    if (!isEmpty(beforeCveId)) {
+	                        vulnMailInfo.put("TYPE", beforeVulnType);
+	                    }
+
+	                    vulnMailInfo.put("OSS_NAME", ossMaster.getOssName());
+	                    vulnMailInfo.put("OSS_VERSION", ossMaster.getOssVersion());
+	                    
+	                    CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED);
+	                    mailBean.setParamOssId(ossId);
+	                    mailBean.setParamOssInfo(ossMaster);
+	                    mailBean.setParamMap(vulnMailInfo);
+	                    CoMailManager.getInstance().sendMail(mailBean);
+	                } else {
+	                    log.info("Skipped vulnerability update email because vulnMainInfo is null. OSS ID: {}", ossId);
+	                }
+	            } catch (Exception e) {
+	                log.error("Failed to send mail:" + e.getMessage());
+	            }
+	        }
+	    }
 	}
 }

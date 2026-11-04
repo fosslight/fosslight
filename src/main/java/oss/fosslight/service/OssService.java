@@ -193,4 +193,6 @@ public interface OssService extends HistoryConfig{
 	OssAnalysis selectOssAnalysisOne(String componentId);
 
 	void updateOssAnalysis(String ossName, String ossVersion, String jobSeq, String ossId);
+
+	void updateOssVulnerabilityAndSendMail(Map<String, Object> map);
 }

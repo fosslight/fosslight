@@ -511,6 +511,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_OSS_REGIST_NEWVERSION = "13";
 	/** Mail Type [FOSSLight] OSS has been rename */
 	public static final String CD_MAIL_TYPE_OSS_CHANGE_NAME = "14";
+	/** Mail Type [FOSSLight] OSS vulnerabilities updated */
+	public static final String CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED = "15";
 	/** Mail Type [FOSSLight] OSS has been removed */
 	public static final String CD_MAIL_TYPE_OSS_RENAME = "18";
 	/** Mail Type [FOSSLight] OSS has been removed */

@@ -172,6 +172,7 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT.equals(bean.getMsgType())
@@ -362,6 +363,15 @@ public class CoMailManager extends CoTopComponent {
     				convertDataMap.put("retiree_user_info", retireeUserList);
     			}
     			
+    		}
+    		
+    		if (CoConstDef.CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED.equals(bean.getMsgType())) {
+    			convertDataMap.put("oss_basic_info", bean.getParamOssInfo());
+    			
+    			Map<String, Object> vulnerabilityInfo = bean.getParamMap();
+    			String customCveId = formatCveIdWithLink(vulnerabilityInfo);
+    			vulnerabilityInfo.put("CVE_ID", customCveId);
+    			convertDataMap.put("vulnerability_info", vulnerabilityInfo);
     		}
     		
     		// Common
@@ -889,6 +899,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME:
@@ -1824,6 +1835,7 @@ public class CoMailManager extends CoTopComponent {
 								|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
+								|| CoConstDef.CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())
@@ -1858,6 +1870,7 @@ public class CoMailManager extends CoTopComponent {
 							|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_VULNERABILITIES_UPDATED.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())

@@ -415,6 +415,7 @@ public class OssController extends CoTopComponent{
 		try {
 			resMap = ossService.saveOss(ossMaster);
 			resMap = ossService.sendMailForSaveOss(resMap);
+			ossService.updateOssVulnerabilityAndSendMail(resMap);
 		} catch (Exception e) {
 			resMap.put("resCd", "00");
 			log.error(e.getMessage(), e);
@@ -2568,8 +2569,8 @@ public class OssController extends CoTopComponent{
 			}
 			if (bean == null) {
 				bean = new OssMaster();
-				bean.setOssName(ossName);
-				bean.setOssVersion(ossVersion);
+				bean.setOssName(ossMaster.getOssName());
+				bean.setOssVersion(ossMaster.getOssVersion());
 			}
 		}
 		
