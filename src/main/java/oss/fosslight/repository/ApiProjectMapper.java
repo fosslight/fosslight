@@ -40,6 +40,8 @@ public interface ApiProjectMapper {
 	int checkProject(Map<String, Object> param);
 	
 	int createProject(Map<String, Object> param);
+
+	int updateProjectBasicInfo(Map<String, Object> param);
 	
 	int makeOssNotice(Map<String, Object> param);
 	
