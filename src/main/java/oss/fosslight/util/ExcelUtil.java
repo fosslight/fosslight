@@ -3742,21 +3742,16 @@ public class ExcelUtil extends CoTopComponent {
 				"SPDX SHORT IDENTIFIER", "NICKNAME", "WEBSITE FOR THE LICENSE", "DISCLOSING SRC", "RESTRICTION",
 				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"});
 
-		List<String> firstRowColData = new ArrayList<>();
-		while (cellIterator.hasNext()) {
-			Cell cell = (Cell) cellIterator.next();
-			firstRowColData.add(getCellData(cell));
-		}
-
 		int validationCnt = 0;
-		for (int cIdx = 0; cIdx < firstRowColData.size(); cIdx++) {
-			String colData = firstRowColData.get(cIdx);
-			if (colData != null && definedColData.contains(colData.toUpperCase())){
+		while (cellIterator.hasNext()) {
+			Cell cell = cellIterator.next();
+			String colData = getCellData(cell);
+			if (colData != null && definedColData.contains(colData.toUpperCase())) {
 				validationCnt++;
-				columnCheckMap.put(cIdx, colData.toUpperCase());
+				columnCheckMap.put(cell.getColumnIndex(), colData.toUpperCase());
 			}
 		}
-		
+
 		return validationCnt > 0 ? true : false;
 	}
 
@@ -3990,7 +3985,8 @@ public class ExcelUtil extends CoTopComponent {
 				}
 			}
 		}
-		return licenseMaster;
+		return licenseMaster.getLicenseName() == null || licenseMaster.getLicenseName().trim().isEmpty()
+				? null : licenseMaster;
 	}
 
 	private static void readAndroidBuildFindHeaderRowIndex(Sheet sheet, Map<String, Object> checkHeaderSheetName) {

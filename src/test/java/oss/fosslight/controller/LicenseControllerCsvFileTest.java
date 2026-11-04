@@ -198,6 +198,41 @@ class LicenseControllerCsvFileTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("headerCases")
+    void preservesActualHeaderColumns(String extension, int nameColumn, int identifierColumn,
+                                     boolean missingName) throws Exception {
+        byte[] data;
+        try (Workbook book = "xls".equalsIgnoreCase(extension) ? new HSSFWorkbook() : new XSSFWorkbook();
+             ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+            Sheet sheet = book.createSheet("Licenses");
+            Row header = sheet.createRow(0);
+            header.createCell(nameColumn).setCellValue("LICENSE NAME");
+            header.createCell(identifierColumn).setCellValue("SPDX SHORT IDENTIFIER");
+            Row row = sheet.createRow(1);
+            if (!missingName) row.createCell(nameColumn).setCellValue("Example License");
+            row.createCell(identifierColumn).setCellValue("MIT");
+            book.write(bytes);
+            data = bytes.toByteArray();
+        }
+        org.springframework.test.web.servlet.ResultActions result = mockMvc.perform(upload(
+                new MockMultipartFile("headers", "headers." + extension, "application/octet-stream", data)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.res").value(true))
+                .andExpect(jsonPath("$.value.length()").value(missingName ? 0 : 1));
+        if (!missingName) {
+            result.andExpect(jsonPath("$.value[0].license.licenseName").value("Example License"))
+                    .andExpect(jsonPath("$.value[0].license.shortIdentifier").value("MIT"))
+                    .andExpect(jsonPath("$.value[0].status").value("Ready"));
+        }
+    }
+
+    static Stream<Arguments> headerCases() {
+        return Stream.of("xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx")
+                .flatMap(ext -> Stream.of(Arguments.of(ext, 1, 2, false),
+                        Arguments.of(ext, 0, 2, false), Arguments.of(ext, 1, 2, true),
+                        Arguments.of(ext, 2, 0, true)));
+    }
+
     static Stream<Arguments> workbookSizeCases() {
         return Stream.of("xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx")
                 .flatMap(extension -> Stream.of(
