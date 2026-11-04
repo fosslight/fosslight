@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -67,7 +70,7 @@ class LicenseControllerCsvFileTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"xls", "xlsx"})
+    @ValueSource(strings = {"xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx"})
     void returnsParsedLicensesInOrderWithReadyStatus(String extension) throws Exception {
         mockMvc.perform(upload(workbook("licenses", extension, "LICENSE NAME", "MIT", "Apache-2.0")))
                 .andExpect(status().isOk())
@@ -83,7 +86,7 @@ class LicenseControllerCsvFileTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"xls", "xlsx"})
+    @ValueSource(strings = {"xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx"})
     void rejectsUnrecognizedHeadersWithoutReadyRows(String extension) throws Exception {
         mockMvc.perform(upload(workbook("invalid", extension, "UNKNOWN COLUMN", "MIT")))
                 .andExpect(status().isOk())
@@ -103,12 +106,11 @@ class LicenseControllerCsvFileTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT,
-            CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT + 1L})
-    void reportsWorkbookSizeLimitWithoutLosingParsedRows(long size) throws Exception {
-        MockMultipartFile source = workbook("sized", "xlsx", "LICENSE NAME", "MIT");
+    @MethodSource("workbookSizeCases")
+    void reportsWorkbookSizeLimitWithoutLosingParsedRows(String extension, long size) throws Exception {
+        MockMultipartFile source = workbook("sized", extension, "LICENSE NAME", "MIT");
         // Override only metadata so testing the 15 MiB boundary does not allocate a huge fixture.
-        MockMultipartFile file = new MockMultipartFile("sized", "sized.xlsx",
+        MockMultipartFile file = new MockMultipartFile("sized", "sized." + extension,
                 source.getContentType(), source.getBytes()) {
             @Override
             public long getSize() {
@@ -154,6 +156,13 @@ class LicenseControllerCsvFileTest {
                 .andExpect(jsonPath("$.value").doesNotExist());
     }
 
+    static Stream<Arguments> workbookSizeCases() {
+        return Stream.of("xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx")
+                .flatMap(extension -> Stream.of(
+                        Arguments.of(extension, (long) CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT),
+                        Arguments.of(extension, CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT + 1L)));
+    }
+
     private MockMultipartHttpServletRequestBuilder upload(MockMultipartFile file) {
         MockMultipartHttpServletRequestBuilder request = multipart(Url.LICENSE.CSV_FILE).file(file);
         request.header("User-Agent", "Mozilla/5.0");
@@ -162,7 +171,7 @@ class LicenseControllerCsvFileTest {
 
     private MockMultipartFile workbook(String name, String extension, String header, String... licenses)
             throws Exception {
-        try (Workbook workbook = "xls".equals(extension) ? new HSSFWorkbook() : new XSSFWorkbook();
+        try (Workbook workbook = "xls".equalsIgnoreCase(extension) ? new HSSFWorkbook() : new XSSFWorkbook();
              ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Licenses");
             sheet.createRow(0).createCell(0).setCellValue(header);

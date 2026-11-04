@@ -3789,7 +3789,7 @@ public class ExcelUtil extends CoTopComponent {
 
 			if (count != 1) {
 				return null;
-			} else if ("xls".equals(extType) || "XLS".equals(extType)) {
+			} else if ("xls".equalsIgnoreCase(extType)) {
 				try {
 					wbHSSF = new HSSFWorkbook(new FileInputStream(file));
 					HSSFSheet sheet = wbHSSF.getSheetAt(0);
@@ -3829,7 +3829,7 @@ public class ExcelUtil extends CoTopComponent {
 						log.error(e.getMessage(), e);
 					}
 				}
-			} else if ("xlsx".equals(extType) || "XLSX".equals(extType)) {
+			} else if ("xlsx".equalsIgnoreCase(extType)) {
 				try {
 					wbXSSF = new XSSFWorkbook(new FileInputStream(file));
 					XSSFSheet sheet = wbXSSF.getSheetAt(0);
