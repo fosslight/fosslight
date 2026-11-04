@@ -156,6 +156,48 @@ class LicenseControllerCsvFileTest {
                 .andExpect(jsonPath("$.value").doesNotExist());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx"})
+    void preservesRowsAfterGaps(String extension) throws Exception {
+        mockMvc.perform(upload(sparseWorkbook(extension, false)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.res").value(true))
+                .andExpect(jsonPath("$.value.length()").value(2))
+                .andExpect(jsonPath("$.value[0].license.licenseName").value("MIT"))
+                .andExpect(jsonPath("$.value[1].license.licenseName").value("BSD-3-Clause"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx"})
+    void skipsMissingLicenseNameWithoutShiftingIdentifier(String extension) throws Exception {
+        mockMvc.perform(upload(sparseWorkbook(extension, true)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.res").value(true))
+                .andExpect(jsonPath("$.value.length()").value(1))
+                .andExpect(jsonPath("$.value[0].license.licenseName").value("BSD-3-Clause"))
+                .andExpect(jsonPath("$.value[0].license.shortIdentifier").value("BSD-3-Clause"));
+    }
+
+    private MockMultipartFile sparseWorkbook(String extension, boolean missingName) throws Exception {
+        try (Workbook workbook = "xls".equalsIgnoreCase(extension) ? new HSSFWorkbook() : new XSSFWorkbook();
+             ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Licenses");
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("LICENSE NAME");
+            header.createCell(1).setCellValue("SPDX SHORT IDENTIFIER");
+            Row first = sheet.createRow(missingName ? 1 : 2);
+            if (!missingName) first.createCell(0).setCellValue("MIT");
+            first.createCell(1).setCellValue("Apache-2.0");
+            if (!missingName) sheet.createRow(3); // Defined but empty row, in addition to absent row 1.
+            Row last = sheet.createRow(missingName ? 2 : 5);
+            last.createCell(0).setCellValue("BSD-3-Clause");
+            last.createCell(1).setCellValue("BSD-3-Clause");
+            workbook.write(bytes);
+            return new MockMultipartFile("sparse", "sparse." + extension,
+                    "application/octet-stream", bytes.toByteArray());
+        }
+    }
+
     static Stream<Arguments> workbookSizeCases() {
         return Stream.of("xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx")
                 .flatMap(extension -> Stream.of(
