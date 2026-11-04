@@ -6442,7 +6442,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public String addWatcher(Project project) {
 		String addWatcher = "";
 		
-		if (!isEmpty(project.getPrjEmail())) {
+		if (!isEmpty(project.getPrjEmail()) && !isEmpty(project.getPrjId())) {
 			if (projectMapper.existsWatcherByEmail(project) == 0) { // 이미 추가된 watcher 체크
 				projectMapper.insertWatcher(project); // watcher 추가
 				
