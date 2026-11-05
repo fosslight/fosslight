@@ -165,32 +165,37 @@
 		FROM
 			COMMENTS_HISTORY CH
 		WHERE 1=1
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
-				<if test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
-					AND CH.REFERENCE_ID = #{referenceId}
-					AND CH.REFERENCE_DIV = '40'
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@notEquals(referenceDiv,'oss')">
-					AND CH.REFERENCE_ID = #{referenceId}
-					<choose>
-						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
-							AND CH.REFERENCE_DIV IN ('19', '10', '12', '14')
-						</when>
-						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
-							AND CH.REFERENCE_DIV IN ('30')
-						</when>
-						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-							AND CH.REFERENCE_DIV IN ('20', '22')
-						</when>
-						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
-							AND CH.REFERENCE_DIV = '60'
-						</when>
-						<otherwise>
-							AND CH.REFERENCE_DIV IN ('99')
-						</otherwise>
-					</choose>
-				</if>
-			</if>
+			<choose>
+				<when test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv)">
+					<if test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+						AND CH.REFERENCE_ID = #{referenceId}
+						AND CH.REFERENCE_DIV = '40'
+					</if>
+					<if test="@oss.fosslight.util.StringUtil@notEquals(referenceDiv,'oss')">
+						AND CH.REFERENCE_ID = #{referenceId}
+						<choose>
+							<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+								AND CH.REFERENCE_DIV IN ('19', '10', '12', '14')
+							</when>
+							<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+								AND CH.REFERENCE_DIV IN ('30')
+							</when>
+							<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+								AND CH.REFERENCE_DIV IN ('20', '22')
+							</when>
+							<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+								AND CH.REFERENCE_DIV = '60'
+							</when>
+							<otherwise>
+								AND CH.REFERENCE_DIV = '99'
+							</otherwise>
+						</choose>
+					</if>
+				</when>
+				<otherwise>
+					AND CH.REFERENCE_DIV = '99'
+				</otherwise>
+			</choose>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
 				AND CH.REFERENCE_DIV = #{schReferenceDiv}
 			</if>
