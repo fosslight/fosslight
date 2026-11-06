@@ -1228,10 +1228,12 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
     						) {
-        				if (!isEmpty(prjInfo.getReviewer())) {
-        					bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
-        				} else {
-        					bccList.addAll(Arrays.asList(selectAdminMailAddr()));
+        				if (!CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())) {
+        					if (!isEmpty(prjInfo.getReviewer())) {
+        						bccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
+        					} else {
+        						bccList.addAll(Arrays.asList(selectAdminMailAddr()));
+        					}
         				}
         				
         				// Secuirty 파트 추가
