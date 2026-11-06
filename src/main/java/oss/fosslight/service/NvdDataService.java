@@ -299,6 +299,9 @@ public class NvdDataService extends CoTopComponent {
 //								_matchNameParams.put("cpe23Uri", criteria);
 //								_matchNameParams.put("matchCriteriaId", matchCriteriaId);
 									
+									if (criteria.equalsIgnoreCase("cpe:2.3:a:pcre:pcre2:10.48:rc1:*:*:*:*:*:*")) {
+										continue;
+									}
 
 									// configurations의 operator (AND/OR)에 따라 동일한 CVE ID에 matchCriteriaId 가 여러번 등장할 수 있음
 									// FL-Hub에서는 operator 조건을 확인하지 않기 때문에, CVEID + matchCriteriaId를 PK로 사용하는 경우 중복 오류가 발생할 수 있음
@@ -768,6 +771,10 @@ public class NvdDataService extends CoTopComponent {
 									String matchCriteriaId = (String) matchString.get("matchCriteriaId");
 									String cpe23Uri = (String) matchString.get("criteria");
 
+									if (!isEmpty(cpe23Uri) && cpe23Uri.equalsIgnoreCase("cpe:2.3:a:pcre:pcre2:10.48:rc1:*:*:*:*:*:*")) {
+										continue;
+									}
+									
 									Map<String, Object> cpeMatchMap = new HashMap<>();
 									cpeMatchMap.put("matchCriteriaId", matchCriteriaId);
 									cpeMatchMap.put("cpe23Uri", cpe23Uri);
