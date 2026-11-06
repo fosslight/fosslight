@@ -376,16 +376,18 @@ var Ctrl_fn = {
 	},
 	detectedLicenseAdd : function(seq) {
 		var duplicatedFlag = false;
-		var addNickname = $("#input_detectedLicense" + seq).val();
-	
-		$("input[name='detectedLicenses']").each(function (i) {
-			if (addNickname == $(this).val()) duplicatedFlag = true;
+		var addDetectedLicense = $("#input_detectedLicense" + seq).val();
+		
+		$("input[name='detectedLicenses" + seq + "']").each(function (i) {
+			if (addDetectedLicense == $(this).val()) {
+				duplicatedFlag = true;
+			}
 		});
 	
 		if (!duplicatedFlag) {
 			let detectedLicenseHtml 	= 	'<div class="col-lg-4 mt-1 pl-0">';
 			detectedLicenseHtml 		+= 		'<div class="form-group mb-0">';
-			detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="' + addNickname + '" readonly/>';
+			detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses' + seq + '" type="text" value="' + addDetectedLicense + '" readonly/>';
 			detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
 			detectedLicenseHtml 		+=		'</div>';
 			detectedLicenseHtml 		+=		'<span class="retxt"></span>';
