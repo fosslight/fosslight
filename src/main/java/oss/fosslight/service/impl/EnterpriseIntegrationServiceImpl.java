@@ -32,6 +32,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -190,26 +192,49 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
         }
     	
     	try {
-    		if (!preResult.containsKey("skipCoReviewer")) {
-    			String autoReviewUrl = String.format("http://127.0.0.1:%s/autoReview/autoReviewStart/%s/true/true/true", port, targetPrjId);
-                executeEnterpriseAnalysis(autoReviewUrl, null, prjId, false);
-    		}
-            log.info("[Final Success] Auto Review initiated for Project {}", targetPrjId);
+    		String autoReviewUrl = String.format("http://127.0.0.1:%s/autoReview/autoReviewStart/%s/true/true/true", port, targetPrjId);
+			String finalTargetPrjId = targetPrjId;
+			Integer finalJobSeq = jobSeq;
+			Map<String, OssMaster> ossInfo = (Map<String, OssMaster>) preResult.get("chunkMap");
+			boolean skipCoReviewer = preResult.containsKey("skipCoReviewer");
+			
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					// Execute Auto Review
+					if (!skipCoReviewer) {
+						try {
+							executeEnterpriseAnalysis(autoReviewUrl, null, prjId, false);
+							log.info("[Auto Review] Successfully initiated for Project {}", finalTargetPrjId);
+						} catch (Exception e) {
+							log.error("[Auto Review] Failed to initiate for Project {}. Reason: {}", finalTargetPrjId, e.getMessage(), e);
+						}
+					}
+					
+					// Sync OSS information
+		            if (MapUtils.isNotEmpty(ossInfo)) {
+		                try {
+		                    syncOssInfoByChunk(ossInfo);
+		                    log.info("[OSS Sync] Successfully synchronized OSS information for Project {}", finalTargetPrjId);
+		                } catch (Exception e) {
+		                    log.error("[OSS Sync] Failed to synchronize OSS information for Project {}. Reason: {}", finalTargetPrjId, e.getMessage(), e);
+		                }
+		            }
+					
+		            // Update analysis result
+		            if (finalJobSeq != null && skipCoReviewer) {
+		                try {
+		                    executeAnalysisUpdate(String.valueOf(finalJobSeq), null, null, true);
+		                    log.info("[Analysis Update] Successfully completed for JobSeq {}", finalJobSeq);
+		                } catch (Exception e) {
+		                    log.error("[Analysis Update] Failed to update analysis for JobSeq {}. Reason: {}", finalJobSeq, e.getMessage(), e);
+		                }
+		            }
+				}
+			});
 		} catch (Exception e) {
-			log.error("[Final Error] Failed to initiate Auto Review: {}", e.getMessage(), e);
+			log.error("[Post-Commit Registration] Failed to register transaction synchronization for Project {}. Reason: {}", targetPrjId, e.getMessage(), e);
 		}
-    	
-    	try {
-    		if (preResult.containsKey("chunkMap")) {
-            	Map<String, OssMaster> ossInfo = (Map<String, OssMaster>) preResult.get("chunkMap");
-            	syncOssInfoByChunk(ossInfo);
-            }
-    		if (jobSeq != null && preResult.containsKey("skipCoReviewer")) {
-    			executeAnalysisUpdate(String.valueOf(jobSeq), null, null, true);
-    		}
-    	} catch (Exception e) {
-    		log.error("[Final Error] Failed to initiate Auto Review: {}", e.getMessage(), e);
-    	}
 	}
 
 	private Map<String, Object> preProcessEnterpriseAnalysis(String analysisKey, Map<String, Object> analysisData) {
