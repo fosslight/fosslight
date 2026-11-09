@@ -4920,8 +4920,7 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	@PostMapping(value=PROJECT.PROJECT_STATUS)
-	public @ResponseBody ResponseEntity<Object> getProjectStatus(@RequestBody Project project, HttpServletRequest req,
-			HttpServletResponse res, Model model) {
+	public @ResponseBody ResponseEntity<Object> getProjectStatus(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Map<String, String> map = new HashMap<String, String>();
 		Project prjBean = projectService.getProjectDetail(project);
 		

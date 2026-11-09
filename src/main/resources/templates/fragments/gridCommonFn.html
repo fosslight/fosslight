@@ -1675,7 +1675,7 @@
             	    	}
             	  	});
           		},
-          		initAutoReview : function(prjId) {
+          		initAutoReview : function(prjId, jobSeq) {
           			$.ajax({
           				url : '/project/initAutoReview',
             	      	type : 'POST',
@@ -1686,7 +1686,7 @@
             	      	contentType : 'application/json',
             	       	success : function(data){
             	       		if (data.isValid) {
-            	       			src_fn_com.autoReviewStart(prjId, true);
+            	       			src_fn_com.autoReviewStart(prjId, jobSeq, true);
             	       		} else {
             	       			loadingIden.hide();
             	       			alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -1697,7 +1697,7 @@
             	     	}
           			});
           		},
-            	checkAutoReview : function(prjId) {
+            	checkAutoReview : function(prjId, jobSeq) {
             		var returnFlag = false;
 					
             		$.ajax({
@@ -1717,7 +1717,7 @@
             	               	alertify.alert("Auto review is running now.<br>It has not been completed yet.", function (e) {});
             	           	} else if (isValid) {
             	              	alertify.success([[#{msg.common.start.autoreview}]]);
-            	              	src_fn_com.initAutoReview(prjId);
+            	              	src_fn_com.initAutoReview(prjId, jobSeq);
             	           	}
             	       	},
             	      	error : function(){
@@ -1726,11 +1726,15 @@
             	   	});
             	  	return returnFlag;
             	},
-            	autoReviewStart : function(prjId, startNow){
+            	autoReviewStart : function(prjId, jobSeq, startNow){
             	  	var url;
             		if (startNow == true) {
 //            	    	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/true';
-						url = '/autoReview/autoReviewStart/' + prjId + '/true/true';
+						if (jobSeq != null) {
+							url = '/autoReview/autoReviewStart/' + prjId + '/true/true/true';
+						} else {
+							url = '/autoReview/autoReviewStart/' + prjId + '/true/true';
+						}
             	 	} else {
 //            	      	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/false';
             	 		url = '/autoReview/autoReviewStart/' + prjId + '/false/true';

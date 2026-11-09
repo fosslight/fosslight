@@ -3837,7 +3837,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> licenseNickNameCheckResult = new ArrayList<>();
 		Map<String, List<String>> result = new HashMap<String, List<String>>();
 		
-		List<String> ossCheckParam = new ArrayList<>();
+		Set<String> ossCheckParam = new HashSet<>();
 		List<String> licenseCheckParam = new ArrayList<>();
 		
 		List<ProjectIdentification> adminCheckList = projectMapper.selectAdminCheckList(prjId);
@@ -3864,7 +3864,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (refComponentIdList.contains(bean.getComponentId()) || ossNameVersionList.contains((_ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
 					adminCheckFlag = true;
 				}
-				if (!ossCheckParam.contains(_ossName) && !adminCheckFlag) {
+				if (!adminCheckFlag) {
 					ossCheckParam.add(_ossName);
 				}
 			}
@@ -3895,7 +3895,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (!ossCheckParam.isEmpty()) {
 			OssMaster param = new OssMaster();
-			param.setOssNames(ossCheckParam.toArray(new String[ossCheckParam.size()]));
+			param.setOssNames(ossCheckParam.toArray(new String[0]));
 			ossNickNameList = projectMapper.checkOssNickName(param);
 			
 			if (CollectionUtils.isNotEmpty(ossNickNameList)) {

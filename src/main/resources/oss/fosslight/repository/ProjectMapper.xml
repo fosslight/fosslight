@@ -879,7 +879,8 @@
 				  ON OCL.LICENSE_ID = LM.LICENSE_ID 
 				 AND LM.USE_YN = 'Y'
 			   WHERE OC.REFERENCE_ID = A.PRJ_ID AND OC.REFERENCE_DIV = '13'
-				 AND LM.LICENSE_TYPE NOT IN ('NA', 'PF')) AS IDENTIFICATION_SUB_STATUS_BOM 
+				 AND LM.LICENSE_TYPE NOT IN ('NA', 'PF')) AS IDENTIFICATION_SUB_STATUS_BOM
+			, (SELECT JOB_SEQ FROM OSS_COMPONENTS WHERE REFERENCE_ID = #{prjId} AND JOB_SEQ IS NOT NULL LIMIT 1) AS JOB_SEQ
 		FROM
 			PROJECT_MASTER A 
 			LEFT JOIN COMMENTS_HISTORY B ON A.COMMENT = B.COMM_ID
@@ -1495,7 +1496,7 @@
 			, REFERENCE_DIV
 			, COMPONENT_IDX
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
-			, OSS_ID
+				, OSS_ID
 			</if>
 			, OSS_NAME
 			, OSS_VERSION
@@ -1505,37 +1506,40 @@
 			, EXCLUDE_YN
 			, COPYRIGHT
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
-			, BINARY_NAME
+				, BINARY_NAME
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binarySize)">
-			, BINARY_SIZE
+				, BINARY_SIZE
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryNotice)">
-			, BINARY_NOTICE
+				, BINARY_NOTICE
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(customBinaryYn)">
-			, CUSTOM_BINARY_YN
+				, CUSTOM_BINARY_YN
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(mergePreDiv)">
-			, MERGE_PRE_DIV
+				, MERGE_PRE_DIV
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationType)">
-			, OBLIGATION_TYPE
+				, OBLIGATION_TYPE
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refComponentId)">
-			, REF_COMPONENT_ID
+				, REF_COMPONENT_ID
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(dependencies)">
-			, DEPENDENCIES
+				, DEPENDENCIES
 			</if>
 			, REF_DIV
 			, PRE_OBLIGATION_TYPE
 			, ADMIN_CHECK_YN
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
-			, REF_OSS_NAME
+				, REF_OSS_NAME
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
-			, PACKAGE_URL
+				, PACKAGE_URL
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(jobSeq)">
+				, JOB_SEQ
 			</if>
 			)
 			VALUES
@@ -1554,37 +1558,40 @@
 			, #{excludeYn}
 			, #{copyrightText}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
-			, #{binaryName}
+				, #{binaryName}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binarySize)">
-			, #{binarySize}
+				, #{binarySize}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryNotice)">
-			, #{binaryNotice}
+				, #{binaryNotice}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(customBinaryYn)">
-			, #{customBinaryYn}
+				, #{customBinaryYn}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(mergePreDiv)">
-			, #{mergePreDiv}
+				, #{mergePreDiv}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationType)">
-			, #{obligationType}
+				, #{obligationType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refComponentId)">
-			, #{refComponentId}
+				, #{refComponentId}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(dependencies)">
-			, #{dependencies}
+				, #{dependencies}
 			</if>
 			, #{refDiv}
 			, #{preObligationType}
 			, #{adminCheckYn}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
-			, #{refOssName}
+				, #{refOssName}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
-			, #{packageUrl}
+				, #{packageUrl}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(jobSeq)">
+				, #{jobSeq}
 			</if>
 			)
 	</insert>
@@ -1995,7 +2002,8 @@
 			RTN.LICENSE_TYPE,
 			RTN.DEPENDENCIES,
 			RTN.REF_OSS_NAME,
-			RTN.PACKAGE_URL
+			RTN.PACKAGE_URL,
+			RTN.JOB_SEQ
 		FROM  (
 			SELECT 
 				A1.REFERENCE_ID, A1.COMPONENT_ID, A1.REF_COMPONENT_ID, A1.REFERENCE_DIV, A1.COMPONENT_IDX,A1.OSS_ID, A1.OSS_NAME, A1.OSS_VERSION
@@ -2005,7 +2013,7 @@
 				, GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME
 				, IFNULL(A1.REF_DIV, (SELECT S.REFERENCE_DIV FROM OSS_COMPONENTS S WHERE S.COMPONENT_ID = A1.REF_COMPONENT_ID)) AS REF_DIV
 				, (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 WHEN A3.LICENSE_TYPE IS NULL THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
-				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL
+				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL, A1.JOB_SEQ
 			FROM OSS_COMPONENTS A1 
 				INNER JOIN PROJECT_MASTER PRJ ON A1.REFERENCE_ID = PRJ.PRJ_ID
 				INNER JOIN OSS_COMPONENTS_LICENSE A2 
