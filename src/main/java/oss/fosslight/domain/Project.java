@@ -382,7 +382,7 @@ public class Project extends ComBean implements Serializable {
 	private String reqPerUserNms;
 	private String rejPerUserNm;
 	
-	private String jobSeq;
+	private Integer jobSeq;
 	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
@@ -4983,11 +4983,11 @@ public class Project extends ComBean implements Serializable {
 		this.filtersParam = filtersParam;
 	}
 
-	public String getJobSeq() {
+	public Integer getJobSeq() {
 		return jobSeq;
 	}
 
-	public void setJobSeq(String jobSeq) {
+	public void setJobSeq(Integer jobSeq) {
 		this.jobSeq = jobSeq;
 	}
 }

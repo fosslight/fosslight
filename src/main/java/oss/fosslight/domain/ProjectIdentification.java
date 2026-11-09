@@ -371,7 +371,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private int urlSearchSeq;
 	
-	private int jobSeq;
+	private Integer jobSeq;
 	
 	private Map<String, Object> filtersParam;
 	
@@ -2261,11 +2261,11 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 		this.skipVulnerabilityResolution = skipVulnerabilityResolution;
 	}
 
-	public int getJobSeq() {
+	public Integer getJobSeq() {
 		return jobSeq;
 	}
 
-	public void setJobSeq(int jobSeq) {
+	public void setJobSeq(Integer jobSeq) {
 		this.jobSeq = jobSeq;
 	}
 
