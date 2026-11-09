@@ -1538,7 +1538,7 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
 				, PACKAGE_URL
 			</if>
-			<if test="jobSeq != null">
+			<if test="jobSeq != null and jobSeq != 0">
 				, JOB_SEQ
 			</if>
 			)
@@ -1590,7 +1590,7 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
 				, #{packageUrl}
 			</if>
-			<if test="jobSeq != null">
+			<if test="jobSeq != null and jobSeq != 0">
 				, #{jobSeq}
 			</if>
 			)
