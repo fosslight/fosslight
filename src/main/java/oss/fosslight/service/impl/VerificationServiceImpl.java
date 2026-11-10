@@ -3610,8 +3610,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		pv.setAppendix("bomList", bomList);
 		
 		T2CoValidationResult vr = pv.validate(new HashMap<>());
+		boolean isAdminCheck = false;
+		if (map.containsKey("adminCheckList")) {
+			isAdminCheck = vr.isAdminCheck((List<String>) map.get("adminCheckList"));
+		}
+		
 		boolean isValid = true;
-		if (!vr.isValid()) {
+		if (!vr.isValid() && !isAdminCheck) {
 			Map<String, String> customErrorMap = new HashMap<>();
 			for (String key : vr.getValidMessageMap().keySet()) {
 				if (!key.contains(".")) {

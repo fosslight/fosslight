@@ -765,12 +765,8 @@ public class VerificationController extends CoTopComponent {
 	}
 
 	@ResponseBody
-	@GetMapping(value = VERIFICATION.DOWNLOAD_FILE,  produces = {
-			MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", 
-			MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
-	public ResponseEntity<FileSystemResource> downloadFile (
-			HttpServletRequest req,
-			HttpServletResponse res, Model model) throws Exception{
+	@GetMapping(value = VERIFICATION.DOWNLOAD_FILE,  produces = {MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
+	public ResponseEntity<FileSystemResource> downloadFile (HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/downloadFile");
 		
 		String prjId = req.getParameter("prjId");
@@ -781,11 +777,8 @@ public class VerificationController extends CoTopComponent {
 	}
 	
 	@ResponseBody
-	@PostMapping(value=VERIFICATION.WGET_URL,  produces = {
-					MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", 
-					MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
-	public String wgetUrl(@RequestBody Map<Object, Object> map, T2File file, HttpServletRequest request,
-			HttpServletResponse res, Model model) throws Exception {
+	@PostMapping(value=VERIFICATION.WGET_URL,  produces = {MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
+	public String wgetUrl(@RequestBody Map<Object, Object> map, T2File file, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/wgetUrl");
 		
 		//파일 등록
