@@ -1561,46 +1561,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                // [F] Package Originator (5)
 	                row.createCell(5).setCellValue("");
 
-	                String downloadLocation = "NOASSERTION";
-	                String homepage = "";
-	                
-	                if (c.getExternalReferences() != null) {
-	                	int bestPriority = Integer.MAX_VALUE;
-	                	for (ExternalReference ref : c.getExternalReferences()) {
-	                		if (ref.getType() == null || ref.getUrl() == null) {
-	                			continue;
-	                		}
-	                		
-	                		String typeName = ref.getType().getTypeName();
-	                		if (typeName == null) {
-	                			continue;
-	                		}
-	                		
-	                		Integer priority = EXTERNAL_REFERENCE_PRIORITY.get(typeName.toLowerCase());
-	                		if (priority != null && priority < bestPriority) {
-	                			bestPriority = priority;
-	                			downloadLocation = ref.getUrl();
-	                		}
-	                	}
-	                	
-	                	bestPriority = Integer.MAX_VALUE;
-	                	for (ExternalReference ref : c.getExternalReferences()) {
-	                		if (ref.getType() == null || ref.getUrl() == null) {
-	                			continue;
-	                		}
-	                		
-	                		String typeName = ref.getType().getTypeName();
-	                		if (typeName == null) {
-	                			continue;
-	                		}
-	                		
-	                		Integer priority = HOMEPAGE_REFERENCE_PRIORITY.get(typeName.toLowerCase());
-	                		if (priority != null && priority < bestPriority) {
-	                			bestPriority = priority;
-	                			homepage = ref.getUrl();
-	                		}
-	                	}
-	                }
+	                ExternalReference downloadReference = selectCdxExternalReference(c.getExternalReferences(), EXTERNAL_REFERENCE_PRIORITY);
+	                ExternalReference homepageReference = selectCdxExternalReference(c.getExternalReferences(), HOMEPAGE_REFERENCE_PRIORITY);
+	                String downloadLocation = downloadReference == null ? "NOASSERTION" : normalizeSbomValue(downloadReference.getUrl());
+	                String homepage = homepageReference == null ? "" : normalizeSbomValue(homepageReference.getUrl());
 	                // [G] Home Page (6) - Website URL 추출
 	                row.createCell(6).setCellValue(homepage);
 
@@ -1613,6 +1577,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                Cell packageCommentCell = row.getCell(15);
 	                if (packageCommentCell != null) {
 	                	packageComment = avoidNull(packageCommentCell.toString()).trim();
+	                }
+	                if (homepageReference != null && homepageReference.getType() != null) {
+	                    String typeName = homepageReference.getType().getTypeName();
+	                    if (!HOMEPAGE_REFERENCE_PRIORITY.containsKey(typeName.toLowerCase(Locale.ROOT))) {
+	                        String typeComment = "type:" + typeName;
+	                        packageComment = isEmpty(packageComment) ? typeComment : packageComment + " / " + typeComment;
+	                    }
 	                }
 	                
 	                org.cyclonedx.model.LicenseChoice lc = c.getLicenses();
@@ -1774,6 +1745,38 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	        setUploadError(uploadFile, FileUploadErrorCode.CDX_CONVERSION_FAILED, e.getMessage());
 	        return false;
 	    }
+	}
+
+	private ExternalReference selectCdxExternalReference(List<ExternalReference> references, Map<String, Integer> priorities) {
+		if (CollectionUtils.isEmpty(references)) {
+			return null;
+		}
+
+		ExternalReference selectedReference = null;
+		int bestPriority = Integer.MAX_VALUE;
+		for (ExternalReference reference : references) {
+			if (reference == null) {
+				continue;
+			}
+			String url = normalizeSbomValue(reference.getUrl());
+			// The CycloneDX deserializer converts JSON null URLs to the string "null".
+			if (isEmpty(url) || "null".equals(url)) {
+				continue;
+			}
+			if (selectedReference == null) {
+				selectedReference = reference;
+			}
+			if (reference.getType() == null) {
+				continue;
+			}
+			String typeName = reference.getType().getTypeName();
+			Integer priority = priorities.get(avoidNull(typeName).toLowerCase(Locale.ROOT));
+			if (priority != null && priority < bestPriority) {
+				bestPriority = priority;
+				selectedReference = reference;
+			}
+		}
+		return selectedReference;
 	}
 
 	private List<Component> collectCdxLoadTargetComponents(Bom bom) {
