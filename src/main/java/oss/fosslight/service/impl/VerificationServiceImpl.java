@@ -672,17 +672,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
 		String androidNoticeContents = getAndroidNotice(prjInfo);
 		
-		if (CoConstDef.FLAG_YES.equals(ossNotice.getPreviewOnly()) && !isEmpty(androidNoticeContents)) {
+		if (!isEmpty(androidNoticeContents)) {
 			return androidNoticeContents;
 		} else {
-			if (!isEmpty(androidNoticeContents)) {
-				return "binAndroid"; 
-			} else {
-				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
-
-				// Convert Map to Apache Velocity Template
-				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice, true));
-			}
+			ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
+			// Convert Map to Apache Velocity Template
+			return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice, true));
 		}
 	}
 	

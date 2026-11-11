@@ -880,9 +880,7 @@ public class VerificationController extends CoTopComponent {
 	}
 	
 	@PostMapping(value = VERIFICATION.MAKE_NOTICE_PREVIEW)
-	public @ResponseBody ResponseEntity<Object>  makeNoticePreview(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
-			HttpServletResponse res, Model model) throws IOException {
+	public @ResponseBody ResponseEntity<Object>  makeNoticePreview(OssNotice ossNotice, HttpServletRequest req, @RequestParam(value="useCustomNoticeYn", defaultValue="") String useCustomNoticeYn, HttpServletResponse res, Model model) throws IOException {
 		log.info("URI: "+ "/project/verification/makeNoticePreview");
 		
 		String downloadId = null;
