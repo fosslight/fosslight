@@ -4857,6 +4857,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			List<String> ossVersionAliasWithColon = new ArrayList<>();
 			List<String> ossVersionAliasWithoutColon = new ArrayList<>();
 			
+			if (!isEmpty(ossMaster.getOssVersionAlias()) && ossMaster.getOssVersionAliases() == null) {
+				ossMaster.setOssVersionAliases(ossMaster.getOssVersionAlias().split(","));
+			}
+			
 			if (ossMaster.getOssVersionAliases() != null) {
 				for (String alias : ossMaster.getOssVersionAliases()) {
 					if (alias.contains(":")) {

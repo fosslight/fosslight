@@ -1723,9 +1723,10 @@ public class OsvDataService extends CoTopComponent {
 	}
 	private List<Vulnerability> filterByVersionPriority(List<Vulnerability> osvVulnerabilityList, Map<String, Vulnerability> osvVulnerabilityMap, String targetVersion, String[] aliases, boolean isSecurity) {
 	    if (CollectionUtils.isEmpty(osvVulnerabilityList)) {
-	        return Collections.emptyList();
+	        return null;
 	    }
 
+	    boolean hasOssVersionAlias = aliases != null ? true : false;
 	    List<Vulnerability> resultList = new ArrayList<>();
 	    String currentTargetVersion;
 	    Set<String> seenVulnerabilities = new HashSet<>();
@@ -1738,6 +1739,12 @@ public class OsvDataService extends CoTopComponent {
 	        
 	        currentTargetVersion = isSecurity ? osvVulnerability.getOssVersion() : targetVersion;
 	        
+	        if (!hasOssVersionAlias) {
+	        	aliases = null;
+	        }
+	        if (!isEmpty(osvVulnerability.getOssVersionAlias())) {
+	        	aliases = osvVulnerability.getOssVersionAlias().split(",");
+	        }
 	        // 1순위 검증: Exact Match
 	        if (!isEmpty(osvVulnerability.getSearchVersionP1())) {
 	        	if (isExactVersionMatch(currentTargetVersion, aliases, osvVulnerability.getSearchVersionP1())) {

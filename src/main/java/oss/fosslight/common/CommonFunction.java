@@ -6637,6 +6637,7 @@ public class CommonFunction extends CoTopComponent {
 	        String searchVersionP2 = osvVulnInfo.getSearchVersionP2();
 	        String searchVersionP3Yn = osvVulnInfo.getSearchVersionP3Yn();
 	        String affectedVersion = osvVulnInfo.getAffectedVersion();
+	        String ossVersionAlias = osvVulnInfo.getOssVersionAlias();
 	        
 	        if (!existingKeys.contains(uniqueKey)) {
 	            if (!isEmpty(ossVersion)) {
@@ -6672,19 +6673,38 @@ public class CommonFunction extends CoTopComponent {
 	                    if (versionSet.contains(trimmedOssVer)) {
 	                    	isMatched = true;
 	                    }
+	                    
+	                    if (!isMatched && !isEmpty(ossVersionAlias)) {
+	                    	for (String ossVersionAliasStr : ossVersionAlias.split(",")) {
+	                    		if (versionSet.contains(ossVersionAliasStr.trim())) {
+	    	                    	isMatched = true;
+	    	                    	break;
+	    	                    }
+	                    	}
+	                    }
 	                }
 	                
 	                if (!isMatched) {
 	                    boolean isMatchedInRange = false;
 	                    if (!isEmpty(searchVersionP2)) {
 	                        isMatchedInRange = isVersionInRange(ossVersion, searchVersionP2, affectedVersion);
-	                        if (bean != null && !isMatchedInRange && bean.getOssVersionAliases() != null) {
-	                            for (String alias : bean.getOssVersionAliases()) {
-	                                if (isVersionInRange(alias, searchVersionP2, affectedVersion)) {
-	                                    isMatchedInRange = true;
-	                                    break;
-	                                }
-	                            }
+	                        if (!isMatchedInRange) {
+	                        	if (bean != null && bean.getOssVersionAliases() != null) {
+		                            for (String alias : bean.getOssVersionAliases()) {
+		                                if (isVersionInRange(alias, searchVersionP2, affectedVersion)) {
+		                                    isMatchedInRange = true;
+		                                    break;
+		                                }
+		                            }
+		                        }
+	                        	if (!isMatchedInRange && !isEmpty(ossVersionAlias)) {
+	                        		for (String ossVersionAliasStr : ossVersionAlias.split(",")) {
+	                        			if (isVersionInRange(ossVersionAliasStr, searchVersionP2, affectedVersion)) {
+		                                    isMatchedInRange = true;
+		                                    break;
+		                                }
+	    	                    	}
+	                        	}
 	                        }
 	                    }
 	                    if (!isMatchedInRange) {
