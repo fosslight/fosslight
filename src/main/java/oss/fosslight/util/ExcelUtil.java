@@ -3985,7 +3985,8 @@ public class ExcelUtil extends CoTopComponent {
 				}
 			}
 		}
-		return licenseMaster.getLicenseName() == null || licenseMaster.getLicenseName().trim().isEmpty()
+		return columnCheckMap.containsValue("LICENSE NAME")
+				&& (licenseMaster.getLicenseName() == null || licenseMaster.getLicenseName().trim().isEmpty())
 				? null : licenseMaster;
 	}
 

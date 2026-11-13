@@ -233,6 +233,27 @@ class LicenseControllerCsvFileTest {
                         Arguments.of(ext, 2, 0, true)));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"xls", "xlsx"})
+    void preservesIdentifierOnlyUploads(String extension) throws Exception {
+        mockMvc.perform(upload(workbook("identifier", extension, "SPDX SHORT IDENTIFIER", "MIT")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.res").value(true))
+                .andExpect(jsonPath("$.value.length()").value(1))
+                .andExpect(jsonPath("$.value[0].license.shortIdentifier").value("MIT"))
+                .andExpect(jsonPath("$.value[0].status").value("Ready"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"xls", "xlsx"})
+    void preservesIdentifierOnlyPartAlongsideNamedPart(String extension) throws Exception {
+        mockMvc.perform(upload(workbook("identifier", extension, "SPDX SHORT IDENTIFIER", "MIT"))
+                        .file(workbook("named", extension, "LICENSE NAME", "BSD-3-Clause")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.res").value(true))
+                .andExpect(jsonPath("$.value.length()").value(2))
+                .andExpect(jsonPath("$.value[0].license.shortIdentifier").value("MIT"))
+                .andExpect(jsonPath("$.value[1].license.licenseName").value("BSD-3-Clause"));
+    }
+
     static Stream<Arguments> workbookSizeCases() {
         return Stream.of("xls", "XLS", "Xls", "xlsx", "XLSX", "Xlsx")
                 .flatMap(extension -> Stream.of(
