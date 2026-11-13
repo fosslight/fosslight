@@ -3742,21 +3742,16 @@ public class ExcelUtil extends CoTopComponent {
 				"SPDX SHORT IDENTIFIER", "NICKNAME", "WEBSITE FOR THE LICENSE", "DISCLOSING SRC", "RESTRICTION",
 				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"});
 
-		List<String> firstRowColData = new ArrayList<>();
-		while (cellIterator.hasNext()) {
-			Cell cell = (Cell) cellIterator.next();
-			firstRowColData.add(getCellData(cell));
-		}
-
 		int validationCnt = 0;
-		for (int cIdx = 0; cIdx < firstRowColData.size(); cIdx++) {
-			String colData = firstRowColData.get(cIdx);
-			if (colData != null && definedColData.contains(colData.toUpperCase())){
+		while (cellIterator.hasNext()) {
+			Cell cell = cellIterator.next();
+			String colData = getCellData(cell);
+			if (colData != null && definedColData.contains(colData.toUpperCase())) {
 				validationCnt++;
-				columnCheckMap.put(cIdx, colData.toUpperCase());
+				columnCheckMap.put(cell.getColumnIndex(), colData.toUpperCase());
 			}
 		}
-		
+
 		return validationCnt > 0 ? true : false;
 	}
 
@@ -3789,13 +3784,17 @@ public class ExcelUtil extends CoTopComponent {
 
 			if (count != 1) {
 				return null;
-			} else if ("xls".equals(extType) || "XLS".equals(extType)) {
+			} else if ("xls".equalsIgnoreCase(extType)) {
 				try {
 					wbHSSF = new HSSFWorkbook(new FileInputStream(file));
 					HSSFSheet sheet = wbHSSF.getSheetAt(0);
-					int rowSize = sheet.getPhysicalNumberOfRows();
-					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+					int rowSize = sheet.getLastRowNum();
+					for (int rowIndex = 0; rowIndex <= rowSize; rowIndex++) {
 						HSSFRow row = sheet.getRow(rowIndex);
+						if (row == null) {
+							if (rowIndex == 0) return null;
+							continue;
+						}
 						if (rowIndex == 0) {
 							//check header in here
 							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator(), columnCheckMap);
@@ -3804,7 +3803,8 @@ public class ExcelUtil extends CoTopComponent {
 								return null;
 							}
 						} else {
-							short firstCell = row.getFirstCellNum();
+							if (row.getFirstCellNum() < 0) continue;
+							short firstCell = 0;
 							short lastCell = row.getLastCellNum();
 							
 							for (short cellIdx = firstCell; cellIdx <= lastCell; cellIdx++) {
@@ -3829,13 +3829,17 @@ public class ExcelUtil extends CoTopComponent {
 						log.error(e.getMessage(), e);
 					}
 				}
-			} else if ("xlsx".equals(extType) || "XLSX".equals(extType)) {
+			} else if ("xlsx".equalsIgnoreCase(extType)) {
 				try {
 					wbXSSF = new XSSFWorkbook(new FileInputStream(file));
 					XSSFSheet sheet = wbXSSF.getSheetAt(0);
-					int rowSize = sheet.getPhysicalNumberOfRows();
-					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+					int rowSize = sheet.getLastRowNum();
+					for (int rowIndex = 0; rowIndex <= rowSize; rowIndex++) {
 						XSSFRow row = sheet.getRow(rowIndex);
+						if (row == null) {
+							if (rowIndex == 0) return null;
+							continue;
+						}
 						if (rowIndex == 0) {
 							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator(), columnCheckMap);
 							if (!validHeader) {
@@ -3843,7 +3847,8 @@ public class ExcelUtil extends CoTopComponent {
 								return null;
 							}
 						} else {
-							short firstCell = row.getFirstCellNum();
+							if (row.getFirstCellNum() < 0) continue;
+							short firstCell = 0;
 							short lastCell = row.getLastCellNum();
 							
 							for (short cellIdx = firstCell; cellIdx <= lastCell; cellIdx++) {
@@ -3980,7 +3985,9 @@ public class ExcelUtil extends CoTopComponent {
 				}
 			}
 		}
-		return licenseMaster;
+		return columnCheckMap.containsValue("LICENSE NAME")
+				&& (licenseMaster.getLicenseName() == null || licenseMaster.getLicenseName().trim().isEmpty())
+				? null : licenseMaster;
 	}
 
 	private static void readAndroidBuildFindHeaderRowIndex(Sheet sheet, Map<String, Object> checkHeaderSheetName) {
