@@ -727,10 +727,34 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Project project = new Project();
         project.setPrjId(prjId);
         Project projectMaster = projectService.getProjectDetail(project);
-        project.setCsvFileSeq(new ArrayList<T2File>());
 
         switch (tabName) {
             case "ALL":
+                HashMap<String, Object> resetUploadParam = new HashMap<>();
+                resetUploadParam.put("prjId", prjId);
+                resetUploadParam.put("reset", CoConstDef.FLAG_YES);
+                Project uploadListProject = new Project();
+                uploadListProject.setPrjId(prjId);
+                uploadListProject.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+                Map<String, Object> uploadList = projectService.getIdentificationAddList(uploadListProject);
+                List<String> uploadItems = new ArrayList<>();
+                Object uploadRows = uploadList.get("rows");
+                if (uploadRows instanceof List<?>) {
+                    for (Object uploadRow : (List<?>) uploadRows) {
+                        if (uploadRow instanceof Map<?, ?>) {
+                            Object itemId = ((Map<?, ?>) uploadRow).get("id");
+                            if (itemId == null) {
+                                itemId = ((Map<?, ?>) uploadRow).get("item");
+                            }
+                            if (itemId != null) {
+                                uploadItems.add(String.valueOf(itemId));
+                            }
+                        }
+                    }
+                }
+                resetUploadParam.put("items", uploadItems);
+                projectService.deleteIdentificationUploadFile(resetUploadParam);
+                projectService.deleteIdentificationUploadSearchData(resetUploadParam);
                 apiProjectService.processResetTab("DEP", projectMaster, ossComponents, ossComponentsLicense);
                 apiProjectService.processResetTab("SRC", projectMaster, ossComponents, ossComponentsLicense);
                 apiProjectService.processResetTab("BIN", projectMaster, ossComponents, ossComponentsLicense);
@@ -741,6 +765,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 apiProjectService.processResetTab(tabName, projectMaster, ossComponents, ossComponentsLicense);
                 break;
         }
+        apiProjectService.registBom(prjId, CoConstDef.FLAG_YES, userInfo.getUserId());
+        projectService.updateSecurityDataForProject(prjId);
         resultMap.put("success", true);
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
