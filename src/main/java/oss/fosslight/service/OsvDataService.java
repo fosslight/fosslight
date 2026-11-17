@@ -788,142 +788,144 @@ public class OsvDataService extends CoTopComponent {
 	    // [개선 4] 스트림 내부 정렬 구조를 제거하고 단일 반복문 내 대소 비교(Map.compute) 구조로 변환
 	    Map<FinalGroupKey, Vulnerability> finalMap = new LinkedHashMap<>();
 	    
-	    for (Vulnerability item : osvResultList) {
-	        if (item == null || isEmpty(item.getCveId())) {
-	            continue;
-	        }
+	    if (CollectionUtils.isNotEmpty(osvResultList)) {
+	    	for (Vulnerability item : osvResultList) {
+		        if (item == null || isEmpty(item.getCveId())) {
+		            continue;
+		        }
 
-	        FinalGroupKey key = new FinalGroupKey(item.getOssName(), item.getOssVersion(), item.getCveId());
+		        FinalGroupKey key = new FinalGroupKey(item.getOssName(), item.getOssVersion(), item.getCveId());
 
-	        finalMap.compute(key, (k, existing) -> {
-	            if (existing == null) {
-	            	return item;
-	            }
+		        finalMap.compute(key, (k, existing) -> {
+		            if (existing == null) {
+		            	return item;
+		            }
 
-	            // 기존 로직의 정렬(sorted) 기준을 1:1 비교 연산으로 완벽히 대체
-	            boolean validA = CommonFunction.isBigDecimal(existing.getCvssScore());
-	            boolean validB = CommonFunction.isBigDecimal(item.getCvssScore());
+		            // 기존 로직의 정렬(sorted) 기준을 1:1 비교 연산으로 완벽히 대체
+		            boolean validA = CommonFunction.isBigDecimal(existing.getCvssScore());
+		            boolean validB = CommonFunction.isBigDecimal(item.getCvssScore());
 
-	            if (validA && validB) {
-	                // 두 점수 모두 유효할 경우: 내림차순(높은 점수가 우선)
-	                BigDecimal scoreA = new BigDecimal(existing.getCvssScore());
-	                BigDecimal scoreB = new BigDecimal(item.getCvssScore());
-	                int scoreCompare = scoreB.compareTo(scoreA); // B가 크면 양수 -> item 우선
-	                
-	                if (scoreCompare != 0) {
-	                    return scoreCompare > 0 ? item : existing;
-	                }
-	            } else if (validA) {
-	                return existing; // 기존 데이터만 유효하면 기존 데이터 유지
-	            } else if (validB) {
-	                return item; // 새로운 데이터만 유효하면 새로운 데이터 선택
-	            }
+		            if (validA && validB) {
+		                // 두 점수 모두 유효할 경우: 내림차순(높은 점수가 우선)
+		                BigDecimal scoreA = new BigDecimal(existing.getCvssScore());
+		                BigDecimal scoreB = new BigDecimal(item.getCvssScore());
+		                int scoreCompare = scoreB.compareTo(scoreA); // B가 크면 양수 -> item 우선
+		                
+		                if (scoreCompare != 0) {
+		                    return scoreCompare > 0 ? item : existing;
+		                }
+		            } else if (validA) {
+		                return existing; // 기존 데이터만 유효하면 기존 데이터 유지
+		            } else if (validB) {
+		                return item; // 새로운 데이터만 유효하면 새로운 데이터 선택
+		            }
 
-	            // 둘 다 유효하지 않거나 점수가 같다면: priority 오름차순(낮은 숫자가 우선)
-	            return existing.getPriority() <= item.getPriority() ? existing : item;
-	        });
-	    }
+		            // 둘 다 유효하지 않거나 점수가 같다면: priority 오름차순(낮은 숫자가 우선)
+		            return existing.getPriority() <= item.getPriority() ? existing : item;
+		        });
+		    }
+	    	
+	    	List<Vulnerability> finalFilteredVulnList = new ArrayList<>(finalMap.values());
+		    // [개선 1] 루프 진입 전, 단 한 번만 맵의 상태를 체크하여 CPU 오버헤드 제거
+		    boolean hasGridMap = MapUtils.isNotEmpty(securityGridMap);
 
-	    List<Vulnerability> finalFilteredVulnList = new ArrayList<>(finalMap.values());
-	    // [개선 1] 루프 진입 전, 단 한 번만 맵의 상태를 체크하여 CPU 오버헤드 제거
-	    boolean hasGridMap = MapUtils.isNotEmpty(securityGridMap);
+		    // [개선 2] 문자열 결합 속도 향상을 위해 StringBuilder 인스턴스 하나를 재사용
+		    StringBuilder gridIdBuilder = new StringBuilder(64);
+		    String gridIdPrefix = "jqg_sec_" + prjId + "_";
 
-	    // [개선 2] 문자열 결합 속도 향상을 위해 StringBuilder 인스턴스 하나를 재사용
-	    StringBuilder gridIdBuilder = new StringBuilder(64);
-	    String gridIdPrefix = "jqg_sec_" + prjId + "_";
+		    for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
+		        boolean activateFlag = isEmpty(osvVulnInfo.getOssVersion());
+		        
+		        // [개선 3] StringBuilder를 활용한 그리드 ID 결합 효율화 (힙 오버헤드 대폭 감소)
+		        gridIdBuilder.setLength(0);
+		        gridIdBuilder.append(gridIdPrefix).append(securityIdx++);
 
-	    for (Vulnerability osvVulnInfo : finalFilteredVulnList) {
-	        boolean activateFlag = isEmpty(osvVulnInfo.getOssVersion());
-	        
-	        // [개선 3] StringBuilder를 활용한 그리드 ID 결합 효율화 (힙 오버헤드 대폭 감소)
-	        gridIdBuilder.setLength(0);
-	        gridIdBuilder.append(gridIdPrefix).append(securityIdx++);
+		        // 공통 객체 생성 및 기본 필드 매핑 (isSecurity 여부와 관계없이 중복 분리)
+		        OssComponents ossComponents = new OssComponents();
+		        ossComponents.setGridId(gridIdBuilder.toString());
+		        ossComponents.setOssName(osvVulnInfo.getOssName());
+		        ossComponents.setOssVersion(osvVulnInfo.getOssVersion());
+		        ossComponents.setCvssScore(osvVulnInfo.getCvssScore());
+		        ossComponents.setCveId(osvVulnInfo.getCveId());
+		        ossComponents.setPublDate(osvVulnInfo.getPublDate());
+		        ossComponents.setModiDate(osvVulnInfo.getModiDate());
+		        ossComponents.setVulnSummary(osvVulnInfo.getVulnSummary());
+		        ossComponents.setActivateFlag(CoConstDef.FLAG_NO);
+		        ossComponents.setGroupKeyId(osvVulnInfo.getGroupKeyId());
 
-	        // 공통 객체 생성 및 기본 필드 매핑 (isSecurity 여부와 관계없이 중복 분리)
-	        OssComponents ossComponents = new OssComponents();
-	        ossComponents.setGridId(gridIdBuilder.toString());
-	        ossComponents.setOssName(osvVulnInfo.getOssName());
-	        ossComponents.setOssVersion(osvVulnInfo.getOssVersion());
-	        ossComponents.setCvssScore(osvVulnInfo.getCvssScore());
-	        ossComponents.setCveId(osvVulnInfo.getCveId());
-	        ossComponents.setPublDate(osvVulnInfo.getPublDate());
-	        ossComponents.setModiDate(osvVulnInfo.getModiDate());
-	        ossComponents.setVulnSummary(osvVulnInfo.getVulnSummary());
-	        ossComponents.setActivateFlag(CoConstDef.FLAG_NO);
-	        ossComponents.setGroupKeyId(osvVulnInfo.getGroupKeyId());
+		        // [개선 4] generateKey가 일으키는 문자열 폭탄을 제어하기 위해 맵 조회 키 생성 규칙 최적화
+		        String securityGridMapKey = (!activateFlag) 
+		            ? generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore()).toUpperCase()
+		            : generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null).toUpperCase();
 
-	        // [개선 4] generateKey가 일으키는 문자열 폭탄을 제어하기 위해 맵 조회 키 생성 규칙 최적화
-	        String securityGridMapKey = (!activateFlag) 
-	            ? generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCveId(), osvVulnInfo.getCvssScore()).toUpperCase()
-	            : generateKey(osvVulnInfo.getOssName(), osvVulnInfo.getOssVersion(), osvVulnInfo.getCvssScore(), null).toUpperCase();
+		        // 해상도(Resolution) 판단 공통 비즈니스 로직
+		        if (!activateFlag) {
+		            boolean hasPatch = !isEmpty(osvVulnInfo.getPatchLink());
+		            boolean isValidScore = CommonFunction.isBigDecimal(ossComponents.getCvssScore());
+		            
+		            if (isSecurity && hasPatch) {
+		                ossComponents.setOfficialPatchLink(osvVulnInfo.getPatchLink());
+		            } else if (isSecurity) {
+		                ossComponents.setOfficialPatchLink("N/A");
+		            }
+		            
+		            if (isValidScore) {
+		                ossComponents.setVulnerabilityResolution(hasPatch ? "Unresolved" : "Deferred (Not Available)");
+		            } else {
+		                ossComponents.setVulnerabilityResolution("");
+		            }
+		            
+		            if (isSecurity) {
+		                ossComponents.setSecurityPatchLink("N/A");
+		            }
+		        } else {
+		            ossComponents.setVulnerabilityResolution("");
+		        }
 
-	        // 해상도(Resolution) 판단 공통 비즈니스 로직
-	        if (!activateFlag) {
-	            boolean hasPatch = !isEmpty(osvVulnInfo.getPatchLink());
-	            boolean isValidScore = CommonFunction.isBigDecimal(ossComponents.getCvssScore());
-	            
-	            if (isSecurity && hasPatch) {
-	                ossComponents.setOfficialPatchLink(osvVulnInfo.getPatchLink());
-	            } else if (isSecurity) {
-	                ossComponents.setOfficialPatchLink("N/A");
-	            }
-	            
-	            if (isValidScore) {
-	                ossComponents.setVulnerabilityResolution(hasPatch ? "Unresolved" : "Deferred (Not Available)");
-	            } else {
-	                ossComponents.setVulnerabilityResolution("");
-	            }
-	            
-	            if (isSecurity) {
-	                ossComponents.setSecurityPatchLink("N/A");
-	            }
-	        } else {
-	            ossComponents.setVulnerabilityResolution("");
-	        }
+		        // 바깥으로 뺀 플래그를 활용하여 맵 매핑 조건 분기 성능 개선
+		        if (hasGridMap) {
+		            OssComponents bean = (OssComponents) securityGridMap.get(securityGridMapKey);
+		            if (bean != null) {
+		                if (isSecurity) {
+		                    ossComponents.setSecurityComments(bean.getSecurityComments());
+		                }
+		                if (!activateFlag) {
+		                    ossComponents.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+		                    if (isSecurity) {
+		                        if (!isEmpty(bean.getSecurityPatchLink()) || ("Fixed".equals(ossComponents.getVulnerabilityResolution()) && isEmpty(bean.getSecurityPatchLink()))) {
+		                            ossComponents.setSecurityPatchLink(bean.getSecurityPatchLink());
+		                        }
+		                    }
+		                }
+		            }
+		        } else {
+		            if (!isEmpty(osvVulnInfo.getVulnerabilityResolution())) {
+		                ossComponents.setVulnerabilityResolution(osvVulnInfo.getVulnerabilityResolution());
+		            }
+		        }
 
-	        // 바깥으로 뺀 플래그를 활용하여 맵 매핑 조건 분기 성능 개선
-	        if (hasGridMap) {
-	            OssComponents bean = (OssComponents) securityGridMap.get(securityGridMapKey);
-	            if (bean != null) {
-	                if (isSecurity) {
-	                    ossComponents.setSecurityComments(bean.getSecurityComments());
-	                }
-	                if (!activateFlag) {
-	                    ossComponents.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-	                    if (isSecurity) {
-	                        if (!isEmpty(bean.getSecurityPatchLink()) || ("Fixed".equals(ossComponents.getVulnerabilityResolution()) && isEmpty(bean.getSecurityPatchLink()))) {
-	                            ossComponents.setSecurityPatchLink(bean.getSecurityPatchLink());
-	                        }
-	                    }
-	                }
-	            }
-	        } else {
-	            if (!isEmpty(osvVulnInfo.getVulnerabilityResolution())) {
-	                ossComponents.setVulnerabilityResolution(osvVulnInfo.getVulnerabilityResolution());
-	            }
-	        }
+		        // 보안 전용 부가 정보 세팅 (isSecurity 전용 로직)
+		        if (isSecurity) {
+		        	if (activateFlag) {
+		        		ossComponents.setVulnerabilityLink(CommonFunction.getProperty("server.domain") + "/vulnerability/vulnpopup?ossName=" + osvVulnInfo.getOssName() + "&ossVersion=" + osvVulnInfo.getOssVersion());
+		        	} else {
+		        		ossComponents.setVulnerabilityLink("https://osv.dev/vulnerability/" + ossComponents.getCveId());
+		        	}
+		            
+		            if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
+		                // 상단 전역 static final로 컴파일해둔 COMPONENT_PATTERN 재사용
+		                String verStartEndRange = convertOsvToSimpleFormat(osvVulnInfo.getAffectedVersion(), COMPONENT_PATTERN);
+		                if (!isEmpty(verStartEndRange)) {
+		                    ossComponents.setVerStartEndRange(verStartEndRange);
+		                }
+		            }
+		            if (!isEmpty(osvVulnInfo.getAliasId())) {
+		                ossComponents.setAliasIds(osvVulnInfo.getAliasId());
+		            }
+		        }
 
-	        // 보안 전용 부가 정보 세팅 (isSecurity 전용 로직)
-	        if (isSecurity) {
-	        	if (activateFlag) {
-	        		ossComponents.setVulnerabilityLink(CommonFunction.getProperty("server.domain") + "/vulnerability/vulnpopup?ossName=" + osvVulnInfo.getOssName() + "&ossVersion=" + osvVulnInfo.getOssVersion());
-	        	} else {
-	        		ossComponents.setVulnerabilityLink("https://osv.dev/vulnerability/" + ossComponents.getCveId());
-	        	}
-	            
-	            if (!isEmpty(osvVulnInfo.getAffectedVersion())) {
-	                // 상단 전역 static final로 컴파일해둔 COMPONENT_PATTERN 재사용
-	                String verStartEndRange = convertOsvToSimpleFormat(osvVulnInfo.getAffectedVersion(), COMPONENT_PATTERN);
-	                if (!isEmpty(verStartEndRange)) {
-	                    ossComponents.setVerStartEndRange(verStartEndRange);
-	                }
-	            }
-	            if (!isEmpty(osvVulnInfo.getAliasId())) {
-	                ossComponents.setAliasIds(osvVulnInfo.getAliasId());
-	            }
-	        }
-
-	        osvVulnerabilityList.add(ossComponents);
+		        osvVulnerabilityList.add(ossComponents);
+		    }
 	    }
 
 	    return osvVulnerabilityList;
