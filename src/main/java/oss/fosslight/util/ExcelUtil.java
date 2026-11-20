@@ -1336,16 +1336,17 @@ public class ExcelUtil extends CoTopComponent {
         						bean.setDownloadLocation(downloadLocation);
         					}
     					}
-    					if (isSpdxSpreadsheet && !isSbomEmptyValue(bean.getPackageUrl())) {
-    						String generatedDownloadLocation = generateDownloadLocationFromPurl(bean.getPackageUrl());
-    						if (!isSbomEmptyValue(generatedDownloadLocation)
-    								&& !StringUtils.equals(bean.getDownloadLocation(), generatedDownloadLocation)) {
-    							bean.setDownloadLocation(generatedDownloadLocation);
-    						}
-    					}
-					
-    					String homepage = homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\\s", "");
-    					bean.setHomepage(isSbomEmptyValue(homepage) ? "" : homepage);
+					String homepage = homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\\s", "");
+					if (isSpdxSpreadsheet && !isSbomEmptyValue(bean.getPackageUrl())) {
+						String generatedPurlUrl = generateDownloadLocationFromPurl(bean.getPackageUrl());
+						if (!isSbomEmptyValue(generatedPurlUrl)) {
+							if (isSbomEmptyValue(bean.getDownloadLocation())) {
+								bean.setDownloadLocation(generatedPurlUrl);
+							}
+							homepage = generatedPurlUrl;
+						}
+					}
+					bean.setHomepage(isSbomEmptyValue(homepage) ? "" : homepage);
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
 					
