@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.advice.CProjectNotAvailableException;
 import oss.fosslight.api.advice.CProjectNotFoundException;
@@ -2253,7 +2254,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         StringBuilder comment = new StringBuilder();
 
         if (!isEmpty(userComment)) {
-            comment.append("<p>").append(userComment).append("</p>");
+            comment.append("<p>").append(HtmlUtils.htmlEscape(Objects.toString(userComment, ""))).append("</p>");
         }
 
         comment.append("<p>project information updated (by API)</p>");
@@ -2262,8 +2263,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             String key = beforeEntry.getKey();
             Object afterValue = afterMap.get(key);
             comment.append("<p><strong>").append(getProjectUpdateFieldDisplayName(key)).append("</strong><br />");
-            comment.append("Before : ").append(beforeEntry.getValue()).append("<br />");
-            comment.append("After : <span style='background-color:yellow'>").append(afterValue).append("</span></p>");
+            comment.append("Before : ").append(HtmlUtils.htmlEscape(Objects.toString(beforeEntry.getValue(), ""))).append("<br />");
+            comment.append("After : <span style='background-color:yellow'>")
+                    .append(HtmlUtils.htmlEscape(Objects.toString(afterValue, ""))).append("</span></p>");
         }
 
         return comment.toString();
