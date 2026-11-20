@@ -2262,10 +2262,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
         for (Map.Entry<String, Object> beforeEntry : beforeMap.entrySet()) {
             String key = beforeEntry.getKey();
             Object afterValue = afterMap.get(key);
+            String beforeDisplayValue = getProjectUpdateFieldDisplayValue(key, beforeEntry.getValue());
+            String afterDisplayValue = getProjectUpdateFieldDisplayValue(key, afterValue);
             comment.append("<p><strong>").append(getProjectUpdateFieldDisplayName(key)).append("</strong><br />");
-            comment.append("Before : ").append(HtmlUtils.htmlEscape(Objects.toString(beforeEntry.getValue(), ""))).append("<br />");
+            comment.append("Before : ").append(HtmlUtils.htmlEscape(beforeDisplayValue)).append("<br />");
             comment.append("After : <span style='background-color:yellow'>")
-                    .append(HtmlUtils.htmlEscape(Objects.toString(afterValue, ""))).append("</span></p>");
+                    .append(HtmlUtils.htmlEscape(afterDisplayValue)).append("</span></p>");
         }
 
         return comment.toString();
@@ -2298,6 +2300,37 @@ public class ApiProjectV2Controller extends CoTopComponent {
             default:
                 return key;
         }
+    }
+
+    private String getProjectUpdateFieldDisplayValue(String key, Object value) {
+        String valueAsString = Objects.toString(value, "");
+        if (isEmpty(valueAsString)) {
+            return "";
+        }
+
+        switch (key) {
+            case "distributionType":
+                return getCodeNameOrRawValue(CoConstDef.CD_DISTRIBUTION_TYPE, valueAsString);
+            case "osType":
+                return getCodeNameOrRawValue(CoConstDef.CD_OS_TYPE, valueAsString);
+            case "distributionSite":
+                return getCodeNameOrRawValue(CoConstDef.CD_DISTRIBUTE_CODE, valueAsString);
+            case "networkServerType":
+                return getCodeNameOrRawValue(CoConstDef.CD_NETWORK_SERVER, valueAsString);
+            case "noticeType":
+                return getCodeNameOrRawValue(CoConstDef.CD_NOTICE_TYPE, valueAsString);
+            case "noticeTypeEtc":
+                return getCodeNameOrRawValue(CoConstDef.CD_PLATFORM_GENERATED, valueAsString);
+            case "priority":
+                return getCodeNameOrRawValue(CoConstDef.CD_PROJECT_PRIORITY, valueAsString);
+            default:
+                return valueAsString;
+        }
+    }
+
+    private String getCodeNameOrRawValue(String codeNo, String codeDetailNo) {
+        String codeName = CoCodeManager.getCodeString(codeNo, codeDetailNo);
+        return isEmpty(codeName) ? codeDetailNo : codeName;
     }
 
     private void addChangedField(Map<String, Object> beforeMap, Map<String, Object> afterMap, String key, Object beforeValue, Object afterValue) {
