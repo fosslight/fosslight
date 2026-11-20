@@ -2938,8 +2938,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			sheetPerFile = wb.getSheetAt(4);
 			sheetRelationships = wb.getSheetAt(5);
 
-			String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddhhmm");
-			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd hh:mm:ss");
+			String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddHHmm");
+			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd HH:mm:ss");
 			Date createdDateTime = DateUtil.getCurrentDate();
 
 			Project projectInfo = new Project();
@@ -3565,8 +3565,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			sheetPerFile = wb.getSheetAt(4);
 			sheetRelationships = wb.getSheetAt(5);
 
-			String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddhhmm");
-			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd hh:mm:ss");
+			String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddHHmm");
+			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd HH:mm:ss");
 			Date createdDateTime = DateUtil.getCurrentDate();
 
 			List<OssComponents> dependenciesDataList = null;
@@ -4282,8 +4282,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			sheetPerFile = wb.getSheetAt(4);
 			sheetRelationships = wb.getSheetAt(5);
 			
-			String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddhhmm");
-			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd hh:mm:ss");
+			String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddHHmm");
+			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd HH:mm:ss");
 			Date createdDateTime = DateUtil.getCurrentDate();
 			
 			Project projectInfo = new Project();
@@ -5873,8 +5873,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		String strPrjName = "";
 		String creator = "";
 		
-		Date timeStamp = null;
-		SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+		String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddHHmm");
+		Date timeStamp = new Date();
+		SimpleDateFormat sdformat = new SimpleDateFormat("yyyyMMddHHmm");
+		try {
+			timeStamp = sdformat.parse(createdTime);
+		} catch (Exception e) {
+			log.error("Failed to parse CycloneDX timestamp: {}", createdTime, e);
+		}
 		
 		try {
 			if (!thirdPartyCheckFlag) {
@@ -5892,10 +5898,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				} else {
 					ossNotice = verificationService.selectOssNoticeOne(prjId);
 				}
-				String createDate = projectInfo.getCreatedDate();
-				
-				timeStamp = sdformat.parse(createDate.replace(" ", "T") + ".000");
-				
 				creator = projectInfo.getCreator();
 				strPrjName = projectInfo.getPrjName();
 				if (!isEmpty(projectInfo.getPrjVersion())) {
@@ -5920,8 +5922,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				partner = new PartnerMaster();
 				partner.setPartnerId(prjId);
 				partner = partnerService.getPartnerMasterOne(partner);
-				
-				timeStamp = sdformat.parse(partner.getCreatedDate().replace(" ", "T") + ".000");
 				
 				creator = partner.getCreator();
 				strPrjName = partner.getPartnerName();
