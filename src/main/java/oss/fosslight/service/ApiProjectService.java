@@ -46,6 +46,10 @@ public interface ApiProjectService {
 	public int getCreateProjectCnt(String prjId);
 	
 	Map<String, Object> createProject(Map<String, Object> paramMap);
+
+	int updateProjectBasicInfo(Map<String, Object> paramMap);
+
+	int updateProjectBasicInfoAndNotice(Map<String, Object> updateParamMap, Map<String, Object> noticeParamMap);
 	
 	public int makeOssNotice(Map<String, Object> paramMap);
 	
