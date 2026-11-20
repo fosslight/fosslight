@@ -8,6 +8,7 @@ package oss.fosslight.service.impl;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +119,7 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
 	        Map<String, String> requestBody = new HashMap<>();
 	        requestBody.put("prjId", prjId);
 	        HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
+	        log.info("[Enterprise API Request] url={}, prjId={}, responseRequired={}", url, prjId, isResponseRequired);
 	        
 	        if (isResponseRequired) {
 	        	// Define the response type according to the expected JSON structure
@@ -125,6 +127,10 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
 	            
 	            // Exchange and return the entire ResponseEntity instead of just the body
 	            ResponseEntity<Map<String, Map<String, Object>>> response = enterpriseApiRestTemplate.exchange(url, HttpMethod.POST, entity, responseType);
+	            Map<String, Object> sanitizedBody = sanitizeEnterpriseResponseBodyForLog(response.getBody());
+	            log.info("[Enterprise API Response] url={}, prjId={}, status={}, bodySanitized={}",
+	            		url, prjId, response.getStatusCode(), sanitizedBody);
+	            log.info("[Enterprise API Response] bodySanitized note: ossList is omitted and replaced with ossListCount for readability.");
 	            return response;
 	        } else {
 	        	if (!isEmpty(token)) {
@@ -148,6 +154,34 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
 	        log.error("[executeEnterpriseAnalysis Exception] {}", e.getMessage(), e);
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 	    }
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> sanitizeEnterpriseResponseBodyForLog(Map<String, Map<String, Object>> body) {
+		Map<String, Object> sanitized = new HashMap<>();
+		if (MapUtils.isEmpty(body)) {
+			sanitized.put("responseType", "empty");
+			return sanitized;
+		}
+
+		for (Map.Entry<String, Map<String, Object>> entry : body.entrySet()) {
+			Map<String, Object> payload = entry.getValue();
+			if (payload == null) {
+				sanitized.put(entry.getKey(), null);
+				continue;
+			}
+
+			Map<String, Object> copiedPayload = new HashMap<>(payload);
+			Object ossList = copiedPayload.remove("ossList");
+			int ossListCount = 0;
+			if (ossList instanceof Collection<?>) {
+				ossListCount = ((Collection<?>) ossList).size();
+			}
+			copiedPayload.put("ossListCount", ossListCount);
+			sanitized.put(entry.getKey(), copiedPayload);
+		}
+
+		return sanitized;
 	}
 	
 	@SuppressWarnings("unchecked")
