@@ -610,17 +610,17 @@
 	<update id="updateProjectBasicInfo" parameterType="hashMap">
 		UPDATE PROJECT_MASTER
 		<set>
-			PRJ_NAME = #{prjName}
-			, PRJ_VERSION = #{prjVersion}
-			, DISTRIBUTION_TYPE = #{distributionType}
-			, COMMENT = #{comment}
-			, MODIFIER = #{loginUserName}
+			<if test="prjName != null">PRJ_NAME = #{prjName},</if>
+			<if test="prjVersion != null">PRJ_VERSION = #{prjVersion},</if>
+			<if test="distributionType != null">DISTRIBUTION_TYPE = #{distributionType},</if>
+			<if test="comment != null">COMMENT = #{comment},</if>
+			MODIFIER = #{loginUserName}
 			, MODIFIED_DATE = now()
-			, NETWORK_SERVER_TYPE = #{networkServerType}
-			, OS_TYPE = #{osType}
-			, OS_TYPE_ETC = #{osTypeEtc}
-			, DISTRIBUTE_TARGET = #{distributionSite}
-			, PRIORITY = #{priority}
+			<if test="networkServerType != null">, NETWORK_SERVER_TYPE = #{networkServerType}</if>
+			<if test="osType != null">, OS_TYPE = #{osType}</if>
+			<if test="osTypeEtc != null">, OS_TYPE_ETC = #{osTypeEtc}</if>
+			<if test="distributionSite != null">, DISTRIBUTE_TARGET = #{distributionSite}</if>
+			<if test="priority != null">, PRIORITY = #{priority}</if>
 		</set>
 		WHERE PRJ_ID = #{prjId}
 		  AND USE_YN = 'Y'

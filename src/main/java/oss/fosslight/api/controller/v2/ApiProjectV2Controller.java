@@ -548,7 +548,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             updatedPrjName = prjName;
         }
 
-        String updatedPrjVersion = prjVersion != null ? prjVersion : avoidNull(beforeProject.getPrjVersion(), "");
+        String updatedPrjVersion = prjVersion != null
+                ? (StringUtils.isBlank(prjVersion) ? "" : prjVersion)
+                : avoidNull(beforeProject.getPrjVersion(), "");
         String updatedAdditionalInformation = additionalInformation != null ? additionalInformation : avoidNull(beforeProject.getComment(), "");
 
         String updatedDistributionType = avoidNull(beforeProject.getDistributionType(), "");
@@ -623,28 +625,46 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         Map<String, Object> updateParam = new HashMap<>();
         updateParam.put("prjId", prjId);
-        updateParam.put("prjName", updatedPrjName);
-        updateParam.put("prjVersion", updatedPrjVersion);
-        updateParam.put("distributionType", updatedDistributionType);
-        updateParam.put("comment", updatedAdditionalInformation);
         updateParam.put("loginUserName", userInfo.getUserId());
-        updateParam.put("networkServerType", updatedNetworkServerType);
-        updateParam.put("osType", updatedOsType);
-        updateParam.put("osTypeEtc", updatedOsTypeEtc);
-        updateParam.put("distributionSite", updatedDistributionSite);
-        updateParam.put("priority", updatedPriority);
-
-        int updatedCount = apiProjectService.updateProjectBasicInfo(updateParam);
-        if (updatedCount == 0) {
-            throw new CProjectNotFoundException("Project not found. Project ID: " + prjId);
+        if (prjName != null) {
+            updateParam.put("prjName", updatedPrjName);
+        }
+        if (prjVersion != null) {
+            updateParam.put("prjVersion", updatedPrjVersion);
+        }
+        if (distributionType != null) {
+            updateParam.put("distributionType", updatedDistributionType);
+        }
+        if (additionalInformation != null) {
+            updateParam.put("comment", updatedAdditionalInformation);
+        }
+        if (networkServerType != null) {
+            updateParam.put("networkServerType", updatedNetworkServerType);
+        }
+        if (osType != null) {
+            updateParam.put("osType", updatedOsType);
+        }
+        if (osTypeEtc != null) {
+            updateParam.put("osTypeEtc", updatedOsTypeEtc);
+        }
+        if (distributionSite != null) {
+            updateParam.put("distributionSite", updatedDistributionSite);
+        }
+        if (priority != null) {
+            updateParam.put("priority", updatedPriority);
         }
 
+        Map<String, Object> noticeMap = null;
         if (shouldUpdateNotice) {
-            Map<String, Object> noticeMap = new HashMap<>();
+            noticeMap = new HashMap<>();
             noticeMap.put("prjId", prjId);
             noticeMap.put("noticeType", updatedNoticeType);
             noticeMap.put("noticeTypeEtc", updatedNoticeTypeEtc);
-            apiProjectService.makeOssNotice(noticeMap);
+        }
+
+        int updatedCount = apiProjectService.updateProjectBasicInfoAndNotice(updateParam, noticeMap);
+        if (updatedCount == 0) {
+            throw new CProjectNotFoundException("Project not found. Project ID: " + prjId);
         }
 
         Project afterProject = projectService.getProjectBasicInfo(prjId);
