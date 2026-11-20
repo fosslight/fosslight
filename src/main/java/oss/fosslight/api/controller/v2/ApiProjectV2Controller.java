@@ -667,21 +667,40 @@ public class ApiProjectV2Controller extends CoTopComponent {
             throw new CProjectNotFoundException("Project not found. Project ID: " + prjId);
         }
 
-        Project afterProject = projectService.getProjectBasicInfo(prjId);
         Map<String, Object> beforeMap = new LinkedHashMap<>();
         Map<String, Object> afterMap = new LinkedHashMap<>();
 
-        addChangedField(beforeMap, afterMap, "prjName", beforeProject.getPrjName(), afterProject.getPrjName());
-        addChangedField(beforeMap, afterMap, "prjVersion", beforeProject.getPrjVersion(), afterProject.getPrjVersion());
-        addChangedField(beforeMap, afterMap, "additionalInformation", beforeProject.getComment(), afterProject.getComment());
-        addChangedField(beforeMap, afterMap, "distributionType", beforeProject.getDistributionType(), afterProject.getDistributionType());
-        addChangedField(beforeMap, afterMap, "osType", beforeProject.getOsType(), afterProject.getOsType());
-        addChangedField(beforeMap, afterMap, "osTypeEtc", beforeProject.getOsTypeEtc(), afterProject.getOsTypeEtc());
-        addChangedField(beforeMap, afterMap, "distributionSite", beforeProject.getDistributeTarget(), afterProject.getDistributeTarget());
-        addChangedField(beforeMap, afterMap, "networkServerType", beforeProject.getNetworkServerType(), afterProject.getNetworkServerType());
-        addChangedField(beforeMap, afterMap, "noticeType", beforeProject.getNoticeType(), afterProject.getNoticeType());
-        addChangedField(beforeMap, afterMap, "noticeTypeEtc", beforeProject.getNoticeTypeEtc(), afterProject.getNoticeTypeEtc());
-        addChangedField(beforeMap, afterMap, "priority", beforeProject.getPriority(), afterProject.getPriority());
+        if (prjName != null) {
+            addChangedField(beforeMap, afterMap, "prjName", beforeProject.getPrjName(), updatedPrjName);
+        }
+        if (prjVersion != null) {
+            addChangedField(beforeMap, afterMap, "prjVersion", beforeProject.getPrjVersion(), updatedPrjVersion);
+        }
+        if (additionalInformation != null) {
+            addChangedField(beforeMap, afterMap, "additionalInformation", beforeProject.getComment(), updatedAdditionalInformation);
+        }
+        if (distributionType != null) {
+            addChangedField(beforeMap, afterMap, "distributionType", beforeProject.getDistributionType(), updatedDistributionType);
+        }
+        if (osType != null) {
+            addChangedField(beforeMap, afterMap, "osType", beforeProject.getOsType(), updatedOsType);
+        }
+        if (osTypeEtc != null) {
+            addChangedField(beforeMap, afterMap, "osTypeEtc", beforeProject.getOsTypeEtc(), updatedOsTypeEtc);
+        }
+        if (distributionSite != null) {
+            addChangedField(beforeMap, afterMap, "distributionSite", beforeProject.getDistributeTarget(), updatedDistributionSite);
+        }
+        if (networkServerType != null) {
+            addChangedField(beforeMap, afterMap, "networkServerType", beforeProject.getNetworkServerType(), updatedNetworkServerType);
+        }
+        if (noticeType != null || noticeTypeEtc != null) {
+            addChangedField(beforeMap, afterMap, "noticeType", beforeProject.getNoticeType(), updatedNoticeType);
+            addChangedField(beforeMap, afterMap, "noticeTypeEtc", beforeProject.getNoticeTypeEtc(), updatedNoticeTypeEtc);
+        }
+        if (priority != null) {
+            addChangedField(beforeMap, afterMap, "priority", beforeProject.getPriority(), updatedPriority);
+        }
 
         Map<String, Object> resultMap = new LinkedHashMap<>();
         resultMap.put("prjId", prjId);
@@ -720,6 +739,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
 
         try {
+            Project afterProject = projectService.getProjectBasicInfo(prjId);
             CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED);
             mailBean.setParamPrjId(prjId);
             mailBean.setCompareDataBefore(beforeProject);
