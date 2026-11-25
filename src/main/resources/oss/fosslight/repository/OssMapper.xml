@@ -791,6 +791,40 @@
 								ELSE M.SEARCH_VERSION_P3_YN = 'Y'
 							END
 						)
+						OR EXISTS (
+							SELECT 1
+							FROM OSV_SEARCH_MASTER M
+							INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+							INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+							INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+							WHERE M_ALIAS.ID = #{cveId}
+							AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+							AND (
+								(
+		        					M.SEARCH_NAME_P1 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
+		        					OR M.SEARCH_NAME_P3 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
+		    					)
+								OR EXISTS (
+						            SELECT 1
+						            FROM OSS_DOWNLOADLOCATION DL
+						            WHERE DL.OSS_COMMON_ID = T1.OSS_COMMON_ID
+						            AND DL.PURL IS NOT NULL
+						            AND DL.PURL <![CDATA[<>]]> ''
+						            AND M.SEARCH_NAME_P2 = DL.PURL
+						        )
+							)
+							AND CASE WHEN IFNULL(OV.OSS_VERSION, '') <![CDATA[<>]]> ''
+								THEN
+									(
+										M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+									)
+									OR
+									(
+										M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+									)
+								ELSE M_ALIAS.SEARCH_VERSION_P3_YN = 'Y'
+							END
+						)
 						<include refid="ossSearchFilters"/>
 	                </when>
 	                <otherwise>
@@ -937,6 +971,40 @@
 									M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
 								)
 							ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+						END
+					)
+					OR EXISTS (
+						SELECT 1
+						FROM OSV_SEARCH_MASTER M
+						INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+						INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+						INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+						WHERE M_ALIAS.ID = #{cveId}
+						AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+						AND (
+							(
+	        					M.SEARCH_NAME_P1 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
+	        					OR M.SEARCH_NAME_P3 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
+	    					)
+							OR EXISTS (
+					            SELECT 1
+					            FROM OSS_DOWNLOADLOCATION DL
+					            WHERE DL.OSS_COMMON_ID = T1.OSS_COMMON_ID
+					            AND DL.PURL IS NOT NULL
+					            AND DL.PURL <![CDATA[<>]]> ''
+					            AND M.SEARCH_NAME_P2 = DL.PURL
+					        )
+						)
+						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') <![CDATA[<>]]> ''
+							THEN
+								(
+									M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+								)
+								OR
+								(
+									M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+								)
+							ELSE M_ALIAS.SEARCH_VERSION_P3_YN = 'Y'
 						END
 					)
 					<include refid="ossSearchFilters"/>
@@ -1098,31 +1166,28 @@
 			    	
 			    	SELECT OC.OSS_NAME
 			    	FROM OSS_COMMON OC
-			    	INNER JOIN OSS_VERSION OV
-			    	ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			    	INNER JOIN OSS_VERSION OV ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			    	LEFT OUTER JOIN OSS_NICKNAME NICK ON OC.OSS_COMMON_ID = NICK.OSS_COMMON_ID
 			    	WHERE EXISTS (
 	                   	SELECT 1
 						FROM OSV_SEARCH_MASTER M
 						WHERE M.ID = #{cveId}
-						AND (
-							M.SEARCH_NAME_P1 IS NULL
-							OR NOT EXISTS (
-								SELECT 1
-								FROM OSS_COMMON OC_P1
-								WHERE OC_P1.OSS_NAME = M.SEARCH_NAME_P1
+						AND 
+						(
+							(
+								M.SEARCH_NAME_P1 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
+								OR M.SEARCH_NAME_P3 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
 							)
-						)
-						AND (
-							EXISTS (
-						    	SELECT 1
+							OR EXISTS (
+						     	SELECT 1
 						        FROM OSS_DOWNLOADLOCATION DL
-						        WHERE DL.OSS_COMMON_ID IN (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = OC.OSS_NAME)
+						        WHERE DL.OSS_COMMON_ID = OC.OSS_COMMON_ID
 						        AND DL.PURL IS NOT NULL
 						        AND DL.PURL <![CDATA[<>]]> ''
 						        AND M.SEARCH_NAME_P2 = DL.PURL
 						  	)
 						)
-						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') = ''
+						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') <![CDATA[<>]]> ''
 							THEN
 								(
 									M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
@@ -1134,35 +1199,29 @@
 							ELSE M.SEARCH_VERSION_P3_YN = 'Y'
 						END
 					)
-					
-					UNION ALL
-			    	
-			    	SELECT OC.OSS_NAME
-			    	FROM OSS_COMMON OC
-			    	INNER JOIN OSS_VERSION OV
-			    	ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-			    	WHERE EXISTS (
-	                   	SELECT 1
+					OR EXISTS (
+						SELECT 1
 						FROM OSV_SEARCH_MASTER M
-						WHERE M.ID = #{cveId}
-						AND M.SEARCH_NAME_P3 = OC.OSS_NAME
+						INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+						INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+						INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+						WHERE M_ALIAS.ID = #{cveId}
+						AND M.ID <![CDATA[<>]]> M_ALIAS.ID
 						AND (
-							M.SEARCH_NAME_P1 IS NULL
-							OR NOT EXISTS (
-								SELECT 1
-								FROM OSS_COMMON OC_P1
-								WHERE OC_P1.OSS_NAME = M.SEARCH_NAME_P1
-							)
+							(
+	        					M.SEARCH_NAME_P1 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
+	        					OR M.SEARCH_NAME_P3 IN (OC.OSS_NAME, NICK.OSS_NICKNAME)
+	    					)
+							OR EXISTS (
+					            SELECT 1
+					            FROM OSS_DOWNLOADLOCATION DL
+					            WHERE DL.OSS_COMMON_ID = T1.OSS_COMMON_ID
+					            AND DL.PURL IS NOT NULL
+					            AND DL.PURL <![CDATA[<>]]> ''
+					            AND M.SEARCH_NAME_P2 = DL.PURL
+					        )
 						)
-						AND (
-							M.SEARCH_NAME_P2 IS NULL
-							OR NOT EXISTS (
-								SELECT 1
-								FROM OSS_DOWNLOADLOCATION DL_P2
-								WHERE DL_P2.PURL IS NOT NULL AND DL_P2.PURL <![CDATA[<>]]> '' AND DL_P2.PURL = M.SEARCH_NAME_P2
-							)
-						)
-						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') = ''
+						AND CASE WHEN IFNULL(OV.OSS_VERSION, '') <![CDATA[<>]]> ''
 							THEN
 								(
 									M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(OV.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
@@ -1171,7 +1230,7 @@
 								(
 									M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(OV.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
 								)
-							ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+							ELSE M_ALIAS.SEARCH_VERSION_P3_YN = 'Y'
 						END
 					)
 			   	) TBL
@@ -1493,7 +1552,7 @@
 				            AND M.SEARCH_NAME_P2 = DL.PURL
 				        )
 					)
-					AND CASE WHEN IFNULL(T1.OSS_VERSION, '') = ''
+					AND CASE WHEN IFNULL(T1.OSS_VERSION, '') <![CDATA[<>]]> ''
 						THEN
 							(
 								M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(T1.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
@@ -1503,6 +1562,40 @@
 								M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(T1.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
 							)
 						ELSE M.SEARCH_VERSION_P3_YN = 'Y'
+					END
+				)
+				OR EXISTS (
+					SELECT 1
+					FROM OSV_SEARCH_MASTER M
+					INNER JOIN OSV_VULNERABILITIES V ON V.OSV_ID = M.ID
+					INNER JOIN OSV_ALIASES A ON A.ID = V.ID
+					INNER JOIN OSV_SEARCH_MASTER M_ALIAS ON M_ALIAS.ID = A.ALIAS_ID
+					WHERE M_ALIAS.ID = #{cveId}
+					AND M.ID <![CDATA[<>]]> M_ALIAS.ID
+					AND (
+						(
+        					M.SEARCH_NAME_P1 IN (T1.OSS_NAME, NICK.OSS_NICKNAME)
+        					OR M.SEARCH_NAME_P3 IN (T1.OSS_NAME, NICK.OSS_NICKNAME)
+    					)
+						OR EXISTS (
+				            SELECT 1
+				            FROM OSS_DOWNLOADLOCATION DL
+				            WHERE DL.OSS_COMMON_ID = T1.OSS_COMMON_ID
+				            AND DL.PURL IS NOT NULL
+				            AND DL.PURL <![CDATA[<>]]> ''
+				            AND M.SEARCH_NAME_P2 = DL.PURL
+				        )
+					)
+					AND CASE WHEN IFNULL(T1.OSS_VERSION, '') <![CDATA[<>]]> ''
+						THEN
+							(
+								M.SEARCH_VERSION_P1 IS NOT NULL AND M.SEARCH_VERSION_P1 <![CDATA[<>]]> '' AND FIND_IN_SET(T1.OSS_VERSION, M.SEARCH_VERSION_P1) > 0
+							)
+							OR
+							(
+								M.SEARCH_VERSION_P2 IS NOT NULL AND M.SEARCH_VERSION_P2 <![CDATA[<>]]> '' AND CHECK_VERSION_RANGE(T1.OSS_VERSION, M.SEARCH_VERSION_P2) > 0
+							)
+						ELSE M_ALIAS.SEARCH_VERSION_P3_YN = 'Y'
 					END
 				)
 			)
