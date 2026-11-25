@@ -2182,6 +2182,74 @@ public class CoMailManager extends CoTopComponent {
 		return title;
 	}
 
+	private static class DownloadLocationPair {
+	    private String downloadLocation;
+	    private String purl;
+
+	    public DownloadLocationPair(String downloadLocation, String purl) {
+	        this.downloadLocation = downloadLocation;
+	        this.purl = purl;
+	    }
+	}
+
+	private static class DownloadLocationCompareResult {
+	    private List<DownloadLocationPair> before = new ArrayList<>();
+	    private List<DownloadLocationPair> after = new ArrayList<>();
+	}
+	
+	private List<DownloadLocationPair> getDownloadLocationPairs(String downloadLocation, String purl, String[] downloadLocations) {
+	    String[] urls = !isEmpty(downloadLocation) ? downloadLocation.split(",") : downloadLocations != null ? downloadLocations : new String[0];
+
+	    String[] purls = !isEmpty(purl) ? purl.split(",") : new String[0];
+
+	    List<DownloadLocationPair> result = new ArrayList<>();
+
+	    for (int i = 0; i < urls.length; i++) {
+	        result.add(new DownloadLocationPair(urls[i], i < purls.length ? purls[i] : ""));
+	    }
+
+	    return result;
+	}
+	
+	private DownloadLocationCompareResult sortDownloadLocationPairs(List<DownloadLocationPair> beforeList, List<DownloadLocationPair> afterList) {
+	    DownloadLocationCompareResult result = new DownloadLocationCompareResult();
+	    boolean[] beforeMatched = new boolean[beforeList.size()];
+	    boolean[] afterMatched = new boolean[afterList.size()];
+
+	    // 동일한 Download Location 우선 배치
+	    for (int i = 0; i < afterList.size(); i++) {
+	        DownloadLocationPair afterPair = afterList.get(i);
+
+	        for (int j = 0; j < beforeList.size(); j++) {
+	            if (!beforeMatched[j] && beforeList.get(j).downloadLocation.equals(afterPair.downloadLocation)) {
+
+	                result.before.add(beforeList.get(j));
+	                result.after.add(afterPair);
+
+	                beforeMatched[j] = true;
+	                afterMatched[i] = true;
+	                break;
+	            }
+	        }
+	    }
+
+	    // 변경 또는 삭제된 Before 데이터 후순위 배치
+	    for (int i = 0; i < beforeList.size(); i++) {
+	        if (!beforeMatched[i]) {
+	            result.before.add(beforeList.get(i));
+	        }
+	    }
+
+	    // 변경 또는 추가된 After 데이터 후순위 배치
+	    for (int i = 0; i < afterList.size(); i++) {
+	        if (!afterMatched[i]) {
+	            result.after.add(afterList.get(i));
+	        }
+	    }
+
+	    return result;
+	}
+	
 	private Map<String, Object> convertModifiedData(Map<String, Object> convertDataMap, String msgType) {
 		boolean isModified = false;
 		if (CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(msgType)
@@ -2333,48 +2401,22 @@ public class CoMailManager extends CoTopComponent {
 			}
 			after.setCopyright(appendChangeStyleMultiLine(before.getCopyright(), after.getCopyright(), true));
 			isModified = checkEquals(before.getCopyright(), after.getCopyright(), isModified);
-			String[] beforeUrl = null;
-			String[] beforePurl = null;
-			List<String> downloadLocationList = new ArrayList<>();
-			if (before.getDownloadLocations() != null && !isEmpty(before.getPurl())) {
-				beforeUrl = before.getDownloadLocations();
-				for (String downloadLocation : before.getDownloadLocations()) {
-					downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
-				}
-				before.setDownloadLocations(downloadLocationList.toArray(new String[0]));
-				before.setPurls(before.getPurl().split(","));
-			} else if (!isEmpty(before.getDownloadLocation())) {
-				beforeUrl = before.getDownloadLocation().split(",");
-				if (!isEmpty(before.getPurl())) {
-					beforePurl = before.getPurl().split(",");
-				} else {
-					beforePurl = new String[0];
-				}
-				for (String downloadLocation : beforeUrl) {
-					downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
-				}
-				before.setDownloadLocations(downloadLocationList.toArray(new String[0]));
-				before.setPurls(beforePurl);
-			} else {
-				beforeUrl = new String[0];
-				beforePurl = new String[0];
-			}
-			String[] afterUrl = null;
-			String[] afterPurl = null;
-			if (after.getDownloadLocations() != null && !isEmpty(after.getPurl())) {
-				afterUrl = after.getDownloadLocations();
-				after.setPurls(after.getPurl().split(","));
-			} else if (!isEmpty(after.getDownloadLocation())) {
-				afterUrl = after.getDownloadLocation().split(",");
-				if (!isEmpty(after.getPurl())) {
-					afterPurl = after.getPurl().split(",");
-				} else {
-					afterPurl = new String[0];
-				}
-			} else {
-				afterUrl = new String[0];
-				afterPurl = new String[0];
-			}
+			
+			List<DownloadLocationPair> beforeList = getDownloadLocationPairs(before.getDownloadLocation(), before.getPurl(), before.getDownloadLocations());
+			List<DownloadLocationPair> afterList = getDownloadLocationPairs(after.getDownloadLocation(), after.getPurl(), after.getDownloadLocations());
+			
+			DownloadLocationCompareResult compareResult = sortDownloadLocationPairs(beforeList, afterList);
+
+			String[] beforeUrl = compareResult.before.stream().map(e -> e.downloadLocation).toArray(String[]::new);
+			String[] beforePurl = compareResult.before.stream().map(e -> e.purl).toArray(String[]::new);
+			String[] afterUrl = compareResult.after.stream().map(e -> e.downloadLocation).toArray(String[]::new);
+			String[] afterPurl = compareResult.after.stream().map(e -> e.purl).toArray(String[]::new);
+
+			before.setDownloadLocations(beforeUrl);
+			before.setPurls(beforePurl);
+
+			after.setDownloadLocations(afterUrl);
+			after.setPurls(afterPurl);
 			
 			List<String> changeStyleLinkFormatDownloadLocationList = new ArrayList<>();
 			List<String> changeStyleFormatPurlList = new ArrayList<>();
