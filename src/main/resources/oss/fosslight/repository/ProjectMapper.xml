@@ -870,6 +870,7 @@
 		   , A.PUBLIC_YN
 	   	   , A.VULNERABILITY_RESOLUTION
 		   , A.CVSS_SCORE_MAX
+		   , A.JOB_SEQ
 		   , (SELECT COUNT(1) 
 				FROM OSS_COMPONENTS OC 
 		  INNER JOIN OSS_COMPONENTS_LICENSE OCL 
@@ -880,7 +881,6 @@
 				 AND LM.USE_YN = 'Y'
 			   WHERE OC.REFERENCE_ID = A.PRJ_ID AND OC.REFERENCE_DIV = '13'
 				 AND LM.LICENSE_TYPE NOT IN ('NA', 'PF')) AS IDENTIFICATION_SUB_STATUS_BOM
-			, (SELECT JOB_SEQ FROM OSS_COMPONENTS WHERE REFERENCE_ID = #{prjId} AND JOB_SEQ IS NOT NULL LIMIT 1) AS JOB_SEQ
 		FROM
 			PROJECT_MASTER A 
 			LEFT JOIN COMMENTS_HISTORY B ON A.COMMENT = B.COMM_ID
@@ -972,6 +972,9 @@
 			, TRANSFER_DIVISION
 			, PRIORITY
 			, DIVISION
+			<if test="jobSeq != null and jobSeq != 0">
+				, JOB_SEQ
+			</if>
 		)
 		VALUES
 		(
@@ -1004,6 +1007,9 @@
 		    , #{transferDivision}
 			, #{priority}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
+			<if test="jobSeq != null and jobSeq != 0">
+				, #{jobSeq}
+			</if>
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 			PRJ_ID                            = #{prjId} ,
@@ -1030,6 +1036,9 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
 			, DIVISION                    = #{division}
+			</if>
+			<if test="jobSeq != null and jobSeq != 0">
+				, JOB_SEQ				  = #{jobSeq}
 			</if>
 	</insert>
 	
@@ -2013,7 +2022,7 @@
 				, GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME
 				, IFNULL(A1.REF_DIV, (SELECT S.REFERENCE_DIV FROM OSS_COMPONENTS S WHERE S.COMPONENT_ID = A1.REF_COMPONENT_ID)) AS REF_DIV
 				, (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 WHEN A3.LICENSE_TYPE IS NULL THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
-				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL, A1.JOB_SEQ
+				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL, PRJ.JOB_SEQ
 			FROM OSS_COMPONENTS A1 
 				INNER JOIN PROJECT_MASTER PRJ ON A1.REFERENCE_ID = PRJ.PRJ_ID
 				INNER JOIN OSS_COMPONENTS_LICENSE A2 
@@ -3173,7 +3182,7 @@
 			M.OBLIGATION_TYPE,
 			M.DEPENDENCIES,
 			M.REF_OSS_NAME,
-   			M.JOB_SEQ,
+   			(SELECT JOB_SEQ FROM PROJECT_MASTER WHERE PRJ_ID = M.REFERENCE_ID) AS JOB_SEQ,
 			M.REF_LOADED_VAL
 			<if test="@oss.fosslight.util.StringUtil@equals('30', referenceDiv)">
 				, BAR.GUIREPORT_FLAG

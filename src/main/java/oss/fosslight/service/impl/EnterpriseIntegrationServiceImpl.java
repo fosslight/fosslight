@@ -403,6 +403,7 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
 		String prjName = "Enterprise_" + prjId + "_" + companyName;
 		String prjVersion;
 		Double maxVersion = projectService.selectMaxProjectVersion(prjName);
+		int jobSeq = (Integer) preResult.get("jobSeq");
 
 		if (maxVersion == null) {
 		    prjVersion = "1.0";
@@ -422,6 +423,7 @@ public class EnterpriseIntegrationServiceImpl extends CoTopComponent implements 
 		project.setModelList(new ArrayList<>());
 		project.setCreator(userId);
 		project.setLoginUserName(userId);
+		project.setJobSeq(jobSeq);
 		
 		projectService.registProject(project);
 		
