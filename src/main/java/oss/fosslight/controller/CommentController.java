@@ -67,7 +67,7 @@ public class CommentController extends CoTopComponent {
 	public String getCusCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model){
     	List<CommentsHistory> commentList = commentService.getCommentListHis(commentsHistory);
     	model.addAttribute("commentList", commentList);
-    	model.addAttribute("commentListCnt", CollectionUtils.isEmpty(commentList) ? 0 : commentList.size());
+    	model.addAttribute("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
 		model.addAttribute("commentsHistory", commentsHistory);
 		
 		return "comment/commentList";
