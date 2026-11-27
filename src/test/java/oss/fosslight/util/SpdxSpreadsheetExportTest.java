@@ -182,7 +182,7 @@ class SpdxSpreadsheetExportTest {
 			assertThat(document.getCell(1).getStringCellValue()).isEqualTo("SPDX-2.3");
 			assertThat(document.getCell(2).getStringCellValue()).isEqualTo("CC0-1.0");
 			assertThat(document.getCell(3).getStringCellValue()).isEqualTo("SPDXRef-DOCUMENT");
-			assertThat(document.getCell(4).getStringCellValue()).isEqualTo("3.17");
+			assertThat(new DataFormatter().formatCellValue(document.getCell(4))).isEqualTo("3.29");
 			assertThat(new DataFormatter().formatCellValue(document.getCell(7))).isEmpty();
 			assertThat(document.getCell(11).getCellType()).isEqualTo(CellType.NUMERIC);
 			assertThat(DateUtil.isCellDateFormatted(document.getCell(11))).isTrue();
@@ -209,7 +209,7 @@ class SpdxSpreadsheetExportTest {
 		assertThat(result.path("name").asText()).isEqualTo("generated-project-1.0");
 		assertThat(result.path("documentNamespace").asText())
 				.startsWith("https://example.org/SPDXRef-generated-project-1.0-");
-		assertThat(result.path("creationInfo").path("licenseListVersion").asText()).isEqualTo("3.17");
+		assertThat(result.path("creationInfo").path("licenseListVersion").asText()).isEqualTo("3.29");
 		assertThat(result.path("creationInfo").path("created").asText()).isNotBlank();
 		assertThat(result.path("creationInfo").path("creators").toString())
 				.contains("Person: exporter (exporter@example.org)",

@@ -48,7 +48,7 @@ class SpdxSpreadsheetTemplateTest {
 			assertThat(document.getCell(1).getStringCellValue()).isEqualTo("SPDX-2.3");
 			assertThat(document.getCell(2).getStringCellValue()).isEqualTo("CC0-1.0");
 			assertThat(document.getCell(3).getStringCellValue()).isEqualTo("SPDXRef-DOCUMENT");
-			assertThat(document.getCell(4).getStringCellValue()).isEqualTo("3.17");
+			assertThat(new DataFormatter().formatCellValue(document.getCell(4))).isEqualTo("3.29");
 			Row header = workbook.getSheet("Package Info").getRow(0);
 			assertThat(header.getCell(18).getStringCellValue()).isEqualTo("Description");
 			assertThat(header.getCell(22).getStringCellValue()).isEqualTo("Primary Purpose");
@@ -137,7 +137,7 @@ class SpdxSpreadsheetTemplateTest {
 		}
 		JsonNode result = new ObjectMapper().readTree(json.toFile());
 		assertThat(result.path("spdxVersion").asText()).isEqualTo("SPDX-2.3");
-		assertThat(result.path("creationInfo").path("licenseListVersion").asText()).isEqualTo("3.17");
+		assertThat(result.path("creationInfo").path("licenseListVersion").asText()).isEqualTo("3.29");
 		assertThat(result.path("packages").size()).isEqualTo(1);
 		JsonNode pkg = result.path("packages").get(0);
 		assertThat(pkg.path("name").asText()).isEqualTo("test-package");
