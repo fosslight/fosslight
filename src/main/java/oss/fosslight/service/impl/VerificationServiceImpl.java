@@ -1998,7 +1998,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				String filePath = NOTICE_PATH + "/" + prjInfo.getPrjId();
 				FileUtil.moveTo(spdxFileInfo.getLogiPath() + "/" + spdxFileInfo.getLogiNm(), filePath, fileName);
 				project.setSpdxSheetFileId(fileService.registFileDownload(filePath, fileName, fileName));
-				spdxSheetFileId = project.getSpdxSheetFileId();
+				spdxSheetFileId = ossNotice.getSpdxSheetFileId();
 				makeZipFile = true;
 			}
 		}
