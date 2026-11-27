@@ -2908,14 +2908,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 */
 	@SuppressWarnings("unchecked")
 	private static String getVerificationSPDX_SpreadSheetExcelPost(String dataStr) throws IOException {
-		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
 		Sheet sheetPackage = null; // Package Info
 		Sheet sheetExternalRefs = null; // ExternalRefs
 		Sheet sheetLicense = null; // Extracted License Info
 		Sheet sheetPerFile = null; // Per File Info
 		Sheet sheetRelationships = null; // Relationships
-		FileInputStream inFile=null;
 
 		// download file name
 		String downloadFileName = "SPDXRdf-"; // Default
@@ -2927,10 +2925,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 		String prjId = ossNotice.getPrjId();
 
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
-
-			wb = WorkbookFactory.create(inFile);
+		Workbook wb = SPDXUtil2.openSpreadsheetTemplate(downloadpath);
+		try (Workbook workbook = wb) {
 			sheetDoc = wb.getSheetAt(0);
 			sheetPackage = wb.getSheetAt(1);
 			sheetExternalRefs = wb.getSheetAt(2);
@@ -3185,6 +3181,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					cellLicenseConcluded.setCellValue(CommonFunction.licenseStrToSPDXLicenseFormat(srtLicenseName));
 
 					// License Info From Files
+					// "Files Analyzed"가 true로 될 때를 대비해 원본 코드를 주석으로 남겨 둔다.
+					// 주석 해제 시 아래의 별도 cellIdx++는 제거한다.
+					/*
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
 
 					if (ossName.equals("-")) {
@@ -3192,6 +3191,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					} else {
 						licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean, true)); // Declared & Detected License Info (중복제거)
 					}
+					*/
+					cellIdx++;
 
 					// License Comments
 					cellIdx++;
@@ -3514,29 +3515,20 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 				}
 			}
+			return makeExcelFileId(workbook, downloadFileName, "xlsx");
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e) {}
-			}
+			throw new IOException("Failed to export verification SPDX spreadsheet", e);
 		}
-
-		return makeExcelFileId(wb,downloadFileName, "xls");
 	}
 	
 	@SuppressWarnings("unchecked")
 	private static String getSBOMSPDX_SpreadSheetExcelPost(String dataStr) throws IOException {
-		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
 		Sheet sheetPackage = null; // Package Info
 		Sheet sheetExternalRefs = null;
 		Sheet sheetLicense = null; // Extracted License Info
 		Sheet sheetPerFile = null; // Per File Info
 		Sheet sheetRelationships = null; // Relationships
-		FileInputStream inFile=null;
 
 		// download file name
 		String downloadFileName = "SPDXRdf-"; // Default
@@ -3554,10 +3546,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		ossNotice.setPrjId(dataStr);
 		ossNotice.setFileType("text");
 
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
-
-			wb = WorkbookFactory.create(inFile);
+		Workbook wb = SPDXUtil2.openSpreadsheetTemplate(downloadpath);
+		try (Workbook workbook = wb) {
 			sheetDoc = wb.getSheetAt(0);
 			sheetPackage = wb.getSheetAt(1);
 			sheetExternalRefs = wb.getSheetAt(2);
@@ -3894,6 +3884,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					cellLicenseConcluded.setCellValue(srtLicenseName);
 
 					// License Info From Files
+					// "Files Analyzed"가 true로 될 때를 대비해 원본 코드를 주석으로 남겨 둔다.
+					// 주석 해제 시 아래의 별도 cellIdx++는 제거한다.
+					/*
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
 
 					if (ossName.equals("-")) {
@@ -3911,6 +3904,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					} else {
 						licenseInfoFromFiles.setCellValue(""); // OSS Info가 없으므로 빈값이 들어감.
 					}
+					*/
+					cellIdx++;
 
 					// License Comments
 					cellIdx++;
@@ -4238,29 +4233,20 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 				}
 			}
+			return makeExcelFileId(workbook, downloadFileName, "xlsx");
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e) {}
-			}
+			throw new IOException("Failed to export SBOM SPDX spreadsheet", e);
 		}
-
-		return makeExcelFileId(wb,downloadFileName, "xls");
 	}
 	
 	@SuppressWarnings("unchecked")
 	private static String getSelfCheckSPDX_SpreadSheetExcelPost(String dataStr) throws IOException {
 
-		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
 		Sheet sheetPackage = null; // Package Info
 		Sheet sheetLicense = null; // Extracted License Info
 		Sheet sheetPerFile = null; // Per File Info
 		Sheet sheetRelationships = null; // Relationships
-		FileInputStream inFile=null;
 		
 		// download file name
 		String downloadFileName = "SPDXRdf-"; // Default
@@ -4272,10 +4258,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		String prjId = ossNotice.getPrjId();
 		
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
-			
-			wb = WorkbookFactory.create(inFile);
+		Workbook wb = SPDXUtil2.openSpreadsheetTemplate(downloadpath);
+		try (Workbook workbook = wb) {
 			sheetDoc = wb.getSheetAt(0);
 			sheetPackage = wb.getSheetAt(1);
 			sheetLicense = wb.getSheetAt(3);
@@ -4520,6 +4504,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					cellLicenseConcluded.setCellValue(srtLicenseName);
 					
 					// License Info From Files
+					// "Files Analyzed"가 true로 될 때를 대비해 원본 코드를 주석으로 남겨 둔다.
+					// 주석 해제 시 아래의 별도 cellIdx++는 제거한다.
+					/*
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
 
 					if (ossName.equals("-")) {
@@ -4529,6 +4516,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					} else {
 						licenseInfoFromFiles.setCellValue(""); // OSS Info가 없으므로 빈값이 들어감.
 					}
+					*/
+					cellIdx++;
 					
 					// License Comments
 					cellIdx++;
@@ -4774,17 +4763,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					rowIdx++;
 				}
 			}
+			return makeExcelFileId(workbook, downloadFileName, "xlsx");
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e) {}
-			}
+			throw new IOException("Failed to export self-check SPDX spreadsheet", e);
 		}
-		
-		return makeExcelFileId(wb,downloadFileName, "xls");
 	}
 
 	private static Cell getCell(Row row, int cellIdx) {

@@ -6,15 +6,34 @@
 package oss.fosslight.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.security.Permission;
 
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spdx.tools.SpdxConverter;
 
+import oss.fosslight.common.CommonFunction;
+
 public class SPDXUtil2 {
 	static final Logger logger = LoggerFactory.getLogger("DEFAULT_LOG");
+	public static final String SPREADSHEET_TEMPLATE = "SPDXRdf_2.3.xlsx";
+	public static final String SPREADSHEET_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+	public static Workbook openSpreadsheetTemplate() throws IOException {
+		return openSpreadsheetTemplate(CommonFunction.emptyCheckProperty("export.template.path", "/template"));
+	}
+
+	public static Workbook openSpreadsheetTemplate(String templatePath) throws IOException {
+		try (InputStream input = new FileInputStream(new File(templatePath, SPREADSHEET_TEMPLATE))) {
+			return new XSSFWorkbook(input);
+		}
+	}
 
 	public static void convert(String prjId, String inputFilePath, String outputFilePath) throws Exception {
 		File inputFile = Paths.get(outputFilePath).toFile();

@@ -1994,11 +1994,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
 				String fileName = "spdx_" + CommonFunction.getNoticeFileName(prjInfo.getPrjId(), prjInfo.getPrjName(), prjInfo.getPrjVersion(), null, CommonFunction.getCurrentDateTime("yyMMdd"), "", true);
-				fileName += "."+FilenameUtils.getExtension(spdxFileInfo.getOrigNm());
+				fileName += ".xlsx";
 				String filePath = NOTICE_PATH + "/" + prjInfo.getPrjId();
 				FileUtil.moveTo(spdxFileInfo.getLogiPath() + "/" + spdxFileInfo.getLogiNm(), filePath, fileName);
 				project.setSpdxSheetFileId(fileService.registFileDownload(filePath, fileName, fileName));
-				spdxSheetFileId = ossNotice.getSpdxSheetFileId();
+				spdxSheetFileId = project.getSpdxSheetFileId();
 				makeZipFile = true;
 			}
 		}
