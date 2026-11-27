@@ -273,6 +273,6 @@
 		SET
 			PACKAGE_FILE_IDS = #{idText}
 		WHERE
-			PRJ_ID = ${prjId}
+			PRJ_ID = #{prjId}
 	</update>
 </mapper>

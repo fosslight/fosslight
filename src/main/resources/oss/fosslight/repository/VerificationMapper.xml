@@ -318,7 +318,13 @@
 		T2.*
 	FROM
 		PROJECT_MASTER T1
-		LEFT JOIN T2_FILE T2 ON T1.PACKAGE_FILE_ID${fileIdx} = T2.FILE_SEQ
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('2', fileIdx)">LEFT JOIN T2_FILE T2 ON T1.PACKAGE_FILE_ID2 = T2.FILE_SEQ</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('3', fileIdx)">LEFT JOIN T2_FILE T2 ON T1.PACKAGE_FILE_ID3 = T2.FILE_SEQ</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('4', fileIdx)">LEFT JOIN T2_FILE T2 ON T1.PACKAGE_FILE_ID4 = T2.FILE_SEQ</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('5', fileIdx)">LEFT JOIN T2_FILE T2 ON T1.PACKAGE_FILE_ID5 = T2.FILE_SEQ</when>
+			<otherwise>LEFT JOIN T2_FILE T2 ON T1.PACKAGE_FILE_ID = T2.FILE_SEQ</otherwise>
+		</choose>
 	WHERE
 		T1.PRJ_ID = #{prjId}
 	</select>

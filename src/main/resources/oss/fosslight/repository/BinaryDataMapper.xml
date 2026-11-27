@@ -8,39 +8,46 @@
 	<sql id="limitPage">
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
-    <sql id="orderby">
-    	<choose>
-    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY BAT_ID desc</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('SOFTWARE_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('asc', sord)">
-    			ORDER BY (
-    			  CASE 
-    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 1 
-					WHEN ${sidx} REGEXP '^[가-힣].+$' then 2 
-					WHEN ${sidx} REGEXP '^[0-9].+$' then 3 
-					ELSE 4 
-			      END), ${sidx} ${sord}
-    		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('SOFTWARE_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('desc', sord)">
-    			ORDER BY (
-    			  CASE 
-    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 4 
-					WHEN ${sidx} REGEXP '^[가-힣].+$' then 3
-					WHEN ${sidx} REGEXP '^[0-9].+$' then 2 
-					ELSE 1
-			      END), ${sidx} ${sord}
-    		</when>
-    		<when test="@oss.fosslight.util.StringUtil@equals('SOFTWARE_VERSION', sidx)">
-				ORDER BY A.SEQ ${sord}
-				    , A.MAJOR_VERSION ${sord}
-				    , BINARY ( CASE WHEN A.SOFTWARE_VERSION REGEXP '^[a-zA-Z]+' THEN SOFTWARE_VERSION END ) ${sord}
-				    , A.ASCII ${sord}
-				    , A.MINOR_VERSION ${sord}
-				    , A.PATCH_VERSION ${sord}
-				    , A.VERSION_LEN ${sord}
-    		</when>
-    		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
-    	</choose>
-    </sql>
+	<sql id="allowedSortColumn">
+		<choose>
+			<when test="sortColumn == 'BAT_ID'">BAT_ID</when>
+			<when test="sortColumn == 'FILE_NAME'">FILE_NAME</when>
+			<when test="sortColumn == 'PATH_NAME'">PATH_NAME</when>
+			<when test="sortColumn == 'SOURCE_PATH'">SOURCE_PATH</when>
+			<when test="sortColumn == 'CHECK_SUM'">CHECK_SUM</when>
+			<when test="sortColumn == 'TLSH_CHECK_SUM'">TLSH_CHECK_SUM</when>
+			<when test="sortColumn == 'OSS_NAME'">OSS_NAME</when>
+			<when test="sortColumn == 'OSS_VERSION'">OSS_VERSION</when>
+			<when test="sortColumn == 'LICENSE'">LICENSE</when>
+			<when test="sortColumn == 'PARENT_NAME'">PARENT_NAME</when>
+			<when test="sortColumn == 'PLATFORM_NAME'">PLATFORM_NAME</when>
+			<when test="sortColumn == 'PLATFORM_VERSION'">PLATFORM_VERSION</when>
+			<when test="sortColumn == 'UPDATE_DATE'">UPDATE_DATE</when>
+			<otherwise><bind name="useDefaultSort" value="true"/></otherwise>
+		</choose>
+	</sql>
+
+	<sql id="orderby">
+		<!-- ComBean normalizes the column and may wrap it for configured numeric sorting. -->
+		<bind name="sortExpression" value="sidx"/>
+		<bind name="numericSort" value="sortExpression != null and sortExpression.startsWith('CAST(') and sortExpression.endsWith(' AS SIGNED)')"/>
+		<bind name="sortColumn" value="numericSort ? sortExpression.substring('CAST('.length(), sortExpression.length() - ' AS SIGNED)'.length()) : sortExpression"/>
+		<bind name="useDefaultSort" value="false"/>
+		ORDER BY
+		<choose>
+			<when test="numericSort">
+				<trim prefix="CAST(" suffix="AS SIGNED)">
+					<include refid="allowedSortColumn"/>
+				</trim>
+			</when>
+			<otherwise><include refid="allowedSortColumn"/></otherwise>
+		</choose>
+		<choose>
+			<when test="useDefaultSort">BAT_ID DESC</when>
+			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase('desc', sord)">DESC</when>
+			<otherwise>ASC</otherwise>
+		</choose>
+	</sql>
 
     <sql id="filters">
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(fileName)">
