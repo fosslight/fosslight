@@ -6,7 +6,6 @@
 package oss.fosslight.service.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +39,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
@@ -348,7 +346,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			boolean isCycloneDxFile = isCycloneDX(contentStr);
 			boolean isSpdxFile = isSPDX(contentStr);
-			boolean isNotExcel = !fileExt.equalsIgnoreCase("xls");
+			boolean isNotExcel = !fileExt.equalsIgnoreCase("xls") && !fileExt.equalsIgnoreCase("xlsx");
 			
 			if (isCycloneDxFile || (isSpdxFile && isNotExcel)) {
 				String tempId = "temp_" + UUID.randomUUID().toString().substring(0, 8);
@@ -413,7 +411,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						}
 						isConvert = new File(convertFullStrPath).exists();
 					} else {
-						fileExt = "xls";
+						fileExt = "xlsx";
 						originalFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')) + "." + fileExt;
 						uploadFileName = randomUUID + "." + fileExt;
 						convertFullStrPath = uploadFilePath + "/" + uploadFileName;
@@ -469,7 +467,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		try {
 			if (isConverted) {
-				upFile.setContentType("application/vnd.ms-excel");
+				upFile.setContentType(SPDXUtil2.SPREADSHEET_CONTENT_TYPE);
 				upFile.setSize(finalFileSize);
 			} else {
 				upFile.setContentType(mFile.getContentType());
@@ -517,7 +515,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		try {
 			if (isConverted) {
 				registFile.setGubn("CV");
-				registFile.setContentType("application/vnd.ms-excel");
+				registFile.setContentType(SPDXUtil2.SPREADSHEET_CONTENT_TYPE);
 				registFile.setSize(String.valueOf(finalFileSize));
 			} else {
 				registFile.setContentType(mFile.getContentType());
@@ -715,11 +713,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	private void writeSpdxYamlTreeXls(File xlsFile, Map<String, Map<String, String>> packages,
 			Map<String, String> packagePurlMap, Map<String, Map<String, String>> files, JsonNode relationshipsNode)
 			throws Exception {
-		String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-		File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
-
-		try (FileInputStream fis = new FileInputStream(templateFile);
-				Workbook workbook = WorkbookFactory.create(fis);
+		try (Workbook workbook = SPDXUtil2.openSpreadsheetTemplate();
 				FileOutputStream fos = new FileOutputStream(xlsFile)) {
 			Sheet packageSheet = workbook.getSheet("Package Info");
 			Sheet externalRefsSheet = workbook.getSheet("External Refs");
@@ -1108,11 +1102,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	}
 
     private static void writeXls(File xlsFile, Map<String, Map<String, String>> packages, Map<String, Map<String, String>> files, Map<String, Map<String, String>> snippets, List<Map<String, String>> relationships) throws Exception {
-    	String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-    	File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
-	    
-	    try (FileInputStream fis = new FileInputStream(templateFile);
-	    	Workbook workbook = WorkbookFactory.create(fis);
+	    try (Workbook workbook = SPDXUtil2.openSpreadsheetTemplate();
 	    	FileOutputStream fos = new FileOutputStream(xlsFile)) {
 	    	
 	    	createSheet(workbook, "Package Info", packages, 1);
@@ -1468,8 +1458,6 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	}
 	
 	private boolean convertCdxToExcel(File tempFile, String contentStr, String convertFullStrPath, UploadFile uploadFile) throws Exception {
-		String templatePath = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-		
 	    Bom bom;
 	    boolean isXml = contentStr.trim().startsWith("<");
 	    try {
@@ -1519,10 +1507,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	    }
 
 	    File resultFile = new File(convertFullStrPath);
-	    File templateFile = new File(templatePath + "/SPDXRdf_2.2.2.xls");
-	    
-	    try (FileInputStream fis = new FileInputStream(templateFile);
-	    	Workbook workbook = WorkbookFactory.create(fis);
+	    try (Workbook workbook = SPDXUtil2.openSpreadsheetTemplate();
 	    	FileOutputStream fos = new FileOutputStream(resultFile)) {
 
 	        Sheet pkgSheet = workbook.getSheet("Package Info");
@@ -1610,8 +1595,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	                // [Q] Package Copyright Text (16)
 	                row.createCell(16).setCellValue(c.getCopyright() != null ? c.getCopyright() : "");
 
-	                // [V] Files Analyzed (21) - 대문자 FALSE 기입
-	                row.createCell(21).setCellValue("FALSE");
+	                // [U] Files Analyzed (20)
+	                row.createCell(20).setCellValue("FALSE");
 
 	                // [P] License Comments (15)
 	                // metadata.component is the BOM root package.
